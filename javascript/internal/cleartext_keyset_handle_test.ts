@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.CleartextKeysetHandleTest');
-goog.setTestOnly();
+import 'jasmine';
 
-const {CleartextKeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.cleartext_keyset_handle');
-const {KeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
-const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import {createKeyset} from '../testing/internal/test_utils';
+
+import {CleartextKeysetHandle} from './cleartext_keyset_handle';
+import {KeysetHandle} from './keyset_handle';
+import {PbKeyset} from './proto';
 
 describe('cleartext keyset handle test', function() {
   it('parse from lightweight should work', function() {

@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.CryptoFormatTest');
-goog.setTestOnly('tink.CryptoFormatTest');
+import 'jasmine';
 
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const {PbKeysetKey: PbKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {CryptoFormat} from './crypto_format';
+import {PbKeysetKey as PbKey, PbOutputPrefixType} from './proto';
 
 describe('crypto format test', function() {
   it('constants', async function() {
@@ -57,9 +56,9 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix tink', async function() {
-    let key = new PbKey()
-                  .setOutputPrefixType(PbOutputPrefixType.TINK)
-                  .setKeyId(2864434397);
+    const key = new PbKey()
+                    .setOutputPrefixType(PbOutputPrefixType.TINK)
+                    .setKeyId(2864434397);
     const expectedResult =
         new Uint8Array([CryptoFormat.TINK_START_BYTE, 0xAA, 0xBB, 0xCC, 0xDD]);
 
@@ -68,9 +67,9 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix legacy', async function() {
-    let key = new PbKey()
-                  .setOutputPrefixType(PbOutputPrefixType.LEGACY)
-                  .setKeyId(16909060);
+    const key = new PbKey()
+                    .setOutputPrefixType(PbOutputPrefixType.LEGACY)
+                    .setKeyId(16909060);
     const expectedResult = new Uint8Array(
         [CryptoFormat.LEGACY_START_BYTE, 0x01, 0x02, 0x03, 0x04]);
 
@@ -79,9 +78,9 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix raw', async function() {
-    let key = new PbKey()
-                  .setOutputPrefixType(PbOutputPrefixType.RAW)
-                  .setKeyId(370491921);
+    const key = new PbKey()
+                    .setOutputPrefixType(PbOutputPrefixType.RAW)
+                    .setKeyId(370491921);
     const expectedResult = new Uint8Array(0);
 
     const actualResult = CryptoFormat.getOutputPrefix(key);

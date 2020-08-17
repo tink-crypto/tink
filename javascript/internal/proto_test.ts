@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.ProtoTest');
-goog.setTestOnly('tink.ProtoTest');
+import 'jasmine';
 
-const {PbKeyset} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {PbKeyset} from './proto';
 
 describe('proto test', function() {
   it('field', function() {

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.BinaryKeysetWriterTest');
-goog.setTestOnly('tink.BinaryKeysetWriterTest');
+import 'jasmine';
 
-const {BinaryKeysetReader} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_reader');
-const {BinaryKeysetWriter} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_writer');
-const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import {createKeyset} from '../testing/internal/test_utils';
+
+import {BinaryKeysetReader} from './binary_keyset_reader';
+import {BinaryKeysetWriter} from './binary_keyset_writer';
 
 describe('binary keyset writer test', function() {
   it('get serialized key set', function() {

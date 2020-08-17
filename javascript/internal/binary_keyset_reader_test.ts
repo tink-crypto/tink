@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.BinaryKeysetReaderTest');
-goog.setTestOnly('tink.BinaryKeysetReaderTest');
+import 'jasmine';
 
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {BinaryKeysetReader} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_reader');
-const {PbKeyData, PbKeyStatusType, PbKeyset, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import * as Random from '../subtle/random';
+
+import {BinaryKeysetReader} from './binary_keyset_reader';
+import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from './proto';
 
 describe('binary keyset reader test', function() {
   it('read, invalid serialized keyset proto', function() {
@@ -81,32 +81,25 @@ describe('binary keyset reader test', function() {
  * @final
  */
 class ExceptionText {
-  /** @return {string} */
-  static notImplemented() {
+  static notImplemented(): string {
     return 'SecurityException: Not implemented yet.';
   }
-  /** @return {string} */
-  static nullKeyset() {
+
+  static nullKeyset(): string {
     return 'SecurityException: Serialized keyset has to be non-null.';
   }
-  /** @return {string} */
-  static invalidSerialization() {
+
+  static invalidSerialization(): string {
     return 'SecurityException: Could not parse the given serialized proto as ' +
         'a keyset proto.';
   }
 }
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {boolean} enabled
- *
- * @return {!PbKeysetKey}
- */
-const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
-  let key = new PbKeysetKey();
+/** Function for creating keys for testing purposes. */
+function createDummyKeysetKey(
+    keyId: number, outputPrefix: PbOutputPrefixType,
+    enabled: boolean): PbKeysetKey {
+  const key = new PbKeysetKey();
 
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -118,9 +111,9 @@ const createDummyKeysetKey = function(keyId, outputPrefix, enabled) {
 
   // Set some key data.
   key.setKeyData(new PbKeyData());
-  key.getKeyData().setTypeUrl('SOME_KEY_TYPE_URL_' + keyId.toString());
-  key.getKeyData().setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
-  key.getKeyData().setValue(Random.randBytes(10));
+  key.getKeyData()?.setTypeUrl('SOME_KEY_TYPE_URL_' + keyId.toString());
+  key.getKeyData()?.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
+  key.getKeyData()?.setValue(Random.randBytes(10));
 
   return key;
-};
+}

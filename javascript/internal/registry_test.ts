@@ -4,23 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.RegistryTest');
-goog.setTestOnly('tink.RegistryTest');
+import 'jasmine';
 
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {AeadConfig} = goog.require('google3.third_party.tink.javascript.aead.aead_config');
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {AesCtrHmacAeadKeyManager} = goog.require('google3.third_party.tink.javascript.aead.aes_ctr_hmac_aead_key_manager');
-const {EncryptThenAuthenticate} = goog.require('google3.third_party.tink.javascript.subtle.encrypt_then_authenticate');
-const HybridConfig = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_config');
-const {HybridKeyTemplates} = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_key_templates');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {PrimitiveWrapper} = goog.require('google3.third_party.tink.javascript.internal.primitive_wrapper');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate, PbMessage} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import {Aead} from '../aead';
+import {AeadConfig} from '../aead/aead_config';
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import {AesCtrHmacAeadKeyManager} from '../aead/aes_ctr_hmac_aead_key_manager';
+import {SecurityException} from '../exception/security_exception';
+import * as HybridConfig from '../hybrid/hybrid_config';
+import {HybridKeyTemplates} from '../hybrid/hybrid_key_templates';
+import {Mac} from '../mac';
+import {EncryptThenAuthenticate} from '../subtle/encrypt_then_authenticate';
+import {assertExists, assertInstanceof} from '../testing/internal/test_utils';
+
+import * as KeyManager from './key_manager';
+import * as PrimitiveSet from './primitive_set';
+import {PrimitiveWrapper} from './primitive_wrapper';
+import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbHashType, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbKeyTemplate, PbMessage} from './proto';
+import * as Registry from './registry';
+import {Constructor} from './util';
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests
@@ -42,12 +44,13 @@ describe('registry test', function() {
 
   it('register primitive wrapper, overwriting with different class',
      function() {
-       /** @implements {PrimitiveWrapper<DummyPrimitive1>} */
-       class DummyPrimitiveWrapper1Alternative {
+       class DummyPrimitiveWrapper1Alternative implements
+           PrimitiveWrapper<DummyPrimitive1> {
          /** @override */
-         wrap() {
+         wrap(): DummyPrimitive1 {
            throw new Error();
          }
+
          /** @override */
          getPrimitiveType() {
            return DummyPrimitive1;
@@ -162,9 +165,8 @@ describe('registry test', function() {
   // tests for getKeyManager method
   it('get key manager, should work', function() {
     const numberOfKeyManagers = 10;
-    let keyManagers1 = [];
-    let keyManagers2 = [];
-
+    const keyManagers1 = [];
+    const keyManagers2 = [];
     for (let i = 0; i < numberOfKeyManagers; i++) {
       keyManagers1.push(new DummyKeyManager1('someKeyType' + i.toString()));
       keyManagers2.push(new DummyKeyManager2('otherKeyType' + i.toString()));
@@ -230,7 +232,7 @@ describe('registry test', function() {
   });
 
   it('new key data, new key allowed', async function() {
-    const /** !Array<string> */ keyTypes = [];
+    const keyTypes: string[] = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -248,7 +250,7 @@ describe('registry test', function() {
   });
 
   it('new key data, new key is allowed automatically', async function() {
-    const /** !Array<string> */ keyTypes = [];
+    const keyTypes: string[] = [];
     for (let i = 0; i < 10; i++) {
       keyTypes.push('someKeyType' + i.toString());
     }
@@ -276,15 +278,15 @@ describe('registry test', function() {
         PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
     // Check AES CTR key.
-    expect(keyFormat.getAesCtrKeyFormat().getKeySize())
-        .toBe(key.getAesCtrKey().getKeyValue().length);
-    expect(keyFormat.getAesCtrKeyFormat().getParams())
-        .toEqual(key.getAesCtrKey().getParams());
+    expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
+        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+    expect(keyFormat.getAesCtrKeyFormat()?.getParams())
+        .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
-    expect(keyFormat.getHmacKeyFormat().getKeySize())
-        .toBe(key.getHmacKey().getKeyValue().length);
-    expect(keyFormat.getHmacKeyFormat().getParams())
-        .toEqual(key.getHmacKey().getParams());
+    expect(keyFormat.getHmacKeyFormat()?.getKeySize())
+        .toBe(key.getHmacKey()?.getKeyValue().length);
+    expect(keyFormat.getHmacKeyFormat()?.getParams())
+        .toEqual(key.getHmacKey()?.getParams());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -317,8 +319,8 @@ describe('registry test', function() {
   });
 
   it('new key, should work', async function() {
-    const /** !Array<string> */ keyTypes = [];
-    const /** !Array<!Uint8Array> */ newKeyMethodResult = [];
+    const keyTypes: string[] = [];
+    const newKeyMethodResult: Uint8Array[] = [];
     const keyTypesLength = 10;
 
     // Add some keys to Registry.
@@ -337,35 +339,34 @@ describe('registry test', function() {
       const keyTemplate = new PbKeyTemplate().setTypeUrl(keyTypes[i]);
 
       const key =
-          /** @type {!PbAesCtrKey} */ (await Registry.newKey(keyTemplate));
+          assertInstanceof(await Registry.newKey(keyTemplate), PbAesCtrKey);
 
       // The new key method of DummyKeyFactory returns an AesCtrKey which
       // KeyValue is set to corresponding value in newKeyMethodResult.
-      expect(key.getKeyValue()).toBe(newKeyMethodResult[i]);
+      expect(key.getKeyValue_asU8()).toBe(newKeyMethodResult[i]);
     }
   });
-
   it('new key, with aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
     const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
 
-    const key =
-        /** @type{!PbAesCtrHmacAeadKey} */ (await Registry.newKey(keyTemplate));
+    const key = assertInstanceof(
+        await Registry.newKey(keyTemplate), PbAesCtrHmacAeadKey);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
     const keyFormat =
         PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
     // Check AES CTR key.
-    expect(keyFormat.getAesCtrKeyFormat().getKeySize())
-        .toBe(key.getAesCtrKey().getKeyValue().length);
-    expect(keyFormat.getAesCtrKeyFormat().getParams())
-        .toEqual(key.getAesCtrKey().getParams());
+    expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
+        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+    expect(keyFormat.getAesCtrKeyFormat()?.getParams())
+        .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
-    expect(keyFormat.getHmacKeyFormat().getKeySize())
-        .toBe(key.getHmacKey().getKeyValue().length);
-    expect(keyFormat.getHmacKeyFormat().getParams())
-        .toEqual(key.getHmacKey().getParams());
+    expect(keyFormat.getHmacKeyFormat()?.getKeySize())
+        .toBe(key.getHmacKey()?.getKeyValue().length);
+    expect(keyFormat.getHmacKeyFormat()?.getParams())
+        .toEqual(key.getHmacKey()?.getParams());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -388,7 +389,7 @@ describe('registry test', function() {
   it('get primitive, without defining key type', async function() {
     // Get primitive from key proto without key type.
     try {
-      await Registry.getPrimitive(Aead, new PbMessage);
+      await Registry.getPrimitive(Aead, new PbMessage());
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.keyTypeNotDefined());
@@ -412,7 +413,7 @@ describe('registry test', function() {
   it('get primitive, from aes ctr hmac aead key data', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
-    let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
+    const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
 
     const primitive =
@@ -423,7 +424,7 @@ describe('registry test', function() {
   it('get primitive, from aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
-    let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
+    const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
@@ -435,7 +436,7 @@ describe('registry test', function() {
   it('get primitive, mac from aes ctr hmac aead key', async function() {
     const manager = new AesCtrHmacAeadKeyManager();
     Registry.registerKeyManager(manager);
-    let keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
+    const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
     const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
 
@@ -487,7 +488,7 @@ describe('registry test', function() {
       expect(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC)
           .toBe(publicKeyData.getKeyMaterialType());
 
-      const expectedPublicKey = privateKey.getPublicKey();
+      const expectedPublicKey = assertExists(privateKey.getPublicKey());
       const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
           publicKeyData.getValue_asU8());
       expect(publicKey).toEqual(expectedPublicKey);
@@ -504,145 +505,91 @@ describe('registry test', function() {
  * @final
  */
 class ExceptionText {
-  /** @return {string} */
-  static notImplemented() {
+  static notImplemented(): string {
     return 'SecurityException: Not implemented yet.';
   }
 
-  /**
-   * @param {string} keyType
-   *
-   * @return {string}
-   */
-  static newKeyForbidden(keyType) {
+  static newKeyForbidden(keyType: string): string {
     return 'SecurityException: New key operation is forbidden for key type: ' +
         keyType + '.';
   }
 
-  /**
-   * @param {string} keyType
-   *
-   * @return {string}
-   */
-  static notRegisteredKeyType(keyType) {
+  static notRegisteredKeyType(keyType: string): string {
     return 'SecurityException: Key manager for key type ' + keyType +
         ' has not been registered.';
   }
 
-  /**
-   * @return {string}
-   */
-  static nullKeyManager() {
+  static nullKeyManager(): string {
     return 'SecurityException: Key manager cannot be null.';
   }
 
-  /**
-   * @return {string}
-   */
-  static undefinedKeyType() {
+  static undefinedKeyType(): string {
     return 'SecurityException: Key type has to be defined.';
   }
 
-  /**
-   * @param {string} keyType
-   *
-   * @return {string}
-   */
-  static keyManagerOverwrittingAttempt(keyType) {
+  static keyManagerOverwrittingAttempt(keyType: string): string {
     return 'SecurityException: Key manager for key type ' + keyType +
         ' has already been registered and cannot be overwritten.';
   }
 
-  /**
-   * @param {string} givenKeyType
-   *
-   * @return {string}
-   */
-  static notSupportedKey(givenKeyType) {
+  static notSupportedKey(givenKeyType: string): string {
     return 'SecurityException: The provided key manager does not support ' +
         'key type ' + givenKeyType + '.';
   }
 
-  /**
-   * @param {string} keyType
-   *
-   * @return {string}
-   */
-  static prohibitedChangeToLessRestricted(keyType) {
+  static prohibitedChangeToLessRestricted(keyType: string): string {
     return 'SecurityException: Key manager for key type ' + keyType +
         ' has already been registered with forbidden new key operation.';
   }
 
-  /**
-   * @param {string} keyTypeFromKeyData
-   * @param {string} keyTypeParam
-   *
-   * @return {string}
-   */
-  static keyTypesAreNotMatching(keyTypeFromKeyData, keyTypeParam) {
+  static keyTypesAreNotMatching(
+      keyTypeFromKeyData: string, keyTypeParam: string): string {
     return 'SecurityException: Key type is ' + keyTypeParam +
         ', but it is expected to be ' + keyTypeFromKeyData + ' or undefined.';
   }
 
-  /** @return {string} */
-  static keyTypeNotDefined() {
+  static keyTypeNotDefined(): string {
     return 'SecurityException: Key type has to be specified.';
   }
 
-  /** @return {string} */
-  static nullKeysetHandle() {
+  static nullKeysetHandle(): string {
     return 'SecurityException: Keyset handle has to be non-null.';
   }
 
-  /**
-   * @return {string}
-   */
-  static getPrimitiveBadPrimitive() {
+  static getPrimitiveBadPrimitive(): string {
     return 'Requested primitive type which is not supported by this ' +
         'key manager.';
   }
 
-  /**
-   * @param {string} typeUrl
-   * @return {string}
-   */
-  static notPrivateKeyFactory(typeUrl) {
+  static notPrivateKeyFactory(typeUrl: string): string {
     return 'SecurityException: Key manager for key type ' + typeUrl +
         ' does not have a private key factory.';
   }
 
-  /**
-   * @param {string} typeUrl
-   * @return {string}
-   */
-  static couldNotParse(typeUrl) {
+  static couldNotParse(typeUrl: string): string {
     return 'SecurityException: Input cannot be parsed as ' + typeUrl +
         ' key-proto.';
   }
 }
 
-/**
- * Creates AES CTR HMAC AEAD key format which can be used in tests
- *
- * @return {!PbKeyTemplate}
- */
-const createAesCtrHmacAeadTestKeyTemplate = function() {
+/** Creates AES CTR HMAC AEAD key format which can be used in tests */
+function createAesCtrHmacAeadTestKeyTemplate(): PbKeyTemplate {
   const KEY_SIZE = 16;
   const IV_SIZE = 12;
   const TAG_SIZE = 16;
 
-  let keyFormat = new PbAesCtrHmacAeadKeyFormat().setAesCtrKeyFormat(
+  const keyFormat = new PbAesCtrHmacAeadKeyFormat().setAesCtrKeyFormat(
       new PbAesCtrKeyFormat());
-  keyFormat.getAesCtrKeyFormat().setKeySize(KEY_SIZE);
-  keyFormat.getAesCtrKeyFormat().setParams(new PbAesCtrParams());
-  keyFormat.getAesCtrKeyFormat().getParams().setIvSize(IV_SIZE);
+  keyFormat.getAesCtrKeyFormat()?.setKeySize(KEY_SIZE);
+  keyFormat.getAesCtrKeyFormat()?.setParams(new PbAesCtrParams());
+  keyFormat.getAesCtrKeyFormat()?.getParams()?.setIvSize(IV_SIZE);
 
   // set HMAC key
   keyFormat.setHmacKeyFormat(new PbHmacKeyFormat());
-  keyFormat.getHmacKeyFormat().setKeySize(KEY_SIZE);
-  keyFormat.getHmacKeyFormat().setParams(new PbHmacParams());
-  keyFormat.getHmacKeyFormat().getParams().setHash(PbHashType.SHA1);
-  keyFormat.getHmacKeyFormat().getParams().setTagSize(TAG_SIZE);
+  keyFormat.getHmacKeyFormat()?.setKeySize(KEY_SIZE);
+  keyFormat.getHmacKeyFormat()?.setParams(new PbHmacParams());
+  keyFormat.getHmacKeyFormat()?.getParams()?.setHash(PbHashType.SHA1);
+  keyFormat.getHmacKeyFormat()?.getParams()?.setTagSize(TAG_SIZE);
 
   let keyTemplate =
       new PbKeyTemplate()
@@ -650,50 +597,31 @@ const createAesCtrHmacAeadTestKeyTemplate = function() {
               'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey')
           .setValue(keyFormat.serializeBinary());
   return keyTemplate;
-};
+}
 
 // Key factory and key manager classes used in tests
-/**
- * @final
- * @implements {KeyManager.KeyFactory}
- */
-class DummyKeyFactory {
-  /**
-   * @param {string} keyType
-   * @param {?Uint8Array=} opt_newKeyMethodResult
-   */
-  constructor(keyType, opt_newKeyMethodResult) {
-    /**
-     * @const @private {string}
-     */
-    this.KEY_TYPE_ = keyType;
 
-    if (!opt_newKeyMethodResult) {
-      opt_newKeyMethodResult = new Uint8Array(10);
-    }
-
-    /**
-     * @const @private {!Uint8Array}
-     */
-    this.NEW_KEY_METHOD_RESULT_ = opt_newKeyMethodResult;
-  }
+/** @final */
+class DummyKeyFactory implements KeyManager.KeyFactory {
+  constructor(
+      private readonly keyType: string,
+      private readonly NEW_KEY_METHOD_RESULT_ = new Uint8Array(10)) {}
 
   /**
    * @override
    */
-  newKey(keyFormat) {
+  newKey(keyFormat: PbMessage|Uint8Array) {
     const key = new PbAesCtrKey().setKeyValue(this.NEW_KEY_METHOD_RESULT_);
-
     return key;
   }
 
   /**
    * @override
    */
-  newKeyData(serializedKeyFormat) {
-    let keyData =
+  newKeyData(serializedKeyFormat: Uint8Array) {
+    const keyData =
         new PbKeyData()
-            .setTypeUrl(this.KEY_TYPE_)
+            .setTypeUrl(this.keyType)
             .setValue(this.NEW_KEY_METHOD_RESULT_)
             .setKeyMaterialType(PbKeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
 
@@ -702,34 +630,27 @@ class DummyKeyFactory {
 }
 
 // Primitive abstract types for testing purposes.
-/** @record */
-class DummyPrimitive1 {
-  /** @return {number} */
-  operation1() {}
+abstract class DummyPrimitive1 {
+  abstract operation1(): number;
 }
-/** @record */
-class DummyPrimitive2 {
-  /** @return {string} */
-  operation2() {}
+abstract class DummyPrimitive2 {
+  abstract operation2(): string;
 }
 
 // Primitive implementations for testing purposes.
-/** @implements {DummyPrimitive1} */
-class DummyPrimitive1Impl1 {
+class DummyPrimitive1Impl1 extends DummyPrimitive1 {
   /** @override */
   operation1() {
     return 1;
   }
 }
-/** @implements {DummyPrimitive1} */
-class DummyPrimitive1Impl2 {
+class DummyPrimitive1Impl2 extends DummyPrimitive1 {
   /** @override */
   operation1() {
     return 2;
   }
 }
-/** @implements {DummyPrimitive2} */
-class DummyPrimitive2Impl {
+class DummyPrimitive2Impl extends DummyPrimitive2 {
   /** @override */
   operation2() {
     return 'dummy';
@@ -738,45 +659,20 @@ class DummyPrimitive2Impl {
 
 const DEFAULT_PRIMITIVE_TYPE = Aead;
 
-/**
- * @final
- * @implements {KeyManager.KeyManager<!DummyPrimitive1>}
- */
-class DummyKeyManager1 {
-  /**
-   * @param {string} keyType
-   * @param {?DummyPrimitive1=} opt_primitive
-   * @param {?Object=} opt_primitiveType
-   */
-  constructor(keyType, opt_primitive, opt_primitiveType) {
-    /**
-     * @private @const {string}
-     */
-    this.KEY_TYPE_ = keyType;
+/** @final */
+class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
+  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
 
-    if (!opt_primitive) {
-      opt_primitive = new DummyPrimitive1Impl1();
-    }
-    /**
-     * @private @const {!DummyPrimitive1}
-     */
-    this.PRIMITIVE_ = opt_primitive;
-    /**
-     * @private @const {!KeyManager.KeyFactory}
-     */
+  constructor(
+      private readonly keyType: string,
+      private readonly PRIMITIVE_: DummyPrimitive1 = new DummyPrimitive1Impl1(),
+      private readonly PRIMITIVE_TYPE_ = DEFAULT_PRIMITIVE_TYPE) {
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
-
-    if (!opt_primitiveType) {
-      opt_primitiveType = DEFAULT_PRIMITIVE_TYPE;
-    }
-    /**
-     * @private @const {!Object}
-     */
-    this.PRIMITIVE_TYPE_ = opt_primitiveType;
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
     if (primitiveType !== this.PRIMITIVE_TYPE_) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -786,13 +682,13 @@ class DummyKeyManager1 {
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /** @override */
   getKeyType() {
-    return this.KEY_TYPE_;
+    return this.keyType;
   }
 
   /** @override */
@@ -801,7 +697,7 @@ class DummyKeyManager1 {
   }
 
   /** @override */
-  getVersion() {
+  getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
@@ -811,45 +707,20 @@ class DummyKeyManager1 {
   }
 }
 
-/**
- * @final
- * @implements {KeyManager.KeyManager<!DummyPrimitive2>}
- */
-class DummyKeyManager2 {
-  /**
-   * @param {string} keyType
-   * @param {!DummyPrimitive2=} opt_primitive
-   * @param {?Object=} opt_primitiveType
-   */
-  constructor(keyType, opt_primitive, opt_primitiveType) {
-    /**
-     * @private @const {string}
-     */
-    this.KEY_TYPE_ = keyType;
+/** @final */
+class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
+  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
 
-    if (!opt_primitive) {
-      opt_primitive = new DummyPrimitive2Impl();
-    }
-    /**
-     * @private @const {!DummyPrimitive2}
-     */
-    this.PRIMITIVE_ = opt_primitive;
-    /**
-     * @private @const {!KeyManager.KeyFactory}
-     */
+  constructor(
+      private readonly keyType: string,
+      private readonly PRIMITIVE_: DummyPrimitive2 = new DummyPrimitive2Impl(),
+      private readonly PRIMITIVE_TYPE_ = DEFAULT_PRIMITIVE_TYPE) {
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
-
-    if (!opt_primitiveType) {
-      opt_primitiveType = DEFAULT_PRIMITIVE_TYPE;
-    }
-    /**
-     * @private @const {!Object}
-     */
-    this.PRIMITIVE_TYPE_ = opt_primitiveType;
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
     if (primitiveType !== this.PRIMITIVE_TYPE_) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -859,13 +730,13 @@ class DummyKeyManager2 {
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /** @override */
   getKeyType() {
-    return this.KEY_TYPE_;
+    return this.keyType;
   }
 
   /** @override */
@@ -874,7 +745,7 @@ class DummyKeyManager2 {
   }
 
   /** @override */
-  getVersion() {
+  getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
@@ -884,40 +755,30 @@ class DummyKeyManager2 {
   }
 }
 
-/**
- * @final
- * @implements {KeyManager.KeyManager<string>}
- */
-class DummyKeyManagerForNewKeyTests {
-  /**
-   * @param {string} keyType
-   * @param {?Uint8Array=} opt_newKeyMethodResult
-   */
-  constructor(keyType, opt_newKeyMethodResult) {
-    /**
-     * @private @const {string}
-     */
-    this.KEY_TYPE_ = keyType;
+/** @final */
+class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
+  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
 
-    /**
-     * @private @const {!KeyManager.KeyFactory}
-     */
+  constructor(
+      private readonly keyType: string, opt_newKeyMethodResult?: Uint8Array) {
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration,
+      key: PbKeyData|PbMessage): Promise<string> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /** @override */
   getKeyType() {
-    return this.KEY_TYPE_;
+    return this.keyType;
   }
 
   /** @override */
@@ -926,7 +787,7 @@ class DummyKeyManagerForNewKeyTests {
   }
 
   /** @override */
-  getVersion() {
+  getVersion(): number {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
@@ -937,75 +798,37 @@ class DummyKeyManagerForNewKeyTests {
 }
 
 // PrimitiveWrapper classes for testing purposes
-/**
- * @final
- * @implements {PrimitiveWrapper<DummyPrimitive1>}
- */
-class DummyPrimitiveWrapper1 {
-  /**
-   * @param {!DummyPrimitive1} primitive
-   * @param {!Object} primitiveType
-   */
-  constructor(primitive, primitiveType) {
-    /**
-     * @private @const {!DummyPrimitive1}
-     */
-    this.PRIMITIVE_ = primitive;
 
-    /**
-     * @private @const {!Object}
-     */
-    this.PRIMITIVE_TYPE_ = primitiveType;
+/** @final */
+class DummyPrimitiveWrapper1 implements PrimitiveWrapper<DummyPrimitive1> {
+  constructor(
+      private readonly primitive: DummyPrimitive1,
+      private readonly primitiveType: Constructor<DummyPrimitive1>) {}
+
+  /** @override */
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive1>) {
+    return this.primitive;
   }
 
-  /**
-   * @override
-   */
-  wrap(primitiveSet) {
-    return this.PRIMITIVE_;
-  }
-
-  /**
-   * @override
-   */
+  /** @override */
   getPrimitiveType() {
-    return this.PRIMITIVE_TYPE_;
+    return this.primitiveType;
   }
 }
 
-// PrimitiveWrapper classes for testing purposes
-/**
- * @final
- * @implements {PrimitiveWrapper<DummyPrimitive2>}
- */
-class DummyPrimitiveWrapper2 {
-  /**
-   * @param {!DummyPrimitive2} primitive
-   * @param {!Object} primitiveType
-   */
-  constructor(primitive, primitiveType) {
-    /**
-     * @private @const {!DummyPrimitive2}
-     */
-    this.PRIMITIVE_ = primitive;
+/** @final */
+class DummyPrimitiveWrapper2 implements PrimitiveWrapper<DummyPrimitive2> {
+  constructor(
+      private readonly primitive: DummyPrimitive2,
+      private readonly primitiveType: Constructor<DummyPrimitive2>) {}
 
-    /**
-     * @private @const {!Object}
-     */
-    this.PRIMITIVE_TYPE_ = primitiveType;
+  /** @override */
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive2>) {
+    return this.primitive;
   }
 
-  /**
-   * @override
-   */
-  wrap(primitiveSet) {
-    return this.PRIMITIVE_;
-  }
-
-  /**
-   * @override
-   */
+  /** @override */
   getPrimitiveType() {
-    return this.PRIMITIVE_TYPE_;
+    return this.primitiveType;
   }
 }

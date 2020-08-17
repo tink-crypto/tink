@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.PrimitiveSetTest');
-goog.setTestOnly('tink.PrimitiveSetTest');
+import 'jasmine';
 
-const PrimitiveSet = goog.require('google3.third_party.tink.javascript.internal.primitive_set');
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {CryptoFormat} = goog.require('google3.third_party.tink.javascript.internal.crypto_format');
-const {PbKeyStatusType, PbKeysetKey, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
+import {Aead} from '../aead';
+import {SecurityException} from '../exception/security_exception';
+
+import {CryptoFormat} from './crypto_format';
+import * as PrimitiveSet from './primitive_set';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from './proto';
 
 describe('primitive set test', function() {
   /////////////////////////////////////////////////////////////////////////////
@@ -30,21 +30,6 @@ describe('primitive set test', function() {
     }
     fail('An exception should be thrown.');
   });
-
-  it('add primitive null primitive', function() {
-    const primitive = null;
-    const key = createKey();
-    const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
-
-    try {
-      primitiveSet.addPrimitive(primitive, key);
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.addingNullPrimitive());
-      return;
-    }
-    fail('An exception should be thrown.');
-  });
-
   it('add primitive multiple times should work', function() {
     const key = createKey();
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
@@ -84,7 +69,7 @@ describe('primitive set test', function() {
     const n = 100;
     const primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
 
-    let added = [];
+    const added = [];
     for (let id = 0; id < n; id++) {
       const legacyKeyType = ((id % 2) < 1);
       const enabledKey = ((id % 4) < 2);
@@ -98,7 +83,7 @@ describe('primitive set test', function() {
       }
 
       const res = primitiveSet.addPrimitive(primitive, key);
-      added.push({key: key, entry: res});
+      added.push({key, entry: res});
     }
 
     // Test that getPrimitives return correct value for them.
@@ -124,7 +109,7 @@ describe('primitive set test', function() {
     const keyId = 0xABCDEF98;
     const legacyKeyType = false;
 
-    let expectedResult = [];
+    const expectedResult = [];
     for (let i = 0; i < n; i++) {
       const enabledKey = ((i % 2) < 1);
       const key = createKey(keyId, legacyKeyType, enabledKey);
@@ -154,12 +139,12 @@ describe('primitive set test', function() {
     const primitiveSet = initPrimitiveSet(numberOfAddedPrimitives);
 
     // No RAW primitives were added.
-    let expectedResult = [];
+    const expectedResult: Array<PrimitiveSet.Entry<Aead>> = [];
     let result = primitiveSet.getRawPrimitives();
     expect(result).toEqual(expectedResult);
 
     // Add RAW primitives and check the result again after each adding.
-    let key = createKey().setOutputPrefixType(PbOutputPrefixType.RAW);
+    const key = createKey().setOutputPrefixType(PbOutputPrefixType.RAW);
 
     let addResult = primitiveSet.addPrimitive(new DummyAead1(), key);
     expectedResult.push(addResult);
@@ -249,68 +234,59 @@ describe('primitive set test', function() {
 });
 
 // Helper classes and functions used for testing purposes.
+
 class ExceptionText {
-  /** @return {string} */
-  static unknownPrefixType() {
+  static unknownPrefixType(): string {
     return 'SecurityException: Unsupported key prefix type.';
   }
 
-  /** @return {string} */
-  static addingNullPrimitive() {
+  static addingNullPrimitive(): string {
     return 'SecurityException: Primitive has to be non null.';
   }
 
-  /** @return {string} */
-  static addingNullKey() {
+  static addingNullKey(): string {
     return 'SecurityException: Key has to be non null.';
   }
 
-  /** @return {string} */
-  static setPrimaryToNull() {
+  static setPrimaryToNull(): string {
     return 'SecurityException: Primary cannot be set to null.';
   }
 
-  /** @return {string} */
-  static setPrimaryToMissingEntry() {
+  static setPrimaryToMissingEntry(): string {
     return 'SecurityException: Primary cannot be set to an entry which is ' +
         'not held by this primitive set.';
   }
 
-  /** @return {string} */
-  static setPrimaryToDisabled() {
+  static setPrimaryToDisabled(): string {
     return 'SecurityException: Primary has to be enabled.';
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyAead1 extends Aead {
   /** @override */
-  encrypt(plaintext, aad) {
+  encrypt(plaintext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
 
   /** @override */
-  decrypt(ciphertext, aad) {
+  decrypt(ciphertext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyAead2 extends Aead {
   /** @override */
-  encrypt(plaintext, aad) {
+  encrypt(plaintext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
 
   /** @override */
-  decrypt(ciphertext, aad) {
+  decrypt(ciphertext: Uint8Array, aad: Uint8Array): Promise<Uint8Array> {
     throw new SecurityException(
         'Not implemented, intentended just for testing.');
   }
@@ -323,12 +299,9 @@ class DummyAead2 extends Aead {
  *    primitive types ({DummyAead1, DummyAead2}),
  *    key status (enabled, disabled),
  *    and key types (legacy, tink).
- *
- * @param {number} n
- * @return {!PrimitiveSet.PrimitiveSet}
  */
-const initPrimitiveSet = function(n) {
-  let primitiveSet = new PrimitiveSet.PrimitiveSet(Aead);
+function initPrimitiveSet(n: number): PrimitiveSet.PrimitiveSet<Aead> {
+  const primitiveSet = new PrimitiveSet.PrimitiveSet<Aead>(Aead);
 
   // Set primary.
   const primaryKey = createKey(/* opt_id = */ 0, /* opt_legacy = */ false,
@@ -353,22 +326,17 @@ const initPrimitiveSet = function(n) {
   }
 
   return primitiveSet;
-};
+}
 
 /**
  * Function for creating keys for testing purposes.
  * If doesn't set otherwise it generates a key with id 0x12345678, which is
  * ENABLED and with prefix type TINK.
- *
- * @param {number=} opt_keyId
- * @param {boolean=} opt_legacy
- * @param {boolean=} opt_enabled
- *
- * @return{!PbKeysetKey}
  */
-const createKey = function(opt_keyId = 0x12345678, opt_legacy = false,
-    opt_enabled = true) {
-  let key = new PbKeysetKey();
+function createKey(
+    opt_keyId: number = 0x12345678, opt_legacy: boolean = false,
+    opt_enabled: boolean = true): PbKeysetKey {
+  const key = new PbKeysetKey();
 
   if (opt_enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
@@ -385,4 +353,4 @@ const createKey = function(opt_keyId = 0x12345678, opt_legacy = false,
   key.setKeyId(opt_keyId);
 
   return key;
-};
+}

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.UtilTest');
-goog.setTestOnly('tink.UtilTest');
+import 'jasmine';
 
-const EllipticCurves = goog.require('google3.third_party.tink.javascript.subtle.elliptic_curves');
-const Util = goog.require('google3.third_party.tink.javascript.internal.util');
-const {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyStatusType, PbKeyset, PbOutputPrefixType, PbPointFormat} = goog.require('google3.third_party.tink.javascript.internal.proto');
+import * as EllipticCurves from '../subtle/elliptic_curves';
+
+import {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyset, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
+import * as Util from './util';
 
 ////////////////////////////////////////////////////////////////////////////////
 // tests
@@ -166,60 +166,35 @@ describe('util test', function() {
  */
 class ExceptionText {
   // Exceptions for invalid keys.
-  /**
-   * @param {number} keyId
-   *
-   * @return {string}
-   */
-  static InvalidKeyMissingKeyData(keyId) {
+  static InvalidKeyMissingKeyData(keyId: number): string {
     return 'SecurityException: Key data are missing for key ' + keyId + '.';
   }
-  /**
-   * @param {number} keyId
-   *
-   * @return {string}
-   */
-  static InvalidKeyUnknownPrefix(keyId) {
+  static InvalidKeyUnknownPrefix(keyId: number): string {
     return 'SecurityException: Key ' + keyId +
         ' has unknown output prefix type.';
   }
-  /**
-   * @param {number} keyId
-   *
-   * @return {string}
-   */
-  static InvalidKeyUnknownStatus(keyId) {
+  static InvalidKeyUnknownStatus(keyId: number): string {
     return 'SecurityException: Key ' + keyId + ' has unknown status.';
   }
 
   // Exceptions for invalid keysets.
-  /** @return {string} */
-  static InvalidKeysetMissingKeys() {
+  static InvalidKeysetMissingKeys(): string {
     return 'SecurityException: Keyset should be non null and ' +
         'must contain at least one key.';
   }
-  /** @return {string} */
-  static InvalidKeysetDisabledPrimary() {
+  static InvalidKeysetDisabledPrimary(): string {
     return 'SecurityException: Primary key has to be in the keyset and ' +
         'has to be enabled.';
   }
-  /** @return {string} */
-  static InvalidKeysetMultiplePrimaries() {
+  static InvalidKeysetMultiplePrimaries(): string {
     return 'SecurityException: Primary key has to be unique.';
   }
 }
 
-/**
- * Returns a valid PbKeyset.Key.
- *
- * @param {number=} opt_id
- * @param {boolean=} opt_enabled
- * @param {boolean=} opt_publicKey
- *
- * @return {!PbKeyset.Key}
- */
-const createKey = function(
-    opt_id = 0x12345678, opt_enabled = true, opt_publicKey = false) {
+/** Returns a valid PbKeyset.Key. */
+function createKey(
+    opt_id: number = 0x12345678, opt_enabled: boolean = true,
+    opt_publicKey: boolean = false): PbKeyset.Key {
   const keyData =
       new PbKeyData().setTypeUrl('someTypeUrl').setValue(new Uint8Array(10));
   if (opt_publicKey) {
@@ -238,14 +213,10 @@ const createKey = function(
   key.setOutputPrefixType(PbOutputPrefixType.TINK);
 
   return key;
-};
+}
 
-/**
- * Returns a valid PbKeyset which primary has id equal to 1.
- *
- * @return {!PbKeyset}
- */
-const createKeyset = function() {
+/** Returns a valid PbKeyset which primary has id equal to 1. */
+function createKeyset(): PbKeyset {
   const numberOfKeys = 20;
 
   const keyset = new PbKeyset();
@@ -257,4 +228,4 @@ const createKeyset = function() {
 
   keyset.setPrimaryKeyId(1);
   return keyset;
-};
+}

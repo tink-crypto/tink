@@ -4,26 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.module('tink.KeysetHandleTest');
-goog.setTestOnly('tink.KeysetHandleTest');
+import 'jasmine';
 
-const Bytes = goog.require('google3.third_party.tink.javascript.subtle.bytes');
-const HybridConfig = goog.require('google3.third_party.tink.javascript.hybrid.hybrid_config');
-const KeyManager = goog.require('google3.third_party.tink.javascript.internal.key_manager');
-const Random = goog.require('google3.third_party.tink.javascript.subtle.random');
-const {AeadKeyTemplates} = goog.require('google3.third_party.tink.javascript.aead.aead_key_templates');
-const {Aead} = goog.require('google3.third_party.tink.javascript.aead.internal.aead');
-const {BinaryKeysetReader} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_reader');
-const {BinaryKeysetWriter} = goog.require('google3.third_party.tink.javascript.internal.binary_keyset_writer');
-const {CleartextKeysetHandle} = goog.require('google3.third_party.tink.javascript.internal.cleartext_keyset_handle');
-const {HybridDecrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_decrypt');
-const {HybridEncrypt} = goog.require('google3.third_party.tink.javascript.hybrid.internal.hybrid_encrypt');
-const {KeysetHandle, generateNew, read, readNoSecret} = goog.require('google3.third_party.tink.javascript.internal.keyset_handle');
-const {Mac} = goog.require('google3.third_party.tink.javascript.mac.internal.mac');
-const {PbKeyData, PbKeyMaterialType, PbKeyStatusType, PbKeyset, PbOutputPrefixType} = goog.require('google3.third_party.tink.javascript.internal.proto');
-const Registry = goog.require('google3.third_party.tink.javascript.internal.registry');
-const {SecurityException} = goog.require('google3.third_party.tink.javascript.exception.security_exception');
-const {createKeyset} = goog.require('google3.third_party.tink.javascript.testing.internal.test_utils');
+import {Aead} from '../aead';
+import {AeadKeyTemplates} from '../aead/aead_key_templates';
+import {SecurityException} from '../exception/security_exception';
+import {HybridDecrypt, HybridEncrypt} from '../hybrid';
+import * as HybridConfig from '../hybrid/hybrid_config';
+import {Mac} from '../mac';
+import * as Bytes from '../subtle/bytes';
+import * as Random from '../subtle/random';
+import {assertExists, createKeyset} from '../testing/internal/test_utils';
+
+import {BinaryKeysetReader} from './binary_keyset_reader';
+import {BinaryKeysetWriter} from './binary_keyset_writer';
+import {CleartextKeysetHandle} from './cleartext_keyset_handle';
+import * as KeyManager from './key_manager';
+import {generateNew, KeysetHandle, read, readNoSecret} from './keyset_handle';
+import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeyStatusType, PbMessage, PbOutputPrefixType} from './proto';
+import * as Registry from './registry';
 
 describe('keyset handle test', function() {
   beforeEach(function() {
@@ -79,7 +78,7 @@ describe('keyset handle test', function() {
     const serializedKeyset =
         CleartextKeysetHandle.serializeToBinary(keysetHandle);
     const keysetReader = new BinaryKeysetReader(serializedKeyset);
-    const aead = await keysetHandle.getPrimitive(Aead);
+    const aead = await keysetHandle.getPrimitive<Aead>(Aead);
     try {
       await read(keysetReader, aead);
     } catch (e) {
@@ -104,7 +103,7 @@ describe('keyset handle test', function() {
     expect(keyTemplate.getOutputPrefixType()).toBe(key.getOutputPrefixType());
     expect(PbKeyStatusType.ENABLED).toBe(key.getStatus());
 
-    const keyData = key.getKeyData();
+    const keyData = assertExists(key.getKeyData());
     expect(keyTemplate.getTypeUrl()).toBe(keyData.getTypeUrl());
 
     const aead = await keysetHandle.getPrimitive(Aead);
@@ -119,7 +118,7 @@ describe('keyset handle test', function() {
     const keyset = createKeysetAndInitializeRegistry(Aead);
     const keysetHandle = new KeysetHandle(keyset);
     const keysetWriter = new BinaryKeysetWriter();
-    const aead = await keysetHandle.getPrimitive(Aead);
+    const aead = await keysetHandle.getPrimitive<Aead>(Aead);
 
     try {
       await keysetHandle.write(keysetWriter, aead);
@@ -139,7 +138,7 @@ describe('keyset handle test', function() {
     const keyset = createKeysetAndInitializeRegistry(Aead);
     const keysetHandle = new KeysetHandle(keyset);
 
-    const aead = await keysetHandle.getPrimitive(Aead);
+    const aead = await keysetHandle.getPrimitive<Aead>(Aead);
 
     // Test the aead primitive returned by getPrimitive method.
     const plaintext = new Uint8Array([1, 2, 3, 4, 5, 6]);
@@ -154,9 +153,11 @@ describe('keyset handle test', function() {
     const keysetHandle = new KeysetHandle(keyset);
 
     // Test the HybridEncrypt primitive returned by getPrimitive method.
-    const hybridEncrypt = await keysetHandle.getPrimitive(HybridEncrypt);
+    const hybridEncrypt =
+        await keysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
     const plaintext = Random.randBytes(10);
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
+
     // DummyHybridEncrypt just appends a ciphertext suffix to the plaintext.
     // Since the primary key id is 1, the ciphertext prefix should also be 1.
     expect(ciphertext)
@@ -171,11 +172,13 @@ describe('keyset handle test', function() {
   it('get primitive,  hybrid decrypt', async function() {
     const decryptKeysetHandle =
         new KeysetHandle(createKeysetAndInitializeRegistry(HybridDecrypt));
-    const hybridDecrypt = await decryptKeysetHandle.getPrimitive(HybridDecrypt);
+    const hybridDecrypt =
+        await decryptKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
 
     const encryptKeysetHandle =
         new KeysetHandle(createKeysetAndInitializeRegistry(HybridEncrypt));
-    const hybridEncrypt = await encryptKeysetHandle.getPrimitive(HybridEncrypt);
+    const hybridEncrypt =
+        await encryptKeysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
 
     const plaintext = Random.randBytes(10);
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
@@ -203,7 +206,7 @@ describe('keyset handle test', function() {
         keyTypeUrl, new DummyAead(Random.randBytes(10)), Aead);
 
     // Encrypt with the primitive returned by customKeyManager.
-    const aead = await keysetHandle.getPrimitive(Aead, customKeyManager);
+    const aead = await keysetHandle.getPrimitive<Aead>(Aead, customKeyManager);
     const plaintext = Random.randBytes(20);
     const ciphertext = await aead.encrypt(plaintext);
 
@@ -215,7 +218,7 @@ describe('keyset handle test', function() {
     // Check that the primitive returned by getPrimitive cannot decrypt the
     // ciphertext. This is because managerInRegistry is different from
     // customKeyManager.
-    const aeadFromRegistry = await keysetHandle.getPrimitive(Aead);
+    const aeadFromRegistry = await keysetHandle.getPrimitive<Aead>(Aead);
     try {
       await aeadFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
@@ -228,7 +231,7 @@ describe('keyset handle test', function() {
     // Check that the primitive returned by getPrimitive with customKeyManager
     // decrypts correctly.
     const aeadFromCustomKeyManager =
-        await keysetHandle.getPrimitive(Aead, customKeyManager);
+        await keysetHandle.getPrimitive<Aead>(Aead, customKeyManager);
     const decryptedText = await aeadFromCustomKeyManager.decrypt(ciphertext);
     expect(decryptedText).toEqual(plaintext);
   });
@@ -253,8 +256,8 @@ describe('keyset handle test', function() {
         HybridEncrypt);
 
     // Encrypt with the primitive returned by customKeyManager.
-    const customHybridEncrypt =
-        await keysetHandle.getPrimitive(HybridEncrypt, customKeyManager);
+    const customHybridEncrypt = await keysetHandle.getPrimitive<HybridEncrypt>(
+        HybridEncrypt, customKeyManager);
     const plaintext = Random.randBytes(20);
     const ciphertext = await customHybridEncrypt.encrypt(plaintext);
 
@@ -267,14 +270,16 @@ describe('keyset handle test', function() {
     // Check that the primitive returned by getPrimitive is not the same as
     // customHybridEncrypt. This is because managerInRegistry is different from
     // customKeyManager.
-    const hybridFromRegistry = await keysetHandle.getPrimitive(HybridEncrypt);
+    const hybridFromRegistry =
+        await keysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
     const ciphertext2 = await hybridFromRegistry.encrypt(plaintext);
     expect(ciphertext2).not.toEqual(ciphertext);
 
     // Check that the primitive returned by getPrimitive with customKeyManager
     // is the same as customHybridEncrypt.
     const hybridEncryptFromCustomKeyManager =
-        await keysetHandle.getPrimitive(HybridEncrypt, customKeyManager);
+        await keysetHandle.getPrimitive<HybridEncrypt>(
+            HybridEncrypt, customKeyManager);
     const ciphertext3 =
         await hybridEncryptFromCustomKeyManager.encrypt(plaintext);
     expect(ciphertext3).toEqual(ciphertext);
@@ -322,7 +327,8 @@ describe('keyset handle test', function() {
     Registry.registerKeyManager(publicKeyManagerInRegistry);
 
     // Encrypt with the primitive returned by getPrimitive.
-    const hybridEncrypt = await publicKeysetHandle.getPrimitive(HybridEncrypt);
+    const hybridEncrypt =
+        await publicKeysetHandle.getPrimitive<HybridEncrypt>(HybridEncrypt);
     const plaintext = Random.randBytes(20);
     const ciphertext = await hybridEncrypt.encrypt(plaintext);
 
@@ -335,7 +341,7 @@ describe('keyset handle test', function() {
     // Check that the primitive returned by getPrimitive cannot decrypt. This is
     // because the ciphertext suffix is different.
     const hybridDecryptFromRegistry =
-        await privateKeysetHandle.getPrimitive(HybridDecrypt);
+        await privateKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
     try {
       await hybridDecryptFromRegistry.decrypt(ciphertext);
       fail('An exception should be thrown here.');
@@ -352,8 +358,9 @@ describe('keyset handle test', function() {
 
     // Check that the primitive returned by getPrimitive with
     // customHybridDecryptKeyManager can decrypt.
-    const customHybridDecrypt = await privateKeysetHandle.getPrimitive(
-        HybridDecrypt, customHybridDecryptKeyManager);
+    const customHybridDecrypt =
+        await privateKeysetHandle.getPrimitive<HybridDecrypt>(
+            HybridDecrypt, customHybridDecryptKeyManager);
     const decrypted = await customHybridDecrypt.decrypt(ciphertext);
     expect(decrypted).toEqual(plaintext);
   });
@@ -377,7 +384,7 @@ describe('keyset handle test', function() {
        const keysetHandle = new KeysetHandle(keyset);
 
        try {
-         await keysetHandle.getPrimitive(Aead);
+         await keysetHandle.getPrimitive<Aead>(Aead);
          fail('An exception should be thrown.');
        } catch (e) {
          expect(e.toString())
@@ -417,8 +424,7 @@ describe('keyset handle test', function() {
            Aead));
 
        const primitiveSet = await keysetHandle.getPrimitiveSet(Aead);
-       const primary = primitiveSet.getPrimary();
-
+       const primary = assertExists(primitiveSet.getPrimary());
        expect(primary.getPrimitive()).toBe(primitive);
      });
 
@@ -485,7 +491,7 @@ describe('keyset handle test', function() {
 
     // Primary should be the entry corresponding to the keyTypeUrl and thus
     // getPrimitive should return customPrimitive.
-    const primary = primitiveSet.getPrimary();
+    const primary = assertExists(primitiveSet.getPrimary());
     expect(primary.getPrimitive()).toBe(customPrimitive);
   });
 
@@ -497,7 +503,7 @@ describe('keyset handle test', function() {
       PbKeyMaterialType.SYMMETRIC, PbKeyMaterialType.ASYMMETRIC_PRIVATE,
       PbKeyMaterialType.UNKNOWN_KEYMATERIAL
     ];
-    for (let secretKeyMaterialType of secretKeyMaterialTypes) {
+    for (const secretKeyMaterialType of secretKeyMaterialTypes) {
       // Create a public keyset.
       const keyset = new PbKeyset();
       for (let i = 0; i < 3; i++) {
@@ -550,22 +556,13 @@ describe('keyset handle test', function() {
   });
 });
 
-/**
- * Function for creating keys for testing purposes.
- *
- * @param {number} keyId
- * @param {!PbOutputPrefixType} outputPrefix
- * @param {string} keyTypeUrl
- * @param {boolean} enabled
- * @param {!PbKeyMaterialType=} opt_keyMaterialType (default: SYMMETRIC)
- *
- * @return {!PbKeyset.Key}
- */
-const createKey = function(
-    keyId, outputPrefix, keyTypeUrl, enabled,
-    opt_keyMaterialType = PbKeyMaterialType.SYMMETRIC) {
-  let key = new PbKeyset.Key();
-
+/** Function for creating keys for testing purposes. */
+function createKey(
+    keyId: number, outputPrefix: PbOutputPrefixType, keyTypeUrl: string,
+    enabled: boolean,
+    opt_keyMaterialType: PbKeyMaterialType =
+        PbKeyMaterialType.SYMMETRIC): PbKeyset.Key {
+  const key = new PbKeyset.Key();
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {
@@ -582,7 +579,7 @@ const createKey = function(
   key.setKeyData(keyData);
 
   return key;
-};
+}
 
 /**
  * Function for creating keysets for testing purposes.
@@ -590,14 +587,10 @@ const createKey = function(
  *
  * The function also register DummyKeyManager providing primitives for each
  * keyType added to the Keyset.
- *
- * @param {!Object} primitiveType
- * @param {number=} opt_numberOfKeys
- *
- * @return {!PbKeyset}
  */
-const createKeysetAndInitializeRegistry = function(
-    primitiveType, opt_numberOfKeys = 15) {
+function createKeysetAndInitializeRegistry(
+    primitiveType: AnyDuringMigration,
+    opt_numberOfKeys: number = 15): PbKeyset {
   const numberOfKeyTypes = 5;
   const keyTypePrefix = 'key_type_';
 
@@ -623,7 +616,7 @@ const createKeysetAndInitializeRegistry = function(
 
   for (let i = 1; i < opt_numberOfKeys; i++) {
     const keyType = keyTypePrefix + (i % numberOfKeyTypes).toString();
-    let /** @type{!PbOutputPrefixType} */ outputPrefix;
+    let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
         outputPrefix = PbOutputPrefixType.TINK;
@@ -642,43 +635,38 @@ const createKeysetAndInitializeRegistry = function(
 
   keyset.setPrimaryKeyId(1);
   return keyset;
-};
+}
 
 /**
  * @final
  */
 class DummyAead extends Aead {
-  /**
-   * @param {!Uint8Array} ciphertextSuffix
-   */
-  constructor(ciphertextSuffix) {
+  constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
-    /** @private @const {!Uint8Array} */
-    this.ciphertextSuffix_ = ciphertextSuffix;
   }
 
-  /** @override*/
+  /** @override */
   // Encrypt method just append the primitive identifier to plaintext.
-  async encrypt(plaintext, opt_associatedData) {
+  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array) {
     const result =
-        new Uint8Array(plaintext.length + this.ciphertextSuffix_.length);
+        new Uint8Array(plaintext.length + this.ciphertextSuffix.length);
     result.set(plaintext, 0);
-    result.set(this.ciphertextSuffix_, plaintext.length);
+    result.set(this.ciphertextSuffix, plaintext.length);
     return result;
   }
 
-  /** @override*/
+  /** @override */
   // Decrypt method throws an exception whenever ciphertext does not end with
   // ciphertext suffix, otherwise it returns the first part (without
   // ciphertext suffix).
-  async decrypt(ciphertext, opt_associatedData) {
+  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array) {
     const plaintext = ciphertext.subarray(
-        0, ciphertext.length - this.ciphertextSuffix_.length);
+        0, ciphertext.length - this.ciphertextSuffix.length);
     const ciphertextSuffix = ciphertext.subarray(
-        ciphertext.length - this.ciphertextSuffix_.length, ciphertext.length);
+        ciphertext.length - this.ciphertextSuffix.length, ciphertext.length);
 
     if ([...ciphertextSuffix].toString() !=
-        [...this.ciphertextSuffix_].toString()) {
+        [...this.ciphertextSuffix].toString()) {
       throw new SecurityException('Ciphertext decryption failed.');
     }
 
@@ -686,41 +674,30 @@ class DummyAead extends Aead {
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
-  /** @param {!Uint8Array} ciphertextSuffix */
-  constructor(ciphertextSuffix) {
+  constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
-    /** @const @private {!Uint8Array} */
-    this.ciphertextSuffix_ = ciphertextSuffix;
   }
   // Async is used here just because real primitives returns Promise.
-  /** @override*/
-  async encrypt(plaintext, opt_associatedData) {
-    return Bytes.concat(plaintext, this.ciphertextSuffix_);
+  /** @override */
+  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array) {
+    return Bytes.concat(plaintext, this.ciphertextSuffix);
   }
 }
 
-/**
- * @final
- */
+/** @final */
 class DummyHybridDecrypt extends HybridDecrypt {
-  /** @param {!Uint8Array} ciphertextSuffix */
-  constructor(ciphertextSuffix) {
+  constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
-    /** @const @private {!Uint8Array} */
-    this.ciphertextSuffix_ = ciphertextSuffix;
   }
-  /** @override*/
-  async decrypt(ciphertext, opt_associatedData) {
+  /** @override */
+  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array) {
     const cipherLen = ciphertext.length;
-    const suffixLen = this.ciphertextSuffix_.length;
+    const suffixLen = this.ciphertextSuffix.length;
     const plaintext = ciphertext.subarray(0, cipherLen - suffixLen);
     const suffix = ciphertext.subarray(cipherLen - suffixLen, cipherLen);
-
-    if (!Bytes.isEqual(this.ciphertextSuffix_, suffix)) {
+    if (!Bytes.isEqual(this.ciphertextSuffix, suffix)) {
       throw new SecurityException('Ciphertext decryption failed.');
     }
     return plaintext;
@@ -728,77 +705,51 @@ class DummyHybridDecrypt extends HybridDecrypt {
 }
 
 // Key factory and key manager classes used in tests.
-/**
- * @final
- * @implements {KeyManager.KeyFactory}
- */
-class DummyKeyFactory {
-  /**
-   * @override
-   */
-  newKey(keyFormat) {
+
+/** @final */
+class DummyKeyFactory implements KeyManager.KeyFactory {
+  /** @override */
+  newKey(keyFormat: PbMessage|Uint8Array): PbMessage|Promise<PbMessage> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /**
-   * @override
-   */
-  newKeyData(serializedKeyFormat) {
+  /** @override */
+  newKeyData(serializedKeyFormat: Uint8Array): PbKeyData|Promise<PbKeyData> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 }
 
 /**
  * @final
- * @implements {KeyManager.KeyManager<T>}
- * @template T
  */
-class DummyKeyManager {
-  /**
-   * @param {string} keyType
-   * @param {T} primitive
-   * @param {!Object} primitiveType
-   */
-  constructor(keyType, primitive, primitiveType) {
-    /**
-     * @private @const {string}
-     */
-    this.KEY_TYPE_ = keyType;
+class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
+  private readonly KEY_FACTORY_ = new DummyKeyFactory();
 
-    /**
-     * @private @const {T}
-     */
-    this.PRIMITIVE_ = primitive;
-
-    /**
-     * @private @const {!KeyManager.KeyFactory}
-     */
-    this.KEY_FACTORY_ = new DummyKeyFactory();
-
-    /**
-     * @private @const {!Object}
-     */
-    this.PRIMITIVE_TYPE_ = primitiveType;
+  constructor(
+      private readonly keyType: string, private readonly primitive: T,
+      private readonly PRIMITIVE_TYPE_: AnyDuringMigration) {
+    this.KEY_FACTORY_;
   }
 
   /** @override */
-  async getPrimitive(primitiveType, key) {
+  async getPrimitive(
+      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
     if (primitiveType != this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    return this.PRIMITIVE_;
+    return this.primitive;
   }
 
   /** @override */
-  doesSupport(keyType) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /** @override */
   getKeyType() {
-    return this.KEY_TYPE_;
+    return this.keyType;
   }
 
   /** @override */
@@ -807,12 +758,12 @@ class DummyKeyManager {
   }
 
   /** @override */
-  getVersion() {
+  getVersion(): number {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
   /** @override */
-  getKeyFactory() {
+  getKeyFactory(): KeyManager.KeyFactory {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 }
