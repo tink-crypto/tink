@@ -68,30 +68,15 @@ TEST(InputStreamAdapterTest, MultipleRead) {
   EXPECT_EQ(read_result.ValueOrDie(), data.substr(10, 5));
 }
 
-TEST(InputStreamAdapterTest, BasicRead1) {
-  std::string data = subtle::Random::GetRandomBytes(10);
-  auto adapter = GetInputStreamAdapter(-1, data);
-  auto read_result = adapter->Read1(10);
-  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data);
-}
-
 // In this test size of the IstreamInputStream buffer is smaller than the
-// size of data to be read, so multiple calls to Next() will be needed.
-TEST(InputStreamAdapterTest, MultipleNext) {
+// size of data to be read. Only one call to Next() is made and hence the output
+// is smaller.
+TEST(InputStreamAdapterTest, OnlyOneNext) {
   std::string data = subtle::Random::GetRandomBytes(40);
   auto adapter = GetInputStreamAdapter(10, data);
   auto read_result = adapter->Read(35);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 35));
-}
-
-TEST(InputStreamAdapterTest, ReadUntilEOF) {
-  std::string data = subtle::Random::GetRandomBytes(35);
-  auto adapter = GetInputStreamAdapter(10, data);
-  auto read_result = adapter->Read(-1);
-  ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data);
+  EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 10));
 }
 
 TEST(InputStreamAdapterTest, ReadLessThanAvailable) {

@@ -66,7 +66,7 @@ class RawDecryptingStream(io.RawIOBase):
   @core.use_tink_errors
   def _read_from_input_stream_adapter(self, size: int) -> bytes:
     """Implemented as a separate method to ensure correct error transform."""
-    return self._input_stream_adapter.read1(size)
+    return self._input_stream_adapter.read(size)
 
   def read(self, size=-1) -> Optional[bytes]:
     """Read and return up to size bytes, where size is an int.

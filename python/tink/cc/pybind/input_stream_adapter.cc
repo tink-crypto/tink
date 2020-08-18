@@ -30,11 +30,6 @@ void PybindRegisterInputStreamAdapter(pybind11::module* module) {
   // TODO(b/146492561): Reduce the number of complicated lambdas.
   py::class_<InputStreamAdapter>(m, "InputStreamAdapter")
       .def(
-          "read1",
-          [](InputStreamAdapter *self, int64_t size)
-              -> util::StatusOr<py::bytes> { return self->Read1(size); },
-          py::arg("size"))
-      .def(
           "read",
           [](InputStreamAdapter *self, int64_t size)
               -> util::StatusOr<py::bytes> { return self->Read(size); },

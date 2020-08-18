@@ -33,12 +33,6 @@ class InputStreamAdapter {
   // call to Next().
   // If size is negative, all bytes that Next() gives are returned.
   // Returns OUT_OF_RANGE status if the stream is already at EOF.
-  util::StatusOr<std::string> Read1(int64_t size);
-
-  // Reads at most 'size' bytes from the underlying InputStream.
-  // It repeatedly calls Next() as long as it returns positive values.
-  // If size is negative, it reads until EOF is reached or Next() returns 0.
-  // Returns OUT_OF_RANGE status if the stream is already at EOF.
   util::StatusOr<std::string> Read(int64_t size);
 
  private:

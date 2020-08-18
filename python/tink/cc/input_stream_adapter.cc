@@ -24,45 +24,16 @@
 namespace crypto {
 namespace tink {
 
-namespace {
-
-util::StatusOr<absl::string_view> Read1NoCopy(InputStream* stream,
-                                              int64_t size) {
+util::StatusOr<std::string> InputStreamAdapter::Read(int64_t size) {
   const void* buffer;
-  auto next_result = stream->Next(&buffer);
+  auto next_result = stream_->Next(&buffer);
   if (!next_result.ok()) return next_result.status();
   int available = next_result.ValueOrDie();
   int read_count =
       size < 0 ? available : std::min(static_cast<int64_t>(available), size);
-  if (read_count < available) stream->BackUp(available - read_count);
-  return absl::string_view(static_cast<const char*>(buffer), read_count);
-}
-
-}  // namespace
-
-util::StatusOr<std::string> InputStreamAdapter::Read1(int64_t size) {
-  auto result = Read1NoCopy(stream_.get(), size);
-  if (!result.ok()) return result.status();
-  return std::string(result.ValueOrDie());
-}
-
-util::StatusOr<std::string> InputStreamAdapter::Read(int64_t size) {
-  std::string buffer;
-  while (buffer.size() < size || size < 0) {
-    auto result =
-        Read1NoCopy(stream_.get(), size < 0 ? -1 : size - buffer.size());
-    if (!result.ok()) {
-      if (buffer.empty()) {
-        return result.status();
-      } else {
-        break;
-      }
-    }
-    auto data = result.ValueOrDie();
-    if (data.empty()) break;
-    absl::StrAppend(&buffer, data);
-  }
-  return buffer;
+  if (read_count < available) stream_->BackUp(available - read_count);
+  return std::string(
+      absl::string_view(static_cast<const char*>(buffer), read_count));
 }
 
 }  // namespace tink

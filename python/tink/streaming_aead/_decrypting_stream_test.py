@@ -49,10 +49,6 @@ class FakeInputStreamAdapter(object):
           'Reached end of stream.')
       raise not_ok
 
-  def read1(self, size=-1):
-    del size  # unused
-    return self.read(4)
-
 
 def fake_get_input_stream_adapter(self, cc_primitive, aad, source):
   del cc_primitive, aad, self  # unused
@@ -90,13 +86,6 @@ class DecryptingStreamTest(absltest.TestCase):
 
     self.assertEqual(ds.read(9), B_SOMETHING_)
 
-  def test_read1(self):
-    f = io.BytesIO(B_SOMETHING_)
-    # Cast is needed since read1 is not part of BinaryIO.
-    ds = cast(io.BufferedReader, get_decrypting_stream(f, B_AAD_))
-
-    self.assertEqual(ds.read1(9), b'some')
-
   def test_readinto(self):
     f = io.BytesIO(B_SOMETHING_)
     # Cast is needed since readinto is not part of BinaryIO.
@@ -105,15 +94,6 @@ class DecryptingStreamTest(absltest.TestCase):
     b = bytearray(9)
     self.assertEqual(ds.readinto(b), 9)
     self.assertEqual(bytes(b), B_SOMETHING_)
-
-  def test_readinto1(self):
-    f = io.BytesIO(B_SOMETHING_)
-    # Cast is needed since readinto1 is not part of BinaryIO.
-    ds = cast(io.BufferedReader, get_decrypting_stream(f, B_AAD_))
-
-    b = bytearray(9)
-    self.assertEqual(ds.readinto1(b), 4)
-    self.assertEqual(bytes(b[:4]), b'some')
 
   def test_read_until_eof(self):
     f = io.BytesIO(B_SOMETHING_)
