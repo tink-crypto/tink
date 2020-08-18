@@ -9,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module defines the interface for Streaming AEAD."""
+"""This module defines the 'raw' interface for Streaming AEAD."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import io
 from typing import BinaryIO
 
 # Special imports
@@ -24,24 +25,28 @@ import six
 
 
 @six.add_metaclass(abc.ABCMeta)
-class StreamingAead(object):
-  """The interface for streaming authenticated encryption with associated data.
+class RawStreamingAead(object):
+  """Raw interface for streaming authenticated encryption with associated data.
 
   Streaming encryption is typically used for encrypting large plaintexts such
   as large files. This interface supports a streaming interface for symmetric
   encryption with authentication. The underlying encryption modes are selected
   so that partial plaintext can be obtained fast by decrypting and
   authenticating just a part of the ciphertext.
+
+  This is the 'raw' interface implemented by key managers, based on
+  io.RawIOBase. Users usually don't use this directly. Instead, they should use
+  streaming_aead.StreamingAead, generated from a keyset_handle.
   """
 
   @abc.abstractmethod
-  def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    """Returns an encrypting stream that writes to ciphertext_destination.
+  def new_raw_encrypting_stream(self, ciphertext_destination: BinaryIO,
+                                associated_data: bytes) -> io.RawIOBase:
+    """Returns a raw encrypting stream that writes to ciphertext_destination.
 
-    The returned stream implements a writable but not seekable io.BufferedIOBase
-    interface. It only accepts binary data. For text, it needs to be wrapped
-    with io.TextIOWrapper.
+    The returned stream implements a writable io.RawIOBase interface. Users
+    usually don't use this directly, they should use
+    streaming_aead.StreamingAead instead.
 
     The ciphertext_destination's write() method is expected to present one of
     the following three behaviours in the case of a partial or failed write():
@@ -62,7 +67,7 @@ class StreamingAead(object):
         decryption.
 
     Returns:
-      An implementation of the io.RawIOBase interface that wraps around
+      A writable implementation of the io.RawIOBase interface that wraps around
       'ciphertext_destination', such that any bytes written to the wrapper are
       AEAD-encrypted using 'associated_data' as associated authenticated data.
       Closing this wrapper also closes the ciphertext_source.
@@ -72,18 +77,21 @@ class StreamingAead(object):
     raise NotImplementedError()
 
   @abc.abstractmethod
-  def new_decrypting_stream(self, ciphertext_source: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    """Returns a decrypting stream that reads from ciphertext_source.
+  def new_raw_decrypting_stream(
+      self,
+      ciphertext_source: BinaryIO,
+      associated_data: bytes,
+      close_ciphertext_source: bool = True) -> io.RawIOBase:
+    """Returns a raw decrypting stream that reads from ciphertext_source.
 
-    The returned stream implements a readable but not seekable io.BufferedIOBase
-    interface. It only accepts binary data. For text, it needs to be wrapped
-    with io.TextIOWrapper.
+    The returned stream implements a readable io.RawIOBase interface. Users
+    usually don't use this directly, they should use
+    streaming_aead.StreamingAead instead.
 
     The cipertext_source's read() method is expected to return an empty bytes
     object if the stream is already at EOF. In the case where the stream is not
     at EOF yet but no data is available at the moment, it is expected to either
-    return None or raise BlockingIOError.
+    return None or raise a BlockingIOError.
     The standard io.BufferedIOBase and io.RawIOBase base classes exhibit these
     behaviours and are hence supported.
 
@@ -92,12 +100,13 @@ class StreamingAead(object):
         will be read.
       associated_data: Associated data to be used by the AEAD decryption. It
         must match the associated_data supplied for the encryption.
+      close_ciphertext_source: Whether ciphertext_source should be closed when
+      close() is called.
 
     Returns:
-      A readable implementation of the io.BufferedIOBase interface that wraps
-      around 'ciphertext_source', such that any bytes read from the wrapper are
+      A readable implementation of the io.RawIOBase interface that wraps around
+      'ciphertext_source', such that any bytes read from the wrapper are
       AEAD-decrypted using 'associated_data' as associated authenticated data.
-      Closing the wrapper also closes the ciphertext_source.
     Raises:
       tink.TinkError if the creation fails.
     """

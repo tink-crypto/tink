@@ -27,6 +27,7 @@ from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import core
 from tink import streaming_aead
+from tink.streaming_aead import _raw_streaming_aead
 from tink.testing import bytes_io
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
@@ -48,9 +49,9 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
   def test_primitive_class(self):
     self.assertEqual(self.key_manager_gcm.primitive_class(),
-                     streaming_aead.StreamingAead)
+                     _raw_streaming_aead.RawStreamingAead)
     self.assertEqual(self.key_manager_ctr.primitive_class(),
-                     streaming_aead.StreamingAead)
+                     _raw_streaming_aead.RawStreamingAead)
 
   def test_key_type(self):
     self.assertEqual(
@@ -102,8 +103,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
                                 'key_size must not be smaller than'):
       self.key_manager_ctr.new_key_data(key_template)
 
-  def test_encrypt_decrypt(self):
-    saead_primitive = self.key_manager_ctr.primitive(
+  def test_encrypt_decrypt_raw(self):
+    raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
             .AES128_CTR_HMAC_SHA256_4KB))
@@ -112,21 +113,21 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
     # Encrypt
     ct_destination = bytes_io.BytesIOWithValueAfterClose()
-    with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
+    with raw_primitive.new_raw_encrypting_stream(ct_destination, aad) as es:
       self.assertLen(plaintext, es.write(plaintext))
     # context manager closes es, which also closes ciphertext_dest
     self.assertTrue(ct_destination.closed)
 
     # Decrypt
     ct_source = io.BytesIO(ct_destination.value_after_close())
-    with saead_primitive.new_decrypting_stream(ct_source, aad) as ds:
-      output = ds.read()
+    with raw_primitive.new_raw_decrypting_stream(ct_source, aad) as ds:
+      output = ds.readall()
     # context manager closes ds, which also closes ct_source
     self.assertTrue(ct_source.closed)
     self.assertEqual(output, plaintext)
 
   def test_read_after_eof_returns_empty_bytes(self):
-    saead_primitive = self.key_manager_ctr.primitive(
+    raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
             .AES128_CTR_HMAC_SHA256_4KB))
@@ -134,16 +135,16 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     aad = b'associated_data' + B_X80
 
     ct_destination = bytes_io.BytesIOWithValueAfterClose()
-    with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
+    with raw_primitive.new_raw_encrypting_stream(ct_destination, aad) as es:
       self.assertLen(plaintext, es.write(plaintext))
 
     ct_source = io.BytesIO(ct_destination.value_after_close())
-    with saead_primitive.new_decrypting_stream(ct_source, aad) as ds:
-      _ = ds.read()
+    with raw_primitive.new_raw_decrypting_stream(ct_source, aad) as ds:
+      _ = ds.readall()
       self.assertEqual(ds.read(100), b'')
 
   def test_encrypt_decrypt_tempfile(self):
-    saead_primitive = self.key_manager_ctr.primitive(
+    raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
             .AES128_CTR_HMAC_SHA256_4KB))
@@ -153,20 +154,20 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     ciphertext_dest = cast(BinaryIO,
                            tempfile.NamedTemporaryFile('wb', delete=False))
     encryptedfile_name = ciphertext_dest.name
-    with saead_primitive.new_encrypting_stream(ciphertext_dest, aad) as es:
+    with raw_primitive.new_raw_encrypting_stream(ciphertext_dest, aad) as es:
       n = es.write(plaintext)
     self.assertTrue(ciphertext_dest.closed)
     self.assertLen(plaintext, n)
 
     ciphertext_src = open(encryptedfile_name, 'rb')
-    with saead_primitive.new_decrypting_stream(ciphertext_src, aad) as ds:
-      output = ds.read()
+    with raw_primitive.new_raw_decrypting_stream(ciphertext_src, aad) as ds:
+      output = ds.readall()
     self.assertTrue(ciphertext_src.closed)
     os.unlink(encryptedfile_name)
     self.assertEqual(output, plaintext)
 
   def test_encrypt_decrypt_wrong_aad(self):
-    saead_primitive = self.key_manager_ctr.primitive(
+    raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
             .AES128_CTR_HMAC_SHA256_4KB))
@@ -175,13 +176,13 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
     # Encrypt
     ct_destination = bytes_io.BytesIOWithValueAfterClose()
-    with saead_primitive.new_encrypting_stream(ct_destination, aad) as es:
+    with raw_primitive.new_raw_encrypting_stream(ct_destination, aad) as es:
       self.assertLen(plaintext, es.write(plaintext))
     self.assertNotEqual(ct_destination.value_after_close(), plaintext)
 
     # Decrypt
     ct_source = io.BytesIO(ct_destination.value_after_close())
-    with saead_primitive.new_decrypting_stream(ct_source, b'bad ' + aad) as ds:
+    with raw_primitive.new_raw_decrypting_stream(ct_source, b'bad' + aad) as ds:
       with self.assertRaises(core.TinkError):
         ds.read()
 

@@ -9,7 +9,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python wrapper of the wrapped C++ Streaming AEAD key manager."""
+"""Python wrapper of the wrapped C++ Streaming AEAD key manager.
+
+
+  def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
+                            associated_data: bytes) -> BinaryIO:
+    raw = self.new_raw_encrypting_stream(ciphertext_destination,
+                                         associated_data)
+    return typing.cast(BinaryIO, io.BufferedWriter(raw))
+
+  def new_decrypting_stream(self, ciphertext_source: BinaryIO,
+                            associated_data: bytes) -> BinaryIO:
+    raw = self.new_raw_decrypting_stream(ciphertext_source, associated_data)
+    return typing.cast(BinaryIO, io.BufferedReader(raw))
+
+
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -17,7 +32,6 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-import typing
 from typing import Text, BinaryIO
 import six
 
@@ -25,35 +39,34 @@ from tink import core
 from tink.cc.pybind import tink_bindings
 from tink.streaming_aead import _decrypting_stream
 from tink.streaming_aead import _encrypting_stream
-from tink.streaming_aead import _streaming_aead
+from tink.streaming_aead import _raw_streaming_aead
+from tink.streaming_aead import _streaming_aead_wrapper
 
 
-class _StreamingAeadCcToPyWrapper(_streaming_aead.StreamingAead):
-  """Transforms C++ StreamingAead into a Python primitive."""
+class _StreamingAeadCcToPyWrapper(_raw_streaming_aead.RawStreamingAead):
+  """Transforms C++ StreamingAead into a RawStreamingAead Python primitive."""
 
   def __init__(self, cc_streaming_aead: tink_bindings.StreamingAead):
     self._cc_streaming_aead = cc_streaming_aead
 
-  def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    raw = _encrypting_stream.RawEncryptingStream(self._cc_streaming_aead,
-                                                 ciphertext_destination,
-                                                 associated_data)
-    return typing.cast(BinaryIO, io.BufferedWriter(raw))
+  def new_raw_encrypting_stream(self, ciphertext_destination: BinaryIO,
+                                associated_data: bytes) -> io.RawIOBase:
+    return _encrypting_stream.RawEncryptingStream(self._cc_streaming_aead,
+                                                  ciphertext_destination,
+                                                  associated_data)
 
-  def new_decrypting_stream(self, ciphertext_source: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    raw = _decrypting_stream.RawDecryptingStream(self._cc_streaming_aead,
-                                                 ciphertext_source,
-                                                 associated_data)
-    return typing.cast(BinaryIO, io.BufferedReader(raw))
+  def new_raw_decrypting_stream(self, ciphertext_source: BinaryIO,
+                                associated_data: bytes) -> io.RawIOBase:
+    return _decrypting_stream.RawDecryptingStream(self._cc_streaming_aead,
+                                                  ciphertext_source,
+                                                  associated_data)
 
 
 def from_cc_registry(
-    type_url: Text) -> core.KeyManager[_streaming_aead.StreamingAead]:
+    type_url: Text) -> core.KeyManager[_raw_streaming_aead.RawStreamingAead]:
   return core.KeyManagerCcToPyWrapper(
       tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
-      _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)
+      _raw_streaming_aead.RawStreamingAead, _StreamingAeadCcToPyWrapper)
 
 
 def register() -> None:
@@ -68,5 +81,7 @@ def register() -> None:
     type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
     key_manager = core.KeyManagerCcToPyWrapper(
         tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
-        _streaming_aead.StreamingAead, _StreamingAeadCcToPyWrapper)
+        _raw_streaming_aead.RawStreamingAead, _StreamingAeadCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
+  core.Registry.register_primitive_wrapper(
+      _streaming_aead_wrapper.StreamingAeadWrapper())

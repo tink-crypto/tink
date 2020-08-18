@@ -20,6 +20,7 @@ import io
 
 from absl.testing import absltest
 
+import tink
 from tink import streaming_aead
 from tink.testing import bytes_io
 
@@ -38,14 +39,10 @@ class StreamingAeadTest(absltest.TestCase):
 
   @staticmethod
   def get_primitive():
-    key_manager = streaming_aead.key_manager_from_cc_registry(
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
-
-    # Generate the key data.
     key_template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
-    key_data = key_manager.new_key_data(key_template)
-
-    return key_manager.primitive(key_data)
+    keyset_handle = tink.new_keyset_handle(key_template)
+    primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
+    return primitive
 
   def test_get_encrypting_stream(self):
     primitive = self.get_primitive()
