@@ -136,3 +136,6 @@ class RawDecryptingStream(io.RawIOBase):
   def readable(self) -> bool:
     """Return True if the stream can be read from."""
     return True
+
+  def write(self, b: bytes) -> int:
+    raise io.UnsupportedOperation()

@@ -50,8 +50,8 @@ def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
 
 
 # We use the same return type as StreamingAead.new_decrypting_stream
-def get_encrypting_stream(ciphertext_destination: BinaryIO,
-                          aad: bytes) -> BinaryIO:
+def get_raw_encrypting_stream(ciphertext_destination: BinaryIO,
+                              aad: bytes) -> BinaryIO:
   raw = _encrypting_stream.RawEncryptingStream(
       None, ciphertext_destination, aad)
   return cast(BinaryIO, io.BufferedWriter(raw))
@@ -73,49 +73,29 @@ class EncryptingStreamTest(absltest.TestCase):
     f = mock.Mock()
     f.writable = mock.Mock(return_value=False)
     with self.assertRaisesRegex(ValueError, 'writable'):
-      get_encrypting_stream(f, B_AAD_)
+      get_raw_encrypting_stream(f, B_AAD_)
 
   def test_write(self):
     f = bytes_io.BytesIOWithValueAfterClose()
-    with get_encrypting_stream(f, B_AAD_) as es:
+    with get_raw_encrypting_stream(f, B_AAD_) as es:
       es.write(b'Hello world!' + B_X80)
     self.assertTrue(f.closed)
     self.assertEqual(b'Hello world!' + B_X80, f.value_after_close())
 
   @absltest.skipIf(sys.version_info[0] == 2, 'Python 2 strings are bytes')
   def test_write_non_bytes(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, B_AAD_) as es:
+    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_AAD_) as es:
       with self.assertRaisesRegex(TypeError, 'bytes-like object is required'):
         es.write(cast(bytes, 'This is a string, not a bytes object'))
 
-  def test_textiowrapper_compatibility(self):
-    """A test that checks the TextIOWrapper works as expected.
-
-    It encrypts the same plaintext twice - once directly from bytes, and once
-    through TextIOWrapper's encoding. The two ciphertexts should have the same
-    length.
-    """
-    file_1 = bytes_io.BytesIOWithValueAfterClose()
-    file_2 = bytes_io.BytesIOWithValueAfterClose()
-
-    with get_encrypting_stream(file_1, B_AAD_) as es:
-      with io.TextIOWrapper(es) as wrapper:
-        wrapper.write(b'some data'.decode('utf-8'))
-
-    with get_encrypting_stream(file_2, B_AAD_) as es:
-      es.write(b'some data')
-
-    self.assertEqual(len(file_1.value_after_close()),
-                     len(file_2.value_after_close()))
-
   def test_flush(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
+    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
       es.write(b'Hello world!' + B_X80)
       es.flush()
 
   def test_closed(self):
     f = io.BytesIO()
-    es = get_encrypting_stream(f, B_ASSOC_)
+    es = get_raw_encrypting_stream(f, B_ASSOC_)
     es.write(b'Hello world!' + B_X80)
     es.close()
 
@@ -124,7 +104,7 @@ class EncryptingStreamTest(absltest.TestCase):
 
   def test_closed_methods_raise(self):
     f = io.BytesIO()
-    es = get_encrypting_stream(f, B_ASSOC_)
+    es = get_raw_encrypting_stream(f, B_ASSOC_)
     es.write(b'Hello world!' + B_X80)
     es.close()
 
@@ -137,7 +117,7 @@ class EncryptingStreamTest(absltest.TestCase):
       es.flush()
 
   def test_unsupported_operation(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
+    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
       with self.assertRaisesRegex(io.UnsupportedOperation, 'seek'):
         es.seek(0, 2)
       with self.assertRaisesRegex(io.UnsupportedOperation, 'truncate'):
@@ -146,7 +126,7 @@ class EncryptingStreamTest(absltest.TestCase):
         es.read(-1)
 
   def test_inquiries(self):
-    with io.BytesIO() as f, get_encrypting_stream(f, B_ASSOC_) as es:
+    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
       self.assertTrue(es.writable())
       self.assertFalse(es.readable())
       self.assertFalse(es.seekable())
@@ -160,7 +140,7 @@ class EncryptingStreamTest(absltest.TestCase):
     """
     ciphertext_destination = io.BytesIO()
     with self.assertRaisesRegex(ValueError, 'raised inside'):
-      with get_encrypting_stream(ciphertext_destination, B_ASSOC_) as es:
+      with get_raw_encrypting_stream(ciphertext_destination, B_ASSOC_) as es:
         es.write(b'some message' + B_X80)
         raise ValueError('Error raised inside context manager')
     self.assertTrue(ciphertext_destination.closed)

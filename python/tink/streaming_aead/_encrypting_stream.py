@@ -21,7 +21,7 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-from typing import BinaryIO
+from typing import BinaryIO, Optional
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -72,6 +72,9 @@ class RawEncryptingStream(io.RawIOBase):
   @core.use_tink_errors
   def _close_output_stream_adapter(self) -> None:
     self._output_stream_adapter.close()
+
+  def readinto(self, b: bytearray) -> Optional[int]:
+    raise io.UnsupportedOperation()
 
   def write(self, b: bytes) -> int:
     """Write the given buffer to the IO stream.
