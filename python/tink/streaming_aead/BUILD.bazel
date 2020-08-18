@@ -144,3 +144,20 @@ py_test(
         "//tink/testing:bytes_io",
     ],
 )
+
+py_library(
+    name = "_rewindable_input_stream",
+    srcs = ["_rewindable_input_stream.py"],
+    srcs_version = "PY3",
+)
+
+py_test(
+    name = "_rewindable_input_stream_test",
+    srcs = ["_rewindable_input_stream_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_rewindable_input_stream",
+        requirement("absl-py"),
+        "//tink/testing:bytes_io",
+    ],
+)
