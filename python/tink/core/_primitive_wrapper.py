@@ -27,25 +27,33 @@ import six
 from tink.core import _primitive_set
 
 
+B = TypeVar('B')
 P = TypeVar('P')
 
 
 @six.add_metaclass(abc.ABCMeta)
-class PrimitiveWrapper(Generic[P]):
+class PrimitiveWrapper(Generic[B, P]):
   """Basic interface for wrapping a primitive.
 
   A PrimitiveSet can be wrapped by a single primitive in order to fulfill a
   cryptographic task. This is done by the PrimitiveWrapper. Whenever a new
   primitive type is added to Tink, the user should define a new PrimitiveWrapper
   and register it by calling registry.registerPrimitiveWrapper().
+
+  The primitive of type B is wrapped into a primitive of type P. In most cases,
+  B and P are the same.
   """
 
   @abc.abstractmethod
   def wrap(self, pset: _primitive_set.PrimitiveSet) -> P:
     """Wraps a PrimitiveSet and returns a single primitive instance."""
-    pass
+    raise NotImplementedError()
 
   @abc.abstractmethod
   def primitive_class(self) -> Type[P]:
-    """Returns the primitive class of the primitive managed."""
-    pass
+    """Returns the class of the primitive produced by the wrapper."""
+    raise NotImplementedError()
+
+  def input_primitive_class(self) -> Type[B]:
+    """Returns the class of the primitive that gets wrapped."""
+    raise NotImplementedError()

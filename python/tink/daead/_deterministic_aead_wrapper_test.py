@@ -44,7 +44,7 @@ class AeadWrapperTest(absltest.TestCase):
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
 
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
 
     plaintext = b'plaintext'
     associated_data = b'associated_data'
@@ -59,7 +59,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(daead.DeterministicAead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
     ciphertext = wrapped_daead.encrypt_deterministically(
         b'plaintext', b'associated_data')
 
@@ -87,7 +87,7 @@ class AeadWrapperTest(absltest.TestCase):
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
     new_ciphertext = wrapped_daead.encrypt_deterministically(
         b'new_plaintext', b'new_associated_data')
 
@@ -111,7 +111,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(daead.DeterministicAead)
     pset.add_primitive(primitive1, raw_key1)
     pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
 
     self.assertEqual(
         wrapped_daead.decrypt_deterministically(raw_ciphertext1,
@@ -139,7 +139,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, raw_key)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
 
     with self.assertRaises(core.TinkError):
       wrapped_daead.decrypt_deterministically(unknown_ciphertext,
@@ -150,7 +150,7 @@ class AeadWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(daead.DeterministicAead)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
 
     ciphertext = wrapped_daead.encrypt_deterministically(
         b'plaintext', b'associated_data')

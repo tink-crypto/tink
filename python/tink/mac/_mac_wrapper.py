@@ -72,7 +72,7 @@ class _WrappedMac(_mac.Mac):
     raise core.TinkError('invalid MAC')
 
 
-class MacWrapper(core.PrimitiveWrapper[_mac.Mac]):
+class MacWrapper(core.PrimitiveWrapper[_mac.Mac, _mac.Mac]):
   """MacWrapper is the implementation of PrimitiveWrapper for the Mac primitive.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -87,4 +87,7 @@ class MacWrapper(core.PrimitiveWrapper[_mac.Mac]):
     return _WrappedMac(pset)
 
   def primitive_class(self) -> Type[_mac.Mac]:
+    return _mac.Mac
+
+  def input_primitive_class(self) -> Type[_mac.Mac]:
     return _mac.Mac

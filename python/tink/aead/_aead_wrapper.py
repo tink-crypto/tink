@@ -58,7 +58,7 @@ class _WrappedAead(_aead.Aead):
     raise core.TinkError('Decryption failed.')
 
 
-class AeadWrapper(core.PrimitiveWrapper[_aead.Aead]):
+class AeadWrapper(core.PrimitiveWrapper[_aead.Aead, _aead.Aead]):
   """AeadWrapper is the implementation of PrimitiveWrapper for Aead.
 
   Key rotation works as follows: each ciphertext is prefixed with the keyId.
@@ -72,4 +72,7 @@ class AeadWrapper(core.PrimitiveWrapper[_aead.Aead]):
     return _WrappedAead(pset)
 
   def primitive_class(self) -> Type[_aead.Aead]:
+    return _aead.Aead
+
+  def input_primitive_class(self) -> Type[_aead.Aead]:
     return _aead.Aead

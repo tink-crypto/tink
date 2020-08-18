@@ -159,14 +159,17 @@ class KeysetHandle(object):
       primitive_class cannot be used with this KeysetHandle.
     """
     _validate_keyset(self._keyset)
-    pset = core.PrimitiveSet(primitive_class)
+    input_primitive_class = core.Registry.input_primitive_class(
+        primitive_class)
+    pset = core.PrimitiveSet(input_primitive_class)
     for key in self._keyset.key:
       if key.status == tink_pb2.ENABLED:
-        primitive = core.Registry.primitive(key.key_data, primitive_class)
+        primitive = core.Registry.primitive(
+            key.key_data, input_primitive_class)
         entry = pset.add_primitive(primitive, key)
         if key.key_id == self._keyset.primary_key_id:
           pset.set_primary(entry)
-    return core.Registry.wrap(pset)
+    return core.Registry.wrap(pset, primitive_class)
 
 
 def new_keyset_handle(key_template: tink_pb2.KeyTemplate) -> KeysetHandle:

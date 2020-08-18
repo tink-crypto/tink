@@ -42,7 +42,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
 
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
     tag = wrapped_mac.compute_mac(b'data')
     # No exception raised, no return value.
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
@@ -52,7 +52,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
 
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
     tag = wrapped_mac.compute_mac(b'data')
     # No exception raised, no return value.
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
@@ -66,7 +66,7 @@ class MacWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(mac.Mac)
     pset.add_primitive(primitive1, raw_key1)
     pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
 
     self.assertIsNone(wrapped_mac.verify_mac(tag1, b'data1'))
     self.assertIsNone(wrapped_mac.verify_mac(tag2, b'data2'))
@@ -77,7 +77,7 @@ class MacWrapperTest(absltest.TestCase):
     primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
     pset = core.new_primitive_set(mac.Mac)
     pset.set_primary(pset.add_primitive(primitive, key))
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
     tag = wrapped_mac.compute_mac(b'data')
 
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
@@ -93,7 +93,7 @@ class MacWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, key)
     new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
     pset.set_primary(pset.add_primitive(new_primitive, new_key))
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
     self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
 
   def test_verify_unknown_mac_fails(self):
@@ -105,7 +105,7 @@ class MacWrapperTest(absltest.TestCase):
     pset.add_primitive(primitive, raw_key)
     new_entry = pset.add_primitive(new_primitive, new_key)
     pset.set_primary(new_entry)
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
 
     with self.assertRaises(core.TinkError):
       wrapped_mac.verify_mac(unknown_tag, b'data')

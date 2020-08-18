@@ -13,6 +13,10 @@
 # limitations under the License.
 
 """Tests for tink.python.tink.registry."""
+
+# Placeholder for import for type annotations
+
+from typing import Mapping, Type
 from absl.testing import absltest
 
 from tink.proto import tink_pb2
@@ -20,7 +24,9 @@ from tink.proto import tink_pb2
 from tink import aead
 from tink import core
 from tink import mac
+from tink import prf
 from tink.mac import _mac_wrapper
+from tink.prf import _prf_set_wrapper
 from tink.testing import helper
 
 
@@ -86,6 +92,63 @@ class InconsistentWrapper(core.PrimitiveWrapper):
 
   def primitive_class(self):
     return mac.Mac
+
+  def input_primitive_class(self):
+    return mac.Mac
+
+
+class _WrappedPrfSet(prf.PrfSet):
+  """Implements PrfSet for a set of Prf primitives."""
+
+  def __init__(self, primitive_set: core.PrimitiveSet):
+    self._primitive_set = primitive_set
+
+  def primary_id(self) -> int:
+    return self._primitive_set.primary().key_id
+
+  def all(self) -> Mapping[int, prf.Prf]:
+    return {
+        entry.key_id: entry.primitive
+        for entry in self._primitive_set.raw_primitives()
+    }
+
+  def primary(self) -> prf.Prf:
+    return self._primitive_set.primary().primitive
+
+
+class PrfToPrfSetWrapper(core.PrimitiveWrapper[prf.Prf, prf.PrfSet]):
+  """A PrimitiveWrapper that wraps Prfs into a PrfSet."""
+
+  def wrap(self, primitives_set: core.PrimitiveSet) -> _WrappedPrfSet:
+    return _WrappedPrfSet(primitives_set)
+
+  def primitive_class(self) -> Type[prf.PrfSet]:
+    return prf.PrfSet
+
+  def input_primitive_class(self) -> Type[prf.Prf]:
+    return prf.Prf
+
+
+class _InvalidPrf(prf.Prf):
+
+  def compute(self, input_data: bytes, output_length: int) -> bytes:
+    raise core.TinkError('Invalid Prf')
+
+
+class PrfToPrfWrapper(core.PrimitiveWrapper[prf.Prf, prf.Prf]):
+  """A PrimitiveWrapper that wraps Prfs into a Prf."""
+
+  def wrap(self, primitives_set: core.PrimitiveSet) -> prf.Prf:
+    if primitives_set.primary():
+      return primitives_set.primary().primitive
+    else:
+      return _InvalidPrf()
+
+  def primitive_class(self) -> Type[prf.Prf]:
+    return prf.Prf
+
+  def input_primitive_class(self) -> Type[prf.Prf]:
+    return prf.Prf
 
 
 def _mac_set(mac_list):
@@ -217,16 +280,36 @@ class RegistryTest(absltest.TestCase):
     self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
     mac1 = helper.FakeMac('FakeMac1')
     mac2 = helper.FakeMac('FakeMac2')
-    wrapped_mac = self.reg.wrap(_mac_set([mac1, mac2]))
+    wrapped_mac = self.reg.wrap(_mac_set([mac1, mac2]), mac.Mac)
     wrapped_mac.verify_mac(mac1.compute_mac(b'data1'), b'data1')
     wrapped_mac.verify_mac(mac2.compute_mac(b'data2'), b'data2')
     wrapped_mac.verify_mac(wrapped_mac.compute_mac(b'data'), b'data')
+
+  def test_wrap_with_primitive_class_success(self):
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
+    mac1 = helper.FakeMac('FakeMac1')
+    mac2 = helper.FakeMac('FakeMac2')
+    wrapped_mac = self.reg.wrap(_mac_set([mac1, mac2]), mac.Mac)
+    wrapped_mac.verify_mac(mac1.compute_mac(b'data1'), b'data1')
+    wrapped_mac.verify_mac(mac2.compute_mac(b'data2'), b'data2')
+    wrapped_mac.verify_mac(wrapped_mac.compute_mac(b'data'), b'data')
+
+  def test_wrap_with_incompatible_primitive_class_fails(self):
+    self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
+    pset = core.new_primitive_set(prf.Prf)
+    prf1 = helper.FakePrf('FakePrf1')
+    pset.set_primary(
+        pset.add_primitive(
+            prf1,
+            helper.fake_key(key_id=1234, output_prefix_type=tink_pb2.RAW)))
+    with self.assertRaises(core.TinkError):
+      _ = self.reg.wrap(pset, mac.Mac)
 
   def test_wrap_unknown_primitive(self):
     with self.assertRaisesRegex(
         core.TinkError,
         'No PrimitiveWrapper registered for primitive Mac.'):
-      self.reg.wrap(_mac_set([helper.FakeMac()]))
+      self.reg.wrap(_mac_set([helper.FakeMac()]), mac.Mac)
 
   def test_primitive_wrapper_reset(self):
     self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
@@ -234,7 +317,7 @@ class RegistryTest(absltest.TestCase):
     with self.assertRaisesRegex(
         core.TinkError,
         'No PrimitiveWrapper registered for primitive Mac.'):
-      self.reg.wrap(_mac_set([helper.FakeMac()]))
+      self.reg.wrap(_mac_set([helper.FakeMac()]), mac.Mac)
 
   def test_register_same_primitive_wrapper_twice(self):
     self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
@@ -253,6 +336,66 @@ class RegistryTest(absltest.TestCase):
         'Wrapper for primitive Mac generates incompatible primitive'):
       self.reg.register_primitive_wrapper(InconsistentWrapper())
 
+  def test_register_prf_to_prfset_wrapper_success(self):
+    self.reg.register_primitive_wrapper(PrfToPrfSetWrapper())
+    pset = core.new_primitive_set(prf.Prf)
+    prf1 = helper.FakePrf('FakePrf1')
+    prf2 = helper.FakePrf('FakePrf2')
+    pset.add_primitive(
+        prf1,
+        helper.fake_key(key_id=1234, output_prefix_type=tink_pb2.RAW))
+    pset.set_primary(
+        pset.add_primitive(
+            prf2,
+            helper.fake_key(key_id=5678, output_prefix_type=tink_pb2.RAW)))
+    wrapped_prf_set = self.reg.wrap(pset, prf.PrfSet)
+
+    expected_output1 = prf1.compute(b'input', output_length=31)
+    expected_output2 = prf2.compute(b'input', output_length=31)
+
+    self.assertEqual(
+        wrapped_prf_set.primary().compute(b'input', output_length=31),
+        expected_output2)
+    self.assertEqual(wrapped_prf_set.primary_id(), 5678)
+    prfs = wrapped_prf_set.all()
+    self.assertLen(prfs, 2)
+    self.assertEqual(prfs[1234].compute(b'input', output_length=31),
+                     expected_output1)
+    self.assertEqual(prfs[5678].compute(b'input', output_length=31),
+                     expected_output2)
+
+  def test_two_wrappers_with_equal_primitive_class_fails(self):
+    self.reg.register_primitive_wrapper(_prf_set_wrapper.PrfSetWrapper())
+    # Only one wrapper for a output primitive is allowed.
+    with self.assertRaises(core.TinkError):
+      self.reg.register_primitive_wrapper(PrfToPrfSetWrapper())
+
+  def test_two_wrappers_with_equal_input_primitive_class_success(self):
+    self.reg.register_primitive_wrapper(PrfToPrfSetWrapper())
+    # this is allowed, since PrfToPrfWrapper has a different output primitive.
+    self.reg.register_primitive_wrapper(PrfToPrfWrapper())
+    pset = core.new_primitive_set(prf.Prf)
+    prf1 = helper.FakePrf('FakePrf1')
+    prf2 = helper.FakePrf('FakePrf2')
+    pset.add_primitive(
+        prf1,
+        helper.fake_key(key_id=1234, output_prefix_type=tink_pb2.RAW))
+    pset.set_primary(
+        pset.add_primitive(
+            prf2,
+            helper.fake_key(key_id=5678, output_prefix_type=tink_pb2.RAW)))
+
+    wrapped_prf_set = self.reg.wrap(pset, prf.PrfSet)
+    wrapped_prf = self.reg.wrap(pset, prf.Prf)
+
+    expected_output2 = prf2.compute(b'input', output_length=31)
+
+    self.assertEqual(
+        wrapped_prf_set.primary().compute(b'input', output_length=31),
+        expected_output2)
+    self.assertEqual(
+        wrapped_prf.compute(b'input', output_length=31),
+        expected_output2)
 
 if __name__ == '__main__':
   absltest.main()

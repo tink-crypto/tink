@@ -40,7 +40,8 @@ class _WrappedPrfSet(_prf_set.PrfSet):
     return self._primitive_set.primary().primitive.primary()
 
 
-class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.PrfSet]):
+# TODO(juerg): Change this into a wrapper from Prf to PrfSet.
+class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.PrfSet, _prf_set.PrfSet]):
   """A PrimitiveWrapper for the PrfSet primitive.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -52,4 +53,7 @@ class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.PrfSet]):
     return _WrappedPrfSet(primitives_set)
 
   def primitive_class(self) -> Type[_prf_set.PrfSet]:
+    return _prf_set.PrfSet
+
+  def input_primitive_class(self) -> Type[_prf_set.PrfSet]:
     return _prf_set.PrfSet

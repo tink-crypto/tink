@@ -170,7 +170,7 @@ class Registry(object):
     Args:
       wrapper: A PrimitiveWrapper object.
     Raises:
-      Error if a different wrapper has already been registered for the same
+      TinkError if a different wrapper has already been registered for the same
       Primitive.
     """
     if (wrapper.primitive_class() in cls._wrappers and
@@ -179,7 +179,7 @@ class Registry(object):
           'A wrapper for primitive {} has already been added.'.format(
               wrapper.primitive_class().__name__))
     wrapped = wrapper.wrap(
-        _primitive_set.PrimitiveSet(wrapper.primitive_class()))
+        _primitive_set.PrimitiveSet(wrapper.input_primitive_class()))
     if not isinstance(wrapped, wrapper.primitive_class()):
       raise _tink_error.TinkError(
           'Wrapper for primitive {} generates incompatible primitive of type {}'
@@ -188,20 +188,51 @@ class Registry(object):
     cls._wrappers[wrapper.primitive_class()] = wrapper
 
   @classmethod
-  def wrap(
-      cls, primitive_set: _primitive_set.PrimitiveSet) -> Any:  # -> Primitive
-    """Tries to register a PrimitiveWrapper.
+  def input_primitive_class(cls, primitive_class: Any) -> Any:
+    """Returns the primitive class that gets wrapped into primitive_class.
+
+    Args:
+      primitive_class: Class of the output primitive of a wrapper.
+    Returns:
+      the primitive class that gets wrapped. This needs to be the type used
+      in the primitive set.
+    Raises:
+      TinkError if no wrapper for this primitive class is registered.
+    """
+    if primitive_class not in cls._wrappers:
+      raise _tink_error.TinkError(
+          'No PrimitiveWrapper registered for primitive {}.'
+          .format(primitive_class.__name__))
+    wrapper = cls._wrappers[primitive_class]
+    return wrapper.input_primitive_class()
+
+  @classmethod
+  def wrap(cls,
+           primitive_set: _primitive_set.PrimitiveSet,
+           primitive_class: Type[P]) -> P:
+    """Wraps a set of primitives into a single primitive.
 
     Args:
       primitive_set: A PrimitiveSet object.
+      primitive_class: Class of the output primitive.
     Returns:
-      A primitive that wraps the primitives in primitive_set.
+      A primitive of type primitive_class that wraps the primitives in
+      primitive_set.
     Raises:
-      Error if no wrapper for this primitive class is registered.
+      TinkError if no wrapper for this primitive class is registered or the type
+      of the primitives in primitive_set are don't match the
+      input_primitive_class of the wrapper.
     """
-    if primitive_set.primitive_class() not in cls._wrappers:
+    if primitive_class not in cls._wrappers:
       raise _tink_error.TinkError(
           'No PrimitiveWrapper registered for primitive {}.'
-          .format(primitive_set.primitive_class() .__name__))
-    wrapper = cls._wrappers[primitive_set.primitive_class()]
+          .format(primitive_class.__name__))
+    wrapper = cls._wrappers[primitive_class]
+    if primitive_set.primitive_class() != wrapper.input_primitive_class():
+      raise _tink_error.TinkError(
+          'Wrapper for primitive {} wraps type {}, but the primitive_set'
+          'has type {}'
+          .format(wrapper.primitive_class().__name__,
+                  wrapper.input_primitive_class().__name__,
+                  primitive_set.primitive_class().__name__))
     return wrapper.wrap(primitive_set)

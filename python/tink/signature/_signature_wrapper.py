@@ -56,7 +56,8 @@ class _WrappedPublicKeySign(_public_key_sign.PublicKeySign):
 
 
 class PublicKeySignWrapper(
-    core.PrimitiveWrapper[_public_key_sign.PublicKeySign]):
+    core.PrimitiveWrapper[_public_key_sign.PublicKeySign,
+                          _public_key_sign.PublicKeySign]):
   """A PrimitiveWrapper for the PublicKeySign primitive.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -69,6 +70,9 @@ class PublicKeySignWrapper(
     return _WrappedPublicKeySign(primitives_set)
 
   def primitive_class(self) -> Type[_public_key_sign.PublicKeySign]:
+    return _public_key_sign.PublicKeySign
+
+  def input_primitive_class(self) -> Type[_public_key_sign.PublicKeySign]:
     return _public_key_sign.PublicKeySign
 
 
@@ -122,7 +126,8 @@ class _WrappedPublicKeyVerify(_public_key_verify.PublicKeyVerify):
 
 
 class PublicKeyVerifyWrapper(
-    core.PrimitiveWrapper[_public_key_verify.PublicKeyVerify]):
+    core.PrimitiveWrapper[_public_key_verify.PublicKeyVerify,
+                          _public_key_verify.PublicKeyVerify]):
   """WrappedPublicKeyVerify is the PrimitiveWrapper for PublicKeyVerify.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -141,4 +146,7 @@ class PublicKeyVerifyWrapper(
     return _WrappedPublicKeyVerify(primitives_set)
 
   def primitive_class(self) -> Type[_public_key_verify.PublicKeyVerify]:
+    return _public_key_verify.PublicKeyVerify
+
+  def input_primitive_class(self) -> Type[_public_key_verify.PublicKeyVerify]:
     return _public_key_verify.PublicKeyVerify

@@ -19,8 +19,8 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from absl import logging
 from typing import Type
+from absl import logging
 
 from tink import core
 from tink.hybrid import _hybrid_decrypt
@@ -54,8 +54,9 @@ class _WrappedHybridDecrypt(_hybrid_decrypt.HybridDecrypt):
     raise core.TinkError('Decryption failed.')
 
 
-class HybridDecryptWrapper(
-    core.PrimitiveWrapper[_hybrid_decrypt.HybridDecrypt]):
+class HybridDecryptWrapper(core.PrimitiveWrapper[_hybrid_decrypt.HybridDecrypt,
+                                                 _hybrid_decrypt.HybridDecrypt]
+                          ):
   """HybridDecryptWrapper is the PrimitiveWrapper for HybridDecrypt.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -71,6 +72,9 @@ class HybridDecryptWrapper(
   def primitive_class(self) -> Type[_hybrid_decrypt.HybridDecrypt]:
     return _hybrid_decrypt.HybridDecrypt
 
+  def input_primitive_class(self) -> Type[_hybrid_decrypt.HybridDecrypt]:
+    return _hybrid_decrypt.HybridDecrypt
+
 
 class _WrappedHybridEncrypt(_hybrid_encrypt.HybridEncrypt):
   """Implements HybridEncrypt for a set of HybridEncrypt primitives."""
@@ -84,8 +88,9 @@ class _WrappedHybridEncrypt(_hybrid_encrypt.HybridEncrypt):
         plaintext, context_info)
 
 
-class HybridEncryptWrapper(
-    core.PrimitiveWrapper[_hybrid_encrypt.HybridEncrypt]):
+class HybridEncryptWrapper(core.PrimitiveWrapper[_hybrid_encrypt.HybridEncrypt,
+                                                 _hybrid_encrypt.HybridEncrypt]
+                          ):
   """HybridEncryptWrapper is the PrimitiveWrapper for HybridEncrypt.
 
   The returned primitive works with a keyset (rather than a single key). To
@@ -98,4 +103,7 @@ class HybridEncryptWrapper(
     return _WrappedHybridEncrypt(pset)
 
   def primitive_class(self) -> Type[_hybrid_encrypt.HybridEncrypt]:
+    return _hybrid_encrypt.HybridEncrypt
+
+  def input_primitive_class(self) -> Type[_hybrid_encrypt.HybridEncrypt]:
     return _hybrid_encrypt.HybridEncrypt

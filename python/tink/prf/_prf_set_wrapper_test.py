@@ -40,7 +40,7 @@ class PrfSetWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(prf.PrfSet)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_prf_set = core.Registry.wrap(pset)
+    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
     expected_output = primitive.primary().compute(b'input', output_length=31)
 
     self.assertEqual(
@@ -59,7 +59,7 @@ class PrfSetWrapperTest(absltest.TestCase):
     _ = pset.add_primitive(primitive1, key1)
     entry2 = pset.add_primitive(primitive2, key2)
     pset.set_primary(entry2)
-    wrapped_prf_set = core.Registry.wrap(pset)
+    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
     expected_output1 = primitive1.primary().compute(b'input', output_length=31)
     expected_output2 = primitive2.primary().compute(b'input', output_length=31)
 
@@ -79,7 +79,7 @@ class PrfSetWrapperTest(absltest.TestCase):
     pset = core.new_primitive_set(prf.PrfSet)
     entry = pset.add_primitive(primitive, key)
     pset.set_primary(entry)
-    wrapped_prf_set = core.Registry.wrap(pset)
+    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
 
     with self.assertRaises(core.TinkError):
       _ = wrapped_prf_set.primary().compute(b'input', output_length=1234567)

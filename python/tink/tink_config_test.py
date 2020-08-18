@@ -97,7 +97,7 @@ class TinkConfigTest(absltest.TestCase):
     pset = core.PrimitiveSet(aead.Aead)
     pset.add_primitive(aead1, key1)
     pset.set_primary(pset.add_primitive(aead2, key2))
-    wrapped_aead = core.Registry.wrap(pset)
+    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
 
     self.assertEqual(
         wrapped_aead.decrypt(aead1.encrypt(b'plaintext1', b'ad1'), b'ad1'),
@@ -114,7 +114,7 @@ class TinkConfigTest(absltest.TestCase):
     pset = core.PrimitiveSet(mac.Mac)
     pset.add_primitive(mac1, key1)
     pset.set_primary(pset.add_primitive(mac2, key2))
-    wrapped_mac = core.Registry.wrap(pset)
+    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
 
     self.assertIsNone(
         wrapped_mac.verify_mac(mac1.compute_mac(b'data1'), b'data1'))
@@ -131,7 +131,7 @@ class TinkConfigTest(absltest.TestCase):
     pset = core.PrimitiveSet(daead.DeterministicAead)
     pset.add_primitive(daead1, key1)
     pset.set_primary(pset.add_primitive(daead2, key2))
-    wrapped_daead = core.Registry.wrap(pset)
+    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
 
     self.assertEqual(
         wrapped_daead.decrypt_deterministically(
@@ -158,12 +158,12 @@ class TinkConfigTest(absltest.TestCase):
     dec_pset = core.PrimitiveSet(hybrid.HybridDecrypt)
     dec_pset.add_primitive(dec1, dec1_key)
     dec_pset.set_primary(dec_pset.add_primitive(dec2, dec2_key))
-    wrapped_dec = core.Registry.wrap(dec_pset)
+    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
 
     enc_pset = core.PrimitiveSet(hybrid.HybridEncrypt)
     enc_pset.add_primitive(enc1, enc1_key)
     enc_pset.set_primary(enc_pset.add_primitive(enc2, enc2_key))
-    wrapped_enc = core.Registry.wrap(enc_pset)
+    wrapped_enc = core.Registry.wrap(enc_pset, hybrid.HybridEncrypt)
 
     self.assertEqual(
         wrapped_dec.decrypt(enc1.encrypt(b'plaintext1', b'ad1'), b'ad1'),
@@ -210,12 +210,12 @@ class TinkConfigTest(absltest.TestCase):
     pset = core.PrimitiveSet(signature.PublicKeySign)
     pset.add_primitive(sig1, key1)
     pset.set_primary(pset.add_primitive(sig2, key2))
-    wrapped_sig = core.Registry.wrap(pset)
+    wrapped_sig = core.Registry.wrap(pset, signature.PublicKeySign)
 
     pset_verify = core.new_primitive_set(signature.PublicKeyVerify)
     pset_verify.add_primitive(ver1, pubkey1)
     pset_verify.set_primary(pset_verify.add_primitive(ver2, pubkey2))
-    wrapped_ver = core.Registry.wrap(pset_verify)
+    wrapped_ver = core.Registry.wrap(pset_verify, signature.PublicKeyVerify)
 
     sig = wrapped_sig.sign(b'data')
     wrapped_ver.verify(sig, b'data')

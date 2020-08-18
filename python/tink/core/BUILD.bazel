@@ -61,6 +61,8 @@ py_test(
         "//tink/aead",
         "//tink/mac",
         "//tink/mac:_mac_wrapper",
+        "//tink/prf",
+        "//tink/prf:_prf_set_wrapper",
         "//tink/proto:tink_py_pb2",
         "//tink/testing:helper",
     ],

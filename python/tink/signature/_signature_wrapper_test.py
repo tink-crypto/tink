@@ -63,8 +63,9 @@ class PublicKeySignWrapperTest(parameterized.TestCase):
     entry = pset_verify.add_primitive(*to_verify_key_pair(pair1[1]))
     pset_verify.set_primary(entry)
 
-    wrapped_pk_sign = core.Registry.wrap(pset)
-    wrapped_pk_verify = core.Registry.wrap(pset_verify)
+    wrapped_pk_sign = core.Registry.wrap(pset, signature.PublicKeySign)
+    wrapped_pk_verify = core.Registry.wrap(pset_verify,
+                                           signature.PublicKeyVerify)
     data_signature = wrapped_pk_sign.sign(b'data')
 
     wrapped_pk_verify.verify(data_signature, b'data')
@@ -103,8 +104,8 @@ class PublicKeyVerifyWrapperTest(absltest.TestCase):
               helper.FakePublicKeySign('fakePublicKeySign {}'.format(
                   key.key_id)), key))
 
-      wrapped_pk_verify = core.Registry.wrap(pset)
-      wrapped_pk_sign = core.Registry.wrap(pset_sign)
+      wrapped_pk_verify = core.Registry.wrap(pset, signature.PublicKeyVerify)
+      wrapped_pk_sign = core.Registry.wrap(pset_sign, signature.PublicKeySign)
 
       wrapped_pk_verify.verify(wrapped_pk_sign.sign(b'data'), b'data')
 
