@@ -36,7 +36,8 @@ class RawDecryptingStream(io.RawIOBase):
   """
 
   def __init__(self, stream_aead: tink_bindings.StreamingAead,
-               ciphertext_source: BinaryIO, associated_data: bytes):
+               ciphertext_source: BinaryIO, associated_data: bytes, *,
+               close_ciphertext_source: bool):
     """Create a new RawDecryptingStream.
 
     Args:
@@ -45,10 +46,12 @@ class RawDecryptingStream(io.RawIOBase):
       ciphertext_source: A readable file-like object from which ciphertext bytes
         will be read.
       associated_data: The associated data to use for decryption.
+      close_ciphertext_source: Whether ciphertext_source should be closed when
+        close() is called.
     """
     super(RawDecryptingStream, self).__init__()
     self._ciphertext_source = ciphertext_source
-
+    self._close_ciphertext_source = close_ciphertext_source
     if not ciphertext_source.readable():
       raise ValueError('ciphertext_source must be readable')
     cc_ciphertext_source = file_object_adapter.FileObjectAdapter(
@@ -130,7 +133,8 @@ class RawDecryptingStream(io.RawIOBase):
     """Close the stream. Has no effect on a closed stream."""
     if self.closed:  # pylint:disable=using-constant-test
       return
-    self._ciphertext_source.close()
+    if self._close_ciphertext_source:
+      self._ciphertext_source.close()
     super(RawDecryptingStream, self).close()
 
   def readable(self) -> bool:

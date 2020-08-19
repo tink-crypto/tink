@@ -41,7 +41,7 @@ class _WrappedStreamingAead(_streaming_aead.StreamingAead):
     # TODO(juerg): Implement a proper wrapper.
     # This implementation only works for keysets with a single key!
     raw = self._primitive_set.primary().primitive.new_raw_decrypting_stream(
-        ciphertext_source, associated_data)
+        ciphertext_source, associated_data, close_ciphertext_source=True)
     return cast(BinaryIO, io.BufferedReader(raw))
 
 

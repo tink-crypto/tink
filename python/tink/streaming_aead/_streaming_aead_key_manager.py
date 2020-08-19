@@ -55,11 +55,16 @@ class _StreamingAeadCcToPyWrapper(_raw_streaming_aead.RawStreamingAead):
                                                   ciphertext_destination,
                                                   associated_data)
 
-  def new_raw_decrypting_stream(self, ciphertext_source: BinaryIO,
-                                associated_data: bytes) -> io.RawIOBase:
-    return _decrypting_stream.RawDecryptingStream(self._cc_streaming_aead,
-                                                  ciphertext_source,
-                                                  associated_data)
+  def new_raw_decrypting_stream(
+      self,
+      ciphertext_source: BinaryIO,
+      associated_data: bytes,
+      close_ciphertext_source: bool) -> io.RawIOBase:
+    return _decrypting_stream.RawDecryptingStream(
+        self._cc_streaming_aead,
+        ciphertext_source,
+        associated_data,
+        close_ciphertext_source=close_ciphertext_source)
 
 
 def from_cc_registry(

@@ -81,7 +81,7 @@ class RawStreamingAead(object):
       self,
       ciphertext_source: BinaryIO,
       associated_data: bytes,
-      close_ciphertext_source: bool = True) -> io.RawIOBase:
+      close_ciphertext_source: bool) -> io.RawIOBase:
     """Returns a raw decrypting stream that reads from ciphertext_source.
 
     The returned stream implements a readable io.RawIOBase interface. Users

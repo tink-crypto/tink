@@ -56,8 +56,12 @@ def fake_get_input_stream_adapter(self, cc_primitive, aad, source):
 
 
 def get_raw_decrypting_stream(
-    ciphertext_source: BinaryIO, aad: bytes) -> io.RawIOBase:
-  return _decrypting_stream.RawDecryptingStream(None, ciphertext_source, aad)
+    ciphertext_source: BinaryIO,
+    aad: bytes,
+    close_ciphertext_source: bool = True) -> io.RawIOBase:
+  return _decrypting_stream.RawDecryptingStream(
+      None, ciphertext_source, aad,
+      close_ciphertext_source=close_ciphertext_source)
 
 
 class DecryptingStreamTest(absltest.TestCase):
@@ -131,6 +135,17 @@ class DecryptingStreamTest(absltest.TestCase):
     ds.close()
     self.assertTrue(ds.closed)
     self.assertTrue(f.closed)
+    ds.close()
+
+  def test_close_ciphertext_source_false(self):
+    f = io.BytesIO(B_SOMETHING_)
+    ds = get_raw_decrypting_stream(f, B_AAD_, close_ciphertext_source=False)
+
+    self.assertFalse(ds.closed)
+    self.assertFalse(f.closed)
+    ds.close()
+    self.assertTrue(ds.closed)
+    self.assertFalse(f.closed)
     ds.close()
 
   def test_closed_methods_raise(self):

@@ -103,7 +103,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
                                 'key_size must not be smaller than'):
       self.key_manager_ctr.new_key_data(key_template)
 
-  def test_encrypt_decrypt_raw(self):
+  def test_encrypt_decrypt(self):
     raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
@@ -118,13 +118,15 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     # context manager closes es, which also closes ciphertext_dest
     self.assertTrue(ct_destination.closed)
 
-    # Decrypt
-    ct_source = io.BytesIO(ct_destination.value_after_close())
-    with raw_primitive.new_raw_decrypting_stream(ct_source, aad) as ds:
-      output = ds.readall()
-    # context manager closes ds, which also closes ct_source
-    self.assertTrue(ct_source.closed)
-    self.assertEqual(output, plaintext)
+    # Decrypt, with and without close_ciphertext_source
+    for close_ciphertext_source in [True, False]:
+      ct_source = io.BytesIO(ct_destination.value_after_close())
+      with raw_primitive.new_raw_decrypting_stream(
+          ct_source, aad,
+          close_ciphertext_source=close_ciphertext_source) as ds:
+        output = ds.readall()
+      self.assertEqual(ct_source.closed, close_ciphertext_source)
+      self.assertEqual(output, plaintext)
 
   def test_read_after_eof_returns_empty_bytes(self):
     raw_primitive = self.key_manager_ctr.primitive(
@@ -139,7 +141,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
       self.assertLen(plaintext, es.write(plaintext))
 
     ct_source = io.BytesIO(ct_destination.value_after_close())
-    with raw_primitive.new_raw_decrypting_stream(ct_source, aad) as ds:
+    with raw_primitive.new_raw_decrypting_stream(
+        ct_source, aad, close_ciphertext_source=True) as ds:
       _ = ds.readall()
       self.assertEqual(ds.read(100), b'')
 
@@ -160,7 +163,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     self.assertLen(plaintext, n)
 
     ciphertext_src = open(encryptedfile_name, 'rb')
-    with raw_primitive.new_raw_decrypting_stream(ciphertext_src, aad) as ds:
+    with raw_primitive.new_raw_decrypting_stream(
+        ciphertext_src, aad, close_ciphertext_source=True) as ds:
       output = ds.readall()
     self.assertTrue(ciphertext_src.closed)
     os.unlink(encryptedfile_name)
@@ -182,7 +186,8 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
 
     # Decrypt
     ct_source = io.BytesIO(ct_destination.value_after_close())
-    with raw_primitive.new_raw_decrypting_stream(ct_source, b'bad' + aad) as ds:
+    with raw_primitive.new_raw_decrypting_stream(
+        ct_source, b'bad' + aad, close_ciphertext_source=True) as ds:
       with self.assertRaises(core.TinkError):
         ds.read()
 
