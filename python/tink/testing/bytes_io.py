@@ -52,8 +52,9 @@ class BytesIOWithValueAfterClose(io.BytesIO):
 class SlowBytesIO(io.BytesIO):
   """A readable BytesIO that raised BlockingIOError on some calls to read."""
 
-  def __init__(self, data: bytes):
+  def __init__(self, data: bytes, seekable: bool = False):
     super(SlowBytesIO, self).__init__(data)
+    self._seekable = seekable
     self._state = -1
 
   def read(self, size: int = -1) -> bytes:
@@ -67,13 +68,17 @@ class SlowBytesIO(io.BytesIO):
       return super(SlowBytesIO, self).read(min(size, 5))
     return super(SlowBytesIO, self).read(size)
 
+  def seekable(self)-> bool:
+    return self._seekable
+
 
 class SlowReadableRawBytes(io.RawIOBase):
   """A readable io.RawIOBase stream that only sometimes returns data."""
 
-  def __init__(self, data: bytes):
+  def __init__(self, data: bytes, seekable: bool = False):
     super(SlowReadableRawBytes, self).__init__()
     self._bytes_io = io.BytesIO(data)
+    self._seekable = seekable
     self._state = -1
 
   def readinto(self, b: bytearray) -> Optional[int]:
@@ -90,3 +95,6 @@ class SlowReadableRawBytes(io.RawIOBase):
 
   def readable(self):
     return True
+
+  def seekable(self)-> bool:
+    return self._seekable

@@ -19,20 +19,32 @@ import io
 import tempfile
 from typing import BinaryIO, cast
 from absl.testing import absltest
+from absl.testing import parameterized
 
 from tink.streaming_aead import _rewindable_input_stream
 from tink.testing import bytes_io
 
 
-def _rewindable(data) -> _rewindable_input_stream.RewindableInputStream:
-  return _rewindable_input_stream.RewindableInputStream(
-      cast(BinaryIO, io.BytesIO(data)))
+class NonSeekableBytesIO(io.BytesIO):
+
+  def seekable(self) -> bool:
+    return False
 
 
-class RewindableInputStreamTest(absltest.TestCase):
+def _rewindable(data,
+                seekable) -> _rewindable_input_stream.RewindableInputStream:
+  if seekable:
+    b = cast(BinaryIO, io.BytesIO(data))
+  else:
+    b = cast(BinaryIO, NonSeekableBytesIO(data))
+  return _rewindable_input_stream.RewindableInputStream(b)
 
-  def test_read(self):
-    with _rewindable(b'The quick brown fox') as f:
+
+class RewindableInputStreamTest(parameterized.TestCase):
+
+  @parameterized.parameters([False, True])
+  def test_read(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The q', f.read(5))
       self.assertEqual(b'uick ', f.read(5))
       self.assertEqual(b'brown', f.read(5))
@@ -40,20 +52,23 @@ class RewindableInputStreamTest(absltest.TestCase):
       self.assertEqual(b'', f.read(5))
       self.assertEqual(b'', f.read(5))
 
-  def test_read_no_argument(self):
-    with _rewindable(b'The quick brown fox') as f:
+  @parameterized.parameters([False, True])
+  def test_read_no_argument(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The quick brown fox', f.read())
 
-  def test_read_minus_one(self):
-    with _rewindable(b'The quick brown fox') as f:
+  @parameterized.parameters([False, True])
+  def test_read_minus_one(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The quick brown fox', f.read(-1))
 
-  def test_readall(self):
-    with _rewindable(b'The quick brown fox') as f:
+  @parameterized.parameters([False, True])
+  def test_readall(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The quick brown fox', f.readall())
 
-  def test_rewind_read(self):
-    with _rewindable(b'The quick brown fox') as f:
+  def test_rewind_read_non_seekable(self):
+    with _rewindable(b'The quick brown fox', seekable=False) as f:
       self.assertEqual(b'The quick', f.read(9))
       f.rewind()
       self.assertEqual(b'The ', f.read(4))
@@ -61,15 +76,26 @@ class RewindableInputStreamTest(absltest.TestCase):
       self.assertEqual(b'quick', f.read(100))
       self.assertEqual(b' brown fox', f.read())
 
-  def test_rewind_readall(self):
-    with _rewindable(b'The quick brown fox') as f:
+  def test_rewind_read_seekable(self):
+    with _rewindable(b'The quick brown fox', seekable=True) as f:
+      self.assertEqual(b'The quick', f.read(9))
+      f.rewind()
+      self.assertEqual(b'The ', f.read(4))
+      # no buffering, so this reads the rest.
+      self.assertEqual(b'quick brown fox', f.read(100))
+      self.assertEqual(b'', f.read())
+
+  @parameterized.parameters([False, True])
+  def test_rewind_readall(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The q', f.read(5))
       f.rewind()
       # this must read the whole file.
       self.assertEqual(b'The quick brown fox', f.read())
 
-  def test_rewind_twice(self):
-    with _rewindable(b'The quick brown fox') as f:
+  @parameterized.parameters([False, True])
+  def test_rewind_twice(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The q', f.read(5))
       f.rewind()
       self.assertEqual(b'The q', f.read(5))
@@ -77,8 +103,8 @@ class RewindableInputStreamTest(absltest.TestCase):
       f.rewind()
       self.assertEqual(b'The quick brown fox', f.read())
 
-  def test_disable_rewind(self):
-    with _rewindable(b'The quick brown fox') as f:
+  def test_disable_rewind_non_seekable(self):
+    with _rewindable(b'The quick brown fox', seekable=False) as f:
       self.assertEqual(b'The q', f.read(5))
       f.rewind()
       f.disable_rewind()
@@ -88,15 +114,26 @@ class RewindableInputStreamTest(absltest.TestCase):
       self.assertEmpty(f._buffer)
       self.assertEqual(b'ick brown fox', f.read())
 
-  def test_disable_rewind_readall(self):
-    with _rewindable(b'The quick brown fox') as f:
+  def test_disable_rewind_seekable(self):
+    with _rewindable(b'The quick brown fox', seekable=True) as f:
+      self.assertEqual(b'The q', f.read(5))
+      f.rewind()
+      f.disable_rewind()
+      # no buffering, so this reads everything
+      self.assertEqual(b'The quick brown fox', f.read(100))
+      self.assertEqual(b'', f.read())
+
+  @parameterized.parameters([False, True])
+  def test_disable_rewind_readall(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The q', f.read(5))
       f.rewind()
       f.disable_rewind()
       self.assertEqual(b'The quick brown fox', f.read())
 
-  def test_read_slow(self):
-    input_stream = bytes_io.SlowBytesIO(b'The quick brown fox')
+  @parameterized.parameters([False, True])
+  def test_read_slow(self, seekable):
+    input_stream = bytes_io.SlowBytesIO(b'The quick brown fox', seekable)
     with _rewindable_input_stream.RewindableInputStream(
         cast(BinaryIO, input_stream)) as f:
       self.assertIsNone(f.read(10))
@@ -108,8 +145,10 @@ class RewindableInputStreamTest(absltest.TestCase):
       self.assertIsNone(f.read(10))
       self.assertEqual(b'', f.read(10))
 
-  def test_read_slow_raw(self):
-    input_stream = bytes_io.SlowReadableRawBytes(b'The quick brown fox')
+  @parameterized.parameters([False, True])
+  def test_read_slow_raw(self, seekable):
+    input_stream = bytes_io.SlowReadableRawBytes(b'The quick brown fox',
+                                                 seekable)
     with _rewindable_input_stream.RewindableInputStream(
         cast(BinaryIO, input_stream)) as f:
       self.assertIsNone(f.read(10))
@@ -121,8 +160,10 @@ class RewindableInputStreamTest(absltest.TestCase):
       self.assertIsNone(f.read(10))
       self.assertEqual(b'', f.read(10))
 
-  def test_read_slow_raw_readall(self):
-    input_stream = bytes_io.SlowReadableRawBytes(b'The quick brown fox')
+  @parameterized.parameters([False, True])
+  def test_read_slow_raw_readall(self, seekable):
+    input_stream = bytes_io.SlowReadableRawBytes(b'The quick brown fox',
+                                                 seekable)
     with _rewindable_input_stream.RewindableInputStream(
         cast(BinaryIO, input_stream)) as f:
       self.assertIsNone(f.readall())

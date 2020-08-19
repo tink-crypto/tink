@@ -66,14 +66,17 @@ class RewindableInputStream(io.RawIOBase):
     if data is None:
       # self._input_stream is a RawIOBase and has currently no data
       return None
-    if self._rewindable:
-      self._buffer += data
+    if self._rewindable and not self._input_stream.seekable():
+      self._buffer.extend(data)
       self._pos += len(data)
     return data
 
   def rewind(self):
     if not self._rewindable:
       raise ValueError('rewind is disabled')
+    if self._input_stream.seekable():
+      self._input_stream.seek(0)
+      return
     self._pos = 0
 
   def disable_rewind(self):
