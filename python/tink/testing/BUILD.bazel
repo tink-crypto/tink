@@ -50,3 +50,25 @@ py_test(
         requirement("absl-py"),
     ],
 )
+
+py_library(
+    name = "fake_streaming_aead",
+    srcs = ["fake_streaming_aead.py"],
+    srcs_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/streaming_aead",
+    ],
+)
+
+py_test(
+    name = "fake_streaming_aead_test",
+    srcs = ["fake_streaming_aead_test.py"],
+    deps = [
+        ":bytes_io",
+        ":fake_streaming_aead",
+        "//tink/core",
+        requirement("absl-py"),
+    ],
+)
