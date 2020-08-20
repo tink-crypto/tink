@@ -21,7 +21,7 @@ from tink.testing import fake_streaming_aead
 
 class FakeStreamingAeadTest(absltest.TestCase):
 
-  def test_fake_streaming_aead_success(self):
+  def test_raw_fake_streaming_aead_success(self):
     saead = fake_streaming_aead.FakeRawStreamingAead('Name')
 
     ciphertext_dest = bytes_io.BytesIOWithValueAfterClose()
@@ -37,7 +37,7 @@ class FakeStreamingAeadTest(absltest.TestCase):
       self.assertEqual(ciphertext_src.closed, close_ciphertext_source)
       self.assertEqual(output, b'plaintext')
 
-  def test_raw_fake_streaming_aead_success(self):
+  def test_raw_fake_streaming_aead_readall_success(self):
     saead = fake_streaming_aead.FakeRawStreamingAead('Name')
 
     ciphertext_dest = bytes_io.BytesIOWithValueAfterClose()
@@ -51,6 +51,23 @@ class FakeStreamingAeadTest(absltest.TestCase):
       output = ds.readall()
     self.assertTrue(ciphertext_src.closed)
     self.assertEqual(output, b'plaintext')
+
+  def test_fake_streaming_aead_slow_read_success(self):
+    saead = fake_streaming_aead.FakeRawStreamingAead('Name')
+
+    ciphertext_dest = bytes_io.BytesIOWithValueAfterClose()
+    with saead.new_raw_encrypting_stream(ciphertext_dest, b'aad') as es:
+      self.assertLen(b'plaintext', es.write(b'plaintext'))
+    self.assertTrue(ciphertext_dest.closed)
+
+    ciphertext_src = bytes_io.SlowReadableRawBytes(
+        ciphertext_dest.value_after_close())
+    with saead.new_raw_decrypting_stream(ciphertext_src, b'aad',
+                                         close_ciphertext_source=True) as ds:
+      # explicitly test that read returns None on the first call, because
+      # that is needed to test one execution path in the wrapper.
+      self.assertIsNone(ds.read())
+      self.assertEqual(ds.read(), b'plaintext')
 
   def test_fake_streaming_aead_fails_wrong_key(self):
     saead1 = fake_streaming_aead.FakeRawStreamingAead('Name1')

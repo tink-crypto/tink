@@ -18,50 +18,64 @@ from tink import core
 from tink.streaming_aead import _raw_streaming_aead
 
 
-class _ReadableRawBytes(io.RawIOBase):
-  """A readable RawIOBase implementation that also closes another file."""
+class _FakeDecryptingStream(io.RawIOBase):
+  """A fake implementation of a decyrpting stream."""
 
-  def __init__(self, data: bytes, also_close: Optional[BinaryIO] = None):
-    super(_ReadableRawBytes, self).__init__()
-    self._bytes_io = io.BytesIO(data)
-    self._also_close = also_close
+  def __init__(self, name: Text,
+               ciphertext_source: BinaryIO,
+               associated_data: bytes,
+               close_ciphertext_source: bool):
+    super(_FakeDecryptingStream, self).__init__()
+    self._name = name
+    self._ciphertext_source = ciphertext_source
+    self._associated_data = associated_data
+    self._close_ciphertext_source = close_ciphertext_source
+    self._error = False
+    self._data = bytearray()
+    self._bytes_io = None
+
+  def read(self, size: int = -1) -> Optional[bytes]:
+    if self._error:
+      raise self._error
+    if not self._bytes_io:
+      # read to EOF, and don't stop when None is returned.
+      while True:
+        try:
+          d = self._ciphertext_source.read()
+          if d is None:
+            return None
+        except BlockingIOError:
+          # There is currently no data available. This error may be raised by a
+          # BufferedIOBase source. For RawIOBase, we have to return None in this
+          # case.
+          return None
+        if not d:
+          # d == b'', which means EOF
+          break
+        self._data.extend(d)
+      data = bytes(self._data).split(b'|')
+      if (len(data) < 3 or data[1] != self._associated_data or
+          data[0] != self._name.encode()):
+        self._error = core.TinkError('error occured.')
+        raise self._error
+      self._bytes_io = io.BytesIO(data[2])
+    return self._bytes_io.read(size)
 
   def readinto(self, b: bytearray) -> Optional[int]:
-    try:
-      return self._bytes_io.readinto1(b)
-    except BlockingIOError as b:
-      if not b.characters_written:
-        # No data at the moment
-        return None
-      else:
-        return b.characters_written
+    data = self.read(len(b))
+    if data is None:
+      return None
+    n = len(data)
+    b[:n] = data
+    return n
 
   def readable(self):
     return True
 
   def close(self):
-    if not self.closed and self._also_close:
-      self._also_close.close()
-    super(_ReadableRawBytes, self).close()
-
-
-class _AlwaysFailingDecryptingStream(io.RawIOBase):
-  """A readable RawIOBase that raises a TinkError on read and readinto."""
-
-  def __init__(self, also_close: Optional[BinaryIO] = None):
-    super(_AlwaysFailingDecryptingStream, self).__init__()
-    self._also_close = also_close
-
-  def readinto(self, b: bytearray) -> Optional[int]:
-    raise core.TinkError('decryption failed')
-
-  def readable(self) -> bool:
-    return True
-
-  def close(self):
-    if not self.closed and self._also_close:
-      self._also_close.close()
-    super(_AlwaysFailingDecryptingStream, self).close()
+    if not self.closed and self._close_ciphertext_source:
+      self._ciphertext_source.close()
+    super(_FakeDecryptingStream, self).close()
 
 
 class _WritableRawBytes(io.RawIOBase):
@@ -114,11 +128,5 @@ class FakeRawStreamingAead(_raw_streaming_aead.RawStreamingAead):
   def new_raw_decrypting_stream(self, ciphertext_source: BinaryIO,
                                 associated_data: bytes,
                                 close_ciphertext_source: bool) -> io.RawIOBase:
-    data = ciphertext_source.read().split(b'|')
-    if not close_ciphertext_source:
-      ciphertext_source = None
-    if (len(data) < 3 or data[1] != associated_data or
-        data[0] != self._name.encode()):
-      return _AlwaysFailingDecryptingStream(ciphertext_source)
-    else:
-      return _ReadableRawBytes(data[2], ciphertext_source)
+    return _FakeDecryptingStream(
+        self._name, ciphertext_source, associated_data, close_ciphertext_source)
