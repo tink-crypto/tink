@@ -81,6 +81,19 @@ class SlowBytesIOTest(absltest.TestCase):
       self.assertEqual(b'The quick brown fox', f.read(-1))
       self.assertEqual(b'', f.read(-1))
 
+  def test_not_seekable(self):
+    with bytes_io.SlowBytesIO(b'The quick brown fox', seekable=False) as f:
+      self.assertFalse(f.seekable())
+      with self.assertRaises(io.UnsupportedOperation):
+        f.seek(0)
+
+  def test_seekable(self):
+    with bytes_io.SlowBytesIO(b'The quick brown fox', seekable=True) as f:
+      self.assertTrue(f.seekable())
+      self.assertEqual(b'The quick brown fox', f.read())
+      f.seek(0)
+      self.assertEqual(b'The quick brown fox', f.read())
+
 
 class SlowReadableRawBytesTest(absltest.TestCase):
 
@@ -120,6 +133,22 @@ class SlowReadableRawBytesTest(absltest.TestCase):
       self.assertEqual(b'The quick ', f.read(-1))
       self.assertEqual(b'brown fox', f.read(-1))
       self.assertEqual(b'', f.read(-1))
+
+  def test_not_seekable(self):
+    with bytes_io.SlowReadableRawBytes(
+        b'The quick brown fox', seekable=False) as f:
+      self.assertFalse(f.seekable())
+      with self.assertRaises(io.UnsupportedOperation):
+        f.seek(0)
+
+  def test_seekable(self):
+    with bytes_io.SlowReadableRawBytes(
+        b'The quick brown fox', seekable=True) as f:
+      self.assertTrue(f.seekable())
+      self.assertIsNone(None, f.read())
+      self.assertEqual(b'The quick ', f.read())
+      f.seek(0)
+      self.assertEqual(b'The quick ', f.read())
 
 if __name__ == '__main__':
   absltest.main()

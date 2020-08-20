@@ -56,7 +56,6 @@ py_library(
     srcs = ["fake_streaming_aead.py"],
     srcs_version = "PY3",
     deps = [
-        requirement("absl-py"),
         "//tink/core",
         "//tink/streaming_aead",
     ],

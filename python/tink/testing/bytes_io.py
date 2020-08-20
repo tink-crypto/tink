@@ -60,6 +60,8 @@ class SlowBytesIO(io.BytesIO):
   def read(self, size: int = -1) -> bytes:
     if size > 0:
       self._state += 1
+      if self._state > 1000:
+        raise AssertionError('too many read. Is there an infinite loop?')
       if self._state % 3 == 0:   # block on every third call.
         raise io.BlockingIOError(
             errno.EAGAIN,
@@ -67,6 +69,11 @@ class SlowBytesIO(io.BytesIO):
       # read at most 5 bytes.
       return super(SlowBytesIO, self).read(min(size, 5))
     return super(SlowBytesIO, self).read(size)
+
+  def seek(self, pos: int, whence: int = 0) -> int:
+    if self._seekable:
+      return super(SlowBytesIO, self).seek(pos, whence)
+    raise io.UnsupportedOperation('seek')
 
   def seekable(self)-> bool:
     return self._seekable
@@ -84,6 +91,8 @@ class SlowReadableRawBytes(io.RawIOBase):
   def readinto(self, b: bytearray) -> Optional[int]:
     try:
       self._state += 1
+      if self._state > 1000:
+        raise AssertionError('too many read. Is there an infinite loop?')
       if self._state % 3 == 0:   # return None on every third call.
         return None
       # read at most 5 bytes
@@ -95,6 +104,11 @@ class SlowReadableRawBytes(io.RawIOBase):
 
   def readable(self):
     return True
+
+  def seek(self, pos: int, whence: int = 0) -> int:
+    if self._seekable:
+      return self._bytes_io.seek(pos, whence)
+    raise io.UnsupportedOperation('seek')
 
   def seekable(self)-> bool:
     return self._seekable
