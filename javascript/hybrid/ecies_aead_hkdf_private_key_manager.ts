@@ -27,8 +27,8 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   /**
    * @override
    */
-  async newKey(keyFormat: AnyDuringMigration):
-      Promise<PbEciesAeadHkdfPrivateKey> {
+  async newKey(keyFormat: PbMessage|
+               Uint8Array): Promise<PbEciesAeadHkdfPrivateKey> {
     if (!keyFormat) {
       throw new SecurityException('Key format has to be non-null.');
     }
@@ -41,8 +41,8 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   /**
    * @override
    */
-  async newKeyData(serializedKeyFormat: AnyDuringMigration):
-      Promise<PbKeyData> {
+  async newKeyData(serializedKeyFormat: PbMessage|
+                   Uint8Array): Promise<PbKeyData> {
     const key = await this.newKey(serializedKeyFormat);
     const keyData =
         (new PbKeyData())
@@ -53,7 +53,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   }
 
   /** @override */
-  getPublicKeyData(serializedPrivateKey: AnyDuringMigration) {
+  getPublicKeyData(serializedPrivateKey: Uint8Array) {
     const privateKey = deserializePrivateKey(serializedPrivateKey);
     const publicKey = privateKey.getPublicKey();
     if (!publicKey) {
@@ -86,10 +86,10 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-    const jsonPublicKey = await EllipticCurves.exportCryptoKey(
-        (keyPair as AnyDuringMigration).publicKey);
-    const jsonPrivateKey = await EllipticCurves.exportCryptoKey(
-        (keyPair as AnyDuringMigration).privateKey);
+    const jsonPublicKey =
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const jsonPrivateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }
@@ -168,19 +168,15 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
  */
 export class EciesAeadHkdfPrivateKeyManager implements
     KeyManager.KeyManager<HybridDecrypt> {
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
-      HybridDecrypt;
+  private static readonly SUPPORTED_PRIMITIVE_ = HybridDecrypt;
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
-  keyFactory: AnyDuringMigration;
-
-  constructor() {
-    this.keyFactory = new EciesAeadHkdfPrivateKeyFactory();
-  }
+  keyFactory = new EciesAeadHkdfPrivateKeyFactory();
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Util.Constructor<HybridDecrypt>,
+      key: PbKeyData|PbMessage) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -189,7 +185,8 @@ export class EciesAeadHkdfPrivateKeyManager implements
     const keyProto = EciesAeadHkdfPrivateKeyManager.getKeyProto_(key);
     EciesAeadHkdfValidators.validatePrivateKey(
         keyProto, VERSION, EciesAeadHkdfPublicKeyManager.VERSION);
-    const recepientPrivateKey = EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
+    const recepientPrivateKey =
+        EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
     const publicKey = keyProto.getPublicKey();
     if (!publicKey) {
       throw new SecurityException('Public key not set');
@@ -220,7 +217,7 @@ export class EciesAeadHkdfPrivateKeyManager implements
   }
 
   /** @override */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

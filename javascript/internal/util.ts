@@ -18,6 +18,12 @@ import {PbEllipticCurveType, PbHashType, PbKeyset, PbKeyStatusType, PbOutputPref
  */
 export type Constructor<T> = Function&{prototype: T};
 
+/** Like the `instanceof` operator, but works with `Constructor`. */
+export function isInstanceOf<T>(
+    value: unknown, ctor: Constructor<T>): value is T {
+  return value instanceof ctor;
+}
+
 /**
  * Validates the given key and throws SecurityException if it is invalid.
  *

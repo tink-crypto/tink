@@ -15,7 +15,7 @@ import * as Validators from './validators';
  *
  * @final
  */
-export class EcdsaVerify implements PublicKeyVerify {
+export class EcdsaVerify extends PublicKeyVerify {
   private readonly ieeeSignatureLength_: number;
 
   /**
@@ -25,6 +25,7 @@ export class EcdsaVerify implements PublicKeyVerify {
   constructor(
       private readonly key: CryptoKey, private readonly hash: string,
       private readonly encoding: EllipticCurves.EcdsaSignatureEncodingType) {
+    super();
     const {namedCurve}: Partial<EcKeyAlgorithm> = key.algorithm;
     if (!namedCurve) {
       throw new SecurityException('Curve has to be defined.');

@@ -15,7 +15,7 @@ import * as Validators from './validators';
  *
  * @final
  */
-export class EcdsaSign implements PublicKeySign {
+export class EcdsaSign extends PublicKeySign {
   private readonly encoding_: EllipticCurves.EcdsaSignatureEncodingType;
 
   /**
@@ -25,6 +25,7 @@ export class EcdsaSign implements PublicKeySign {
   constructor(
       private readonly key: CryptoKey, private readonly hash: string,
       opt_encoding?: EllipticCurves.EcdsaSignatureEncodingType|null) {
+    super();
     if (!opt_encoding) {
       opt_encoding = EllipticCurves.EcdsaSignatureEncodingType.IEEE_P1363;
     }

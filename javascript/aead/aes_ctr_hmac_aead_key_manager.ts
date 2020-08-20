@@ -6,8 +6,9 @@
 
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
-import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} from '../internal/proto';
+import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData, PbMessage} from '../internal/proto';
 import * as Registry from '../internal/registry';
+import {Constructor} from '../internal/util';
 import {aesCtrHmacFromRawKeys, EncryptThenAuthenticate} from '../subtle/encrypt_then_authenticate';
 import * as Random from '../subtle/random';
 import * as Validators from '../subtle/validators';
@@ -30,7 +31,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   /**
    * @override
    */
-  newKey(keyFormat: AnyDuringMigration) {
+  newKey(keyFormat: PbMessage|Uint8Array) {
     let keyFormatProto: PbAesCtrHmacAeadKeyFormat;
     if (keyFormat instanceof Uint8Array) {
       try {
@@ -72,7 +73,7 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   /**
    * @override
    */
-  newKeyData(serializedKeyFormat: AnyDuringMigration) {
+  newKeyData(serializedKeyFormat: Uint8Array) {
     const key = (this.newKey(serializedKeyFormat));
     const keyData =
         (new PbKeyData())
@@ -170,21 +171,17 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
  * @final
  */
 export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration = Aead;
+  private static readonly SUPPORTED_PRIMITIVE_ = Aead;
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey';
   private static readonly VERSION_: number = 0;
-  private readonly keyFactory_: AesCtrHmacAeadKeyFactory;
-
-  constructor() {
-    this.keyFactory_ = new AesCtrHmacAeadKeyFactory();
-  }
+  private readonly keyFactory_ = new AesCtrHmacAeadKeyFactory();
 
   /**
    * @override
    */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Constructor<Aead>, key: PbKeyData|PbMessage) {
     if (primitiveType != this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -229,7 +226,7 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
   /**
    * @override
    */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

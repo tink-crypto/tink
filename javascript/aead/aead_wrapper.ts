@@ -17,10 +17,12 @@ import {Aead} from './internal/aead';
 /**
  * @final
  */
-class WrappedAead implements Aead {
+class WrappedAead extends Aead {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
-  constructor(private readonly aeadSet: PrimitiveSet.PrimitiveSet<Aead>) {}
+  constructor(private readonly aeadSet: PrimitiveSet.PrimitiveSet<Aead>) {
+    super();
+  }
 
   static newAead(aeadSet: PrimitiveSet.PrimitiveSet<Aead>): Aead {
     if (!aeadSet) {

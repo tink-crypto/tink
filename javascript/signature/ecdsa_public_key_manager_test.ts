@@ -55,18 +55,6 @@ describe('ecdsa public key manager test', function() {
     }
   });
 
-  it('get primitive, unsupported primitive type', async function() {
-    const manager = new EcdsaPublicKeyManager();
-    const key = await createKey();
-
-    try {
-      await manager.getPrimitive(Mac, key);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
-    }
-  });
-
   it('get primitive, unsupported key data type', async function() {
     const manager = new EcdsaPublicKeyManager();
     const keyData =

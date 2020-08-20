@@ -14,11 +14,13 @@ import {HybridEncrypt} from './internal/hybrid_encrypt';
 /**
  * @final
  */
-class WrappedHybridEncrypt implements HybridEncrypt {
+class WrappedHybridEncrypt extends HybridEncrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(private readonly hybridEncryptPrimitiveSet:
-                  PrimitiveSet.PrimitiveSet<HybridEncrypt>) {}
+                  PrimitiveSet.PrimitiveSet<HybridEncrypt>) {
+    super();
+  }
 
   static newHybridEncrypt(hybridEncryptPrimitiveSet:
                               PrimitiveSet.PrimitiveSet<HybridEncrypt>):
@@ -33,8 +35,7 @@ class WrappedHybridEncrypt implements HybridEncrypt {
   }
 
   /** @override */
-  async encrypt(
-      plaintext: AnyDuringMigration, opt_contextInfo?: AnyDuringMigration) {
+  async encrypt(plaintext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (!plaintext) {
       throw new SecurityException('Plaintext has to be non-null.');
     }
@@ -53,7 +54,7 @@ export class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt> {
   /**
    * @override
    */
-  wrap(primitiveSet: AnyDuringMigration) {
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<HybridEncrypt>) {
     return WrappedHybridEncrypt.newHybridEncrypt(primitiveSet);
   }
 

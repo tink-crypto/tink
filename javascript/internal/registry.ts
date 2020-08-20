@@ -25,23 +25,22 @@ import * as KeyManager from './key_manager';
 import * as PrimitiveSet from './primitive_set';
 import {PrimitiveWrapper} from './primitive_wrapper';
 import {PbKeyData, PbKeyTemplate, PbMessage} from './proto';
+import {Constructor, isInstanceOf} from './util';
 
 // key managers maps
-const typeToManagerMap_:
-    Map<string, KeyManager.KeyManager<AnyDuringMigration>> = new Map();
+const typeToManagerMap_ = new Map<string, KeyManager.KeyManager<unknown>>();
 
-const typeToNewKeyAllowedMap_: Map<string, boolean> = new Map();
+const typeToNewKeyAllowedMap_ = new Map<string, boolean>();
 
 // primitive wrappers map
-const primitiveTypeToWrapper_:
-    Map<AnyDuringMigration, PrimitiveWrapper<AnyDuringMigration>> = new Map();
+const primitiveTypeToWrapper_ = new Map<unknown, PrimitiveWrapper<unknown>>();
 
 /**
  * Register the given manager for the given key type. Manager must be
  * non-nullptr. New keys are allowed if not specified.
  */
-export function registerKeyManager<P>(
-    manager: KeyManager.KeyManager<P>, opt_newKeyAllowed?: boolean) {
+export function registerKeyManager(
+    manager: KeyManager.KeyManager<unknown>, opt_newKeyAllowed?: boolean) {
   if (opt_newKeyAllowed === undefined) {
     opt_newKeyAllowed = true;
   }
@@ -76,7 +75,7 @@ export function registerKeyManager<P>(
  * @param typeUrl -- key type
  *
  */
-export function getKeyManager<P>(typeUrl: string): KeyManager.KeyManager<P> {
+export function getKeyManager(typeUrl: string): KeyManager.KeyManager<unknown> {
   const res = typeToManagerMap_.get(typeUrl);
   if (!res) {
     throw new SecurityException(
@@ -99,7 +98,7 @@ export function getKeyManager<P>(typeUrl: string): KeyManager.KeyManager<P> {
  *
  */
 export async function getPrimitive<P>(
-    primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage,
+    primitiveType: Constructor<P>, key: PbKeyData|PbMessage,
     opt_typeUrl?: string|null): Promise<P> {
   if (key instanceof PbKeyData) {
     if (opt_typeUrl && key.getTypeUrl() != opt_typeUrl) {
@@ -112,8 +111,12 @@ export async function getPrimitive<P>(
   if (!opt_typeUrl) {
     throw new SecurityException('Key type has to be specified.');
   }
-  const manager = getKeyManager<P>(opt_typeUrl);
-  return manager.getPrimitive(primitiveType, key);
+  const manager = getKeyManager(opt_typeUrl);
+  const primitive = await manager.getPrimitive(primitiveType, key);
+  if (!isInstanceOf(primitive, primitiveType)) {
+    throw new TypeError('Unexpected type');
+  }
+  return primitive;
 }
 
 /**
@@ -157,7 +160,7 @@ export function getPublicKeyData(
   // This solution might cause some problems in the future due to Closure
   // compiler optimizations, which may map factory.getPublicKeyData to
   // concrete function.
-  const factory = (manager.getKeyFactory() as AnyDuringMigration);
+  const factory = manager.getKeyFactory();
   if (!factory.getPublicKeyData) {
     throw new SecurityException(
         'Key manager for key type ' + typeUrl +
@@ -185,7 +188,7 @@ export function reset() {
  *
  */
 function getKeyManagerWithNewKeyAllowedCheck_(keyTemplate: PbKeyTemplate):
-    KeyManager.KeyManager<AnyDuringMigration> {
+    KeyManager.KeyManager<unknown> {
   const keyType = keyTemplate.getTypeUrl();
   const manager = getKeyManager(keyType);
   if (!typeToNewKeyAllowedMap_.get(keyType)) {
@@ -232,5 +235,9 @@ export function wrap<P>(primitiveSet: PrimitiveSet.PrimitiveSet<P>): P {
     throw new SecurityException(
         'no primitive wrapper found for type ' + primitiveType);
   }
-  return wrapper.wrap(primitiveSet);
+  const primitive = wrapper.wrap(primitiveSet);
+  if (!isInstanceOf(primitive, primitiveType)) {
+    throw new TypeError('Unexpected type');
+  }
+  return primitive;
 }

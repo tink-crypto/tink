@@ -26,7 +26,7 @@ import * as Validators from './validators';
  *
  * @final
  */
-export class EncryptThenAuthenticate implements Aead {
+export class EncryptThenAuthenticate extends Aead {
   /**
    * @param ivSize the IV size in bytes
    * @param tagSize the MAC tag size in bytes
@@ -34,7 +34,9 @@ export class EncryptThenAuthenticate implements Aead {
    */
   constructor(
       private readonly cipher: IndCpaCipher, private readonly ivSize: number,
-      private readonly mac: Mac, private readonly tagSize: number) {}
+      private readonly mac: Mac, private readonly tagSize: number) {
+    super();
+  }
 
   /**
    * The plaintext is encrypted with an {@link IndCpaCipher}, then MAC

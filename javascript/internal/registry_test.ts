@@ -90,8 +90,7 @@ describe('registry test', function() {
   it('wrap, not registered primitive type', function() {
     expect(() => {
       Registry.wrap(new PrimitiveSet.PrimitiveSet(DummyPrimitive1));
-    }).toThrowError('no primitive wrapper found for type ' +
-              DummyPrimitive1);
+    }).toThrowError('no primitive wrapper found for type ' + DummyPrimitive1);
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -666,18 +665,13 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
   constructor(
       private readonly keyType: string,
       private readonly PRIMITIVE_: DummyPrimitive1 = new DummyPrimitive1Impl1(),
-      private readonly PRIMITIVE_TYPE_ = DEFAULT_PRIMITIVE_TYPE) {
+      private readonly PRIMITIVE_TYPE_ = DummyPrimitive1) {
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
   }
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
-    if (primitiveType !== this.PRIMITIVE_TYPE_) {
-      throw new SecurityException(
-          'Requested primitive type which is not ' +
-          'supported by this key manager.');
-    }
+      primitiveType: Constructor<DummyKeyManager1>, key: PbKeyData|PbMessage) {
     return this.PRIMITIVE_;
   }
 
@@ -692,7 +686,7 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
   }
 
   /** @override */
-  getPrimitiveType() {
+  getPrimitiveType(): Constructor<DummyPrimitive1> {
     return this.PRIMITIVE_TYPE_;
   }
 
@@ -714,18 +708,13 @@ class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
   constructor(
       private readonly keyType: string,
       private readonly PRIMITIVE_: DummyPrimitive2 = new DummyPrimitive2Impl(),
-      private readonly PRIMITIVE_TYPE_ = DEFAULT_PRIMITIVE_TYPE) {
+      private readonly PRIMITIVE_TYPE_ = DummyPrimitive2) {
     this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
   }
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
-    if (primitiveType !== this.PRIMITIVE_TYPE_) {
-      throw new SecurityException(
-          'Requested primitive type which is not ' +
-          'supported by this key manager.');
-    }
+      primitiveType: Constructor<DummyKeyManager2>, key: PbKeyData|PbMessage) {
     return this.PRIMITIVE_;
   }
 
@@ -766,7 +755,7 @@ class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration,
+      primitiveType: Constructor<DummyKeyManagerForNewKeyTests>,
       key: PbKeyData|PbMessage): Promise<string> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
@@ -782,12 +771,12 @@ class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
   }
 
   /** @override */
-  getPrimitiveType() {
+  getPrimitiveType(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
   /** @override */
-  getVersion(): number {
+  getVersion(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 

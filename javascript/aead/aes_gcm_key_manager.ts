@@ -8,6 +8,7 @@ import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData, PbMessage} from '../internal/proto';
 import * as Registry from '../internal/registry';
+import {Constructor} from '../internal/util';
 import * as aesGcm from '../subtle/aes_gcm';
 import * as Random from '../subtle/random';
 import * as Validators from '../subtle/validators';
@@ -21,7 +22,7 @@ const VERSION = 0;
  */
 class AesGcmKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat: AnyDuringMigration) {
+  newKey(keyFormat: PbMessage|Uint8Array) {
     const keyFormatProto = AesGcmKeyFactory.getKeyFormatProto_(keyFormat);
     AesGcmKeyFactory.validateKeyFormat_(keyFormatProto);
     const key = (new PbAesGcmKey())
@@ -31,7 +32,7 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat: AnyDuringMigration) {
+  newKeyData(serializedKeyFormat: Uint8Array) {
     const key = (this.newKey(serializedKeyFormat));
     const keyData =
         (new PbKeyData())
@@ -84,7 +85,7 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
  * @final
  */
 export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration = Aead;
+  private static readonly SUPPORTED_PRIMITIVE_ = Aead;
   static KEY_TYPE: string = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
   private readonly keyFactory_: AesGcmKeyFactory;
 
@@ -95,7 +96,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Constructor<Aead>, key: PbKeyData|PbMessage) {
     if (primitiveType != this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -107,7 +108,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
   }
 
   /** @override */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

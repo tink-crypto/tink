@@ -17,7 +17,7 @@ import * as EllipticCurves from './elliptic_curves';
  *
  * @final
  */
-export class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
+export class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
   private readonly kemSender_: sender.EciesHkdfKemSender;
   private readonly hkdfHash_: string;
   private readonly pointFormat_: EllipticCurves.PointFormatType;
@@ -32,6 +32,7 @@ export class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
       kemSender: sender.EciesHkdfKemSender, hkdfHash: string,
       pointFormat: EllipticCurves.PointFormatType,
       demHelper: EciesAeadHkdfDemHelper, opt_hkdfSalt?: Uint8Array) {
+    super();
     // TODO(thaidn): do we actually need these null checks?
     if (!kemSender) {
       throw new SecurityException('KEM sender has to be non-null.');

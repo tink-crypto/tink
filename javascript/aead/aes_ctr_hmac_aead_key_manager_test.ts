@@ -542,22 +542,6 @@ describe('aes ctr hmac aead key manager test', function() {
     expect(decryptedCiphertext).toEqual(plaintext);
   });
 
-  it('get primitive unsupported primitive', async function() {
-    const manager = new AesCtrHmacAeadKeyManager();
-    const keyData = createTestKeyData();
-
-    try {
-      await manager.getPrimitive(Mac, keyData);
-    } catch (e) {
-      expect(e.toString())
-          .toBe(
-              'SecurityException: Requested primitive type which is not ' +
-              'supported by this key manager.');
-      return;
-    }
-    fail('An exception should be thrown.');
-  });
-
   /////////////////////////////////////////////////////////////////////////////
   // tests for getVersion, getKeyType and doesSupport methods
 

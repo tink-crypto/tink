@@ -15,11 +15,13 @@ import {PublicKeySign} from './internal/public_key_sign';
 /**
  * @final
  */
-class WrappedPublicKeySign implements PublicKeySign {
+class WrappedPublicKeySign extends PublicKeySign {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(private readonly primitiveSet:
-                  PrimitiveSet.PrimitiveSet<PublicKeySign>) {}
+                  PrimitiveSet.PrimitiveSet<PublicKeySign>) {
+    super();
+  }
 
   static newPublicKeySign(
       primitiveSet: PrimitiveSet.PrimitiveSet<PublicKeySign>): PublicKeySign {
@@ -33,7 +35,7 @@ class WrappedPublicKeySign implements PublicKeySign {
   }
 
   /** @override */
-  async sign(data: AnyDuringMigration) {
+  async sign(data: Uint8Array) {
     Validators.requireUint8Array(data);
     const primary = this.primitiveSet.getPrimary();
     if (!primary) {
@@ -50,7 +52,7 @@ export class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
   /**
    * @override
    */
-  wrap(primitiveSet: AnyDuringMigration) {
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<PublicKeySign>) {
     return WrappedPublicKeySign.newPublicKeySign(primitiveSet);
   }
 

@@ -16,11 +16,13 @@ import {PublicKeyVerify} from './internal/public_key_verify';
 /**
  * @final
  */
-class WrappedPublicKeyVerify implements PublicKeyVerify {
+class WrappedPublicKeyVerify extends PublicKeyVerify {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(private readonly primitiveSet:
-                  PrimitiveSet.PrimitiveSet<PublicKeyVerify>) {}
+                  PrimitiveSet.PrimitiveSet<PublicKeyVerify>) {
+    super();
+  }
 
   static newPublicKeyVerify(primitiveSet:
                                 PrimitiveSet.PrimitiveSet<PublicKeyVerify>):
@@ -32,7 +34,7 @@ class WrappedPublicKeyVerify implements PublicKeyVerify {
   }
 
   /** @override */
-  async verify(signature: AnyDuringMigration, data: AnyDuringMigration) {
+  async verify(signature: Uint8Array, data: Uint8Array) {
     Validators.requireUint8Array(signature);
     Validators.requireUint8Array(data);
     if (signature.length > CryptoFormat.NON_RAW_PREFIX_SIZE) {
@@ -89,7 +91,7 @@ export class PublicKeyVerifyWrapper implements
   /**
    * @override
    */
-  wrap(primitiveSet: AnyDuringMigration) {
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<PublicKeyVerify>) {
     return WrappedPublicKeyVerify.newPublicKeyVerify(primitiveSet);
   }
 

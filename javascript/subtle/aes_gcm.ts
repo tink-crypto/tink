@@ -28,8 +28,10 @@ const TAG_SIZE_IN_BITS: number = 128;
  *
  * @final
  */
-export class AesGcm implements Aead {
-  constructor(private readonly key: CryptoKey) {}
+export class AesGcm extends Aead {
+  constructor(private readonly key: CryptoKey) {
+    super();
+  }
 
   /**
    * @override

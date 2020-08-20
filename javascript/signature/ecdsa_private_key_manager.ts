@@ -8,6 +8,7 @@ import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
 import {PbEcdsaKeyFormat, PbEcdsaParams, PbEcdsaPrivateKey, PbEcdsaPublicKey, PbKeyData, PbMessage} from '../internal/proto';
 import * as Util from '../internal/util';
+import {Constructor} from '../internal/util';
 import * as Bytes from '../subtle/bytes';
 import * as ecdsaSign from '../subtle/ecdsa_sign';
 import * as EllipticCurves from '../subtle/elliptic_curves';
@@ -25,7 +26,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   /**
    * @override
    */
-  async newKey(keyFormat: AnyDuringMigration): Promise<PbEcdsaPrivateKey> {
+  async newKey(keyFormat: PbMessage|Uint8Array): Promise<PbEcdsaPrivateKey> {
     if (!keyFormat) {
       throw new SecurityException('Key format has to be non-null.');
     }
@@ -37,8 +38,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   /**
    * @override
    */
-  async newKeyData(serializedKeyFormat: AnyDuringMigration):
-      Promise<PbKeyData> {
+  async newKeyData(serializedKeyFormat: Uint8Array): Promise<PbKeyData> {
     const key = await this.newKey(serializedKeyFormat);
     const keyData =
         (new PbKeyData())
@@ -49,7 +49,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
   }
 
   /** @override */
-  getPublicKeyData(serializedPrivateKey: AnyDuringMigration) {
+  getPublicKeyData(serializedPrivateKey: Uint8Array) {
     const privateKey = deserializePrivateKey(serializedPrivateKey);
     const publicKey = privateKey.getPublicKey();
     if (!publicKey) {
@@ -78,10 +78,10 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
-    const jsonPublicKey = await EllipticCurves.exportCryptoKey(
-        (keyPair as AnyDuringMigration).publicKey);
-    const jsonPrivateKey = await EllipticCurves.exportCryptoKey(
-        (keyPair as AnyDuringMigration).privateKey);
+    const jsonPublicKey =
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const jsonPrivateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
     return EcdsaPrivateKeyFactory.jsonToProtoKey_(
         jsonPrivateKey, jsonPublicKey, params);
   }
@@ -158,19 +158,14 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
  */
 export class EcdsaPrivateKeyManager implements
     KeyManager.KeyManager<PublicKeySign> {
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
-      PublicKeySign;
+  private static readonly SUPPORTED_PRIMITIVE_ = PublicKeySign;
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
-  keyFactory: AnyDuringMigration;
-
-  constructor() {
-    this.keyFactory = new EcdsaPrivateKeyFactory();
-  }
+  keyFactory = new EcdsaPrivateKeyFactory();
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Constructor<PublicKeySign>, key: PbKeyData|PbMessage) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -194,7 +189,7 @@ export class EcdsaPrivateKeyManager implements
   }
 
   /** @override */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

@@ -21,14 +21,16 @@ const MIN_TAG_SIZE_IN_BYTES: number = 10;
  *
  * @final
  */
-export class Hmac implements Mac {
+export class Hmac extends Mac {
   /**
    * @param hash accepted names are SHA-1, SHA-256 and SHA-512
    * @param tagSize the size of the tag
    */
   constructor(
       private readonly hash: string, private readonly key: CryptoKey,
-      private readonly tagSize: number) {}
+      private readonly tagSize: number) {
+    super();
+  }
 
   /**
    * @override

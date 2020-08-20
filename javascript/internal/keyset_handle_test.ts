@@ -23,6 +23,7 @@ import * as KeyManager from './key_manager';
 import {generateNew, KeysetHandle, read, readNoSecret} from './keyset_handle';
 import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeyStatusType, PbMessage, PbOutputPrefixType} from './proto';
 import * as Registry from './registry';
+import {Constructor} from './util';
 
 describe('keyset handle test', function() {
   beforeEach(function() {
@@ -377,7 +378,7 @@ describe('keyset handle test', function() {
            macKeyId, PbOutputPrefixType.TINK, macKeyTypeUrl,
            /* enabled = */ true);
        keyset.addKey(macKey);
-       const primitive = new DummyAead(new Uint8Array([0xFF]));
+       const primitive = new DummyMac(new Uint8Array([0xFF]));
        Registry.registerKeyManager(
            new DummyKeyManager(macKeyTypeUrl, primitive, Mac));
 
@@ -589,7 +590,7 @@ function createKey(
  * keyType added to the Keyset.
  */
 function createKeysetAndInitializeRegistry(
-    primitiveType: AnyDuringMigration,
+    primitiveType: Constructor<unknown>,
     opt_numberOfKeys: number = 15): PbKeyset {
   const numberOfKeyTypes = 5;
   const keyTypePrefix = 'key_type_';
@@ -674,6 +675,31 @@ class DummyAead extends Aead {
   }
 }
 
+/**
+ * @final
+ */
+class DummyMac extends Mac {
+  constructor(private readonly tag: Uint8Array) {
+    super();
+  }
+
+  /**
+   * Just appends the tag to the data.
+   * @override
+   */
+  async computeMac(data: Uint8Array) {
+    return this.tag;
+  }
+
+  /**
+   * Returns whether data ends with tag.
+   * @override
+   */
+  async verifyMac(tag: Uint8Array, data: Uint8Array) {
+    return [...tag].toString() === [...this.tag].toString();
+  }
+}
+
 /** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
   constructor(private readonly ciphertextSuffix: Uint8Array) {
@@ -727,13 +753,10 @@ class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
 
   constructor(
       private readonly keyType: string, private readonly primitive: T,
-      private readonly PRIMITIVE_TYPE_: AnyDuringMigration) {
-    this.KEY_FACTORY_;
-  }
+      private readonly PRIMITIVE_TYPE_: Constructor<T>) {}
 
   /** @override */
-  async getPrimitive(
-      primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage) {
+  async getPrimitive(primitiveType: Constructor<T>, key: PbKeyData|PbMessage) {
     if (primitiveType != this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +

@@ -20,14 +20,14 @@ import {RegistryEciesAeadHkdfDemHelper} from './registry_ecies_aead_hkdf_dem_hel
  */
 class EciesAeadHkdfPublicKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat: AnyDuringMigration): never {
+  newKey(keyFormat: PbMessage|Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.');
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat: AnyDuringMigration): never {
+  newKeyData(serializedKeyFormat: Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.');
@@ -41,18 +41,14 @@ export class EciesAeadHkdfPublicKeyManager implements
     KeyManager.KeyManager<HybridEncrypt> {
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
-      HybridEncrypt;
+  private static readonly SUPPORTED_PRIMITIVE_ = HybridEncrypt;
   static VERSION: number = 0;
-  keyFactory: AnyDuringMigration;
-
-  constructor() {
-    this.keyFactory = new EciesAeadHkdfPublicKeyFactory();
-  }
+  keyFactory = new EciesAeadHkdfPublicKeyFactory();
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Util.Constructor<HybridEncrypt>,
+      key: PbKeyData|PbMessage) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -60,7 +56,8 @@ export class EciesAeadHkdfPublicKeyManager implements
     }
     const keyProto = EciesAeadHkdfPublicKeyManager.getKeyProto_(key);
     EciesAeadHkdfValidators.validatePublicKey(keyProto, this.getVersion());
-    const recepientPublicKey = EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
+    const recepientPublicKey =
+        EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
     const params = (keyProto.getParams() as PbEciesAeadHkdfParams);
     const demParams = params.getDemParams();
     if (!demParams) {
@@ -81,7 +78,7 @@ export class EciesAeadHkdfPublicKeyManager implements
   }
 
   /** @override */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

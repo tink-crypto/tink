@@ -15,11 +15,13 @@ import {HybridDecrypt} from './internal/hybrid_decrypt';
 /**
  * @final
  */
-class WrappedHybridDecrypt implements HybridDecrypt {
+class WrappedHybridDecrypt extends HybridDecrypt {
   // The constructor should be @private, but it is not supported by Closure
   // (see https://github.com/google/closure-compiler/issues/2761).
   constructor(private readonly hybridDecryptPrimitiveSet:
-                  PrimitiveSet.PrimitiveSet<HybridDecrypt>) {}
+                  PrimitiveSet.PrimitiveSet<HybridDecrypt>) {
+    super();
+  }
 
   static newHybridDecrypt(hybridDecryptPrimitiveSet:
                               PrimitiveSet.PrimitiveSet<HybridDecrypt>):
@@ -31,8 +33,7 @@ class WrappedHybridDecrypt implements HybridDecrypt {
   }
 
   /** @override */
-  async decrypt(
-      ciphertext: AnyDuringMigration, opt_contextInfo?: AnyDuringMigration) {
+  async decrypt(ciphertext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (!ciphertext) {
       throw new SecurityException('Ciphertext has to be non-null.');
     }
@@ -89,7 +90,7 @@ export class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
   /**
    * @override
    */
-  wrap(primitiveSet: AnyDuringMigration) {
+  wrap(primitiveSet: PrimitiveSet.PrimitiveSet<HybridDecrypt>) {
     return WrappedHybridDecrypt.newHybridDecrypt(primitiveSet);
   }
 

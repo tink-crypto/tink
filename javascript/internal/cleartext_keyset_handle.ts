@@ -25,7 +25,7 @@ export class CleartextKeysetHandle {
    * either.
    *
    */
-  static fromJspbArray(keysetJspbArray: AnyDuringMigration[]): KeysetHandle {
+  static fromJspbArray(keysetJspbArray: unknown[]): KeysetHandle {
     return new KeysetHandle(new PbKeyset(keysetJspbArray));
   }
 

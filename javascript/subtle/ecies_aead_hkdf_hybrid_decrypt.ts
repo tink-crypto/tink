@@ -17,7 +17,7 @@ import * as EllipticCurves from './elliptic_curves';
  *
  * @final
  */
-export class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
+export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
   private readonly kemRecipient_: EciesHkdfKemRecipient;
   private readonly hkdfHash_: string;
   private readonly pointFormat_: EllipticCurves.PointFormatType;
@@ -33,6 +33,7 @@ export class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
       recipientPrivateKey: JsonWebKey, kemRecipient: EciesHkdfKemRecipient,
       hkdfHash: string, pointFormat: EllipticCurves.PointFormatType,
       demHelper: EciesAeadHkdfDemHelper, opt_hkdfSalt?: Uint8Array) {
+    super();
     if (!recipientPrivateKey) {
       throw new SecurityException('Recipient private key has to be non-null.');
     }

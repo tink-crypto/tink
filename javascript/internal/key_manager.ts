@@ -5,6 +5,7 @@
  */
 
 import {PbKeyData, PbMessage} from './proto';
+import {Constructor} from './util';
 
 /**
  * An auxiliary container for methods that generate new keys.
@@ -28,13 +29,16 @@ export interface KeyFactory {
    *
    */
   newKeyData(serializedKeyFormat: Uint8Array): PbKeyData|Promise<PbKeyData>;
-}
 
-export interface PrivateKeyFactory extends KeyFactory {
   /**
    * Returns a public key data extracted from the given serialized private key.
    *
    */
+  getPublicKeyData?: (serializedPrivateKey: Uint8Array) => PbKeyData;
+}
+
+export interface PrivateKeyFactory extends KeyFactory {
+  /** @override */
   getPublicKeyData(serializedPrivateKey: Uint8Array): PbKeyData;
 }
 
@@ -55,7 +59,7 @@ export interface KeyManager<P> {
    * @param key is either a KeyData proto or a supported
    *     key proto
    */
-  getPrimitive(primitiveType: AnyDuringMigration, key: PbKeyData|PbMessage):
+  getPrimitive(primitiveType: Constructor<P>, key: PbKeyData|PbMessage):
       Promise<P>;
 
   /**
@@ -78,7 +82,7 @@ export interface KeyManager<P> {
    * primitive interface (e.g. that the primitive is AEAD).
    *
    */
-  getPrimitiveType(): AnyDuringMigration;
+  getPrimitiveType(): Constructor<P>;
 
   /**
    * Returns the version of this KeyManager.

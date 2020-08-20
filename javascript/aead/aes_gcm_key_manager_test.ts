@@ -177,18 +177,6 @@ describe('aes gcm key manager test', function() {
     }
   });
 
-  it('get primitive, unsupported primitive', async function() {
-    const manager = new AesGcmKeyManager();
-    const keyData = createTestKeyData();
-
-    try {
-      await manager.getPrimitive(Mac, keyData);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
-    }
-  });
-
   // Tests for getting primitive from valid key/keyData.
   it('get primitive, from key', async function() {
     const manager = new AesGcmKeyManager();

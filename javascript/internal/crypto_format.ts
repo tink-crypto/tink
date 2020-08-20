@@ -49,7 +49,7 @@ export class CryptoFormat {
    */
   private static makeOutputPrefix_(keyId: number, keyTypeIdentifier: number):
       Uint8Array {
-    let res: AnyDuringMigration[] = [keyTypeIdentifier];
+    let res = [keyTypeIdentifier];
     res = res.concat(CryptoFormat.numberAsBigEndian_(keyId));
     return new Uint8Array(res);
   }
@@ -62,7 +62,7 @@ export class CryptoFormat {
    * @static
    *
    */
-  private static numberAsBigEndian_(n: number): AnyDuringMigration[] {
+  private static numberAsBigEndian_(n: number): number[] {
     if (!Number.isInteger(n) || n < 0 || n >= 2 ** 32) {
       throw new InvalidArgumentsException(
           'Number has to be unsigned 32-bit integer.');

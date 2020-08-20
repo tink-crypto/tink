@@ -202,24 +202,11 @@ describe('ecdsa private key manager test', function() {
     const publicKey =
         PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue());
     expect(publicKey.getVersion())
-        .toEqual(privateKey.getPublicKey()?.getVersion());
+        .toEqual(privateKey.getPublicKey()!.getVersion());
     expect(publicKey.getParams())
-        .toEqual(privateKey.getPublicKey()?.getParams());
-    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()?.getX());
-    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()?.getY());
-  });
-
-  it('get primitive, unsupported primitive type', async function() {
-    const manager = new EcdsaPrivateKeyManager();
-    const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
-
-    try {
-      await manager.getPrimitive(PublicKeyVerify, key);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
-    }
+        .toEqual(privateKey.getPublicKey()!.getParams());
+    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()!.getX());
+    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()!.getY());
   });
 
   it('get primitive, unsupported key data type', async function() {

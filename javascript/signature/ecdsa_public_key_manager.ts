@@ -18,14 +18,14 @@ import {PublicKeyVerify} from './internal/public_key_verify';
  */
 class EcdsaPublicKeyFactory implements KeyManager.KeyFactory {
   /** @override */
-  newKey(keyFormat: AnyDuringMigration): never {
+  newKey(keyFormat: PbMessage|Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.');
   }
 
   /** @override */
-  newKeyData(serializedKeyFormat: AnyDuringMigration): never {
+  newKeyData(serializedKeyFormat: Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.');
@@ -39,18 +39,14 @@ export class EcdsaPublicKeyManager implements
     KeyManager.KeyManager<PublicKeyVerify> {
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
-  private static readonly SUPPORTED_PRIMITIVE_: AnyDuringMigration =
-      PublicKeyVerify;
+  private static readonly SUPPORTED_PRIMITIVE_ = PublicKeyVerify;
   static VERSION: number = 0;
-  keyFactory: AnyDuringMigration;
-
-  constructor() {
-    this.keyFactory = new EcdsaPublicKeyFactory();
-  }
+  keyFactory = new EcdsaPublicKeyFactory();
 
   /** @override */
   async getPrimitive(
-      primitiveType: AnyDuringMigration, key: AnyDuringMigration) {
+      primitiveType: Util.Constructor<PublicKeyVerify>,
+      key: PbKeyData|PbMessage) {
     if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
@@ -66,7 +62,7 @@ export class EcdsaPublicKeyManager implements
   }
 
   /** @override */
-  doesSupport(keyType: AnyDuringMigration) {
+  doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 

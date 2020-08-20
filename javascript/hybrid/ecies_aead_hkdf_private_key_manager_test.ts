@@ -200,24 +200,13 @@ describe('ecies aead hkdf private key manager test', function() {
     const publicKey =
         PbEciesAeadHkdfPublicKey.deserializeBinary(publicKeyData.getValue());
     expect(publicKey.getVersion())
-        .toEqual(privateKey.getPublicKey()?.getVersion());
+        .toEqual(assertExists(privateKey.getPublicKey()).getVersion());
     expect(publicKey.getParams())
-        .toEqual(privateKey.getPublicKey()?.getParams());
-    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()?.getX());
-    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()?.getY());
-  });
-
-  it('get primitive, unsupported primitive type', async function() {
-    const manager = new EciesAeadHkdfPrivateKeyManager();
-    const keyFormat = createKeyFormat();
-    const key = await manager.getKeyFactory().newKey(keyFormat);
-
-    try {
-      await manager.getPrimitive(HybridEncrypt, key);
-      fail('An exception should be thrown.');
-    } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.unsupportedPrimitive());
-    }
+        .toEqual(assertExists(privateKey.getPublicKey()).getParams());
+    expect(publicKey.getX())
+        .toEqual(assertExists(privateKey.getPublicKey()).getX());
+    expect(publicKey.getY())
+        .toEqual(assertExists(privateKey.getPublicKey()).getY());
   });
 
   it('get primitive, unsupported key data type', async function() {
