@@ -94,11 +94,11 @@ func checkHKDFTemplate(template *tinkpb.KeyTemplate, keySize uint32, salt []byte
 	}
 	keymanager, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
 	if err != nil {
-		return fmt.Errorf("Could not obtain HMAC key manager: %v", err)
+		return fmt.Errorf("Could not obtain HKDF key manager: %v", err)
 	}
 	_, err = keymanager.NewKey(template.Value)
 	if err != nil {
-		return fmt.Errorf("HMAC key manager cannot create key: %v", err)
+		return fmt.Errorf("HKDF key manager cannot create key: %v", err)
 	}
 	return nil
 }
@@ -119,11 +119,11 @@ func checkCMACTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
 	}
 	keymanager, err := registry.GetKeyManager(testutil.AESCMACPRFTypeURL)
 	if err != nil {
-		return fmt.Errorf("Could not obtain HMAC key manager: %v", err)
+		return fmt.Errorf("Could not obtain AES-CMAC key manager: %v", err)
 	}
 	_, err = keymanager.NewKey(template.Value)
 	if err != nil {
-		return fmt.Errorf("HMAC key manager cannot create key: %v", err)
+		return fmt.Errorf("AES-CMAC key manager cannot create key: %v", err)
 	}
 	return nil
 }

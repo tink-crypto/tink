@@ -285,7 +285,7 @@ func validateHMACPrimitive(p interface{}, key *hmacpb.HmacKey) error {
 		hmacPrimitive.TagSize != key.Params.TagSize ||
 		reflect.ValueOf(hmacPrimitive.HashFunc).Pointer() !=
 			reflect.ValueOf(subtle.GetHashFunc(commonpb.HashType_name[int32(key.Params.Hash)])).Pointer() {
-		return fmt.Errorf("primitive and key do not matched")
+		return fmt.Errorf("primitive and key do not match")
 	}
 	data := random.GetRandomBytes(20)
 	mac, err := hmacPrimitive.ComputeMAC(data)

@@ -64,7 +64,7 @@ type Set struct {
 	PRFs map[uint32]PRF
 }
 
-// ComputePrimaryPRF is equivalent to set.GetPRFs()[set.GetPrimaryID].ComputePRF(input, outputLength).
+// ComputePrimaryPRF is equivalent to set.PRFs[set.PrimaryID].ComputePRF(input, outputLength).
 func (s Set) ComputePrimaryPRF(input []byte, outputLength uint32) ([]byte, error) {
 	prf, ok := s.PRFs[s.PrimaryID]
 	if !ok {

@@ -29,7 +29,7 @@ func TestDummyAEAD(t *testing.T) {
 }
 
 func TestDummyMAC(t *testing.T) {
-	// Assert that DummyMAC implements the AEAD interface.
+	// Assert that DummyMAC implements the MAC interface.
 	var _ tink.MAC = (*testutil.DummyMAC)(nil)
 	// try to compute mac
 	data := []byte{1, 2, 3, 4, 5}

@@ -53,13 +53,13 @@ func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Determini
 	return tink.DeterministicAEAD(ret), nil
 }
 
-// primitiveSet is an DeterministicAEAD implementation that uses the underlying primitive set
+// wrappedDeterministicAEAD is an DeterministicAEAD implementation that uses an underlying primitive set
 // for deterministic encryption and decryption.
 type wrappedDeterministicAEAD struct {
 	ps *primitiveset.PrimitiveSet
 }
 
-// Asserts that primitiveSet implements the DeterministicAEAD interface.
+// Asserts that wrappedDeterministicAEAD implements the DeterministicAEAD interface.
 var _ tink.DeterministicAEAD = (*wrappedDeterministicAEAD)(nil)
 
 // EncryptDeterministically deterministically encrypts plaintext with additionalData as additional authenticated data.

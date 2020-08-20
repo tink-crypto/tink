@@ -25,21 +25,21 @@ import (
 
 // This file contains pre-generated KeyTemplate for PRF.
 
-// HMACSHA256PRFKeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
+// HMACSHA256PRFKeyTemplate is a KeyTemplate that generates an HMAC key with the following parameters:
 //   - Key size: 32 bytes
 //   - Hash function: SHA256
 func HMACSHA256PRFKeyTemplate() *tinkpb.KeyTemplate {
 	return createHMACPRFKeyTemplate(32, commonpb.HashType_SHA256)
 }
 
-// HMACSHA512PRFKeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
+// HMACSHA512PRFKeyTemplate is a KeyTemplate that generates an HMAC key with the following parameters:
 //   - Key size: 64 bytes
 //   - Hash function: SHA512
 func HMACSHA512PRFKeyTemplate() *tinkpb.KeyTemplate {
 	return createHMACPRFKeyTemplate(64, commonpb.HashType_SHA512)
 }
 
-// HKDFSHA256PRFKeyTemplate is a KeyTemplate that generates a HMAC key with the following parameters:
+// HKDFSHA256PRFKeyTemplate is a KeyTemplate that generates an HKDF key with the following parameters:
 //   - Key size: 32 bytes
 //   - Salt: empty
 //   - Hash function: SHA256
@@ -70,7 +70,7 @@ func createHMACPRFKeyTemplate(keySize uint32, hashType commonpb.HashType) *tinkp
 	}
 }
 
-// createHKDFPRFKeyTemplate creates a new KeyTemplate for HMAC using the given parameters.
+// createHKDFPRFKeyTemplate creates a new KeyTemplate for HKDF using the given parameters.
 func createHKDFPRFKeyTemplate(keySize uint32, hashType commonpb.HashType, salt []byte) *tinkpb.KeyTemplate {
 	params := hkdfpb.HkdfPrfParams{
 		Hash: hashType,

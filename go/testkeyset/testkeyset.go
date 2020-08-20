@@ -35,7 +35,7 @@ var (
 	errInvalidWriter = errors.New("cleartextkeyset: invalid writer")
 )
 
-// NewHandle creates a new instance of NewHandle using the given keyset.
+// NewHandle creates a new instance of Handle using the given keyset.
 func NewHandle(ks *tinkpb.Keyset) (*keyset.Handle, error) {
 	if ks == nil || len(ks.Key) == 0 {
 		return nil, errInvalidKeyset

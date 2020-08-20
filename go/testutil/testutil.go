@@ -240,7 +240,7 @@ func NewECDSAPublicKey(version uint32,
 	}
 }
 
-// NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with a randomly generated key material.
+// NewRandomECDSAPrivateKey creates an ECDSAPrivateKey with randomly generated key material.
 func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPrivateKey {
 	curveName := commonpb.EllipticCurveType_name[int32(curve)]
 	priv, _ := ecdsa.GenerateKey(subtle.GetCurve(curveName), rand.Reader)
@@ -249,7 +249,7 @@ func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.Ellipti
 	return NewECDSAPrivateKey(ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
 }
 
-// NewRandomECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with a randomly generated key material.
+// NewRandomECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with randomly generated key material.
 func NewRandomECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
 	serializedKey, err := proto.Marshal(NewRandomECDSAPrivateKey(hashType, curve))
 	if err != nil {
@@ -262,7 +262,7 @@ func NewRandomECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.Ell
 	}
 }
 
-// NewRandomECDSAPublicKey creates an ECDSAPublicKe with a randomly generated key material.
+// NewRandomECDSAPublicKey creates an ECDSAPublicKey with randomly generated key material.
 func NewRandomECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
 	return NewRandomECDSAPrivateKey(hashType, curve).PublicKey
 }
@@ -276,7 +276,7 @@ func GetECDSAParamNames(params *ecdsapb.EcdsaParams) (string, string, string) {
 	return hashName, curveName, encodingName
 }
 
-// NewED25519PrivateKey creates an ED25519PrivateKey with a randomly generated key material.
+// NewED25519PrivateKey creates an ED25519PrivateKey with randomly generated key material.
 func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
 	public, private, _ := ed25519.GenerateKey(rand.Reader)
 	publicProto := &ed25519pb.Ed25519PublicKey{
@@ -290,7 +290,7 @@ func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
 	}
 }
 
-// NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with a randomly generated key material.
+// NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with randomly generated key material.
 func NewED25519PrivateKeyData() *tinkpb.KeyData {
 	serializedKey, err := proto.Marshal(NewED25519PrivateKey())
 	if err != nil {
@@ -303,7 +303,7 @@ func NewED25519PrivateKeyData() *tinkpb.KeyData {
 	}
 }
 
-// NewED25519PublicKey creates an ED25519PublicKey with a randomly generated key material.
+// NewED25519PublicKey creates an ED25519PublicKey with randomly generated key material.
 func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
 	return NewED25519PrivateKey().PublicKey
 }

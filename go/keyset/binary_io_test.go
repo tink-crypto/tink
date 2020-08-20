@@ -66,10 +66,10 @@ func TestBinaryIOEncrypted(t *testing.T) {
 
 	kse2, err := r.ReadEncrypted()
 	if err != nil {
-		t.Fatalf("cannot read encryped keyset: %v", err)
+		t.Fatalf("cannot read encrypted keyset: %v", err)
 	}
 
 	if !proto.Equal(kse1, kse2) {
-		t.Errorf("written encryped keyset (%s) doesn't match read encryped keyset (%s)", kse1, kse2)
+		t.Errorf("written encrypted keyset (%s) doesn't match read encrypted keyset (%s)", kse1, kse2)
 	}
 }

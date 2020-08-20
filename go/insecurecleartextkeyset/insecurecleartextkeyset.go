@@ -39,7 +39,7 @@ var (
 	errInvalidWriter = errors.New("insecurecleartextkeyset: invalid writer")
 )
 
-// Read creates a keyset.Handle from a a cleartext keyset obtained via r.
+// Read creates a keyset.Handle from a cleartext keyset obtained via r.
 func Read(r keyset.Reader) (*keyset.Handle, error) {
 	if r == nil {
 		return nil, errInvalidReader

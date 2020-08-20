@@ -156,7 +156,7 @@ func TestNonRawKeys(t *testing.T) {
 	template.OutputPrefixType = tinkpb.OutputPrefixType_TINK
 	h, err := keyset.NewHandle(template)
 	if err != nil {
-		t.Errorf("Could create keyset: %v", err)
+		t.Errorf("Couldn't create keyset: %v", err)
 	}
 	_, err = prf.NewPRFSet(h)
 	if err == nil {
@@ -182,7 +182,7 @@ func TestNonPRFPrimitives(t *testing.T) {
 	template.OutputPrefixType = tinkpb.OutputPrefixType_RAW
 	h, err := keyset.NewHandle(template)
 	if err != nil {
-		t.Errorf("Could create keyset: %v", err)
+		t.Errorf("Couldn't create keyset: %v", err)
 	}
 	_, err = prf.NewPRFSet(h)
 	if err == nil {

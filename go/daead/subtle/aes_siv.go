@@ -27,7 +27,7 @@ import (
 	// Placeholder for internal crypto/subtle allowlist, please ignore.
 )
 
-// AESSIV is an implemenatation of AES-SIV-CMAC as defined in
+// AESSIV is an implementation of AES-SIV-CMAC as defined in
 // https://tools.ietf.org/html/rfc5297.
 //
 // AESSIV implements a deterministic encryption with additional data (i.e. the
