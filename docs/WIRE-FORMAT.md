@@ -2,7 +2,7 @@
 
 <!--*
 # Document freshness: For more information, see go/fresh-source.
-freshness: { owner: 'sschmieg' reviewed: '2020-01-21' }
+freshness: { owner: 'sschmieg' reviewed: '2020-08-20' }
 *-->
 
 This is a description of Tink's wire format for keys and primitive output. The
@@ -141,6 +141,13 @@ have the exact same format as the AEAD primitive corresponding to the `DEK`.
 ### MAC
 
 Tink follows the corresponding RFCs.
+
+### PRF Set
+
+Tink follows the corresponding RFCs. Note that for PRF Set the key type differs
+from the MAC key type of the same algorithm by not including the outputlength.
+PRF Set keys have to have a RAW output prefix type, as the key ID handling is
+done by the user. This ensures the output is actually a PRF.
 
 ### Hybrid Encryption
 
