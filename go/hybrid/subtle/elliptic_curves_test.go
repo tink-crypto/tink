@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -71,8 +72,8 @@ type testcase struct {
 // //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/EllipticCurvesTest.java
 var (
 	testVectors = []string{
-		os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/ecdh_test.json",
-		os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/ecdh_test.json",
+		"wycheproof/testvectors/ecdh_test.json",
+		"wycheproof/testvectors/ecdh_test.json",
 	}
 	tEC1 = []testEC1{
 		{
@@ -551,10 +552,14 @@ func getX509PublicKey(t *testing.T, b []byte) (*ECPublicKey, error) {
 }
 
 func TestVectors(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
 	for _, i := range testVectors {
-		f, err := os.Open(i)
+		f, err := os.Open(filepath.Join(srcDir, i))
 		if err != nil {
-			t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
+			t.Fatalf("cannot open file: %s", err)
 		}
 		parser := json.NewDecoder(f)
 		data := new(testData)

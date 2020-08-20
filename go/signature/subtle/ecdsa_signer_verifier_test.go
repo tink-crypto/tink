@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	subtleSignature "github.com/google/tink/go/signature/subtle"
@@ -122,15 +123,19 @@ func TestWycheproofVectors(t *testing.T) {
 		{"ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
 		{"ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
 	}
-	path := os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/"
+	vectorsDir := "wycheproof/testvectors"
 	for _, v := range vectors {
-		wycheproofTest(t, path+v.Filename, v.Encoding)
+		wycheproofTest(t, filepath.Join(vectorsDir, v.Filename), v.Encoding)
 	}
 }
 
 func wycheproofTest(t *testing.T, filename, encoding string) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
 	fmt.Printf("now testing wycheproof file %q, encoding %q\n", filename, encoding)
-	f, err := os.Open(filename)
+	f, err := os.Open(filepath.Join(srcDir, filename))
 	if err != nil {
 		fmt.Printf("cannot open file: %s, this is typically caused by an older version of Wycheproof.", err)
 		return

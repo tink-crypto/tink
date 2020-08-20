@@ -18,11 +18,11 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"flag"
 	// context is used to cancel outstanding requests
-	// TEST_SRCDIR to read the roots.pem
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -36,18 +36,15 @@ const (
 )
 
 var (
-	credFile    = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
-	credINIFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.cred"
+	credFile    = "tink_base/testdata/credentials_aws.csv"
+	credINIFile = "tink_base/testdata/credentials_aws.cred"
 )
 
-// lint placeholder header, please ignore
 func init() {
-	certPath := os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "roots.pem"
+	certPath := filepath.Join(os.Getenv("TEST_SRCDIR"), "tink_base/roots.pem")
 	flag.Set("cacerts", certPath)
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
-
-// lint placeholder footer, please ignore
 
 func setupKMS(t *testing.T, cf string) {
 	t.Helper()
@@ -79,8 +76,13 @@ func basicAEADTest(t *testing.T, a tink.AEAD) error {
 }
 
 func TestBasicAead(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
 	for _, file := range []string{credFile, credINIFile} {
-		setupKMS(t, file)
+		setupKMS(t, filepath.Join(srcDir, file))
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 		if err != nil {
@@ -97,8 +99,13 @@ func TestBasicAead(t *testing.T) {
 }
 
 func TestBasicAeadWithoutAdditionalData(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
 	for _, file := range []string{credFile, credINIFile} {
-		setupKMS(t, file)
+		setupKMS(t, filepath.Join(srcDir, file))
 		dek := aead.AES128CTRHMACSHA256KeyTemplate()
 		kh, err := keyset.NewHandle(aead.KMSEnvelopeAEADKeyTemplate(keyURI, dek))
 		if err != nil {

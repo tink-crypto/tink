@@ -19,9 +19,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/kwp/subtle"
@@ -110,15 +109,18 @@ type KwpSuite struct {
 }
 
 func TestWycheproofCases(t *testing.T) {
-	suiteBytes, err := ioutil.ReadFile(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/kwp_test.json")
-	if err != nil {
-		t.Fatal(err)
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
 	}
-
-	suite := new(KwpSuite)
-	err = json.Unmarshal(suiteBytes, suite)
+	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/kwp_test.json"))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("cannot open file %s", err)
+	}
+	parser := json.NewDecoder(f)
+	suite := new(KwpSuite)
+	if err := parser.Decode(suite); err != nil {
+		t.Fatalf("cannot decode test data: %s", err)
 	}
 
 	for _, group := range suite.Groups {

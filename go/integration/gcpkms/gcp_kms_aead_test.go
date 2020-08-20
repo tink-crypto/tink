@@ -18,11 +18,11 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"flag"
 	// context is used to cancel outstanding requests
-	// TEST_SRCDIR to read the roots.pem
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -35,23 +35,24 @@ const (
 )
 
 var (
-	// lint placeholder header, please ignore
-	credFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credential.json"
-	// lint placeholder footer, please ignore
+	credFile = "tink_base/testdata/credential.json"
 )
 
-// lint placeholder header, please ignore
 func init() {
-	certPath := os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/" + "roots.pem"
+	certPath := filepath.Join(os.Getenv("TEST_SRCDIR"), "tink_base/roots.pem")
 	flag.Set("cacerts", certPath)
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
 
-// lint placeholder footer, please ignore
-
 func setupKMS(t *testing.T) {
 	t.Helper()
-	g, err := NewClientWithCredentials(keyURI, credFile)
+
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
+	g, err := NewClientWithCredentials(keyURI, filepath.Join(srcDir, credFile))
 	if err != nil {
 		t.Errorf("error setting up gcp client: %v", err)
 	}

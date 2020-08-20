@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"golang.org/x/crypto/chacha20poly1305"
@@ -197,9 +198,13 @@ func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 }
 
 func TestChaCha20Poly1305WycheproofVectors(t *testing.T) {
-	f, err := os.Open(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/chacha20_poly1305_test.json")
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/chacha20_poly1305_test.json"))
 	if err != nil {
-		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
+		t.Fatalf("cannot open file: %s", err)
 	}
 	parser := json.NewDecoder(f)
 	data := new(testdata)

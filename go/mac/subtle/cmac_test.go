@@ -18,6 +18,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/mac/subtle"
@@ -60,9 +61,13 @@ type testcase struct {
 }
 
 func TestVectorsWycheproof(t *testing.T) {
-	f, err := os.Open(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/aes_cmac_test.json")
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_cmac_test.json"))
 	if err != nil {
-		t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
+		t.Fatalf("cannot open file: %s", err)
 	}
 	parser := json.NewDecoder(f)
 	data := new(testdata)

@@ -29,6 +29,13 @@ function test_go_mod() {
   local full_mod_name="${REPO_URL_PREFIX}/${mod_name}"
 
   echo "### Testing ${full_mod_name}..."
+  (
+    set -x
+    cd "${REPO_DIR}/${mod_name}"
+    go build -v ./...
+    go test -v ./...
+  )
+
   mkdir "${GO_MOD_DIR}"
   (
     cd "${GO_MOD_DIR}"

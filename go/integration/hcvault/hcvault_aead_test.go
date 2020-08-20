@@ -25,6 +25,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -35,10 +36,8 @@ const (
 )
 
 var (
-	// lint placeholder header, please ignore
-	vaultKey  = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/integration/hcvault/testdata/server.key"
-	vaultCert = os.Getenv("TEST_SRCDIR") + "/" + os.Getenv("TEST_WORKSPACE") + "/integration/hcvault/testdata/server.crt"
-	// lint placeholder footer, please ignore
+	vaultKey  = filepath.Join(os.Getenv("TEST_WORKSPACE"), "/integration/hcvault/testdata/server.key")
+	vaultCert = filepath.Join(os.Getenv("TEST_WORKSPACE"), "/integration/hcvault/testdata/server.crt")
 )
 
 func TestVaultAEAD_Encrypt(t *testing.T) {
@@ -172,10 +171,17 @@ func newServer(t *testing.T) (int, closeFunc) {
 		}
 	}
 
-	if _, err := os.Stat(vaultCert); err != nil {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
+	vaultCertPath := filepath.Join(srcDir, vaultCert)
+	if _, err := os.Stat(vaultCertPath); err != nil {
 		t.Fatal("Cannot load Vault certificate file:", err)
 	}
-	if _, err := os.Stat(vaultKey); err != nil {
+	vaultKeyPath := filepath.Join(srcDir, vaultKey)
+	if _, err := os.Stat(vaultKeyPath); err != nil {
 		t.Fatal("Cannot load Vault key file:", err)
 	}
 
@@ -183,7 +189,7 @@ func newServer(t *testing.T) (int, closeFunc) {
 	if err != nil {
 		t.Fatal("Cannot start Vault mock server:", err)
 	}
-	go http.ServeTLS(l, http.HandlerFunc(handler), vaultCert, vaultKey)
+	go http.ServeTLS(l, http.HandlerFunc(handler), vaultCertPath, vaultKeyPath)
 
 	port := l.Addr().(*net.TCPAddr).Port
 	return port, l.Close

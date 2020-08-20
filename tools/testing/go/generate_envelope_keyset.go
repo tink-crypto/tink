@@ -21,11 +21,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"flag"
 	// context is used to cancel outstanding requests
-	// TEST_SRCDIR to read the roots.pem
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/insecurecleartextkeyset"
@@ -36,21 +37,18 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-// lint placeholder header, please ignore
 var (
 	gcpURI      = "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key"
-	gcpCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credential.json"
+	gcpCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tink_base/testdata/credential.json")
 	awsURI      = "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	awsCredFile = os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
+	awsCredFile = filepath.Join(os.Getenv("TEST_SRCDIR"), "tink_base/testdata/credentials_aws.csv")
 )
 
 func init() {
-	certPath := os.Getenv("TEST_SRCDIR") + "/tink_base/" + "roots.pem"
+	certPath := path.Join(os.Getenv("TEST_SRCDIR"), "tink_base/roots.pem")
 	flag.Set("cacerts", certPath)
 	os.Setenv("SSL_CERT_FILE", certPath)
 }
-
-// lint placeholder footer, please ignore
 
 func main() {
 	if len(os.Args) != 4 {

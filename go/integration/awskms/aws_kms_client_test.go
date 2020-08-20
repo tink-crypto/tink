@@ -16,6 +16,7 @@ package awskms
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -54,7 +55,12 @@ func TestNewClientBadUriPrefix(t *testing.T) {
 
 func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	goodCsvCredFile := os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.csv"
+
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	goodCsvCredFile := filepath.Join(srcDir, "tink_base/testdata/credentials_aws.csv")
 
 	_, err := NewClientWithCredentials(uriPrefix, goodCsvCredFile)
 	if err != nil {
@@ -64,7 +70,12 @@ func TestNewClientWithCredentialsWithGoodCredentialsCsv(t *testing.T) {
 
 func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	credINIFile := os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/credentials_aws.cred"
+
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	credINIFile := filepath.Join(srcDir, "tink_base/testdata/credentials_aws.cred")
 
 	_, err := NewClientWithCredentials(uriPrefix, credINIFile)
 	if err != nil {
@@ -74,7 +85,12 @@ func TestNewClientWithCredentialsWithGoodCredentialsIni(t *testing.T) {
 
 func TestNewClientWithCredentialsWithBadCredentials(t *testing.T) {
 	uriPrefix := "aws-kms://arn:aws:kms:us-east-2:235739564943:key/3ee50705-5a82-4f5b-9753-05c4f473922f"
-	badCredFile := os.Getenv("TEST_SRCDIR") + "/tink_base/testdata/bad_access_keys_aws.csv"
+
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	badCredFile := filepath.Join(srcDir, "tink_base/testdata/bad_access_keys_aws.csv")
 
 	_, err := NewClientWithCredentials(uriPrefix, badCredFile)
 	if err == nil {

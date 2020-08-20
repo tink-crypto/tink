@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"golang.org/x/crypto/ed25519"
@@ -182,8 +183,13 @@ type testcaseED25519 struct {
 }
 
 func TestVectorsED25519(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+
 	// signing tests are same between ecdsa and ed25519
-	f, err := os.Open(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/eddsa_test.json")
+	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/eddsa_test.json"))
 	if err != nil {
 		t.Fatalf("cannot open file: %s", err)
 	}

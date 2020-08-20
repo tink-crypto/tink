@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -144,10 +145,14 @@ type hkdftestcase struct {
 }
 
 func TestVectorsHKDFWycheproof(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
 	for _, hash := range []string{"SHA1", "SHA256", "SHA512"} {
-		f, err := os.Open(fmt.Sprintf(os.Getenv("TEST_SRCDIR") + "/wycheproof/testvectors/hkdf_%s_test.json", strings.ToLower(hash)))
+		f, err := os.Open(filepath.Join(srcDir, fmt.Sprintf("wycheproof/testvectors/hkdf_%s_test.json", strings.ToLower(hash))))
 		if err != nil {
-			t.Fatalf("cannot open file: %s, make sure that github.com/google/wycheproof is in your gopath", err)
+			t.Fatalf("cannot open file: %s", err)
 		}
 		parser := json.NewDecoder(f)
 		data := new(hkdftestdata)
