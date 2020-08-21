@@ -67,23 +67,15 @@ class RewindableInputStreamTest(parameterized.TestCase):
     with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The quick brown fox', f.readall())
 
-  def test_rewind_read_non_seekable(self):
-    with _rewindable(b'The quick brown fox', seekable=False) as f:
+  @parameterized.parameters([False, True])
+  def test_rewind_read(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The quick', f.read(9))
       f.rewind()
       self.assertEqual(b'The ', f.read(4))
       # this only reads the rest of current buffer content.
       self.assertEqual(b'quick', f.read(100))
       self.assertEqual(b' brown fox', f.read())
-
-  def test_rewind_read_seekable(self):
-    with _rewindable(b'The quick brown fox', seekable=True) as f:
-      self.assertEqual(b'The quick', f.read(9))
-      f.rewind()
-      self.assertEqual(b'The ', f.read(4))
-      # no buffering, so this reads the rest.
-      self.assertEqual(b'quick brown fox', f.read(100))
-      self.assertEqual(b'', f.read())
 
   @parameterized.parameters([False, True])
   def test_rewind_readall(self, seekable):
@@ -103,8 +95,9 @@ class RewindableInputStreamTest(parameterized.TestCase):
       f.rewind()
       self.assertEqual(b'The quick brown fox', f.read())
 
-  def test_disable_rewind_non_seekable(self):
-    with _rewindable(b'The quick brown fox', seekable=False) as f:
+  @parameterized.parameters([False, True])
+  def test_disable_rewind(self, seekable):
+    with _rewindable(b'The quick brown fox', seekable) as f:
       self.assertEqual(b'The q', f.read(5))
       f.rewind()
       f.disable_rewind()
@@ -113,15 +106,6 @@ class RewindableInputStreamTest(parameterized.TestCase):
       self.assertEqual(b'u', f.read(1))
       self.assertEmpty(f._buffer)
       self.assertEqual(b'ick brown fox', f.read())
-
-  def test_disable_rewind_seekable(self):
-    with _rewindable(b'The quick brown fox', seekable=True) as f:
-      self.assertEqual(b'The q', f.read(5))
-      f.rewind()
-      f.disable_rewind()
-      # no buffering, so this reads everything
-      self.assertEqual(b'The quick brown fox', f.read(100))
-      self.assertEqual(b'', f.read())
 
   @parameterized.parameters([False, True])
   def test_disable_rewind_readall(self, seekable):

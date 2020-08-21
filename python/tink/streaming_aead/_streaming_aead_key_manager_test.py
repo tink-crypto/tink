@@ -21,10 +21,13 @@ import tempfile
 from typing import BinaryIO, cast
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_streaming_pb2
 from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
+import tink
+from tink import cleartext_keyset_handle
 from tink import core
 from tink import streaming_aead
 from tink.streaming_aead import _raw_streaming_aead
@@ -38,7 +41,7 @@ def setUpModule():
   streaming_aead.register()
 
 
-class StreamingAeadKeyManagerTest(absltest.TestCase):
+class StreamingAeadKeyManagerTest(parameterized.TestCase):
 
   def setUp(self):
     super(StreamingAeadKeyManagerTest, self).setUp()
@@ -103,7 +106,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
                                 'key_size must not be smaller than'):
       self.key_manager_ctr.new_key_data(key_template)
 
-  def test_encrypt_decrypt(self):
+  def test_raw_encrypt_decrypt(self):
     raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
@@ -128,7 +131,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
       self.assertEqual(ct_source.closed, close_ciphertext_source)
       self.assertEqual(output, plaintext)
 
-  def test_read_after_eof_returns_empty_bytes(self):
+  def test_raw_read_after_eof_returns_empty_bytes(self):
     raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
@@ -146,7 +149,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
       _ = ds.readall()
       self.assertEqual(ds.read(100), b'')
 
-  def test_encrypt_decrypt_tempfile(self):
+  def test_raw_encrypt_decrypt_tempfile(self):
     raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
@@ -170,7 +173,7 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
     os.unlink(encryptedfile_name)
     self.assertEqual(output, plaintext)
 
-  def test_encrypt_decrypt_wrong_aad(self):
+  def test_raw_encrypt_decrypt_wrong_aad(self):
     raw_primitive = self.key_manager_ctr.primitive(
         self.key_manager_ctr.new_key_data(
             streaming_aead.streaming_aead_key_templates
@@ -191,6 +194,60 @@ class StreamingAeadKeyManagerTest(absltest.TestCase):
       with self.assertRaises(core.TinkError):
         ds.read()
 
+  @parameterized.parameters(
+      [io.BytesIO, bytes_io.SlowBytesIO, bytes_io.SlowReadableRawBytes])
+  def test_wrapped_encrypt_decrypt_two_keys(self, input_stream_factory):
+    template = (
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
+    old_keyset = tink_pb2.Keyset()
+    key1 = old_keyset.key.add()
+    key1.key_data.CopyFrom(tink.core.Registry.new_key_data(template))
+    key1.status = tink_pb2.ENABLED
+    key1.key_id = 1234
+    key1.output_prefix_type = template.output_prefix_type
+    old_keyset.primary_key_id = key1.key_id
+    old_keyset_handle = cleartext_keyset_handle.from_keyset(old_keyset)
+    old_primitive = old_keyset_handle.primitive(streaming_aead.StreamingAead)
+
+    new_keyset = tink_pb2.Keyset()
+    new_keyset.CopyFrom(old_keyset)
+    key2 = new_keyset.key.add()
+    key2.key_data.CopyFrom(tink.core.Registry.new_key_data(template))
+    key2.status = tink_pb2.ENABLED
+    key2.key_id = 5678
+    key2.output_prefix_type = template.output_prefix_type
+    new_keyset.primary_key_id = key2.key_id
+    new_keyset_handle = cleartext_keyset_handle.from_keyset(new_keyset)
+    new_primitive = new_keyset_handle.primitive(streaming_aead.StreamingAead)
+
+    plaintext1 = b' '.join(b'%d' % i for i in range(100 * 1000))
+    ciphertext1_dest = bytes_io.BytesIOWithValueAfterClose()
+    with old_primitive.new_encrypting_stream(ciphertext1_dest, b'aad1') as es:
+      es.write(plaintext1)
+    ciphertext1 = ciphertext1_dest.value_after_close()
+
+    plaintext2 = b' '.join(b'%d' % i for i in range(100 * 1001))
+    ciphertext2_dest = bytes_io.BytesIOWithValueAfterClose()
+    with new_primitive.new_encrypting_stream(ciphertext2_dest, b'aad2') as es:
+      es.write(plaintext2)
+    ciphertext2 = ciphertext2_dest.value_after_close()
+
+    # old_primitive can read 1st ciphertext, but not the 2nd
+    with old_primitive.new_decrypting_stream(
+        cast(BinaryIO, input_stream_factory(ciphertext1)), b'aad1') as ds:
+      self.assertEqual(ds.read(), plaintext1)
+    with old_primitive.new_decrypting_stream(
+        cast(BinaryIO, input_stream_factory(ciphertext2)), b'aad2') as ds:
+      with self.assertRaises(tink.TinkError):
+        ds.read()
+
+    # new_primitive can read both ciphertexts
+    with new_primitive.new_decrypting_stream(
+        cast(BinaryIO, input_stream_factory(ciphertext1)), b'aad1') as ds:
+      self.assertEqual(ds.read(), plaintext1)
+    with new_primitive.new_decrypting_stream(
+        cast(BinaryIO, input_stream_factory(ciphertext2)), b'aad2') as ds:
+      self.assertEqual(ds.read(), plaintext2)
 
 if __name__ == '__main__':
   absltest.main()

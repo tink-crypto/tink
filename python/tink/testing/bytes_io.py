@@ -60,7 +60,7 @@ class SlowBytesIO(io.BytesIO):
   def read(self, size: int = -1) -> bytes:
     if size > 0:
       self._state += 1
-      if self._state > 1000:
+      if self._state > 10000000:
         raise AssertionError('too many read. Is there an infinite loop?')
       if self._state % 3 == 0:   # block on every third call.
         raise io.BlockingIOError(
@@ -91,7 +91,7 @@ class SlowReadableRawBytes(io.RawIOBase):
   def readinto(self, b: bytearray) -> Optional[int]:
     try:
       self._state += 1
-      if self._state > 1000:
+      if self._state > 10000000:
         raise AssertionError('too many read. Is there an infinite loop?')
       if self._state % 3 == 0:   # return None on every third call.
         return None

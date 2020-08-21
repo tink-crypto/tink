@@ -104,6 +104,8 @@ py_test(
         ":_raw_streaming_aead",
         ":streaming_aead",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
@@ -161,8 +163,25 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_raw_streaming_aead",
+        ":_rewindable_input_stream",
         ":_streaming_aead",
         "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_streaming_aead_wrapper_test",
+    timeout = "short",
+    srcs = ["_streaming_aead_wrapper_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("absl-py"),
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+        "//tink/testing:bytes_io",
+        "//tink/testing:fake_streaming_aead",
+        "//tink/testing:helper",
     ],
 )
 
