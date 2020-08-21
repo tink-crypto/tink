@@ -27,9 +27,11 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature
+from tink import streaming_aead
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
+from google3.third_party.tink.python.tink.testing import bytes_io
 
 
 class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):
@@ -134,6 +136,44 @@ class AeadServicer(testing_api_pb2_grpc.AeadServicer):
       return testing_api_pb2.AeadDecryptResponse(plaintext=plaintext)
     except tink.TinkError as e:
       return testing_api_pb2.AeadDecryptResponse(err=str(e))
+
+
+class StreamingAeadServicer(testing_api_pb2_grpc.StreamingAeadServicer):
+  """A service for testing StreamingAEAD encryption."""
+
+  def Encrypt(
+      self, request: testing_api_pb2.StreamingAeadEncryptRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.StreamingAeadEncryptResponse:
+    """Encrypts a message."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(streaming_aead.StreamingAead)
+      ciphertext_destination = bytes_io.BytesIOWithValueAfterClose()
+      with p.new_encrypting_stream(ciphertext_destination,
+                                   request.associated_data) as plaintext_stream:
+        plaintext_stream.write(request.plaintext)
+      return testing_api_pb2.StreamingAeadEncryptResponse(
+          ciphertext=ciphertext_destination.value_after_close())
+    except tink.TinkError as e:
+      return testing_api_pb2.StreamingAeadEncryptResponse(err=str(e))
+
+  def Decrypt(
+      self, request: testing_api_pb2.StreamingAeadDecryptRequest,
+      context: grpc.ServicerContext
+  ) -> testing_api_pb2.StreamingAeadDecryptResponse:
+    """Decrypts a message."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(streaming_aead.StreamingAead)
+      stream = io.BytesIO(request.ciphertext)
+      with p.new_decrypting_stream(stream, request.associated_data) as s:
+        plaintext = s.read()
+      return testing_api_pb2.StreamingAeadDecryptResponse(plaintext=plaintext)
+    except tink.TinkError as e:
+      return testing_api_pb2.StreamingAeadDecryptResponse(err=str(e))
 
 
 class DeterministicAeadServicer(testing_api_pb2_grpc.DeterministicAeadServicer):

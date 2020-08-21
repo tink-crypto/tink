@@ -27,6 +27,7 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature
+from tink import streaming_aead
 
 from proto.testing import testing_api_pb2_grpc
 
@@ -44,6 +45,7 @@ def main(unused_argv):
   mac.register()
   prf.register()
   signature.register()
+  streaming_aead.register()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
       services.MetadataServicer(), server)
@@ -61,6 +63,8 @@ def main(unused_argv):
       services.HybridServicer(), server)
   testing_api_pb2_grpc.add_SignatureServicer_to_server(
       services.SignatureServicer(), server)
+  testing_api_pb2_grpc.add_StreamingAeadServicer_to_server(
+      services.StreamingAeadServicer(), server)
   server.add_secure_port('[::]:%d' % FLAGS.port,
                          grpc.local_server_credentials())
   server.start()

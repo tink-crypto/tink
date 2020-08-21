@@ -22,6 +22,7 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature
+from tink import streaming_aead
 
 
 from proto.testing import testing_api_pb2
@@ -95,6 +96,7 @@ class ServicesTest(absltest.TestCase):
     hybrid.register()
     prf.register()
     signature.register()
+    streaming_aead.register()
 
   def test_from_json(self):
     keyset_servicer = services.KeysetServicer()
@@ -454,6 +456,52 @@ class ServicesTest(absltest.TestCase):
                                                         self._ctx)
     self.assertEqual(invalid_compute_response.WhichOneof('result'), 'err')
     self.assertNotEmpty(invalid_compute_response.err)
+
+  def test_generate_streaming_encrypt_decrypt(self):
+    keyset_servicer = services.KeysetServicer()
+    streaming_aead_servicer = services.StreamingAeadServicer()
+
+    templates = streaming_aead.streaming_aead_key_templates
+    template = templates.AES128_CTR_HMAC_SHA256_4KB.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+    plaintext = b'The quick brown fox jumps over the lazy dog'
+    associated_data = b'associated_data'
+
+    enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
+        keyset=keyset, plaintext=plaintext, associated_data=associated_data)
+    enc_response = streaming_aead_servicer.Encrypt(enc_request, self._ctx)
+    self.assertEqual(enc_response.WhichOneof('result'), 'ciphertext')
+    ciphertext = enc_response.ciphertext
+
+    dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
+        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = streaming_aead_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'plaintext')
+
+    self.assertEqual(dec_response.plaintext, plaintext)
+
+  def test_generate_streaming_decrypt_fail(self):
+    keyset_servicer = services.KeysetServicer()
+    streaming_aead_servicer = services.StreamingAeadServicer()
+
+    templates = streaming_aead.streaming_aead_key_templates
+    template = templates.AES128_CTR_HMAC_SHA256_4KB.SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    ciphertext = b'some invalid ciphertext'
+    associated_data = b'associated_data'
+    dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
+        keyset=keyset, ciphertext=ciphertext, associated_data=associated_data)
+    dec_response = streaming_aead_servicer.Decrypt(dec_request, self._ctx)
+    self.assertEqual(dec_response.WhichOneof('result'), 'err')
+    logging.info('Error in response: %s', dec_response.err)
+    self.assertNotEmpty(dec_response.err)
 
 
 if __name__ == '__main__':

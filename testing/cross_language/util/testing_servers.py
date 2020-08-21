@@ -74,7 +74,7 @@ _PRIMITIVES = list(_PRIMITIVE_STUBS.keys())
 SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'aead': ['cc', 'go', 'java', 'python'],
     'daead': ['cc', 'go', 'java', 'python'],
-    'streaming_aead': ['cc', 'go', 'java'],
+    'streaming_aead': ['cc', 'go', 'java', 'python'],
     'hybrid': ['cc', 'go', 'java', 'python'],
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
