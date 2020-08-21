@@ -193,7 +193,7 @@ func TestCMACVerifyMACWithInvalidInput(t *testing.T) {
 }
 
 func TestCMACModification(t *testing.T) {
-	a, err := subtle.NewAESCMAC(key, 16)
+	a, err := subtle.NewAESCMAC(keyRFC4493, 16)
 	if err != nil {
 		t.Errorf("Could not create subtle.CMAC object: %v", err)
 	}
@@ -217,7 +217,7 @@ func TestCMACModification(t *testing.T) {
 }
 
 func TestCMACTruncation(t *testing.T) {
-	a, err := subtle.NewAESCMAC(key, 16)
+	a, err := subtle.NewAESCMAC(keyRFC4493, 16)
 	if err != nil {
 		t.Errorf("Could not create subtle.CMAC object: %v", err)
 	}
