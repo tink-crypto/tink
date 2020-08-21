@@ -48,6 +48,7 @@ py_test(
     deps = [
         ":bytes_io",
         requirement("absl-py"),
+        requirement("six"),
     ],
 )
 

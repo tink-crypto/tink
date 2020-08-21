@@ -179,6 +179,7 @@ py_test(
     deps = [
         ":_rewindable_input_stream",
         requirement("absl-py"),
+        requirement("six"),
         "//tink/testing:bytes_io",
     ],
 )
