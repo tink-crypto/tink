@@ -11,7 +11,10 @@
 # limitations under the License.
 """Tests for tink.python.tink.testing.fake_streaming_aead."""
 
+# Placeholder for import for type annotations
+
 import io
+from typing import BinaryIO, cast
 
 from absl.testing import absltest
 from tink import core
@@ -62,7 +65,7 @@ class FakeStreamingAeadTest(absltest.TestCase):
 
     ciphertext_src = bytes_io.SlowReadableRawBytes(
         ciphertext_dest.value_after_close())
-    with saead.new_raw_decrypting_stream(ciphertext_src, b'aad',
+    with saead.new_raw_decrypting_stream(cast(BinaryIO, ciphertext_src), b'aad',
                                          close_ciphertext_source=True) as ds:
       # explicitly test that read returns None on the first call, because
       # that is needed to test one execution path in the wrapper.

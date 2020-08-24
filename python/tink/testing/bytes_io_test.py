@@ -13,9 +13,11 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 import io
+
 from absl.testing import absltest
 from tink.testing import bytes_io
 
@@ -28,11 +30,13 @@ class BytesIoTest(absltest.TestCase):
     f.close()
     self.assertEqual(f.value_after_close(), b'foobar')
 
-  def test_with_close_success(self):
-    with bytes_io.BytesIOWithValueAfterClose() as f:
-      f.write(b'foobar')
-      f.close()
-      self.assertEqual(f.value_after_close(), b'foobar')
+  def test_with_text_wrapper_success(self):
+    f = bytes_io.BytesIOWithValueAfterClose()
+    with io.TextIOWrapper(f, encoding='utf8') as t:
+      t.write(u'foobar')
+    self.assertTrue(f.closed)
+    value = f.value_after_close()
+    self.assertEqual(value, u'foobar'.encode('utf8'))
 
   def test_initial_bytes_success(self):
     f = bytes_io.BytesIOWithValueAfterClose(b'abc')
@@ -41,10 +45,11 @@ class BytesIoTest(absltest.TestCase):
     self.assertEqual(f.value_after_close(), b'foobar')
 
   def test_value_before_close_fails(self):
-    with bytes_io.BytesIOWithValueAfterClose() as f:
-      f.write(b'foobar')
-      with self.assertRaises(ValueError):
-        f.value_after_close()
+    f = bytes_io.BytesIOWithValueAfterClose()
+    f.write(b'foobar')
+    with self.assertRaises(ValueError):
+      f.value_after_close()
+    f.close()
 
   def test_close_twice_success(self):
     f = bytes_io.BytesIOWithValueAfterClose(b'abc')
