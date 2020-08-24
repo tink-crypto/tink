@@ -18,40 +18,6 @@ const binaryKeysetWriter = new BinaryKeysetWriter();
  */
 export class CleartextKeysetHandle {
   /**
-   * Creates a KeysetHandle from a JSPB array representation of a keyset. The
-   * array is used in place and not cloned.
-   *
-   * Note that JSPB is currently not open source, so this method can't be
-   * either.
-   *
-   */
-  static fromJspbArray(keysetJspbArray: unknown[]): KeysetHandle {
-    return new KeysetHandle(new PbKeyset(keysetJspbArray));
-  }
-
-  /**
-   * Creates a KeysetHandle from a JSPB string representation of a keyset.
-   *
-   * Note that JSPB is currently not open source, so this method can't be
-   * either.
-   *
-   */
-  static deserializeFromJspb(keysetJspbString: string): KeysetHandle {
-    return new KeysetHandle(PbKeyset.deserialize(keysetJspbString));
-  }
-
-  /**
-   * Serializes a KeysetHandle to string.
-   *
-   * Note that JSPB is currently not open source, so this method can't be
-   * either.
-   *
-   */
-  static serializeToJspb(keysetHandle: KeysetHandle): string {
-    return keysetHandle.getKeyset().serialize();
-  }
-
-  /**
    * Serializes a KeysetHandle to binary.
    *
    */
