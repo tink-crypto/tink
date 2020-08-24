@@ -64,6 +64,12 @@ public final class CleartextKeysetHandle {
   public static Keyset getKeyset(KeysetHandle keysetHandle) {
     return keysetHandle.getKeyset();
   }
+
+  /** Returns a KeysetHandle for {@code keyset}. */
+  public static KeysetHandle fromKeyset(Keyset keyset) throws GeneralSecurityException {
+    return KeysetHandle.fromKeyset(keyset);
+  }
+
   /**
    * Serializes and writes the {@link Keyset} managed by {@code handle} to {@code keysetWriter}.
    *
