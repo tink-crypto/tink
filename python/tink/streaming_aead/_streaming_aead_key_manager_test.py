@@ -16,8 +16,6 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-import os
-import tempfile
 from typing import BinaryIO, cast
 
 from absl.testing import absltest
@@ -148,30 +146,6 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
         ct_source, aad, close_ciphertext_source=True) as ds:
       _ = ds.readall()
       self.assertEqual(ds.read(100), b'')
-
-  def test_raw_encrypt_decrypt_tempfile(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
-    plaintext = b'plaintext'
-    aad = b'associated_data'
-
-    ciphertext_dest = cast(BinaryIO,
-                           tempfile.NamedTemporaryFile('wb', delete=False))
-    encryptedfile_name = ciphertext_dest.name
-    with raw_primitive.new_raw_encrypting_stream(ciphertext_dest, aad) as es:
-      n = es.write(plaintext)
-    self.assertTrue(ciphertext_dest.closed)
-    self.assertLen(plaintext, n)
-
-    ciphertext_src = open(encryptedfile_name, 'rb')
-    with raw_primitive.new_raw_decrypting_stream(
-        ciphertext_src, aad, close_ciphertext_source=True) as ds:
-      output = ds.readall()
-    self.assertTrue(ciphertext_src.closed)
-    os.unlink(encryptedfile_name)
-    self.assertEqual(output, plaintext)
 
   def test_raw_encrypt_decrypt_wrong_aad(self):
     raw_primitive = self.key_manager_ctr.primitive(
