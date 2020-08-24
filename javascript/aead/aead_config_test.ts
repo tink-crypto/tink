@@ -7,7 +7,7 @@
 import 'jasmine';
 
 import {KeysetHandle} from '../internal/keyset_handle';
-import {PbKeyData, PbKeyset, PbKeyStatusType, PbKeyTemplate, PbOutputPrefixType} from '../internal/proto';
+import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
 import * as Registry from '../internal/registry';
 import * as Random from '../subtle/random';
 
@@ -86,7 +86,7 @@ const AES_GCM_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
  */
 function createKeysetHandleFromKeyData(keyData: PbKeyData): KeysetHandle {
   const keyId = 1;
-  const key = new PbKeyset.Key()
+  const key = new PbKeysetKey()
                   .setKeyData(keyData)
                   .setStatus(PbKeyStatusType.ENABLED)
                   .setKeyId(keyId)

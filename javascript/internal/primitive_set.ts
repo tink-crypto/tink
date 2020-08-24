@@ -7,7 +7,7 @@
 import {SecurityException} from '../exception/security_exception';
 
 import {CryptoFormat} from './crypto_format';
-import {PbKeyset, PbKeyStatusType, PbOutputPrefixType} from './proto';
+import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from './proto';
 import {Constructor} from './util';
 
 /**
@@ -84,7 +84,7 @@ export class PrimitiveSet<P> {
    *
    *
    */
-  addPrimitive(primitive: P, key: PbKeyset.Key): Entry<P> {
+  addPrimitive(primitive: P, key: PbKeysetKey): Entry<P> {
     if (!primitive) {
       throw new SecurityException('Primitive has to be non null.');
     }

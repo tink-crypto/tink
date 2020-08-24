@@ -6,7 +6,8 @@
 
 import {InvalidArgumentsException} from '../exception/invalid_arguments_exception';
 import {SecurityException} from '../exception/security_exception';
-import {PbKeyset, PbOutputPrefixType} from './proto';
+
+import {PbKeysetKey, PbOutputPrefixType} from './proto';
 
 /**
  * Constants and methods that deal with the format of the outputs handled by
@@ -22,7 +23,7 @@ export class CryptoFormat {
    *
    *
    */
-  static getOutputPrefix(key: PbKeyset.Key): Uint8Array {
+  static getOutputPrefix(key: PbKeysetKey): Uint8Array {
     switch (key.getOutputPrefixType()) {
       case PbOutputPrefixType.LEGACY:
 

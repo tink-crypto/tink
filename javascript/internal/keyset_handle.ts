@@ -13,7 +13,7 @@ import * as KeyManager from './key_manager';
 import {KeysetReader} from './keyset_reader';
 import {KeysetWriter} from './keyset_writer';
 import * as PrimitiveSet from './primitive_set';
-import {PbKeyMaterialType, PbKeyset, PbKeyStatusType, PbKeyTemplate} from './proto';
+import {PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbKeyTemplate} from './proto';
 import * as Registry from './registry';
 import * as Util from './util';
 
@@ -139,7 +139,7 @@ export async function generateNew(keyTemplate: PbKeyTemplate):
  */
 async function generateNewKeyset_(keyTemplate: PbKeyTemplate):
     Promise<PbKeyset> {
-  const key = (new PbKeyset.Key())
+  const key = (new PbKeysetKey())
                   .setStatus(PbKeyStatusType.ENABLED)
                   .setOutputPrefixType(keyTemplate.getOutputPrefixType());
   const keyId = generateNewKeyId_();

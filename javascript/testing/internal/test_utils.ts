@@ -5,7 +5,8 @@
  */
 
 import 'jasmine';
-import {PbKeyData, PbKeyset, PbKeyStatusType, PbOutputPrefixType} from '../../internal/proto';
+
+import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../../internal/proto';
 
 /**
  * Returns its input type-narrowed not to be null or undefined. Throws a failed
@@ -39,8 +40,8 @@ export function assertInstanceof<T>(
  */
 export function createKey(
     keyId: number = 305419896, legacy: boolean = false,
-    enabled: boolean = true): PbKeyset.Key {
-  const key = new PbKeyset.Key();
+    enabled: boolean = true): PbKeysetKey {
+  const key = new PbKeysetKey();
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {

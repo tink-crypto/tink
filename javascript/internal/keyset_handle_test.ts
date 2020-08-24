@@ -21,7 +21,7 @@ import {BinaryKeysetWriter} from './binary_keyset_writer';
 import {CleartextKeysetHandle} from './cleartext_keyset_handle';
 import * as KeyManager from './key_manager';
 import {generateNew, KeysetHandle, read, readNoSecret} from './keyset_handle';
-import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeyStatusType, PbMessage, PbOutputPrefixType} from './proto';
+import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbMessage, PbOutputPrefixType} from './proto';
 import * as Registry from './registry';
 import {Constructor} from './util';
 
@@ -562,8 +562,8 @@ function createKey(
     keyId: number, outputPrefix: PbOutputPrefixType, keyTypeUrl: string,
     enabled: boolean,
     opt_keyMaterialType: PbKeyMaterialType =
-        PbKeyMaterialType.SYMMETRIC): PbKeyset.Key {
-  const key = new PbKeyset.Key();
+        PbKeyMaterialType.SYMMETRIC): PbKeysetKey {
+  const key = new PbKeysetKey();
   if (enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {

@@ -8,7 +8,7 @@ import {SecurityException} from '../exception/security_exception';
 import * as Bytes from '../subtle/bytes';
 import * as EllipticCurves from '../subtle/elliptic_curves';
 
-import {PbEllipticCurveType, PbHashType, PbKeyset, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
+import {PbEllipticCurveType, PbHashType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
 
 /**
  * A type representing the constructor function for a given class. Unlike
@@ -28,7 +28,7 @@ export function isInstanceOf<T>(
  * Validates the given key and throws SecurityException if it is invalid.
  *
  */
-export function validateKey(key: PbKeyset.Key) {
+export function validateKey(key: PbKeysetKey) {
   if (!key) {
     throw new SecurityException('Key should be non null.');
   }

@@ -7,7 +7,7 @@
 import 'jasmine';
 
 import {CryptoFormat} from './crypto_format';
-import {PbKeysetKey as PbKey, PbOutputPrefixType} from './proto';
+import {PbKeysetKey as PbKeysetKey, PbOutputPrefixType} from './proto';
 
 describe('crypto format test', function() {
   it('constants', async function() {
@@ -21,7 +21,7 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix unknown prefix type', async function() {
-    let key = new PbKey()
+    let key = new PbKeysetKey()
                   .setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX)
                   .setKeyId(2864434397);
 
@@ -38,7 +38,7 @@ describe('crypto format test', function() {
   it('get output prefix invalid key id', async function() {
     // Key id has to be an unsigned 32-bit integer.
     const invalidKeyIds = [0.2, -10, 2**32];
-    let key = new PbKey().setOutputPrefixType(PbOutputPrefixType.TINK);
+    let key = new PbKeysetKey().setOutputPrefixType(PbOutputPrefixType.TINK);
 
     const invalidKeyIdsLength = invalidKeyIds.length;
     for (let i = 0; i < invalidKeyIdsLength; i++) {
@@ -56,7 +56,7 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix tink', async function() {
-    const key = new PbKey()
+    const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.TINK)
                     .setKeyId(2864434397);
     const expectedResult =
@@ -67,7 +67,7 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix legacy', async function() {
-    const key = new PbKey()
+    const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.LEGACY)
                     .setKeyId(16909060);
     const expectedResult = new Uint8Array(
@@ -78,7 +78,7 @@ describe('crypto format test', function() {
   });
 
   it('get output prefix raw', async function() {
-    const key = new PbKey()
+    const key = new PbKeysetKey()
                     .setOutputPrefixType(PbOutputPrefixType.RAW)
                     .setKeyId(370491921);
     const expectedResult = new Uint8Array(0);

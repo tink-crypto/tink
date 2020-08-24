@@ -8,7 +8,7 @@ import 'jasmine';
 
 import * as EllipticCurves from '../subtle/elliptic_curves';
 
-import {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyset, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
+import {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';
 import * as Util from './util';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,10 +191,10 @@ class ExceptionText {
   }
 }
 
-/** Returns a valid PbKeyset.Key. */
+/** Returns a valid PbKeysetKey. */
 function createKey(
     opt_id: number = 0x12345678, opt_enabled: boolean = true,
-    opt_publicKey: boolean = false): PbKeyset.Key {
+    opt_publicKey: boolean = false): PbKeysetKey {
   const keyData =
       new PbKeyData().setTypeUrl('someTypeUrl').setValue(new Uint8Array(10));
   if (opt_publicKey) {
@@ -203,7 +203,7 @@ function createKey(
     keyData.setKeyMaterialType(PbKeyData.KeyMaterialType.SYMMETRIC);
   }
 
-  const key = new PbKeyset.Key().setKeyData(keyData);
+  const key = new PbKeysetKey().setKeyData(keyData);
   if (opt_enabled) {
     key.setStatus(PbKeyStatusType.ENABLED);
   } else {
