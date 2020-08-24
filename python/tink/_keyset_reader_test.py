@@ -51,8 +51,8 @@ class JsonKeysetReaderTest(absltest.TestCase):
     self.assertLen(keyset.key, 1)
 
   def test_read_invalid(self):
-    with self.assertRaisesRegex(core.TinkError, 'Failed to load JSON'):
-      reader = tink.JsonKeysetReader('not json')
+    reader = tink.JsonKeysetReader('not json')
+    with self.assertRaises(core.TinkError):
       reader.read()
 
   def test_read_encrypted(self):
@@ -81,8 +81,8 @@ class JsonKeysetReaderTest(absltest.TestCase):
                      'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
   def test_read_encrypted_invalid(self):
-    with self.assertRaisesRegex(core.TinkError, 'Failed to load JSON'):
-      reader = tink.JsonKeysetReader('not json')
+    reader = tink.JsonKeysetReader('not json')
+    with self.assertRaises(core.TinkError):
       reader.read_encrypted()
 
 
