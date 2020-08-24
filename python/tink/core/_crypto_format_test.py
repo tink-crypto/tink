@@ -72,11 +72,10 @@ class CryptoFormatTest(absltest.TestCase):
     self.assertLen(prefix, core.crypto_format.RAW_PREFIX_SIZE)
 
   def test_invalid_output_prefix(self):
-    with self.assertRaisesRegex(
-        core.TinkError, 'The given key has invalid OutputPrefixType 42.'):
-      key = tink_pb2.Keyset.Key()
-      key.output_prefix_type = 42
-      key.key_id = 0x11223344
+    key = tink_pb2.Keyset.Key()
+    key.output_prefix_type = 42
+    key.key_id = 0x11223344
+    with self.assertRaises(core.TinkError):
       _ = core.crypto_format.output_prefix(key)
 
 

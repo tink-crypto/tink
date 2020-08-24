@@ -59,6 +59,7 @@ py_test(
         ":core",
         requirement("absl-py"),
         "//tink/aead",
+        "//tink/hybrid",
         "//tink/mac",
         "//tink/mac:_mac_wrapper",
         "//tink/prf",

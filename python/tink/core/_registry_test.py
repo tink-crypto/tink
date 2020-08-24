@@ -16,13 +16,14 @@
 
 # Placeholder for import for type annotations
 
-from typing import Mapping, Type
+from typing import cast, Mapping, Type, TypeVar, Text
 from absl.testing import absltest
 
 from tink.proto import tink_pb2
 
 from tink import aead
 from tink import core
+from tink import hybrid
 from tink import mac
 from tink import prf
 from tink.mac import _mac_wrapper
@@ -30,70 +31,85 @@ from tink.prf import _prf_set_wrapper
 from tink.testing import helper
 
 
-class DummyKeyManager(core.KeyManager):
+P = TypeVar('P')
 
-  def __init__(self, type_url, primitive_class=aead.Aead):
+
+class DummyKeyManager(core.KeyManager[P]):
+
+  def __init__(self, type_url: Text, primitive_class: Type[P] = aead.Aead):
     self._type_url = type_url
     self._primitive_class = primitive_class
 
-  def primitive_class(self):
+  def primitive_class(self) -> Type[P]:
     return self._primitive_class
 
-  def primitive(self, key_data):
+  def primitive(self, key_data: tink_pb2.KeyData) -> P:
     return helper.FakeAead()
 
-  def key_type(self):
+  def key_type(self) -> Text:
     return self._type_url
 
-  def new_key_data(self, key_template):
+  def new_key_data(self,
+                   key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
     return tink_pb2.KeyData(type_url=key_template.type_url)
 
+  def does_support(self, type_url: Text) -> bool:
+    return self.key_type() == type_url
 
-class UnsupportedKeyManager(DummyKeyManager):
 
-  def does_support(self, type_url):
+class UnsupportedKeyManager(DummyKeyManager[P]):
+
+  def does_support(self, type_url: Text) -> bool:
     return False
 
 
-class DummyPrivateKeyManager(core.PrivateKeyManager):
+class DummyPrivateKeyManager(core.PrivateKeyManager[hybrid.HybridDecrypt]):
 
-  def __init__(self, type_url):
+  def __init__(self, type_url: Text):
     self._type_url = type_url
 
-  def primitive_class(self):
-    return None
+  def primitive_class(self) -> Type[hybrid.HybridDecrypt]:
+    return hybrid.HybridDecrypt
 
-  def primitive(self, key_data):
-    return None
+  def primitive(self, key_data: tink_pb2.KeyData) -> hybrid.HybridDecrypt:
+    return helper.FakeHybridDecrypt()
 
-  def key_type(self):
+  def key_type(self) -> Text:
     return self._type_url
 
-  def new_key_data(self, key_template):
-    return None
+  def new_key_data(self,
+                   key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
+    return tink_pb2.KeyData()
 
-  def public_key_data(self, private_key_data):
+  def public_key_data(
+      self, private_key_data: tink_pb2.KeyData) -> tink_pb2.KeyData:
     return tink_pb2.KeyData(type_url='public_' + private_key_data.type_url)
 
 
-class DummyMacWrapper(core.PrimitiveWrapper):
+class DummyMacWrapper(core.PrimitiveWrapper[mac.Mac, mac.Mac]):
 
-  def wrap(self, _):
+  def wrap(self, pset: core.PrimitiveSet) -> mac.Mac:
+    _ = pset
     return helper.FakeMac()
 
-  def primitive_class(self):
+  def primitive_class(self) -> Type[mac.Mac]:
+    return mac.Mac
+
+  def input_primitive_class(self) -> Type[mac.Mac]:
     return mac.Mac
 
 
-class InconsistentWrapper(core.PrimitiveWrapper):
+class InconsistentWrapper(core.PrimitiveWrapper[mac.Mac, mac.Mac]):
 
-  def wrap(self, _):
-    return helper.FakeAead()
+  def wrap(self, pset: core.PrimitiveSet) -> mac.Mac:
+    _ = pset
+    # returns a primitive of the wrong type
+    return cast(mac.Mac, helper.FakeAead())
 
-  def primitive_class(self):
+  def primitive_class(self) -> Type[mac.Mac]:
     return mac.Mac
 
-  def input_primitive_class(self):
+  def input_primitive_class(self) -> Type[mac.Mac]:
     return mac.Mac
 
 
@@ -151,7 +167,7 @@ class PrfToPrfWrapper(core.PrimitiveWrapper[prf.Prf, prf.Prf]):
     return prf.Prf
 
 
-def _mac_set(mac_list):
+def _mac_set(mac_list) -> core.PrimitiveSet[mac.Mac]:
   """Converts a List of Mac in a PrimitiveSet and sets the last primary."""
   mac_set = core.new_primitive_set(mac.Mac)
   for i, primitive in enumerate(mac_list):
@@ -218,15 +234,13 @@ class RegistryTest(absltest.TestCase):
 
   def test_primitive_fails_on_wrong_primitive(self):
     self.reg.register_key_manager(DummyKeyManager('dummy_type_url', aead.Aead))
-    with self.assertRaisesRegex(core.TinkError,
-                                'uses primitive Aead, and not Mac'):
+    with self.assertRaises(core.TinkError):
       self.reg.primitive(tink_pb2.KeyData(type_url='dummy_type_url'), mac.Mac)
 
   def test_primitive_fails_on_subclass(self):
     self.reg.register_key_manager(
         DummyKeyManager('dummy_type_url', helper.FakeAead))
-    with self.assertRaisesRegex(core.TinkError,
-                                'uses primitive FakeAead, and not Aead'):
+    with self.assertRaises(core.TinkError):
       self.reg.primitive(tink_pb2.KeyData(type_url='dummy_type_url'), aead.Aead)
 
   def test_new_key_data_success(self):
@@ -238,16 +252,14 @@ class RegistryTest(absltest.TestCase):
   def test_new_key_data_wrong_type_url(self):
     self.reg.register_key_manager(DummyKeyManager('dummy_type_url'))
     unknown_key_template = tink_pb2.KeyTemplate(type_url='unknown_type_url')
-    with self.assertRaisesRegex(core.TinkError,
-                                'No manager for type unknown_type_url'):
+    with self.assertRaises(core.TinkError):
       self.reg.new_key_data(unknown_key_template)
 
   def test_new_key_data_no_new_key_allowed(self):
     self.reg.register_key_manager(
         DummyKeyManager('dummy_type_url'), new_key_allowed=False)
     key_template = tink_pb2.KeyTemplate(type_url='dummy_type_url')
-    with self.assertRaisesRegex(core.TinkError,
-                                'does not allow for creation of new keys'):
+    with self.assertRaises(core.TinkError):
       self.reg.new_key_data(key_template)
 
   def test_public_key_data_success(self):
@@ -263,8 +275,7 @@ class RegistryTest(absltest.TestCase):
     key_data = tink_pb2.KeyData(
         type_url='dummy_type_url',
         key_material_type=tink_pb2.KeyData.ASYMMETRIC_PUBLIC)
-    with self.assertRaisesRegex(core.TinkError,
-                                'contains a non-private key'):
+    with self.assertRaises(core.TinkError):
       self.reg.public_key_data(key_data)
 
   def test_public_key_data_fails_for_non_private_key_manager(self):
@@ -272,8 +283,7 @@ class RegistryTest(absltest.TestCase):
     key_data = tink_pb2.KeyData(
         type_url='dummy_type_url',
         key_material_type=tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
-    with self.assertRaisesRegex(core.TinkError,
-                                'is not a PrivateKeyManager'):
+    with self.assertRaises(core.TinkError):
       self.reg.public_key_data(key_data)
 
   def test_wrap_success(self):
@@ -306,17 +316,13 @@ class RegistryTest(absltest.TestCase):
       _ = self.reg.wrap(pset, mac.Mac)
 
   def test_wrap_unknown_primitive(self):
-    with self.assertRaisesRegex(
-        core.TinkError,
-        'No PrimitiveWrapper registered for primitive Mac.'):
+    with self.assertRaises(core.TinkError):
       self.reg.wrap(_mac_set([helper.FakeMac()]), mac.Mac)
 
   def test_primitive_wrapper_reset(self):
     self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
     self.reg.reset()
-    with self.assertRaisesRegex(
-        core.TinkError,
-        'No PrimitiveWrapper registered for primitive Mac.'):
+    with self.assertRaises(core.TinkError):
       self.reg.wrap(_mac_set([helper.FakeMac()]), mac.Mac)
 
   def test_register_same_primitive_wrapper_twice(self):
@@ -325,15 +331,11 @@ class RegistryTest(absltest.TestCase):
 
   def test_register_different_primitive_wrappers_twice_fails(self):
     self.reg.register_primitive_wrapper(_mac_wrapper.MacWrapper())
-    with self.assertRaisesRegex(
-        core.TinkError,
-        'A wrapper for primitive Mac has already been added.'):
+    with self.assertRaises(core.TinkError):
       self.reg.register_primitive_wrapper(DummyMacWrapper())
 
   def test_register_inconsistent_wrapper_fails(self):
-    with self.assertRaisesRegex(
-        core.TinkError,
-        'Wrapper for primitive Mac generates incompatible primitive'):
+    with self.assertRaises(core.TinkError):
       self.reg.register_primitive_wrapper(InconsistentWrapper())
 
   def test_register_prf_to_prfset_wrapper_success(self):
