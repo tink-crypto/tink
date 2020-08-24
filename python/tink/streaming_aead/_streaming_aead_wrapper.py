@@ -50,7 +50,22 @@ class _DecryptingStreamWrapper(io.RawIOBase):
         ciphertext_source)
     self._associated_data = associated_data
     self._matching_stream = None
-    self._primitive_set = primitive_set
+    self._remaining_primitives = [
+        entry.primitive for entry in primitive_set.raw_primitives()]
+    self._attempting_stream = self._next_decrypting_stream()
+
+  def _next_decrypting_stream(self) -> io.RawIOBase:
+    """Takes the next remaining primitive and returns a decrypting stream."""
+    if not self._remaining_primitives:
+      raise ValueError('No primitive remaining.')
+    # ciphertext_source should never be closed by any of the raw decrypting
+    # streams, to be able to use it for another decrypting stream.
+    # ciphertext_source will be closed in close().
+    # self._ciphertext_source needs to be at the starting position.
+    return self._remaining_primitives.pop(0).new_raw_decrypting_stream(
+        self._ciphertext_source,
+        self._associated_data,
+        close_ciphertext_source=False)
 
   def read(self, size=-1) -> Optional[bytes]:
     """Read and return up to size bytes, where size is an int.
@@ -73,35 +88,28 @@ class _DecryptingStreamWrapper(io.RawIOBase):
       return bytes()
     if self._matching_stream:
       return self._matching_stream.read(size)
-    # if self._matching_stream is not set, no data has been read successfully
-    # and self._ciphertext_source is at the beginning.
-    for entry in self._primitive_set.raw_primitives():
+    # if self._matching_stream is not set, we are currently reading from
+    # self._attempting_stream but no data has been read successfully yet.
+    while True:
       try:
-        # ciphertext_source should never be closed by any of the raw decrypting
-        # streams. It will be closed in close(), and only there.
-        attempted_stream = entry.primitive.new_raw_decrypting_stream(
-            self._ciphertext_source,
-            self._associated_data,
-            close_ciphertext_source=False)
-        data = attempted_stream.read(size)
+        data = self._attempting_stream.read(size)
         if data is None:
           # No data at the moment. Not clear if decryption was successful.
-          # Try again.
-          # To not end up in an infinite loop, we need self._ciphertext_source
-          # to make progress, even if rewind() is called inbetween calls to
-          # read().
-          self._ciphertext_source.rewind()
+          # Try again with the same stream next time.
           return None
         # Any value other than None means that decryption was successful.
         # (b'' indicates that the plaintext is an empty string.)
-        self._matching_stream = attempted_stream
+        self._matching_stream = self._attempting_stream
+        self._attempting_stream = None
         self._ciphertext_source.disable_rewind()
         return data
       except core.TinkError:
+        if not self._remaining_primitives:
+          raise core.TinkError(
+              'No matching key found for the ciphertext in the stream')
         # Try another key.
         self._ciphertext_source.rewind()
-    raise core.TinkError(
-        'No matching key found for the ciphertext in the stream')
+        self._attempting_stream = self._next_decrypting_stream()
 
   def readinto(self, b: bytearray) -> Optional[int]:
     """Read bytes into a pre-allocated bytes-like object b."""
@@ -117,6 +125,8 @@ class _DecryptingStreamWrapper(io.RawIOBase):
       return
     if self._matching_stream:
       self._matching_stream.close()
+    if self._attempting_stream:
+      self._attempting_stream.close()
     self._ciphertext_source.close()
     super(_DecryptingStreamWrapper, self).close()
 

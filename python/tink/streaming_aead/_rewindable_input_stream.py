@@ -41,9 +41,7 @@ class RewindableInputStream(io.RawIOBase):
     """Read and return up to size bytes when size >= 0.
 
     This function may return None on some calls, but it will eventually return
-    some data, or return b'' if EOF is reached. Since all data is buffered when
-    the stream is still rewindable, it is also guaranteed that None will not be
-    returned on previously read data.
+    some data, or return b'' if EOF is reached.
 
     Args:
       size: Maximum number of bytes to be returned, if >= 0. If size is smaller

@@ -31,7 +31,7 @@ from tink import streaming_aead
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
-from google3.third_party.tink.python.tink.testing import bytes_io
+from tink.testing import bytes_io
 
 
 class MetadataServicer(testing_api_pb2_grpc.MetadataServicer):

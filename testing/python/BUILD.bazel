@@ -30,6 +30,7 @@ py_library(
         "@tink_py//tink/prf",
         "@tink_py//tink/signature",
         "@tink_py//tink/streaming_aead",
+        "@tink_py//tink/testing:bytes_io",
     ],
 )
 
