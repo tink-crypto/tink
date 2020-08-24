@@ -1,0 +1,56 @@
+{
+  "name": "tink-crypto",
+  "version": "0.1.0",
+  "description": "A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.",
+  "keywords": [
+    "crypto",
+    "cryptography",
+    "security",
+    "encryption",
+    "AEAD",
+    "MAC",
+    "signature",
+    "AES-CTR-HMAC",
+    "AES-GCM",
+    "HMAC",
+    "ECDSA",
+    "ECIES",
+    "HKDF"
+  ],
+  "homepage": "https://github.com/google/tink#readme",
+  "bugs": "https://github.com/google/tink/issues",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google/tink.git",
+    "directory": "javascript"
+  },
+  "dependencies": {
+    "tslib": "^2.0.1"
+  },
+  "devDependencies": {
+    "@angular/bazel": "10.0.11",
+    "@bazel/karma": "2.0.3",
+    "@bazel/typescript": "2.0.3",
+    "@types/jasmine": "3.5.12",
+    "jasmine-core": "3.6.0",
+    "karma": "4.1.0",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-firefox-launcher": "1.1.0",
+    "karma-jasmine": "2.0.1",
+    "karma-json-result-reporter": "1.0.0",
+    "karma-requirejs": "1.1.0",
+    "karma-sourcemap-loader": "0.3.7",
+    "requirejs": "2.3.6",
+    "rollup": "2.26.5",
+    "rollup-plugin-commonjs": "10.1.0",
+    "rollup-plugin-node-resolve": "5.2.0",
+    "rollup-plugin-sourcemaps": "0.6.2",
+    "terser": "5.2.1",
+    "typescript": "4.0.2"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "registry": "https://wombat-dressing-room.appspot.com"
+  }
+}

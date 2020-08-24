@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {PbKeyset} from './proto';
 
 describe('proto test', function() {

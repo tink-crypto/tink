@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {PbAesGcmKeyFormat, PbOutputPrefixType} from '../internal/proto';
 
 import {AesGcmKeyManager} from './aes_gcm_key_manager';

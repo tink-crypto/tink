@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import * as EllipticCurves from '../subtle/elliptic_curves';
 
 import {PbEllipticCurveType, PbHashType, PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType, PbPointFormat} from './proto';

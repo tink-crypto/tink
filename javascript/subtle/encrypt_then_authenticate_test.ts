@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import * as Bytes from './bytes';
 import {aesCtrHmacFromRawKeys} from './encrypt_then_authenticate';
 import * as Random from './random';

@@ -1,0 +1,172 @@
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+load(":ts_library_from_closure.bzl", "ts_library_from_closure")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library_from_closure(
+    name = "proto",
+    namespace_aliases = {
+        "PbMessage": "jspb.Message",
+        "PbAesCmacKey": "proto.google.crypto.tink.AesCmacKey",
+        "PbAesCmacKeyFormat": "proto.google.crypto.tink.AesCmacKeyFormat",
+        "PbAesCmacParams": "proto.google.crypto.tink.AesCmacParams",
+        "PbAesCtrHmacAeadKey": "proto.google.crypto.tink.AesCtrHmacAeadKey",
+        "PbAesCtrHmacAeadKeyFormat": "proto.google.crypto.tink.AesCtrHmacAeadKeyFormat",
+        "PbAesCtrKey": "proto.google.crypto.tink.AesCtrKey",
+        "PbAesCtrKeyFormat": "proto.google.crypto.tink.AesCtrKeyFormat",
+        "PbAesCtrParams": "proto.google.crypto.tink.AesCtrParams",
+        "PbAesGcmKey": "proto.google.crypto.tink.AesGcmKey",
+        "PbAesGcmKeyFormat": "proto.google.crypto.tink.AesGcmKeyFormat",
+        "PbAesGcmSivKey": "proto.google.crypto.tink.AesGcmSivKey",
+        "PbAesGcmSivKeyFormat": "proto.google.crypto.tink.AesGcmSivKeyFormat",
+        "PbEcdsaKeyFormat": "proto.google.crypto.tink.EcdsaKeyFormat",
+        "PbEcdsaParams": "proto.google.crypto.tink.EcdsaParams",
+        "PbEcdsaPrivateKey": "proto.google.crypto.tink.EcdsaPrivateKey",
+        "PbEcdsaPublicKey": "proto.google.crypto.tink.EcdsaPublicKey",
+        "PbEcdsaSignatureEncoding": "proto.google.crypto.tink.EcdsaSignatureEncoding",
+        "PbEciesAeadDemParams": "proto.google.crypto.tink.EciesAeadDemParams",
+        "PbEciesAeadHkdfKeyFormat": "proto.google.crypto.tink.EciesAeadHkdfKeyFormat",
+        "PbEciesAeadHkdfParams": "proto.google.crypto.tink.EciesAeadHkdfParams",
+        "PbEciesAeadHkdfPrivateKey": "proto.google.crypto.tink.EciesAeadHkdfPrivateKey",
+        "PbEciesAeadHkdfPublicKey": "proto.google.crypto.tink.EciesAeadHkdfPublicKey",
+        "PbEciesHkdfKemParams": "proto.google.crypto.tink.EciesHkdfKemParams",
+        "PbPointFormat": "proto.google.crypto.tink.EcPointFormat",
+        "PbEllipticCurveType": "proto.google.crypto.tink.EllipticCurveType",
+        "PbEncryptedKeyset": "proto.google.crypto.tink.EncryptedKeyset",
+        "PbHashType": "proto.google.crypto.tink.HashType",
+        "PbHmacKey": "proto.google.crypto.tink.HmacKey",
+        "PbHmacKeyFormat": "proto.google.crypto.tink.HmacKeyFormat",
+        "PbHmacParams": "proto.google.crypto.tink.HmacParams",
+        "PbKeyData": "proto.google.crypto.tink.KeyData",
+        "PbKeyMaterialType": "proto.google.crypto.tink.KeyData.KeyMaterialType",
+        "PbKeyset": "proto.google.crypto.tink.Keyset",
+        "PbKeysetKey": "proto.google.crypto.tink.Keyset.Key",
+        "PbKeysetInfo": "proto.google.crypto.tink.KeysetInfo",
+        "PbKeyStatusType": "proto.google.crypto.tink.KeyStatusType",
+        "PbKeyTemplate": "proto.google.crypto.tink.KeyTemplate",
+        "PbOutputPrefixType": "proto.google.crypto.tink.OutputPrefixType",
+        "PbXChaCha20Poly1305Key": "proto.google.crypto.tink.XChaCha20Poly1305Key",
+        "PbXChaCha20Poly1305KeyFormat": "proto.google.crypto.tink.XChaCha20Poly1305KeyFormat",
+    },
+    deps = [
+        ":aes_cmac_closure_proto",
+        ":aes_ctr_closure_proto",
+        ":aes_ctr_hmac_aead_closure_proto",
+        ":aes_gcm_closure_proto",
+        ":aes_gcm_siv_closure_proto",
+        ":common_closure_proto",
+        ":ecdsa_closure_proto",
+        ":ecies_aead_hkdf_closure_proto",
+        ":hmac_closure_proto",
+        ":tink_closure_proto",
+        ":xchacha20_poly1305_closure_proto",
+        "@io_bazel_rules_closure//closure/protobuf:jspb",
+    ],
+)
+
+ts_library(
+    name = "internal",
+    srcs = [
+        "binary_keyset_reader.ts",
+        "binary_keyset_writer.ts",
+        "cleartext_keyset_handle.ts",
+        "crypto_format.ts",
+        "key_manager.ts",
+        "keyset_handle.ts",
+        "keyset_reader.ts",
+        "keyset_writer.ts",
+        "primitive_set.ts",
+        "primitive_wrapper.ts",
+        "registry.ts",
+        "util.ts",
+    ],
+    deps = [
+        ":proto",
+        "//aead/internal",
+        "//exception",
+        "//subtle",
+    ],
+)
+
+ts_library(
+    name = "internal_tests",
+    testonly = True,
+    srcs = [
+        "binary_keyset_reader_test.ts",
+        "binary_keyset_writer_test.ts",
+        "cleartext_keyset_handle_test.ts",
+        "crypto_format_test.ts",
+        "keyset_handle_test.ts",
+        "primitive_set_test.ts",
+        "proto_test.ts",
+        "registry_test.ts",
+        "util_test.ts",
+    ],
+    deps = [
+        ":internal",
+        ":proto",
+        "//aead",
+        "//exception",
+        "//hybrid",
+        "//mac",
+        "//subtle",
+        "//testing/internal",
+        "@npm//@types/jasmine",
+    ],
+)
+
+closure_proto_library(
+    name = "aes_cmac_closure_proto",
+    deps = ["@tink_base//proto:aes_cmac_proto"],
+)
+
+closure_proto_library(
+    name = "aes_ctr_hmac_aead_closure_proto",
+    deps = ["@tink_base//proto:aes_ctr_hmac_aead_proto"],
+)
+
+closure_proto_library(
+    name = "aes_ctr_closure_proto",
+    deps = ["@tink_base//proto:aes_ctr_proto"],
+)
+
+closure_proto_library(
+    name = "aes_gcm_closure_proto",
+    deps = ["@tink_base//proto:aes_gcm_proto"],
+)
+
+closure_proto_library(
+    name = "aes_gcm_siv_closure_proto",
+    deps = ["@tink_base//proto:aes_gcm_siv_proto"],
+)
+
+closure_proto_library(
+    name = "common_closure_proto",
+    deps = ["@tink_base//proto:common_proto"],
+)
+
+closure_proto_library(
+    name = "ecdsa_closure_proto",
+    deps = ["@tink_base//proto:ecdsa_proto"],
+)
+
+closure_proto_library(
+    name = "ecies_aead_hkdf_closure_proto",
+    deps = ["@tink_base//proto:ecies_aead_hkdf_proto"],
+)
+
+closure_proto_library(
+    name = "hmac_closure_proto",
+    deps = ["@tink_base//proto:hmac_proto"],
+)
+
+closure_proto_library(
+    name = "tink_closure_proto",
+    deps = ["@tink_base//proto:tink_proto"],
+)
+
+closure_proto_library(
+    name = "xchacha20_poly1305_closure_proto",
+    deps = ["@tink_base//proto:xchacha20_poly1305_proto"],
+)

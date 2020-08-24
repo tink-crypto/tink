@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {fromRawKey as aesGcmFromRawKey} from './aes_gcm';
 import * as Bytes from './bytes';
 import * as Random from './random';

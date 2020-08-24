@@ -1,0 +1,80 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "subtle",
+    srcs = [
+        "aes_ctr.ts",
+        "aes_gcm.ts",
+        "bytes.ts",
+        "ecdsa_sign.ts",
+        "ecdsa_verify.ts",
+        "ecies_aead_hkdf_dem_helper.ts",
+        "ecies_aead_hkdf_hybrid_decrypt.ts",
+        "ecies_aead_hkdf_hybrid_encrypt.ts",
+        "ecies_hkdf_kem_recipient.ts",
+        "ecies_hkdf_kem_sender.ts",
+        "elliptic_curves.ts",
+        "encrypt_then_authenticate.ts",
+        "hkdf.ts",
+        "hmac.ts",
+        "ind_cpa_cipher.ts",
+        "random.ts",
+        "validators.ts",
+    ],
+    deps = [
+        "//aead/internal",
+        "//exception",
+        "//hybrid/internal",
+        "//mac/internal",
+        "//signature/internal",
+    ],
+)
+
+ts_library(
+    name = "subtle_tests",
+    testonly = True,
+    srcs = [
+        "aes_ctr_test.ts",
+        "aes_gcm_test.ts",
+        "bytes_test.ts",
+        "ecdsa_sign_test.ts",
+        "ecdsa_verify_test.ts",
+        "ecies_aead_hkdf_hybrid_decrypt_test.ts",
+        "ecies_aead_hkdf_hybrid_encrypt_test.ts",
+        "ecies_hkdf_kem_recipient_test.ts",
+        "ecies_hkdf_kem_sender_test.ts",
+        "elliptic_curves_test.ts",
+        "encrypt_then_authenticate_test.ts",
+        "hkdf_test.ts",
+        "hmac_test.ts",
+        ":wycheproof_ecdh_test_vectors",
+        ":wycheproof_ecdsa_test_vectors",
+    ],
+    deps = [
+        ":subtle",
+        "//aead",
+        "//hybrid",
+        "//internal",
+        "//signature/internal",
+        "//testing/internal",
+        "@npm//@types/jasmine",
+    ],
+)
+
+genrule(
+    name = "wycheproof_ecdh_test_vectors",
+    testonly = True,
+    srcs = ["@wycheproof//testvectors:ecdh_webcrypto"],
+    outs = [":wycheproof_ecdh_test_vectors.ts"],
+    cmd = 'cat - $< <<<"export const WYCHEPROOF_ECDH_TEST_VECTORS =" >$@',
+)
+
+genrule(
+    name = "wycheproof_ecdsa_test_vectors",
+    testonly = True,
+    srcs = ["@wycheproof//testvectors:ecdsa_webcrypto"],
+    outs = [":wycheproof_ecdsa_test_vectors.ts"],
+    cmd = 'cat - $< <<<"export const WYCHEPROOF_ECDSA_TEST_VECTORS =" >$@',
+)

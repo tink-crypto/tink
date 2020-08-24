@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../../internal/proto';
 
 /**
@@ -23,11 +21,16 @@ export function assertExists<T>(value: T): NonNullable<T> {
  * assertion if it isn't that type at runtime.
  */
 export function assertInstanceof<T>(
-    value: unknown, type: new (...args: never[]) => T): T {
+    value: unknown, type: new (...args: never[]) => T): T;
+// For classes exported via ts_library_from_closure.
+// tslint:disable-next-line:no-any
+export function assertInstanceof<T>(value: unknown, type: any): any;
+export function assertInstanceof<T>(
+    value: unknown, type: new (...args: never[]) => unknown) {
   expect(value instanceof type)
       .withContext(`${value} should be an instance of ${type}`)
       .toBe(true);
-  return value as T;
+  return value;
 }
 
 /**

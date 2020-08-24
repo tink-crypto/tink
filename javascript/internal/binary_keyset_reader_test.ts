@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import * as Random from '../subtle/random';
 
 import {BinaryKeysetReader} from './binary_keyset_reader';

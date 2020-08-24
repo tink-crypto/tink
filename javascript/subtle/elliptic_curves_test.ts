@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {assertExists} from '../testing/internal/test_utils';
 
 import * as Bytes from './bytes';

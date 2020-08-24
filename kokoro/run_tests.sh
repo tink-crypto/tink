@@ -62,6 +62,7 @@ run_all_linux_tests() {
   run_linux_tests "java_src"
   run_linux_tests "go"
   run_linux_tests "python"
+  run_linux_tests "javascript"
   run_linux_tests "examples/cc"
   run_linux_tests "examples/java_src"
   run_linux_tests "tools"

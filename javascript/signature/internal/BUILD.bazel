@@ -1,0 +1,11 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "internal",
+    srcs = [
+        "public_key_sign.ts",
+        "public_key_verify.ts",
+    ],
+)

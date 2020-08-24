@@ -130,3 +130,6 @@ time bazel --bazelrc="$RBE_BAZELRC" \
 #   --test_tag_filters=-no_rbe \
 #   --jvmopt=-Drbe=1 \
 #   -- ...
+
+# We don't currently run TypeScript/JavaScript tests remotely because they
+# require libx11-xcb-dev in order to bring up browsers.

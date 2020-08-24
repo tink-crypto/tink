@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {createKeyset} from '../testing/internal/test_utils';
 
 import {CleartextKeysetHandle} from './cleartext_keyset_handle';

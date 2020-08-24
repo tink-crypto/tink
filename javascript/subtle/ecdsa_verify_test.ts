@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {PublicKeyVerify} from '../signature/internal/public_key_verify';
 
 import * as Bytes from './bytes';

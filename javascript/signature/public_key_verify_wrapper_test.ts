@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import * as PrimitiveSet from '../internal/primitive_set';
 import {PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../internal/proto';
 import * as Bytes from '../subtle/bytes';

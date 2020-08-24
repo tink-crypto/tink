@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {CryptoFormat} from './crypto_format';
 import {PbKeysetKey as PbKeysetKey, PbOutputPrefixType} from './proto';
 

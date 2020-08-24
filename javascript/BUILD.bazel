@@ -1,0 +1,61 @@
+load("@npm//@bazel/karma:index.bzl", "karma_web_test_suite")
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+load("@tink_angular//:ng_package.bzl", "ng_package")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "javascript",
+    srcs = [
+        "index.ts",
+        "keyset_handle.ts",
+    ],
+    module_name = "tink-crypto",
+    deps = [
+        "//aead",
+        "//aead/subtle",
+        "//binary",
+        "//binary/insecure",
+        "//hybrid",
+        "//internal",
+        "//mac",
+        "//mac/subtle",
+        "//signature",
+        "//signature/subtle",
+        "//testing",
+    ],
+)
+
+karma_web_test_suite(
+    name = "unit_tests",
+    browsers = [
+        "@io_bazel_rules_webtesting//browsers:chromium-local",
+        "@io_bazel_rules_webtesting//browsers:firefox-local",
+    ],
+    tags = [
+        "native",
+        "no_rbe",
+    ],
+    deps = [
+        "//aead:aead_tests",
+        "//hybrid:hybrid_tests",
+        "//internal:internal_tests",
+        "//signature:signature_tests",
+        "//subtle:subtle_tests",
+    ],
+)
+
+exports_files(
+    ["tsconfig.json"],
+    visibility = ["//:__subpackages__"],
+)
+
+ng_package(
+    name = "tink-crypto",
+    srcs = [
+        "package.json",
+        "@tink_base//:README.md",
+    ],
+    entry_point = ":index.ts",
+    deps = [":javascript"],
+)

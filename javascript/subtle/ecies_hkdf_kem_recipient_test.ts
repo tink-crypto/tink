@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import * as Bytes from './bytes';
 import {EciesHkdfKemRecipient, fromJsonWebKey as recipientFromJsonWebKey} from './ecies_hkdf_kem_recipient';
 import {fromJsonWebKey as senderFromJsonWebKey} from './ecies_hkdf_kem_sender';

@@ -1,0 +1,15 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+ts_library(
+    name = "subtle",
+    srcs = [
+        "aes_ctr_hmac.ts",
+        "aes_gcm.ts",
+        "encrypt_then_authenticate.ts",
+        "index.ts",
+    ],
+    module_name = "tink-crypto/aead/subtle",
+    deps = ["//subtle"],
+)

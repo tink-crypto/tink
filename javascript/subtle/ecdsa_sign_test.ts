@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {fromJsonWebKey} from './ecdsa_sign';
 import * as EllipticCurves from './elliptic_curves';
 import * as Random from './random';

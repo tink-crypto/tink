@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {Aead} from '../aead';
 import {AeadConfig} from '../aead/aead_config';
 import {AeadKeyTemplates} from '../aead/aead_key_templates';

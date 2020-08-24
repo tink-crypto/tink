@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import 'jasmine';
-
 import {SecurityException} from '../exception/security_exception';
 import {CryptoFormat} from '../internal/crypto_format';
 import * as PrimitiveSet from '../internal/primitive_set';

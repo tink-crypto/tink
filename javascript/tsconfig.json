@@ -1,0 +1,11 @@
+// See https://www.typescriptlang.org/tsconfig for documentation of these
+// options.
+{
+  "compilerOptions": {
+    // According to https://kangax.github.io/compat-table/es2016plus/, ES2017
+    // is the latest standard fully supported by Chrome, Firefox, and Safari as
+    // of 2020-08-24. It is also used in ts_library_from_closure.bzl.
+    "target": "ES2017",
+    "lib": ["ES2017", "DOM"]
+  }
+}
