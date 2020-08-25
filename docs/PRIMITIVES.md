@@ -57,7 +57,7 @@ JavaScript is currently under development.
 
 | Primitive          | C++ Implementations                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------------------ |
-| AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305 |
+| AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                                                   |
 | Deterministic AEAD | AES-SIV                                                                                          |
 | MAC                | HMAC-SHA2, AES-CMAC                                                                              |
@@ -91,7 +91,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 
 Primitive          | Python Implementations
 ------------------ | -----------------------------------------------------------------------------
-AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA20-POLY1305
+AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2
 PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC
