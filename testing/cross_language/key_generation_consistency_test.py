@@ -21,6 +21,7 @@ from tink import aead
 from tink import daead
 from tink import hybrid
 from tink import mac
+from tink import prf
 from tink import signature
 
 from tink.proto import common_pb2
@@ -44,12 +45,18 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     ('HmacKey(32,24,SHA384)', 'go'),
     ('HmacKey(32,32,SHA384)', 'go'),
     ('HmacKey(32,33,SHA384)', 'go'),
+    ('HmacPrfKey(32,SHA384)', 'go'),
+    # TODO(b/166257312) In Go, the minimal key_size of HkdfPrfKey Keys is 16,
+    # while in all other langs it is 32.
+    ('HkdfPrfKey(16,SHA256)', 'go'),
+    ('HkdfPrfKey(24,SHA256)', 'go'),
     # TODO(b/160130470): In CC and Python Hybrid templates are not checked for
     # valid AEAD params. (These params *are* checked when the key is used.)
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'python'),
+
 ]
 
 # Test cases that fail in a language but should succeed
@@ -129,6 +136,12 @@ def aes_gcm_test_cases():
            aead.aead_key_templates.create_aes_gcm_key_template(key_size))
 
 
+def aes_gcm_siv_test_cases():
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield ('AesGcmSivKey(%d)' % key_size,
+           aead.aead_key_templates.create_aes_gcm_siv_key_template(key_size))
+
+
 def aes_ctr_hmac_aead_test_cases():
   def _test_case(aes_key_size=16, iv_size=16, hmac_key_size=16,
                  tag_size=16, hash_type=common_pb2.SHA256):
@@ -162,6 +175,47 @@ def hmac_test_cases():
   for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
     for hash_type in HASH_TYPES:
       yield _test_case(tag_size=tag_size, hash_type=hash_type)
+
+
+def aes_cmac_test_cases():
+  def _test_case(key_size=32, tag_size=16):
+    return ('AesCmacKey(%d,%d)' % (key_size, tag_size),
+            mac.mac_key_templates.create_aes_cmac_key_template(
+                key_size, tag_size))
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield _test_case(key_size=key_size)
+  for tag_size in [9, 10, 16, 20, 21, 24, 32, 33, 64, 65]:
+    yield _test_case(tag_size=tag_size)
+
+
+def aes_cmac_prf_test_cases():
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield ('AesCmacPrfKey(%d)' % key_size,
+           prf.prf_key_templates._create_aes_cmac_key_template(key_size))
+
+
+def hmac_prf_test_cases():
+  def _test_case(key_size=32, hash_type=common_pb2.SHA256):
+    return ('HmacPrfKey(%d,%s)' % (key_size,
+                                   common_pb2.HashType.Name(hash_type)),
+            prf.prf_key_templates._create_hmac_key_template(
+                key_size, hash_type))
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield _test_case(key_size=key_size)
+  for hash_type in HASH_TYPES:
+    yield _test_case(hash_type=hash_type)
+
+
+def hkdf_prf_test_cases():
+  def _test_case(key_size=32, hash_type=common_pb2.SHA256):
+    return ('HkdfPrfKey(%d,%s)' % (key_size,
+                                   common_pb2.HashType.Name(hash_type)),
+            prf.prf_key_templates._create_hkdf_key_template(
+                key_size, hash_type))
+  for key_size in [15, 16, 24, 32, 64, 96]:
+    yield _test_case(key_size=key_size)
+  for hash_type in HASH_TYPES:
+    yield _test_case(hash_type=hash_type)
 
 
 def aes_siv_test_cases():
@@ -318,8 +372,13 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
   @parameterized.parameters(
       itertools.chain(aes_eax_test_cases(),
                       aes_gcm_test_cases(),
+                      aes_gcm_siv_test_cases(),
                       aes_ctr_hmac_aead_test_cases(),
                       hmac_test_cases(),
+                      aes_cmac_test_cases(),
+                      aes_cmac_prf_test_cases(),
+                      hmac_prf_test_cases(),
+                      hkdf_prf_test_cases(),
                       aes_siv_test_cases(),
                       ecies_aead_hkdf_test_cases(),
                       ecdsa_test_cases(),
