@@ -24,7 +24,11 @@ import (
 )
 
 const (
-	minHKDFKeySizeInBytes = uint32(16)
+	// We use a somewhat larger minimum key size than usual, because PRFs might be
+	// used by many users, in which case the security can degrade by a factor
+	// depending on the number of users. (Discussed for example in
+	// https://eprint.iacr.org/2012/159)
+	minHKDFKeySizeInBytes = uint32(32)
 )
 
 // HKDFPRF is a type that can be used to compute several HKDFs with the same key material.

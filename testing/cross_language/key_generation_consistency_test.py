@@ -46,10 +46,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
     ('HmacKey(32,32,SHA384)', 'go'),
     ('HmacKey(32,33,SHA384)', 'go'),
     ('HmacPrfKey(32,SHA384)', 'go'),
-    # TODO(b/166257312) In Go, the minimal key_size of HkdfPrfKey Keys is 16,
-    # while in all other langs it is 32.
-    ('HkdfPrfKey(16,SHA256)', 'go'),
-    ('HkdfPrfKey(24,SHA256)', 'go'),
     # TODO(b/160130470): In CC and Python Hybrid templates are not checked for
     # valid AEAD params. (These params *are* checked when the key is used.)
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
