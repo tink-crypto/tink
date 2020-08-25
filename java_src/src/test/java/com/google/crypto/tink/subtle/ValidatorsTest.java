@@ -149,11 +149,7 @@ public class ValidatorsTest {
 
   @Test
   public void testValidateRsaPublicExponent() throws Exception {
-    try {
-      Validators.validateRsaPublicExponent(BigInteger.valueOf(65537));
-    } catch (GeneralSecurityException e) {
-      // Letting the exception pass through on failure
-    }
+    Validators.validateRsaPublicExponent(BigInteger.valueOf(65537));
     try {
       Validators.validateRsaPublicExponent(BigInteger.valueOf(65535));
       fail("Expected GeneralSecurityException");
