@@ -82,6 +82,7 @@ py_library(
     srcs = ["_mac_key_templates.py"],
     srcs_version = "PY3",
     deps = [
+        "//tink/proto:aes_cmac_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:hmac_py_pb2",
         "//tink/proto:tink_py_pb2",

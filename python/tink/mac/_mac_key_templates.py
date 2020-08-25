@@ -24,6 +24,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+from tink.proto import aes_cmac_pb2
 from tink.proto import common_pb2
 from tink.proto import hmac_pb2
 from tink.proto import tink_pb2
@@ -44,6 +45,20 @@ def create_hmac_key_template(
   return key_template
 
 
+def create_aes_cmac_key_template(
+    key_size: int, tag_size: int) -> tink_pb2.KeyTemplate:
+  """"Creates an AES-CMAC KeyTemplate, and fills in its values."""
+  key_format = aes_cmac_pb2.AesCmacKeyFormat()
+  key_format.key_size = key_size
+  key_format.params.tag_size = tag_size
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = 'type.googleapis.com/google.crypto.tink.AesCmacKey'
+  key_template.output_prefix_type = tink_pb2.TINK
+  return key_template
+
+
+AES_CMAC = create_aes_cmac_key_template(key_size=32, tag_size=16)
 HMAC_SHA256_128BITTAG = create_hmac_key_template(
     key_size=32, tag_size=16, hash_type=common_pb2.SHA256)
 HMAC_SHA256_256BITTAG = create_hmac_key_template(

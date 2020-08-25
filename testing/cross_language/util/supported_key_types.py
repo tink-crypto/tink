@@ -43,7 +43,10 @@ STREAMING_AEAD_KEY_TYPES = [
     'AesGcmHkdfStreamingKey',
 ]
 HYBRID_PRIVATE_KEY_TYPES = ['EciesAeadHkdfPrivateKey']
-MAC_KEY_TYPES = ['HmacKey']
+MAC_KEY_TYPES = [
+    'AesCmacKey',
+    'HmacKey',
+]
 SIGNATURE_KEY_TYPES = [
     'EcdsaPrivateKey',
     'Ed25519PrivateKey',
@@ -72,6 +75,7 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
     'EciesAeadHkdfPrivateKey': ['cc', 'java', 'go', 'python'],
+    'AesCmacKey': ['cc', 'java', 'go', 'python'],
     'HmacKey': ['cc', 'java', 'go', 'python'],
     'EcdsaPrivateKey': ['cc', 'java', 'go', 'python'],
     'Ed25519PrivateKey': ['cc', 'java', 'go', 'python'],
@@ -108,6 +112,7 @@ KEY_TEMPLATE_NAMES = {
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256'
     ],
+    'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
         'HMAC_SHA256_128BITTAG', 'HMAC_SHA256_256BITTAG',
         'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
@@ -171,6 +176,8 @@ KEY_TEMPLATE = {
     'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
         hybrid.hybrid_key_templates
         .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'AES_CMAC':
+        mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':
         mac.mac_key_templates.HMAC_SHA256_128BITTAG,
     'HMAC_SHA256_256BITTAG':
