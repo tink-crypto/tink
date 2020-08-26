@@ -27,6 +27,25 @@ py_test(
 )
 
 py_test(
+    name = "key_version_test",
+    srcs = ["key_version_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/proto:aes_ctr_hmac_aead_py_pb2",
+        "@tink_py//tink/proto:aes_eax_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_py_pb2",
+        "@tink_py//tink/proto:aes_gcm_siv_py_pb2",
+        "@tink_py//tink/proto:chacha20_poly1305_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/proto:xchacha20_poly1305_py_pb2",
+    ],
+)
+
+py_test(
     name = "json_test",
     srcs = ["json_test.py"],
     deps = [
