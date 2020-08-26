@@ -34,7 +34,7 @@
     "@bazel/typescript": "2.0.3",
     "@types/jasmine": "3.5.12",
     "jasmine-core": "3.6.0",
-    "karma": "4.1.0",
+    "karma": "5.0.6",
     "karma-chrome-launcher": "2.2.0",
     "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "2.0.1",
