@@ -9,22 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Python wrapper of the wrapped C++ Streaming AEAD key manager.
-
-
-  def new_encrypting_stream(self, ciphertext_destination: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    raw = self.new_raw_encrypting_stream(ciphertext_destination,
-                                         associated_data)
-    return typing.cast(BinaryIO, io.BufferedWriter(raw))
-
-  def new_decrypting_stream(self, ciphertext_source: BinaryIO,
-                            associated_data: bytes) -> BinaryIO:
-    raw = self.new_raw_decrypting_stream(ciphertext_source, associated_data)
-    return typing.cast(BinaryIO, io.BufferedReader(raw))
-
-
-"""
+"""Python wrapper of the wrapped C++ Streaming AEAD key manager."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -75,7 +60,7 @@ def from_cc_registry(
 
 
 def register() -> None:
-  """Registers all AEAD key managers and AEAD wrapper in the Registry."""
+  """Registers Streaming AEAD key managers and the wrapper in the Registry."""
   if six.PY2:
     raise NotImplementedError('StreamingAEAD requires Python 3.')
   tink_bindings.register()
