@@ -92,12 +92,13 @@ util::StatusOr<std::string> EciesAeadHkdfHybridEncrypt::Encrypt(
   auto kem_key = std::move(kem_key_result.ValueOrDie());
 
   // Use the symmetric key to get an AEAD-primitive.
-  auto aead_result = dem_helper_->GetAead(kem_key->get_symmetric_key());
-  if (!aead_result.ok()) return aead_result.status();
-  auto aead = std::move(aead_result.ValueOrDie());
+  auto aead_or_daead_result =
+      dem_helper_->GetAeadOrDaead(kem_key->get_symmetric_key());
+  if (!aead_or_daead_result.ok()) return aead_or_daead_result.status();
+  auto aead_or_daead = std::move(aead_or_daead_result.ValueOrDie());
 
   // Do the actual encryption using the AEAD-primitive.
-  auto encrypt_result = aead->Encrypt(plaintext, "");  // empty aad
+  auto encrypt_result = aead_or_daead->Encrypt(plaintext, "");  // empty aad
   if (!encrypt_result.ok()) return encrypt_result.status();
 
   // Prepend AEAD-ciphertext with a KEM component.

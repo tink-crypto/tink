@@ -119,10 +119,13 @@ cc_library(
     visibility = ["//visibility:private"],
     deps = [
         "//:aead",
+        "//:deterministic_aead",
         "//:key_manager",
         "//:registry",
+        "//daead/subtle:aead_or_daead",
         "//proto:aes_ctr_hmac_aead_cc_proto",
         "//proto:aes_gcm_cc_proto",
+        "//proto:aes_siv_cc_proto",
         "//proto:common_cc_proto",
         "//proto:tink_cc_proto",
         "//proto:xchacha20_poly1305_cc_proto",
@@ -356,6 +359,22 @@ cc_test(
 )
 
 cc_test(
+    name = "ecies_aead_hkdf_dem_helper_test",
+    size = "small",
+    srcs = ["ecies_aead_hkdf_dem_helper_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":ecies_aead_hkdf_dem_helper",
+        "//:registry",
+        "//aead:aes_gcm_key_manager",
+        "//util:secret_data",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "ecies_aead_hkdf_hybrid_decrypt_test",
     size = "small",
     srcs = ["ecies_aead_hkdf_hybrid_decrypt_test.cc"],
@@ -367,6 +386,7 @@ cc_test(
         "//aead:aes_ctr_hmac_aead_key_manager",
         "//aead:aes_gcm_key_manager",
         "//aead:xchacha20_poly1305_key_manager",
+        "//daead:aes_siv_key_manager",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//subtle:random",
@@ -374,6 +394,7 @@ cc_test(
         "//util:enums",
         "//util:status",
         "//util:statusor",
+        "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
