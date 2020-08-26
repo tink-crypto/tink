@@ -153,10 +153,10 @@ TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
   status = verifier->Verify(signature, message);
   EXPECT_TRUE(status.ok()) << status;
 
-  // Message is a null ptr.
-  signature = signer->Sign(nullptr).ValueOrDie();
+  // Message is a default constructed string_view.
+  signature = signer->Sign(absl::string_view()).ValueOrDie();
   EXPECT_EQ(signature.size(), ED25519_SIGNATURE_LEN);
-  status = verifier->Verify(signature, nullptr);
+  status = verifier->Verify(signature, absl::string_view());
   EXPECT_TRUE(status.ok()) << status;
 }
 

@@ -78,9 +78,9 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
-  // Checks that a string_view initialized with a null ptr works.
+  // Checks that a default constructed string_view works.
   auto cipher = std::move(res.ValueOrDie());
-  absl::string_view null(nullptr);
+  absl::string_view null;
   auto ct = cipher->EncryptDeterministically(null, null);
   EXPECT_TRUE(ct.ok()) << ct.status();
   auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), null);

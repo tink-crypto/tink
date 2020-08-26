@@ -147,8 +147,8 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
   auto ct1_or_status = cipher->Encrypt(message, "");
   EXPECT_TRUE(ct1_or_status.ok()) << ct1_or_status.status();
   auto ct1 = ct1_or_status.ValueOrDie();
-  // AAD is a nullptr.
-  auto ct2_or_status = cipher->Encrypt(message, nullptr);
+  // AAD is a default constructed string_view.
+  auto ct2_or_status = cipher->Encrypt(message, absl::string_view());
   EXPECT_TRUE(ct2_or_status.ok()) << ct2_or_status.status();
   auto ct2 = ct2_or_status.ValueOrDie();
 
@@ -175,14 +175,14 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
 
-  // AAD is a nullptr.
-  pt = cipher->Decrypt(ct0, nullptr);
+  // AAD is a default constructed string_view.
+  pt = cipher->Decrypt(ct0, absl::string_view());
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
-  pt = cipher->Decrypt(ct1, nullptr);
+  pt = cipher->Decrypt(ct1, absl::string_view());
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
-  pt = cipher->Decrypt(ct2, nullptr);
+  pt = cipher->Decrypt(ct2, absl::string_view());
   EXPECT_TRUE(pt.ok()) << pt.status();
   EXPECT_EQ(message, pt.ValueOrDie());
 }
@@ -217,8 +217,8 @@ TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
   auto pt1 = pt1_or_status.ValueOrDie();
   EXPECT_EQ("", pt1);
 
-  // Message is a nullptr.
-  auto ct2_or_status = cipher->Encrypt(nullptr, aad);
+  // Message is a default constructed string_view.
+  auto ct2_or_status = cipher->Encrypt(absl::string_view(), aad);
   EXPECT_TRUE(ct2_or_status.ok());
   auto ct2 = ct2_or_status.ValueOrDie();
   auto pt2_or_status = cipher->Decrypt(ct2, aad);

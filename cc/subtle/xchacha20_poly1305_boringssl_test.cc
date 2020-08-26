@@ -106,8 +106,8 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ(message, pt);
   }
-  {  // AAD is a nullptr.
-    auto pt_or_status = cipher->Decrypt(ct, nullptr);
+  {  // AAD is a default-constructed string_view.
+    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
     EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ(message, pt);
@@ -138,9 +138,9 @@ TEST(XChacha20Poly1305BoringSslTest, TestAadEmptyVersusNullStringView) {
     auto ct = ct_or_status.ValueOrDie();
     TestDecryptWithEmptyAad(cipher.get(), ct, message);
   }
-  {  // AAD is a nullptr.
+  {  // AAD is a default-constructed string_view.
     const std::string message = "Some data to encrypt.";
-    auto ct_or_status = cipher->Encrypt(message, nullptr);
+    auto ct_or_status = cipher->Encrypt(message, absl::string_view());
     EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
     auto ct = ct_or_status.ValueOrDie();
     TestDecryptWithEmptyAad(cipher.get(), ct, message);
@@ -177,8 +177,8 @@ TEST(XChacha20Poly1305BoringSslTest, TestMessageEmptyVersusNullStringView) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Message is a nullptr.
-    auto ct_or_status = cipher->Encrypt(nullptr, aad);
+  {  // Message is a default-constructed string_view.
+    auto ct_or_status = cipher->Encrypt(absl::string_view(), aad);
     EXPECT_TRUE(ct_or_status.ok());
     auto ct = ct_or_status.ValueOrDie();
     auto pt_or_status = cipher->Decrypt(ct, aad);
@@ -219,11 +219,12 @@ TEST(XChacha20Poly1305BoringSslTest, TestBothMessageAndAadEmpty) {
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
   }
-  {  // Both are nullptr.
-    auto ct_or_status = cipher->Encrypt(nullptr, nullptr);
+  {  // Both are default-constructed string_view.
+    auto ct_or_status =
+        cipher->Encrypt(absl::string_view(), absl::string_view());
     EXPECT_TRUE(ct_or_status.ok());
     auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, nullptr);
+    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
     EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
     auto pt = pt_or_status.ValueOrDie();
     EXPECT_EQ("", pt);
