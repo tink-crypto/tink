@@ -95,9 +95,10 @@ public class WycheproofTestUtil {
       // TODO(b/67385998): make this work outside google3.
       filePath = "/sdcard/googletest/test_runfiles/google3/" + path;
     }
-
-    JSONObject result =
-        new JSONObject(new String(readAll(new FileInputStream(new File(filePath))), UTF_8));
+    JSONObject result;
+    try (FileInputStream fileInputStream = new FileInputStream(new File(filePath))) {
+      result = new JSONObject(new String(readAll(fileInputStream), UTF_8));
+    }
     String algorithm = result.getString("algorithm");
     String generatorVersion = result.getString("generatorVersion");
     int numTests = result.getInt("numberOfTests");
