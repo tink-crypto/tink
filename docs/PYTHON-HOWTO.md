@@ -224,6 +224,34 @@ daead_primitive = keyset_handle.primitive(daead.DeterministicAead)
 ciphertext = daead_primitive.encrypt_deterministically(plaintext, associated_data)
 ```
 
+### Symmetric key encryption of streaming data
+
+You can obtain and use a
+[Streaming AEAD (Streaming Authenticated Encryption with Associated Data)](PRIMITIVES.md#streaming-authenticated-encryption-with-associated-data)
+primitive to encrypt or decrypt data streams:
+
+```python
+import tink
+from tink import streaming_aead
+
+long_plaintext = b'your data...'
+associated_data = b'context'
+
+# Register all streaming AEAD primitives
+streaming_aead.register()
+
+# 1. Get a handle to the key material
+keyset_handle = tink.new_keyset_handle(streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB)
+
+# 2. Get the primitive.
+streaming_aead_primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
+
+# 3. Use the primitive.
+output_file = open("ciphertext.out", 'wb')
+with streaming_aead_primitive.new_encrypting_stream(output_file, associated_data) as enc_stream:
+  bytes_written = enc_stream.write(long_plaintext)
+```
+
 ### Message Authentication Code
 
 You can compute or verify a
