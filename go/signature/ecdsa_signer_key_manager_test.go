@@ -341,6 +341,10 @@ func genValidECDSAParams() []ecdsaParams {
 			curve:    commonpb.EllipticCurveType_NIST_P256,
 		},
 		ecdsaParams{
+			hashType: commonpb.HashType_SHA384,
+			curve:    commonpb.EllipticCurveType_NIST_P384,
+		},
+		ecdsaParams{
 			hashType: commonpb.HashType_SHA512,
 			curve:    commonpb.EllipticCurveType_NIST_P384,
 		},
