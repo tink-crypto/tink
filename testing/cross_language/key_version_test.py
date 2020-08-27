@@ -11,95 +11,154 @@
 # limitations under the License.
 """Tests that keys with higher version numbers are rejected."""
 
+# Placeholder for import for type annotations
+
+from typing import List, Text
+
 from absl.testing import absltest
 from absl.testing import parameterized
 
 import tink
 from tink import aead
+from tink import daead
+from tink import mac
+from tink import prf
 
+from tink.proto import aes_cmac_pb2
+from tink.proto import aes_cmac_prf_pb2
 from tink.proto import aes_ctr_hmac_aead_pb2
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import aes_gcm_siv_pb2
+from tink.proto import aes_siv_pb2
 from tink.proto import chacha20_poly1305_pb2
+from tink.proto import hkdf_prf_pb2
+from tink.proto import hmac_pb2
+from tink.proto import hmac_prf_pb2
 from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
 
 from util import supported_key_types
 from util import testing_servers
 
-TYPE_URL_TO_SUPPORTED_LANGUAGES = {
-    'type.googleapis.com/google.crypto.tink.' + key_type: langs
-    for key_type, langs in supported_key_types.SUPPORTED_LANGUAGES.items()
+
+KEY_TYPE_TO_PROTO_CLASS = {
+    'AesEaxKey': aes_eax_pb2.AesEaxKey,
+    'AesGcmKey': aes_gcm_pb2.AesGcmKey,
+    'AesGcmSivKey': aes_gcm_siv_pb2.AesGcmSivKey,
+    'AesCtrHmacAeadKey': aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey,
+    'ChaCha20Poly1305Key': chacha20_poly1305_pb2.ChaCha20Poly1305Key,
+    'XChaCha20Poly1305Key': xchacha20_poly1305_pb2.XChaCha20Poly1305Key,
+    'AesCmacKey': aes_cmac_pb2.AesCmacKey,
+    'HmacKey': hmac_pb2.HmacKey,
+    'AesCmacPrfKey': aes_cmac_prf_pb2.AesCmacPrfKey,
+    'HmacPrfKey': hmac_prf_pb2.HmacPrfKey,
+    'HkdfPrfKey': hkdf_prf_pb2.HkdfPrfKey,
+    'AesSivKey': aes_siv_pb2.AesSivKey,
 }
 
 
-def inc_version(keyset, key_class):
-  """Parses the keyset and increments the version of each key by 1."""
+def gen_inc_versions(keyset):
+  """Parses keyset and generates modified keyset with incremented version."""
   keyset_proto = tink_pb2.Keyset.FromString(keyset)
   for key in keyset_proto.key:
-    key_proto = key_class.FromString(key.key_data.value)
-    key_proto.version = key_proto.version + 1
-    key.key_data.value = key_proto.SerializeToString()
-  return keyset_proto.SerializeToString()
+    key_type = supported_key_types.KEY_TYPE_FROM_URL[key.key_data.type_url]
+    key_class = KEY_TYPE_TO_PROTO_CLASS[key_type]
 
-
-def gen_keys_for_aes_ctr_hmac_aead(keyset):
-  keyset_proto = tink_pb2.Keyset.FromString(keyset)
-  for key in keyset_proto.key:
     default_val = key.key_data.value
 
-    key_proto = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey.FromString(default_val)
-    key_proto.aes_ctr_key.version = key_proto.version + 1
+    key_proto = key_class.FromString(default_val)
+    key_proto.version = key_proto.version + 1
     key.key_data.value = key_proto.SerializeToString()
     yield keyset_proto.SerializeToString()
 
-    key_proto = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey.FromString(default_val)
-    key_proto.hmac_key.version = key_proto.version + 1
-    key.key_data.value = key_proto.SerializeToString()
-    yield keyset_proto.SerializeToString()
+    if key_type == 'AesCtrHmacAeadKey':
+      key_proto1 = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey.FromString(
+          default_val)
+      key_proto1.aes_ctr_key.version = key_proto1.aes_ctr_key.version + 1
+      key.key_data.value = key_proto1.SerializeToString()
+      yield keyset_proto.SerializeToString()
+
+      key_proto2 = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey.FromString(
+          default_val)
+      key_proto2.hmac_key.version = key_proto2.hmac_key.version + 1
+      key.key_data.value = key_proto2.SerializeToString()
+      yield keyset_proto.SerializeToString()
+
+    key.key_data.value = default_val
 
 
-def aead_test_cases():
-  yield ('AES128_EAX', aes_eax_pb2.AesEaxKey)
-  yield ('AES128_GCM', aes_gcm_pb2.AesGcmKey)
-  yield ('AES128_GCM_SIV', aes_gcm_siv_pb2.AesGcmSivKey)
-  yield ('AES128_CTR_HMAC_SHA256', aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey)
-  yield ('CHACHA20_POLY1305', chacha20_poly1305_pb2.ChaCha20Poly1305Key)
-  yield ('XCHACHA20_POLY1305', xchacha20_poly1305_pb2.XChaCha20Poly1305Key)
+def test_cases(key_types: List[Text]):
+  for key_type in key_types:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:
+        yield (key_template_name, lang)
 
 
 def setUpModule():
   aead.register()
-  testing_servers.start('key_generation_consistency')
+  mac.register()
+  daead.register()
+  prf.register()
+  testing_servers.start('key_version')
 
 
 def tearDownModule():
   testing_servers.stop()
 
 
-class KeyGenerationConsistencyTest(parameterized.TestCase):
+class KeyVersionTest(parameterized.TestCase):
+  """These tests verify that keys with an unknown version are rejected.
 
-  @parameterized.parameters(aead_test_cases())
-  def test_inc_version_aead(self, name, key_class):
+  The tests first try out the unmodified key to make sure that it works. This is
+  done to make sure that the failure of the modified key is really due to the
+  incremented version.
+  """
+
+  @parameterized.parameters(test_cases(supported_key_types.AEAD_KEY_TYPES))
+  def test_inc_version_aead(self, key_template_name, lang):
     """Increments the key version by one and checks they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE[name]
-    for lang in TYPE_URL_TO_SUPPORTED_LANGUAGES[template.type_url]:
-      keyset = testing_servers.new_keyset(lang, template)
-      keyset1 = inc_version(keyset, key_class)
+    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset = testing_servers.new_keyset(lang, template)
+    _ = testing_servers.aead(lang, keyset).encrypt(b'foo', b'bar')
+    for keyset1 in gen_inc_versions(keyset):
       aead_primitive = testing_servers.aead(lang, keyset1)
       with self.assertRaises(tink.TinkError):
         _ = aead_primitive.encrypt(b'foo', b'bar')
 
-  def test_inc_version_aead_aes_ctr_hmac_subkeys(self):
-    """Increments the subkey versions by one and check they can't be used."""
-    template = supported_key_types.KEY_TEMPLATE['AES128_CTR_HMAC_SHA256']
-    for lang in TYPE_URL_TO_SUPPORTED_LANGUAGES[template.type_url]:
-      keyset = testing_servers.new_keyset(lang, template)
-      for keyset1 in gen_keys_for_aes_ctr_hmac_aead(keyset):
-        aead_primitive = testing_servers.aead(lang, keyset1)
-        with self.assertRaises(tink.TinkError):
-          _ = aead_primitive.encrypt(b'foo', b'bar')
+  @parameterized.parameters(test_cases(supported_key_types.DAEAD_KEY_TYPES))
+  def test_inc_version_daead(self, key_template_name, lang):
+    """Increments the key version by one and checks they can't be used."""
+    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset = testing_servers.new_keyset(lang, template)
+    p = testing_servers.deterministic_aead(lang, keyset)
+    _ = p.encrypt_deterministically(b'foo', b'bar')
+    for keyset1 in gen_inc_versions(keyset):
+      daead_primitive = testing_servers.deterministic_aead(lang, keyset1)
+      with self.assertRaises(tink.TinkError):
+        _ = daead_primitive.encrypt_deterministically(b'foo', b'bar')
+
+  @parameterized.parameters(test_cases(supported_key_types.MAC_KEY_TYPES))
+  def test_inc_version_mac(self, key_template_name, lang):
+    """Increments the key version by one and checks they can't be used."""
+    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset = testing_servers.new_keyset(lang, template)
+    _ = testing_servers.mac(lang, keyset).compute_mac(b'foo')
+    for keyset1 in gen_inc_versions(keyset):
+      mac_primitive1 = testing_servers.mac(lang, keyset1)
+      with self.assertRaises(tink.TinkError):
+        _ = mac_primitive1.compute_mac(b'foo')
+
+  @parameterized.parameters(test_cases(supported_key_types.PRF_KEY_TYPES))
+  def test_inc_version_prf(self, key_template_name, lang):
+    """Increments the key version by one and checks they can't be used."""
+    template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    keyset = testing_servers.new_keyset(lang, template)
+    _ = testing_servers.prf_set(lang, keyset).primary().compute(b'foo', 16)
+    for keyset1 in gen_inc_versions(keyset):
+      prf_set_primitive = testing_servers.prf_set(lang, keyset1)
+      with self.assertRaises(tink.TinkError):
+        _ = prf_set_primitive.primary().compute(b'foo', 16)
 
 
 if __name__ == '__main__':

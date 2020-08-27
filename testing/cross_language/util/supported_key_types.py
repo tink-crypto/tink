@@ -86,9 +86,9 @@ SUPPORTED_LANGUAGES = {
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
 }
 
-SUPPORTED_LANGUAGES_PER_TYPE_URL = {
-    'type.googleapis.com/google.crypto.tink.' + name: langs
-    for name, langs in SUPPORTED_LANGUAGES.items()}
+KEY_TYPE_FROM_URL = {
+    'type.googleapis.com/google.crypto.tink.' + key_type: key_type
+    for key_type in ALL_KEY_TYPES}
 
 # For each KeyType, a list of all KeyTemplate Names that must be supported.
 KEY_TEMPLATE_NAMES = {

@@ -157,8 +157,8 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
                       aes_gcm_key_test_cases(),
                       aes_ctr_hmac_aead_key_test_cases()))
   def test_keyset_validation_consistency(self, name, keyset):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_PER_TYPE_URL[
-        keyset.key[0].key_data.type_url]
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+        supported_key_types.KEY_TYPE_FROM_URL[keyset.key[0].key_data.type_url]]
     supported_aeads = [
         testing_servers.aead(lang, keyset.SerializeToString())
         for lang in supported_langs
