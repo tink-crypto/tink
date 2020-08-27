@@ -249,7 +249,7 @@ public final class AndroidKeysetManager {
       if (!existed) {
         try {
           AndroidKeystoreKmsClient.generateNewAeadKey(masterKeyUri);
-        } catch (GeneralSecurityException ex) {
+        } catch (GeneralSecurityException | ProviderException ex) {
           Log.w(TAG, "cannot use Android Keystore, it'll be disabled", ex);
           return null;
         }
