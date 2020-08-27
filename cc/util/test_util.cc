@@ -32,7 +32,6 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/cleartext_keyset_handle.h"
-#include "tink/daead/aes_siv_key_manager.h"
 #include "tink/keyset_handle.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -43,7 +42,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
-#include "proto/aes_siv.pb.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
@@ -345,24 +343,6 @@ EciesAeadHkdfPrivateKey GetEciesXChaCha20Poly1305HkdfTestKey(
   std::unique_ptr<XChaCha20Poly1305KeyManager> key_manager(
       new XChaCha20Poly1305KeyManager());
   std::string dem_key_type = key_manager->get_key_type();
-  aead_dem->set_type_url(dem_key_type);
-  aead_dem->set_value(key_format.SerializeAsString());
-  return ecies_key;
-}
-
-google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesSivHkdfTestKey(
-    google::crypto::tink::EllipticCurveType curve_type,
-    google::crypto::tink::EcPointFormat ec_point_format,
-    google::crypto::tink::HashType hash_type) {
-  auto ecies_key =
-      GetEciesAeadHkdfTestKey(curve_type, ec_point_format, hash_type);
-  auto params = ecies_key.mutable_public_key()->mutable_params();
-
-  google::crypto::tink::AesSivKeyFormat key_format;
-  key_format.set_key_size(64);
-  auto aead_dem = params->mutable_dem_params()->mutable_aead_dem();
-  AesSivKeyManager key_manager;
-  std::string dem_key_type = key_manager.get_key_type();
   aead_dem->set_type_url(dem_key_type);
   aead_dem->set_value(key_format.SerializeAsString());
   return ecies_key;

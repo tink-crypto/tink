@@ -7,6 +7,9 @@ cc_library(
     srcs = ["aead_or_daead.cc"],
     hdrs = ["aead_or_daead.h"],
     include_prefix = "tink/daead/subtle",
+    visibility = [
+        "//third_party/tink/cc/hybrid:__subpackages__",
+    ],
     deps = [
         "//:aead",
         "//:deterministic_aead",

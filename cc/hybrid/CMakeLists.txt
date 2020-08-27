@@ -108,10 +108,8 @@ tink_cc_library(
     ecies_aead_hkdf_dem_helper.h
   DEPS
     tink::core::aead
-    tink::core::deterministic_aead
     tink::core::key_manager
     tink::core::registry
-    tink::daead::subtle::aead_or_daead
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::secret_data
@@ -119,7 +117,6 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_gcm_cc_proto
-    tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
@@ -134,7 +131,6 @@ tink_cc_library(
   DEPS
     tink::hybrid::ecies_aead_hkdf_dem_helper
     tink::core::hybrid_decrypt
-    tink::daead::subtle::aead_or_daead
     tink::subtle::ec_util
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::util::enums
@@ -154,7 +150,6 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_dem_helper
     tink::core::aead
     tink::core::hybrid_encrypt
-    tink::daead::subtle::aead_or_daead
     tink::subtle::ecies_hkdf_sender_kem_boringssl
     tink::util::enums
     tink::util::status
@@ -308,20 +303,6 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME ecies_aead_hkdf_dem_helper_test
-  SRCS ecies_aead_hkdf_dem_helper_test.cc
-  DEPS
-    tink::hybrid::ecies_aead_hkdf_dem_helper
-    tink::aead::aes_gcm_key_manager
-    tink::core::registry
-    tink::daead::subtle::aead_or_daead
-    tink::util::secret_data
-    tink::util::statusor
-    tink::util::test_matchers
-    tink::util::test_util
-)
-
-tink_cc_test(
   NAME ecies_aead_hkdf_hybrid_decrypt_test
   SRCS ecies_aead_hkdf_hybrid_decrypt_test.cc
   DEPS
@@ -329,7 +310,6 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_hybrid_encrypt
     tink::core::hybrid_decrypt
     tink::aead::aes_ctr_hmac_aead_key_manager
-    tink::daead::aes_siv_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::subtle::random
@@ -337,7 +317,6 @@ tink_cc_test(
     tink::util::enums
     tink::util::status
     tink::util::statusor
-    tink::util::test_matchers
     tink::util::test_util
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto

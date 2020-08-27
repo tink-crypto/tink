@@ -153,13 +153,6 @@ google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesCtrHmacHkdfTestKey(
     uint32_t aes_ctr_iv_size, google::crypto::tink::HashType hmac_hash_type,
     uint32_t hmac_tag_size, uint32_t hmac_key_size);
 
-// Generates a fresh test key for ECIES-AEAD-HKDF for the given curve,
-// using AesSiv as the determinisitic AEAD, and HKDF with 'hash_type'.
-google::crypto::tink::EciesAeadHkdfPrivateKey GetEciesAesSivHkdfTestKey(
-    google::crypto::tink::EllipticCurveType curve_type,
-    google::crypto::tink::EcPointFormat ec_point_format,
-    google::crypto::tink::HashType hash_type);
-
 // Generates a fresh test key for EC DSA for the given 'curve_type', 'hash_type'
 // and 'encoding'.
 google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(

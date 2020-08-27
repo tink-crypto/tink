@@ -1,5 +1,3 @@
-add_subdirectory(subtle)
-
 tink_module(daead)
 
 tink_cc_library(

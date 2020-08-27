@@ -106,13 +106,13 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
   auto symmetric_key = std::move(symmetric_key_result.ValueOrDie());
 
   // Use the symmetric key to get an AEAD-primitive.
-  auto aead_or_daead_result = dem_helper_->GetAeadOrDaead(symmetric_key);
-  if (!aead_or_daead_result.ok()) return aead_or_daead_result.status();
-  auto aead_or_daead = std::move(aead_or_daead_result.ValueOrDie());
+  auto aead_result = dem_helper_->GetAead(symmetric_key);
+  if (!aead_result.ok()) return aead_result.status();
+  auto aead = std::move(aead_result.ValueOrDie());
 
   // Do the actual decryption using the AEAD-primitive.
   auto decrypt_result =
-      aead_or_daead->Decrypt(ciphertext.substr(header_size), "");  // empty aad
+      aead->Decrypt(ciphertext.substr(header_size), "");  // empty aad
   if (!decrypt_result.ok()) return decrypt_result.status();
 
   return decrypt_result.ValueOrDie();

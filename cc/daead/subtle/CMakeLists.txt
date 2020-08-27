@@ -1,4 +1,4 @@
-tink_module(daead::subtle)
+tink_module(daead:subtle)
 
 tink_cc_library(
   NAME aead_or_daead
