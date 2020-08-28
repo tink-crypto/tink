@@ -23,7 +23,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.security.GeneralSecurityException;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -31,17 +32,18 @@ import javax.annotation.concurrent.GuardedBy;
  */
 final class SeekableByteChannelDecrypter implements SeekableByteChannel {
   @GuardedBy("this")
-  boolean attemptedMatching;
+  SeekableByteChannel attemptingChannel;
   @GuardedBy("this")
   SeekableByteChannel matchingChannel;
   @GuardedBy("this")
   SeekableByteChannel ciphertextChannel;
   @GuardedBy("this")
-  long cachedPosition;    // Position to which matchingChannel should be set before 1st read();
+  long cachedPosition;    // Position to which attemptingChannel should be set before 1st read();
   @GuardedBy("this")
   long startingPosition;  // Position at which the ciphertext should begin.
 
-  PrimitiveSet<StreamingAead> primitives;
+  // The StreamingAeads that have not yet been tried in nextAttemptingChannel.
+  Deque<StreamingAead> remainingPrimitives;
   byte[] associatedData;
 
   /**
@@ -57,13 +59,42 @@ final class SeekableByteChannelDecrypter implements SeekableByteChannel {
    */
   public SeekableByteChannelDecrypter(PrimitiveSet<StreamingAead> primitives,
       SeekableByteChannel ciphertextChannel, final byte[] associatedData) throws IOException {
-    this.attemptedMatching = false;
+    // There are 3 phases:
+    // 1) both matchingChannel and attemptingChannel are null.
+    // 2) attemptingChannel is non-null, matchingChannel is null
+    // 3) attemptingChannel is null, matchingChannel is non-null.
+    this.attemptingChannel = null;
     this.matchingChannel = null;
-    this.primitives = primitives;
+    this.remainingPrimitives = new ArrayDeque<>();
+    for (PrimitiveSet.Entry<StreamingAead> entry : primitives.getRawPrimitives()) {
+      this.remainingPrimitives.add(entry.getPrimitive());
+    }
     this.ciphertextChannel = ciphertextChannel;
+    // In phase 1) and 2), cachedPosition is always equal to the last position value set.
+    // In phase 2), attemptingChannel always has its position set to cachedPosition.
+    // In phase 3), cachedPosition is not needed.
     this.cachedPosition = -1;
     this.startingPosition = ciphertextChannel.position();
     this.associatedData = associatedData.clone();
+  }
+
+  @GuardedBy("this")
+  private synchronized SeekableByteChannel nextAttemptingChannel() throws IOException {
+    while (!remainingPrimitives.isEmpty()) {
+      ciphertextChannel.position(startingPosition);
+      StreamingAead streamingAead = this.remainingPrimitives.removeFirst();
+      try {
+        SeekableByteChannel decChannel =
+            streamingAead.newSeekableDecryptingChannel(ciphertextChannel, associatedData);
+        if (cachedPosition >= 0) { // Caller already set new position.
+          decChannel.position(cachedPosition);
+        }
+        return decChannel;
+      } catch (GeneralSecurityException e) {
+        // Try another primitive.
+      }
+    }
+    throw new IOException("No matching key found for the ciphertext in the stream.");
   }
 
   @Override
@@ -75,47 +106,29 @@ final class SeekableByteChannelDecrypter implements SeekableByteChannel {
     if (matchingChannel != null) {
       return matchingChannel.read(dst);
     } else {
-      if (attemptedMatching) {
-        throw new IOException("No matching key found for the ciphertext in the stream.");
+      if (attemptingChannel == null) {
+        attemptingChannel = nextAttemptingChannel();
       }
-      attemptedMatching = true;
-      List<PrimitiveSet.Entry<StreamingAead>> entries = primitives.getRawPrimitives();
-      for (PrimitiveSet.Entry<StreamingAead> entry : entries) {
+      while (true) {
         try {
-          SeekableByteChannel attemptedChannel =
-              entry.getPrimitive().newSeekableDecryptingChannel(ciphertextChannel, associatedData);
-          if (cachedPosition >= 0) {  // Caller did set new position before 1st read().
-            attemptedChannel.position(cachedPosition);
+          int retValue = attemptingChannel.read(dst);
+          if (retValue == 0) {
+            // No data at the moment. Not clear if decryption was successful.
+            // Try again with the same stream next time.
+            return 0;
           }
-          int retValue = attemptedChannel.read(dst);
-          if (retValue > 0) {
-            // Found a matching channel.
-            matchingChannel = attemptedChannel;
-          } else if (retValue == 0) {
-            // Not clear whether the channel could be matched: it might be
-            // that the underlying channel didn't provide sufficiently many bytes
-            // to check the header, or maybe the header was checked, but there
-            // were no actual encrypted bytes in the channel yet.
-            // Should try again.
-            ciphertextChannel.position(startingPosition);
-            attemptedMatching = false;
-          }
-          matchingChannel = attemptedChannel;
+          // Found a matching channel.
+          matchingChannel = attemptingChannel;
+          attemptingChannel = null;
           return retValue;
         } catch (IOException e) {
           // Try another key.
           // IOException is thrown e.g. when MAC is incorrect, but also in case
           // of I/O failures.
           // TODO(b/66098906): Use a subclass of IOException.
-          ciphertextChannel.position(startingPosition);
-          continue;
-        } catch (GeneralSecurityException e) {
-          // Try another key.
-          ciphertextChannel.position(startingPosition);
-          continue;
+          attemptingChannel = nextAttemptingChannel();
         }
       }
-      throw new IOException("No matching key found for the ciphertext in the stream.");
     }
   }
 
@@ -129,6 +142,9 @@ final class SeekableByteChannelDecrypter implements SeekableByteChannel {
         throw new IllegalArgumentException("Position must be non-negative");
       }
       cachedPosition = newPosition;
+      if (attemptingChannel != null) {
+        attemptingChannel.position(cachedPosition);
+      }
     }
     return this;
   }

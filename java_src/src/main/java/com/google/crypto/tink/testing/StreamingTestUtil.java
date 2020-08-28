@@ -66,6 +66,10 @@ public class StreamingTestUtil {
       super(bytes);
     }
 
+    public SeekableByteBufferChannel(byte[] bytes, int maxChunkSize) {
+      super(bytes, maxChunkSize);
+    }
+
     @Override
     public long position() throws ClosedChannelException {
       checkIsOpen();
@@ -143,6 +147,12 @@ public class StreamingTestUtil {
     public ByteBufferChannel(byte[] bytes) {
       this.buffer = ByteBuffer.wrap(bytes);
       maxChunkSize = java.lang.Integer.MAX_VALUE;
+      isopen = true;
+    }
+
+    public ByteBufferChannel(byte[] bytes, int maxChunkSize) {
+      this.buffer = ByteBuffer.wrap(bytes);
+      this.maxChunkSize = maxChunkSize;
       isopen = true;
     }
 
@@ -343,6 +353,39 @@ public class StreamingTestUtil {
 
       // Compare results;
       TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
+    }
+
+    // Decrypt ciphertext via SeekableByteChannel, using a very small chunck size.
+    {
+      SeekableByteChannel ciphertextChannel =
+          new SeekableByteBufferChannel(ciphertext.toByteArray(), 10);
+      SeekableByteChannel decChannel =
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
+      do {
+        int unused = decChannel.read(decrypted);
+      } while (decrypted.hasRemaining());
+      // Compare results;
+      TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
+    }
+
+    // Decrypt ciphertext via SeekableByteChannel, setting position
+    if (plaintext.length > 5) {
+      SeekableByteChannel ciphertextChannel =
+          new SeekableByteBufferChannel(ciphertext.toByteArray(), 10);
+      SeekableByteChannel decChannel =
+          decryptionStreamingAead.newSeekableDecryptingChannel(ciphertextChannel, aad);
+      decChannel.position(5);
+      assertEquals(5, decChannel.position());
+
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length - 5);
+      do {
+        int unused = decChannel.read(decrypted);
+      } while (decrypted.hasRemaining());
+      // Compare results;
+      TestUtil.assertByteArrayEquals(
+          Arrays.copyOfRange(plaintext, 5, plaintext.length),
+          decrypted.array());
     }
 
     // Decrypt ciphertext via InputStream.
