@@ -11,6 +11,9 @@
 # limitations under the License.
 """Cross-language tests for JSON serialization."""
 
+# Placeholder for import for type annotations
+from typing import Iterable, Text
+
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -46,6 +49,13 @@ def _is_equal_keyset(keyset1: bytes, keyset2: bytes) -> bool:
   return _keyset_proto(keyset1) == _keyset_proto(keyset2)
 
 
+def all_key_template_names() -> Iterable[Text]:
+  """Yields all key template names."""
+  for key_type in supported_key_types.ALL_KEY_TYPES:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      yield key_template_name
+
+
 class JsonTest(parameterized.TestCase):
 
   def test_is_equal_keyset(self):
@@ -79,9 +89,10 @@ class JsonTest(parameterized.TestCase):
       self.fail('these keysets are not equal: \n%s\n \n%s\n'
                 % (_keyset_proto(keyset1), _keyset_proto(keyset2)))
 
-  @parameterized.parameters(
-      supported_key_types.test_cases(supported_key_types.ALL_KEY_TYPES))
-  def test_to_from_json(self, key_template_name, supported_langs):
+  @parameterized.parameters(all_key_template_names())
+  def test_to_from_json(self, key_template_name):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.

@@ -9,9 +9,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.testing.cross_language.key_generation_consistency."""
+"""Tests that keys are consistently accepted or rejected in all languages."""
 
+# Placeholder for import for type annotations
 import itertools
+from typing import Iterable, Text, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -26,13 +28,9 @@ from tink import signature
 
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
+from tink.proto import tink_pb2
 from util import supported_key_types
 from util import testing_servers
-
-TYPE_URL_TO_SUPPORTED_LANGUAGES = {
-    'type.googleapis.com/google.crypto.tink.' + key_type: langs
-    for key_type, langs in supported_key_types.SUPPORTED_LANGUAGES.items()
-}
 
 # Test cases that succeed in a language but should fail
 SUCCEEDS_BUT_SHOULD_FAIL = [
@@ -118,7 +116,10 @@ SIGNATURE_ENCODINGS = [
 ]
 
 
-def aes_eax_test_cases():
+TestCasesType = Iterable[Tuple[Text, tink_pb2.KeyTemplate]]
+
+
+def aes_eax_test_cases() -> TestCasesType:
   for key_size in [15, 16, 24, 32, 64, 96]:
     for iv_size in [11, 12, 16, 17, 24, 32]:
       yield ('AesEaxKey(%d,%d)' % (key_size, iv_size),
@@ -126,19 +127,19 @@ def aes_eax_test_cases():
                  key_size, iv_size))
 
 
-def aes_gcm_test_cases():
+def aes_gcm_test_cases() -> TestCasesType:
   for key_size in [15, 16, 24, 32, 64, 96]:
     yield ('AesGcmKey(%d)' % key_size,
            aead.aead_key_templates.create_aes_gcm_key_template(key_size))
 
 
-def aes_gcm_siv_test_cases():
+def aes_gcm_siv_test_cases() -> TestCasesType:
   for key_size in [15, 16, 24, 32, 64, 96]:
     yield ('AesGcmSivKey(%d)' % key_size,
            aead.aead_key_templates.create_aes_gcm_siv_key_template(key_size))
 
 
-def aes_ctr_hmac_aead_test_cases():
+def aes_ctr_hmac_aead_test_cases() -> TestCasesType:
   def _test_case(aes_key_size=16, iv_size=16, hmac_key_size=16,
                  tag_size=16, hash_type=common_pb2.SHA256):
     return ('AesCtrHmacAeadKey(%d,%d,%d,%d,%s)' %
@@ -160,7 +161,7 @@ def aes_ctr_hmac_aead_test_cases():
                          hash_type=hash_type)
 
 
-def hmac_test_cases():
+def hmac_test_cases() -> TestCasesType:
   def _test_case(key_size=32, tag_size=16, hash_type=common_pb2.SHA256):
     return ('HmacKey(%d,%d,%s)' % (key_size, tag_size,
                                    common_pb2.HashType.Name(hash_type)),
@@ -173,7 +174,7 @@ def hmac_test_cases():
       yield _test_case(tag_size=tag_size, hash_type=hash_type)
 
 
-def aes_cmac_test_cases():
+def aes_cmac_test_cases() -> TestCasesType:
   def _test_case(key_size=32, tag_size=16):
     return ('AesCmacKey(%d,%d)' % (key_size, tag_size),
             mac.mac_key_templates.create_aes_cmac_key_template(
@@ -184,13 +185,13 @@ def aes_cmac_test_cases():
     yield _test_case(tag_size=tag_size)
 
 
-def aes_cmac_prf_test_cases():
+def aes_cmac_prf_test_cases() -> TestCasesType:
   for key_size in [15, 16, 24, 32, 64, 96]:
     yield ('AesCmacPrfKey(%d)' % key_size,
            prf.prf_key_templates._create_aes_cmac_key_template(key_size))
 
 
-def hmac_prf_test_cases():
+def hmac_prf_test_cases() -> TestCasesType:
   def _test_case(key_size=32, hash_type=common_pb2.SHA256):
     return ('HmacPrfKey(%d,%s)' % (key_size,
                                    common_pb2.HashType.Name(hash_type)),
@@ -202,7 +203,7 @@ def hmac_prf_test_cases():
     yield _test_case(hash_type=hash_type)
 
 
-def hkdf_prf_test_cases():
+def hkdf_prf_test_cases() -> TestCasesType:
   def _test_case(key_size=32, hash_type=common_pb2.SHA256):
     return ('HkdfPrfKey(%d,%s)' % (key_size,
                                    common_pb2.HashType.Name(hash_type)),
@@ -214,14 +215,14 @@ def hkdf_prf_test_cases():
     yield _test_case(hash_type=hash_type)
 
 
-def aes_siv_test_cases():
+def aes_siv_test_cases() -> TestCasesType:
   for key_size in [15, 16, 24, 32, 64, 96]:
     yield ('AesSivKey(%d)' % key_size,
            daead.deterministic_aead_key_templates.create_aes_siv_key_template(
                key_size))
 
 
-def ecies_aead_hkdf_test_cases():
+def ecies_aead_hkdf_test_cases() -> TestCasesType:
   for curve_type in CURVE_TYPES:
     for hash_type in HASH_TYPES:
       ec_point_format = common_pb2.UNCOMPRESSED
@@ -257,7 +258,7 @@ def ecies_aead_hkdf_test_cases():
              curve_type, ec_point_format, hash_type, dem_key_template))
 
 
-def ecdsa_test_cases():
+def ecdsa_test_cases() -> TestCasesType:
   for hash_type in HASH_TYPES:
     for curve_type in CURVE_TYPES:
       for signature_encoding in SIGNATURE_ENCODINGS:
@@ -269,7 +270,7 @@ def ecdsa_test_cases():
                    hash_type, curve_type, signature_encoding))
 
 
-def rsa_ssa_pkcs1_test_cases():
+def rsa_ssa_pkcs1_test_cases() -> TestCasesType:
   gen = signature.signature_key_templates.create_rsa_ssa_pkcs1_key_template
   for hash_type in HASH_TYPES:
     modulus_size = 2048
@@ -294,7 +295,7 @@ def rsa_ssa_pkcs1_test_cases():
            gen(hash_type, modulus_size, public_exponent))
 
 
-def rsa_ssa_pss_test_cases():
+def rsa_ssa_pss_test_cases() -> TestCasesType:
   gen = signature.signature_key_templates.create_rsa_ssa_pss_key_template
   for hash_type in HASH_TYPES:
     salt_length = 32
@@ -381,7 +382,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
                       rsa_ssa_pkcs1_test_cases(),
                       rsa_ssa_pss_test_cases()))
   def test_key_generation_consistency(self, name, template):
-    supported_langs = TYPE_URL_TO_SUPPORTED_LANGUAGES[template.type_url]
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[
+        supported_key_types.KEY_TYPE_FROM_URL[template.type_url]]
     failures = 0
     results = {}
     for lang in supported_langs:

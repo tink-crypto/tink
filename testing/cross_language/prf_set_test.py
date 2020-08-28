@@ -11,7 +11,8 @@
 # limitations under the License.
 """Cross-language tests for the PrfSet primitive."""
 
-from typing import Text
+# Placeholder for import for type annotations
+from typing import Iterable, Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -30,11 +31,19 @@ OUTPUT_LENGTHS = [
 ]
 
 
-def test_cases_with_output_length():
-  for key_template_name, supported_langs in supported_key_types.test_cases(
-      supported_key_types.PRF_KEY_TYPES):
-    for output_length in OUTPUT_LENGTHS:
-      yield (key_template_name, output_length, supported_langs)
+def all_prf_key_template_names() -> Iterable[Text]:
+  """Yields all PRF key template names."""
+  for key_type in supported_key_types.PRF_KEY_TYPES:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      yield key_template_name
+
+
+def all_prf_key_template_names_with_some_output_length():
+  """Yields (prf_key_template_name, output_length) tuples."""
+  for key_type in supported_key_types.PRF_KEY_TYPES:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      for output_length in OUTPUT_LENGTHS:
+        yield (key_template_name, output_length)
 
 
 def gen_keyset(key_template_name: Text) -> bytes:
@@ -64,9 +73,10 @@ def tearDownModule():
 
 class PrfSetPythonTest(parameterized.TestCase):
 
-  @parameterized.parameters(
-      supported_key_types.test_cases(supported_key_types.PRF_KEY_TYPES))
-  def test_unsupported(self, key_template_name, supported_langs):
+  @parameterized.parameters(all_prf_key_template_names())
+  def test_unsupported(self, key_template_name):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     keyset = gen_keyset(key_template_name)
     unsupported_languages = [
@@ -77,9 +87,10 @@ class PrfSetPythonTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         p.primary().compute(b'input_data', output_length=16)
 
-  @parameterized.parameters(
-      supported_key_types.test_cases(supported_key_types.PRF_KEY_TYPES))
-  def test_supported(self, key_template_name, supported_langs):
+  @parameterized.parameters(all_prf_key_template_names())
+  def test_supported(self, key_template_name):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     keyset = gen_keyset(key_template_name)
     input_data = b'This is some input data.'
@@ -91,9 +102,12 @@ class PrfSetPythonTest(parameterized.TestCase):
     self.assertLen(outputs[0], 16)
     self.assertLen(set(outputs), 1)
 
-  @parameterized.parameters(test_cases_with_output_length())
+  @parameterized.parameters(
+      all_prf_key_template_names_with_some_output_length())
   def test_compute_consistent_for_output_length(self, key_template_name,
-                                                output_length, supported_langs):
+                                                output_length):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     # This test checks that for a given output_length, either all
     # implementations fail or all produce the same value.
     self.assertNotEmpty(supported_langs)

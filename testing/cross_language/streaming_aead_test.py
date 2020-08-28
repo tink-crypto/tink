@@ -11,7 +11,9 @@
 # limitations under the License.
 """Cross-language tests for the StreamingAead primitive."""
 
+# Placeholder for import for type annotations
 import io
+from typing import Iterable, Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -45,12 +47,19 @@ def tearDownModule():
   testing_servers.stop()
 
 
+def all_streaming_aead_key_template_names() -> Iterable[Text]:
+  """Yields all Streaming AEAD key template names."""
+  for key_type in supported_key_types.STREAMING_AEAD_KEY_TYPES:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      yield key_template_name
+
+
 class StreamingAeadPythonTest(parameterized.TestCase):
 
-  @parameterized.parameters(
-      supported_key_types.test_cases(
-          supported_key_types.STREAMING_AEAD_KEY_TYPES))
-  def test_encrypt_decrypt(self, key_template_name, supported_langs):
+  @parameterized.parameters(all_streaming_aead_key_template_names())
+  def test_encrypt_decrypt(self, key_template_name):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.

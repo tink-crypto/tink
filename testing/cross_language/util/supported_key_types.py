@@ -13,8 +13,6 @@
 
 # Placeholder for import for type annotations
 
-from typing import Iterable, List, Text, Tuple
-
 from tink import aead
 from tink import daead
 from tink import hybrid
@@ -218,9 +216,7 @@ KEY_TEMPLATE = {
         prf.prf_key_templates.HKDF_SHA256,
 }
 
-
-def test_cases(key_types: List[Text]) -> Iterable[Tuple[Text, List[Text]]]:
-  """Generates (key_template_name, supported_langs) tuples."""
-  for key_type in key_types:
-    for key_template_name in KEY_TEMPLATE_NAMES[key_type]:
-      yield (key_template_name, SUPPORTED_LANGUAGES[key_type])
+SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
+    name: SUPPORTED_LANGUAGES[KEY_TYPE_FROM_URL[template.type_url]]
+    for name, template in KEY_TEMPLATE.items()
+}

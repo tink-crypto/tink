@@ -34,13 +34,6 @@ class SupportedKeyTypesTest(absltest.TestCase):
         list(all_key_template_names()),
         list(supported_key_types.KEY_TEMPLATE.keys()))
 
-  def test_test_cases(self):
-    self.assertEqual(
-        list(supported_key_types.test_cases(
-            ['AesEaxKey', 'ChaCha20Poly1305Key'])),
-        [('AES128_EAX', ['cc', 'java', 'python']),
-         ('AES256_EAX', ['cc', 'java', 'python']),
-         ('CHACHA20_POLY1305', ['java', 'go'])])
 
 if __name__ == '__main__':
   absltest.main()

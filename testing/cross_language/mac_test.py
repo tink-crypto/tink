@@ -11,6 +11,9 @@
 # limitations under the License.
 """Cross-language tests for the MAC primitive."""
 
+# Placeholder for import for type annotations
+from typing import Iterable, Text
+
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -46,11 +49,19 @@ def tearDownModule():
   testing_servers.stop()
 
 
+def all_mac_key_template_names() -> Iterable[Text]:
+  """Yields all MAC key template names."""
+  for key_type in supported_key_types.MAC_KEY_TYPES:
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      yield key_template_name
+
+
 class MacTest(parameterized.TestCase):
 
-  @parameterized.parameters(
-      supported_key_types.test_cases(supported_key_types.MAC_KEY_TYPES))
-  def test_encrypt_decrypt(self, key_template_name, supported_langs):
+  @parameterized.parameters(all_mac_key_template_names())
+  def test_encrypt_decrypt(self, key_template_name):
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
