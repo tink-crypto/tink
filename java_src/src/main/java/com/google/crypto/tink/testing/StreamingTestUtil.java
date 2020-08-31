@@ -121,6 +121,8 @@ public class StreamingTestUtil {
    */
   public static class ByteBufferChannel implements ReadableByteChannel {
     final ByteBuffer buffer;
+    private final boolean noDataEveryOtherRead;
+    private boolean returnDataOnNextRead;
 
     /**
      * Defines the maximal size of a chunk that is transferred with a single write. This can be used
@@ -133,27 +135,32 @@ public class StreamingTestUtil {
     private boolean isopen;
 
     public ByteBufferChannel(ByteBuffer buffer) {
-      this.buffer = buffer.duplicate();
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
+      this(buffer, java.lang.Integer.MAX_VALUE);
     }
 
     public ByteBufferChannel(ByteBuffer buffer, int maxChunkSize) {
+      this(buffer, maxChunkSize, /* noDataEveryOtherRead= */ false);
+    }
+
+    public ByteBufferChannel(ByteBuffer buffer, int maxChunkSize, boolean noDataEveryOtherRead) {
       this.buffer = buffer.duplicate();
       this.maxChunkSize = maxChunkSize;
       isopen = true;
+      this.noDataEveryOtherRead = noDataEveryOtherRead;
+      // when noDataEveryOtherRead, then the first read should already not return any data.
+      this.returnDataOnNextRead = !noDataEveryOtherRead;
     }
 
     public ByteBufferChannel(byte[] bytes) {
-      this.buffer = ByteBuffer.wrap(bytes);
-      maxChunkSize = java.lang.Integer.MAX_VALUE;
-      isopen = true;
+      this(ByteBuffer.wrap(bytes));
     }
 
     public ByteBufferChannel(byte[] bytes, int maxChunkSize) {
-      this.buffer = ByteBuffer.wrap(bytes);
-      this.maxChunkSize = maxChunkSize;
-      isopen = true;
+      this(ByteBuffer.wrap(bytes), maxChunkSize);
+    }
+
+    public ByteBufferChannel(byte[] bytes, int maxChunkSize, boolean noDataEveryOtherRead) {
+      this(ByteBuffer.wrap(bytes), maxChunkSize, noDataEveryOtherRead);
     }
 
     void checkIsOpen() throws ClosedChannelException {
@@ -165,6 +172,13 @@ public class StreamingTestUtil {
     @Override
     public synchronized int read(ByteBuffer dst) throws IOException {
       checkIsOpen();
+      if (this.noDataEveryOtherRead) {
+        boolean returnData = this.returnDataOnNextRead;
+        this.returnDataOnNextRead = !this.returnDataOnNextRead;
+        if (!returnData) {
+          return 0;
+        }
+      }
       if (buffer.remaining() == 0) {
         return -1;
       }

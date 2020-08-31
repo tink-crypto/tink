@@ -33,8 +33,10 @@ import javax.annotation.concurrent.GuardedBy;
 public final class RewindableReadableByteChannel implements ReadableByteChannel {
   @GuardedBy("this")
   final ReadableByteChannel baseChannel;
+  // Buffer for caching initial portion of baseChannel, to enable rewinding.
+  // A non-null buffer is always in "draining" mode at the beginning and end of a read call.
   @GuardedBy("this")
-  ByteBuffer buffer;  // Buffer for caching initial portion of baseChannel, to enable rewinding.
+  ByteBuffer buffer;
   @GuardedBy("this")
   boolean canRewind;  // True iff this channel still has rewinding enabled.
   @GuardedBy("this")
@@ -89,8 +91,8 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
       }
       buffer = ByteBuffer.allocate(bytesToReadCount);
       int readBytesCount = baseChannel.read(buffer);
+      buffer.flip();
       if (readBytesCount > 0) {  // Copy the read bytes to destination.
-        buffer.flip();
         dst.put(buffer);
       }
       return readBytesCount;
@@ -114,8 +116,8 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
         // Read the extra bytes needed, and copy them to dst.
         ByteBuffer extraBuffer = ByteBuffer.allocate(stillToReadCount);
         int readBytesCount = baseChannel.read(extraBuffer);
+        extraBuffer.flip();
         if (readBytesCount > 0) {
-          extraBuffer.flip();
           dst.put(extraBuffer);
         }
 
@@ -124,10 +126,10 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
           int newBufferSize = buffer.limit() + stillToReadCount;
           // Allocate a larger buffer and copy the entire current buffer.
           ByteBuffer newBuffer = ByteBuffer.allocate(newBufferSize);
-          buffer.flip();
+          buffer.rewind();
           newBuffer.put(buffer);
           if (readBytesCount > 0) {
-            extraBuffer.flip();
+            extraBuffer.rewind();
             newBuffer.put(extraBuffer);
           }
           // Record that all buffered data has been consumed already.
