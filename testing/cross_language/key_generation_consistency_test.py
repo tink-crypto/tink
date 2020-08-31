@@ -79,11 +79,6 @@ FAILS_BUT_SHOULD_SUCCEED = [
      'java'),
     ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,SHA384,AesGcmKey(16))',
      'java'),
-    # TODO(b/140101381) CC does not support Ecdsa with NIST_P384 and SHA384.
-    ('EcdsaPrivateKey(SHA384,NIST_P384,IEEE_P1363)', 'cc'),
-    ('EcdsaPrivateKey(SHA384,NIST_P384,IEEE_P1363)', 'python'),
-    ('EcdsaPrivateKey(SHA384,NIST_P384,DER)', 'cc'),
-    ('EcdsaPrivateKey(SHA384,NIST_P384,DER)', 'python'),
 ]
 
 HASH_TYPES = [

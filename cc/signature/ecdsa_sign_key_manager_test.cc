@@ -95,7 +95,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP256) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
@@ -106,7 +106,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
@@ -117,7 +117,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, CreateKey) {
@@ -166,7 +166,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
@@ -177,7 +177,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
@@ -188,7 +188,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, GetPublicKey) {

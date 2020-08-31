@@ -93,7 +93,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
@@ -104,7 +104,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
@@ -115,13 +115,21 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParams) {
   EcdsaParams params;
   params.set_hash_type(HashType::SHA256);
   params.set_curve(EllipticCurveType::NIST_P256);
+  params.set_encoding(EcdsaSignatureEncoding::DER);
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), IsOk());
+}
+
+TEST(EcdsaSignKeyManagerTest, ValidateParamsHashP384) {
+  EcdsaParams params;
+  params.set_hash_type(HashType::SHA384);
+  params.set_curve(EllipticCurveType::NIST_P384);
   params.set_encoding(EcdsaSignatureEncoding::DER);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), IsOk());
 }
@@ -134,7 +142,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP256) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA256")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP384) {
@@ -145,7 +153,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP384) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP521) {
@@ -156,7 +164,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP521) {
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
   EXPECT_THAT(
       EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Only SHA512")));
+      StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, Create) {

@@ -74,6 +74,13 @@ Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
       }
       break;
     case EllipticCurveType::NIST_P384:
+      // Allow using SHA384 and SHA512 with NIST-P384.
+      if ((params.hash_type() != HashType::SHA384) &&
+          (params.hash_type() != HashType::SHA512)) {
+        return Status(util::error::INVALID_ARGUMENT,
+                      "Only SHA384 and SHA512 are supported for this curve.");
+      }
+      break;
     case EllipticCurveType::NIST_P521:
       if (params.hash_type() != HashType::SHA512) {
         return Status(util::error::INVALID_ARGUMENT,
