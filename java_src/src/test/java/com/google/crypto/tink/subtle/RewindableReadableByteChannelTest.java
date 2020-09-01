@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.StreamingTestUtil.ByteBufferChannel;
-import com.google.crypto.tink.testing.StreamingTestUtil.PseudorandomReadableByteChannel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -331,117 +330,135 @@ public class RewindableReadableByteChannelTest {
     assertArrayEquals(buffer2.array(), inputData);
   }
 
-  // TODO(juerg): Refactor these tests into smaller tests.
   @Test
-  public void testSubsequentReads() throws Exception {
-    int inputSize = 1234;
-    ReadableByteChannel baseChannel = new PseudorandomReadableByteChannel(inputSize);
-    assertTrue(baseChannel.isOpen());
+  public void testReadToLimit() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
     RewindableReadableByteChannel rewindableChannel =
         new RewindableReadableByteChannel(baseChannel);
-    assertTrue(rewindableChannel.isOpen());
 
-    // Read some initial bytes.
-    int buffer1Size = 105;
-    ByteBuffer buffer1 = ByteBuffer.allocate(buffer1Size);
-    int limit1 = 42;
-    buffer1.limit(limit1);
-    assertEquals(limit1, rewindableChannel.read(buffer1));
-
-    // Continue reading until the buffer is full.
-    buffer1.limit(buffer1.capacity());
-    assertEquals(buffer1Size - limit1, rewindableChannel.read(buffer1));
-
-    // Rewind, and read a longer sequence of initial bytes.
-    rewindableChannel.rewind();
-    int buffer2Size = 160;
-    ByteBuffer buffer2 = ByteBuffer.allocate(buffer2Size);
-    assertEquals(buffer2Size, rewindableChannel.read(buffer2));
-    assertArrayEquals(buffer1.array(), Arrays.copyOfRange(buffer2.array(), 0, buffer1Size));
-
-    // Rewind, and read a longer sequence in multiple steps.
-    rewindableChannel.rewind();
-    int buffer3Size = 150;
-    ByteBuffer buffer3 = ByteBuffer.allocate(buffer3Size);
-    int stepCount = 5;
-    int blockSize = buffer3Size / stepCount;
-    for (int i = 1; i <= stepCount; i++) {
-      buffer3.limit(i * blockSize);
-      assertEquals(blockSize, rewindableChannel.read(buffer3));
-    }
-    assertArrayEquals(buffer3.array(), Arrays.copyOfRange(buffer2.array(), 0, buffer3Size));
-
-    // Read the remaining bytes and check the size;
-    ByteBuffer buffer4 = ByteBuffer.allocate(inputSize);
-    assertEquals(inputSize - buffer3Size, rewindableChannel.read(buffer4));
-    assertEquals(-1, rewindableChannel.read(buffer4));
-
-    // Close the channel.
-    rewindableChannel.close();
-    assertFalse(rewindableChannel.isOpen());
-    assertFalse(baseChannel.isOpen());
+    ByteBuffer buffer = ByteBuffer.allocate(40);
+    buffer.limit(10);
+    assertEquals(10, rewindableChannel.read(buffer));
+    buffer.limit(30);
+    assertEquals(20, rewindableChannel.read(buffer));
+    assertArrayEquals(Arrays.copyOf(buffer.array(), 30), Arrays.copyOf(inputData, 30));
   }
 
   @Test
-  public void testDisableRewind() throws Exception {
-    int blockSize = PseudorandomReadableByteChannel.BLOCK_SIZE;
-    int extraSize = 123;
-    int blockCount = 5;
-    int inputSize = blockSize * blockCount + extraSize;
-    ReadableByteChannel baseChannel = new PseudorandomReadableByteChannel(inputSize);
-    assertTrue(baseChannel.isOpen());
+  public void testReadLongInputByteByByte() throws Exception {
+    int size = 400000;
+    byte[] inputData = new byte[size];
+    for (int i = 0; i < size; i++) {
+      inputData[i] = (byte) (i % 253);
+    }
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
     RewindableReadableByteChannel rewindableChannel =
         new RewindableReadableByteChannel(baseChannel);
-    assertTrue(rewindableChannel.isOpen());
 
-    // Read two blocks.
-    ByteBuffer twoBlocksBuffer = ByteBuffer.allocate(2 * blockSize);
-    assertEquals(2 * blockSize, rewindableChannel.read(twoBlocksBuffer));
-    // Verify that the read bytes are not all the same.
-    assertFalse(Arrays.equals(Arrays.copyOfRange(twoBlocksBuffer.array(), 0, 42),
-            Arrays.copyOfRange(twoBlocksBuffer.array(), 42, 2 * 42)));
+    ByteBuffer buffer = ByteBuffer.allocate(size);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(1);
 
-    // Rewind and read 1 block + extraSize;
-    rewindableChannel.rewind();
-    ByteBuffer blockAndExtraBuffer = ByteBuffer.allocate(blockSize + extraSize);
-    assertEquals(blockSize + extraSize, rewindableChannel.read(blockAndExtraBuffer));
-    assertArrayEquals(blockAndExtraBuffer.array(),
-        Arrays.copyOfRange(twoBlocksBuffer.array(), 0, blockSize + extraSize));
+    while (true) {
+      int s = rewindableChannel.read(byteBuffer);
+      byteBuffer.flip();
+      buffer.put(byteBuffer);
+      if (s == -1) {
+        break;
+      }
+      byteBuffer.clear();
+    }
+    assertArrayEquals(Arrays.copyOf(buffer.array(), buffer.position()), inputData);
+  }
 
-    // Disable the rewinding feature, and continue reading.
+  @Test
+  public void testRewindAfterDisableRewindFails() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
     rewindableChannel.disableRewinding();
     try {
       rewindableChannel.rewind();
-      fail("Should have thrown exception, as rewinding has been dropped");
+      fail("Should have thrown exception, as cannot rewind after closing.");
     } catch (IOException expected) {
       assertExceptionContains(expected, "Cannot rewind");
     }
-    ByteBuffer oneBlockBuffer = ByteBuffer.allocate(blockSize);
-    assertEquals(blockSize, rewindableChannel.read(oneBlockBuffer));
-    assertArrayEquals(oneBlockBuffer.array(),
-        Arrays.copyOfRange(twoBlocksBuffer.array(), extraSize, blockSize + extraSize));
-
-    int remainingSize = (blockCount - 2) * blockSize;
-    ByteBuffer remainingBuffer = ByteBuffer.allocate(remainingSize);
-    assertEquals(remainingSize, rewindableChannel.read(remainingBuffer));
-    assertArrayEquals(blockAndExtraBuffer.array(),
-        Arrays.copyOfRange(remainingBuffer.array(),
-            remainingSize - blockSize - extraSize, remainingSize));
-
-    // Check EOF.
-    ByteBuffer buffer = ByteBuffer.allocate(42);
-    assertEquals(-1, rewindableChannel.read(buffer));
-
-    // Close the channel.
-    rewindableChannel.close();
-    assertFalse(rewindableChannel.isOpen());
-    assertFalse(baseChannel.isOpen());
   }
 
   @Test
-  public void testExceptions() throws Exception {
-    int inputSize = 1234;
-    ReadableByteChannel baseChannel = new PseudorandomReadableByteChannel(inputSize);
+  public void testDisableRewindingAtBeginning() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
+    rewindableChannel.disableRewinding();
+
+    ByteBuffer buffer = ByteBuffer.allocate(100);
+    assertEquals(inputData.length, rewindableChannel.read(buffer));
+    assertArrayEquals(Arrays.copyOf(buffer.array(), buffer.position()), inputData);
+  }
+
+  @Test
+  public void testDisableRewindingBetweenReading() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
+    ByteBuffer buffer1 = ByteBuffer.allocate(10);
+    assertEquals(10, rewindableChannel.read(buffer1));
+    rewindableChannel.disableRewinding();
+    ByteBuffer buffer2 = ByteBuffer.allocate(100);
+    assertEquals(inputData.length - 10, rewindableChannel.read(buffer2));
+    assertArrayEquals(
+        Arrays.copyOf(buffer1.array(), buffer1.position()),
+        Arrays.copyOf(inputData, 10));
+    assertArrayEquals(
+        Arrays.copyOf(buffer2.array(), buffer2.position()),
+        Arrays.copyOfRange(inputData, 10, inputData.length));
+  }
+
+  @Test
+  public void testDisableRewindingAfterRewind() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
+    ByteBuffer buffer1 = ByteBuffer.allocate(10);
+    assertEquals(10, rewindableChannel.read(buffer1));
+    rewindableChannel.rewind();
+    rewindableChannel.disableRewinding();
+    ByteBuffer buffer2 = ByteBuffer.allocate(100);
+    assertEquals(inputData.length, rewindableChannel.read(buffer2));
+    assertArrayEquals(Arrays.copyOf(buffer2.array(), buffer2.position()), inputData);
+  }
+
+  @Test
+  public void testDisableRewindingAfterRewindBetweenReading() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
+    ByteBuffer buffer0 = ByteBuffer.allocate(20);
+    assertEquals(20, rewindableChannel.read(buffer0));
+    rewindableChannel.rewind();
+    ByteBuffer buffer1 = ByteBuffer.allocate(10);
+    assertEquals(10, rewindableChannel.read(buffer1));
+    rewindableChannel.disableRewinding();
+    ByteBuffer buffer2 = ByteBuffer.allocate(100);
+    assertEquals(inputData.length - 10, rewindableChannel.read(buffer2));
+    assertArrayEquals(
+        Arrays.copyOf(buffer1.array(), buffer1.position()),
+        Arrays.copyOf(inputData, 10));
+    assertArrayEquals(
+        Arrays.copyOf(buffer2.array(), buffer2.position()),
+        Arrays.copyOfRange(inputData, 10, inputData.length));
+  }
+
+  @Test
+  public void testReadingWhenBaseIsClosedFails() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
     baseChannel.close();
     assertFalse(baseChannel.isOpen());
     RewindableReadableByteChannel rewindableChannel =
