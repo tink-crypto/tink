@@ -150,6 +150,27 @@ public class RewindableReadableByteChannelTest {
   }
 
   @Test
+  public void testReadTwiceRewindRead() throws Exception {
+    byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
+    ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);
+    RewindableReadableByteChannel rewindableChannel =
+        new RewindableReadableByteChannel(baseChannel);
+
+    // this will allocate a buffer
+    ByteBuffer buffer1 = ByteBuffer.allocate(20);
+    assertEquals(20, rewindableChannel.read(buffer1));
+    // this will extend the buffer
+    ByteBuffer buffer2 = ByteBuffer.allocate(20);
+    assertEquals(20, rewindableChannel.read(buffer2));
+
+    rewindableChannel.rewind();
+
+    ByteBuffer buffer3 = ByteBuffer.allocate(300);
+    assertEquals(inputData.length, rewindableChannel.read(buffer3));
+    assertArrayEquals(Arrays.copyOf(buffer3.array(), buffer3.position()), inputData);
+  }
+
+  @Test
   public void testRewindAfterCloseFails() throws Exception {
     byte[] inputData = "The quick brown fox jumps over the lazy dog.".getBytes(UTF_8);
     ReadableByteChannel baseChannel = new ByteBufferChannel(inputData);

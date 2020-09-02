@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
+import static java.lang.Math.max;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -75,6 +77,24 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
     }
   }
 
+  /**
+   * Sets a new limit to the buffer. If the buffer does not have enough capacity, it creates a new
+   * buffer with at least twice the capacity, and copies data and position of the old buffer.
+   * buffer is expected to be in draining mode before this call.
+   */
+  private synchronized void setBufferLimit(int newLimit) {
+    if (buffer.capacity() < newLimit) {
+      int pos = buffer.position();
+      int newBufferCapacity = max(2 * buffer.capacity(), newLimit);
+      ByteBuffer newBuffer = ByteBuffer.allocate(newBufferCapacity);
+      buffer.rewind();
+      newBuffer.put(buffer);
+      newBuffer.position(pos);
+      buffer = newBuffer;
+    }
+    buffer.limit(newLimit);
+  }
+
   @Override
   public synchronized int read(ByteBuffer dst) throws IOException {
     if (directRead) {
@@ -90,60 +110,55 @@ public final class RewindableReadableByteChannel implements ReadableByteChannel 
         return baseChannel.read(dst);
       }
       buffer = ByteBuffer.allocate(bytesToReadCount);
-      int readBytesCount = baseChannel.read(buffer);
+      int baseReadResult = baseChannel.read(buffer);
+      // put buffer in draining mode
       buffer.flip();
-      if (readBytesCount > 0) {  // Copy the read bytes to destination.
+      if (baseReadResult > 0) {
         dst.put(buffer);
       }
-      return readBytesCount;
-    } else {  // Subsequent read, some data might be in the buffer.
-      if (buffer.remaining() >= bytesToReadCount) {
-        // Copy from the buffer and advance the buffer.
-        byte[] toDst = new byte[bytesToReadCount];
-        buffer.get(toDst);
-        dst.put(toDst);
-        if (!canRewind && buffer.remaining() == 0) {
-          directRead = true;
-        }
-        return bytesToReadCount;
-      } else {
-        int bytesFromBufferCount = buffer.remaining();
-        int stillToReadCount = bytesToReadCount - bytesFromBufferCount;
-
-        // Copy the remaining bytes from the current buffer to dst.
-        dst.put(buffer);
-
-        // Read the extra bytes needed, and copy them to dst.
-        ByteBuffer extraBuffer = ByteBuffer.allocate(stillToReadCount);
-        int readBytesCount = baseChannel.read(extraBuffer);
-        extraBuffer.flip();
-        if (readBytesCount > 0) {
-          dst.put(extraBuffer);
-        }
-
-        // If rewind still suported, update the buffer...
-        if (canRewind) {
-          int newBufferSize = buffer.limit() + stillToReadCount;
-          // Allocate a larger buffer and copy the entire current buffer.
-          ByteBuffer newBuffer = ByteBuffer.allocate(newBufferSize);
-          buffer.rewind();
-          newBuffer.put(buffer);
-          if (readBytesCount > 0) {
-            extraBuffer.rewind();
-            newBuffer.put(extraBuffer);
-          }
-          // Record that all buffered data has been consumed already.
-          newBuffer.flip();
-          newBuffer.position(newBuffer.limit());
-          buffer = newBuffer;
-        } else {  // ... otherwise free the buffer memory.
-          buffer = null;
-          directRead = true;
-        }
-
-        return bytesFromBufferCount + readBytesCount;
-      }
+      return baseReadResult;
     }
+    // Subsequent read
+    if (buffer.remaining() >= bytesToReadCount) {
+      // buffer has all data needed.
+      // dst.put expects buffer.remaining() <= dst.remaining(). So we have to temporarily lower
+      // buffer.limit. Note that
+      // buffer.position() + bytesToReadCount <= buffer.position() + buffer.remaining()
+      // = buffer.position() + buffer.limit() - buffer.position() = buffer.limit().
+      int limit = buffer.limit();
+      buffer.limit(buffer.position() + bytesToReadCount);
+      dst.put(buffer);
+      buffer.limit(limit);
+      if (!canRewind && !buffer.hasRemaining()) {
+        buffer = null;
+        directRead = true;
+      }
+      return bytesToReadCount;
+    }
+    int bytesFromBufferCount = buffer.remaining();
+    int stillToReadCount = bytesToReadCount - bytesFromBufferCount;
+
+    // buffer is in draining mode.
+    int currentReadPos = buffer.position();
+    int contentLimit = buffer.limit();
+    // Put the buffer into into filling mode by hand. The filling should start right after the
+    // current limit, and at most stillToReadCount bytes should be written.
+    setBufferLimit(contentLimit + stillToReadCount);
+    buffer.position(contentLimit);
+    int baseReadResult = baseChannel.read(buffer);
+    // Put buffer in draining mode.
+    buffer.flip();
+    buffer.position(currentReadPos); // restore reading position.
+    dst.put(buffer);
+    if (bytesFromBufferCount == 0 && baseReadResult < 0) {
+      return -1;  // EOF
+    }
+    int bytesCount = buffer.position() - currentReadPos;
+    if (!canRewind && !buffer.hasRemaining()) {
+      buffer = null;
+      directRead = true;
+    }
+    return bytesCount;
   }
 
   @Override
