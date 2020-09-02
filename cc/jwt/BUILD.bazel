@@ -14,3 +14,48 @@ cc_library(
         "@com_google_absl//absl/strings:str_format",
     ],
 )
+
+cc_library(
+    name = "jwt",
+    srcs = ["jwt.cc"],
+    hdrs = ["jwt.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":jwt_names",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_library(
+    name = "json_util",
+    hdrs = ["json_struct_util.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+# tests
+
+cc_test(
+    name = "jwt_test",
+    size = "small",
+    srcs = ["jwt_test.cc"],
+    deps = [
+        ":json_util",
+        ":jwt",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
+    ],
+)

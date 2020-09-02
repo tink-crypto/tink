@@ -19,6 +19,19 @@
 namespace crypto {
 namespace tink {
 
+constexpr absl::string_view JwtNames::kClaimIssuer;
+constexpr absl::string_view JwtNames::kClaimSubject;
+constexpr absl::string_view JwtNames::kClaimAudience;
+constexpr absl::string_view JwtNames::kClaimExpiration;
+constexpr absl::string_view JwtNames::kClaimNotBefore;
+constexpr absl::string_view JwtNames::kClaimIssuedAt;
+constexpr absl::string_view JwtNames::kClaimJwtId;
+
+constexpr absl::string_view JwtNames::kHeaderAlgorithm;
+constexpr absl::string_view JwtNames::kHeaderKeyId;
+constexpr absl::string_view JwtNames::kHeaderType;
+constexpr absl::string_view JwtNames::kHeaderContentType;
+
 util::Status JwtNames::validate(absl::string_view name) {
   if (isRegisteredName(name)) {
     return absl::InvalidArgumentError(
