@@ -23,7 +23,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.security.GeneralSecurityException;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -31,14 +32,16 @@ import javax.annotation.concurrent.GuardedBy;
  */
 final class ReadableByteChannelDecrypter implements ReadableByteChannel {
   @GuardedBy("this")
-  boolean attemptedMatching;
+  ReadableByteChannel attemptingChannel;
   @GuardedBy("this")
   ReadableByteChannel matchingChannel;
   @GuardedBy("this")
   RewindableReadableByteChannel ciphertextChannel;
 
-  PrimitiveSet<StreamingAead> primitives;
+  // The StreamingAeads that have not yet been tried in nextAttemptingChannel.
+  Deque<StreamingAead> remainingPrimitives;
   byte[] associatedData;
+
 
   /**
    * Constructs a new decrypter for {@code ciphertextChannel}.
@@ -57,11 +60,34 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
    */
   public ReadableByteChannelDecrypter(PrimitiveSet<StreamingAead> primitives,
       ReadableByteChannel ciphertextChannel, final byte[] associatedData) {
-    this.attemptedMatching = false;
+    // There are 3 phases:
+    // 1) both matchingChannel and attemptingChannel are null. Rewind is enabled.
+    // 2) attemptingChannel is non-null, matchingChannel is null. Rewind is enabled.
+    // 3) attemptingChannel is null, matchingChannel is non-null. Rewind is disabled.
+    this.attemptingChannel = null;
     this.matchingChannel = null;
-    this.primitives = primitives;
+    this.remainingPrimitives = new ArrayDeque<>();
+    for (PrimitiveSet.Entry<StreamingAead> entry : primitives.getRawPrimitives()) {
+      this.remainingPrimitives.add(entry.getPrimitive());
+    }
     this.ciphertextChannel = new RewindableReadableByteChannel(ciphertextChannel);
     this.associatedData = associatedData.clone();
+  }
+
+  @GuardedBy("this")
+  private synchronized ReadableByteChannel nextAttemptingChannel() throws IOException {
+    while (!remainingPrimitives.isEmpty()) {
+      StreamingAead streamingAead = this.remainingPrimitives.removeFirst();
+      try {
+        ReadableByteChannel decChannel = streamingAead.newDecryptingChannel(
+            ciphertextChannel, associatedData);
+        return decChannel;
+      } catch (GeneralSecurityException e) {
+        // Try another primitive.
+        ciphertextChannel.rewind();
+      }
+    }
+    throw new IOException("No matching key found for the ciphertext in the stream.");
   }
 
   @Override
@@ -72,29 +98,21 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
     if (matchingChannel != null) {
       return matchingChannel.read(dst);
     } else {
-      if (attemptedMatching) {
-        throw new IOException("No matching key found for the ciphertext in the stream.");
+      if (attemptingChannel == null) {
+        attemptingChannel = nextAttemptingChannel();
       }
-      attemptedMatching = true;
-      List<PrimitiveSet.Entry<StreamingAead>> entries = primitives.getRawPrimitives();
-      for (PrimitiveSet.Entry<StreamingAead> entry : entries) {
+      while (true) {
         try {
-          ReadableByteChannel attemptedChannel =
-              entry.getPrimitive().newDecryptingChannel(ciphertextChannel, associatedData);
-          int retValue = attemptedChannel.read(dst);
-          if (retValue > 0) {
-            // Found a matching channel
-            matchingChannel = attemptedChannel;
-            ciphertextChannel.disableRewinding();
-          } else if (retValue == 0) {
-            // Not clear whether the channel could be matched: it might be
-            // that the underlying channel didn't provide sufficiently many bytes
-            // to check the header, or maybe the header was checked, but there
-            // were no actual encrypted bytes in the channel yet.
-            // Should try again.
-            ciphertextChannel.rewind();
-            attemptedMatching = false;
+          int retValue = attemptingChannel.read(dst);
+          if (retValue == 0) {
+            // No data at the moment. Not clear if decryption was successful.
+            // Try again with the same stream next time.
+            return 0;
           }
+          // Found a matching channel.
+          matchingChannel = attemptingChannel;
+          attemptingChannel = null;
+          ciphertextChannel.disableRewinding();
           return retValue;
         } catch (IOException e) {
           // Try another key.
@@ -102,14 +120,9 @@ final class ReadableByteChannelDecrypter implements ReadableByteChannel {
           // of I/O failures.
           // TODO(b/66098906): Use a subclass of IOException.
           ciphertextChannel.rewind();
-          continue;
-        } catch (GeneralSecurityException e) {
-          // Try another key.
-          ciphertextChannel.rewind();
-          continue;
+          attemptingChannel = nextAttemptingChannel();
         }
       }
-      throw new IOException("No matching key found for the ciphertext in the stream.");
     }
   }
 

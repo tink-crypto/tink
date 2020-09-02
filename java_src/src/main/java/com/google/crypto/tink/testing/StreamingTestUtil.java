@@ -356,6 +356,20 @@ public class StreamingTestUtil {
       TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
     }
 
+    // Decrypt ciphertext via ReadableByteChannel, using a very small chunck size.
+    {
+      ByteBufferChannel ciphertextChannel = new ByteBufferChannel(
+          ciphertext.toByteArray(), /* */10, true);
+      ReadableByteChannel decChannel =
+          decryptionStreamingAead.newDecryptingChannel(ciphertextChannel, aad);
+      ByteBuffer decrypted = ByteBuffer.allocate(plaintext.length);
+      do {
+        int unused = decChannel.read(decrypted);
+      } while (decrypted.hasRemaining());
+      // Compare results;
+      TestUtil.assertByteArrayEquals(plaintext, decrypted.array());
+    }
+
     // Decrypt ciphertext via SeekableByteChannel.
     {
       SeekableByteChannel ciphertextChannel =
