@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
+import static java.lang.Math.min;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,17 +46,17 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
    * necessary to read a segment plus one more byte to decrypt a segment, since the last segment of
    * a ciphertext is encrypted differently.
    */
-  private ByteBuffer ciphertextSegment;
+  private final ByteBuffer ciphertextSegment;
 
   /**
    * A buffer containing a plaintext segment. The bytes in the range plaintexSegment.position() ..
    * plaintextSegment.limit() - 1 are plaintext that have been decrypted but not yet read out of
    * AesGcmInputStream.
    */
-  private ByteBuffer plaintextSegment;
+  private final ByteBuffer plaintextSegment;
 
   /* Header information */
-  private int headerLength;
+  private final int headerLength;
   private boolean headerRead;
 
   /* Indicates whether the end of this InputStream has been reached. */
@@ -67,7 +69,7 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
   private boolean decryptionErrorOccured;
 
   /** The additional data that is authenticated with the ciphertext. */
-  private byte[] aad;
+  private final byte[] aad;
 
   /** The number of the current segment of ciphertext buffered in ciphertexSegment. */
   private int segmentNr;
@@ -228,7 +230,7 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
         }
         loadSegment();
       }
-      int sliceSize = java.lang.Math.min(plaintextSegment.remaining(), length - bytesRead);
+      int sliceSize = min(plaintextSegment.remaining(), length - bytesRead);
       plaintextSegment.get(dst, bytesRead + offset, sliceSize);
       bytesRead += sliceSize;
     }
@@ -269,7 +271,7 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
    * stream is non-blocking and not enough bytes are available or when the stream reaches the end of
    * the stream.
    *
-   * @throws IOException when an exception occurs while reading from @code{in} or when the
+   * @throws IOException when an exception occurs while reading from {@code in} or when the
    *     ciphertext is corrupt. Currently all corrupt ciphertext will be detected. However this
    *     behaviour may change.
    */
@@ -280,10 +282,10 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     if (n <= 0) {
       return 0;
     }
-    int size = (int) Math.min(maxSkipBufferSize, remaining);
+    int size = (int) min(maxSkipBufferSize, remaining);
     byte[] skipBuffer = new byte[size];
     while (remaining > 0) {
-      int bytesRead = read(skipBuffer, 0, (int) Math.min(size, remaining));
+      int bytesRead = read(skipBuffer, 0, (int) min(size, remaining));
       if (bytesRead <= 0) {
         break;
       }
