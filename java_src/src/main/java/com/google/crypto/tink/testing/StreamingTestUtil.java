@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.testing;
 
+import static java.lang.Math.min;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -274,6 +275,33 @@ public class StreamingTestUtil {
     }
   }
 
+  /**
+   * Implements a ByteArrayInputStream that returns only small chunks for testing.
+   */
+  public static class SmallChunksByteArrayInputStream extends ByteArrayInputStream {
+    final int maxChunkSize;
+
+    SmallChunksByteArrayInputStream(byte[] data, int maxChunkSize) {
+      super(data);
+      this.maxChunkSize = maxChunkSize;
+    }
+
+    @Override
+    public synchronized int available() {
+      return min(maxChunkSize, super.available());
+    }
+
+    @Override
+    public synchronized int read(byte[] b) {
+      return super.read(b, 0, min(b.length, maxChunkSize));
+    }
+
+    @Override
+    public synchronized int read(byte[] b, int off, int len){
+      return super.read(b, off, min(len, maxChunkSize));
+    }
+  }
+
   /** Returns a plaintext of a given size. */
   public static byte[] generatePlaintext(int size) {
     byte[] plaintext = new byte[size];
@@ -419,6 +447,19 @@ public class StreamingTestUtil {
     // Decrypt ciphertext via InputStream.
     {
       InputStream ctStream = new ByteArrayInputStream(ciphertext.toByteArray());
+      InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, aad);
+      byte[] decrypted = new byte[plaintext.length];
+      int decryptedLength = decStream.read(decrypted);
+
+      // Compare results;
+      assertEquals("Decrypted length should be equal to plaintext length", decryptedLength,
+          plaintext.length);
+      TestUtil.assertByteArrayEquals(plaintext, decrypted);
+    }
+
+    // Decrypt ciphertext via SmallChunksByteArrayInputStream.
+    {
+      InputStream ctStream = new SmallChunksByteArrayInputStream(ciphertext.toByteArray(), 10);
       InputStream decStream = decryptionStreamingAead.newDecryptingStream(ctStream, aad);
       byte[] decrypted = new byte[plaintext.length];
       int decryptedLength = decStream.read(decrypted);

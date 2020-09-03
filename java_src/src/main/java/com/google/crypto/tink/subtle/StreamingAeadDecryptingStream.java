@@ -63,11 +63,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
   /* Indicates whether the end of the plaintext has been reached. */
   private boolean endOfPlaintext;
 
-  /**
-   * Indicates whether this stream is in a defined state. Currently the state of this instance
-   * becomes undefined when an authentication error has occurred.
-   */
-  private boolean definedState;
+  /* Indicates whether a decyrption error has occured. */
+  private boolean decryptionErrorOccured;
 
   /** The additional data that is authenticated with the ciphertext. */
   private byte[] aad;
@@ -100,35 +97,43 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     endOfCiphertext = false;
     endOfPlaintext = false;
     segmentNr = 0;
-    definedState = true;
+    decryptionErrorOccured = false;
   }
 
   /**
-   * Tries to read the header of the ciphertext.
+   * Reads the header of the ciphertext and sets headerRead = true.
    *
-   * @return true if the header has been fully read and false if not enough bytes were available
-   *     from the ciphertext stream.
-   * @throws IOException when an exception occurs while reading from @code{in} or when the header is
-   *     too short.
+   * @throws IOException when an exception occurs while reading from {@code in} or when the header
+   *     is too short.
    */
   private void readHeader() throws IOException {
-    assert headerRead == false;
-    byte[] header = new byte[headerLength];
-    int bytesRead = in.read(header);
-    if (bytesRead != headerLength) {
-      setUndefinedState();
-      throw new IOException("Ciphertext is too short");
+    if (headerRead) {
+      setDecryptionErrorOccured();
+      throw new IOException("Decryption failed.");
     }
+    ByteBuffer header = ByteBuffer.allocate(headerLength);
+    while (header.remaining() > 0) {
+      int read = in.read(header.array(), header.position(), header.remaining());
+      if (read == -1) {
+        setDecryptionErrorOccured();
+        throw new IOException("Ciphertext is too short");
+      }
+      if (read == 0) {
+        throw new IOException("Could not read bytes from the ciphertext stream");
+      }
+      header.position(header.position() + read);
+    }
+    header.flip();
     try {
-      decrypter.init(ByteBuffer.wrap(header), aad);
+      decrypter.init(header, aad);
     } catch (GeneralSecurityException ex) {
       throw new IOException(ex);
     }
     headerRead = true;
   }
 
-  private void setUndefinedState() {
-    definedState = false;
+  private void setDecryptionErrorOccured() {
+    decryptionErrorOccured = true;
     plaintextSegment.limit(0);
   }
 
@@ -162,7 +167,7 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
     } catch (GeneralSecurityException ex) {
       // The current segment did not validate.
       // Currently this means that decryption cannot resume.
-      setUndefinedState();
+      setDecryptionErrorOccured();
       throw new IOException(
           ex.getMessage()
               + "\n"
@@ -203,8 +208,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
 
   @Override
   public synchronized int read(byte[] dst, int offset, int length) throws IOException {
-    if (!definedState) {
-      throw new IOException("This StreamingAeadDecryptingStream is in an undefined state");
+    if (decryptionErrorOccured) {
+      throw new IOException("Decryption failed.");
     }
     if (!headerRead) {
       readHeader();
@@ -302,8 +307,8 @@ class StreamingAeadDecryptingStream extends FilterInputStream {
         .append(endOfCiphertext)
         .append("\nendOfPlaintext:")
         .append(endOfPlaintext)
-        .append("\ndefinedState:")
-        .append(definedState)
+        .append("\ndecryptionErrorOccured:")
+        .append(decryptionErrorOccured)
         .append("\nciphertextSgement")
         .append(" position:")
         .append(ciphertextSegment.position())
