@@ -150,21 +150,15 @@ final class InputStreamDecrypter extends InputStream {
               entry.getPrimitive().newDecryptingStream(ciphertextStream, associatedData);
           int retValue = attemptedStream.read(b, offset, len);
           if (retValue == 0) {
-            // Not clear whether the stream could be matched: it might be
-            // that the underlying stream didn't provide sufficiently many bytes
-            // to check the header, or maybe the header was checked, but there
-            // were no actual encrypted bytes in the stream yet.
-            // Should try again.
-            rewind();
-            attemptedMatching = false;
-          } else {
-            // Found a matching stream.
-            // If retValue > 0 then the first ciphertext segment has been decrypted and
-            // authenticated. If retValue == -1 then plaintext is empty and again this has been
-            // authenticated.
-            matchingStream = attemptedStream;
-            disableRewinding();
+            // Read should never return 0 when len > 0.
+            throw new IOException("Could not read bytes from the ciphertext stream");
           }
+          // Found a matching stream.
+          // If retValue > 0 then the first ciphertext segment has been decrypted and
+          // authenticated. If retValue == -1 then plaintext is empty and again this has been
+          // authenticated.
+          matchingStream = attemptedStream;
+          disableRewinding();
           return retValue;
         } catch (IOException e) {
           // Try another key.
