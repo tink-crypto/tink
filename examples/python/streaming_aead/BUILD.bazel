@@ -1,0 +1,53 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "aes256ctrhmac_keyset.json",
+])
+
+py_binary(
+    name = "streaming_aead",
+    srcs = ["streaming_aead.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/streaming_aead",
+    ],
+)
+
+sh_test(
+    name = "streaming_aead_test",
+    size = "small",
+    srcs = ["streaming_aead_test.sh"],
+    args = [
+        "$(rootpath :streaming_aead)",
+        "$(rootpath :aes256ctrhmac_keyset.json)",
+    ],
+    data = [
+        ":aes256ctrhmac_keyset.json",
+        ":streaming_aead",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "streaming_aead_test_package",
+    size = "small",
+    srcs = ["streaming_aead_test.sh"],
+    args = [
+        "'python3 $(rootpath :streaming_aead.py)'",
+        "$(rootpath :aes256ctrhmac_keyset.json)",
+    ],
+    data = [
+        ":streaming_aead.py",
+        ":aes256ctrhmac_keyset.json",
+        ":streaming_aead",
+    ],
+)
