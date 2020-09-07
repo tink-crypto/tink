@@ -15,9 +15,9 @@
 
 import io
 import random
+from tink.proto import tink_pb2
 import tink
 from tink import cleartext_keyset_handle
-from tink.proto import tink_pb2
 
 _MAX_INT32 = 4294967295  # 2^32-1
 
@@ -33,7 +33,18 @@ def _generate_unused_key_id(keyset: tink_pb2.Keyset) -> int:
       return key_id
 
 
-# TODO(juerg) Remove this, and use the version in tink/python/tink/testing.
+def raw_template(template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
+  template_copy = tink_pb2.KeyTemplate()
+  template_copy.CopyFrom(template)
+  template_copy.output_prefix_type = tink_pb2.RAW
+  return template_copy
+
+
+def legacy_template(template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
+  template_copy = tink_pb2.KeyTemplate()
+  template_copy.CopyFrom(template)
+  template_copy.output_prefix_type = tink_pb2.LEGACY
+  return template_copy
 
 
 class KeysetBuilder(object):

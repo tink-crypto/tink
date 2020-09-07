@@ -16,132 +16,111 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.proto import tink_pb2
+from absl.testing import parameterized
+import tink
 from tink import aead
-from tink import core
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+AEAD_TEMPLATE = aead.aead_key_templates.AES128_EAX
+RAW_AEAD_TEMPLATE = keyset_builder.raw_template(AEAD_TEMPLATE)
 
 
 def setUpModule():
   aead.register()
 
 
-class AeadWrapperTest(absltest.TestCase):
+class AeadWrapperTest(parameterized.TestCase):
 
-  def new_primitive_key_pair(self, key_id, output_prefix_type):
-    fake_key = helper.fake_key(key_id=key_id,
-                               output_prefix_type=output_prefix_type)
-    fake_aead = helper.FakeAead('fakeAead {}'.format(key_id))
-    return fake_aead, fake_key
+  @parameterized.parameters([AEAD_TEMPLATE, RAW_AEAD_TEMPLATE])
+  def test_encrypt_decrypt(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
+    ciphertext = primitive.encrypt(b'plaintext', b'associated_data')
+    self.assertEqual(primitive.decrypt(ciphertext, b'associated_data'),
+                     b'plaintext')
 
-  def test_encrypt_decrypt(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(aead.Aead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
-
-    plaintext = b'plaintext'
-    associated_data = b'associated_data'
-    ciphertext = wrapped_aead.encrypt(plaintext, associated_data)
-    self.assertEqual(
-        wrapped_aead.decrypt(ciphertext, associated_data), plaintext)
-
-  def test_encrypt_decrypt_with_key_rotation(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(aead.Aead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
-    ciphertext = wrapped_aead.encrypt(b'plaintext', b'associated_data')
-
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    new_ciphertext = wrapped_aead.encrypt(b'new_plaintext',
-                                          b'new_associated_data')
-
-    self.assertEqual(
-        wrapped_aead.decrypt(ciphertext, b'associated_data'),
-        b'plaintext')
-    self.assertEqual(
-        wrapped_aead.decrypt(new_ciphertext, b'new_associated_data'),
-        b'new_plaintext')
-
-  def test_encrypt_decrypt_with_key_rotation_from_raw(self):
-    primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    old_raw_ciphertext = primitive.encrypt(b'plaintext', b'associated_data')
-
-    pset = core.new_primitive_set(aead.Aead)
-    pset.add_primitive(primitive, raw_key)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
-    new_ciphertext = wrapped_aead.encrypt(b'new_plaintext',
-                                          b'new_associated_data')
-
-    self.assertEqual(
-        wrapped_aead.decrypt(old_raw_ciphertext, b'associated_data'),
-        b'plaintext')
-    self.assertEqual(
-        wrapped_aead.decrypt(new_ciphertext, b'new_associated_data'),
-        b'new_plaintext')
-
-  def test_encrypt_decrypt_two_raw_keys(self):
-    primitive1, raw_key1 = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    primitive2, raw_key2 = self.new_primitive_key_pair(5678, tink_pb2.RAW)
-    raw_ciphertext1 = primitive1.encrypt(b'plaintext1', b'associated_data1')
-    raw_ciphertext2 = primitive2.encrypt(b'plaintext2', b'associated_data2')
-
-    pset = core.new_primitive_set(aead.Aead)
-    pset.add_primitive(primitive1, raw_key1)
-    pset.set_primary(
-        pset.add_primitive(primitive2, raw_key2))
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
-
-    self.assertEqual(
-        wrapped_aead.decrypt(raw_ciphertext1, b'associated_data1'),
-        b'plaintext1')
-    self.assertEqual(
-        wrapped_aead.decrypt(raw_ciphertext2, b'associated_data2'),
-        b'plaintext2')
-    self.assertEqual(
-        wrapped_aead.decrypt(
-            wrapped_aead.encrypt(b'plaintext', b'associated_data'),
-            b'associated_data'),
-        b'plaintext')
-
-  def test_decrypt_unknown_ciphertext_fails(self):
-    unknown_primitive = helper.FakeAead('unknownFakeAead')
+  @parameterized.parameters([AEAD_TEMPLATE, RAW_AEAD_TEMPLATE])
+  def test_decrypt_unknown_ciphertext_fails(self, template):
+    unknown_handle = tink.new_keyset_handle(template)
+    unknown_primitive = unknown_handle.primitive(aead.Aead)
     unknown_ciphertext = unknown_primitive.encrypt(b'plaintext',
                                                    b'associated_data')
 
-    pset = core.new_primitive_set(aead.Aead)
-    primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    pset.add_primitive(primitive, raw_key)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
 
-    with self.assertRaises(core.TinkError):
-      wrapped_aead.decrypt(unknown_ciphertext, b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt(unknown_ciphertext, b'associated_data')
 
-  def test_decrypt_wrong_associated_data_fails(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(aead.Aead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_aead = core.Registry.wrap(pset, aead.Aead)
+  @parameterized.parameters([AEAD_TEMPLATE, RAW_AEAD_TEMPLATE])
+  def test_decrypt_wrong_associated_data_fails(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(aead.Aead)
 
-    ciphertext = wrapped_aead.encrypt(b'plaintext', b'associated_data')
-    with self.assertRaises(core.TinkError):
-      wrapped_aead.decrypt(ciphertext, b'wrong_associated_data')
+    ciphertext = primitive.encrypt(b'plaintext', b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt(ciphertext, b'wrong_associated_data')
+
+  @parameterized.parameters([(AEAD_TEMPLATE, AEAD_TEMPLATE),
+                             (RAW_AEAD_TEMPLATE, AEAD_TEMPLATE),
+                             (AEAD_TEMPLATE, RAW_AEAD_TEMPLATE),
+                             (RAW_AEAD_TEMPLATE, RAW_AEAD_TEMPLATE)])
+  def test_encrypt_decrypt_with_key_rotation(self, template1, template2):
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(template1)
+    builder.set_primary_key(older_key_id)
+    p1 = builder.keyset_handle().primitive(aead.Aead)
+
+    newer_key_id = builder.add_new_key(template2)
+    p2 = builder.keyset_handle().primitive(aead.Aead)
+
+    builder.set_primary_key(newer_key_id)
+    p3 = builder.keyset_handle().primitive(aead.Aead)
+
+    builder.disable_key(older_key_id)
+    p4 = builder.keyset_handle().primitive(aead.Aead)
+
+    self.assertNotEqual(older_key_id, newer_key_id)
+    # p1 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext1 = p1.encrypt(b'plaintext', b'ad')
+    self.assertEqual(p1.decrypt(ciphertext1, b'ad'), b'plaintext')
+    self.assertEqual(p2.decrypt(ciphertext1, b'ad'), b'plaintext')
+    self.assertEqual(p3.decrypt(ciphertext1, b'ad'), b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = p4.decrypt(ciphertext1, b'ad')
+
+    # p2 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext2 = p2.encrypt(b'plaintext', b'ad')
+    self.assertEqual(p1.decrypt(ciphertext2, b'ad'), b'plaintext')
+    self.assertEqual(p2.decrypt(ciphertext2, b'ad'), b'plaintext')
+    self.assertEqual(p3.decrypt(ciphertext2, b'ad'), b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = p4.decrypt(ciphertext2, b'ad')
+
+    # p3 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext3 = p3.encrypt(b'plaintext', b'ad')
+    with self.assertRaises(tink.TinkError):
+      _ = p1.decrypt(ciphertext3, b'ad')
+    self.assertEqual(p2.decrypt(ciphertext3, b'ad'), b'plaintext')
+    self.assertEqual(p3.decrypt(ciphertext3, b'ad'), b'plaintext')
+    self.assertEqual(p4.decrypt(ciphertext3, b'ad'), b'plaintext')
+
+    # p4 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext4 = p4.encrypt(b'plaintext', b'ad')
+    with self.assertRaises(tink.TinkError):
+      _ = p1.decrypt(ciphertext4, b'ad')
+    self.assertEqual(p2.decrypt(ciphertext4, b'ad'), b'plaintext')
+    self.assertEqual(p3.decrypt(ciphertext4, b'ad'), b'plaintext')
+    self.assertEqual(p4.decrypt(ciphertext4, b'ad'), b'plaintext')
 
 
 if __name__ == '__main__':

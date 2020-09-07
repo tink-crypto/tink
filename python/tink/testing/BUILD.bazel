@@ -72,3 +72,30 @@ py_test(
         requirement("absl-py"),
     ],
 )
+
+py_library(
+    name = "keyset_builder",
+    testonly = 1,
+    srcs = [
+        "keyset_builder.py",
+    ],
+    deps = [
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "keyset_builder_test",
+    srcs = ["keyset_builder_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":keyset_builder",
+        requirement("absl-py"),
+        "//tink/proto:tink_py_pb2",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
