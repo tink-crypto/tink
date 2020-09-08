@@ -95,6 +95,12 @@ TEST(InputStreamAdapterTest, ReadMoreThanAvailable) {
   EXPECT_EQ(read_result.ValueOrDie(), data);
 }
 
+TEST(InputStreamAdapterTest, ReadFromEmptyStream) {
+  auto adapter = GetInputStreamAdapter(-1, "");
+  auto read_result = adapter->Read(10);
+  EXPECT_EQ(read_result.status().error_code(), util::error::OUT_OF_RANGE);
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
