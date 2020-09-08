@@ -19,153 +19,124 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.proto import tink_pb2
+from absl.testing import parameterized
+import tink
 from tink import core
 from tink import hybrid
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+TEMPLATE = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
+RAW_TEMPLATE = keyset_builder.raw_template(TEMPLATE)
 
 
 def setUpModule():
   hybrid.register()
 
 
-def new_primitives_and_keys(key_id, output_prefix_type):
-  fake_dec_key = helper.fake_key(
-      key_material_type=tink_pb2.KeyData.ASYMMETRIC_PRIVATE,
-      key_id=key_id,
-      output_prefix_type=output_prefix_type)
-  fake_enc_key = helper.fake_key(
-      key_material_type=tink_pb2.KeyData.ASYMMETRIC_PUBLIC,
-      key_id=key_id, output_prefix_type=output_prefix_type)
-  fake_hybrid_decrypt = helper.FakeHybridDecrypt(
-      'fakeHybrid {}'.format(key_id))
-  fake_hybrid_encrypt = helper.FakeHybridEncrypt(
-      'fakeHybrid {}'.format(key_id))
-  return fake_hybrid_decrypt, fake_hybrid_encrypt, fake_dec_key, fake_enc_key
+class HybridWrapperTest(parameterized.TestCase):
 
+  @parameterized.parameters([TEMPLATE, RAW_TEMPLATE])
+  def test_encrypt_decrypt(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
 
-class HybridWrapperTest(absltest.TestCase):
+    hybrid_enc = public_handle.primitive(hybrid.HybridEncrypt)
+    ciphertext = hybrid_enc.encrypt(b'plaintext', b'context')
+    hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
+    self.assertEqual(hybrid_dec.decrypt(ciphertext, b'context'),
+                     b'plaintext')
 
-  def test_encrypt_decrypt(self):
-    dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-    dec_pset.set_primary(dec_pset.add_primitive(dec, dec_key))
-    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
+  @parameterized.parameters([TEMPLATE, RAW_TEMPLATE])
+  def test_decrypt_unknown_ciphertext_fails(self, template):
+    unknown_private_handle = tink.new_keyset_handle(template)
+    unknown_public_handle = unknown_private_handle.public_keyset_handle()
+    unknown_enc = unknown_public_handle.primitive(hybrid.HybridEncrypt)
+    unknown_ciphertext = unknown_enc.encrypt(b'plaintext', b'context')
 
-    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
-    enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = core.Registry.wrap(enc_pset, hybrid.HybridEncrypt)
-
-    ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
-    self.assertEqual(
-        wrapped_dec.decrypt(ciphertext, b'context_info'), b'plaintext')
-
-  def test_encrypt_decrypt_with_key_rotation(self):
-    dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
-    enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = core.Registry.wrap(enc_pset, hybrid.HybridEncrypt)
-    ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
-
-    new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
-        5678, tink_pb2.TINK)
-    new_enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
-    new_enc_pset.set_primary(new_enc_pset.add_primitive(new_enc, new_enc_key))
-    new_wrapped_enc = core.Registry.wrap(
-        new_enc_pset, hybrid.HybridEncrypt)
-
-    new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
-        5678, tink_pb2.TINK)
-    new_dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-    new_dec_pset.add_primitive(dec, dec_key)
-    new_dec_pset.set_primary(new_dec_pset.add_primitive(new_dec, new_dec_key))
-    new_wrapped_dec = core.Registry.wrap(
-        new_dec_pset, hybrid.HybridDecrypt)
-
-    new_ciphertext = new_wrapped_enc.encrypt(b'new_plaintext',
-                                             b'new_context_info')
-    self.assertEqual(
-        new_wrapped_dec.decrypt(ciphertext, b'context_info'),
-        b'plaintext')
-    self.assertEqual(
-        new_wrapped_dec.decrypt(new_ciphertext, b'new_context_info'),
-        b'new_plaintext')
-
-  def test_encrypt_decrypt_with_key_rotation_from_raw(self):
-    raw_dec, raw_enc, raw_dec_key, raw_enc_key = new_primitives_and_keys(
-        1234, tink_pb2.RAW)
-    old_raw_ciphertext = raw_enc.encrypt(b'old_raw_ciphertext', b'context_info')
-
-    new_dec, new_enc, new_dec_key, new_enc_key = new_primitives_and_keys(
-        5678, tink_pb2.TINK)
-    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
-    enc_pset.add_primitive(raw_enc, raw_enc_key)
-    enc_pset.set_primary(enc_pset.add_primitive(new_enc, new_enc_key))
-    wrapped_enc = core.Registry.wrap(
-        enc_pset, hybrid.HybridEncrypt)
-
-    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-    dec_pset.add_primitive(raw_dec, raw_dec_key)
-    dec_pset.set_primary(dec_pset.add_primitive(new_dec, new_dec_key))
-    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
-
-    new_ciphertext = wrapped_enc.encrypt(b'new_plaintext', b'new_context_info')
-    self.assertEqual(
-        wrapped_dec.decrypt(old_raw_ciphertext, b'context_info'),
-        b'old_raw_ciphertext')
-    self.assertEqual(
-        wrapped_dec.decrypt(new_ciphertext, b'new_context_info'),
-        b'new_plaintext')
-
-  def test_encrypt_decrypt_two_raw_keys(self):
-    dec1, enc1, dec1_key, _ = new_primitives_and_keys(
-        1234, tink_pb2.RAW)
-    raw_ciphertext1 = enc1.encrypt(b'plaintext1', b'context_info1')
-    dec2, enc2, dec2_key, _ = new_primitives_and_keys(
-        1234, tink_pb2.RAW)
-    raw_ciphertext2 = enc2.encrypt(b'plaintext2', b'context_info2')
-
-    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-    dec_pset.add_primitive(dec1, dec1_key)
-    dec_pset.set_primary(dec_pset.add_primitive(dec2, dec2_key))
-    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
-
-    self.assertEqual(
-        wrapped_dec.decrypt(raw_ciphertext1, b'context_info1'),
-        b'plaintext1')
-    self.assertEqual(
-        wrapped_dec.decrypt(raw_ciphertext2, b'context_info2'),
-        b'plaintext2')
-
-  def test_decrypt_unknown_ciphertext_fails(self):
-    unknown_enc = helper.FakeHybridEncrypt('unknownHybrid')
-    unknown_ciphertext = unknown_enc.encrypt(b'plaintext', b'context_info')
-
-    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-
-    dec1, _, dec1_key, _ = new_primitives_and_keys(1234, tink_pb2.RAW)
-    dec2, _, dec2_key, _ = new_primitives_and_keys(5678, tink_pb2.TINK)
-    dec_pset.add_primitive(dec1, dec1_key)
-    dec_pset.set_primary(dec_pset.add_primitive(dec2, dec2_key))
-
-    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
-
+    private_handle = tink.new_keyset_handle(template)
+    hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
     with self.assertRaises(core.TinkError):
-      wrapped_dec.decrypt(unknown_ciphertext, b'context_info')
+      hybrid_dec.decrypt(unknown_ciphertext, b'context')
 
-  def test_decrypt_wrong_associated_data_fails(self):
-    dec, enc, dec_key, enc_key = new_primitives_and_keys(1234, tink_pb2.TINK)
-    dec_pset = core.new_primitive_set(hybrid.HybridDecrypt)
-    dec_pset.set_primary(dec_pset.add_primitive(dec, dec_key))
-    wrapped_dec = core.Registry.wrap(dec_pset, hybrid.HybridDecrypt)
+  @parameterized.parameters([TEMPLATE, RAW_TEMPLATE])
+  def test_decrypt_wrong_associated_data_fails(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
 
-    enc_pset = core.new_primitive_set(hybrid.HybridEncrypt)
-    enc_pset.set_primary(enc_pset.add_primitive(enc, enc_key))
-    wrapped_enc = core.Registry.wrap(enc_pset, hybrid.HybridEncrypt)
-
-    ciphertext = wrapped_enc.encrypt(b'plaintext', b'context_info')
+    hybrid_enc = public_handle.primitive(hybrid.HybridEncrypt)
+    ciphertext = hybrid_enc.encrypt(b'plaintext', b'context')
+    hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
     with self.assertRaises(core.TinkError):
-      wrapped_dec.decrypt(ciphertext, b'wrong_context_info')
+      hybrid_dec.decrypt(ciphertext, b'wrong_context')
+
+  @parameterized.parameters([(TEMPLATE, TEMPLATE),
+                             (RAW_TEMPLATE, TEMPLATE),
+                             (TEMPLATE, RAW_TEMPLATE),
+                             (RAW_TEMPLATE, RAW_TEMPLATE)])
+  def test_encrypt_decrypt_with_key_rotation(self, old_template, new_template):
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(old_template)
+    builder.set_primary_key(older_key_id)
+    private_handle1 = builder.keyset_handle()
+    dec1 = private_handle1.primitive(hybrid.HybridDecrypt)
+    enc1 = private_handle1.public_keyset_handle().primitive(
+        hybrid.HybridEncrypt)
+
+    newer_key_id = builder.add_new_key(new_template)
+    private_handle2 = builder.keyset_handle()
+    dec2 = private_handle2.primitive(hybrid.HybridDecrypt)
+    enc2 = private_handle2.public_keyset_handle().primitive(
+        hybrid.HybridEncrypt)
+
+    builder.set_primary_key(newer_key_id)
+    private_handle3 = builder.keyset_handle()
+    dec3 = private_handle3.primitive(hybrid.HybridDecrypt)
+    enc3 = private_handle3.public_keyset_handle().primitive(
+        hybrid.HybridEncrypt)
+
+    builder.disable_key(older_key_id)
+    private_handle4 = builder.keyset_handle()
+    dec4 = private_handle4.primitive(hybrid.HybridDecrypt)
+    enc4 = private_handle4.public_keyset_handle().primitive(
+        hybrid.HybridEncrypt)
+    self.assertNotEqual(older_key_id, newer_key_id)
+
+    # p1 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext1 = enc1.encrypt(b'plaintext', b'context')
+    self.assertEqual(dec1.decrypt(ciphertext1, b'context'), b'plaintext')
+    self.assertEqual(dec2.decrypt(ciphertext1, b'context'), b'plaintext')
+    self.assertEqual(dec3.decrypt(ciphertext1, b'context'), b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = dec4.decrypt(ciphertext1, b'context')
+
+    # p2 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext2 = enc2.encrypt(b'plaintext', b'context')
+    self.assertEqual(dec1.decrypt(ciphertext2, b'context'), b'plaintext')
+    self.assertEqual(dec2.decrypt(ciphertext2, b'context'), b'plaintext')
+    self.assertEqual(dec3.decrypt(ciphertext2, b'context'), b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = dec4.decrypt(ciphertext2, b'context')
+
+    # p3 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext3 = enc3.encrypt(b'plaintext', b'context')
+    with self.assertRaises(tink.TinkError):
+      _ = dec1.decrypt(ciphertext3, b'context')
+    self.assertEqual(dec2.decrypt(ciphertext3, b'context'), b'plaintext')
+    self.assertEqual(dec3.decrypt(ciphertext3, b'context'), b'plaintext')
+    self.assertEqual(dec4.decrypt(ciphertext3, b'context'), b'plaintext')
+
+    # p4 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext4 = enc4.encrypt(b'plaintext', b'context')
+    with self.assertRaises(tink.TinkError):
+      _ = dec1.decrypt(ciphertext4, b'context')
+    self.assertEqual(dec2.decrypt(ciphertext4, b'context'), b'plaintext')
+    self.assertEqual(dec3.decrypt(ciphertext4, b'context'), b'plaintext')
+    self.assertEqual(dec4.decrypt(ciphertext4, b'context'), b'plaintext')
 
 
 if __name__ == '__main__':
