@@ -16,147 +16,127 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.proto import tink_pb2
-from tink import core
+from absl.testing import parameterized
+import tink
 from tink import daead
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+DAEAD_TEMPLATE = daead.deterministic_aead_key_templates.AES256_SIV
+RAW_DAEAD_TEMPLATE = keyset_builder.raw_template(DAEAD_TEMPLATE)
 
 
 def setUpModule():
   daead.register()
 
 
-class AeadWrapperTest(absltest.TestCase):
+class AeadWrapperTest(parameterized.TestCase):
 
-  def new_primitive_key_pair(self, key_id, output_prefix_type):
-    fake_key = helper.fake_key(
-        key_id=key_id, output_prefix_type=output_prefix_type)
-    fake_aead = helper.FakeDeterministicAead(
-        'fakeDeterministicAead {}'.format(key_id))
-    return fake_aead, fake_key
-
-  def test_encrypt_decrypt(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
-
-    plaintext = b'plaintext'
-    associated_data = b'associated_data'
-    ciphertext = wrapped_daead.encrypt_deterministically(
-        plaintext, associated_data)
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(ciphertext, associated_data),
-        plaintext)
-
-  def test_encrypt_decrypt_with_key_rotation(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
-    ciphertext = wrapped_daead.encrypt_deterministically(
+  @parameterized.parameters([DAEAD_TEMPLATE, RAW_DAEAD_TEMPLATE])
+  def test_encrypt_decrypt(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(daead.DeterministicAead)
+    ciphertext = primitive.encrypt_deterministically(
         b'plaintext', b'associated_data')
-
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    new_ciphertext = wrapped_daead.encrypt_deterministically(
-        b'new_plaintext', b'new_associated_data')
-
     self.assertEqual(
-        wrapped_daead.decrypt_deterministically(ciphertext, b'associated_data'),
+        primitive.decrypt_deterministically(ciphertext, b'associated_data'),
         b'plaintext')
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(new_ciphertext,
-                                                b'new_associated_data'),
-        b'new_plaintext')
 
-  def test_encrypt_decrypt_with_key_rotation_from_raw(self):
-    primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    old_raw_ciphertext = primitive.encrypt_deterministically(
-        b'plaintext', b'associated_data')
-
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    pset.add_primitive(primitive, raw_key)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
-    new_ciphertext = wrapped_daead.encrypt_deterministically(
-        b'new_plaintext', b'new_associated_data')
-
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(old_raw_ciphertext,
-                                                b'associated_data'),
-        b'plaintext')
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(new_ciphertext,
-                                                b'new_associated_data'),
-        b'new_plaintext')
-
-  def test_encrypt_decrypt_two_raw_keys(self):
-    primitive1, raw_key1 = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    primitive2, raw_key2 = self.new_primitive_key_pair(5678, tink_pb2.RAW)
-    raw_ciphertext1 = primitive1.encrypt_deterministically(
-        b'plaintext1', b'associated_data1')
-    raw_ciphertext2 = primitive2.encrypt_deterministically(
-        b'plaintext2', b'associated_data2')
-
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    pset.add_primitive(primitive1, raw_key1)
-    pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
-
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(raw_ciphertext1,
-                                                b'associated_data1'),
-        b'plaintext1')
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(raw_ciphertext2,
-                                                b'associated_data2'),
-        b'plaintext2')
-    self.assertEqual(
-        wrapped_daead.decrypt_deterministically(
-            wrapped_daead.encrypt_deterministically(b'plaintext',
-                                                    b'associated_data'),
-            b'associated_data'), b'plaintext')
-
-  def test_decrypt_unknown_ciphertext_fails(self):
-    unknown_primitive = helper.FakeDeterministicAead(
-        'unknownFakeDeterministicAead')
+  @parameterized.parameters([DAEAD_TEMPLATE, RAW_DAEAD_TEMPLATE])
+  def test_decrypt_unknown_ciphertext_fails(self, template):
+    unknown_handle = tink.new_keyset_handle(template)
+    unknown_primitive = unknown_handle.primitive(daead.DeterministicAead)
     unknown_ciphertext = unknown_primitive.encrypt_deterministically(
         b'plaintext', b'associated_data')
 
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    pset.add_primitive(primitive, raw_key)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(daead.DeterministicAead)
 
-    with self.assertRaises(core.TinkError):
-      wrapped_daead.decrypt_deterministically(unknown_ciphertext,
-                                              b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt_deterministically(unknown_ciphertext,
+                                          b'associated_data')
 
-  def test_decrypt_wrong_associated_data_fails(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(daead.DeterministicAead)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_daead = core.Registry.wrap(pset, daead.DeterministicAead)
+  @parameterized.parameters([DAEAD_TEMPLATE, RAW_DAEAD_TEMPLATE])
+  def test_decrypt_wrong_associated_data_fails(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(daead.DeterministicAead)
 
-    ciphertext = wrapped_daead.encrypt_deterministically(
-        b'plaintext', b'associated_data')
-    with self.assertRaises(core.TinkError):
-      wrapped_daead.decrypt_deterministically(ciphertext,
-                                              b'wrong_associated_data')
+    ciphertext = primitive.encrypt_deterministically(b'plaintext',
+                                                     b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      primitive.decrypt_deterministically(ciphertext, b'wrong_associated_data')
+
+  @parameterized.parameters([(DAEAD_TEMPLATE, DAEAD_TEMPLATE),
+                             (RAW_DAEAD_TEMPLATE, DAEAD_TEMPLATE),
+                             (DAEAD_TEMPLATE, RAW_DAEAD_TEMPLATE),
+                             (RAW_DAEAD_TEMPLATE, RAW_DAEAD_TEMPLATE)])
+  def test_encrypt_decrypt_with_key_rotation(self, template1, template2):
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(template1)
+    builder.set_primary_key(older_key_id)
+    p1 = builder.keyset_handle().primitive(daead.DeterministicAead)
+
+    newer_key_id = builder.add_new_key(template2)
+    p2 = builder.keyset_handle().primitive(daead.DeterministicAead)
+
+    builder.set_primary_key(newer_key_id)
+    p3 = builder.keyset_handle().primitive(daead.DeterministicAead)
+
+    builder.disable_key(older_key_id)
+    p4 = builder.keyset_handle().primitive(daead.DeterministicAead)
+
+    self.assertNotEqual(older_key_id, newer_key_id)
+    # p1 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext1 = p1.encrypt_deterministically(b'plaintext', b'ad')
+    self.assertEqual(p1.decrypt_deterministically(ciphertext1, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p2.decrypt_deterministically(ciphertext1, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p3.decrypt_deterministically(ciphertext1, b'ad'),
+                     b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = p4.decrypt_deterministically(ciphertext1, b'ad')
+
+    # p2 encrypts with the older key. So p1, p2 and p3 can decrypt it,
+    # but not p4.
+    ciphertext2 = p2.encrypt_deterministically(b'plaintext', b'ad')
+    self.assertEqual(p1.decrypt_deterministically(ciphertext2, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p2.decrypt_deterministically(ciphertext2, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p3.decrypt_deterministically(ciphertext2, b'ad'),
+                     b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      _ = p4.decrypt_deterministically(ciphertext2, b'ad')
+
+    # p3 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext3 = p3.encrypt_deterministically(b'plaintext', b'ad')
+    with self.assertRaises(tink.TinkError):
+      _ = p1.decrypt_deterministically(ciphertext3, b'ad')
+    self.assertEqual(p2.decrypt_deterministically(ciphertext3, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p3.decrypt_deterministically(ciphertext3, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p4.decrypt_deterministically(ciphertext3, b'ad'),
+                     b'plaintext')
+
+    # p4 encrypts with the newer key. So p2, p3 and p4 can decrypt it,
+    # but not p1.
+    ciphertext4 = p4.encrypt_deterministically(b'plaintext', b'ad')
+    with self.assertRaises(tink.TinkError):
+      _ = p1.decrypt_deterministically(ciphertext4, b'ad')
+    self.assertEqual(p2.decrypt_deterministically(ciphertext4, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p3.decrypt_deterministically(ciphertext4, b'ad'),
+                     b'plaintext')
+    self.assertEqual(p4.decrypt_deterministically(ciphertext4, b'ad'),
+                     b'plaintext')
 
 
 if __name__ == '__main__':
