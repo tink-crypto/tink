@@ -38,6 +38,10 @@ ECDSA_DER_PARAMS_P384 = [
     signature.signature_key_templates.ECDSA_P384, common_pb2.SHA512,
     common_pb2.NIST_P384
 ]
+ECDSA_DER_PARAMS_P384_SHA384 = [
+    signature.signature_key_templates.ECDSA_P384_SHA384, common_pb2.SHA384,
+    common_pb2.NIST_P384
+]
 ECDSA_DER_PARAMS_P521 = [
     signature.signature_key_templates.ECDSA_P521, common_pb2.SHA512,
     common_pb2.NIST_P521
@@ -49,6 +53,11 @@ ECDSA_IEEE_PARAMS_P256 = [
 ]
 ECDSA_IEEE_PARAMS_P384 = [
     signature.signature_key_templates.ECDSA_P384_IEEE_P1363, common_pb2.SHA512,
+    common_pb2.NIST_P384
+]
+ECDSA_IEEE_PARAMS_P384_SHA384 = [
+    signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
+    common_pb2.SHA384,
     common_pb2.NIST_P384
 ]
 ECDSA_IEEE_PARAMS_P521 = [
@@ -108,6 +117,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
   @parameterized.named_parameters(
       ['ecdsa_p256'] + ECDSA_DER_PARAMS_P256,
       ['ecdsa_p384'] + ECDSA_DER_PARAMS_P384,
+      ['ecdsa_p384_sha384'] + ECDSA_DER_PARAMS_P384_SHA384,
       ['ecdsa_p521'] + ECDSA_DER_PARAMS_P521,
   )
   def test_ecdsa_der(self, key_template, hash_type, curve):
@@ -128,6 +138,7 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
   @parameterized.named_parameters(
       ['ecdsa_p256'] + ECDSA_IEEE_PARAMS_P256,
       ['ecdsa_p384'] + ECDSA_IEEE_PARAMS_P384,
+      ['ecdsa_p384_sha384'] + ECDSA_IEEE_PARAMS_P384_SHA384,
       ['ecdsa_p521'] + ECDSA_IEEE_PARAMS_P521,
   )
   def test_ecdsa_ieee(self, key_template, hash_type, curve):

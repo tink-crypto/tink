@@ -114,6 +114,9 @@ ECDSA_P256 = create_ecdsa_key_template(common_pb2.SHA256, common_pb2.NIST_P256,
                                        ecdsa_pb2.DER)
 ECDSA_P384 = create_ecdsa_key_template(common_pb2.SHA512, common_pb2.NIST_P384,
                                        ecdsa_pb2.DER)
+ECDSA_P384_SHA384 = create_ecdsa_key_template(common_pb2.SHA384,
+                                              common_pb2.NIST_P384,
+                                              ecdsa_pb2.DER)
 ECDSA_P521 = create_ecdsa_key_template(common_pb2.SHA512, common_pb2.NIST_P521,
                                        ecdsa_pb2.DER)
 
@@ -123,6 +126,8 @@ ECDSA_P256_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA256,
 ECDSA_P384_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA512,
                                                   common_pb2.NIST_P384,
                                                   ecdsa_pb2.IEEE_P1363)
+ECDSA_P384_SHA384_IEEE_P1363 = create_ecdsa_key_template(
+    common_pb2.SHA384, common_pb2.NIST_P384, ecdsa_pb2.IEEE_P1363)
 ECDSA_P521_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA512,
                                                   common_pb2.NIST_P521,
                                                   ecdsa_pb2.IEEE_P1363)

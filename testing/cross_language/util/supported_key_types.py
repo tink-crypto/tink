@@ -116,8 +116,9 @@ KEY_TEMPLATE_NAMES = {
         'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
     ],
     'EcdsaPrivateKey': [
-        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P521', 'ECDSA_P256_IEEE_P1363',
-        'ECDSA_P384_IEEE_P1363', 'ECDSA_P521_IEEE_P1363'
+        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P384_SHA384', 'ECDSA_P521',
+        'ECDSA_P256_IEEE_P1363', 'ECDSA_P384_IEEE_P1363',
+        'ECDSA_P384_SHA384_IEEE_P1363', 'ECDSA_P521_IEEE_P1363'
     ],
     'Ed25519PrivateKey': ['ED25519'],
     'RsaSsaPkcs1PrivateKey': [
@@ -188,12 +189,16 @@ KEY_TEMPLATE = {
         signature.signature_key_templates.ECDSA_P256,
     'ECDSA_P384':
         signature.signature_key_templates.ECDSA_P384,
+    'ECDSA_P384_SHA384':
+        signature.signature_key_templates.ECDSA_P384_SHA384,
     'ECDSA_P521':
         signature.signature_key_templates.ECDSA_P521,
     'ECDSA_P256_IEEE_P1363':
         signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
     'ECDSA_P384_IEEE_P1363':
         signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
+    'ECDSA_P384_SHA384_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
     'ECDSA_P521_IEEE_P1363':
         signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
     'ED25519':
