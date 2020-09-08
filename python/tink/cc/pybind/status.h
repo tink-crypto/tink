@@ -15,11 +15,11 @@
 #define TINK_PYTHON_TINK_CC_PYBIND_STATUS_H_
 
 namespace pybind11 {
-namespace google {
+namespace google_tink {
 
 void PybindRegisterStatus(pybind11::module* m);
 
-}  // namespace google
+}  // namespace google_tink
 }  // namespace pybind11
 
 #endif  // TINK_PYTHON_TINK_CC_PYBIND_STATUS_H_

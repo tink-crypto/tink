@@ -54,8 +54,8 @@ namespace util = crypto::tink::util;
 // Only return values trigger exceptions, so NoThrowStatus has no meaning for
 // input values. Therefore only C++->Python casting is supported.
 template <typename StatusType>
-struct type_caster<google::NoThrowStatus<StatusType>> {
-  using InputType = google::NoThrowStatus<StatusType>;
+struct type_caster<google_tink::NoThrowStatus<StatusType>> {
+  using InputType = google_tink::NoThrowStatus<StatusType>;
   using StatusCaster = make_caster<StatusType>;
   static constexpr auto name = StatusCaster::name;
 
@@ -77,7 +77,7 @@ struct type_caster<util::Status> : public type_caster_base<util::Status> {
  public:
   // Conversion part 1 (Python->C++) handled by built in caster.
   bool load(handle src, bool convert) {
-    google::ImportStatusModule();
+    google_tink::ImportStatusModule();
     return type_caster_base<util::Status>::load(src, convert);
   }
 
@@ -104,14 +104,14 @@ struct type_caster<util::Status> : public type_caster_base<util::Status> {
   template <typename CType>
   static handle cast_impl(CType src, return_value_policy policy, handle parent,
                           bool throw_exception) {
-    google::ImportStatusModule();
+    google_tink::ImportStatusModule();
     if (!throw_exception) {
       // Use the built-in/standard pybind11 caster.
       return type_caster_base<util::Status>::cast(std::forward<CType>(src),
                                                   policy, parent);
     } else if (!src.ok()) {
       // Convert a non-ok status into an exception.
-      throw google::StatusNotOk(std::forward<CType>(src));
+      throw google_tink::StatusNotOk(std::forward<CType>(src));
     } else {
       // Return none for an ok status.
       return none().release();

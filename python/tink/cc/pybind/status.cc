@@ -24,7 +24,7 @@
 #include "tink/cc/pybind/status_utils.h"
 
 namespace pybind11 {
-namespace google {
+namespace google_tink {
 
 namespace util = crypto::tink::util;
 
@@ -95,5 +95,5 @@ void PybindRegisterStatus(pybind11::module* module) {
   });
 }
 
-}  // namespace google
+}  // namespace google_tink
 }  // namespace pybind11

@@ -61,7 +61,8 @@ util::Status ReturnStatus(util::error::Code code,
 
 pybind11::object ReturnStatusManualCast(util::error::Code code,
                                         const std::string& text = "") {
-  return pybind11::cast(google::DoNotThrowStatus(util::Status(code, text)));
+  return pybind11::cast(
+      google_tink::DoNotThrowStatus(util::Status(code, text)));
 }
 
 const util::Status& ReturnStatusRef(util::error::Code code,
@@ -85,7 +86,8 @@ util::StatusOr<int> ReturnFailureStatusOr(util::error::Code code,
 
 pybind11::object ReturnFailureStatusOrManualCast(util::error::Code code,
                                                  const std::string& text = "") {
-  return pybind11::cast(google::DoNotThrowStatus(util::Status(code, text)));
+  return pybind11::cast(
+      google_tink::DoNotThrowStatus(util::Status(code, text)));
 }
 
 util::StatusOr<int> ReturnValueStatusOr(int value) { return value; }
@@ -112,29 +114,31 @@ void PybindRegisterStatusInjector(pybind11::module* module) {
 
   class_<TestClass>(m, "TestClass")
       .def(init())
-      .def("make_status", google::DoNotThrowStatus(&TestClass::MakeStatus),
+      .def("make_status",
+           google_tink::DoNotThrowStatus(&TestClass::MakeStatus),
            arg("code"), arg("text") = "")
       .def("make_status_const",
-           google::DoNotThrowStatus(&TestClass::MakeStatusConst), arg("code"),
+           google_tink::DoNotThrowStatus(&TestClass::MakeStatusConst),
+           arg("code"),
            arg("text") = "")
       .def("make_failure_status_or",
-           google::DoNotThrowStatus(&TestClass::MakeFailureStatusOr),
+           google_tink::DoNotThrowStatus(&TestClass::MakeFailureStatusOr),
            arg("code"), arg("text") = "");
 
   // util::Status bindings
   m.def("check_status", &CheckStatus, arg("status"), arg("code"));
   m.def("return_status", &ReturnStatus, "Raise an error if code is not OK.",
         arg("code"), arg("text") = "");
-  m.def("make_status", google::DoNotThrowStatus(&ReturnStatus),
+  m.def("make_status", google_tink::DoNotThrowStatus(&ReturnStatus),
         "Return a status without raising an error, regardless of what it is.",
         arg("code"), arg("text") = "");
   m.def("make_status_manual_cast", ReturnStatusManualCast,
         "Return a status without raising an error, regardless of what it is.",
         arg("code"), arg("text") = "");
-  m.def("make_status_ref", google::DoNotThrowStatus(&ReturnStatusRef),
+  m.def("make_status_ref", google_tink::DoNotThrowStatus(&ReturnStatusRef),
         "Return a reference to a static status value without raising an error.",
         arg("code"), arg("text") = "", return_value_policy::reference);
-  m.def("make_status_ptr", google::DoNotThrowStatus(&ReturnStatusPtr),
+  m.def("make_status_ptr", google_tink::DoNotThrowStatus(&ReturnStatusPtr),
         "Return a reference to a static status value without raising an error.",
         arg("code"), arg("text") = "", return_value_policy::reference);
 
@@ -143,7 +147,7 @@ void PybindRegisterStatusInjector(pybind11::module* module) {
   m.def("return_failure_status_or", &ReturnFailureStatusOr,
         "Raise an error with the given code.", arg("code"), arg("text") = "");
   m.def("make_failure_status_or",
-        google::DoNotThrowStatus(&ReturnFailureStatusOr), arg("code"),
+        google_tink::DoNotThrowStatus(&ReturnFailureStatusOr), arg("code"),
         arg("text") = "", "Return a status without raising an error.");
   m.def("make_failure_status_or_manual_cast", &ReturnFailureStatusOrManualCast,
         arg("code"), arg("text") = "", "Return a status.");

@@ -28,7 +28,7 @@
 #include "tink/util/statusor.h"
 
 namespace pybind11 {
-namespace google {
+namespace google_tink {
 
 namespace util = crypto::tink::util;
 
@@ -98,7 +98,7 @@ class StatusNotOk : public std::exception {
   std::string what_;
 };
 
-}  // namespace google
+}  // namespace google_tink
 }  // namespace pybind11
 
 #endif  // TINK_PYTHON_CC_PYBIND_STATUS_UTILS_H_

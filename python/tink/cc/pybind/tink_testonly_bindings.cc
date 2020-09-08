@@ -48,7 +48,7 @@ PYBIND11_MODULE(tink_testonly_bindings, m) {
   PybindRegisterMac(&m);
   PybindRegisterPrfSet(&m);
   pybind11::test::PybindRegisterStatusInjector(&m);
-  pybind11::google::PybindRegisterStatus(&m);
+  pybind11::google_tink::PybindRegisterStatus(&m);
   PybindRegisterHybridDecrypt(&m);
   PybindRegisterOutputStreamAdapter(&m);
   PybindRegisterCcKeyManager(&m);

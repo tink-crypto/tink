@@ -21,7 +21,7 @@
 #include "tink/cc/pybind/import_helper.h"
 
 namespace pybind11 {
-namespace google {
+namespace google_tink {
 
 void ImportStatusModule() {
   // This function is called each time a Status object is passed from
@@ -35,5 +35,5 @@ void ImportStatusModule() {
   }
 }
 
-}  // namespace google
+}  // namespace google_tink
 }  // namespace pybind11
