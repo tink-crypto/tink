@@ -17,74 +17,62 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from tink.proto import tink_pb2
-from tink import core
+import tink
 from tink import prf
-from tink.prf import _prf_set_wrapper
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+TEMPLATE = prf.prf_key_templates.HMAC_SHA256
 
 
 def setUpModule():
-  core.Registry.register_primitive_wrapper(_prf_set_wrapper.PrfSetWrapper())
+  prf.register()
 
 
 class PrfSetWrapperTest(absltest.TestCase):
 
-  def new_primitive_key_pair(self, key_id):
-    fake_key = helper.fake_key(key_id=key_id, output_prefix_type=tink_pb2.RAW)
-    fake_prf_set = helper.FakePrfSet('fakePrfSet {}'.format(key_id))
-    return fake_prf_set, fake_key
-
-  def test_wrap_one(self):
-    primitive, key = self.new_primitive_key_pair(1234)
-    pset = core.new_primitive_set(prf.PrfSet)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
-    expected_output = primitive.primary().compute(b'input', output_length=31)
-
-    self.assertEqual(
-        wrapped_prf_set.primary().compute(b'input', output_length=31),
-        expected_output)
-    self.assertEqual(wrapped_prf_set.primary_id(), 1234)
-    prfs = wrapped_prf_set.all()
+  def test_wrapped_output_is_equal(self):
+    keyset_handle = tink.new_keyset_handle(TEMPLATE)
+    primitive = keyset_handle.primitive(prf.PrfSet)
+    output = primitive.primary().compute(b'input', output_length=31)
+    key_id = primitive.primary_id()
+    prfs = primitive.all()
     self.assertLen(prfs, 1)
-    self.assertEqual(prfs[1234].compute(b'input', output_length=31),
-                     expected_output)
-
-  def test_wrap_two(self):
-    primitive1, key1 = self.new_primitive_key_pair(1234)
-    primitive2, key2 = self.new_primitive_key_pair(5678)
-    pset = core.new_primitive_set(prf.PrfSet)
-    _ = pset.add_primitive(primitive1, key1)
-    entry2 = pset.add_primitive(primitive2, key2)
-    pset.set_primary(entry2)
-    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
-    expected_output1 = primitive1.primary().compute(b'input', output_length=31)
-    expected_output2 = primitive2.primary().compute(b'input', output_length=31)
-
-    self.assertEqual(
-        wrapped_prf_set.primary().compute(b'input', output_length=31),
-        expected_output2)
-    self.assertEqual(wrapped_prf_set.primary_id(), 5678)
-    prfs = wrapped_prf_set.all()
-    self.assertLen(prfs, 2)
-    self.assertEqual(prfs[1234].compute(b'input', output_length=31),
-                     expected_output1)
-    self.assertEqual(prfs[5678].compute(b'input', output_length=31),
-                     expected_output2)
+    self.assertEqual(prfs[key_id].compute(b'input', output_length=31), output)
 
   def test_invalid_length_fails(self):
-    primitive, key = self.new_primitive_key_pair(1234)
-    pset = core.new_primitive_set(prf.PrfSet)
-    entry = pset.add_primitive(primitive, key)
-    pset.set_primary(entry)
-    wrapped_prf_set = core.Registry.wrap(pset, prf.PrfSet)
+    keyset_handle = tink.new_keyset_handle(TEMPLATE)
+    primitive = keyset_handle.primitive(prf.PrfSet)
+    with self.assertRaises(tink.TinkError):
+      _ = primitive.primary().compute(b'input', output_length=1234567)
+    prfs = primitive.all()
+    self.assertLen(prfs, 1)
+    with self.assertRaises(tink.TinkError):
+      _ = prfs[primitive.primary_id()].compute(b'input', output_length=1234567)
 
-    with self.assertRaises(core.TinkError):
-      _ = wrapped_prf_set.primary().compute(b'input', output_length=1234567)
-    with self.assertRaises(core.TinkError):
-      _ = wrapped_prf_set.all()[1234].compute(b'input', output_length=1234567)
+  def test_wrap_three_with_one_disabled(self):
+    builder = keyset_builder.new_keyset_builder()
+    id1 = builder.add_new_key(TEMPLATE)
+    id2 = builder.add_new_key(TEMPLATE)
+    disabled_id = builder.add_new_key(TEMPLATE)
+    builder.disable_key(disabled_id)
+    builder.set_primary_key(id1)
+    prf_set1 = builder.keyset_handle().primitive(prf.PrfSet)
+    builder.set_primary_key(id2)
+    prf_set2 = builder.keyset_handle().primitive(prf.PrfSet)
+    self.assertNotEqual(id1, id2)
+    self.assertEqual(prf_set1.primary_id(), id1)
+    self.assertEqual(prf_set2.primary_id(), id2)
+
+    output1 = prf_set1.primary().compute(b'input', output_length=31)
+    output2 = prf_set2.primary().compute(b'input', output_length=31)
+    self.assertNotEqual(output1, output2)
+    prfs = prf_set1.all()
+    self.assertLen(prfs, 2)
+    self.assertEqual(prfs[id1].compute(b'input', output_length=31),
+                     output1)
+    self.assertEqual(prfs[id2].compute(b'input', output_length=31),
+                     output2)
 
 
 if __name__ == '__main__':

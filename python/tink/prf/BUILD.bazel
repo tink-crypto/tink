@@ -71,9 +71,8 @@ py_test(
         ":_prf_set_wrapper",
         ":prf",
         requirement("absl-py"),
-        "//tink/core",
-        "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
+        "//tink:tink_python",
+        "//tink/testing:keyset_builder",
     ],
 )
 
