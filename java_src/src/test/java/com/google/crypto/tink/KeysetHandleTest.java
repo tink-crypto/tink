@@ -121,7 +121,7 @@ public class KeysetHandleTest {
 
   @Test
   public void testGenerateNew_proto() throws Exception {
-    com.google.crypto.tink.proto.KeyTemplate kt = AeadKeyTemplates.AES128_GCM;
+    com.google.crypto.tink.proto.KeyTemplate kt = AeadKeyTemplates.AES128_EAX;
     KeysetHandle handle = KeysetHandle.generateNew(kt);
     Keyset keyset = handle.getKeyset();
 
@@ -160,7 +160,7 @@ public class KeysetHandleTest {
 
   @Test
   public void testGenerateNew_multipleTimes_proto() throws Exception {
-    com.google.crypto.tink.proto.KeyTemplate kt = AeadKeyTemplates.AES128_GCM;
+    com.google.crypto.tink.proto.KeyTemplate kt = AeadKeyTemplates.AES128_EAX;
 
     // Makes sure that the key generation is randomized.
     Set<String> keys = new TreeSet<>();
@@ -273,7 +273,7 @@ public class KeysetHandleTest {
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
-                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                Registry.newKeyData(AeadKeyTemplates.AES128_EAX),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
@@ -288,11 +288,11 @@ public class KeysetHandleTest {
   // simply add a raw, non-primary key and encrypt directly with it.
   @Test
   public void testGetPrimitive_wrappingDoneCorrectly() throws Exception {
-    KeyData rawKeyData = Registry.newKeyData(AeadKeyTemplates.AES128_GCM);
+    KeyData rawKeyData = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
-                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                Registry.newKeyData(AeadKeyTemplates.AES128_EAX),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK),
@@ -345,7 +345,7 @@ public class KeysetHandleTest {
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
-                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
+                Registry.newKeyData(AeadKeyTemplates.AES128_EAX),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
