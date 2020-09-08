@@ -15,100 +15,119 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from absl.testing import absltest
-
-from tink.proto import tink_pb2
-from tink import core
+from absl.testing import parameterized
+import tink
 from tink import mac
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+MAC_TEMPLATE = mac.mac_key_templates.HMAC_SHA256_128BITTAG
+RAW_MAC_TEMPLATE = keyset_builder.raw_template(MAC_TEMPLATE)
+LEGACY_MAC_TEMPLATE = keyset_builder.legacy_template(MAC_TEMPLATE)
 
 
 def setUpModule():
   mac.register()
 
 
-class MacWrapperTest(absltest.TestCase):
+class MacWrapperTest(parameterized.TestCase):
 
-  def new_primitive_key_pair(self, key_id, output_prefix_type):
-    fake_key = helper.fake_key(
-        key_id=key_id, output_prefix_type=output_prefix_type)
-    fake_mac = helper.FakeMac('fakeMac {}'.format(key_id))
-    return fake_mac, fake_key
-
-  def test_verify_tink_mac(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(mac.Mac)
-    pset.set_primary(pset.add_primitive(primitive, key))
-
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
-    tag = wrapped_mac.compute_mac(b'data')
-    # No exception raised, no return value.
-    self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
-
-  def test_verify_legacy_mac(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.LEGACY)
-    pset = core.new_primitive_set(mac.Mac)
-    pset.set_primary(pset.add_primitive(primitive, key))
-
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
-    tag = wrapped_mac.compute_mac(b'data')
-    # No exception raised, no return value.
-    self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
-
-  def test_verify_macs_from_two_raw_keys(self):
-    primitive1, raw_key1 = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    primitive2, raw_key2 = self.new_primitive_key_pair(5678, tink_pb2.RAW)
-    tag1 = primitive1.compute_mac(b'data1')
-    tag2 = primitive2.compute_mac(b'data2')
-
-    pset = core.new_primitive_set(mac.Mac)
-    pset.add_primitive(primitive1, raw_key1)
-    pset.set_primary(pset.add_primitive(primitive2, raw_key2))
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
-
-    self.assertIsNone(wrapped_mac.verify_mac(tag1, b'data1'))
-    self.assertIsNone(wrapped_mac.verify_mac(tag2, b'data2'))
-    self.assertIsNone(
-        wrapped_mac.verify_mac(wrapped_mac.compute_mac(b'data'), b'data'))
-
-  def test_verify_old_tink_mac_with_new_key(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.TINK)
-    pset = core.new_primitive_set(mac.Mac)
-    pset.set_primary(pset.add_primitive(primitive, key))
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
-    tag = wrapped_mac.compute_mac(b'data')
-
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    pset.set_primary(pset.add_primitive(new_primitive, new_key))
-
-    self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
-
-  def test_verify_old_raw_mac_with_new_key(self):
-    primitive, key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
+  @parameterized.parameters([MAC_TEMPLATE,
+                             RAW_MAC_TEMPLATE,
+                             LEGACY_MAC_TEMPLATE])
+  def test_compute_verify_mac(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(mac.Mac)
     tag = primitive.compute_mac(b'data')
+    # No exception raised, no return value.
+    self.assertIsNone(primitive.verify_mac(tag, b'data'))
 
-    pset = core.new_primitive_set(mac.Mac)
-    pset.add_primitive(primitive, key)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    pset.set_primary(pset.add_primitive(new_primitive, new_key))
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
-    self.assertIsNone(wrapped_mac.verify_mac(tag, b'data'))
+  @parameterized.parameters([MAC_TEMPLATE,
+                             RAW_MAC_TEMPLATE,
+                             LEGACY_MAC_TEMPLATE])
+  def test_verify_unknown_mac_fails(self, template):
+    unknown_handle = tink.new_keyset_handle(template)
+    unknown_primitive = unknown_handle.primitive(mac.Mac)
+    unknown_tag = unknown_primitive.compute_mac(b'data')
 
-  def test_verify_unknown_mac_fails(self):
-    unknown_tag = helper.FakeMac('UnknownfakeMac').compute_mac(b'data')
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(mac.Mac)
+    with self.assertRaises(tink.TinkError):
+      primitive.verify_mac(unknown_tag, b'data')
 
-    pset = core.new_primitive_set(mac.Mac)
-    primitive, raw_key = self.new_primitive_key_pair(1234, tink_pb2.RAW)
-    new_primitive, new_key = self.new_primitive_key_pair(5678, tink_pb2.TINK)
-    pset.add_primitive(primitive, raw_key)
-    new_entry = pset.add_primitive(new_primitive, new_key)
-    pset.set_primary(new_entry)
-    wrapped_mac = core.Registry.wrap(pset, mac.Mac)
+  @parameterized.parameters([MAC_TEMPLATE,
+                             RAW_MAC_TEMPLATE,
+                             LEGACY_MAC_TEMPLATE])
+  def test_verify_short_mac_fails(self, template):
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(mac.Mac)
+    with self.assertRaises(tink.TinkError):
+      primitive.verify_mac(b'', b'data')
+    with self.assertRaises(tink.TinkError):
+      primitive.verify_mac(b'tag', b'data')
 
-    with self.assertRaises(core.TinkError):
-      wrapped_mac.verify_mac(unknown_tag, b'data')
+  @parameterized.parameters(
+      [(MAC_TEMPLATE, MAC_TEMPLATE),
+       (MAC_TEMPLATE, RAW_MAC_TEMPLATE),
+       (MAC_TEMPLATE, LEGACY_MAC_TEMPLATE),
+       (RAW_MAC_TEMPLATE, MAC_TEMPLATE),
+       (RAW_MAC_TEMPLATE, RAW_MAC_TEMPLATE),
+       (RAW_MAC_TEMPLATE, LEGACY_MAC_TEMPLATE),
+       (LEGACY_MAC_TEMPLATE, MAC_TEMPLATE),
+       (LEGACY_MAC_TEMPLATE, RAW_MAC_TEMPLATE),
+       (LEGACY_MAC_TEMPLATE, LEGACY_MAC_TEMPLATE)])
+  def test_key_rotation(self, old_key_tmpl, new_key_tmpl):
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(old_key_tmpl)
+
+    builder.set_primary_key(older_key_id)
+    mac1 = builder.keyset_handle().primitive(mac.Mac)
+
+    newer_key_id = builder.add_new_key(new_key_tmpl)
+    mac2 = builder.keyset_handle().primitive(mac.Mac)
+
+    builder.set_primary_key(newer_key_id)
+    mac3 = builder.keyset_handle().primitive(mac.Mac)
+
+    builder.disable_key(older_key_id)
+    mac4 = builder.keyset_handle().primitive(mac.Mac)
+
+    self.assertNotEqual(older_key_id, newer_key_id)
+    # 1 uses the older key. So 1, 2 and 3 can verify the mac, but not 4.
+    mac_value1 = mac1.compute_mac(b'plaintext')
+    mac1.verify_mac(mac_value1, b'plaintext')
+    mac2.verify_mac(mac_value1, b'plaintext')
+    mac3.verify_mac(mac_value1, b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      mac4.verify_mac(mac_value1, b'plaintext')
+
+    # 2 uses the older key. So 1, 2 and 3 can verify the mac, but not 4.
+    mac_value2 = mac2.compute_mac(b'plaintext')
+    mac1.verify_mac(mac_value2, b'plaintext')
+    mac2.verify_mac(mac_value2, b'plaintext')
+    mac3.verify_mac(mac_value2, b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      mac4.verify_mac(mac_value2, b'plaintext')
+
+    # 3 uses the newer key. So 2, 3 and 4 can verify the mac, but not 1.
+    mac_value3 = mac3.compute_mac(b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      mac1.verify_mac(mac_value3, b'plaintext')
+    mac2.verify_mac(mac_value3, b'plaintext')
+    mac3.verify_mac(mac_value3, b'plaintext')
+    mac4.verify_mac(mac_value3, b'plaintext')
+
+    # 4 uses the newer key. So 2, 3 and 4 can verify the mac, but not 1.
+    mac_value4 = mac4.compute_mac(b'plaintext')
+    with self.assertRaises(tink.TinkError):
+      mac1.verify_mac(mac_value4, b'plaintext')
+    mac2.verify_mac(mac_value4, b'plaintext')
+    mac3.verify_mac(mac_value4, b'plaintext')
+    mac4.verify_mac(mac_value4, b'plaintext')
 
 
 if __name__ == '__main__':

@@ -71,9 +71,9 @@ py_test(
     deps = [
         ":mac",
         requirement("absl-py"),
-        "//tink/core",
+        "//tink:tink_python",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
+        "//tink/testing:keyset_builder",
     ],
 )
 
