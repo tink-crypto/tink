@@ -123,6 +123,12 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
 }
 
 - (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName error:(NSError **)error {
+  return [self initFromKeychainWithName:keysetName accessGroup:nil error:error];
+}
+
+- (nullable instancetype)initFromKeychainWithName:(NSString *)keysetName
+                                      accessGroup:(NSString *)accessGroup
+                                            error:(NSError **)error {
   if (keysetName == nil) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
@@ -138,6 +144,13 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       (__bridge id)kSecAttrService : kTinkService,
       (__bridge id)kSecReturnData : (__bridge id)kCFBooleanTrue,
     };
+
+    if (accessGroup) {
+      NSMutableDictionary *mutableGetQuery =
+          [NSMutableDictionary dictionaryWithDictionary:getQuery];
+      [mutableGetQuery setObject:accessGroup forKey:(__bridge id)kSecAttrAccessGroup];
+      getQuery = [mutableGetQuery copy];
+    }
 
     crypto::tink::util::error::Code errorCode = crypto::tink::util::error::OK;
     std::string errorMessage = "";
@@ -190,6 +203,12 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
 }
 
 + (BOOL)deleteFromKeychainWithName:(NSString *)keysetName error:(NSError **)error {
+  return [self deleteFromKeychainWithName:keysetName accessGroup:nil error:error];
+}
+
++ (BOOL)deleteFromKeychainWithName:(NSString *)keysetName
+                       accessGroup:(NSString *)accessGroup
+                             error:(NSError **)error {
   if (keysetName == nil) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
@@ -203,6 +222,13 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     (__bridge id)kSecAttrAccount : keysetName,
     (__bridge id)kSecAttrService : kTinkService,
   };
+
+  if (accessGroup) {
+    NSMutableDictionary *mutableAttributes =
+        [NSMutableDictionary dictionaryWithDictionary:attributes];
+    [mutableAttributes setObject:accessGroup forKey:(__bridge id)kSecAttrAccessGroup];
+    attributes = [mutableAttributes copy];
+  }
 
   OSStatus status = SecItemDelete((CFDictionaryRef)attributes);
   if (status != errSecSuccess && status != errSecItemNotFound) {
@@ -221,6 +247,13 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
 }
 
 - (BOOL)writeToKeychainWithName:(NSString *)keysetName
+                      overwrite:(BOOL)overwrite
+                          error:(NSError **)error {
+  return [self writeToKeychainWithName:keysetName accessGroup:nil overwrite:overwrite error:error];
+}
+
+- (BOOL)writeToKeychainWithName:(NSString *)keysetName
+                    accessGroup:(NSString *)accessGroup
                       overwrite:(BOOL)overwrite
                           error:(NSError **)error {
   if (keysetName == nil) {
@@ -258,6 +291,13 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     (__bridge id)kSecReturnData : (__bridge id)kCFBooleanTrue,
     (__bridge id)kSecValueData : keysetData,
   };
+
+  if (accessGroup) {
+    NSMutableDictionary *mutableAttributes =
+        [NSMutableDictionary dictionaryWithDictionary:attributes];
+    [mutableAttributes setObject:accessGroup forKey:(__bridge id)kSecAttrAccessGroup];
+    attributes = [mutableAttributes copy];
+  }
 
   OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
   switch (status) {
