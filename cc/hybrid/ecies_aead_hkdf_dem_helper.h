@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "tink/aead.h"
+#include "tink/daead/subtle/aead_or_daead.h"
 #include "tink/key_manager.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
@@ -30,7 +31,6 @@ namespace crypto {
 namespace tink {
 
 // A helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
-// TODO(przydatek):  add a _test.cc-file for this class.
 class EciesAeadHkdfDemHelper {
  public:
   // Constructs a new helper for the specified DEM key template.
@@ -38,22 +38,26 @@ class EciesAeadHkdfDemHelper {
   crypto::tink::util::StatusOr<std::unique_ptr<const EciesAeadHkdfDemHelper>>
       New(const google::crypto::tink::KeyTemplate& dem_key_template);
 
+  virtual ~EciesAeadHkdfDemHelper() {}
+
   // Returns the size of the DEM-key in bytes.
   uint32_t dem_key_size_in_bytes() const {
     return key_params_.key_size_in_bytes;
   }
 
-  // Creates and returns a new Aead-primitive that uses
+  // Creates and returns a new AeadOrDaead object that uses
   // the key material given in 'symmetric_key', which must
   // be of length dem_key_size_in_bytes().
-  crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
-      const util::SecretData& symmetric_key_value) const;
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
+  GetAeadOrDaead(const util::SecretData& symmetric_key_value) const = 0;
 
- private:
+ protected:
   enum DemKeyType {
     AES_GCM_KEY,
     AES_CTR_HMAC_AEAD_KEY,
     XCHACHA20_POLY1305_KEY,
+    AES_SIV_KEY,
   };
 
   struct DemKeyParams {
@@ -62,12 +66,9 @@ class EciesAeadHkdfDemHelper {
     uint32_t aes_ctr_key_size_in_bytes;
   };
 
-  EciesAeadHkdfDemHelper(const KeyManager<Aead>* key_manager,
-                         const google::crypto::tink::KeyTemplate& key_template,
+  EciesAeadHkdfDemHelper(const google::crypto::tink::KeyTemplate& key_template,
                          DemKeyParams key_params)
-      : key_manager_(key_manager),
-        key_template_(key_template),
-        key_params_(key_params) {}
+      : key_template_(key_template), key_params_(key_params) {}
 
   static util::StatusOr<DemKeyParams> GetKeyParams(
       const ::google::crypto::tink::KeyTemplate& key_template);
@@ -77,7 +78,6 @@ class EciesAeadHkdfDemHelper {
 
   void ZeroKeyBytes(portable_proto::MessageLite* proto) const;
 
-  const KeyManager<Aead>* key_manager_;  // not owned
   const google::crypto::tink::KeyTemplate key_template_;
   const DemKeyParams key_params_;
 };
