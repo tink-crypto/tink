@@ -21,93 +21,124 @@ from __future__ import print_function
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from tink.proto import tink_pb2
-from tink import core
+import tink
 from tink import signature
-from tink.testing import helper
+from tink.testing import keyset_builder
+
+
+TEMPLATE = signature.signature_key_templates.ECDSA_P256
+LEGACY_TEMPLATE = keyset_builder.legacy_template(TEMPLATE)
+RAW_TEMPLATE = keyset_builder.raw_template(TEMPLATE)
 
 
 def setUpModule():
   signature.register()
 
 
-def new_sign_key_pair(key_id, output_prefix_type):
-  fake_key = helper.fake_key(
-      key_id=key_id,
-      key_material_type=tink_pb2.KeyData.ASYMMETRIC_PRIVATE,
-      output_prefix_type=output_prefix_type)
-  fake_sign = helper.FakePublicKeySign('fakePublicKeySign {}'.format(key_id))
-  return fake_sign, fake_key
+class SignatureWrapperTest(parameterized.TestCase):
 
+  @parameterized.parameters([TEMPLATE, LEGACY_TEMPLATE, RAW_TEMPLATE])
+  def test_sign_verify(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    sign_primitive = private_handle.primitive(signature.PublicKeySign)
+    verify_primitive = public_handle.primitive(signature.PublicKeyVerify)
 
-def to_verify_key_pair(key):
-  fake_verify = helper.FakePublicKeyVerify('fakePublicKeySign {}'.format(
-      key.key_id))
-  return fake_verify, key
+    data_signature = sign_primitive.sign(b'data')
+    verify_primitive.verify(data_signature, b'data')
 
+  @parameterized.parameters([TEMPLATE, LEGACY_TEMPLATE, RAW_TEMPLATE])
+  def test_verify_fails_on_wrong_data(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    sign_primitive = private_handle.primitive(signature.PublicKeySign)
+    verify_primitive = public_handle.primitive(signature.PublicKeyVerify)
 
-class PublicKeySignWrapperTest(parameterized.TestCase):
+    data_signature = sign_primitive.sign(b'data')
+    with self.assertRaises(tink.TinkError):
+      verify_primitive.verify(data_signature, b'invalid data')
 
-  @parameterized.named_parameters(('tink', tink_pb2.TINK),
-                                  ('legacy', tink_pb2.LEGACY))
-  def test_signature(self, output_prefix_type):
-    pair0 = new_sign_key_pair(1234, output_prefix_type)
-    pair1 = new_sign_key_pair(5678, output_prefix_type)
-    pset = core.new_primitive_set(signature.PublicKeySign)
-    pset_verify = core.new_primitive_set(signature.PublicKeyVerify)
+  @parameterized.parameters([TEMPLATE, LEGACY_TEMPLATE, RAW_TEMPLATE])
+  def test_verify_fails_on_unknown_signature(self, template):
+    unknown_handle = tink.new_keyset_handle(template)
+    unknown_sign_primitive = unknown_handle.primitive(signature.PublicKeySign)
+    unknown_data_signature = unknown_sign_primitive.sign(b'data')
 
-    pset.add_primitive(*pair0)
-    pset.set_primary(pset.add_primitive(*pair1))
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    verify_primitive = public_handle.primitive(signature.PublicKeyVerify)
+    with self.assertRaises(tink.TinkError):
+      verify_primitive.verify(unknown_data_signature, b'data')
 
-    pset_verify.add_primitive(*to_verify_key_pair(pair0[1]))
-    entry = pset_verify.add_primitive(*to_verify_key_pair(pair1[1]))
-    pset_verify.set_primary(entry)
+  @parameterized.parameters([(TEMPLATE, TEMPLATE),
+                             (TEMPLATE, LEGACY_TEMPLATE),
+                             (TEMPLATE, RAW_TEMPLATE),
+                             (LEGACY_TEMPLATE, TEMPLATE),
+                             (LEGACY_TEMPLATE, LEGACY_TEMPLATE),
+                             (LEGACY_TEMPLATE, RAW_TEMPLATE),
+                             (RAW_TEMPLATE, TEMPLATE),
+                             (RAW_TEMPLATE, LEGACY_TEMPLATE),
+                             (RAW_TEMPLATE, RAW_TEMPLATE)])
+  def test_sign_verify_with_key_rotation(self, old_template, new_template):
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(old_template)
+    builder.set_primary_key(older_key_id)
+    private_handle1 = builder.keyset_handle()
+    sign1 = private_handle1.primitive(signature.PublicKeySign)
+    verify1 = private_handle1.public_keyset_handle().primitive(
+        signature.PublicKeyVerify)
 
-    wrapped_pk_sign = core.Registry.wrap(pset, signature.PublicKeySign)
-    wrapped_pk_verify = core.Registry.wrap(pset_verify,
-                                           signature.PublicKeyVerify)
-    data_signature = wrapped_pk_sign.sign(b'data')
+    newer_key_id = builder.add_new_key(new_template)
+    private_handle2 = builder.keyset_handle()
+    sign2 = private_handle2.primitive(signature.PublicKeySign)
+    verify2 = private_handle2.public_keyset_handle().primitive(
+        signature.PublicKeyVerify)
 
-    wrapped_pk_verify.verify(data_signature, b'data')
+    builder.set_primary_key(newer_key_id)
+    private_handle3 = builder.keyset_handle()
+    sign3 = private_handle3.primitive(signature.PublicKeySign)
+    verify3 = private_handle3.public_keyset_handle().primitive(
+        signature.PublicKeyVerify)
 
-    with self.assertRaises(core.TinkError):
-      wrapped_pk_verify.verify(data_signature, b'invalid')
+    builder.disable_key(older_key_id)
+    private_handle4 = builder.keyset_handle()
+    sign4 = private_handle4.primitive(signature.PublicKeySign)
+    verify4 = private_handle4.public_keyset_handle().primitive(
+        signature.PublicKeyVerify)
+    self.assertNotEqual(older_key_id, newer_key_id)
 
+    # 1 signs with the older key. So 1, 2 and 3 can verify it, but not 4.
+    data_signature1 = sign1.sign(b'data')
+    verify1.verify(data_signature1, b'data')
+    verify2.verify(data_signature1, b'data')
+    verify3.verify(data_signature1, b'data')
+    with self.assertRaises(tink.TinkError):
+      verify4.verify(data_signature1, b'data')
 
-def new_verify_key_pair(key_id, output_prefix_type):
-  fake_key = helper.fake_key(
-      key_id=key_id,
-      key_material_type=tink_pb2.KeyData.ASYMMETRIC_PRIVATE,
-      output_prefix_type=output_prefix_type)
-  fake_verify = helper.FakePublicKeyVerify(
-      'fakePublicKeySign {}'.format(key_id))
-  return fake_verify, fake_key,
+    # 2 signs with the older key. So 1, 2 and 3 can verify it, but not 4.
+    data_signature2 = sign2.sign(b'data')
+    verify1.verify(data_signature2, b'data')
+    verify2.verify(data_signature2, b'data')
+    verify3.verify(data_signature2, b'data')
+    with self.assertRaises(tink.TinkError):
+      verify4.verify(data_signature2, b'data')
 
+    # 3 signs with the newer key. So 2, 3 and 4 can verify it, but not 1.
+    data_signature3 = sign3.sign(b'data')
+    with self.assertRaises(tink.TinkError):
+      verify1.verify(data_signature3, b'data')
+    verify2.verify(data_signature3, b'data')
+    verify3.verify(data_signature3, b'data')
+    verify4.verify(data_signature3, b'data')
 
-class PublicKeyVerifyWrapperTest(absltest.TestCase):
+    # 4 signs with the newer key. So 2, 3 and 4 can verify it, but not 1.
+    data_signature4 = sign4.sign(b'data')
+    with self.assertRaises(tink.TinkError):
+      verify1.verify(data_signature4, b'data')
+    verify2.verify(data_signature4, b'data')
+    verify3.verify(data_signature4, b'data')
+    verify4.verify(data_signature4, b'data')
 
-  def test_verify_signature(self):
-    pair0 = new_verify_key_pair(1234, tink_pb2.RAW)
-    pair1 = new_verify_key_pair(5678, tink_pb2.TINK)
-    pair2 = new_verify_key_pair(9012, tink_pb2.LEGACY)
-    pset = core.new_primitive_set(signature.PublicKeyVerify)
-
-    pset.add_primitive(*pair0)
-    pset.add_primitive(*pair1)
-    pset.set_primary(pset.add_primitive(*pair2))
-
-    # Check all keys work
-    for unused_primitive, key in (pair0, pair1, pair2):
-      pset_sign = core.new_primitive_set(signature.PublicKeySign)
-      pset_sign.set_primary(
-          pset_sign.add_primitive(
-              helper.FakePublicKeySign('fakePublicKeySign {}'.format(
-                  key.key_id)), key))
-
-      wrapped_pk_verify = core.Registry.wrap(pset, signature.PublicKeyVerify)
-      wrapped_pk_sign = core.Registry.wrap(pset_sign, signature.PublicKeySign)
-
-      wrapped_pk_verify.verify(wrapped_pk_sign.sign(b'data'), b'data')
 
 if __name__ == '__main__':
   absltest.main()
