@@ -86,8 +86,8 @@ util::Status MacSetWrapper::VerifyMac(
   mac_value = subtle::SubtleUtilBoringSSL::EnsureNonNull(mac_value);
 
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id =
-        std::string(mac_value.substr(0, CryptoFormat::kNonRawPrefixSize));
+    absl::string_view key_id =
+        mac_value.substr(0, CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = mac_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_mac_value =

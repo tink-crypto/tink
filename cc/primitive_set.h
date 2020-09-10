@@ -122,10 +122,10 @@ class PrimitiveSet {
 
   // Returns the entries with primitives identifed by 'identifier'.
   crypto::tink::util::StatusOr<const Primitives*> get_primitives(
-      const std::string& identifier) {
+      absl::string_view identifier) {
     absl::MutexLock lock(&primitives_mutex_);
     typename CiphertextPrefixToPrimitivesMap::iterator found =
-        primitives_.find(identifier);
+        primitives_.find(std::string(identifier));
     if (found == primitives_.end()) {
       return ToStatusF(crypto::tink::util::error::NOT_FOUND,
                        "No primitives found for identifier '%s'.", identifier);

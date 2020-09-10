@@ -79,8 +79,8 @@ util::StatusOr<std::string> AeadSetWrapper::Decrypt(
   associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id =
-        std::string(ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
+    absl::string_view key_id =
+        ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = aead_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =

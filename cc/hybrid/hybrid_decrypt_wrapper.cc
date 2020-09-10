@@ -51,8 +51,8 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
   context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
-    const std::string& key_id =
-        std::string(ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize));
+    absl::string_view key_id =
+        ciphertext.substr(0, CryptoFormat::kNonRawPrefixSize);
     auto primitives_result = hybrid_decrypt_set_->get_primitives(key_id);
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =
