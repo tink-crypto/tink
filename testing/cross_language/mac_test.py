@@ -12,7 +12,7 @@
 """Cross-language tests for the MAC primitive."""
 
 # Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable, Text, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -20,24 +20,33 @@ from absl.testing import parameterized
 import tink
 from tink import mac
 
-from tink.proto import common_pb2
 from tink.proto import tink_pb2
-from util import keyset_builder
+from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['mac']
+TEMPLATE = mac.mac_key_templates.HMAC_SHA512_512BITTAG
+KEY_ROTATION_TEMPLATES = [TEMPLATE,
+                          keyset_builder.raw_template(TEMPLATE),
+                          keyset_builder.legacy_template(TEMPLATE)]
+KEY_ROTATION_TEMPLATES_NO_LEGACY = [TEMPLATE,
+                                    keyset_builder.raw_template(TEMPLATE)]
 
 
-def key_rotation_test_cases():
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for compute_lang in SUPPORTED_LANGUAGES:
     for verify_lang in SUPPORTED_LANGUAGES:
-      for prefix in [tink_pb2.RAW, tink_pb2.TINK]:
-        old_key_tmpl = mac.mac_key_templates.create_hmac_key_template(
-            key_size=32, tag_size=16, hash_type=common_pb2.SHA256)
-        old_key_tmpl.output_prefix_type = prefix
-        new_key_tmpl = mac.mac_key_templates.HMAC_SHA512_512BITTAG
-        yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
+      if compute_lang == 'go' or verify_lang == 'go':
+        # TODO(b/168188126) Enable tests for Go when LEGACY is supported.
+        for old_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
+          for new_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
+            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
+      else:
+        for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+          for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -49,6 +58,7 @@ def tearDownModule():
   testing_servers.stop()
 
 
+# TODO(b/168188126) Add LEGACY when Go supportes it.
 def all_mac_key_template_names() -> Iterable[Text]:
   """Yields all MAC key template names."""
   for key_type in supported_key_types.MAC_KEY_TYPES:
@@ -59,7 +69,7 @@ def all_mac_key_template_names() -> Iterable[Text]:
 class MacTest(parameterized.TestCase):
 
   @parameterized.parameters(all_mac_key_template_names())
-  def test_encrypt_decrypt(self, key_template_name):
+  def test_compute_verify_mac(self, key_template_name):
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
