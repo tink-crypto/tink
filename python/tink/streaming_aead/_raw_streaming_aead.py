@@ -91,7 +91,7 @@ class RawStreamingAead(object):
     The cipertext_source's read() method is expected to return an empty bytes
     object if the stream is already at EOF. In the case where the stream is not
     at EOF yet but no data is available at the moment, it is expected to either
-    return None or raise a BlockingIOError.
+    block until data is available, return None or raise a BlockingIOError.
     The standard io.BufferedIOBase and io.RawIOBase base classes exhibit these
     behaviours and are hence supported.
 

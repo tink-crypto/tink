@@ -92,12 +92,16 @@ class RawDecryptingStream(io.RawIOBase):
     if size < 0:
       return self.readall()
     try:
-      data = self._read_from_input_stream_adapter(size)
-      if not data:
-        # No data is available at the moment, but EOF is not reached yet.
-        return None
-      else:
-        return data
+      # _input_stream_adapter may return an empty string when there is currently
+      # no data is available. In Python (in blocking mode), read is expected to
+      # block until some data is available.
+      # https://docs.python.org/3/library/io.html also mentions a
+      # non-blocking mode, but according to https://bugs.python.org/issue13322
+      # that mode is not properly implemented and not really used.
+      while True:
+        data = self._read_from_input_stream_adapter(size)
+        if data:
+          return data
     except core.TinkError as e:
       # We are checking if the exception was raised because of C++
       # OUT_OF_RANGE status, which signals EOF.

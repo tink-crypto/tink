@@ -170,6 +170,24 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
 
   @parameterized.parameters(
       [io.BytesIO, bytes_io.SlowBytesIO, bytes_io.SlowReadableRawBytes])
+  def test_wrapped_encrypt_decrypt_empty_plaintext(self, input_stream_factory):
+    template = (
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
+    keyset_handle = tink.new_keyset_handle(template)
+    primitive = keyset_handle.primitive(streaming_aead.StreamingAead)
+
+    plaintext = b''
+    ciphertext_dest = bytes_io.BytesIOWithValueAfterClose()
+    with primitive.new_encrypting_stream(ciphertext_dest, b'aad1') as es:
+      es.write(plaintext)
+    ciphertext = ciphertext_dest.value_after_close()
+
+    with primitive.new_decrypting_stream(
+        cast(BinaryIO, input_stream_factory(ciphertext)), b'aad1') as ds:
+      self.assertEqual(ds.read(), plaintext)
+
+  @parameterized.parameters(
+      [io.BytesIO, bytes_io.SlowBytesIO, bytes_io.SlowReadableRawBytes])
   def test_wrapped_encrypt_decrypt_two_keys(self, input_stream_factory):
     template = (
         streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)

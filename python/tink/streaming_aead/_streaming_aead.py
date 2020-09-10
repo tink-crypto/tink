@@ -32,6 +32,8 @@ class StreamingAead(object):
   encryption with authentication. The underlying encryption modes are selected
   so that partial plaintext can be obtained fast by decrypting and
   authenticating just a part of the ciphertext.
+
+  Note that we do not support non-blocking IO.
   """
 
   @abc.abstractmethod
@@ -83,7 +85,7 @@ class StreamingAead(object):
     The cipertext_source's read() method is expected to return an empty bytes
     object if the stream is already at EOF. In the case where the stream is not
     at EOF yet but no data is available at the moment, it is expected to either
-    return None or raise BlockingIOError.
+    block until data is available, return None or raise BlockingIOError.
     The standard io.BufferedIOBase and io.RawIOBase base classes exhibit these
     behaviours and are hence supported.
 
@@ -94,9 +96,10 @@ class StreamingAead(object):
         must match the associated_data supplied for the encryption.
 
     Returns:
-      A readable implementation of the io.BufferedIOBase interface that wraps
-      around 'ciphertext_source', such that any bytes read from the wrapper are
-      AEAD-decrypted using 'associated_data' as associated authenticated data.
+      A readable implementation of the io.BufferedIOBase interface in blocking
+      mode that wraps around 'ciphertext_source', such that any bytes read from
+      the wrapper are AEAD-decrypted using 'associated_data' as associated
+      authenticated data.
       Closing the wrapper also closes the ciphertext_source.
     Raises:
       tink.TinkError if the creation fails.
