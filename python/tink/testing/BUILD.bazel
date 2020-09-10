@@ -97,5 +97,6 @@ py_test(
         "//tink/proto:tink_py_pb2",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
+        "@tink_py//tink/hybrid",
     ],
 )

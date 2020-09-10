@@ -65,6 +65,13 @@ class KeysetBuilder(object):
   def keyset(self) -> bytes:
     return self._keyset.SerializeToString()
 
+  def public_keyset(self) -> bytes:
+    public_handle = self.keyset_handle().public_keyset_handle()
+    public_keyset = io.BytesIO()
+    writer = tink.BinaryKeysetWriter(public_keyset)
+    cleartext_keyset_handle.write(writer, public_handle)
+    return public_keyset.getvalue()
+
   def add_new_key(self, key_template: tink_pb2.KeyTemplate) -> int:
     """Generates a new key, adds it to the keyset, and returns its ID."""
     new_key = self._keyset.key.add()

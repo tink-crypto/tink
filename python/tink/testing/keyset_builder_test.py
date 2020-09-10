@@ -16,11 +16,13 @@ from absl.testing import absltest
 from tink.proto import tink_pb2
 import tink
 from tink import aead
+from tink import hybrid
 from tink.testing import keyset_builder
 
 
 def setUpModule():
   aead.register()
+  hybrid.register()
 
 
 class KeysetBuilderTest(absltest.TestCase):
@@ -64,6 +66,20 @@ class KeysetBuilderTest(absltest.TestCase):
     p2 = keyset_handle2.primitive(aead.Aead)
     ciphertext = p1.encrypt(b'plaintext', b'ad')
     self.assertEqual(p2.decrypt(ciphertext, b'ad'), b'plaintext')
+
+  def test_asymmetric_keyset_conversion(self):
+    builder = keyset_builder.new_keyset_builder()
+    new_key_id = builder.add_new_key(
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+    builder.set_primary_key(new_key_id)
+    private_keyset = builder.keyset()
+    public_keyset = builder.public_keyset()
+    private_handle = keyset_builder.from_keyset(private_keyset).keyset_handle()
+    dec = private_handle.primitive(hybrid.HybridDecrypt)
+    public_handle = keyset_builder.from_keyset(public_keyset).keyset_handle()
+    enc = public_handle.primitive(hybrid.HybridEncrypt)
+    ciphertext = enc.encrypt(b'plaintext', b'context')
+    self.assertEqual(dec.decrypt(ciphertext, b'context'), b'plaintext')
 
   def test_add_new_key_new_id(self):
     builder = keyset_builder.new_keyset_builder()
