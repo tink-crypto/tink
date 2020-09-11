@@ -26,7 +26,6 @@ from tink.proto import ecdsa_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2
 from tink.proto import rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
-from tink import core
 from tink import signature
 
 
@@ -131,10 +130,6 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.curve, curve)
     self.assertEqual(key_format.params.encoding, ecdsa_pb2.DER)
 
-    # Check that the template works with the key manager
-    key_manager = core.Registry.key_manager(key_template.type_url)
-    key_manager.new_key_data(key_template)
-
   @parameterized.named_parameters(
       ['ecdsa_p256'] + ECDSA_IEEE_PARAMS_P256,
       ['ecdsa_p384'] + ECDSA_IEEE_PARAMS_P384,
@@ -152,21 +147,12 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.curve, curve)
     self.assertEqual(key_format.params.encoding, ecdsa_pb2.IEEE_P1363)
 
-    # Check that the template works with the key manager
-    key_manager = core.Registry.key_manager(
-        key_template.type_url)
-    key_manager.new_key_data(key_template)
-
   def test_ed25519(self):
     key_template = signature.signature_key_templates.ED25519
     self.assertEqual(
         key_template.type_url,
         'type.googleapis.com/google.crypto.tink.Ed25519PrivateKey')
     self.assertEqual(key_template.output_prefix_type, tink_pb2.TINK)
-
-    # Check that the template works with the key manager
-    key_manager = core.Registry.key_manager(key_template.type_url)
-    key_manager.new_key_data(key_template)
 
   @parameterized.named_parameters(
       ['rsa_pkcs1_3072'] + RSA_PKCS1_PARAMS_3072,
@@ -184,10 +170,6 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.hash_type, hash_algo)
     self.assertEqual(bytes_to_num(key_format.public_exponent), exponent)
 
-    # Check that the template works with the key manager
-    key_manager = core.Registry.key_manager(key_template.type_url)
-    key_manager.new_key_data(key_template)
-
   @parameterized.named_parameters(
       ['rsa_pss_3072'] + RSA_PSS_PARAMS_3072,
       ['rsa_pss_4096'] + RSA_PSS_PARAMS_4096,
@@ -204,10 +186,6 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(key_format.params.sig_hash, hash_algo)
     self.assertEqual(key_format.params.mgf1_hash, hash_algo)
     self.assertEqual(bytes_to_num(key_format.public_exponent), exponent)
-
-    # Check that the template works with the key manager
-    key_manager = core.Registry.key_manager(key_template.type_url)
-    key_manager.new_key_data(key_template)
 
 
 if __name__ == '__main__':
