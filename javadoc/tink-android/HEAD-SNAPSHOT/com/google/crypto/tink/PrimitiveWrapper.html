@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6};
+var methods = {"i0":6,"i1":6,"i2":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -92,7 +92,7 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.google.crypto.tink</div>
-<h2 title="Interface PrimitiveWrapper" class="title">Interface PrimitiveWrapper&lt;P&gt;</h2>
+<h2 title="Interface PrimitiveWrapper" class="title">Interface PrimitiveWrapper&lt;B,P&gt;</h2>
 </div>
 <div class="contentContainer">
 <div class="description">
@@ -104,13 +104,17 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>public interface <span class="typeNameLabel">PrimitiveWrapper&lt;P&gt;</span></pre>
+<pre>public interface <span class="typeNameLabel">PrimitiveWrapper&lt;B,P&gt;</span></pre>
 <div class="block">Basic interface for wrapping a primitive.
 
  <p>A PrimitiveSet can be wrapped by a single primitive in order to fulfil a cryptographic task.
  This is done by the PrimitiveWrapper. Whenever a new primitive type is added to Tink, the user
- should define a new PrimitiveWrapper and register it by calling
- <code>com.google.crypto.tink.Registry#registerPrimitiveWrapper</code>.</div>
+ should define a new PrimitiveWrapper and register it by calling <code>com.google.crypto.tink.Registry#registerPrimitiveWrapper</code>.
+
+ <p>The primitive wrapper wraps primitives of type <code>B</code> into primitives of type <code>P</code>.
+ Often, these are the same classes, but in some cases they may not be. There can only be one
+ wrapper for each result primitive <code>P</code> (as Tink needs to know how to generate a <code>P</code>),
+ but there may be many wrapping the same <code>B</code>.</div>
 </li>
 </ul>
 </div>
@@ -130,14 +134,20 @@ var activeTableTab = "activeTableTab";
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass</a></span>()</code>
+<div class="block">Returns the primitive class object of the primitive used to create B.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#getPrimitiveClass--">getPrimitiveClass</a></span>()</code>
 <div class="block">Returns the primitive class object of the primitive managed.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&gt;&nbsp;set)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;set)</code>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
 </td>
 </tr>
@@ -162,7 +172,7 @@ var activeTableTab = "activeTableTab";
 <ul class="blockList">
 <li class="blockList">
 <h4>wrap</h4>
-<pre><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&nbsp;wrap(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&gt;&nbsp;set)
+<pre><a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&nbsp;wrap(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;set)
 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.
 
@@ -176,13 +186,24 @@ throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralS
 <a name="getPrimitiveClass--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getPrimitiveClass</h4>
 <pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">P</a>&gt;&nbsp;getPrimitiveClass()</pre>
 <div class="block">Returns the primitive class object of the primitive managed. Used for internal management.
- Should be implemented as <code>return P.class;</code> when implementing a key manager for
- primitive {$code P}.</div>
+ Should be implemented as <code>return P.class;</code> when implementing a wrapper creating objects
+ of type <code>P</code>.</div>
+</li>
+</ul>
+<a name="getInputPrimitiveClass--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getInputPrimitiveClass</h4>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="type parameter in PrimitiveWrapper">B</a>&gt;&nbsp;getInputPrimitiveClass()</pre>
+<div class="block">Returns the primitive class object of the primitive used to create B. Used for internal
+ management. Should be implemented as <code>return B.class;</code>.</div>
 </li>
 </ul>
 </li>

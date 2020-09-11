@@ -172,7 +172,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-java.lang.Class-">getPrimitive</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-java.lang.Class-">getPrimitive</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)</code>
 <div class="block">Returns a primitive from this keyset, using the global registry to create resources creating
  the primitive.</div>
 </td>
@@ -180,7 +180,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-com.google.crypto.tink.KeyManager-java.lang.Class-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
-            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)</code>
+            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)</code>
 <div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
  registry to get resources creating the primitive.</div>
 </td>
@@ -475,7 +475,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <ul class="blockList">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
+<pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)
                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns a primitive from this keyset, using the global registry to create resources creating
  the primitive.</div>
@@ -492,7 +492,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <li class="blockList">
 <h4>getPrimitive</h4>
 <pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
-                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;classObject)
+                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)
                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
  registry to get resources creating the primitive. The given keyManager will take precedence
