@@ -177,11 +177,10 @@ py_test(
     deps = [
         ":streaming_aead",
         requirement("absl-py"),
+        "//tink:tink_python",
         "//tink/core",
-        "//tink/proto:tink_py_pb2",
         "//tink/testing:bytes_io",
-        "//tink/testing:fake_streaming_aead",
-        "//tink/testing:helper",
+        "//tink/testing:keyset_builder",
     ],
 )
 
