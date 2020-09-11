@@ -70,13 +70,13 @@ py_test(
     name = "aead_test",
     srcs = ["aead_test.py"],
     deps = [
-        "//util:keyset_builder",
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/testing:keyset_builder",
     ],
 )
 
@@ -101,13 +101,13 @@ py_test(
     name = "deterministic_aead_test",
     srcs = ["deterministic_aead_test.py"],
     deps = [
-        "//util:keyset_builder",
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/daead",
         "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/testing:keyset_builder",
     ],
 )
 

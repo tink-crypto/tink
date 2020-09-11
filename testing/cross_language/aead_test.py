@@ -12,7 +12,7 @@
 """Cross-language tests for the Aead primitive."""
 
 # Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable, Text, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -21,21 +21,23 @@ import tink
 from tink import aead
 
 from tink.proto import tink_pb2
-from util import keyset_builder
+from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['aead']
+TEMPLATE = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
+KEY_ROTATION_TEMPLATES = [TEMPLATE,
+                          keyset_builder.raw_template(TEMPLATE)]
 
 
-def key_rotation_test_cases():
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for enc_lang in SUPPORTED_LANGUAGES:
     for dec_lang in SUPPORTED_LANGUAGES:
-      for prefix in [tink_pb2.RAW, tink_pb2.TINK]:
-        old_key_tmpl = aead.aead_key_templates.create_aes_gcm_key_template(16)
-        old_key_tmpl.output_prefix_type = prefix
-        new_key_tmpl = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
-        yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():

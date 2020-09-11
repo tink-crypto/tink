@@ -19,23 +19,22 @@ from absl.testing import parameterized
 
 import tink
 from tink import daead
-from tink.proto import tink_pb2
-from util import keyset_builder
+from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['daead']
+TEMPLATE = daead.deterministic_aead_key_templates.AES256_SIV
+KEY_ROTATION_TEMPLATES = [TEMPLATE,
+                          keyset_builder.raw_template(TEMPLATE)]
 
 
 def key_rotation_test_cases():
   for enc_lang in SUPPORTED_LANGUAGES:
     for dec_lang in SUPPORTED_LANGUAGES:
-      for prefix in [tink_pb2.RAW, tink_pb2.TINK]:
-        daead_templates = daead.deterministic_aead_key_templates
-        old_key_tmpl = daead_templates.create_aes_siv_key_template(64)
-        old_key_tmpl.output_prefix_type = prefix
-        new_key_tmpl = daead.deterministic_aead_key_templates.AES256_SIV
-        yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
