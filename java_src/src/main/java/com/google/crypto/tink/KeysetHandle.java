@@ -302,13 +302,25 @@ public final class KeysetHandle {
     }
   }
 
+  /** Helper function to allow us to have a a name {@code B} for the base primitive. */
+  private <B, P> P getPrimitiveWithKnownInputPrimitive(
+      Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
+    PrimitiveSet<B> primitiveSet =
+        Registry.getPrimitives(this, inputPrimitiveClassObject);
+    return Registry.wrap(primitiveSet, classObject);
+  }
+
   /**
    * Returns a primitive from this keyset, using the global registry to create resources creating
    * the primitive.
    */
-  public <P> P getPrimitive(Class<P> classObject) throws GeneralSecurityException {
-    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, classObject);
-    return Registry.wrap(primitiveSet);
+  public <P> P getPrimitive(Class<P> targetClassObject) throws GeneralSecurityException {
+    Class<?> inputPrimitiveClassObject = Registry.getInputPrimitive(targetClassObject);
+    if (inputPrimitiveClassObject == null) {
+      throw new GeneralSecurityException(
+          "No wrapper found for " + targetClassObject.getName());
+    }
+    return getPrimitiveWithKnownInputPrimitive(targetClassObject, inputPrimitiveClassObject);
   }
 
   /**
@@ -316,12 +328,13 @@ public final class KeysetHandle {
    * registry to get resources creating the primitive. The given keyManager will take precedence
    * when creating primitives over the globally registered keyManagers.
    */
-  public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> classObject)
+  public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> targetClassObject)
       throws GeneralSecurityException {
     if (customKeyManager == null) {
       throw new IllegalArgumentException("customKeyManager must be non-null.");
     }
-    PrimitiveSet<P> primitiveSet = Registry.getPrimitives(this, customKeyManager, classObject);
+    PrimitiveSet<P> primitiveSet =
+        Registry.getPrimitives(this, customKeyManager, targetClassObject);
     return Registry.wrap(primitiveSet);
   }
 }

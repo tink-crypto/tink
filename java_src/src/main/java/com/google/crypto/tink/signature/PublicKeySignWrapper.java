@@ -32,7 +32,7 @@ import java.security.GeneralSecurityException;
  * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
  * with the primary key.
  */
-public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
+public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, PublicKeySign> {
   private static class WrappedPublicKeySign implements PublicKeySign {
     private final PrimitiveSet<PublicKeySign> primitives;
 
@@ -63,6 +63,11 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
 
   @Override
   public Class<PublicKeySign> getPrimitiveClass() {
+    return PublicKeySign.class;
+  }
+
+  @Override
+  public Class<PublicKeySign> getInputPrimitiveClass() {
     return PublicKeySign.class;
   }
 

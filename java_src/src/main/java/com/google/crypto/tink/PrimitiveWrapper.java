@@ -23,20 +23,31 @@ import java.security.GeneralSecurityException;
  *
  * <p>A PrimitiveSet can be wrapped by a single primitive in order to fulfil a cryptographic task.
  * This is done by the PrimitiveWrapper. Whenever a new primitive type is added to Tink, the user
- * should define a new PrimitiveWrapper and register it by calling
- * {@code com.google.crypto.tink.Registry#registerPrimitiveWrapper}.
+ * should define a new PrimitiveWrapper and register it by calling {@code
+ * com.google.crypto.tink.Registry#registerPrimitiveWrapper}.
+ *
+ * <p>The primitive wrapper wraps primitives of type {@code B} into primitives of type {@code P}.
+ * Often, these are the same classes, but in some cases they may not be. There can only be one
+ * wrapper for each result primitive {@code P} (as Tink needs to know how to generate a {@code P}),
+ * but there may be many wrapping the same {@code B}.
  */
-public interface PrimitiveWrapper<P> {
+public interface PrimitiveWrapper<B, P> {
   /**
    * Wraps a {@code PrimitiveSet} and returns a single instance.
    *
    * This has to be implemented when a new primitive type is added. */
-  P wrap(PrimitiveSet<P> set) throws GeneralSecurityException;
+  P wrap(PrimitiveSet<B> set) throws GeneralSecurityException;
 
   /**
    * Returns the primitive class object of the primitive managed. Used for internal management.
-   * Should be implemented as {@code return P.class;} when implementing a key manager for
-   * primitive {$code P}.
+   * Should be implemented as {@code return P.class;} when implementing a wrapper creating objects
+   * of type {@code P}.
    */
   Class<P> getPrimitiveClass();
+
+  /**
+   * Returns the primitive class object of the primitive used to create B. Used for internal
+   * management. Should be implemented as {@code return B.class;}.
+   */
+  Class<B> getInputPrimitiveClass();
 }

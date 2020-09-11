@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  *
  * @since 1.0.0
  */
-class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify> {
+class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
   private static final Logger logger = Logger.getLogger(PublicKeyVerifyWrapper.class.getName());
 
   private static class WrappedPublicKeyVerify implements PublicKeyVerify {
@@ -99,6 +99,11 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify> {
 
   @Override
   public Class<PublicKeyVerify> getPrimitiveClass() {
+    return PublicKeyVerify.class;
+  }
+
+  @Override
+  public Class<PublicKeyVerify> getInputPrimitiveClass() {
     return PublicKeyVerify.class;
   }
 

@@ -30,7 +30,7 @@ import java.security.GeneralSecurityException;
  * keyset to select the right key for decryption. All keys in a keyset of StreamingAead have type
  * {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead> {
+public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead, StreamingAead> {
   StreamingAeadWrapper() {}
 
   /**
@@ -45,6 +45,11 @@ public class StreamingAeadWrapper implements PrimitiveWrapper<StreamingAead> {
 
   @Override
   public Class<StreamingAead> getPrimitiveClass() {
+    return StreamingAead.class;
+  }
+
+  @Override
+  public Class<StreamingAead> getInputPrimitiveClass() {
     return StreamingAead.class;
   }
 

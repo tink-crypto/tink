@@ -36,7 +36,8 @@ import java.util.logging.Logger;
  * select the right key in the set. If the keys associated with the prefix do not work, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-public class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicAead> {
+public class DeterministicAeadWrapper
+    implements PrimitiveWrapper<DeterministicAead, DeterministicAead> {
   private static final Logger logger = Logger.getLogger(DeterministicAeadWrapper.class.getName());
 
   private static class WrappedDeterministicAead implements DeterministicAead {
@@ -100,6 +101,11 @@ public class DeterministicAeadWrapper implements PrimitiveWrapper<DeterministicA
 
   @Override
   public Class<DeterministicAead> getPrimitiveClass() {
+    return DeterministicAead.class;
+  }
+
+  @Override
+  public Class<DeterministicAead> getInputPrimitiveClass() {
     return DeterministicAead.class;
   }
 

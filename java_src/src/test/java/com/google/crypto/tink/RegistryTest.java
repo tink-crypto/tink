@@ -19,6 +19,7 @@ package com.google.crypto.tink;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
@@ -117,10 +118,38 @@ public class RegistryTest {
     }
   }
 
+  private static interface EncryptOnly {
+    byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException;
+  }
+
+  private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
+    @Override
+    public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
+      return new EncryptOnly() {
+        @Override
+        public byte[] encrypt(final byte[] plaintext)
+            throws GeneralSecurityException {
+          return set.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+        }
+      };
+    }
+
+    @Override
+    public Class<EncryptOnly> getPrimitiveClass() {
+      return EncryptOnly.class;
+    }
+
+    @Override
+    public Class<Aead> getInputPrimitiveClass() {
+      return Aead.class;
+    }
+  }
+
   @Before
   public void setUp() throws GeneralSecurityException {
     Registry.reset();
     TinkConfig.register();
+    Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
   private void testGetKeyManager_shouldWork(String typeUrl, String className) throws Exception {
@@ -347,6 +376,13 @@ public class RegistryTest {
       assertThat(e.toString()).contains("not a PrivateKeyManager");
     }
   }
+
+  @Test
+  public void testGetInputPrimitive_encryptOnly() throws Exception {
+    assertThat(Registry.getInputPrimitive(EncryptOnly.class)).isEqualTo(Aead.class);
+    assertThat(Registry.getInputPrimitive(Aead.class)).isEqualTo(Aead.class);
+  }
+
 
   @Test
   public void testGetPrimitive_legacy_AesGcm_shouldWork() throws Exception {
@@ -1487,7 +1523,7 @@ public class RegistryTest {
     }
 
     @Override
-    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+    public PrimitiveWrapper<Aead, Aead> getPrimitiveWrapper() {
       return null;
     }
   }
@@ -1499,7 +1535,7 @@ public class RegistryTest {
     }
 
     @Override
-    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+    public PrimitiveWrapper<Aead, Aead> getPrimitiveWrapper() {
       return null;
     }
   }
@@ -1511,7 +1547,7 @@ public class RegistryTest {
     }
 
     @Override
-    public PrimitiveWrapper<Aead> getPrimitiveWrapper() {
+    public PrimitiveWrapper<Aead, Aead> getPrimitiveWrapper() {
       return null;
     }
   }
@@ -1630,6 +1666,55 @@ public class RegistryTest {
       assertExceptionContains(e, "No wrapper found");
       assertExceptionContains(e, "Aead");
     }
+  }
+
+  @Test
+  public void testWrap_wrapAsEncryptOnly() throws Exception {
+    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeysetHandle keysetHandle =
+        KeysetHandle.fromKeyset(
+            Keyset.newBuilder()
+                .addKey(
+                    Keyset.Key.newBuilder()
+                        .setKeyData(key)
+                        .setKeyId(1)
+                        .setStatus(KeyStatusType.ENABLED)
+                        .setOutputPrefixType(OutputPrefixType.TINK)
+                        .build())
+                .setPrimaryKeyId(1)
+                .build());
+
+    // Get a PrimitiveSet using a custom key manager for key1.
+    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
+    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager, Aead.class);
+    // Check that Registry.wrap can be assigned to an EncryptOnly (as there's a suppress warning).
+    EncryptOnly encrypt = Registry.wrap(aeadSet, EncryptOnly.class);
+    assertThat(encrypt).isNotNull();
+  }
+
+  @Test
+  public void testWrap_registerSecondWrapperForEncryptOnly_throws() throws Exception {
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> {
+          Registry.registerPrimitiveWrapper(
+              new PrimitiveWrapper<Mac, EncryptOnly>() {
+                @Override
+                public EncryptOnly wrap(PrimitiveSet<Mac> primitiveSet) {
+                  return null;
+                }
+
+                @Override
+                public Class<EncryptOnly> getPrimitiveClass() {
+                  return EncryptOnly.class;
+                }
+
+                @Override
+                public Class<Mac> getInputPrimitiveClass() {
+                  return Mac.class;
+                }
+              });
+        });
   }
 
   private static class FakeAead {}

@@ -43,5 +43,5 @@ public interface Catalogue<P> {
       throws GeneralSecurityException;
 
   /** Returns a new primitive wrapper for this primitive. */
-  public PrimitiveWrapper<P> getPrimitiveWrapper() throws GeneralSecurityException;
+  public PrimitiveWrapper<?, P> getPrimitiveWrapper() throws GeneralSecurityException;
 }

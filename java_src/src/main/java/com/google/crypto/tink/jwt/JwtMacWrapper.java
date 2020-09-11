@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * JwtMacWrapper is the implementation of {@link PrimitiveWrapper} for the {@link JwtMac} primitive.
  */
-class JwtMacWrapper implements PrimitiveWrapper<JwtMac> {
+class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
   private static void validate(PrimitiveSet<JwtMac> primitiveSet) throws GeneralSecurityException {
     if (primitiveSet.getPrimary() == null) {
       throw new GeneralSecurityException("Primitive set has no primary.");
@@ -75,6 +75,11 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMac> {
 
   @Override
   public Class<JwtMac> getPrimitiveClass() {
+    return JwtMac.class;
+  }
+
+  @Override
+  public Class<JwtMac> getInputPrimitiveClass() {
     return JwtMac.class;
   }
 

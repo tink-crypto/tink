@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * the right key in the set. If the keys associated with the prefix do not validate the tag, the
  * primitive tries all keys with {@link com.google.crypto.tink.proto.OutputPrefixType#RAW}.
  */
-class MacWrapper implements PrimitiveWrapper<Mac> {
+class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
   private static final Logger logger = Logger.getLogger(MacWrapper.class.getName());
 
   private static class WrappedMac implements Mac {
@@ -110,6 +110,11 @@ class MacWrapper implements PrimitiveWrapper<Mac> {
 
   @Override
   public Class<Mac> getPrimitiveClass() {
+    return Mac.class;
+  }
+
+  @Override
+  public Class<Mac> getInputPrimitiveClass() {
     return Mac.class;
   }
 

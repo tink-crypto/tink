@@ -92,9 +92,37 @@ public class KeysetHandleTest {
     }
   }
 
+  private static interface EncryptOnly {
+    byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException;
+  }
+
+  private static class AeadToEncryptOnlyWrapper implements PrimitiveWrapper<Aead, EncryptOnly> {
+    @Override
+    public EncryptOnly wrap(PrimitiveSet<Aead> set) throws GeneralSecurityException {
+      return new EncryptOnly() {
+        @Override
+        public byte[] encrypt(final byte[] plaintext)
+            throws GeneralSecurityException {
+          return set.getPrimary().getPrimitive().encrypt(plaintext, new byte[0]);
+        }
+      };
+    }
+
+    @Override
+    public Class<EncryptOnly> getPrimitiveClass() {
+      return EncryptOnly.class;
+    }
+
+    @Override
+    public Class<Aead> getInputPrimitiveClass() {
+      return Aead.class;
+    }
+  }
+
   @BeforeClass
   public static void setUp() throws GeneralSecurityException {
     Config.register(TinkConfig.TINK_1_0_0);
+    Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
   }
 
   @Test
@@ -356,6 +384,24 @@ public class KeysetHandleTest {
     } catch (IllegalArgumentException e) {
       assertExceptionContains(e, "customKeyManager");
     }
+  }
+
+
+  @Test
+  public void testGetPrimitive_differentPrimitive_works() throws Exception {
+    // We use RAW because the EncryptOnly wrapper wraps everything RAW.
+    Keyset keyset =
+        TestUtil.createKeyset(
+            TestUtil.createKey(
+                Registry.newKeyData(AeadKeyTemplates.AES128_EAX),
+                42,
+                KeyStatusType.ENABLED,
+                OutputPrefixType.RAW));
+    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
+    byte[] message = Random.randBytes(20);
+    EncryptOnly encryptOnly = handle.getPrimitive(EncryptOnly.class);
+    Aead aead = handle.getPrimitive(Aead.class);
+    assertArrayEquals(aead.decrypt(encryptOnly.encrypt(message), new byte[0]), message);
   }
 
   @Test

@@ -87,7 +87,7 @@ public final class Registry {
   private static final ConcurrentMap<String, Catalogue<?>> catalogueMap =
       new ConcurrentHashMap<>(); //  name -> catalogue mapping
 
-  private static final ConcurrentMap<Class<?>, PrimitiveWrapper<?>> primitiveWrapperMap =
+  private static final ConcurrentMap<Class<?>, PrimitiveWrapper<?, ?>> primitiveWrapperMap =
       new ConcurrentHashMap<>();
 
   /**
@@ -616,16 +616,16 @@ public final class Registry {
    *     of the class of {@code manager}, or the registration tries to re-enable the generation of
    *     new keys.
    */
-  public static synchronized <P> void registerPrimitiveWrapper(final PrimitiveWrapper<P> wrapper)
-      throws GeneralSecurityException {
+  public static synchronized <B, P> void registerPrimitiveWrapper(
+      final PrimitiveWrapper<B, P> wrapper) throws GeneralSecurityException {
     if (wrapper == null) {
       throw new IllegalArgumentException("wrapper must be non-null");
     }
     Class<P> classObject = wrapper.getPrimitiveClass();
     if (primitiveWrapperMap.containsKey(classObject)) {
       @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
-      PrimitiveWrapper<P> existingWrapper =
-          (PrimitiveWrapper<P>) primitiveWrapperMap.get(classObject);
+      PrimitiveWrapper<?, P> existingWrapper =
+          (PrimitiveWrapper<?, P>) primitiveWrapperMap.get(classObject);
       if (!wrapper.getClass().equals(existingWrapper.getClass())) {
         logger.warning("Attempted overwrite of a registered SetWrapper for type " + classObject);
         throw new GeneralSecurityException(
@@ -1026,16 +1026,44 @@ public final class Registry {
    * Looks up the globally registered PrimitiveWrapper for this primitive and wraps the given
    * PrimitiveSet with it.
    */
-  public static <P> P wrap(PrimitiveSet<P> primitiveSet)
+  public static <B, P> P wrap(PrimitiveSet<B> primitiveSet, Class<P> clazz)
       throws GeneralSecurityException {
-    @SuppressWarnings("unchecked") // We know that we only inserted Class<P> -> PrimitiveWrapper<P>
-    PrimitiveWrapper<P> wrapper =
-        (PrimitiveWrapper<P>) primitiveWrapperMap.get(primitiveSet.getPrimitiveClass());
+    @SuppressWarnings("unchecked") // We know that we inserted Class<P> -> PrimitiveWrapper<?, P>
+    PrimitiveWrapper<?, P> wrapper = (PrimitiveWrapper<?, P>) primitiveWrapperMap.get(clazz);
     if (wrapper == null) {
       throw new GeneralSecurityException(
           "No wrapper found for " + primitiveSet.getPrimitiveClass().getName());
     }
-    return wrapper.wrap(primitiveSet);
+    if (!wrapper.getInputPrimitiveClass().equals(primitiveSet.getPrimitiveClass())) {
+      throw new GeneralSecurityException(
+          "Wrong input primitive class, expected "
+              + wrapper.getInputPrimitiveClass()
+              + ", got "
+              + primitiveSet.getPrimitiveClass());
+    }
+    @SuppressWarnings("unchecked") // We just checked correctness
+    P result = ((PrimitiveWrapper<B, P>) wrapper).wrap(primitiveSet);
+    return result;
+  }
+
+  public static <P> P wrap(PrimitiveSet<P> primitiveSet)
+      throws GeneralSecurityException {
+    return wrap(primitiveSet, primitiveSet.getPrimitiveClass());
+  }
+
+  /**
+   * Returns the input primitive required when creating a {@code wrappedPrimitive}.
+   *
+   * <p>This returns the primitive class of the objects required when we want to create a wrapped
+   * primitive of type {@code wrappedPrimitive}. Returns {@code null} if no wrapper for this
+   * primitive has been registered.
+   */
+  public static Class<?> getInputPrimitive(Class<?> wrappedPrimitive) {
+    PrimitiveWrapper<?, ?> wrapper = primitiveWrapperMap.get(wrappedPrimitive);
+    if (wrapper == null) {
+      return null;
+    }
+    return wrapper.getInputPrimitiveClass();
   }
 
   /**

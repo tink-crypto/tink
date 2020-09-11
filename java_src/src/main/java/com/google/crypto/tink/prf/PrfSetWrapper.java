@@ -31,7 +31,7 @@ import java.util.Map;
  * Prf instances can then be used to compute psuedo-random sequences from the underlying key.
  */
 @Immutable
-public class PrfSetWrapper implements PrimitiveWrapper<PrfSet> {
+public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
   private static class WrappedPrfSet extends PrfSet {
     // This map is constructed using Collections.unmodifiableMap
     @SuppressWarnings("Immutable")
@@ -86,6 +86,11 @@ public class PrfSetWrapper implements PrimitiveWrapper<PrfSet> {
 
   @Override
   public Class<PrfSet> getPrimitiveClass() {
+    return PrfSet.class;
+  }
+
+  @Override
+  public Class<PrfSet> getInputPrimitiveClass() {
     return PrfSet.class;
   }
 
