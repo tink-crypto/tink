@@ -54,7 +54,7 @@ public final class Jwt {
     this.clockSkew = clockSkew;
   }
 
-  String getHeader(String name) throws JwtExpiredException, JwtNotBeforeException {
+  private String getHeader(String name) throws JwtExpiredException, JwtNotBeforeException {
     validateTimestampClaims();
 
     try {

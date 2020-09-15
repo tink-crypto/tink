@@ -183,14 +183,6 @@ public final class JwtValidator {
     }
   }
 
-  Clock getClock() {
-    return clock;
-  }
-
-  Duration getClockSkew() {
-    return clockSkew;
-  }
-
   /**
    * Validates that {@code target} was signed with {@code algorithm}, and every claim in this
    * validator is also in {@code target}.
@@ -212,7 +204,6 @@ public final class JwtValidator {
               "invalid algorithm; expected %s, got %s", algorithm, target.getAlgorithm()));
     }
 
-    @SuppressWarnings("unchecked") // keys() returns Iterator, not Iterator<String>
     Iterator<String> headerIterator = this.header.keys();
     while (headerIterator.hasNext()) {
       String name = headerIterator.next();
@@ -228,7 +219,6 @@ public final class JwtValidator {
       }
     }
 
-    @SuppressWarnings("unchecked") // keys() returns Iterator, not Iterator<String>
     Iterator<String> payloadIterator = this.payload.keys();
     while (payloadIterator.hasNext()) {
       String name = payloadIterator.next();
