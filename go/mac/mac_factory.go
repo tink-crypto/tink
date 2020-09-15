@@ -17,12 +17,19 @@ package mac
 import (
 	"fmt"
 
+	"flag"
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/tink"
+	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
+
+// TODO(b/168188126) Remove once this bug is fixed.
+var enableComputeOldLegacyMac = flag.Bool(
+	"enable_compute_old_legacy_mac", true,
+	"Lets MAC primitive compute MACs for keys of type LEGACY in an old incompatible format.")
 
 // New creates a MAC primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.MAC, error) {
@@ -72,7 +79,12 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("mac_factory: not a MAC primitive")
 	}
-
+	if m.ps.Primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
+		if !*enableComputeOldLegacyMac {
+			return nil, fmt.Errorf(
+				"mac_factory: computation of old LEGACY MACs is disabled, to enable add flag --enable_compute_old_legacy_mac=true")
+		}
+	}
 	mac, err := primitive.ComputeMAC(data)
 	if err != nil {
 		return nil, err
