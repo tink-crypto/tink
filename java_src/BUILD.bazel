@@ -172,7 +172,6 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305",
         "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
         "//src/main/java/com/google/crypto/tink/util:keys_downloader",
     ],
@@ -356,7 +355,6 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/subtle:x_cha_cha20_poly1305",
         "//src/main/java/com/google/crypto/tink/subtle/prf:hkdf_streaming_prf",
         "//src/main/java/com/google/crypto/tink/subtle/prf:prf_impl",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
         "//src/main/java/com/google/crypto/tink/subtle/prf:streaming_prf",
     ],
 )

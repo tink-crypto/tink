@@ -25,7 +25,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.PrfAesCmac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
-import com.google.crypto.tink.subtle.prf.SingletonPrfSet;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -39,10 +38,10 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
   AesCmacPrfKeyManager() {
     super(
         AesCmacPrfKey.class,
-        new PrimitiveFactory<PrfSet, AesCmacPrfKey>(PrfSet.class) {
+        new PrimitiveFactory<Prf, AesCmacPrfKey>(Prf.class) {
           @Override
-          public PrfSet getPrimitive(AesCmacPrfKey key) throws GeneralSecurityException {
-            return new SingletonPrfSet(new PrfAesCmac(key.getKeyValue().toByteArray()));
+          public Prf getPrimitive(AesCmacPrfKey key) throws GeneralSecurityException {
+            return new PrfAesCmac(key.getKeyValue().toByteArray());
           }
         });
   }

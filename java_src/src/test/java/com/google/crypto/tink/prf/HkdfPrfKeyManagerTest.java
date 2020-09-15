@@ -289,7 +289,7 @@ public class HkdfPrfKeyManagerTest {
                     .setSalt(ByteString.copyFromUtf8("some salt"))
                     .setHash(HashType.SHA256))
             .build();
-    manager.getPrimitive(key, PrfSet.class);
+    manager.getPrimitive(key, Prf.class);
   }
 
   @Test

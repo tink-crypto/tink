@@ -28,8 +28,6 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -58,7 +56,7 @@ public class PrfSetWrapperTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, PrfSet.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, Prf.class));
     byte[] prs = prfSet.computePrimary(plaintext, 12);
     byte[] prs2 = prfSet.getPrfs().get(5).compute(plaintext, 12);
 
@@ -88,7 +86,7 @@ public class PrfSetWrapperTest {
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, secondary));
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, PrfSet.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, Prf.class));
     byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
     byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
     byte[] prs6 = prfSet.getPrfs().get(6).compute(plaintext, 12);
@@ -100,19 +98,19 @@ public class PrfSetWrapperTest {
     assertThat(prsPrimary).isNotEqualTo(prs6);
   }
 
-  @Test
-  public void testWrapEmptyThrows() throws Exception {
-    final PrimitiveSet<PrfSet> primitiveSet = PrimitiveSet.newPrimitiveSet(PrfSet.class);
+    @Test
+    public void testWrapEmptyThrows() throws Exception {
+      final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newPrimitiveSet(Prf.class);
 
-    assertThrows(
-        GeneralSecurityException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            new PrfSetWrapper().wrap(primitiveSet);
-          }
-        });
-  }
+      assertThrows(
+          GeneralSecurityException.class,
+          new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+              new PrfSetWrapper().wrap(primitiveSet);
+            }
+          });
+    }
 
   @Test
   public void testWrapNoPrimaryThrows() throws Exception {
@@ -130,68 +128,9 @@ public class PrfSetWrapperTest {
             return new byte[0];
           }
         };
-    final PrimitiveSet<PrfSet> primitiveSet = PrimitiveSet.newPrimitiveSet(PrfSet.class);
-    primitiveSet.addPrimitive(
-        new PrfSet() {
-          @Override
-          public int getPrimaryId() {
-            return 0;
-          }
-
-          @Override
-          public Map<Integer, Prf> getPrfs() throws GeneralSecurityException {
-            HashMap<Integer, Prf> prfMap = new HashMap<>();
-            prfMap.put(0, unusedPrf);
-            return prfMap;
-          }
-        },
-        primary);
+    final PrimitiveSet<Prf> primitiveSet = PrimitiveSet.newPrimitiveSet(Prf.class);
+    primitiveSet.addPrimitive(unusedPrf, primary);
     // Note: Added a primary key but did not call primitiveSet.setPrimary().
-
-    assertThrows(
-        GeneralSecurityException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            new PrfSetWrapper().wrap(primitiveSet);
-          }
-        });
-  }
-
-  @Test
-  public void testMultiplePrfsIntoWrapperThrows() throws Exception {
-    byte[] primaryKeyValue = Random.randBytes(KEY_SIZE);
-    Keyset.Key primary =
-        TestUtil.createKey(
-            TestUtil.createPrfKeyData(primaryKeyValue),
-            /* keyId= */ 5,
-            KeyStatusType.ENABLED,
-            OutputPrefixType.RAW);
-    final Prf unusedPrf =
-        new Prf() {
-          @Override
-          public byte[] compute(byte[] input, int outputLength) throws GeneralSecurityException {
-            return new byte[0];
-          }
-        };
-    final PrimitiveSet<PrfSet> primitiveSet = PrimitiveSet.newPrimitiveSet(PrfSet.class);
-    primitiveSet.setPrimary(
-        primitiveSet.addPrimitive(
-            new PrfSet() {
-              @Override
-              public int getPrimaryId() {
-                return 0;
-              }
-
-              @Override
-              public Map<Integer, Prf> getPrfs() throws GeneralSecurityException {
-                HashMap<Integer, Prf> prfMap = new HashMap<>();
-                prfMap.put(0, unusedPrf);
-                prfMap.put(1, unusedPrf);
-                return prfMap;
-              }
-            },
-            primary));
 
     assertThrows(
         GeneralSecurityException.class,

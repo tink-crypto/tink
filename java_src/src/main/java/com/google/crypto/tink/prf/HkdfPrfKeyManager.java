@@ -30,8 +30,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * This key manager generates new {@code HkdfPrfKey} keys and produces new instances of {@code
@@ -66,31 +64,14 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
                 key.getParams().getSalt().toByteArray());
           }
         },
-        // PrfSet can be constructed using a KeyManager, but it is not really usable until it
-        // is wrapped with a KeySet, since the KeyManager does not know about key IDs.
-        new PrimitiveFactory<PrfSet, HkdfPrfKey>(PrfSet.class) {
+        new PrimitiveFactory<Prf, HkdfPrfKey>(Prf.class) {
           @Override
-          public PrfSet getPrimitive(HkdfPrfKey key) throws GeneralSecurityException {
-            // We don't know the key ID here. Use 0 as a placeholder. PrfSetWrapper will fix this
-            // for us.
-            final int unknownKeyId = 0;
-            final Prf prf =
-                PrfImpl.wrap(
-                    new HkdfStreamingPrf(
-                        convertHash(key.getParams().getHash()),
-                        key.getKeyValue().toByteArray(),
-                        key.getParams().getSalt().toByteArray()));
-            return new PrfSet() {
-              @Override
-              public int getPrimaryId() {
-                return unknownKeyId;
-              }
-
-              @Override
-              public Map<Integer, Prf> getPrfs() {
-                return Collections.singletonMap(unknownKeyId, prf);
-              }
-            };
+          public Prf getPrimitive(HkdfPrfKey key) throws GeneralSecurityException {
+            return PrfImpl.wrap(
+                new HkdfStreamingPrf(
+                    convertHash(key.getParams().getHash()),
+                    key.getKeyValue().toByteArray(),
+                    key.getParams().getSalt().toByteArray()));
           }
         });
   }

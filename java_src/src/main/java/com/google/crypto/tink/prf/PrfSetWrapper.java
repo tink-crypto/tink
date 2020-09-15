@@ -31,7 +31,7 @@ import java.util.Map;
  * Prf instances can then be used to compute psuedo-random sequences from the underlying key.
  */
 @Immutable
-public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
+public class PrfSetWrapper implements PrimitiveWrapper<Prf, PrfSet> {
   private static class WrappedPrfSet extends PrfSet {
     // This map is constructed using Collections.unmodifiableMap
     @SuppressWarnings("Immutable")
@@ -39,7 +39,7 @@ public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
 
     private final int primaryKeyId;
 
-    private WrappedPrfSet(PrimitiveSet<PrfSet> primitives) throws GeneralSecurityException {
+    private WrappedPrfSet(PrimitiveSet<Prf> primitives) throws GeneralSecurityException {
       if (primitives.getRawPrimitives().isEmpty()) {
         throw new GeneralSecurityException("No primitives provided.");
       }
@@ -48,22 +48,15 @@ public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
       }
 
       primaryKeyId = primitives.getPrimary().getKeyId();
-      List<PrimitiveSet.Entry<PrfSet>> entries = primitives.getRawPrimitives();
+      List<PrimitiveSet.Entry<Prf>> entries = primitives.getRawPrimitives();
       Map<Integer, Prf> mutablePrfMap = new HashMap<>();
-      for (PrimitiveSet.Entry<PrfSet> entry : entries) {
+      for (PrimitiveSet.Entry<Prf> entry : entries) {
         if (!entry.getOutputPrefixType().equals(OutputPrefixType.RAW)) {
           throw new GeneralSecurityException(
               "Key " + entry.getKeyId() + " has non raw prefix type");
         }
-        // PrfSets pushed into this wrapper should have have only one key with ID '0'.
-        if (entry.getPrimitive().getPrfs().size() > 1) {
-          throw new GeneralSecurityException(
-              "More PRFs than expected in KeyTypeManager for key " + entry.getKeyId());
-        }
         // Likewise, the key IDs of the PrfSet passed
-        mutablePrfMap.put(
-            entry.getKeyId(),
-            entry.getPrimitive().getPrfs().get(entry.getPrimitive().getPrimaryId()));
+        mutablePrfMap.put(entry.getKeyId(), entry.getPrimitive());
       }
       keyIdToPrfMap = Collections.unmodifiableMap(mutablePrfMap);
     }
@@ -80,7 +73,7 @@ public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
   }
 
   @Override
-  public PrfSet wrap(PrimitiveSet<PrfSet> set) throws GeneralSecurityException {
+  public PrfSet wrap(PrimitiveSet<Prf> set) throws GeneralSecurityException {
     return new WrappedPrfSet(set);
   }
 
@@ -90,8 +83,8 @@ public class PrfSetWrapper implements PrimitiveWrapper<PrfSet, PrfSet> {
   }
 
   @Override
-  public Class<PrfSet> getInputPrimitiveClass() {
-    return PrfSet.class;
+  public Class<Prf> getInputPrimitiveClass() {
+    return Prf.class;
   }
 
   public static void register() throws GeneralSecurityException {

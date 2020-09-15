@@ -141,10 +141,10 @@ public class AesCmacPrfKeyManagerTest {
   public void getPrimitive_works() throws Exception {
     AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
     AesCmacPrfKey validKey = manager.keyFactory().createKey(makeAesCmacPrfKeyFormat(32));
-    PrfSet managerPrf = manager.getPrimitive(validKey, PrfSet.class);
+    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
     Prf directPrf = new PrfAesCmac(validKey.getKeyValue().toByteArray());
     byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.computePrimary(message, 16)).isEqualTo(directPrf.compute(message, 16));
+    assertThat(managerPrf.compute(message, 16)).isEqualTo(directPrf.compute(message, 16));
   }
 
   @Test

@@ -31,15 +31,3 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
-
-java_test(
-    name = "SingletonPrfSetTest",
-    size = "small",
-    srcs = ["SingletonPrfSetTest.java"],
-    deps = [
-        "//src/main/java/com/google/crypto/tink/prf:prf_set",
-        "//src/main/java/com/google/crypto/tink/subtle/prf:singleton_prf_set",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)

@@ -27,7 +27,6 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
-import com.google.crypto.tink.subtle.prf.SingletonPrfSet;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -44,19 +43,19 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
   public HmacPrfKeyManager() {
     super(
         HmacPrfKey.class,
-        new PrimitiveFactory<PrfSet, HmacPrfKey>(PrfSet.class) {
+        new PrimitiveFactory<Prf, HmacPrfKey>(Prf.class) {
           @Override
-          public PrfSet getPrimitive(HmacPrfKey key) throws GeneralSecurityException {
+          public Prf getPrimitive(HmacPrfKey key) throws GeneralSecurityException {
             HashType hash = key.getParams().getHash();
             byte[] keyValue = key.getKeyValue().toByteArray();
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
             switch (hash) {
               case SHA1:
-                return new SingletonPrfSet(new PrfHmacJce("HMACSHA1", keySpec));
+                return new PrfHmacJce("HMACSHA1", keySpec);
               case SHA256:
-                return new SingletonPrfSet(new PrfHmacJce("HMACSHA256", keySpec));
+                return new PrfHmacJce("HMACSHA256", keySpec);
               case SHA512:
-                return new SingletonPrfSet(new PrfHmacJce("HMACSHA512", keySpec));
+                return new PrfHmacJce("HMACSHA512", keySpec);
               default:
                 throw new GeneralSecurityException("unknown hash");
             }

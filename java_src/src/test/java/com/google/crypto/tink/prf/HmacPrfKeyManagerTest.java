@@ -144,33 +144,33 @@ public class HmacPrfKeyManagerTest {
   @Test
   public void getPrimitive_worksForSha1() throws Exception {
     HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    PrfSet managerPrf = manager.getPrimitive(validKey, PrfSet.class);
+    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
     Prf directPrf =
         new PrfHmacJce("HMACSHA1", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
     byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.computePrimary(message, 19)).isEqualTo(directPrf.compute(message, 19));
+    assertThat(managerPrf.compute(message, 19)).isEqualTo(directPrf.compute(message, 19));
   }
 
   @Test
   public void getPrimitive_worksForSha256() throws Exception {
     HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA256));
-    PrfSet managerPrf = manager.getPrimitive(validKey, PrfSet.class);
+    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
     Prf directPrf =
         new PrfHmacJce(
             "HMACSHA256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
     byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.computePrimary(message, 29)).isEqualTo(directPrf.compute(message, 29));
+    assertThat(managerPrf.compute(message, 29)).isEqualTo(directPrf.compute(message, 29));
   }
 
   @Test
   public void getPrimitive_worksForSha512() throws Exception {
     HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA512));
-    PrfSet managerPrf = manager.getPrimitive(validKey, PrfSet.class);
+    Prf managerPrf = manager.getPrimitive(validKey, Prf.class);
     Prf directPrf =
         new PrfHmacJce(
             "HMACSHA512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
     byte[] message = Random.randBytes(50);
-    assertThat(managerPrf.computePrimary(message, 33)).isEqualTo(directPrf.compute(message, 33));
+    assertThat(managerPrf.compute(message, 33)).isEqualTo(directPrf.compute(message, 33));
   }
 
   @Test
