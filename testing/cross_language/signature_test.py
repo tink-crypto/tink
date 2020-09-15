@@ -12,7 +12,7 @@
 """Cross-language tests for Public-Key Signatures."""
 
 # Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable, Text, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -20,11 +20,26 @@ from absl.testing import parameterized
 import tink
 from tink import signature
 
+from tink.proto import tink_pb2
+from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = (testing_servers
                        .SUPPORTED_LANGUAGES_BY_PRIMITIVE['signature'])
+TEMPLATE = signature.signature_key_templates.ECDSA_P256
+KEY_ROTATION_TEMPLATES = [TEMPLATE,
+                          keyset_builder.raw_template(TEMPLATE),
+                          keyset_builder.legacy_template(TEMPLATE)]
+
+
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -46,7 +61,7 @@ def all_signature_private_key_template_names() -> Iterable[Text]:
 class SignaturePythonTest(parameterized.TestCase):
 
   @parameterized.parameters(all_signature_private_key_template_names())
-  def test_encrypt_decrypt(self, key_template_name):
+  def test_sign_verify(self, key_template_name):
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
@@ -87,6 +102,64 @@ class SignaturePythonTest(parameterized.TestCase):
       with self.assertRaises(tink.TinkError):
         _ = signer.sign(message)
 
+  @parameterized.parameters(key_rotation_test_cases())
+  def test_key_rotation(self, enc_lang, dec_lang, old_key_tmpl, new_key_tmpl):
+    # Do a key rotation from an old key generated from old_key_tmpl to a new
+    # key generated from new_key_tmpl. Encryption and decryption are done
+    # in languages enc_lang and dec_lang.
+    builder = keyset_builder.new_keyset_builder()
+    older_key_id = builder.add_new_key(old_key_tmpl)
+    builder.set_primary_key(older_key_id)
+    sign1 = testing_servers.public_key_sign(enc_lang, builder.keyset())
+    verify1 = testing_servers.public_key_verify(dec_lang,
+                                                builder.public_keyset())
+    newer_key_id = builder.add_new_key(new_key_tmpl)
+    sign2 = testing_servers.public_key_sign(enc_lang, builder.keyset())
+    verify2 = testing_servers.public_key_verify(dec_lang,
+                                                builder.public_keyset())
+
+    builder.set_primary_key(newer_key_id)
+    sign3 = testing_servers.public_key_sign(enc_lang, builder.keyset())
+    verify3 = testing_servers.public_key_verify(dec_lang,
+                                                builder.public_keyset())
+
+    builder.disable_key(older_key_id)
+    sign4 = testing_servers.public_key_sign(enc_lang, builder.keyset())
+    verify4 = testing_servers.public_key_verify(dec_lang,
+                                                builder.public_keyset())
+    self.assertNotEqual(older_key_id, newer_key_id)
+
+    # 1 signs with the older key. So 1, 2 and 3 can verify it, but not 4.
+    data_signature1 = sign1.sign(b'data')
+    verify1.verify(data_signature1, b'data')
+    verify2.verify(data_signature1, b'data')
+    verify3.verify(data_signature1, b'data')
+    with self.assertRaises(tink.TinkError):
+      verify4.verify(data_signature1, b'data')
+
+    # 2 signs with the older key. So 1, 2 and 3 can verify it, but not 4.
+    data_signature2 = sign2.sign(b'data')
+    verify1.verify(data_signature2, b'data')
+    verify2.verify(data_signature2, b'data')
+    verify3.verify(data_signature2, b'data')
+    with self.assertRaises(tink.TinkError):
+      verify4.verify(data_signature2, b'data')
+
+    # 3 signs with the newer key. So 2, 3 and 4 can verify it, but not 1.
+    data_signature3 = sign3.sign(b'data')
+    with self.assertRaises(tink.TinkError):
+      verify1.verify(data_signature3, b'data')
+    verify2.verify(data_signature3, b'data')
+    verify3.verify(data_signature3, b'data')
+    verify4.verify(data_signature3, b'data')
+
+    # 4 signs with the newer key. So 2, 3 and 4 can verify it, but not 1.
+    data_signature4 = sign4.sign(b'data')
+    with self.assertRaises(tink.TinkError):
+      verify1.verify(data_signature4, b'data')
+    verify2.verify(data_signature4, b'data')
+    verify3.verify(data_signature4, b'data')
+    verify4.verify(data_signature4, b'data')
 
 if __name__ == '__main__':
   absltest.main()
