@@ -29,10 +29,10 @@ export class CryptoFormat {
 
       // fall through
       case PbOutputPrefixType.CRUNCHY:
-        return CryptoFormat.makeOutputPrefix_(
+        return CryptoFormat.makeOutputPrefix(
             key.getKeyId(), CryptoFormat.LEGACY_START_BYTE);
       case PbOutputPrefixType.TINK:
-        return CryptoFormat.makeOutputPrefix_(
+        return CryptoFormat.makeOutputPrefix(
             key.getKeyId(), CryptoFormat.TINK_START_BYTE);
       case PbOutputPrefixType.RAW:
         return CryptoFormat.RAW_PREFIX;
@@ -48,10 +48,10 @@ export class CryptoFormat {
    * @static
    *
    */
-  private static makeOutputPrefix_(keyId: number, keyTypeIdentifier: number):
+  private static makeOutputPrefix(keyId: number, keyTypeIdentifier: number):
       Uint8Array {
     let res = [keyTypeIdentifier];
-    res = res.concat(CryptoFormat.numberAsBigEndian_(keyId));
+    res = res.concat(CryptoFormat.numberAsBigEndian(keyId));
     return new Uint8Array(res);
   }
 
@@ -63,7 +63,7 @@ export class CryptoFormat {
    * @static
    *
    */
-  private static numberAsBigEndian_(n: number): number[] {
+  private static numberAsBigEndian(n: number): number[] {
     if (!Number.isInteger(n) || n < 0 || n >= 2 ** 32) {
       throw new InvalidArgumentsException(
           'Number has to be unsigned 32-bit integer.');

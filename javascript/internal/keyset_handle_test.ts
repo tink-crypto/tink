@@ -747,11 +747,9 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
  * @final
  */
 class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
-  private readonly KEY_FACTORY_ = new DummyKeyFactory();
-
   constructor(
       private readonly keyType: string, private readonly primitive: T,
-      private readonly PRIMITIVE_TYPE_: Constructor<T>) {}
+      private readonly primitiveType: Constructor<T>) {}
 
   /** @override */
   async getPrimitive(primitiveType: Constructor<T>, key: PbKeyData|PbMessage) {
@@ -775,7 +773,7 @@ class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
 
   /** @override */
   getPrimitiveType() {
-    return this.PRIMITIVE_TYPE_;
+    return this.primitiveType;
   }
 
   /** @override */

@@ -14,7 +14,7 @@ import * as Hkdf from './hkdf';
  * HKDF-based ECIES-KEM (key encapsulation mechanism) for ECIES sender.
  */
 export class EciesHkdfKemSender {
-  private readonly publicKey_: CryptoKey;
+  private readonly publicKey: CryptoKey;
 
   constructor(recipientPublicKey: CryptoKey) {
     if (!recipientPublicKey) {
@@ -25,7 +25,7 @@ export class EciesHkdfKemSender {
     if (recipientPublicKey.type !== 'public' || !recipientPublicKey.algorithm) {
       throw new SecurityException('Expected Crypto key of type: public.');
     }
-    this.publicKey_ = recipientPublicKey;
+    this.publicKey = recipientPublicKey;
   }
 
   /**
@@ -47,14 +47,14 @@ export class EciesHkdfKemSender {
       keySizeInBytes: number, pointFormat: EllipticCurves.PointFormatType,
       hkdfHash: string, hkdfInfo: Uint8Array, opt_hkdfSalt?: Uint8Array):
       Promise<{key: Uint8Array, token: Uint8Array}> {
-    const {namedCurve}: Partial<EcKeyAlgorithm> = this.publicKey_.algorithm;
+    const {namedCurve}: Partial<EcKeyAlgorithm> = this.publicKey.algorithm;
     if (!namedCurve) {
       throw new SecurityException('Curve has to be defined.');
     }
     const ephemeralKeyPair =
         await EllipticCurves.generateKeyPair('ECDH', namedCurve);
     const sharedSecret = await EllipticCurves.computeEcdhSharedSecret(
-        ephemeralKeyPair.privateKey, this.publicKey_);
+        ephemeralKeyPair.privateKey, this.publicKey);
     const jwk =
         await EllipticCurves.exportCryptoKey(ephemeralKeyPair.publicKey);
     const {crv} = jwk;

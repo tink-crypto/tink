@@ -71,7 +71,7 @@ class WrappedAead extends Aead {
           CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
       let decryptedText: Uint8Array|undefined;
       try {
-        decryptedText = await this.tryDecryption_(
+        decryptedText = await this.tryDecryption(
             entries, rawCiphertext, opt_associatedData);
       } catch (e) {
       }
@@ -81,7 +81,7 @@ class WrappedAead extends Aead {
     }
     const entries = await this.aeadSet.getRawPrimitives();
     const decryptedText =
-        await this.tryDecryption_(entries, ciphertext, opt_associatedData);
+        await this.tryDecryption(entries, ciphertext, opt_associatedData);
     return decryptedText;
   }
 
@@ -92,7 +92,7 @@ class WrappedAead extends Aead {
    *
    *
    */
-  private async tryDecryption_(
+  private async tryDecryption(
       entriesArray: Array<PrimitiveSet.Entry<Aead>>, ciphertext: Uint8Array,
       opt_associatedData?: Uint8Array|null): Promise<Uint8Array> {
     const entriesArrayLength = entriesArray.length;

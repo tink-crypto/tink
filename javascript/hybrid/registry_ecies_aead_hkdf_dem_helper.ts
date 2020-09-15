@@ -15,10 +15,10 @@ import {EciesAeadHkdfDemHelper} from '../subtle/ecies_aead_hkdf_dem_helper';
  * @final
  */
 export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
-  private readonly key_: PbAesCtrHmacAeadKey|PbAesGcmKey;
-  private readonly demKeyTypeUrl_: string;
-  private readonly demKeySize_: number;
-  private readonly aesCtrKeySize_?: number;
+  private readonly key: PbAesCtrHmacAeadKey|PbAesGcmKey;
+  private readonly demKeyTypeUrl: string;
+  private readonly demKeySize: number;
+  private readonly aesCtrKeySize?: number;
 
   constructor(keyTemplate: PbKeyTemplate) {
     let demKeySize: number;
@@ -28,7 +28,7 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
     switch (keyTypeUrl) {
       case AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL:
         keyFormat =
-            RegistryEciesAeadHkdfDemHelper.getAesCtrHmacKeyFormat_(keyTemplate);
+            RegistryEciesAeadHkdfDemHelper.getAesCtrHmacKeyFormat(keyTemplate);
         const aesCtrKeyFormat = keyFormat.getAesCtrKeyFormat();
         if (!aesCtrKeyFormat) {
           throw new SecurityException('AES-CTR key format not set');
@@ -43,7 +43,7 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
         break;
       case AeadConfig.AES_GCM_TYPE_URL:
         keyFormat =
-            RegistryEciesAeadHkdfDemHelper.getAesGcmKeyFormat_(keyTemplate);
+            RegistryEciesAeadHkdfDemHelper.getAesGcmKeyFormat(keyTemplate);
         demKeySize = keyFormat.getKeySize();
         break;
       default:
@@ -51,39 +51,39 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
             'Key type URL ' + keyTypeUrl + ' is not supported.');
     }
     const keyFactory = Registry.getKeyManager(keyTypeUrl).getKeyFactory();
-    this.key_ =
+    this.key =
         (keyFactory.newKey(keyFormat) as PbAesCtrHmacAeadKey | PbAesGcmKey);
-    this.demKeyTypeUrl_ = keyTypeUrl;
-    this.demKeySize_ = demKeySize;
-    this.aesCtrKeySize_ = aesCtrKeySize;
+    this.demKeyTypeUrl = keyTypeUrl;
+    this.demKeySize = demKeySize;
+    this.aesCtrKeySize = aesCtrKeySize;
   }
 
   /**
    * @override
    */
   getDemKeySizeInBytes() {
-    return this.demKeySize_;
+    return this.demKeySize;
   }
 
   /**
    * @override
    */
   async getAead(demKey: Uint8Array): Promise<Aead> {
-    if (demKey.length != this.demKeySize_) {
+    if (demKey.length !== this.demKeySize) {
       throw new SecurityException(
-          'Key is not of the correct length, expected length: ' +
-          this.demKeySize_ + ', but got key of length: ' + demKey.length + '.');
+          `Key is not of the correct length, expected length: ${
+              this.demKeySize}, but got key of length: ${demKey.length}.`);
     }
     let key: PbAesCtrHmacAeadKey|PbAesGcmKey;
-    if (this.demKeyTypeUrl_ === AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL) {
-      key = this.replaceAesCtrHmacKeyValue_(demKey);
+    if (this.demKeyTypeUrl === AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL) {
+      key = this.replaceAesCtrHmacKeyValue(demKey);
     } else {
-      key = this.replaceAesGcmKeyValue_(demKey);
+      key = this.replaceAesGcmKeyValue(demKey);
     }
-    return Registry.getPrimitive<Aead>(Aead, key, this.demKeyTypeUrl_);
+    return Registry.getPrimitive<Aead>(Aead, key, this.demKeyTypeUrl);
   }
 
-  private static getAesGcmKeyFormat_(keyTemplate: PbKeyTemplate):
+  private static getAesGcmKeyFormat(keyTemplate: PbKeyTemplate):
       PbAesGcmKeyFormat {
     let keyFormat: PbAesGcmKeyFormat;
     try {
@@ -101,7 +101,7 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
     return keyFormat;
   }
 
-  private static getAesCtrHmacKeyFormat_(keyTemplate: PbKeyTemplate):
+  private static getAesCtrHmacKeyFormat(keyTemplate: PbKeyTemplate):
       PbAesCtrHmacAeadKeyFormat {
     let keyFormat: PbAesCtrHmacAeadKeyFormat;
     try {
@@ -121,29 +121,29 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
     return keyFormat;
   }
 
-  private replaceAesGcmKeyValue_(symmetricKey: Uint8Array): PbAesGcmKey {
-    if (!(this.key_ instanceof PbAesGcmKey)) {
+  private replaceAesGcmKeyValue(symmetricKey: Uint8Array): PbAesGcmKey {
+    if (!(this.key instanceof PbAesGcmKey)) {
       throw new SecurityException('Key is not an AES-CTR key');
     }
-    const key = this.key_.setKeyValue(symmetricKey);
+    const key = this.key.setKeyValue(symmetricKey);
     return key;
   }
 
-  private replaceAesCtrHmacKeyValue_(symmetricKey: Uint8Array):
+  private replaceAesCtrHmacKeyValue(symmetricKey: Uint8Array):
       PbAesCtrHmacAeadKey {
-    const key = (this.key_ as PbAesCtrHmacAeadKey);
+    const key = (this.key as PbAesCtrHmacAeadKey);
     const aesCtrKey = key.getAesCtrKey();
     if (!aesCtrKey) {
       throw new SecurityException('AES-CTR key not set');
     }
-    const aesCtrKeyValue = symmetricKey.slice(0, this.aesCtrKeySize_);
+    const aesCtrKeyValue = symmetricKey.slice(0, this.aesCtrKeySize);
     aesCtrKey.setKeyValue(aesCtrKeyValue);
     const hmacKey = key.getHmacKey();
     if (!hmacKey) {
       throw new SecurityException('HMAC key not set');
     }
     const hmacKeyValue =
-        symmetricKey.slice(this.aesCtrKeySize_, this.demKeySize_);
+        symmetricKey.slice(this.aesCtrKeySize, this.demKeySize);
     hmacKey.setKeyValue(hmacKeyValue);
     return key;
   }

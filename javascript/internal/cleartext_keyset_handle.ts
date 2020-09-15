@@ -7,7 +7,6 @@
 import {BinaryKeysetReader} from './binary_keyset_reader';
 import {BinaryKeysetWriter} from './binary_keyset_writer';
 import {KeysetHandle} from './keyset_handle';
-import {PbKeyset} from './proto';
 
 const binaryKeysetWriter = new BinaryKeysetWriter();
 

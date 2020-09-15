@@ -602,13 +602,13 @@ function createAesCtrHmacAeadTestKeyTemplate(): PbKeyTemplate {
 class DummyKeyFactory implements KeyManager.KeyFactory {
   constructor(
       private readonly keyType: string,
-      private readonly NEW_KEY_METHOD_RESULT_ = new Uint8Array(10)) {}
+      private readonly newKeyMethodResult = new Uint8Array(10)) {}
 
   /**
    * @override
    */
   newKey(keyFormat: PbMessage|Uint8Array) {
-    const key = new PbAesCtrKey().setKeyValue(this.NEW_KEY_METHOD_RESULT_);
+    const key = new PbAesCtrKey().setKeyValue(this.newKeyMethodResult);
     return key;
   }
 
@@ -619,7 +619,7 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
     const keyData =
         new PbKeyData()
             .setTypeUrl(this.keyType)
-            .setValue(this.NEW_KEY_METHOD_RESULT_)
+            .setValue(this.newKeyMethodResult)
             .setKeyMaterialType(PbKeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL);
 
     return keyData;
@@ -658,19 +658,19 @@ const DEFAULT_PRIMITIVE_TYPE = Aead;
 
 /** @final */
 class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
-  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
+  private readonly KEY_FACTORY: KeyManager.KeyFactory;
 
   constructor(
       private readonly keyType: string,
-      private readonly PRIMITIVE_: DummyPrimitive1 = new DummyPrimitive1Impl1(),
-      private readonly PRIMITIVE_TYPE_ = DummyPrimitive1) {
-    this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
+      private readonly primitive: DummyPrimitive1 = new DummyPrimitive1Impl1(),
+      private readonly primitiveType = DummyPrimitive1) {
+    this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
   /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager1>, key: PbKeyData|PbMessage) {
-    return this.PRIMITIVE_;
+    return this.primitive;
   }
 
   /** @override */
@@ -685,7 +685,7 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
 
   /** @override */
   getPrimitiveType(): Constructor<DummyPrimitive1> {
-    return this.PRIMITIVE_TYPE_;
+    return this.primitiveType;
   }
 
   /** @override */
@@ -695,25 +695,25 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
 
   /** @override */
   getKeyFactory() {
-    return this.KEY_FACTORY_;
+    return this.KEY_FACTORY;
   }
 }
 
 /** @final */
 class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
-  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
+  private readonly KEY_FACTORY: KeyManager.KeyFactory;
 
   constructor(
       private readonly keyType: string,
-      private readonly PRIMITIVE_: DummyPrimitive2 = new DummyPrimitive2Impl(),
-      private readonly PRIMITIVE_TYPE_ = DummyPrimitive2) {
-    this.KEY_FACTORY_ = new DummyKeyFactory(keyType);
+      private readonly primitive: DummyPrimitive2 = new DummyPrimitive2Impl(),
+      private readonly primitiveType = DummyPrimitive2) {
+    this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
   /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager2>, key: PbKeyData|PbMessage) {
-    return this.PRIMITIVE_;
+    return this.primitive;
   }
 
   /** @override */
@@ -728,7 +728,7 @@ class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
 
   /** @override */
   getPrimitiveType() {
-    return this.PRIMITIVE_TYPE_;
+    return this.primitiveType;
   }
 
   /** @override */
@@ -738,17 +738,17 @@ class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
 
   /** @override */
   getKeyFactory() {
-    return this.KEY_FACTORY_;
+    return this.KEY_FACTORY;
   }
 }
 
 /** @final */
 class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
-  private readonly KEY_FACTORY_: KeyManager.KeyFactory;
+  private readonly KEY_FACTORY: KeyManager.KeyFactory;
 
   constructor(
       private readonly keyType: string, opt_newKeyMethodResult?: Uint8Array) {
-    this.KEY_FACTORY_ = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
+    this.KEY_FACTORY = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
   }
 
   /** @override */
@@ -780,7 +780,7 @@ class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
 
   /** @override */
   getKeyFactory() {
-    return this.KEY_FACTORY_;
+    return this.KEY_FACTORY;
   }
 }
 

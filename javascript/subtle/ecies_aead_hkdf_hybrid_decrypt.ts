@@ -22,8 +22,8 @@ export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
   private readonly hkdfHash_: string;
   private readonly pointFormat_: EllipticCurves.PointFormatType;
   private readonly demHelper_: EciesAeadHkdfDemHelper;
-  private readonly headerSize_: number;
-  private readonly hkdfSalt_: Uint8Array|undefined;
+  private readonly headerSize: number;
+  private readonly hkdfSalt: Uint8Array|undefined;
 
   /**
    * @param hkdfHash the name of the HMAC algorithm, accepted names
@@ -60,8 +60,8 @@ export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
     this.hkdfHash_ = hkdfHash;
     this.pointFormat_ = pointFormat;
     this.demHelper_ = demHelper;
-    this.headerSize_ = headerSize;
-    this.hkdfSalt_ = opt_hkdfSalt;
+    this.headerSize = headerSize;
+    this.hkdfSalt = opt_hkdfSalt;
   }
 
   /**
@@ -71,19 +71,18 @@ export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
    * @override
    */
   async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array) {
-    if (ciphertext.length < this.headerSize_) {
+    if (ciphertext.length < this.headerSize) {
       throw new SecurityException('Ciphertext is too short.');
     }
 
     // Split the ciphertext to KEM token and AEAD ciphertext.
-    const kemToken = ciphertext.slice(0, this.headerSize_);
-    const ciphertextBody =
-        ciphertext.slice(this.headerSize_, ciphertext.length);
-    const aead = await this.getAead_(kemToken, associatedData);
+    const kemToken = ciphertext.slice(0, this.headerSize);
+    const ciphertextBody = ciphertext.slice(this.headerSize, ciphertext.length);
+    const aead = await this.getAead(kemToken, associatedData);
     return aead.decrypt(ciphertextBody);
   }
 
-  private async getAead_(
+  private async getAead(
       kemToken: Uint8Array, opt_contextInfo?: Uint8Array|null): Promise<Aead> {
     // Variable hkdfInfo is not optional for decapsulate method. Thus it should
     // be an empty array in case that it is not defined by the caller of decrypt
@@ -93,7 +92,7 @@ export class EciesAeadHkdfHybridDecrypt extends HybridDecrypt {
     }
     const symmetricKey = await this.kemRecipient_.decapsulate(
         kemToken, this.demHelper_.getDemKeySizeInBytes(), this.pointFormat_,
-        this.hkdfHash_, opt_contextInfo, this.hkdfSalt_);
+        this.hkdfHash_, opt_contextInfo, this.hkdfSalt);
     return this.demHelper_.getAead(symmetricKey);
   }
 }

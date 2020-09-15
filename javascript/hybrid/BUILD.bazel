@@ -56,7 +56,6 @@ ts_library(
         "//hybrid/internal",
         "//internal",
         "//internal:proto",
-        "//mac",
         "//subtle",
         "//testing/internal",
         "@npm//@types/jasmine",

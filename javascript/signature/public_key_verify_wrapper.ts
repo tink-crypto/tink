@@ -44,7 +44,7 @@ class WrappedPublicKeyVerify extends PublicKeyVerify {
           CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
       let isValid: boolean = false;
       try {
-        isValid = await this.tryVerification_(primitives, rawSignature, data);
+        isValid = await this.tryVerification(primitives, rawSignature, data);
       } catch (e) {
         // Ignored.
       }
@@ -54,7 +54,7 @@ class WrappedPublicKeyVerify extends PublicKeyVerify {
       }
     }
     const primitives = await this.primitiveSet.getRawPrimitives();
-    return this.tryVerification_(primitives, signature, data);
+    return this.tryVerification(primitives, signature, data);
   }
 
   /**
@@ -63,7 +63,7 @@ class WrappedPublicKeyVerify extends PublicKeyVerify {
    *
    *
    */
-  private async tryVerification_(
+  private async tryVerification(
       primitives: Array<PrimitiveSet.Entry<PublicKeyVerify>>,
       signature: Uint8Array, data: Uint8Array): Promise<boolean> {
     const primitivesLength = primitives.length;

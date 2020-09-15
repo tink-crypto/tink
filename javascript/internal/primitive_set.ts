@@ -61,14 +61,14 @@ export class Entry<P> {
  * @final
  */
 export class PrimitiveSet<P> {
-  private primary_: Entry<P>|null = null;
+  private primary: Entry<P>|null = null;
 
   // Keys have to be stored as strings as two Uint8Arrays holding the same
   // digits are still different objects.
-  private readonly identifierToPrimitivesMap_: Map<string, Array<Entry<P>>>;
+  private readonly identifierToPrimitivesMap: Map<string, Array<Entry<P>>>;
 
   constructor(private readonly primitiveType: Constructor<P>) {
-    this.identifierToPrimitivesMap_ = new Map();
+    this.identifierToPrimitivesMap = new Map();
   }
 
   /**
@@ -94,7 +94,7 @@ export class PrimitiveSet<P> {
     const identifier = CryptoFormat.getOutputPrefix(key);
     const entry = new Entry(
         primitive, identifier, key.getStatus(), key.getOutputPrefixType());
-    this.addPrimitiveToMap_(entry);
+    this.addPrimitiveToMap(entry);
     return entry;
   }
 
@@ -103,7 +103,7 @@ export class PrimitiveSet<P> {
    *
    */
   getPrimary(): Entry<P>|null {
-    return this.primary_;
+    return this.primary;
   }
 
   /**
@@ -133,7 +133,7 @@ export class PrimitiveSet<P> {
           'Primary cannot be set to an entry which is ' +
           'not held by this primitive set.');
     }
-    this.primary_ = primitive;
+    this.primary = primitive;
   }
 
   /**
@@ -150,7 +150,7 @@ export class PrimitiveSet<P> {
    *
    */
   getPrimitives(identifier: Uint8Array): Array<Entry<P>> {
-    const result = this.getPrimitivesFromMap_(identifier);
+    const result = this.getPrimitivesFromMap(identifier);
     if (!result) {
       return [];
     } else {
@@ -163,27 +163,27 @@ export class PrimitiveSet<P> {
    *
    *
    */
-  private getPrimitivesFromMap_(identifier: Uint8Array|
-                                string): Array<Entry<P>>|undefined {
+  private getPrimitivesFromMap(identifier: Uint8Array|
+                               string): Array<Entry<P>>|undefined {
     if (identifier instanceof Uint8Array) {
       identifier = [...identifier].toString();
     }
-    return this.identifierToPrimitivesMap_.get(identifier);
+    return this.identifierToPrimitivesMap.get(identifier);
   }
 
   /**
    * Add primitive to map.
    *
    */
-  private addPrimitiveToMap_(entry: Entry<P>) {
+  private addPrimitiveToMap(entry: Entry<P>) {
     const identifier = entry.getIdentifier();
     const id = [...identifier].toString();
-    const existing = this.getPrimitivesFromMap_(id);
+    const existing = this.getPrimitivesFromMap(id);
     if (!existing) {
-      this.identifierToPrimitivesMap_.set(id, [entry]);
+      this.identifierToPrimitivesMap.set(id, [entry]);
     } else {
       existing.push(entry);
-      this.identifierToPrimitivesMap_.set(id, existing);
+      this.identifierToPrimitivesMap.set(id, existing);
     }
   }
 }

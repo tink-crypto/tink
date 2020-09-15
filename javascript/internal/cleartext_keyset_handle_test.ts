@@ -8,7 +8,6 @@ import {createKeyset} from '../testing/internal/test_utils';
 
 import {CleartextKeysetHandle} from './cleartext_keyset_handle';
 import {KeysetHandle} from './keyset_handle';
-import {PbKeyset} from './proto';
 
 describe('cleartext keyset handle test', function() {
   it('deserialize from binary', function() {

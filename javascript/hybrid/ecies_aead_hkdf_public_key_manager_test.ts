@@ -9,7 +9,6 @@ import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {PbAesCtrKey, PbEciesAeadDemParams, PbEciesAeadHkdfParams, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} from '../internal/proto';
 import * as Registry from '../internal/registry';
 import * as Util from '../internal/util';
-import {Mac} from '../mac';
 import * as Bytes from '../subtle/bytes';
 import * as EllipticCurves from '../subtle/elliptic_curves';
 import * as Random from '../subtle/random';

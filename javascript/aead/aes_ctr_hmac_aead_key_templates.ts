@@ -26,7 +26,7 @@ export class AesCtrHmacAeadKeyTemplates {
    *
    */
   static aes128CtrHmacSha256(): PbKeyTemplate {
-    return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
+    return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate(
         16,
         /* aesKeySize = */
         16,
@@ -49,7 +49,7 @@ export class AesCtrHmacAeadKeyTemplates {
    *
    */
   static aes256CtrHmacSha256(): PbKeyTemplate {
-    return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate_(
+    return AesCtrHmacAeadKeyTemplates.newAesCtrHmacSha256KeyTemplate(
         32,
         /* aesKeySize = */
         16,
@@ -60,7 +60,7 @@ export class AesCtrHmacAeadKeyTemplates {
   }
 
   /* tagSize = */
-  private static newAesCtrHmacSha256KeyTemplate_(
+  private static newAesCtrHmacSha256KeyTemplate(
       aesKeySize: number, ivSize: number, hmacKeySize: number,
       tagSize: number): PbKeyTemplate {
     // Define AES CTR key format.

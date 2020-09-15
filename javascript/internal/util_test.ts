@@ -19,7 +19,7 @@ describe('util test', function() {
     const key = createKey().setKeyData(null);
 
     try {
-      await Util.validateKey(key);
+      Util.validateKey(key);
     } catch (e) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyMissingKeyData(key.getKeyId()));
@@ -33,7 +33,7 @@ describe('util test', function() {
         createKey().setOutputPrefixType(PbOutputPrefixType.UNKNOWN_PREFIX);
 
     try {
-      await Util.validateKey(key);
+      Util.validateKey(key);
     } catch (e) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownPrefix(key.getKeyId()));
@@ -46,7 +46,7 @@ describe('util test', function() {
     const key = createKey().setStatus(PbKeyStatusType.UNKNOWN_STATUS);
 
     try {
-      await Util.validateKey(key);
+      Util.validateKey(key);
     } catch (e) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
@@ -56,10 +56,10 @@ describe('util test', function() {
   });
 
   it('validate key valid keys', async function() {
-    await Util.validateKey(createKey());
-    await Util.validateKey(
+    Util.validateKey(createKey());
+    Util.validateKey(
         createKey(/* opt_keyId = */ 0xAABBCCDD, /* opt_enabled = */ true));
-    await Util.validateKey(
+    Util.validateKey(
         createKey(/* opt_keyId = */ 0xABCDABCD, /* opt_enabled = */ false));
   });
 
@@ -68,7 +68,7 @@ describe('util test', function() {
     const keyset = new PbKeyset();
 
     try {
-      await Util.validateKeyset(keyset);
+      Util.validateKeyset(keyset);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetMissingKeys());
       return;
@@ -83,7 +83,7 @@ describe('util test', function() {
     keyset.setPrimaryKeyId(0xFFFFFFFF);
 
     try {
-      await Util.validateKeyset(keyset);
+      Util.validateKeyset(keyset);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetDisabledPrimary());
       return;
@@ -100,7 +100,7 @@ describe('util test', function() {
     keyset.setPrimaryKeyId(0xFFFFFFFF);
 
     try {
-      await Util.validateKeyset(keyset);
+      Util.validateKeyset(keyset);
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.InvalidKeysetMultiplePrimaries());
       return;
@@ -115,7 +115,7 @@ describe('util test', function() {
     keyset.addKey(key);
 
     try {
-      await Util.validateKeyset(keyset);
+      Util.validateKeyset(keyset);
     } catch (e) {
       expect(e.toString())
           .toBe(ExceptionText.InvalidKeyUnknownStatus(key.getKeyId()));
@@ -127,7 +127,7 @@ describe('util test', function() {
   it('validate keyset with valid keyset', async function() {
     const keyset = createKeyset();
 
-    await Util.validateKeyset(keyset);
+    Util.validateKeyset(keyset);
   });
 
   // tests for protoToSubtle methods

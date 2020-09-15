@@ -22,7 +22,7 @@ export class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
   private readonly hkdfHash_: string;
   private readonly pointFormat_: EllipticCurves.PointFormatType;
   private readonly demHelper_: EciesAeadHkdfDemHelper;
-  private readonly hkdfSalt_: Uint8Array|undefined;
+  private readonly hkdfSalt: Uint8Array|undefined;
 
   /**
    * @param hkdfHash the name of the HMAC algorithm, accepted names
@@ -50,7 +50,7 @@ export class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
     this.hkdfHash_ = hkdfHash;
     this.pointFormat_ = pointFormat;
     this.demHelper_ = demHelper;
-    this.hkdfSalt_ = opt_hkdfSalt;
+    this.hkdfSalt = opt_hkdfSalt;
   }
 
   /**
@@ -65,7 +65,7 @@ export class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
     const keySizeInBytes = this.demHelper_.getDemKeySizeInBytes();
     const kemKey = await this.kemSender_.encapsulate(
         keySizeInBytes, this.pointFormat_, this.hkdfHash_, associatedData,
-        this.hkdfSalt_);
+        this.hkdfSalt);
     const aead = await this.demHelper_.getAead(kemKey['key']);
     const ciphertextBody = await aead.encrypt(plaintext);
     const header = kemKey['token'];

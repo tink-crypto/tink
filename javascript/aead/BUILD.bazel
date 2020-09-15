@@ -46,7 +46,6 @@ ts_library(
         "//exception",
         "//internal",
         "//internal:proto",
-        "//mac",
         "//subtle",
         "//testing/internal",
         "@npm//@types/jasmine",

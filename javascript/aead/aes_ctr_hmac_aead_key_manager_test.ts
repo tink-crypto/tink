@@ -5,7 +5,6 @@
  */
 
 import {PbAesCtrHmacAeadKey, PbAesCtrHmacAeadKeyFormat, PbAesCtrKey, PbAesCtrKeyFormat, PbAesCtrParams, PbHashType, PbHmacKey, PbHmacKeyFormat, PbHmacParams, PbKeyData} from '../internal/proto';
-import {Mac} from '../mac';
 import * as Random from '../subtle/random';
 import {assertExists} from '../testing/internal/test_utils';
 

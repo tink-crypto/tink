@@ -262,7 +262,7 @@ function createDummyPrimitiveSets(opt_withPrimary: boolean = true): {
 
 /** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
-  constructor(private ciphertextSuffix: Uint8Array) {
+  constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
   }
 
@@ -278,7 +278,7 @@ class DummyHybridEncrypt extends HybridEncrypt {
 
 /** @final */
 class DummyHybridDecrypt extends HybridDecrypt {
-  constructor(private ciphertextSuffix: Uint8Array) {
+  constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
   }
 

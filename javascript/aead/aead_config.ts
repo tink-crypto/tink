@@ -21,7 +21,6 @@ import {AesGcmKeyManager} from './aes_gcm_key_manager';
  * @final
  */
 export class AeadConfig {
-  private static readonly CONFIG_NAME_: string = 'TINK_AEAD';
   static PRIMITIVE_NAME: string = 'Aead';
   static AES_CTR_HMAC_AEAD_TYPE_URL: string;
   static AES_GCM_TYPE_URL: string;

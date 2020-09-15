@@ -181,7 +181,7 @@ function createDummyPrimitiveSets(opt_withPrimary: boolean = true): {
 
 /** @final */
 class DummyPublicKeySign extends PublicKeySign {
-  constructor(private signatureSuffix: Uint8Array) {
+  constructor(private readonly signatureSuffix: Uint8Array) {
     super();
   }
 
@@ -193,7 +193,7 @@ class DummyPublicKeySign extends PublicKeySign {
 
 /** @final */
 class DummyPublicKeyVerify extends PublicKeyVerify {
-  constructor(private signatureSuffix: Uint8Array) {
+  constructor(private readonly signatureSuffix: Uint8Array) {
     super();
   }
 

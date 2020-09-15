@@ -6,7 +6,6 @@
 
 import {AeadConfig} from '../aead/aead_config';
 import {AeadKeyTemplates} from '../aead/aead_key_templates';
-import * as KeyManager from '../internal/key_manager';
 import {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} from '../internal/proto';
 import * as Registry from '../internal/registry';
 import * as Random from '../subtle/random';

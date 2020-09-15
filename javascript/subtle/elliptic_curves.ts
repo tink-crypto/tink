@@ -488,7 +488,7 @@ export async function generateKeyPair(
 export async function exportCryptoKey(cryptoKey: CryptoKey):
     Promise<JsonWebKey> {
   const jwk = await window.crypto.subtle.exportKey('jwk', cryptoKey);
-  return (jwk as JsonWebKey);
+  return (jwk);
 }
 
 export async function importPublicKey(

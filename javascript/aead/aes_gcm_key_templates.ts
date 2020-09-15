@@ -22,7 +22,7 @@ export class AesGcmKeyTemplates {
    *
    */
   static aes128Gcm(): PbKeyTemplate {
-    return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
+    return AesGcmKeyTemplates.newAesGcmKeyTemplate(
         /* keySize = */
         16,
         /* outputPrefixType = */
@@ -37,7 +37,7 @@ export class AesGcmKeyTemplates {
    *
    */
   static aes256Gcm(): PbKeyTemplate {
-    return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
+    return AesGcmKeyTemplates.newAesGcmKeyTemplate(
         /* keySize = */
         32,
         /* outputPrefixType = */
@@ -52,14 +52,14 @@ export class AesGcmKeyTemplates {
    *
    */
   static aes256GcmNoPrefix(): PbKeyTemplate {
-    return AesGcmKeyTemplates.newAesGcmKeyTemplate_(
+    return AesGcmKeyTemplates.newAesGcmKeyTemplate(
         /* keySize = */
         32,
         /* outputPrefixType = */
         PbOutputPrefixType.RAW);
   }
 
-  private static newAesGcmKeyTemplate_(
+  private static newAesGcmKeyTemplate(
       keySize: number, outputPrefixType: PbOutputPrefixType): PbKeyTemplate {
     // Define AES GCM key format.
     const keyFormat = (new PbAesGcmKeyFormat()).setKeySize(keySize);

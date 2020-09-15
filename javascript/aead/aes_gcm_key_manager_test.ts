@@ -5,7 +5,6 @@
  */
 
 import {PbAesCtrKey, PbAesCtrKeyFormat, PbAesGcmKey, PbAesGcmKeyFormat, PbKeyData} from '../internal/proto';
-import {Mac} from '../mac';
 import * as Random from '../subtle/random';
 
 import {AesGcmKeyManager} from './aes_gcm_key_manager';

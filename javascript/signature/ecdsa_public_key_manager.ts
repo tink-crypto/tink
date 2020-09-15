@@ -39,7 +39,7 @@ export class EcdsaPublicKeyManager implements
     KeyManager.KeyManager<PublicKeyVerify> {
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EcdsaPublicKey';
-  private static readonly SUPPORTED_PRIMITIVE_ = PublicKeyVerify;
+  private static readonly SUPPORTED_PRIMITIVE = PublicKeyVerify;
   static VERSION: number = 0;
   keyFactory = new EcdsaPublicKeyFactory();
 
@@ -52,7 +52,7 @@ export class EcdsaPublicKeyManager implements
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    const keyProto = EcdsaPublicKeyManager.getKeyProto_(key);
+    const keyProto = EcdsaPublicKeyManager.getKeyProto(key);
     EcdsaUtil.validatePublicKey(keyProto, this.getVersion());
     const jwk = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
     const params = (keyProto.getParams() as PbEcdsaParams);
@@ -73,7 +73,7 @@ export class EcdsaPublicKeyManager implements
 
   /** @override */
   getPrimitiveType() {
-    return EcdsaPublicKeyManager.SUPPORTED_PRIMITIVE_;
+    return EcdsaPublicKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /** @override */
@@ -86,10 +86,10 @@ export class EcdsaPublicKeyManager implements
     return this.keyFactory;
   }
 
-  private static getKeyProto_(keyMaterial: PbKeyData|
-                              PbMessage): PbEcdsaPublicKey {
+  private static getKeyProto(keyMaterial: PbKeyData|
+                             PbMessage): PbEcdsaPublicKey {
     if (keyMaterial instanceof PbKeyData) {
-      return EcdsaPublicKeyManager.getKeyProtoFromKeyData_(keyMaterial);
+      return EcdsaPublicKeyManager.getKeyProtoFromKeyData(keyMaterial);
     }
     if (keyMaterial instanceof PbEcdsaPublicKey) {
       return keyMaterial;
@@ -99,7 +99,7 @@ export class EcdsaPublicKeyManager implements
         EcdsaPublicKeyManager.KEY_TYPE + '.');
   }
 
-  private static getKeyProtoFromKeyData_(keyData: PbKeyData): PbEcdsaPublicKey {
+  private static getKeyProtoFromKeyData(keyData: PbKeyData): PbEcdsaPublicKey {
     if (keyData.getTypeUrl() !== EcdsaPublicKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() + ' is not supported. This key ' +

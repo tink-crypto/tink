@@ -30,9 +30,9 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     if (!keyFormat) {
       throw new SecurityException('Key format has to be non-null.');
     }
-    const keyFormatProto = EcdsaPrivateKeyFactory.getKeyFormatProto_(keyFormat);
+    const keyFormatProto = EcdsaPrivateKeyFactory.getKeyFormatProto(keyFormat);
     EcdsaUtil.validateKeyFormat(keyFormatProto);
-    return EcdsaPrivateKeyFactory.newKeyImpl_(keyFormatProto);
+    return EcdsaPrivateKeyFactory.newKeyImpl(keyFormatProto);
   }
 
   /**
@@ -68,7 +68,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * WARNING: This function assumes that the keyFormat has been validated.
    *
    */
-  private static async newKeyImpl_(keyFormat: PbEcdsaKeyFormat):
+  private static async newKeyImpl(keyFormat: PbEcdsaKeyFormat):
       Promise<PbEcdsaPrivateKey> {
     const params = (keyFormat.getParams());
     if (!params) {
@@ -82,7 +82,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
         await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const jsonPrivateKey =
         await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    return EcdsaPrivateKeyFactory.jsonToProtoKey_(
+    return EcdsaPrivateKeyFactory.jsonToProtoKey(
         jsonPrivateKey, jsonPublicKey, params);
   }
 
@@ -91,7 +91,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * the given params.
    *
    */
-  private static jsonToProtoKey_(
+  private static jsonToProtoKey(
       jsonPrivateKey: JsonWebKey, jsonPublicKey: JsonWebKey,
       params: PbEcdsaParams): PbEcdsaPrivateKey {
     const {x, y} = jsonPublicKey;
@@ -122,10 +122,10 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * Uint8Array) or checked to be an EcdsaKeyFormat-proto (otherwise).
    *
    */
-  private static getKeyFormatProto_(keyFormat: PbMessage|
-                                    Uint8Array): PbEcdsaKeyFormat {
+  private static getKeyFormatProto(keyFormat: PbMessage|
+                                   Uint8Array): PbEcdsaKeyFormat {
     if (keyFormat instanceof Uint8Array) {
-      return EcdsaPrivateKeyFactory.deserializeKeyFormat_(keyFormat);
+      return EcdsaPrivateKeyFactory.deserializeKeyFormat(keyFormat);
     } else if (keyFormat instanceof PbEcdsaKeyFormat) {
       return keyFormat;
     } else {
@@ -134,8 +134,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     }
   }
 
-  private static deserializeKeyFormat_(keyFormat: Uint8Array):
-      PbEcdsaKeyFormat {
+  private static deserializeKeyFormat(keyFormat: Uint8Array): PbEcdsaKeyFormat {
     let keyFormatProto: PbEcdsaKeyFormat;
     try {
       keyFormatProto = PbEcdsaKeyFormat.deserializeBinary(keyFormat);
@@ -158,7 +157,7 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
  */
 export class EcdsaPrivateKeyManager implements
     KeyManager.KeyManager<PublicKeySign> {
-  private static readonly SUPPORTED_PRIMITIVE_ = PublicKeySign;
+  private static readonly SUPPORTED_PRIMITIVE = PublicKeySign;
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EcdsaPrivateKey';
   keyFactory = new EcdsaPrivateKeyFactory();
@@ -171,7 +170,7 @@ export class EcdsaPrivateKeyManager implements
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    const keyProto = EcdsaPrivateKeyManager.getKeyProto_(key);
+    const keyProto = EcdsaPrivateKeyManager.getKeyProto(key);
     EcdsaUtil.validatePrivateKey(
         keyProto, VERSION, EcdsaPublicKeyManager.VERSION);
     const recepientPrivateKey = EcdsaUtil.getJsonWebKeyFromProto(keyProto);
@@ -200,7 +199,7 @@ export class EcdsaPrivateKeyManager implements
 
   /** @override */
   getPrimitiveType() {
-    return EcdsaPrivateKeyManager.SUPPORTED_PRIMITIVE_;
+    return EcdsaPrivateKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /** @override */
@@ -213,10 +212,10 @@ export class EcdsaPrivateKeyManager implements
     return this.keyFactory;
   }
 
-  private static getKeyProto_(keyMaterial: PbKeyData|
-                              PbMessage): PbEcdsaPrivateKey {
+  private static getKeyProto(keyMaterial: PbKeyData|
+                             PbMessage): PbEcdsaPrivateKey {
     if (keyMaterial instanceof PbKeyData) {
-      return EcdsaPrivateKeyManager.getKeyProtoFromKeyData_(keyMaterial);
+      return EcdsaPrivateKeyManager.getKeyProtoFromKeyData(keyMaterial);
     }
     if (keyMaterial instanceof PbEcdsaPrivateKey) {
       return keyMaterial;
@@ -226,8 +225,7 @@ export class EcdsaPrivateKeyManager implements
         'manager supports ' + EcdsaPrivateKeyManager.KEY_TYPE + '.');
   }
 
-  private static getKeyProtoFromKeyData_(keyData: PbKeyData):
-      PbEcdsaPrivateKey {
+  private static getKeyProtoFromKeyData(keyData: PbKeyData): PbEcdsaPrivateKey {
     if (keyData.getTypeUrl() !== EcdsaPrivateKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() +

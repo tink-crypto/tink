@@ -45,7 +45,7 @@ class WrappedHybridDecrypt extends HybridDecrypt {
           CryptoFormat.NON_RAW_PREFIX_SIZE, ciphertext.length);
       let decryptedText: Uint8Array|undefined;
       try {
-        decryptedText = await this.tryDecryption_(
+        decryptedText = await this.tryDecryption(
             primitives, rawCiphertext, opt_contextInfo);
       } catch (e) {
       }
@@ -54,7 +54,7 @@ class WrappedHybridDecrypt extends HybridDecrypt {
       }
     }
     const primitives = await this.hybridDecryptPrimitiveSet.getRawPrimitives();
-    return this.tryDecryption_(primitives, ciphertext, opt_contextInfo);
+    return this.tryDecryption(primitives, ciphertext, opt_contextInfo);
   }
 
   /**
@@ -64,7 +64,7 @@ class WrappedHybridDecrypt extends HybridDecrypt {
    *
    *
    */
-  private async tryDecryption_(
+  private async tryDecryption(
       primitives: Array<PrimitiveSet.Entry<HybridDecrypt>>,
       ciphertext: Uint8Array,
       opt_contextInfo?: Uint8Array|null): Promise<Uint8Array> {

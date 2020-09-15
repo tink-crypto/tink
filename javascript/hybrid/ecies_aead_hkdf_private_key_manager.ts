@@ -6,7 +6,7 @@
 
 import {SecurityException} from '../exception/security_exception';
 import * as KeyManager from '../internal/key_manager';
-import {PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbKeyData, PbKeyTemplate, PbMessage} from '../internal/proto';
+import {PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbKeyData, PbMessage} from '../internal/proto';
 import * as Util from '../internal/util';
 import * as Bytes from '../subtle/bytes';
 import * as eciesAeadHkdfHybridDecrypt from '../subtle/ecies_aead_hkdf_hybrid_decrypt';
@@ -33,9 +33,9 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
       throw new SecurityException('Key format has to be non-null.');
     }
     const keyFormatProto =
-        EciesAeadHkdfPrivateKeyFactory.getKeyFormatProto_(keyFormat);
+        EciesAeadHkdfPrivateKeyFactory.getKeyFormatProto(keyFormat);
     EciesAeadHkdfValidators.validateKeyFormat(keyFormatProto);
-    return EciesAeadHkdfPrivateKeyFactory.newKeyImpl_(keyFormatProto);
+    return EciesAeadHkdfPrivateKeyFactory.newKeyImpl(keyFormatProto);
   }
 
   /**
@@ -72,7 +72,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * WARNING: This function assume that the keyFormat has been validated.
    *
    */
-  private static async newKeyImpl_(keyFormat: PbEciesAeadHkdfKeyFormat):
+  private static async newKeyImpl(keyFormat: PbEciesAeadHkdfKeyFormat):
       Promise<PbEciesAeadHkdfPrivateKey> {
     const params = (keyFormat.getParams());
     if (!params) {
@@ -90,7 +90,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
         await EllipticCurves.exportCryptoKey(keyPair.publicKey);
     const jsonPrivateKey =
         await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey_(
+    return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey(
         jsonPrivateKey, jsonPublicKey, params);
   }
 
@@ -99,7 +99,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * the given params.
    *
    */
-  private static jsonToProtoKey_(
+  private static jsonToProtoKey(
       jsonPrivateKey: JsonWebKey, jsonPublicKey: JsonWebKey,
       params: PbEciesAeadHkdfParams): PbEciesAeadHkdfPrivateKey {
     const {x, y} = jsonPublicKey;
@@ -131,10 +131,10 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
    * Uint8Array) or checked to be an EciesAeadHkdfKeyFormat-proto (otherwise).
    *
    */
-  private static getKeyFormatProto_(keyFormat: PbMessage|
-                                    Uint8Array): PbEciesAeadHkdfKeyFormat {
+  private static getKeyFormatProto(keyFormat: PbMessage|
+                                   Uint8Array): PbEciesAeadHkdfKeyFormat {
     if (keyFormat instanceof Uint8Array) {
-      return EciesAeadHkdfPrivateKeyFactory.deserializeKeyFormat_(keyFormat);
+      return EciesAeadHkdfPrivateKeyFactory.deserializeKeyFormat(keyFormat);
     } else if (keyFormat instanceof PbEciesAeadHkdfKeyFormat) {
       return keyFormat;
     } else {
@@ -144,7 +144,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     }
   }
 
-  private static deserializeKeyFormat_(keyFormat: Uint8Array):
+  private static deserializeKeyFormat(keyFormat: Uint8Array):
       PbEciesAeadHkdfKeyFormat {
     let keyFormatProto: PbEciesAeadHkdfKeyFormat;
     try {
@@ -168,7 +168,7 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
  */
 export class EciesAeadHkdfPrivateKeyManager implements
     KeyManager.KeyManager<HybridDecrypt> {
-  private static readonly SUPPORTED_PRIMITIVE_ = HybridDecrypt;
+  private static readonly SUPPORTED_PRIMITIVE = HybridDecrypt;
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey';
   keyFactory = new EciesAeadHkdfPrivateKeyFactory();
@@ -182,7 +182,7 @@ export class EciesAeadHkdfPrivateKeyManager implements
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    const keyProto = EciesAeadHkdfPrivateKeyManager.getKeyProto_(key);
+    const keyProto = EciesAeadHkdfPrivateKeyManager.getKeyProto(key);
     EciesAeadHkdfValidators.validatePrivateKey(
         keyProto, VERSION, EciesAeadHkdfPublicKeyManager.VERSION);
     const recepientPrivateKey =
@@ -228,7 +228,7 @@ export class EciesAeadHkdfPrivateKeyManager implements
 
   /** @override */
   getPrimitiveType() {
-    return EciesAeadHkdfPrivateKeyManager.SUPPORTED_PRIMITIVE_;
+    return EciesAeadHkdfPrivateKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /** @override */
@@ -241,11 +241,10 @@ export class EciesAeadHkdfPrivateKeyManager implements
     return this.keyFactory;
   }
 
-  private static getKeyProto_(keyMaterial: PbKeyData|
-                              PbMessage): PbEciesAeadHkdfPrivateKey {
+  private static getKeyProto(keyMaterial: PbKeyData|
+                             PbMessage): PbEciesAeadHkdfPrivateKey {
     if (keyMaterial instanceof PbKeyData) {
-      return EciesAeadHkdfPrivateKeyManager.getKeyProtoFromKeyData_(
-          keyMaterial);
+      return EciesAeadHkdfPrivateKeyManager.getKeyProtoFromKeyData(keyMaterial);
     }
     if (keyMaterial instanceof PbEciesAeadHkdfPrivateKey) {
       return keyMaterial;
@@ -255,7 +254,7 @@ export class EciesAeadHkdfPrivateKeyManager implements
         'manager supports ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE + '.');
   }
 
-  private static getKeyProtoFromKeyData_(keyData: PbKeyData):
+  private static getKeyProtoFromKeyData(keyData: PbKeyData):
       PbEciesAeadHkdfPrivateKey {
     if (keyData.getTypeUrl() !== EciesAeadHkdfPrivateKeyManager.KEY_TYPE) {
       throw new SecurityException(

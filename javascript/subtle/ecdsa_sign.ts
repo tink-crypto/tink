@@ -16,7 +16,7 @@ import * as Validators from './validators';
  * @final
  */
 export class EcdsaSign extends PublicKeySign {
-  private readonly encoding_: EllipticCurves.EcdsaSignatureEncodingType;
+  private readonly encoding: EllipticCurves.EcdsaSignatureEncodingType;
 
   /**
    * @param opt_encoding The
@@ -29,7 +29,7 @@ export class EcdsaSign extends PublicKeySign {
     if (!opt_encoding) {
       opt_encoding = EllipticCurves.EcdsaSignatureEncodingType.IEEE_P1363;
     }
-    this.encoding_ = opt_encoding;
+    this.encoding = opt_encoding;
   }
 
   /**
@@ -39,7 +39,7 @@ export class EcdsaSign extends PublicKeySign {
     Validators.requireUint8Array(message);
     const signature = await window.crypto.subtle.sign(
         {name: 'ECDSA', hash: {name: this.hash}}, this.key, message);
-    if (this.encoding_ == EllipticCurves.EcdsaSignatureEncodingType.DER) {
+    if (this.encoding === EllipticCurves.EcdsaSignatureEncodingType.DER) {
       return EllipticCurves.ecdsaIeee2Der(new Uint8Array(signature));
     }
     return new Uint8Array(signature);

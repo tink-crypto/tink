@@ -45,7 +45,6 @@ ts_library(
         ":signature",
         "//internal",
         "//internal:proto",
-        "//mac",
         "//signature/internal",
         "//subtle",
         "//testing/internal",

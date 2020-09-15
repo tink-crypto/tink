@@ -7,7 +7,6 @@
 import {PbEcdsaParams, PbEcdsaPublicKey, PbEcdsaSignatureEncoding, PbEllipticCurveType, PbHashType, PbKeyData} from '../internal/proto';
 import * as Registry from '../internal/registry';
 import * as Util from '../internal/util';
-import {Mac} from '../mac';
 import * as Bytes from '../subtle/bytes';
 import * as EllipticCurves from '../subtle/elliptic_curves';
 import {assertExists} from '../testing/internal/test_utils';

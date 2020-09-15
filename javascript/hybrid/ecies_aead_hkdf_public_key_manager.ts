@@ -41,7 +41,7 @@ export class EciesAeadHkdfPublicKeyManager implements
     KeyManager.KeyManager<HybridEncrypt> {
   static KEY_TYPE: string =
       'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey';
-  private static readonly SUPPORTED_PRIMITIVE_ = HybridEncrypt;
+  private static readonly SUPPORTED_PRIMITIVE = HybridEncrypt;
   static VERSION: number = 0;
   keyFactory = new EciesAeadHkdfPublicKeyFactory();
 
@@ -54,7 +54,7 @@ export class EciesAeadHkdfPublicKeyManager implements
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    const keyProto = EciesAeadHkdfPublicKeyManager.getKeyProto_(key);
+    const keyProto = EciesAeadHkdfPublicKeyManager.getKeyProto(key);
     EciesAeadHkdfValidators.validatePublicKey(keyProto, this.getVersion());
     const recepientPublicKey =
         EciesAeadHkdfUtil.getJsonWebKeyFromProto(keyProto);
@@ -89,7 +89,7 @@ export class EciesAeadHkdfPublicKeyManager implements
 
   /** @override */
   getPrimitiveType() {
-    return EciesAeadHkdfPublicKeyManager.SUPPORTED_PRIMITIVE_;
+    return EciesAeadHkdfPublicKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /** @override */
@@ -102,10 +102,10 @@ export class EciesAeadHkdfPublicKeyManager implements
     return this.keyFactory;
   }
 
-  private static getKeyProto_(keyMaterial: PbKeyData|
-                              PbMessage): PbEciesAeadHkdfPublicKey {
+  private static getKeyProto(keyMaterial: PbKeyData|
+                             PbMessage): PbEciesAeadHkdfPublicKey {
     if (keyMaterial instanceof PbKeyData) {
-      return EciesAeadHkdfPublicKeyManager.getKeyProtoFromKeyData_(keyMaterial);
+      return EciesAeadHkdfPublicKeyManager.getKeyProtoFromKeyData(keyMaterial);
     }
     if (keyMaterial instanceof PbEciesAeadHkdfPublicKey) {
       return keyMaterial;
@@ -115,7 +115,7 @@ export class EciesAeadHkdfPublicKeyManager implements
         EciesAeadHkdfPublicKeyManager.KEY_TYPE + '.');
   }
 
-  private static getKeyProtoFromKeyData_(keyData: PbKeyData):
+  private static getKeyProtoFromKeyData(keyData: PbKeyData):
       PbEciesAeadHkdfPublicKey {
     if (keyData.getTypeUrl() !== EciesAeadHkdfPublicKeyManager.KEY_TYPE) {
       throw new SecurityException(

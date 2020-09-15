@@ -16,7 +16,7 @@ import * as Validators from './validators';
  * @final
  */
 export class EcdsaVerify extends PublicKeyVerify {
-  private readonly ieeeSignatureLength_: number;
+  private readonly ieeeSignatureLength: number;
 
   /**
    * @param encoding The
@@ -30,7 +30,7 @@ export class EcdsaVerify extends PublicKeyVerify {
     if (!namedCurve) {
       throw new SecurityException('Curve has to be defined.');
     }
-    this.ieeeSignatureLength_ = 2 *
+    this.ieeeSignatureLength = 2 *
         EllipticCurves.fieldSizeInBytes(
             EllipticCurves.curveFromString(namedCurve));
   }
@@ -43,7 +43,7 @@ export class EcdsaVerify extends PublicKeyVerify {
     Validators.requireUint8Array(message);
     if (this.encoding === EllipticCurves.EcdsaSignatureEncodingType.DER) {
       signature =
-          EllipticCurves.ecdsaDer2Ieee(signature, this.ieeeSignatureLength_);
+          EllipticCurves.ecdsaDer2Ieee(signature, this.ieeeSignatureLength);
     }
     return window.crypto.subtle.verify(
         {name: 'ECDSA', hash: {name: this.hash}}, this.key, signature, message);

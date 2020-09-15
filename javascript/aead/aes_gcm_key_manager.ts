@@ -23,8 +23,8 @@ const VERSION = 0;
 class AesGcmKeyFactory implements KeyManager.KeyFactory {
   /** @override */
   newKey(keyFormat: PbMessage|Uint8Array) {
-    const keyFormatProto = AesGcmKeyFactory.getKeyFormatProto_(keyFormat);
-    AesGcmKeyFactory.validateKeyFormat_(keyFormatProto);
+    const keyFormatProto = AesGcmKeyFactory.getKeyFormatProto(keyFormat);
+    AesGcmKeyFactory.validateKeyFormat(keyFormatProto);
     const key = (new PbAesGcmKey())
                     .setKeyValue(Random.randBytes(keyFormatProto.getKeySize()))
                     .setVersion(VERSION);
@@ -42,7 +42,7 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
     return keyData;
   }
 
-  private static validateKeyFormat_(keyFormat: PbAesGcmKeyFormat) {
+  private static validateKeyFormat(keyFormat: PbAesGcmKeyFormat) {
     Validators.validateAesKeySize(keyFormat.getKeySize());
   }
 
@@ -51,10 +51,10 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
    * Uint8Array) or checked to be an AesGcmKeyFormat-proto (otherwise).
    *
    */
-  private static getKeyFormatProto_(keyFormat: PbMessage|
-                                    Uint8Array): PbAesGcmKeyFormat {
+  private static getKeyFormatProto(keyFormat: PbMessage|
+                                   Uint8Array): PbAesGcmKeyFormat {
     if (keyFormat instanceof Uint8Array) {
-      return AesGcmKeyFactory.deserializeKeyFormat_(keyFormat);
+      return AesGcmKeyFactory.deserializeKeyFormat(keyFormat);
     } else if (keyFormat instanceof PbAesGcmKeyFormat) {
       return keyFormat;
     } else {
@@ -62,7 +62,7 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
     }
   }
 
-  private static deserializeKeyFormat_(keyFormat: Uint8Array):
+  private static deserializeKeyFormat(keyFormat: Uint8Array):
       PbAesGcmKeyFormat {
     let keyFormatProto: PbAesGcmKeyFormat;
     try {
@@ -85,13 +85,13 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
  * @final
  */
 export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
-  private static readonly SUPPORTED_PRIMITIVE_ = Aead;
+  private static readonly SUPPORTED_PRIMITIVE = Aead;
   static KEY_TYPE: string = 'type.googleapis.com/google.crypto.tink.AesGcmKey';
-  private readonly keyFactory_: AesGcmKeyFactory;
+  private readonly keyFactory: AesGcmKeyFactory;
 
   /** Visible for testing. */
   constructor() {
-    this.keyFactory_ = new AesGcmKeyFactory();
+    this.keyFactory = new AesGcmKeyFactory();
   }
 
   /** @override */
@@ -102,8 +102,8 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
           'Requested primitive type which is not ' +
           'supported by this key manager.');
     }
-    const keyProto = AesGcmKeyManager.getKeyProto_(key);
-    AesGcmKeyManager.validateKey_(keyProto);
+    const keyProto = AesGcmKeyManager.getKeyProto(key);
+    AesGcmKeyManager.validateKey(keyProto);
     return await aesGcm.fromRawKey(keyProto.getKeyValue_asU8());
   }
 
@@ -119,7 +119,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
 
   /** @override */
   getPrimitiveType() {
-    return AesGcmKeyManager.SUPPORTED_PRIMITIVE_;
+    return AesGcmKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /** @override */
@@ -129,10 +129,10 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
 
   /** @override */
   getKeyFactory() {
-    return this.keyFactory_;
+    return this.keyFactory;
   }
 
-  private static validateKey_(key: PbAesGcmKey) {
+  private static validateKey(key: PbAesGcmKey) {
     Validators.validateAesKeySize(key.getKeyValue().length);
     Validators.validateVersion(key.getVersion(), VERSION);
   }
@@ -142,9 +142,9 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
    * KeyData-proto) or checked to be an AesGcmKey-proto (otherwise).
    *
    */
-  private static getKeyProto_(keyMaterial: PbMessage|PbKeyData): PbAesGcmKey {
+  private static getKeyProto(keyMaterial: PbMessage|PbKeyData): PbAesGcmKey {
     if (keyMaterial instanceof PbKeyData) {
-      return AesGcmKeyManager.getKeyProtoFromKeyData_(keyMaterial);
+      return AesGcmKeyManager.getKeyProtoFromKeyData(keyMaterial);
     } else if (keyMaterial instanceof PbAesGcmKey) {
       return keyMaterial;
     } else {
@@ -158,7 +158,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
    * It validates the key type and returns a deserialized AesGcmKey-proto.
    *
    */
-  private static getKeyProtoFromKeyData_(keyData: PbKeyData): PbAesGcmKey {
+  private static getKeyProtoFromKeyData(keyData: PbKeyData): PbAesGcmKey {
     if (keyData.getTypeUrl() != AesGcmKeyManager.KEY_TYPE) {
       throw new SecurityException(
           'Key type ' + keyData.getTypeUrl() +
