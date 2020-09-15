@@ -159,6 +159,8 @@ py_test(
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/testing:keyset_builder",
     ],
 )
 
