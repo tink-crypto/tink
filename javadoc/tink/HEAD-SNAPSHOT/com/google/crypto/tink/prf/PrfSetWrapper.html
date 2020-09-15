@@ -108,14 +108,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</dd>
+<dd><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>@Immutable
 public class <span class="typeNameLabel">PrfSetWrapper</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
-implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</pre>
+implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</pre>
 <div class="block">PrfSetWrapper is the implementation of PrimitiveWrapper for the PrfSet primitive.
 
  <p>The returned primitive has instances of <code>Prf</code> for each key in the KeySet. The individual
@@ -156,7 +156,7 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></td>
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/PrfSetWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass</a></span>()</code>
 <div class="block">Returns the primitive class object of the primitive used to create B.</div>
 </td>
@@ -173,7 +173,7 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/PrfSetWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;&nbsp;set)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/PrfSetWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;&nbsp;set)</code>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.</div>
 </td>
 </tr>
@@ -222,7 +222,7 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
 <ul class="blockList">
 <li class="blockList">
 <h4>wrap</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&nbsp;wrap(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;&nbsp;set)
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&nbsp;wrap(<a href="../../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;&nbsp;set)
             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">PrimitiveWrapper</a></code></span></div>
 <div class="block">Wraps a <code>PrimitiveSet</code> and returns a single instance.
@@ -230,7 +230,7 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
  This has to be implemented when a new primitive type is added.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -249,7 +249,7 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
  of type <code>P</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#getPrimitiveClass--">getPrimitiveClass</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#getPrimitiveClass--">getPrimitiveClass</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -259,13 +259,13 @@ implements <a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html"
 <ul class="blockList">
 <li class="blockList">
 <h4>getInputPrimitiveClass</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;&nbsp;getInputPrimitiveClass()</pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>&gt;&nbsp;getInputPrimitiveClass()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#getInputPrimitiveClass--">PrimitiveWrapper</a></code></span></div>
 <div class="block">Returns the primitive class object of the primitive used to create B. Used for internal
  management. Should be implemented as <code>return B.class;</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;<a href="../../../../../com/google/crypto/tink/prf/Prf.html" title="interface in com.google.crypto.tink.prf">Prf</a>,<a href="../../../../../com/google/crypto/tink/prf/PrfSet.html" title="class in com.google.crypto.tink.prf">PrfSet</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
