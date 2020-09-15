@@ -19,6 +19,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
@@ -27,6 +28,8 @@ import (
 	"github.com/google/tink/go/testutil"
 	"github.com/google/tink/go/tink"
 
+	commonpb "github.com/google/tink/go/proto/common_go_proto"
+	hmacpb "github.com/google/tink/go/proto/hmac_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -110,6 +113,70 @@ func TestFactoryRawKey(t *testing.T) {
 	}
 	if err := verifyMacPrimitive(p, p, cryptofmt.RawPrefix, tagSize); err != nil {
 		t.Errorf("invalid primitive: %s", err)
+	}
+}
+func TestFactoryLegacyKey(t *testing.T) {
+	tagSize := uint32(16)
+	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_LEGACY)
+	primaryKey := keyset.Key[0]
+	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_LEGACY {
+		t.Errorf("expect a legacy key")
+	}
+	keysetHandle, err := testkeyset.NewHandle(keyset)
+	if err != nil {
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
+	}
+	p, err := mac.New(keysetHandle)
+	if err != nil {
+		t.Errorf("mac.New failed: %s", err)
+	}
+	data := []byte("some data")
+	tag, err := p.ComputeMAC(data)
+	if err != nil {
+		t.Errorf("mac computation failed: %s", err)
+	}
+	if err = p.VerifyMAC(tag, data); err != nil {
+		t.Errorf("mac verification failed: %s", err)
+	}
+}
+
+func TestFactoryLegacyFixedKeyTag(t *testing.T) {
+	// This test makes sure that previously created tags are still considered valid.
+	// This is needed to resolve b/168188126.
+	tagSize := uint32(16)
+	params := testutil.NewHMACParams(commonpb.HashType_SHA256, tagSize)
+	keyValue := []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
+	key := &hmacpb.HmacKey{
+		Version:  0,
+		Params:   params,
+		KeyValue: keyValue,
+	}
+	serializedKey, err := proto.Marshal(key)
+	if err != nil {
+		t.Errorf("failed serializing proto: %v", err)
+	}
+	keyData := &tinkpb.KeyData{
+		TypeUrl:         "type.googleapis.com/google.crypto.tink.HmacKey",
+		Value:           serializedKey,
+		KeyMaterialType: tinkpb.KeyData_SYMMETRIC,
+	}
+	keyset := testutil.NewTestKeyset(keyData, tinkpb.OutputPrefixType_LEGACY)
+	primaryKey := keyset.Key[0]
+	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_LEGACY {
+		t.Errorf("expect a legacy key")
+	}
+	keysetHandle, err := testkeyset.NewHandle(keyset)
+	if err != nil {
+		t.Errorf("testkeyset.NewHandle failed: %s", err)
+	}
+	p, err := mac.New(keysetHandle)
+	if err != nil {
+		t.Errorf("mac.New failed: %s", err)
+	}
+	data := []byte("hello")
+	tag := []byte{0, 0, 0, 0, 42, 245, 200, 101, 212, 53, 28, 131, 148, 107, 236, 152, 101, 87, 7, 59, 255}
+	if err = p.VerifyMAC(tag, data); err != nil {
+		t.Errorf("mac verification failed: %s", err)
 	}
 }
 
