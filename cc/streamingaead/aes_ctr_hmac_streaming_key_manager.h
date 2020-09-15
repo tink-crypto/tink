@@ -88,6 +88,11 @@ class AesCtrHmacStreamingKeyManager
   CreateKey(const google::crypto::tink::AesCtrHmacStreamingKeyFormat&
                 key_format) const override;
 
+  crypto::tink::util::StatusOr<google::crypto::tink::AesCtrHmacStreamingKey>
+  DeriveKey(
+      const google::crypto::tink::AesCtrHmacStreamingKeyFormat& key_format,
+      InputStream* input_stream) const override;
+
   ~AesCtrHmacStreamingKeyManager() override {}
 
  private:
