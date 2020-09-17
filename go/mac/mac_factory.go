@@ -28,7 +28,7 @@ import (
 
 // TODO(b/168188126) Remove once this bug is fixed.
 var enableComputeOldLegacyMac = flag.Bool(
-	"enable_compute_old_legacy_mac", true,
+	"enable_compute_old_legacy_mac", false,
 	"Lets MAC primitive compute MACs for keys of type LEGACY in an old incompatible format.")
 
 // New creates a MAC primitive from the given keyset handle.

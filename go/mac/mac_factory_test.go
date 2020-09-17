@@ -118,6 +118,8 @@ func TestFactoryRawKey(t *testing.T) {
 }
 
 func TestFactoryLegacyKey(t *testing.T) {
+	flag.Set("enable_compute_old_legacy_mac", "true")
+	defer flag.Set("enable_compute_old_legacy_mac", "false")
 	tagSize := uint32(16)
 	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_LEGACY)
 	primaryKey := keyset.Key[0]
@@ -143,7 +145,6 @@ func TestFactoryLegacyKey(t *testing.T) {
 }
 
 func TestFactoryDisableLegacyKey(t *testing.T) {
-
 	tagSize := uint32(16)
 	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_LEGACY)
 	primaryKey := keyset.Key[0]
@@ -159,16 +160,16 @@ func TestFactoryDisableLegacyKey(t *testing.T) {
 		t.Errorf("mac.New failed: %s", err)
 	}
 	data := []byte("some data")
-	if _, err := p.ComputeMAC(data); err != nil {
-		t.Errorf("computation of old legacy mac failed, but was enabled by default: %s", err)
-	}
-	flag.Set("enable_compute_old_legacy_mac", "false")
 	if _, err := p.ComputeMAC(data); err == nil {
 		t.Errorf("computation of old legacy mac succeeded, but was disabled")
 	}
 	flag.Set("enable_compute_old_legacy_mac", "true")
 	if _, err := p.ComputeMAC(data); err != nil {
 		t.Errorf("computation of old legacy mac failed, but was enabled: %s", err)
+	}
+	flag.Set("enable_compute_old_legacy_mac", "false")
+	if _, err := p.ComputeMAC(data); err == nil {
+		t.Errorf("computation of old legacy mac succeeded, but was disabled")
 	}
 }
 
