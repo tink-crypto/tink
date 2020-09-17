@@ -19,7 +19,6 @@
 #import "objc/TINKAllConfig.h"
 
 #include "tink/config/tink_config.h"
-#include "tink/util/errors.h"
 #include "proto/config.pb.h"
 
 #import <Foundation/Foundation.h>
