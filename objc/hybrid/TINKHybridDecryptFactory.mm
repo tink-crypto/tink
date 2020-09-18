@@ -26,7 +26,6 @@
 #import "objc/hybrid/TINKHybridDecryptInternal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "tink/hybrid/hybrid_decrypt_factory.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 

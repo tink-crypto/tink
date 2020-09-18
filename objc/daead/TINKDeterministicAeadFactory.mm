@@ -20,15 +20,14 @@
 
 #import <Foundation/Foundation.h>
 
-#include "tink/daead/deterministic_aead_factory.h"
-#include "tink/keyset_handle.h"
-#include "tink/util/status.h"
-
 #import "objc/TINKDeterministicAead.h"
 #import "objc/TINKKeysetHandle.h"
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/daead/TINKDeterministicAeadInternal.h"
 #import "objc/util/TINKErrors.h"
+
+#include "tink/keyset_handle.h"
+#include "tink/util/status.h"
 
 @implementation TINKDeterministicAeadFactory
 

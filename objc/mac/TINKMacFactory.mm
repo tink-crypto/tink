@@ -27,7 +27,6 @@
 #import "objc/util/TINKErrors.h"
 
 #include "tink/keyset_handle.h"
-#include "tink/mac/mac_factory.h"
 #include "tink/util/status.h"
 
 @implementation TINKMacFactory

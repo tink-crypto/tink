@@ -26,7 +26,6 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKErrors.h"
 
-#include "tink/aead/aead_factory.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
 
