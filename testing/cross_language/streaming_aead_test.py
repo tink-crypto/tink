@@ -21,7 +21,7 @@ from absl.testing import parameterized
 import tink
 from tink import streaming_aead
 
-from util import keyset_builder
+from tink.testing import keyset_builder
 from util import supported_key_types
 from util import testing_servers
 
