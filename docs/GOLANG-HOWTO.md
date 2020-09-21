@@ -552,7 +552,7 @@ func main() {
         }
 
         // Fetch the master key from a KMS.
-        gcpClient := gcpkms.NewClientWithCredentials(keyURI, credentialsPath)
+        gcpClient, err := gcpkms.NewClientWithCredentials(keyURI, credentialsPath)
 
         registry.RegisterKMSClient(gcpClient)
 
@@ -561,7 +561,7 @@ func main() {
                 log.Fatal(err)
         }
 
-        masterKey, err = aead.NewKMSEnvelopeAEAD(*aead.AES256GCMKeyTemplate(), backend)
+        masterKey := aead.NewKMSEnvelopeAEAD(*aead.AES256GCMKeyTemplate(), backend)
         if err != nil {
                 log.Fatal(err)
         }
