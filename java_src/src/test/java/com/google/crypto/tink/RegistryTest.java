@@ -788,46 +788,95 @@ public class RegistryTest {
   }
 
   @Test
-  public void testNewKeyData_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
-      throws Exception {
+  public void
+      testNewKeyData_keyTemplateProto_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
+          throws Exception {
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
     Registry.registerKeyManager(km);
-    KeyTemplate template = KeyTemplate.newBuilder()
-                           .setValue(keyformat)
-                           .setTypeUrl(typeUrl)
-                           .setOutputPrefixType(OutputPrefixType.TINK)
-                           .build();
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+        .setValue(keyformat)
+        .setTypeUrl(typeUrl)
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
 
     assertThat(Registry.newKeyData(template)).isEqualTo(km.newKeyData(keyformat));
   }
 
   @Test
-  public void testNewKeyData_registeredTypeUrlNewKeyAllowedFalse_throwsException()
+  public void testNewKeyData_keyTemplateProto_registeredTypeUrlNewKeyAllowedFalse_throwsException()
       throws Exception {
     String typeUrl = "testNewKeyDataTypeUrl";
     CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
     Registry.registerKeyManager(km, false);
-    KeyTemplate template = KeyTemplate.newBuilder()
-                           .setValue(keyformat)
-                           .setTypeUrl(typeUrl)
-                           .setOutputPrefixType(OutputPrefixType.TINK)
-                           .build();
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+        .setValue(keyformat)
+        .setTypeUrl(typeUrl)
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
 
     assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
   }
 
   @Test
-  public void testNewKeyData_unregisteredTypeUrl_throwsException() throws Exception {
+  public void testNewKeyData_keyTemplateProto_unregisteredTypeUrl_throwsException()
+      throws Exception {
     String typeUrl = "testNewKeyDataTypeUrl";
     ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
-    KeyTemplate template = KeyTemplate.newBuilder()
-                           .setValue(keyformat)
-                           .setTypeUrl(typeUrl)
-                           .setOutputPrefixType(OutputPrefixType.TINK)
-                           .build();
+    com.google.crypto.tink.proto.KeyTemplate template =
+        com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+        .setValue(keyformat)
+        .setTypeUrl(typeUrl)
+        .setOutputPrefixType(OutputPrefixType.TINK)
+        .build();
+
+    assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
+  }
+
+  @Test
+  public void
+      testNewKeyData_keyTemplateClass_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
+          throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    Registry.registerKeyManager(km);
+    com.google.crypto.tink.KeyTemplate template =
+        com.google.crypto.tink.KeyTemplate.create(
+            typeUrl, keyformat.toByteArray(),
+            com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK);
+
+    assertThat(Registry.newKeyData(template)).isEqualTo(km.newKeyData(keyformat));
+  }
+
+  @Test
+  public void testNewKeyData_keyTemplateClass_registeredTypeUrlNewKeyAllowedFalse_throwsException()
+      throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    Registry.registerKeyManager(km, false);
+    com.google.crypto.tink.KeyTemplate template =
+        com.google.crypto.tink.KeyTemplate.create(
+            typeUrl, keyformat.toByteArray(),
+            com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK);
+
+    assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
+  }
+
+  @Test
+  public void testNewKeyData_keyTemplateClass_unregisteredTypeUrl_throwsException()
+      throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    com.google.crypto.tink.KeyTemplate template =
+        com.google.crypto.tink.KeyTemplate.create(
+            typeUrl, keyformat.toByteArray(),
+            com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK);
 
     assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
   }

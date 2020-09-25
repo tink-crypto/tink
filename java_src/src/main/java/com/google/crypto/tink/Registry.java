@@ -706,7 +706,8 @@ public final class Registry {
    *
    * @return a new {@link KeyData}
    */
-  public static synchronized KeyData newKeyData(KeyTemplate keyTemplate)
+  public static synchronized KeyData
+      newKeyData(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
     KeyManager<?> manager = getUntypedKeyManager(keyTemplate.getTypeUrl());
     if (newKeyAllowedMap.get(keyTemplate.getTypeUrl()).booleanValue()) {
@@ -715,6 +716,21 @@ public final class Registry {
       throw new GeneralSecurityException(
           "newKey-operation not permitted for key type " + keyTemplate.getTypeUrl());
     }
+  }
+
+    /**
+   * Convenience method for generating a new {@link KeyData} for the specified {@code template}.
+   *
+   * <p>It looks up a {@link KeyManager} identified by {@code keyTemplate.type_url}, and calls
+   * {@link KeyManager#newKeyData}.
+   *
+   * <p>This method should be used solely for key management.
+   *
+   * @return a new {@link KeyData}
+   */
+  public static synchronized KeyData newKeyData(com.google.crypto.tink.KeyTemplate keyTemplate)
+      throws GeneralSecurityException {
+    return newKeyData(keyTemplate.getProto());
   }
 
   /**
