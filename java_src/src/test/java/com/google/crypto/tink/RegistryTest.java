@@ -93,8 +93,11 @@ public class RegistryTest {
     }
 
     @Override
-    public KeyData newKeyData(ByteString serialized) throws GeneralSecurityException {
-      throw new GeneralSecurityException("Not Implemented");
+    public KeyData newKeyData(ByteString serializedKeyFormat) throws GeneralSecurityException {
+      return KeyData.newBuilder()
+            .setTypeUrl(typeUrl)
+            .setValue(serializedKeyFormat)
+            .build();
     }
 
     @Override
@@ -784,6 +787,51 @@ public class RegistryTest {
     }
   }
 
+  @Test
+  public void testNewKeyData_registeredTypeUrl_returnsCustomAeadKeyManagerNewKeyData()
+      throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    Registry.registerKeyManager(km);
+    KeyTemplate template = KeyTemplate.newBuilder()
+                           .setValue(keyformat)
+                           .setTypeUrl(typeUrl)
+                           .setOutputPrefixType(OutputPrefixType.TINK)
+                           .build();
+
+    assertThat(Registry.newKeyData(template)).isEqualTo(km.newKeyData(keyformat));
+  }
+
+  @Test
+  public void testNewKeyData_registeredTypeUrlNewKeyAllowedFalse_throwsException()
+      throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    CustomAeadKeyManager km = new CustomAeadKeyManager(typeUrl);
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    Registry.registerKeyManager(km, false);
+    KeyTemplate template = KeyTemplate.newBuilder()
+                           .setValue(keyformat)
+                           .setTypeUrl(typeUrl)
+                           .setOutputPrefixType(OutputPrefixType.TINK)
+                           .build();
+
+    assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
+  }
+
+  @Test
+  public void testNewKeyData_unregisteredTypeUrl_throwsException() throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    KeyTemplate template = KeyTemplate.newBuilder()
+                           .setValue(keyformat)
+                           .setTypeUrl(typeUrl)
+                           .setOutputPrefixType(OutputPrefixType.TINK)
+                           .build();
+
+    assertThrows(GeneralSecurityException.class, () -> Registry.newKeyData(template));
+  }
+
   /** Implementation of a KeyTypeManager for testing. */
   private static class TestKeyTypeManager extends KeyTypeManager<AesGcmKey> {
     public TestKeyTypeManager() {
@@ -991,7 +1039,7 @@ public class RegistryTest {
   }
 
   @Test
-  public void parseKeyData_succeeds() throws Exception {
+  public void testParseKeyData_succeeds() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
     AesGcmKey key =
