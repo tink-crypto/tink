@@ -1,0 +1,13 @@
+{
+    "primaryKeyId": 1957790490,
+    "key": [{
+        "keyData": {
+            "typeUrl": "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPublicKey",
+            "keyMaterialType": "ASYMMETRIC_PUBLIC",
+            "value": "ElwKBAgCEAMSUhJQCjh0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5jcnlwdG8udGluay5BZXNDdHJIbWFjQWVhZEtleRISCgYKAggQEBASCAoECAMQEBAgGAEYARohAK9vbaFeLJb1v1J9q5tSlyVUxRztWMjq2szPvkgnP3KeIiEAqXGgjXc5dhOf1wwkwOPL+g0j9B5gmVPEsX+4065mVqo="
+        },
+        "outputPrefixType": "TINK",
+        "keyId": 1957790490,
+        "status": "ENABLED"
+    }]
+}
