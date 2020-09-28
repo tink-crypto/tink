@@ -1,0 +1,23 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "tink_key",
+    srcs = ["TinkKey.java"],
+    deps = [
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink:key_template",
+    ],
+)
+
+android_library(
+    name = "tink_key-android",
+    srcs = ["TinkKey.java"],
+    deps = [
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+    ],
+)
