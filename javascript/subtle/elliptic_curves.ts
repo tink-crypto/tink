@@ -343,7 +343,6 @@ export function curveToString(curve: CurveType): string {
     case CurveType.P521:
       return 'P-521';
   }
-  throw new InvalidArgumentsException('unknown curve: ' + curve);
 }
 
 export function curveFromString(curve: string): CurveType {
@@ -443,7 +442,6 @@ export function fieldSizeInBytes(curve: CurveType): number {
     case CurveType.P521:
       return 66;
   }
-  throw new InvalidArgumentsException('unknown curve: ' + curve);
 }
 
 export function encodingSizeInBytes(
@@ -456,7 +454,6 @@ export function encodingSizeInBytes(
     case PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
       return 2 * fieldSizeInBytes(curve);
   }
-  throw new InvalidArgumentsException('invalid format');
 }
 
 export async function computeEcdhSharedSecret(
