@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -69,9 +70,10 @@ public class CreatePublicKeysetCommandTest {
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, KeyType.HYBRID);
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
-  public void testCreate_hybrid_encryptedPrivate_shouldCreateCleartextPublic()
-      throws Exception {
+  public void testCreate_hybrid_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, KeyType.HYBRID);
   }
@@ -85,9 +87,10 @@ public class CreatePublicKeysetCommandTest {
         SignatureKeyTemplates.ED25519, KeyType.SIGNATURE);
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
-  public void testCreate_signature_encryptedPrivate_shouldCreateCleartextPublic()
-      throws Exception {
+  public void testCreate_signature_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(
         SignatureKeyTemplates.ECDSA_P256, KeyType.SIGNATURE);
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(

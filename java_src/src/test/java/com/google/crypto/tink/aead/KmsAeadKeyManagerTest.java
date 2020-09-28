@@ -23,6 +23,7 @@ import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,6 +38,8 @@ public class KmsAeadKeyManagerTest {
     AeadConfig.register();
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
     KeysetHandle keysetHandle =

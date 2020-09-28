@@ -34,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -101,6 +102,8 @@ public class RotateKeysetCommandTest {
     }
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
   public void testRotateEncrypted_shouldAddNewKey() throws Exception {
     // This test requires KMS/internet access and thus cannot run on RBE.

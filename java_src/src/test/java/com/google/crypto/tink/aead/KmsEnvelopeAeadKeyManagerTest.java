@@ -31,6 +31,7 @@ import com.google.crypto.tink.testing.TestUtil;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -47,6 +48,8 @@ public class KmsEnvelopeAeadKeyManagerTest {
     AeadConfig.register();
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
@@ -56,6 +59,8 @@ public class KmsEnvelopeAeadKeyManagerTest {
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
+  // TODO(b/154273145): re-enable this.
+  @Ignore
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
