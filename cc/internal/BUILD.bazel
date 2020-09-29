@@ -1,1 +1,40 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "keyset_wrapper",
+    hdrs = ["keyset_wrapper.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+    ],
+)
+
+cc_library(
+    name = "keyset_wrapper_impl",
+    hdrs = ["keyset_wrapper_impl.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":keyset_wrapper",
+        "//:primitive_set",
+        "//proto:tink_cc_proto",
+        "//util:statusor",
+        "//util:validation",
+    ],
+)
+
+cc_test(
+    name = "keyset_wrapper_impl_test",
+    srcs = ["keyset_wrapper_impl_test.cc"],
+    deps = [
+        ":keyset_wrapper_impl",
+        "//proto:tink_cc_proto",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
