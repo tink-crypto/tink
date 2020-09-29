@@ -1,0 +1,35 @@
+# package containing subtle implementations of PQC primitives
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "hrss_boringssl",
+    srcs = ["hrss_boringssl.cc"],
+    hdrs = ["hrss_boringssl.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//subtle:random",
+        "@tink_cc//subtle:subtle_util",
+        "@tink_cc//util:secret_data",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
+    ],
+)
+
+#tests
+cc_test(
+    name = "hrss_boringssl_test",
+    size = "small",
+    srcs = ["hrss_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":hrss_boringssl",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//subtle:random",
+        "@tink_cc//util:test_matchers",
+    ],
+)
