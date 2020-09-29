@@ -12,6 +12,9 @@
 # limitations under the License.
 ################################################################################
 
+# TODO(b/154273145): re-enable this.
+exit 0
+
 ROOT_DIR="$TEST_SRCDIR/tools"
 GCP_KMS_AEAD_CLI="$ROOT_DIR/testing/cc/gcp_kms_aead_cli"
 TEST_UTIL="$ROOT_DIR/testing/cross_language/test_util.sh"
