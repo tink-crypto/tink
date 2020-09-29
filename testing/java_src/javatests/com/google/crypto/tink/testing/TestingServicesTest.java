@@ -19,11 +19,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.BinaryKeysetReader;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
-import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.prf.PrfKeyTemplates;
+import com.google.crypto.tink.daead.AesSivKeyManager;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.mac.HmacKeyManager;
+import com.google.crypto.tink.prf.HmacPrfKeyManager;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.testing.AeadDecryptRequest;
 import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
@@ -60,7 +61,7 @@ import com.google.crypto.tink.proto.testing.StreamingAeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.StreamingAeadGrpc;
 import com.google.crypto.tink.proto.testing.VerifyMacRequest;
 import com.google.crypto.tink.proto.testing.VerifyMacResponse;
-import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -169,7 +170,7 @@ public final class TestingServicesTest {
 
   @Test
   public void toFromJson_success() throws Exception {
-    byte[] template = AeadKeyTemplates.AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -210,7 +211,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = AeadKeyTemplates.AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -247,7 +248,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = AeadKeyTemplates.AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -261,7 +262,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = AeadKeyTemplates.AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -309,7 +310,7 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadGenerateEncryptDecryptDeterministically_success() throws Exception {
-    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -342,7 +343,7 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadDecryptDeterministically_failsOnBadCiphertext() throws Exception {
-    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -357,7 +358,7 @@ public final class TestingServicesTest {
 
   @Test
   public void daeadDecryptDeterministically_failsOnBadKeyset() throws Exception {
-    byte[] template = DeterministicAeadKeyTemplates.AES256_SIV.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(AesSivKeyManager.aes256SivTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -407,7 +408,8 @@ public final class TestingServicesTest {
 
   @Test
   public void streamingAeadGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -440,7 +442,8 @@ public final class TestingServicesTest {
 
   @Test
   public void streamingAeadDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "streamingAead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -455,7 +458,8 @@ public final class TestingServicesTest {
 
   @Test
   public void streamingAeadDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = StreamingAeadKeyTemplates.AES128_CTR_HMAC_SHA256_4KB.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -498,7 +502,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computeVerifyMac_success() throws Exception {
-    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -524,7 +529,8 @@ public final class TestingServicesTest {
 
   @Test
   public void verifyMac_failsOnBadMacValue() throws Exception {
-    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -538,7 +544,8 @@ public final class TestingServicesTest {
 
   @Test
   public void verifyMac_failsOnBadKeyset() throws Exception {
-    byte[] template = MacKeyTemplates.HMAC_SHA256_128BITTAG.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacKeyManager.hmacSha256HalfDigestTemplate());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
@@ -581,7 +588,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_success() throws Exception {
-    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacPrfKeyManager.hmacSha256Template());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 15;
 
@@ -609,7 +617,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_failsOnUnknownKeyId() throws Exception {
-    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacPrfKeyManager.hmacSha256Template());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 15;
     int badKeyId = 123456789;
@@ -625,7 +634,8 @@ public final class TestingServicesTest {
 
   @Test
   public void computePrf_failsOnBadOutputLength() throws Exception {
-    byte[] template = PrfKeyTemplates.HMAC_SHA256_PRF.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        HmacPrfKeyManager.hmacSha256Template());
     byte[] inputData = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     int outputLength = 12345;
 

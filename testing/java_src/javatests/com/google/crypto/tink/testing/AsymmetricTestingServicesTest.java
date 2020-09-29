@@ -19,7 +19,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
+import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.proto.testing.HybridDecryptRequest;
 import com.google.crypto.tink.proto.testing.HybridDecryptResponse;
 import com.google.crypto.tink.proto.testing.HybridEncryptRequest;
@@ -35,7 +36,7 @@ import com.google.crypto.tink.proto.testing.SignatureSignRequest;
 import com.google.crypto.tink.proto.testing.SignatureSignResponse;
 import com.google.crypto.tink.proto.testing.SignatureVerifyRequest;
 import com.google.crypto.tink.proto.testing.SignatureVerifyResponse;
-import com.google.crypto.tink.signature.SignatureKeyTemplates;
+import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -129,7 +130,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -173,7 +175,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] contextInfo = "hybrid_decrypt_bad_ciphertext".getBytes(UTF_8);
 
@@ -192,7 +195,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void hybridDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] contextInfo = "hybrid_decrypt_bad_keyset".getBytes(UTF_8);
 
@@ -241,7 +245,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureSignVerify_success() throws Exception {
-    byte[] template = SignatureKeyTemplates.ECDSA_P256.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EcdsaSignKeyManager.ecdsaP256Template());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);
@@ -272,7 +277,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureVerify_failsOnBadSignature() throws Exception {
-    byte[] template = SignatureKeyTemplates.ECDSA_P256.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EcdsaSignKeyManager.ecdsaP256Template());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);
@@ -290,7 +296,8 @@ public final class AsymmetricTestingServicesTest {
 
   @Test
   public void signatureVerify_failsOnBadKeyset() throws Exception {
-    byte[] template = SignatureKeyTemplates.ECDSA_P256.toByteArray();
+    byte[] template = KeyTemplateProtoConverter.toByteArray(
+        EcdsaSignKeyManager.ecdsaP256Template());
     byte[] data = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
 
     KeysetGenerateResponse genResponse = generateKeyset(keysetStub, template);

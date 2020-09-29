@@ -1,0 +1,13 @@
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "key_template_proto_converter",
+    srcs = ["KeyTemplateProtoConverter.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)

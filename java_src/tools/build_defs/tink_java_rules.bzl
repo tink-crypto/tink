@@ -40,14 +40,24 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
                         break
             if library_target["kind"] == "android_library" and android_min_version <= version_num:
                 dependencies[target_name] = True
+        if len(dependencies) == 0:
+            # Do not create a test target if there is nothing to test.
+            continue
         dependencies["//java/com/google/android/apps/common/testing/testrunner"] = True
 
         binary_name = name + "_" + str(version_num) + "_collected_binary"
+
+        # Some tests require --config=android_java8_libs which in turn requires enabling multidex.
+        # See go/java8-libs-for-android-faq for details.
+        multidex = "legacy"
+        if version_num >= 21:
+            multidex = "native"
         android_binary(
             name = binary_name,
             deps = list(dependencies),
             manifest = "//third_party/tink/java_src/src/androidtest:AndroidManifest.xml",
             testonly = 1,
+            multidex = multidex,
         )
         android_instrumentation_test(
             name = name + "_" + str(version_num) + "_test",

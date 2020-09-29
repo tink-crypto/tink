@@ -55,6 +55,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink:streaming_aead",
         "@tink_java//src/main/java/com/google/crypto/tink:version",
+        "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_set",
     ],
 )
@@ -98,12 +99,13 @@ java_test(
         "@maven//:junit_junit",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/daead:aes_siv_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
+        "@tink_java//src/main/java/com/google/crypto/tink/mac:hmac_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink/prf:hmac_prf_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
     ],
 )
 
@@ -128,7 +130,8 @@ java_test(
         "@maven//:junit_junit",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
+        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:ecies_aead_hkdf_private_key_manager",
+        "@tink_java//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
+        "@tink_java//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
     ],
 )

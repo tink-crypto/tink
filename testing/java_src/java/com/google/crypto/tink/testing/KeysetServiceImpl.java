@@ -21,8 +21,8 @@ import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.testing.KeysetFromJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetFromJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
@@ -33,7 +33,6 @@ import com.google.crypto.tink.proto.testing.KeysetPublicResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -52,14 +51,8 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       KeysetGenerateRequest request, StreamObserver<KeysetGenerateResponse> responseObserver) {
     KeysetGenerateResponse response;
     try {
-      com.google.crypto.tink.proto.KeyTemplate protoTemplate =
-          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
-              request.getTemplate(), ExtensionRegistryLite.getEmptyRegistry());
       KeyTemplate template =
-          KeyTemplate.create(
-              protoTemplate.getTypeUrl(),
-              protoTemplate.getValue().toByteArray(),
-              convertOutputPrefixTypeFromProto(protoTemplate.getOutputPrefixType()));
+          KeyTemplateProtoConverter.fromByteArray(request.getTemplate().toByteArray());
       KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
       Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
       ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();
@@ -69,7 +62,7 @@ public final class KeysetServiceImpl extends KeysetImplBase {
           KeysetGenerateResponse.newBuilder()
               .setKeyset(ByteString.copyFrom(keysetStream.toByteArray()))
               .build();
-    } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
+    } catch (GeneralSecurityException e) {
       response = KeysetGenerateResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
       responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asException());
@@ -155,19 +148,4 @@ public final class KeysetServiceImpl extends KeysetImplBase {
     responseObserver.onCompleted();
   }
 
-  private static KeyTemplate.OutputPrefixType convertOutputPrefixTypeFromProto(
-      OutputPrefixType outputPrefixType) {
-    switch (outputPrefixType) {
-      case TINK:
-        return KeyTemplate.OutputPrefixType.TINK;
-      case LEGACY:
-        return KeyTemplate.OutputPrefixType.LEGACY;
-      case RAW:
-        return KeyTemplate.OutputPrefixType.RAW;
-      case CRUNCHY:
-        return KeyTemplate.OutputPrefixType.CRUNCHY;
-      default:
-        throw new IllegalArgumentException("Unknown output prefix type");
-    }
-  }
 }
