@@ -44,39 +44,41 @@ test_command() {
   set -e
 }
 
+# TODO(b/154273145): re-enable this
 #############################################################################
 #### Test initialization and encryption
-test_name="encrypt"
-echo "+++ Starting test $test_name..."
+# test_name="encrypt"
+# echo "+++ Starting test $test_name..."
 
-##### Run encryption
-test_command $ENVELOPE_CLI encrypt $CRED_FILE $KEY_URI $DATA_FILE "$DATA_FILE".encrypted
+# ##### Run encryption
+# test_command $ENVELOPE_CLI encrypt $CRED_FILE $KEY_URI $DATA_FILE "$DATA_FILE".encrypted
 
-if [[ $TEST_STATUS -eq 0 ]]; then
-  echo "+++ Success: file was encrypted."
-else
-  echo "--- Failure: could not encrypt file."
-  exit 1
-fi
+# if [[ $TEST_STATUS -eq 0 ]]; then
+#   echo "+++ Success: file was encrypted."
+# else
+#   echo "--- Failure: could not encrypt file."
+#   exit 1
+# fi
 
+# TODO(b/154273145): re-enable this
 #############################################################################
 #### Test if decryption succeeds and returns original file
-test_name="decrypt"
-echo "+++ Starting test $test_name..."
+# test_name="decrypt"
+# echo "+++ Starting test $test_name..."
 
-##### Run decryption
-test_command $ENVELOPE_CLI decrypt $CRED_FILE $KEY_URI "$DATA_FILE".encrypted "$DATA_FILE".decrypted
+# ##### Run decryption
+# test_command $ENVELOPE_CLI decrypt $CRED_FILE $KEY_URI "$DATA_FILE".encrypted "$DATA_FILE".decrypted
 
-if [[ $TEST_STATUS -eq 0 ]]; then
-  echo "+++ Success: file was successfully decrypted."
-else
-  echo "--- Failure: could not decrypt file."
-  exit 1
-fi
+# if [[ $TEST_STATUS -eq 0 ]]; then
+#   echo "+++ Success: file was successfully decrypted."
+# else
+#   echo "--- Failure: could not decrypt file."
+#   exit 1
+# fi
 
-if cmp -s $DATA_FILE $DATA_FILE.decrypted; then
-  echo "+++ Success: file content is the same after decryption."
-else
-  echo "--- Failure: file content is not the same after decryption."
-  exit 1
-fi
+# if cmp -s $DATA_FILE $DATA_FILE.decrypted; then
+#   echo "+++ Success: file content is the same after decryption."
+# else
+#   echo "--- Failure: file content is not the same after decryption."
+#   exit 1
+# fi
