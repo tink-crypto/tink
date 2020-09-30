@@ -18,7 +18,9 @@ set -euo pipefail
 ##### Tests for streaming_aead python example.
 
 HYBRID_ENCRYPTION_CLI="$1"
-PUBLIC_KEYSET_FILE="$2"
+HYBRID_DECRYPTION_CLI="$2"
+PUBLIC_KEYSET_FILE="$3"
+PRIVATE_KEYSET_FILE="$4"
 
 INPUT_FILE="${TEST_TMPDIR}/example_data.txt"
 
@@ -40,10 +42,10 @@ test_command() {
 
 #############################################################################
 #### Test correct encryption and decryption.
-test_name="test_encrypt_succeeds"
+test_name="test_encrypt_decrypt_succeeds"
 echo "+++ Starting test ${test_name}..."
 
-##### Run verification
+##### Run encryption
 test_command ${HYBRID_ENCRYPTION_CLI} --keyset_path=${PUBLIC_KEYSET_FILE} --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
 if [[ ${TEST_STATUS} -eq 0 ]]; then
   echo "+++ Encryption successful."
@@ -52,18 +54,78 @@ else
   exit 1
 fi
 
+##### Run decryption
+test_command ${HYBRID_DECRYPTION_CLI} --keyset_path=${PRIVATE_KEYSET_FILE} --input_path=${INPUT_FILE}.ciphertext --output_path=${INPUT_FILE}.plaintext
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Decryption successful."
+else
+  echo "--- Decryption failed."
+  exit 1
+fi
+
+cmp --silent ${INPUT_FILE} ${INPUT_FILE}.plaintext
+
 
 #############################################################################
-#### Test correct encryption with context
-test_name="test_encrypt_succeeds_with_context"
+#### Test correct encryption and decryption with context
+test_name="test_encrypt_decrypt_succeeds_with_context"
 echo "+++ Starting test ${test_name}..."
 
-##### Run verification
+##### Run encryption
 CONTEXT_INFORMATION="context information"
 test_command ${HYBRID_ENCRYPTION_CLI} --context_info=${CONTEXT_INFORMATION} --keyset_path=${PUBLIC_KEYSET_FILE} --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
 if [[ ${TEST_STATUS} -eq 0 ]]; then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
+  exit 1
+fi
+
+##### Run decryption
+test_command ${HYBRID_DECRYPTION_CLI} --context_info=${CONTEXT_INFORMATION} -keyset_path=${PRIVATE_KEYSET_FILE} --input_path=${INPUT_FILE}.ciphertext --output_path=${INPUT_FILE}.plaintext
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Decryption successful."
+else
+  echo "--- Decryption failed."
+  exit 1
+fi
+
+cmp --silent ${INPUT_FILE} ${INPUT_FILE}.plaintext
+
+#############################################################################
+#### Test decryption fails with missing context
+test_name="test_encrypt_decrypt_fails_with_context"
+echo "+++ Starting test ${test_name}..."
+
+##### Run encryption
+CONTEXT_INFORMATION="context information"
+test_command ${HYBRID_ENCRYPTION_CLI} --context_info=${CONTEXT_INFORMATION} --keyset_path=${PUBLIC_KEYSET_FILE} --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Encryption successful."
+else
+  echo "--- Encryption failed."
+  exit 1
+fi
+
+##### Run decryption
+test_command ${HYBRID_DECRYPTION_CLI} --keyset_path=${PRIVATE_KEYSET_FILE} --input_path=${INPUT_FILE}.ciphertext --output_path=${INPUT_FILE}.plaintext
+if [[ ${TEST_STATUS} -eq 1 ]]; then
+  echo "+++ Decryption failed as expected."
+else
+  echo "--- Decryption succeeded but expected to fail."
+  exit 1
+fi
+
+#############################################################################
+#### Test enryption fails with wrong keyset
+test_name="test_encrypt_fails_with_wrong_keyset"
+echo "+++ Starting test ${test_name}..."
+
+##### Run encryption
+test_command ${HYBRID_ENCRYPTION_CLI} --keyset_path=${PRIVATE_KEYSET_FILE} --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
+if [[ ${TEST_STATUS} -eq 1 ]]; then
+  echo "+++ Encryption failed as expected."
+else
+  echo "--- Encryption succeeded but expected to fail."
   exit 1
 fi

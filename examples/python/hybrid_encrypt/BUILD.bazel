@@ -7,11 +7,24 @@ licenses(["notice"])
 
 exports_files([
     "ecies_test_public_keyset.json",
+    "ecies_test_private_keyset.json",
 ])
 
 py_binary(
     name = "hybrid_encrypt",
     srcs = ["hybrid_encrypt.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+py_binary(
+    name = "hybrid_decrypt",
+    srcs = ["hybrid_decrypt.py"],
     python_version = "PY3",
     deps = [
         requirement("absl-py"),
@@ -27,11 +40,15 @@ sh_test(
     srcs = ["hybrid_encrypt_test.sh"],
     args = [
         "$(rootpath :hybrid_encrypt)",
+        "$(rootpath :hybrid_decrypt)",
         "$(rootpath :ecies_test_public_keyset.json)",
+        "$(rootpath :ecies_test_private_keyset.json)",
     ],
     data = [
-        ":ecies_test_public_keyset.json",
         ":hybrid_encrypt",
+        ":hybrid_decrypt",
+        ":ecies_test_public_keyset.json",
+        ":ecies_test_private_keyset.json",
     ],
 )
 
@@ -43,10 +60,14 @@ sh_test(
     srcs = ["hybrid_encrypt_test.sh"],
     args = [
         "'python3 $(rootpath :hybrid_encrypt)'",
+        "'python3 $(rootpath :hybrid_decrypt)'",
         "$(rootpath :ecies_test_public_keyset.json)",
+        "$(rootpath :ecies_test_private_keyset.json)",
     ],
     data = [
-        ":ecies_test_public_keyset.json",
         ":hybrid_encrypt",
+        ":hybrid_decrypt",
+        ":ecies_test_public_keyset.json",
+        ":ecies_test_private_keyset.json",
     ],
 )
