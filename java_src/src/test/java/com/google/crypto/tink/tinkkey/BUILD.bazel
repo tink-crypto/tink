@@ -1,0 +1,23 @@
+licenses(["notice"])
+
+java_test(
+    name = "SecretKeyAccessTest",
+    size = "small",
+    srcs = ["SecretKeyAccessTest.java"],
+    deps = [
+        "@maven//:junit_junit",
+        "@maven//:com_google_truth_truth",
+        "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
+    ],
+)
+
+java_test(
+    name = "KeyAccessTest",
+    size = "small",
+    srcs = ["KeyAccessTest.java"],
+    deps = [
+        "@maven//:junit_junit",
+        "@maven//:com_google_truth_truth",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
+    ],
+)

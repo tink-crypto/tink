@@ -13,6 +13,23 @@ java_library(
     ],
 )
 
+java_library(
+    name = "secret_key_access",
+    srcs = ["SecretKeyAccess.java"],
+    deps = [
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        ":key_access"
+    ],
+)
+
+java_library(
+    name = "key_access",
+    srcs = ["KeyAccess.java"],
+    deps = [
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
 android_library(
     name = "tink_key-android",
     srcs = ["TinkKey.java"],
@@ -20,4 +37,19 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
         "//src/main/java/com/google/crypto/tink:key_template-android",
     ],
+)
+
+android_library(
+    name = "secret_key_access-android",
+    srcs = ["SecretKeyAccess.java"],
+    deps = [
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        ":key_access-android"
+    ],
+)
+
+android_library(
+    name = "key_access-android",
+    srcs = ["KeyAccess.java"],
+    deps = [ "@maven//:com_google_errorprone_error_prone_annotations" ]
 )
