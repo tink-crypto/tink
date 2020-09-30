@@ -104,6 +104,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//aead:aead_key_templates",
+        "//daead:deterministic_aead_key_templates",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
@@ -350,6 +351,7 @@ cc_test(
         ":hybrid_config",
         ":hybrid_key_templates",
         "//aead:aead_key_templates",
+        "//daead:deterministic_aead_key_templates",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",

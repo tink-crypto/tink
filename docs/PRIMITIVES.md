@@ -63,7 +63,7 @@ JavaScript is currently under development.
 | MAC                | HMAC-SHA2, AES-CMAC                                                                              |
 | PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                                                   |
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS                                      |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                                                                         |
+| Hybrid Encryption  | ECIES with AEAD and HKDF, ECIES with HKDF and Deterministic AEAD                                 |
 
 #### Objective-C
 
@@ -290,6 +290,9 @@ _context info_ to the ciphertext in various ways, for example:
 - use context\_info as "CtxInfo"-input for HKDF (if the implementation uses HKDF
   as key derivation function, cf.
   [RFC 5869](https://tools.ietf.org/html/rfc5869)).
+
+Furthermore, the DataEncapsulationMechanism can be achieved using either an Aead
+primitive or a Determinisitic Aead.
 
 Minimal properties:
 

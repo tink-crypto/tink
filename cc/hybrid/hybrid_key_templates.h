@@ -129,6 +129,16 @@ class HybridKeyTemplates {
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate&
   EciesX25519HkdfHmacSha256XChaCha20Poly1305();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519
+  //   - DEM: AES-SIV (Deterministic Aead)
+  //   - KDF: HKDF-HMAC-SHA256 with an empty salt
+  //   - EC Point Format: Compressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesX25519HkdfHmacSha256DeterministicAesSiv();
 };
 
 }  // namespace tink

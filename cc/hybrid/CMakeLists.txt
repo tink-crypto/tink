@@ -95,6 +95,7 @@ tink_cc_library(
     hybrid_key_templates.h
   DEPS
     tink::aead::aead_key_templates
+    tink::daead::deterministic_aead_key_templates
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
@@ -301,6 +302,7 @@ tink_cc_test(
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
     tink::aead::aead_key_templates
+    tink::daead::deterministic_aead_key_templates
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto

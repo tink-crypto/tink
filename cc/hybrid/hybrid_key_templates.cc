@@ -18,8 +18,9 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/aead/aead_key_templates.h"
-#include "proto/ecies_aead_hkdf.pb.h"
+#include "tink/daead/deterministic_aead_key_templates.h"
 #include "proto/common.pb.h"
+#include "proto/ecies_aead_hkdf.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -146,6 +147,17 @@ HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305() {
   static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
       EllipticCurveType::CURVE25519, HashType::SHA256,
       EcPointFormat::COMPRESSED, AeadKeyTemplates::XChaCha20Poly1305(),
+      OutputPrefixType::TINK,
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesX25519HkdfHmacSha256DeterministicAesSiv() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::CURVE25519, HashType::SHA256,
+      EcPointFormat::COMPRESSED, DeterministicAeadKeyTemplates::Aes256Siv(),
       OutputPrefixType::TINK,
       /* hkdf_salt= */ "");
   return *key_template;
