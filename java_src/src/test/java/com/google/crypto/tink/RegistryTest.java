@@ -562,47 +562,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitives_legacy_CustomManager_shouldWork() throws Exception {
-    // Create a keyset.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
-    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeyData key1 = Registry.newKeyData(template1);
-    KeyData key2 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle =
-        KeysetHandle.fromKeyset(
-            Keyset.newBuilder()
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key1)
-                        .setKeyId(1)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key2)
-                        .setKeyId(2)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .setPrimaryKeyId(2)
-                .build());
-
-    // Get a PrimitiveSet using a custom key manager for key1.
-    KeyManager<Aead> customManager = new CustomAeadKeyManager(AeadConfig.AES_EAX_TYPE_URL);
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, customManager);
-    List<PrimitiveSet.Entry<Aead>> aead1List =
-        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(0));
-    List<PrimitiveSet.Entry<Aead>> aead2List =
-        aeadSet.getPrimitive(keysetHandle.getKeyset().getKey(1));
-
-    assertThat(aead1List).hasSize(1);
-    assertThat(aead1List.get(0).getPrimitive().getClass()).isEqualTo(DummyAead.class);
-    assertThat(aead2List).hasSize(1);
-    assertThat(aead2List.get(0).getPrimitive().getClass()).isEqualTo(EncryptThenAuthenticate.class);
-  }
-
-  @Test
   public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
     KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
