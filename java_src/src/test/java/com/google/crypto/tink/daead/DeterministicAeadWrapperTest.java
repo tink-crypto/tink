@@ -65,7 +65,8 @@ public class DeterministicAeadWrapperTest {
   public void testEncrytDecrypt() throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
     DeterministicAead aead =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle));
+        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle,
+                                                DeterministicAead.class));
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encryptDeterministically(plaintext, associatedData);

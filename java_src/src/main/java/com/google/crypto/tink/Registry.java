@@ -947,23 +947,6 @@ public final class Registry {
    * Primitive-interface.
    *
    * @return a PrimitiveSet with all instantiated primitives
-   * @deprecated Use {@code getPrimitives(keysetHandle, Primitive.class)} instead.
-   */
-  @Deprecated
-  public static <P> PrimitiveSet<P> getPrimitives(KeysetHandle keysetHandle)
-      throws GeneralSecurityException {
-    return getPrimitives(keysetHandle, /* customManager= */ (KeyManager<P>) null);
-  }
-
-  /**
-   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
-   * in {@code keysetHandle}, assuming all the corresponding key managers are present (keys with
-   * status!=ENABLED are skipped).
-   *
-   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
-   * Primitive-interface.
-   *
-   * @return a PrimitiveSet with all instantiated primitives
    */
   public static <P> PrimitiveSet<P> getPrimitives(
       KeysetHandle keysetHandle, Class<P> primitiveClass) throws GeneralSecurityException {
