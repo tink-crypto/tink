@@ -7,11 +7,11 @@ working with Google's product teams, fixing weaknesses in implementations, and
 providing simple APIs that can be used safely without needing a crypto
 background.
 
-Tink provides secure APIs that are easy to use correctly and hard(er) to misuse.
+Tink provides secure APIs that are easy to use correctly and harder to misuse.
 It reduces common crypto pitfalls with user-centered design, careful
 implementation and code reviews, and extensive testing. At Google, Tink is
 already being used to secure data of many products such as AdMob, Google Pay,
-Google Assistant, Firebase, the Android Search App, etc.
+Google Assistant, Firebase, the Android Search App and hence widely used. 
 
 ## Documentation
 
