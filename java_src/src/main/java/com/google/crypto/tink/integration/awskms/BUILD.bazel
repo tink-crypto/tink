@@ -9,6 +9,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:aead",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_google_guava_guava",
     ],
 )
 

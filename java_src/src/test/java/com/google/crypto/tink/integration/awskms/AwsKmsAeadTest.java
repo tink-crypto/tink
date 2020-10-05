@@ -42,7 +42,8 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AwsKmsAeadTest {
-  private static final String KEY_ID = "123";
+  private static final String KEY_ARN =
+      "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
   @Mock private AWSKMS mockKms;
 
   @Test
@@ -54,11 +55,11 @@ public class AwsKmsAeadTest {
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenReturn(mockEncryptResult);
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     for (int messageSize = 0; messageSize < 75; messageSize++) {
       byte[] message = Random.randBytes(messageSize);
-      when(mockDecryptResult.getKeyId()).thenReturn(KEY_ID);
+      when(mockDecryptResult.getKeyId()).thenReturn(KEY_ARN);
       when(mockDecryptResult.getPlaintext()).thenReturn(ByteBuffer.wrap(message));
       when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
       byte[] ciphertext = aead.encrypt(message, aad);
@@ -73,7 +74,7 @@ public class AwsKmsAeadTest {
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenThrow(exception);
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     try {
@@ -93,7 +94,7 @@ public class AwsKmsAeadTest {
     when(mockKms.decrypt(isA(DecryptRequest.class)))
         .thenThrow(exception);
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
@@ -107,7 +108,7 @@ public class AwsKmsAeadTest {
   }
 
   @Test
-  public void testDecryptShouldThrowExceptionIfKeyIdIsDifferent() throws Exception {
+  public void testDecryptShouldThrowExceptionIfKeyArnIsDifferent() throws Exception {
     DecryptResult mockDecryptResult = mock(DecryptResult.class);
     EncryptResult mockEncryptResult = mock(EncryptResult.class);
     when(mockKms.decrypt(isA(DecryptRequest.class)))
@@ -115,11 +116,11 @@ public class AwsKmsAeadTest {
     when(mockKms.encrypt(isA(EncryptRequest.class)))
         .thenReturn(mockEncryptResult);
 
-    Aead aead = new AwsKmsAead(mockKms, KEY_ID);
+    Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
     when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
-    when(mockDecryptResult.getKeyId()).thenReturn(KEY_ID + "1");
+    when(mockDecryptResult.getKeyId()).thenReturn(KEY_ARN + "1");
     byte[] ciphertext = aead.encrypt(message, aad);
     try {
       aead.decrypt(ciphertext, aad);
@@ -127,5 +128,24 @@ public class AwsKmsAeadTest {
     } catch (GeneralSecurityException e) {
       // expected.
     }
+  }
+
+  @Test
+  public void testDecryptShouldNotThrowExceptionIfKeyArnIsAlias() throws Exception {
+    DecryptResult mockDecryptResult = mock(DecryptResult.class);
+    EncryptResult mockEncryptResult = mock(EncryptResult.class);
+    when(mockKms.decrypt(isA(DecryptRequest.class))).thenReturn(mockDecryptResult);
+    when(mockKms.encrypt(isA(EncryptRequest.class))).thenReturn(mockEncryptResult);
+
+    String aliasArn = "arn:aws:kms:us-west-2:111122223333:alias/ExampleAlias";
+    Aead aead = new AwsKmsAead(mockKms, aliasArn);
+    byte[] aad = Random.randBytes(20);
+    byte[] message = Random.randBytes(20);
+    when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
+    when(mockDecryptResult.getPlaintext()).thenReturn(ByteBuffer.wrap(message));
+
+    byte[] ciphertext = aead.encrypt(message, aad);
+    byte[] decrypted = aead.decrypt(ciphertext, aad);
+    assertArrayEquals(message, decrypted);
   }
 }

@@ -22,9 +22,11 @@ import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.kms.model.DecryptResult;
 import com.amazonaws.services.kms.model.EncryptRequest;
 import com.amazonaws.util.BinaryUtils;
+import com.google.common.base.Splitter;
 import com.google.crypto.tink.Aead;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 /**
  * A {@link Aead} that forwards encryption/decryption requests to a key in <a
@@ -40,9 +42,9 @@ public final class AwsKmsAead implements Aead {
   // The location of a crypto key in AWS KMS, without the aws-kms:// prefix.
   private final String keyArn;
 
-  public AwsKmsAead(AWSKMS kmsClient, String keyUri) throws GeneralSecurityException {
+  public AwsKmsAead(AWSKMS kmsClient, String keyArn) {
     this.kmsClient = kmsClient;
-    this.keyArn = keyUri;
+    this.keyArn = keyArn;
   }
 
   @Override
@@ -69,12 +71,24 @@ public final class AwsKmsAead implements Aead {
         req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
       }
       DecryptResult result = kmsClient.decrypt(req);
-      if (!result.getKeyId().equals(keyArn)) {
+      // In AwsKmsAead.decrypt() it is important to check the returned KeyId against the one
+      // previously configured. If we don't do this, the possibility exists for the ciphertext to
+      // be replaced by one under a key we don't control/expect, but do have decrypt permissions
+      // on.
+      // The check is disabled if keyARN is not in key ARN format.
+      // See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
+      if (isKeyArnFormat(keyArn) && !result.getKeyId().equals(keyArn)) {
         throw new GeneralSecurityException("decryption failed: wrong key id");
       }
       return result.getPlaintext().array();
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("decryption failed", e);
     }
+  }
+
+  /** Returns {@code true} if {@code keyArn} is in key ARN format. */
+  private static boolean isKeyArnFormat(String keyArn) {
+    List<String> tokens = Splitter.on(':').splitToList(keyArn);
+    return tokens.size() == 6 && tokens.get(5).startsWith("key/");
   }
 }
