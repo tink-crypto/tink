@@ -31,7 +31,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.ProviderException;
@@ -48,6 +47,9 @@ import javax.annotation.concurrent.GuardedBy;
  * <h3>Usage</h3>
  *
  * <pre>{@code
+ * // One-time operations, should be done when the application is starting up.
+ * // Instead of repeatedly instantiating these crypto objects, instantiate them once and save for
+ * // later use.
  * AndroidKeysetManager manager = AndroidKeysetManager.Builder()
  *    .withSharedPref(getApplicationContext(), "my_keyset_name", "my_pref_file_name")
  *    .withKeyTemplate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf4KBTemplate())
@@ -59,15 +61,21 @@ import javax.annotation.concurrent.GuardedBy;
  * my_pref_file_name} preferences file. If the preference file name is null, it uses the default
  * preferences file.
  *
- * <p>If an invalid keyset is found, an {@link InvalidKeyException} is thrown.
+ * <ul>
+ *   <li>If a keyset is found, but it is invalid, an {@link IOException} is thrown. The most common
+ *       cause is when you decrypted a keyset with a wrong master key. In this case, an {@link
+ *       InvalidProtocolBufferException} would be thrown. This is an irrecoverable error. You'd have
+ *       to delete the keyset in Shared Preferences and all existing data encrypted with it.
+ *   <li>If a keyset is not found, and a {@link KeyTemplate} is set with {@link
+ *       AndroidKeysetManager.Builder#withKeyTemplate(com.google.crypto.tink.KeyTemplate)}, a fresh
+ *       keyset is generated and is written to the {@code my_keyset_name} preference of the {@code
+ *       my_pref_file_name} shared preferences file.
+ * </ul>
  *
- * <p>If a keyset is not found, and a {@link KeyTemplate} is set with {@link
- * AndroidKeysetManager.Builder#withKeyTemplate(com.google.crypto.tink.KeyTemplate)}, a fresh keyset
- * is generated and is written to the {@code my_keyset_name} preference of the {@code
- * my_pref_file_name} shared preferences file.
+ * <h3>Key rotation</h3>
  *
  * <p>The resulting manager supports all operations supported by {@link KeysetManager}. For example
- * to rotate the keyset, one can do:
+ * to rotate the keyset, you can do:
  *
  * <pre>{@code
  * manager.rotate(AesGcmHkfStreamingKeyManager.aes128GcmHkdf1MBTemplate());
@@ -87,7 +95,7 @@ import javax.annotation.concurrent.GuardedBy;
  *
  * <p>Android Keystore is only available on Android M or newer. Since it has been found that Android
  * Keystore is unreliable on certain devices. Tink runs a self-test to detect such problems and
- * disables Android Keystore accordingly, even if a master key URI is set. Users can check whether
+ * disables Android Keystore accordingly, even if a master key URI is set. You can check whether
  * Android Keystore is in use with {@link #isUsingKeystore}.
  *
  * <p>When Android Keystore is disabled or otherwise unavailable, keysets will be stored in
@@ -259,8 +267,7 @@ public final class AndroidKeysetManager {
         return client.getAead(masterKeyUri);
       } catch (GeneralSecurityException | ProviderException ex) {
         // Throw the exception if the key exists but is unusable. We can't recover by generating a
-        // new
-        // key because there might be existing encrypted data under the unusable key.
+        // new key because there might be existing encrypted data under the unusable key.
         // Users can provide a master key that is stored in StrongBox, which may throw a
         // ProviderException if there's any problem with it.
         if (existed) {
