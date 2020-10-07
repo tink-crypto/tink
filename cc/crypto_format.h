@@ -42,12 +42,14 @@ class CryptoFormat {
 
   // Raw prefix is empty.
   static constexpr int kRawPrefixSize = 0;
-  static const std::string kRawPrefix;  // empty string
+  static const absl::string_view kRawPrefix;  // empty string
 
-  // Generates the prefix for the outputs handled by the specified 'key'.
-  // Returns an error if the prefix type of 'key' is invalid.
-  static crypto::tink::util::StatusOr<std::string> get_output_prefix(
-      const google::crypto::tink::Keyset::Key& key);
+  // Generates the prefix for the outputs handled with the given key_id and
+  // output prefix type. Returns an error if the prefix type
+  // 'output_prefix_type' is invalid.
+  static crypto::tink::util::StatusOr<std::string> GetOutputPrefix(
+      uint32_t key_id,
+      google::crypto::tink::OutputPrefixType output_prefix_type);
 };
 
 }  // namespace tink

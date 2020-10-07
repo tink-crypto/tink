@@ -103,7 +103,9 @@ TEST_F(MacFactoryTest, testPrimitive) {
   EXPECT_TRUE(compute_mac_result.ok()) << compute_mac_result.status();
   std::string mac_value = compute_mac_result.ValueOrDie();
   std::string prefix =
-      CryptoFormat::get_output_prefix(keyset.key(2)).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(keyset.key(2).key_id(),
+                                    keyset.key(2).output_prefix_type())
+          .ValueOrDie();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, prefix, mac_value);
 
   util::Status status = mac->VerifyMac(mac_value, data);

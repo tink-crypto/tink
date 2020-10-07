@@ -97,7 +97,9 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
   std::string ciphertext = encrypt_result.ValueOrDie();
   std::string prefix =
-      CryptoFormat::get_output_prefix(keyset.key(2)).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(keyset.key(2).key_id(),
+                                    keyset.key(2).output_prefix_type())
+          .ValueOrDie();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, prefix, ciphertext);
 
   auto decrypt_result = aead->Decrypt(ciphertext, aad);

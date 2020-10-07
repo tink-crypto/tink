@@ -90,7 +90,9 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
   auto signature_result = wrapped.ValueOrDie()->Sign("message");
   ASSERT_TRUE(signature_result.ok());
 
-  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  std::string prefix =
+      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
+          .ValueOrDie();
   EXPECT_EQ(
       signature_result.ValueOrDie(),
       absl::StrCat(prefix,
@@ -114,7 +116,9 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
                           absl::make_unique<DummyPublicKeyVerify>("dummy"), key)
                       .ValueOrDie()),
               IsOk());
-  std::string prefix = CryptoFormat::get_output_prefix(key).ValueOrDie();
+  std::string prefix =
+      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
+          .ValueOrDie();
   std::string signature =
       DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
 

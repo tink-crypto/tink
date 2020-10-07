@@ -31,7 +31,8 @@ namespace {
 
 void testNonRawPrefix(const Keyset::Key& key, int prefix_size,
                       uint8_t prefix_first_byte) {
-  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  auto prefix_result =
+      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type());
   EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(prefix_size, prefix.length());
@@ -89,7 +90,8 @@ TEST_F(CryptoFormatTest, testRawPrefix) {
   Keyset::Key key;
   key.set_output_prefix_type(OutputPrefixType::RAW);
   key.set_key_id(key_id);
-  auto prefix_result = CryptoFormat::get_output_prefix(key);
+  auto prefix_result =
+      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type());
   EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(CryptoFormat::kRawPrefixSize, prefix.length());
