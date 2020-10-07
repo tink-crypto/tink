@@ -126,6 +126,8 @@ std::string ErrorCodeString(crypto::tink::util::error::Code error) {
       return "UNAVAILABLE";
     case crypto::tink::util::error::DATA_LOSS:
       return "DATA_LOSS";
+    case crypto::tink::util::error::UNAUTHENTICATED:
+      return "UNAUTHENTICATED";
   }
   // Avoid using a "default" in the switch, so that the compiler can
   // give us a warning, but still provide a fallback here.

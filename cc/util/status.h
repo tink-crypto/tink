@@ -120,6 +120,9 @@ enum Code {
 
   // Unrecoverable data loss or corruption.
   DATA_LOSS = 15,
+
+  // Invalid authentication credentials.
+  UNAUTHENTICATED = 16,
 };
 
 
