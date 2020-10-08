@@ -19,6 +19,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/aead.h"
+#include "tink/internal/key_info.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
 #include "tink/registry.h"
@@ -198,17 +199,7 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
 }
 
 KeysetInfo KeysetHandle::GetKeysetInfo() const {
-  auto& keyset = get_keyset();
-  KeysetInfo keyset_info;
-  keyset_info.set_primary_key_id(keyset.primary_key_id());
-  for (const Keyset::Key& key : keyset.key()) {
-    auto* key_info = keyset_info.add_key_info();
-    key_info->set_key_id(key.key_id());
-    key_info->set_type_url(key.key_data().type_url());
-    key_info->set_output_prefix_type(key.output_prefix_type());
-    key_info->set_status(key.status());
-  }
-  return keyset_info;
+  return KeysetInfoFromKeyset(get_keyset());
 }
 
 KeysetHandle::KeysetHandle(Keyset keyset)

@@ -510,6 +510,7 @@ cc_library(
         ":keyset_writer",
         ":primitive_set",
         ":registry",
+        "//internal:key_info",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:keyset_util",

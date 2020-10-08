@@ -21,6 +21,15 @@ tink_cc_library(
     tink::proto::tink_cc_proto
 )
 
+tink_cc_library(
+    NAME key_info
+    SRCS
+      key_info.h
+      key_info.cc
+    DEPS
+    tink::proto::tink_cc_proto
+)
+
 tink_cc_test(
   NAME keyset_wrapper_impl_test
   SRCS
@@ -34,4 +43,13 @@ tink_cc_test(
     absl::strings
     absl::flat_hash_map
     gmock
+)
+
+tink_cc_test(
+  NAME key_info_test
+  SRCS key_info_test.cc
+  DEPS
+    tink::internal::key_info
+    gmock
+    tink::proto::tink_cc_proto
 )

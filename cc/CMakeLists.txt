@@ -454,6 +454,7 @@ tink_cc_library(
     tink::core::keyset_writer
     tink::core::primitive_set
     tink::core::registry
+    tink::internal::key_info
     tink::util::errors
     tink::util::keyset_util
     tink::proto::tink_cc_proto

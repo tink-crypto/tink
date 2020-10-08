@@ -25,6 +25,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "key_info",
+    srcs = ["key_info.cc"],
+    hdrs = ["key_info.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//proto:tink_cc_proto",
+    ],
+)
+
 cc_test(
     name = "keyset_wrapper_impl_test",
     srcs = ["keyset_wrapper_impl_test.cc"],
@@ -35,6 +45,16 @@ cc_test(
         "//util:test_util",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "key_info_test",
+    srcs = ["key_info_test.cc"],
+    deps = [
+        ":key_info",
+        "//proto:tink_cc_proto",
         "@com_google_googletest//:gtest_main",
     ],
 )
