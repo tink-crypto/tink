@@ -33,8 +33,8 @@ def tink_go_deps_init():
     go_repository(
         name = "com_github_aws_aws_sdk_go",
         importpath = "github.com/aws/aws-sdk-go",
-        sum = "h1:1xxya3nsUaFlEZuoE5PWsIEd47RoDV/kkOGt0qEuwNw=",
-        version = "v1.25.39",
+        sum = "h1:doSEOxC0UkirPcle20Rc+1kAhJ4Ip+GSEeZ3nKl7Qlk=",
+        version = "v1.35.5",
     )
 
     go_repository(

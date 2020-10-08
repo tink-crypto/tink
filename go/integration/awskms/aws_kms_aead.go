@@ -69,6 +69,7 @@ func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	ad := hex.EncodeToString(additionalData)
 	req := &kms.DecryptInput{
+		KeyId:             aws.String(a.keyURI),
 		CiphertextBlob:    ciphertext,
 		EncryptionContext: map[string]*string{"additionalData": &ad},
 	}
