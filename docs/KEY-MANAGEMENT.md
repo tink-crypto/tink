@@ -10,7 +10,7 @@ about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented at
 
 [Tinkey](TINKEY.md) is a command-line tool that allows managing Tink's key
 material. Tink also provides a rich key management API (e.g., see
-[KeysetManager](https://github.com/google/tink/blob/master/java/src/main/java/com/google/crypto/tink/KeysetManager.java)).
+[KeysetManager](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/KeysetManager.java)).
 
 ## Key, Keyset, and KeysetHandle
 
