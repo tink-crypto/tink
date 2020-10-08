@@ -53,9 +53,10 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
 
         # Some tests require --config=android_java8_libs which in turn requires enabling multidex.
         # See go/java8-libs-for-android-faq for details.
-        multidex = "legacy"
-        if version_num >= 21:
-            multidex = "native"
+        multidex = "native"
+        if version_num < 21:
+            multidex = "legacy"
+            dependencies["//third_party/java/android/android_sdk_linux/extras/android/compatibility/multidex"] = True
         android_binary(
             name = binary_name,
             deps = list(dependencies),
