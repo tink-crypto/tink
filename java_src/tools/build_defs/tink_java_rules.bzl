@@ -30,6 +30,7 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
 
     for version_num, device in TARGET_DEVICES.items():
         dependencies = {}
+        data = {}
         for target_name, library_target in native.existing_rules().items():
             android_min_version = 0
             if "tags" in library_target:
@@ -40,6 +41,9 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
                         break
             if library_target["kind"] == "android_library" and android_min_version <= version_num:
                 dependencies[target_name] = True
+                if "data" in library_target:
+                    for entry in library_target["data"]:
+                        data[entry] = True
         if len(dependencies) == 0:
             # Do not create a test target if there is nothing to test.
             continue
@@ -64,5 +68,6 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
             shard_count = shard_count,
             target_device = device,
             test_app = binary_name,
+            data = list(data),
             tags = ["manual"],
         )
