@@ -1,24 +1,12 @@
 tink_module(jwt)
 
 tink_cc_library(
-  NAME jwt_names
+  NAME json_object
   SRCS
-    jwt_names.cc
-    jwt_names.h
+    json_object.cc
+    json_object.h
   DEPS
-    absl::strings
-    absl::strings:str_format
-    tink::util::status
-    tink::util::statusor
-)
-
-tink_cc_library(
-  NAME jwt
-  SRCS
-    jwt.cc
-    jwt.h
-  DEPS
-    jwt_names
+    json_util
     protobuf:libprotobuf,
     absl::strings
     absl::strings:str_format
@@ -31,17 +19,21 @@ tink_cc_library(
   NAME json_util
   SRCS
     json_struct_util.h
+    json_struct_util.cc
   DEPS
     protobuf:libprotobuf,
+    tink::util::status,
+    tink::util::statusor,
+    absl::strings
 )
 
 # tests
 
 tink_cc_test(
-  NAME jwt_test
-  SRCS jwt_test.cc
+  NAME json_object_test
+  SRCS json_object_test.cc
   DEPS
-    jwt
+    json_object
     json_util
     absl::strings
     absl::strings:string_view

@@ -73,6 +73,8 @@
 #define TINK_JWT_STRUCT_UTIL_H_
 
 #include "google/protobuf/struct.pb.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -158,9 +160,9 @@ class ValueBuilder {
   // Forces `value` to be a struct, and ensures that there is a field with the
   // given `name`, creating it if necessary.  Returns a new ValueBuilder for the
   // field's value.
-  ValueBuilder operator[](const std::string& name) {
+  ValueBuilder operator[](absl::string_view name) {
     google::protobuf::Struct* struct_value = value_->mutable_struct_value();
-    return ValueBuilder(&(*struct_value->mutable_fields())[name]);
+    return ValueBuilder(&(*struct_value->mutable_fields())[std::string(name)]);
   }
 
  private:
@@ -181,6 +183,11 @@ class JsonStructBuilder {
   ValueBuilder operator[](absl::string_view key) {
     return ValueBuilder(&(*struct_->mutable_fields())[std::string(key)]);
   }
+
+  static util::StatusOr<google::protobuf::Struct> FromString(
+      absl::string_view json_string);
+  static util::StatusOr<std::string> ToString(
+      const google::protobuf::Struct& proto);
 
  private:
   google::protobuf::Struct* struct_;
