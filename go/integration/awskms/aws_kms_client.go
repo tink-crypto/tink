@@ -28,6 +28,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/aws/aws-sdk-go/service/kms/kmsiface"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 )
@@ -45,7 +46,7 @@ var (
 // awsClient represents a client that connects to the AWS KMS backend.
 type awsClient struct {
 	keyURIPrefix string
-	kms          *kms.KMS
+	kms          kmsiface.KMSAPI
 }
 
 // NewClient returns a new AWS KMS client which will use default
@@ -101,7 +102,7 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 // Client is responsible for keeping the region consistency between key URI and KMS client.
 // uriPrefix must have the following format: 'aws-kms://arn:<partition>:kms:<region>:[:path]'.
 // See http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html.
-func NewClientWithKMS(uriPrefix string, kms *kms.KMS) (registry.KMSClient, error) {
+func NewClientWithKMS(uriPrefix string, kms kmsiface.KMSAPI) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), awsPrefix) {
 		return nil, fmt.Errorf("uriPrefix must start with %s, but got %s", awsPrefix, uriPrefix)
 	}

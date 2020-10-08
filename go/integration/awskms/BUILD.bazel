@@ -19,6 +19,7 @@ go_library(
         "@com_github_aws_aws_sdk_go//aws/credentials:go_default_library",
         "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
         "@com_github_aws_aws_sdk_go//service/kms:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/kms/kmsiface:go_default_library",
     ],
 )
 
