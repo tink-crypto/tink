@@ -552,19 +552,17 @@ func main() {
         }
 
         // Fetch the master key from a KMS.
-        gcpClient := gcpkms.NewClientWithCredentials(keyURI, credentialsPath)
-
+        gcpClient, err := gcpkms.NewClientWithCredentials(keyURI, credentialsPath)
+        if err != nil {
+                log.Fatal(err)
+        }
         registry.RegisterKMSClient(gcpClient)
 
         backend, err := gcpClient.GetAEAD(keyURI)
         if err != nil {
                 log.Fatal(err)
         }
-
-        masterKey, err = aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), backend)
-        if err != nil {
-                log.Fatal(err)
-        }
+        masterKey := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), backend)
 
         // An io.Reader and io.Writer implementation which simply writes to memory.
         memKeyset := &keyset.MemReaderWriter{}
