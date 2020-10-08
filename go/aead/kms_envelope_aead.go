@@ -36,11 +36,20 @@ type KMSEnvelopeAEAD struct {
 	remote      tink.AEAD
 }
 
-// NewKMSEnvelopeAEAD creates an new instance of KMSEnvelopeAEAD
+// NewKMSEnvelopeAEAD creates an new instance of KMSEnvelopeAEAD.
+// Deprecated: use NewKMSEnvelopeAEAD2 which takes a pointer to a KeyTemplate proto rather than a value.
 func NewKMSEnvelopeAEAD(kt tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEAD {
 	return &KMSEnvelopeAEAD{
 		remote:      remote,
 		dekTemplate: &kt,
+	}
+}
+
+// NewKMSEnvelopeAEAD2 creates an new instance of KMSEnvelopeAEAD.
+func NewKMSEnvelopeAEAD2(kt *tinkpb.KeyTemplate, remote tink.AEAD) *KMSEnvelopeAEAD {
+	return &KMSEnvelopeAEAD{
+		remote:      remote,
+		dekTemplate: kt,
 	}
 }
 

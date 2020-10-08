@@ -561,7 +561,7 @@ func main() {
                 log.Fatal(err)
         }
 
-        masterKey, err = aead.NewKMSEnvelopeAEAD(*aead.AES256GCMKeyTemplate(), backend)
+        masterKey, err = aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), backend)
         if err != nil {
                 log.Fatal(err)
         }

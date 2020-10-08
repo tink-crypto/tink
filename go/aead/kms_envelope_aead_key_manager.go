@@ -61,7 +61,7 @@ func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{
 		return nil, errors.New("kms_envelope_aead_key_manager: invalid aead backend")
 	}
 
-	return NewKMSEnvelopeAEAD(*key.Params.DekTemplate, backend), nil
+	return NewKMSEnvelopeAEAD2(key.Params.DekTemplate, backend), nil
 }
 
 // NewKey creates a new key according to specification the given serialized KMSEnvelopeAEADKeyFormat.

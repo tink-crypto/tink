@@ -35,7 +35,7 @@ func createKMSEnvelopeAEAD(t *testing.T) tink.AEAD {
 		t.Fatalf("failed to create parent AEAD: %v", err)
 	}
 
-	return aead.NewKMSEnvelopeAEAD(*aead.AES256GCMKeyTemplate(), parentAEAD)
+	return aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), parentAEAD)
 }
 
 func TestKMSEnvelopeRoundtrip(t *testing.T) {
