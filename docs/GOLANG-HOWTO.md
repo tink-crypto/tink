@@ -286,7 +286,7 @@ func main() {
           return nil, err
         }
 
-        ksPriv, err := proto.Marshal(exported.Keyset)
+        ksPriv, err := proto.Marshal(exportedPriv.Keyset)
         if err != nil {
           return nil, err
         }
@@ -306,7 +306,7 @@ func main() {
           return nil, err
         }
 
-        ksPub, err := proto.Marshal(exported.Keyset)
+        ksPub, err := proto.Marshal(exportedPub.Keyset)
         if err != nil {
           return nil, err
         }
