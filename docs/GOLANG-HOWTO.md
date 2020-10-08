@@ -40,7 +40,7 @@ have multiple implementations, and you choose a desired implementation by
 using a key of corresponding type (see the [this
 section](KEY-MANAGEMENT.md#key-keyset-and-keysethandle) for details).
 
-A list of primitives and their implemenations currently supported by Tink in
+A list of primitives and their implementations currently supported by Tink in
 Golang can be found [here](PRIMITIVES.md#golang).
 
 ### AEAD
