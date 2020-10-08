@@ -66,7 +66,9 @@ public final class AwsKmsAead implements Aead {
   public byte[] decrypt(final byte[] ciphertext, final byte[] associatedData)
       throws GeneralSecurityException {
     try {
-      DecryptRequest req = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(ciphertext));
+      DecryptRequest req =
+          new DecryptRequest().withKeyId(keyArn)
+              .withCiphertextBlob(ByteBuffer.wrap(ciphertext));
       if (associatedData != null && associatedData.length != 0) {
         req = req.addEncryptionContextEntry("associatedData", BinaryUtils.toHex(associatedData));
       }

@@ -14,8 +14,8 @@ def tink_java_deps_init():
     maven_install(
         artifacts = [
             "args4j:args4j:2.33",
-            "com.amazonaws:aws-java-sdk-core:1.11.625",
-            "com.amazonaws:aws-java-sdk-kms:1.11.625",
+            "com.amazonaws:aws-java-sdk-core:1.11.877",
+            "com.amazonaws:aws-java-sdk-kms:1.11.877",
             "com.google.auto:auto-common:0.10",
             "com.google.auto.service:auto-service:1.0-rc6",
             "com.google.auto.service:auto-service-annotations:1.0-rc6",
