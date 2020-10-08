@@ -207,9 +207,13 @@ func TestFactoryLegacyFixedKeyTag(t *testing.T) {
 		t.Errorf("mac.New failed: %s", err)
 	}
 	data := []byte("hello")
-	tag := []byte{0, 0, 0, 0, 42, 245, 200, 101, 212, 53, 28, 131, 148, 107, 236, 152, 101, 87, 7, 59, 255}
-	if err = p.VerifyMAC(tag, data); err != nil {
-		t.Errorf("mac verification failed: %s", err)
+	incompatibleTag := []byte{0, 0, 0, 0, 42, 245, 200, 101, 212, 53, 28, 131, 148, 107, 236, 152, 101, 87, 7, 59, 255}
+	if err = p.VerifyMAC(incompatibleTag, data); err != nil {
+		t.Errorf("incompatibleTag verification failed: %s", err)
+	}
+	compatibleTag := []byte{0, 0, 0, 0, 42, 64, 150, 12, 207, 250, 175, 32, 216, 164, 77, 69, 28, 29, 204, 235, 75}
+	if err = p.VerifyMAC(compatibleTag, data); err == nil {
+		t.Errorf("compatibleTag verification succeeded, want fail.")
 	}
 }
 
