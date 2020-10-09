@@ -1,8 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])  # keep
-
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -14,7 +14,7 @@ go_library(
     deps = [
         "//core/registry:go_default_library",
         "//tink:go_default_library",
-        "@com_github_hashicorp_vault//api:go_default_library",
+        "@com_github_hashicorp_vault_api//:go_default_library",
     ],
 )
 
@@ -30,5 +30,5 @@ go_test(
         "//aead:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
-    ]
+    ],
 )

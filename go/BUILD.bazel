@@ -1,11 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "nogo")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
-
-load("@io_bazel_rules_go//go:def.bzl", "nogo")
 
 nogo(
     name = "tink_nogo",
     vet = True,
     visibility = ["//visibility:public"],
 )
+
+# gazelle:prefix github.com/google/tink
+gazelle(name = "gazelle")
