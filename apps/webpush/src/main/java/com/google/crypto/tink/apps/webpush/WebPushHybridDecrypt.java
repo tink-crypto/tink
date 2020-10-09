@@ -258,9 +258,21 @@ public final class WebPushHybridDecrypt implements HybridDecrypt {
     GCMParameterSpec params = new GCMParameterSpec(8 * WebPushConstants.TAG_SIZE, nonce);
     cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), params);
     byte[] plaintext = cipher.doFinal(ciphertext);
-    if (plaintext[plaintext.length - 1] != WebPushConstants.PADDING_DELIMITER_BYTE) {
+    if (plaintext.length == 0) {
       throw new GeneralSecurityException("decryption failed");
     }
-    return Arrays.copyOfRange(plaintext, 0, plaintext.length - 1);
+    // Remove zero paddings.
+    int index = plaintext.length - 1;
+    while (index > 0) {
+      if (plaintext[index] != 0) {
+        break;
+      }
+      index--;
+    }
+
+    if (plaintext[index] != WebPushConstants.PADDING_DELIMITER_BYTE) {
+      throw new GeneralSecurityException("decryption failed");
+    }
+    return Arrays.copyOf(plaintext, index);
   }
 }

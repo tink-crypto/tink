@@ -87,6 +87,7 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
   private final byte[] authSecret;
   private final ECPoint recipientPublicPoint;
   private final int recordSize;
+  private final int paddingSize;
 
   private WebPushHybridEncrypt(Builder builder) throws GeneralSecurityException {
     if (builder.recipientPublicKey == null || builder.recipientPublicPoint == null) {
@@ -104,17 +105,8 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
           "auth secret must have " + WebPushConstants.AUTH_SECRET_SIZE + " bytes");
     }
     this.authSecret = builder.authSecret;
-
-    if (builder.recordSize < WebPushConstants.CIPHERTEXT_OVERHEAD
-        || builder.recordSize > WebPushConstants.MAX_CIPHERTEXT_SIZE) {
-      throw new IllegalArgumentException(
-          String.format(
-              "invalid record size (%s); must be a number between [%s, %s]",
-              builder.recordSize,
-              WebPushConstants.CIPHERTEXT_OVERHEAD,
-              WebPushConstants.MAX_CIPHERTEXT_SIZE));
-    }
     this.recordSize = builder.recordSize;
+    this.paddingSize = builder.paddingSize;
   }
 
   /**
@@ -127,6 +119,7 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
     private ECPoint recipientPublicPoint = null;
     private byte[] authSecret = null;
     private int recordSize = WebPushConstants.MAX_CIPHERTEXT_SIZE;
+    private int paddingSize = WebPushConstants.DEFAULT_PADDING_SIZE;
 
     public Builder() {}
 
@@ -139,7 +132,35 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
      * <p>If not set, a record size of 4096 bytes is used. This value should work for most users.
      */
     public Builder withRecordSize(int val) {
+      if (val < WebPushConstants.CIPHERTEXT_OVERHEAD
+          || val > WebPushConstants.MAX_CIPHERTEXT_SIZE) {
+        throw new IllegalArgumentException(
+            String.format(
+                "invalid record size (%s); must be a number between [%s, %s]",
+                val, WebPushConstants.CIPHERTEXT_OVERHEAD, WebPushConstants.MAX_CIPHERTEXT_SIZE));
+      }
+
       recordSize = val;
+      return this;
+    }
+
+    /**
+     * Sets the padding size which is default to 0.
+     *
+     * <p>The padding size cannot be larger than
+     */
+    public Builder withPaddingSize(int val) {
+      if (val < 0
+          || val > WebPushConstants.MAX_CIPHERTEXT_SIZE - WebPushConstants.CIPHERTEXT_OVERHEAD) {
+        throw new IllegalArgumentException(
+            String.format(
+                "invalid padding size (%s); must be a number between [%s, %s]",
+                val,
+                0,
+                WebPushConstants.MAX_CIPHERTEXT_SIZE - WebPushConstants.CIPHERTEXT_OVERHEAD));
+      }
+
+      paddingSize = val;
       return this;
     }
 
@@ -189,8 +210,14 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
       throw new GeneralSecurityException("contextInfo must be null because it is unused");
     }
 
-    if (plaintext.length > recordSize - WebPushConstants.CIPHERTEXT_OVERHEAD) {
-      throw new GeneralSecurityException("plaintext too long");
+    if (plaintext.length > recordSize - paddingSize - WebPushConstants.CIPHERTEXT_OVERHEAD) {
+      throw new GeneralSecurityException(
+          String.format(
+              "plaintext too long; with record size = %d and padding size = %d, plaintext cannot"
+                  + " be longer than %d",
+              recordSize,
+              paddingSize,
+              recordSize - paddingSize - WebPushConstants.CIPHERTEXT_OVERHEAD));
     }
 
     // See https://tools.ietf.org/html/rfc8291#section-3.4.
@@ -209,7 +236,8 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
     byte[] salt = Random.randBytes(WebPushConstants.SALT_SIZE);
     byte[] cek = WebPushUtil.computeCek(ikm, salt);
     byte[] nonce = WebPushUtil.computeNonce(ikm, salt);
-    return ByteBuffer.allocate(WebPushConstants.CIPHERTEXT_OVERHEAD + plaintext.length)
+    return ByteBuffer.allocate(
+            WebPushConstants.CIPHERTEXT_OVERHEAD + plaintext.length + paddingSize)
         .put(salt)
         .putInt(recordSize)
         .put((byte) WebPushConstants.PUBLIC_KEY_SIZE)
@@ -223,8 +251,8 @@ public final class WebPushHybridEncrypt implements HybridEncrypt {
     Cipher cipher = EngineFactory.CIPHER.getInstance("AES/GCM/NoPadding");
     GCMParameterSpec params = new GCMParameterSpec(8 * WebPushConstants.TAG_SIZE, nonce);
     cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), params);
-    byte[] paddedPlaintext = new byte[plaintext.length + 1];
-    paddedPlaintext[paddedPlaintext.length - 1] = WebPushConstants.PADDING_DELIMITER_BYTE;
+    byte[] paddedPlaintext = new byte[plaintext.length + 1 + paddingSize];
+    paddedPlaintext[plaintext.length] = WebPushConstants.PADDING_DELIMITER_BYTE;
     System.arraycopy(plaintext, 0, paddedPlaintext, 0, plaintext.length);
     return cipher.doFinal(paddedPlaintext);
   }

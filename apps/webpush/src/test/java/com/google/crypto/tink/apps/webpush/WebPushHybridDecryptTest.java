@@ -17,6 +17,7 @@
 package com.google.crypto.tink.apps.webpush;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.HybridDecrypt;
@@ -209,5 +210,34 @@ public class WebPushHybridDecryptTest {
         // This is expected.
       }
     }
+  }
+
+  @Test
+  public void testEncryptDecrypt_withPadding_shouldWork() throws Exception {
+    KeyPair uaKeyPair = EllipticCurves.generateKeyPair(WebPushConstants.NIST_P256_CURVE_TYPE);
+    ECPrivateKey uaPrivateKey = (ECPrivateKey) uaKeyPair.getPrivate();
+    ECPublicKey uaPublicKey = (ECPublicKey) uaKeyPair.getPublic();
+    byte[] authSecret = Random.randBytes(16);
+
+    int paddingSize = 20;
+    int plaintextSize = 20;
+    HybridEncrypt hybridEncrypt =
+        new WebPushHybridEncrypt.Builder()
+            .withAuthSecret(authSecret)
+            .withPaddingSize(paddingSize)
+            .withRecipientPublicKey(uaPublicKey)
+            .build();
+    HybridDecrypt hybridDecrypt =
+        new WebPushHybridDecrypt.Builder()
+            .withAuthSecret(authSecret)
+            .withRecipientPublicKey(uaPublicKey)
+            .withRecipientPrivateKey(uaPrivateKey)
+            .build();
+    byte[] plaintext = Random.randBytes(plaintextSize);
+    byte[] ciphertext = hybridEncrypt.encrypt(plaintext, null /* contextInfo */);
+
+    assertEquals(
+        ciphertext.length, plaintext.length + paddingSize + WebPushConstants.CIPHERTEXT_OVERHEAD);
+    assertArrayEquals(plaintext, hybridDecrypt.decrypt(ciphertext, null /* contextInfo */));
   }
 }
