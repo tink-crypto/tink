@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -165,17 +165,23 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridEncrypt.Builder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withPaddingSize-int-">withPaddingSize</a></span>(int&nbsp;val)</code>
+<div class="block">Sets the padding size which is default to 0.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridEncrypt.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withRecipientPublicKey-byte:A-">withRecipientPublicKey</a></span>(byte[]&nbsp;val)</code>
 <div class="block">Sets the public key of the recipient.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridEncrypt.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withRecipientPublicKey-java.security.interfaces.ECPublicKey-">withRecipientPublicKey</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;val)</code>
 <div class="block">Sets the public key of the recipient.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridEncrypt.Builder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withRecordSize-int-">withRecordSize</a></span>(int&nbsp;val)</code>
 <div class="block">Sets the record size.</div>
@@ -232,6 +238,18 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  <p>If set, this value must match the record size set with <a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html#withRecordSize-int-"><code>withRecordSize(int)</code></a>.
 
  <p>If not set, a record size of 4096 bytes is used. This value should work for most users.</div>
+</li>
+</ul>
+<a name="withPaddingSize-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>withPaddingSize</h4>
+<pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/apps/webpush/WebPushHybridEncrypt.Builder.html" title="class in com.google.crypto.tink.apps.webpush">WebPushHybridEncrypt.Builder</a>&nbsp;withPaddingSize(int&nbsp;val)</pre>
+<div class="block">Sets the padding size which is default to 0.
+
+ <p>The padding size cannot be larger than</div>
 </li>
 </ul>
 <a name="withAuthSecret-byte:A-">
