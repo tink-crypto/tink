@@ -29,11 +29,11 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
-using ::testing::HasSubstr;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 
 class DummyStreamingPrf : public StreamingPrf {
  public:
@@ -65,13 +65,13 @@ TEST(KeysetDeriverWrapperTest, WrapEmpty) {
 
 TEST(KeysetDeriverWrapperTest, WrapSingle) {
   auto prf_set = absl::make_unique<PrimitiveSet<StreamingPrf>>();
-  Keyset::Key key;
-  key.set_key_id(1234);
-  key.set_status(KeyStatusType::ENABLED);
-  key.set_output_prefix_type(OutputPrefixType::RAW);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_key_id(1234);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::RAW);
 
   auto entry_or = prf_set->AddPrimitive(
-      absl::make_unique<DummyStreamingPrf>("single_key"), key);
+      absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
   EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
 
@@ -87,13 +87,13 @@ TEST(KeysetDeriverWrapperTest, WrapSingle) {
 
 TEST(KeysetDeriverWrapperTest, WrapNonRaw) {
   auto prf_set = absl::make_unique<PrimitiveSet<StreamingPrf>>();
-  Keyset::Key key;
-  key.set_key_id(1234);
-  key.set_status(KeyStatusType::ENABLED);
-  key.set_output_prefix_type(OutputPrefixType::TINK);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_key_id(1234);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::TINK);
 
   auto entry_or = prf_set->AddPrimitive(
-      absl::make_unique<DummyStreamingPrf>("single_key"), key);
+      absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
   EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
 
@@ -105,21 +105,22 @@ TEST(KeysetDeriverWrapperTest, WrapNonRaw) {
 
 TEST(KeysetDeriverWrapperTest, WrapMultiple) {
   auto prf_set = absl::make_unique<PrimitiveSet<StreamingPrf>>();
-  Keyset::Key key;
-  key.set_key_id(1234);
-  key.set_status(KeyStatusType::ENABLED);
-  key.set_output_prefix_type(OutputPrefixType::RAW);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_key_id(1234);
+  key_info.set_status(KeyStatusType::ENABLED);
+  key_info.set_output_prefix_type(OutputPrefixType::RAW);
 
   auto entry_or = prf_set->AddPrimitive(
-      absl::make_unique<DummyStreamingPrf>("single_key"), key);
+      absl::make_unique<DummyStreamingPrf>("single_key"), key_info);
   ASSERT_THAT(entry_or.status(), IsOk());
   EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
-  key.set_key_id(2345);
-  EXPECT_THAT(prf_set
-                  ->AddPrimitive(
-                      absl::make_unique<DummyStreamingPrf>("second_key"), key)
-                  .status(),
-              IsOk());
+  key_info.set_key_id(2345);
+  EXPECT_THAT(
+      prf_set
+          ->AddPrimitive(absl::make_unique<DummyStreamingPrf>("second_key"),
+                         key_info)
+          .status(),
+      IsOk());
 
   EXPECT_THAT(StreamingPrfWrapper().Wrap(std::move(prf_set)).status(),
               StatusIs(util::error::INVALID_ARGUMENT,

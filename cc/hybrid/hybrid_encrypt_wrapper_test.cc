@@ -22,10 +22,11 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 using ::crypto::tink::test::DummyHybridEncrypt;
 using ::crypto::tink::test::IsOk;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -65,26 +66,26 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
   }
 
   { // Correct hybrid_encrypt_set;
-    Keyset::Key* key;
-    Keyset keyset;
+    KeysetInfo::KeyInfo* key_info;
+    KeysetInfo keyset_info;
 
     uint32_t key_id_0 = 1234543;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
-    key->set_key_id(key_id_0);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_key_id(key_id_0);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::LEGACY);
-    key->set_key_id(key_id_1);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_info->set_key_id(key_id_1);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
-    key->set_key_id(key_id_2);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_key_id(key_id_2);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     std::string hybrid_name_0 = "hybrid_0";
     std::string hybrid_name_1 = "hybrid_1";
@@ -94,15 +95,15 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     std::unique_ptr<HybridEncrypt> hybrid_encrypt(
         new DummyHybridEncrypt(hybrid_name_0));
     auto entry_result = hybrid_encrypt_set->AddPrimitive(
-        std::move(hybrid_encrypt), keyset.key(0));
+        std::move(hybrid_encrypt), keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
     hybrid_encrypt.reset(new DummyHybridEncrypt(hybrid_name_1));
-    entry_result = hybrid_encrypt_set->AddPrimitive(
-        std::move(hybrid_encrypt), keyset.key(1));
+    entry_result = hybrid_encrypt_set->AddPrimitive(std::move(hybrid_encrypt),
+                                                    keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
     hybrid_encrypt.reset(new DummyHybridEncrypt(hybrid_name_2));
-    entry_result = hybrid_encrypt_set->AddPrimitive(
-        std::move(hybrid_encrypt), keyset.key(2));
+    entry_result = hybrid_encrypt_set->AddPrimitive(std::move(hybrid_encrypt),
+                                                    keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
     ASSERT_THAT(hybrid_encrypt_set->set_primary(entry_result.ValueOrDie()),

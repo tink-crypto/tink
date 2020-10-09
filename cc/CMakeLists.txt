@@ -112,6 +112,7 @@ set(TINK_PUBLIC_API_DEPS
   tink::hybrid::hybrid_decrypt_factory
   tink::hybrid::hybrid_encrypt_factory
   tink::hybrid::hybrid_key_templates
+  tink::internal::key_info
   tink::mac::mac_config
   tink::mac::mac_factory
   tink::mac::mac_key_templates

@@ -14,6 +14,7 @@
 #ifndef TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 #define TINK_INTERNAL_KEYSET_WRAPPER_IMPL_H_
 
+#include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
 #include "tink/util/statusor.h"
@@ -59,8 +60,8 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
       }
       auto primitive = primitive_getter_(key.key_data());
       if (!primitive.ok()) return primitive.status();
-      auto entry =
-          primitives->AddPrimitive(std::move(primitive.ValueOrDie()), key);
+      auto entry = primitives->AddPrimitive(std::move(primitive.ValueOrDie()),
+                                            KeyInfoFromKey(key));
       if (!entry.ok()) return entry.status();
       if (key.key_id() == keyset.primary_key_id()) {
         auto primary_result = primitives->set_primary(entry.ValueOrDie());

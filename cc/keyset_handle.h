@@ -18,6 +18,7 @@
 #define TINK_KEYSET_HANDLE_H_
 
 #include "tink/aead.h"
+#include "tink/internal/key_info.h"
 #include "tink/key_manager.h"
 #include "tink/keyset_reader.h"
 #include "tink/keyset_writer.h"
@@ -146,7 +147,8 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
         if (!primitive_result.ok()) return primitive_result.status();
         primitive = std::move(primitive_result.ValueOrDie());
       }
-      auto entry_result = primitives->AddPrimitive(std::move(primitive), key);
+      auto entry_result =
+          primitives->AddPrimitive(std::move(primitive), KeyInfoFromKey(key));
       if (!entry_result.ok()) return entry_result.status();
       if (key.key_id() == get_keyset().primary_key_id()) {
         auto primary_result =

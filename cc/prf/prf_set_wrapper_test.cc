@@ -34,6 +34,7 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::testing::Key;
 using ::testing::NiceMock;
@@ -78,16 +79,17 @@ class PrfSetWrapperTest : public ::testing::Test {
     prfs_.push_back(std::move(prf));
   }
   PrimitiveSet<PrfSet>::Entry<PrfSet>* AddPrfSet(uint32_t primary_id,
-                                                 Keyset::Key key) {
+                                                 KeysetInfo::KeyInfo key_info) {
     auto prf = absl::make_unique<FakePrfSet>(primary_id, prf_map_);
     prf_map_.clear();
-    auto entry_or = prf_set_primitive_set_->AddPrimitive(std::move(prf), key);
+    auto entry_or =
+        prf_set_primitive_set_->AddPrimitive(std::move(prf), key_info);
     EXPECT_THAT(entry_or.status(), IsOk());
     return entry_or.ValueOrDie();
   }
 
-  Keyset::Key MakeKey(uint32_t id) {
-    Keyset::Key key;
+  KeysetInfo::KeyInfo MakeKey(uint32_t id) {
+    KeysetInfo::KeyInfo key;
     key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
     key.set_key_id(id);
     key.set_status(KeyStatusType::ENABLED);
@@ -120,10 +122,11 @@ TEST_F(PrfSetWrapperTest, EmptyPrfSet) {
 }
 
 TEST_F(PrfSetWrapperTest, NonRawKeyType) {
-  Keyset::Key key = MakeKey(1);
-  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  KeysetInfo::KeyInfo key_info = MakeKey(1);
+  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   AddPrf(1, "output");
-  ASSERT_THAT(prf_set_primitive_set()->set_primary(AddPrfSet(1, key)), IsOk());
+  ASSERT_THAT(prf_set_primitive_set()->set_primary(AddPrfSet(1, key_info)),
+              IsOk());
   PrfSetWrapper wrapper;
   EXPECT_THAT(wrapper.Wrap(ReleasePrimitiveSet()).status(), Not(IsOk()));
 }
@@ -138,7 +141,6 @@ TEST_F(PrfSetWrapperTest, TooManyPrfs) {
 }
 
 TEST_F(PrfSetWrapperTest, TooFewPrfs) {
-  Keyset::Key key = MakeKey(1);
   ASSERT_THAT(prf_set_primitive_set()->set_primary(AddPrfSet(1, MakeKey(1))),
               IsOk());
   PrfSetWrapper wrapper;

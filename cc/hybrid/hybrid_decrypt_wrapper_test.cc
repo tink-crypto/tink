@@ -22,13 +22,14 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 using ::crypto::tink::test::DummyHybridDecrypt;
 using ::crypto::tink::test::DummyHybridEncrypt;
-using ::google::crypto::tink::Keyset;
+using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
-using ::crypto::tink::test::IsOk;
 
 namespace crypto {
 namespace tink {
@@ -66,23 +67,23 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
   }
 
   { // Correct hybrid_decrypt_set;
-    Keyset::Key* key;
-    Keyset keyset;
+    KeysetInfo::KeyInfo* key;
+    KeysetInfo keyset;
 
     uint32_t key_id_0 = 1234543;
-    key = keyset.add_key();
+    key = keyset.add_key_info();
     key->set_output_prefix_type(OutputPrefixType::RAW);
     key->set_key_id(key_id_0);
     key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
-    key = keyset.add_key();
+    key = keyset.add_key_info();
     key->set_output_prefix_type(OutputPrefixType::LEGACY);
     key->set_key_id(key_id_1);
     key->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
-    key = keyset.add_key();
+    key = keyset.add_key_info();
     key->set_output_prefix_type(OutputPrefixType::TINK);
     key->set_key_id(key_id_2);
     key->set_status(KeyStatusType::ENABLED);
@@ -95,16 +96,16 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     std::unique_ptr<HybridDecrypt> hybrid_decrypt(
         new DummyHybridDecrypt(hybrid_name_0));
     auto entry_result = hybrid_decrypt_set->AddPrimitive(
-        std::move(hybrid_decrypt), keyset.key(0));
+        std::move(hybrid_decrypt), keyset.key_info(0));
     ASSERT_TRUE(entry_result.ok());
     hybrid_decrypt.reset(new DummyHybridDecrypt(hybrid_name_1));
-    entry_result = hybrid_decrypt_set->AddPrimitive(
-        std::move(hybrid_decrypt), keyset.key(1));
+    entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
+                                                    keyset.key_info(1));
     ASSERT_TRUE(entry_result.ok());
     std::string prefix_id_1 = entry_result.ValueOrDie()->get_identifier();
     hybrid_decrypt.reset(new DummyHybridDecrypt(hybrid_name_2));
-    entry_result = hybrid_decrypt_set->AddPrimitive(
-        std::move(hybrid_decrypt), keyset.key(2));
+    entry_result = hybrid_decrypt_set->AddPrimitive(std::move(hybrid_decrypt),
+                                                    keyset.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
     ASSERT_THAT(hybrid_decrypt_set->set_primary(entry_result.ValueOrDie()),

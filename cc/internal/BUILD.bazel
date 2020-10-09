@@ -17,6 +17,7 @@ cc_library(
     hdrs = ["keyset_wrapper_impl.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":key_info",
         ":keyset_wrapper",
         "//:primitive_set",
         "//proto:tink_cc_proto",

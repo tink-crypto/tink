@@ -60,16 +60,16 @@ TEST_F(MacConfigTest, Basic) {
 TEST_F(MacConfigTest, WrappersRegistered) {
   ASSERT_TRUE(MacConfig::Register().ok());
 
-  google::crypto::tink::Keyset::Key key;
-  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key.set_key_id(1234);
-  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  google::crypto::tink::KeysetInfo::KeyInfo key_info;
+  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key_info.set_key_id(1234);
+  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<Mac>>();
   ASSERT_TRUE(
       primitive_set
           ->set_primary(
               primitive_set
-                  ->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key)
+                  ->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key_info)
                   .ValueOrDie())
           .ok());
 

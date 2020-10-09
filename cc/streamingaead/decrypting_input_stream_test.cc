@@ -34,18 +34,19 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace streamingaead {
 namespace {
 
+using crypto::tink::test::DummyStreamingAead;
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
-using crypto::tink::test::DummyStreamingAead;
-using crypto::tink::util::OstreamOutputStream;
 using crypto::tink::util::IstreamInputStream;
-using google::crypto::tink::Keyset;
+using crypto::tink::util::OstreamOutputStream;
+using google::crypto::tink::KeysetInfo;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::OutputPrefixType;
 using subtle::test::ReadFromStream;
@@ -103,19 +104,17 @@ struct StreamingAeadSpec {
 // The last entry in 'spec' will be the primary primitive in the returned set.
 std::shared_ptr<PrimitiveSet<StreamingAead>> GetTestStreamingAeadSet(
     const std::vector<StreamingAeadSpec>& spec) {
-  Keyset::Key* key;
-  Keyset keyset;
   std::shared_ptr<PrimitiveSet<StreamingAead>> saead_set =
       std::make_shared<PrimitiveSet<StreamingAead>>();
   int i = 0;
   for (auto& s : spec) {
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::RAW);
-    key->set_key_id(s.key_id);
-    key->set_status(KeyStatusType::ENABLED);
+    KeysetInfo::KeyInfo key_info;
+    key_info.set_output_prefix_type(OutputPrefixType::RAW);
+    key_info.set_key_id(s.key_id);
+    key_info.set_status(KeyStatusType::ENABLED);
     std::unique_ptr<StreamingAead> saead =
         absl::make_unique<DummyStreamingAead>(s.saead_name);
-    auto entry_result = saead_set->AddPrimitive(std::move(saead), *key);
+    auto entry_result = saead_set->AddPrimitive(std::move(saead), key_info);
     EXPECT_TRUE(entry_result.ok());
     if (i + 1 == spec.size()) {
       EXPECT_THAT(saead_set->set_primary(entry_result.ValueOrDie()), IsOk());

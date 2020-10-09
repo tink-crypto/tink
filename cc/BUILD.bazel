@@ -96,6 +96,7 @@ PUBLIC_API_DEPS = [
     "//hybrid:hybrid_decrypt_factory",
     "//hybrid:hybrid_encrypt_factory",
     "//hybrid:hybrid_key_templates",
+    "//internal:key_info",
     "//mac:mac_config",
     "//mac:mac_factory",
     "//mac:mac_key_templates",

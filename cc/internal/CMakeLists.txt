@@ -14,6 +14,7 @@ tink_cc_library(
   SRCS
     keyset_wrapper_impl.h
   DEPS
+    tink::internal::key_info
     tink::internal::keyset_wrapper
     tink::core::primitive_set
     tink::util::statusor

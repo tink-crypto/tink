@@ -28,7 +28,7 @@
 
 using ::crypto::tink::test::DummyMac;
 using ::crypto::tink::test::IsOk;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::UnorderedElementsAreArray;
@@ -45,12 +45,12 @@ void add_primitives(PrimitiveSet<Mac>* primitive_set,
                     int primitives_count) {
   for (int i = 0; i < primitives_count; i++) {
     int key_id = key_id_offset + i;
-    Keyset::Key key;
-    key.set_output_prefix_type(OutputPrefixType::TINK);
-    key.set_key_id(key_id);
-    key.set_status(KeyStatusType::ENABLED);
+    KeysetInfo::KeyInfo key_info;
+    key_info.set_output_prefix_type(OutputPrefixType::TINK);
+    key_info.set_key_id(key_id);
+    key_info.set_status(KeyStatusType::ENABLED);
     std::unique_ptr<Mac> mac(new DummyMac("dummy MAC"));
-    auto add_result = primitive_set->AddPrimitive(std::move(mac), key);
+    auto add_result = primitive_set->AddPrimitive(std::move(mac), key_info);
     EXPECT_TRUE(add_result.ok()) << add_result.status();
   }
 }
@@ -60,13 +60,13 @@ void access_primitives(PrimitiveSet<Mac>* primitive_set,
                        int primitives_count) {
   for (int i = 0; i < primitives_count; i++) {
     int key_id = key_id_offset + i;
-    Keyset::Key key;
-    key.set_output_prefix_type(OutputPrefixType::TINK);
-    key.set_key_id(key_id);
-    key.set_status(KeyStatusType::ENABLED);
-    std::string prefix =
-        CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
-            .ValueOrDie();
+    KeysetInfo::KeyInfo key_info;
+    key_info.set_output_prefix_type(OutputPrefixType::TINK);
+    key_info.set_key_id(key_id);
+    key_info.set_status(KeyStatusType::ENABLED);
+    std::string prefix = CryptoFormat::GetOutputPrefix(
+                             key_info.key_id(), key_info.output_prefix_type())
+                             .ValueOrDie();
     auto get_result = primitive_set->get_primitives(prefix);
     EXPECT_TRUE(get_result.ok()) << get_result.status();
     EXPECT_GE(get_result.ValueOrDie()->size(), 1);
@@ -93,13 +93,13 @@ TEST_F(PrimitiveSetTest, ConcurrentOperations) {
 
   // Verify the common key ids added by both threads.
   for (int key_id = offset_a; key_id < offset_b + count; key_id++) {
-    Keyset::Key key;
-    key.set_output_prefix_type(OutputPrefixType::TINK);
-    key.set_key_id(key_id);
-    key.set_status(KeyStatusType::ENABLED);
-    std::string prefix =
-        CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
-            .ValueOrDie();
+    KeysetInfo::KeyInfo key_info;
+    key_info.set_output_prefix_type(OutputPrefixType::TINK);
+    key_info.set_key_id(key_id);
+    key_info.set_status(KeyStatusType::ENABLED);
+    std::string prefix = CryptoFormat::GetOutputPrefix(
+                             key_info.key_id(), key_info.output_prefix_type())
+                             .ValueOrDie();
     auto get_result = mac_set.get_primitives(prefix);
     EXPECT_TRUE(get_result.ok()) << get_result.status();
     auto macs = get_result.ValueOrDie();
@@ -126,37 +126,37 @@ TEST_F(PrimitiveSetTest, Basic) {
   std::unique_ptr<Mac> mac_6(new DummyMac(mac_name_6));
 
   uint32_t key_id_1 = 1234543;
-  Keyset::Key key_1;
+  KeysetInfo::KeyInfo key_1;
   key_1.set_output_prefix_type(OutputPrefixType::TINK);
   key_1.set_key_id(key_id_1);
   key_1.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_2 = 7213743;
-  Keyset::Key key_2;
+  KeysetInfo::KeyInfo key_2;
   key_2.set_output_prefix_type(OutputPrefixType::LEGACY);
   key_2.set_key_id(key_id_2);
   key_2.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_3 = key_id_2;    // same id as key_2
-  Keyset::Key key_3;
+  KeysetInfo::KeyInfo key_3;
   key_3.set_output_prefix_type(OutputPrefixType::TINK);
   key_3.set_key_id(key_id_3);
   key_3.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_4 = 947327;
-  Keyset::Key key_4;
+  KeysetInfo::KeyInfo key_4;
   key_4.set_output_prefix_type(OutputPrefixType::RAW);
   key_4.set_key_id(key_id_4);
   key_4.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_5 = 529472;
-  Keyset::Key key_5;
+  KeysetInfo::KeyInfo key_5;
   key_5.set_output_prefix_type(OutputPrefixType::RAW);
   key_5.set_key_id(key_id_5);
   key_5.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_6 = key_id_1;    // same id as key_1
-  Keyset::Key key_6;
+  KeysetInfo::KeyInfo key_6;
   key_6.set_output_prefix_type(OutputPrefixType::TINK);
   key_6.set_key_id(key_id_6);
   key_6.set_status(KeyStatusType::ENABLED);
@@ -272,26 +272,26 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
   std::string mac_name_2 = "MAC#2";
 
   uint32_t key_id_1 = 1234543;
-  Keyset::Key key_1;
-  key_1.set_key_id(key_id_1);
-  key_1.set_status(KeyStatusType::ENABLED);
+  KeysetInfo::KeyInfo key_info_1;
+  key_info_1.set_key_id(key_id_1);
+  key_info_1.set_status(KeyStatusType::ENABLED);
 
   uint32_t key_id_2 = key_id_1;    // same id as key_2
-  Keyset::Key key_2;
-  key_2.set_key_id(key_id_2);
-  key_2.set_status(KeyStatusType::ENABLED);
+  KeysetInfo::KeyInfo key_info_2;
+  key_info_2.set_key_id(key_id_2);
+  key_info_2.set_status(KeyStatusType::ENABLED);
 
   {  // Test with RAW-keys.
     std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
     std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
-    key_1.set_output_prefix_type(OutputPrefixType::RAW);
-    key_2.set_output_prefix_type(OutputPrefixType::RAW);
+    key_info_1.set_output_prefix_type(OutputPrefixType::RAW);
+    key_info_2.set_output_prefix_type(OutputPrefixType::RAW);
     PrimitiveSet<Mac> primitive_set;
     EXPECT_TRUE(primitive_set.get_primary() == nullptr);
 
     // Add the first primitive, and set it as primary.
     auto add_primitive_result =
-        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+        primitive_set.AddPrimitive(std::move(mac_1), key_info_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
@@ -303,7 +303,8 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
 
     //  Adding another primitive should not invalidate the primary.
-    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_2), key_info_2);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
@@ -312,28 +313,30 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
   {  // Test with TINK-keys.
     std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
     std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
-    key_1.set_output_prefix_type(OutputPrefixType::TINK);
-    key_2.set_output_prefix_type(OutputPrefixType::TINK);
+    key_info_1.set_output_prefix_type(OutputPrefixType::TINK);
+    key_info_2.set_output_prefix_type(OutputPrefixType::TINK);
     PrimitiveSet<Mac> primitive_set;
     EXPECT_TRUE(primitive_set.get_primary() == nullptr);
 
     // Add the first primitive, and set it as primary.
     auto add_primitive_result =
-        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+        primitive_set.AddPrimitive(std::move(mac_1), key_info_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::GetOutputPrefix(
-                                 key_1.key_id(), key_1.output_prefix_type())
-                                 .ValueOrDie();
+    std::string identifier =
+        CryptoFormat::GetOutputPrefix(key_info_1.key_id(),
+                                      key_info_1.output_prefix_type())
+            .ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
 
     //  Adding another primitive should not invalidate the primary.
-    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_2), key_info_2);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
@@ -342,28 +345,30 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
   {  // Test with LEGACY-keys.
     std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
     std::unique_ptr<Mac> mac_2(new DummyMac(mac_name_2));
-    key_1.set_output_prefix_type(OutputPrefixType::LEGACY);
-    key_2.set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_info_1.set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_info_2.set_output_prefix_type(OutputPrefixType::LEGACY);
     PrimitiveSet<Mac> primitive_set;
     EXPECT_TRUE(primitive_set.get_primary() == nullptr);
 
     // Add the first primitive, and set it as primary.
     auto add_primitive_result =
-        primitive_set.AddPrimitive(std::move(mac_1), key_1);
+        primitive_set.AddPrimitive(std::move(mac_1), key_info_1);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     ASSERT_THAT(primitive_set.set_primary(add_primitive_result.ValueOrDie()),
                 IsOk());
 
-    std::string identifier = CryptoFormat::GetOutputPrefix(
-                                 key_1.key_id(), key_1.output_prefix_type())
-                                 .ValueOrDie();
+    std::string identifier =
+        CryptoFormat::GetOutputPrefix(key_info_1.key_id(),
+                                      key_info_1.output_prefix_type())
+            .ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
 
     //  Adding another primitive should not invalidate the primary.
-    add_primitive_result = primitive_set.AddPrimitive(std::move(mac_2), key_2);
+    add_primitive_result =
+        primitive_set.AddPrimitive(std::move(mac_2), key_info_2);
     EXPECT_TRUE(add_primitive_result.ok()) << add_primitive_result.status();
     EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(primitive_set.get_primary(), primitives[0].get());
@@ -375,26 +380,26 @@ TEST_F(PrimitiveSetTest, DisabledKey) {
   std::unique_ptr<Mac> mac_1(new DummyMac(mac_name_1));
 
   uint32_t key_id_1 = 1234543;
-  Keyset::Key key_1;
-  key_1.set_output_prefix_type(OutputPrefixType::TINK);
-  key_1.set_key_id(key_id_1);
-  key_1.set_status(KeyStatusType::DISABLED);
+  KeysetInfo::KeyInfo key_info_1;
+  key_info_1.set_output_prefix_type(OutputPrefixType::TINK);
+  key_info_1.set_key_id(key_id_1);
+  key_info_1.set_status(KeyStatusType::DISABLED);
 
   PrimitiveSet<Mac> primitive_set;
   // Add all the primitives.
   auto add_primitive_result =
-      primitive_set.AddPrimitive(std::move(mac_1), key_1);
+      primitive_set.AddPrimitive(std::move(mac_1), key_info_1);
   EXPECT_FALSE(add_primitive_result.ok());
 }
 
-Keyset::Key CreateKey(uint32_t key_id,
-                      google::crypto::tink::OutputPrefixType output_prefix_type,
-                      google::crypto::tink::KeyStatusType key_status) {
-  Keyset::Key key;
-  key.set_output_prefix_type(output_prefix_type);
-  key.set_key_id(key_id);
-  key.set_status(key_status);
-  return key;
+KeysetInfo::KeyInfo CreateKey(
+    uint32_t key_id, google::crypto::tink::OutputPrefixType output_prefix_type,
+    google::crypto::tink::KeyStatusType key_status) {
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(output_prefix_type);
+  key_info.set_key_id(key_id);
+  key_info.set_status(key_status);
+  return key_info;
 }
 
 TEST_F(PrimitiveSetTest, GetAll) {

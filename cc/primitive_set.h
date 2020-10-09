@@ -56,13 +56,14 @@ class PrimitiveSet {
   class Entry {
    public:
     static crypto::tink::util::StatusOr<std::unique_ptr<Entry<P>>> New(
-        std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
-      if (key.status() != google::crypto::tink::KeyStatusType::ENABLED) {
+        std::unique_ptr<P> primitive,
+        const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
+      if (key_info.status() != google::crypto::tink::KeyStatusType::ENABLED) {
         return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                             "The key must be ENABLED.");
       }
-      auto identifier_result =
-          CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type());
+      auto identifier_result = CryptoFormat::GetOutputPrefix(
+          key_info.key_id(), key_info.output_prefix_type());
       if (!identifier_result.ok()) return identifier_result.status();
       if (primitive == nullptr) {
         return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
@@ -70,9 +71,8 @@ class PrimitiveSet {
       }
       std::string identifier = identifier_result.ValueOrDie();
       return absl::WrapUnique(new Entry(std::move(primitive), identifier,
-                                        key.status(),
-                                        key.key_id(),
-                                        key.output_prefix_type()));
+                                        key_info.status(), key_info.key_id(),
+                                        key_info.output_prefix_type()));
     }
 
     P2& get_primitive() const { return *primitive_; }
@@ -111,8 +111,9 @@ class PrimitiveSet {
 
   // Adds 'primitive' to this set for the specified 'key'.
   crypto::tink::util::StatusOr<Entry<P>*> AddPrimitive(
-      std::unique_ptr<P> primitive, google::crypto::tink::Keyset::Key key) {
-    auto entry_or = Entry<P>::New(std::move(primitive), key);
+      std::unique_ptr<P> primitive,
+      const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
+    auto entry_or = Entry<P>::New(std::move(primitive), key_info);
     if (!entry_or.ok()) return entry_or.status();
 
     absl::MutexLock lock(&primitives_mutex_);

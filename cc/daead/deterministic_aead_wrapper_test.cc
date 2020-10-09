@@ -26,7 +26,7 @@
 
 using ::crypto::tink::test::DummyDeterministicAead;
 using ::crypto::tink::test::IsOk;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -65,26 +65,26 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
   }
 
   {  // Correct daead_set;
-    Keyset::Key* key;
-    Keyset keyset;
+    KeysetInfo::KeyInfo* key_info;
+    KeysetInfo keyset_info;
 
     uint32_t key_id_0 = 1234543;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
-    key->set_key_id(key_id_0);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_key_id(key_id_0);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::LEGACY);
-    key->set_key_id(key_id_1);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_info->set_key_id(key_id_1);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
-    key->set_key_id(key_id_2);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_key_id(key_id_2);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     std::string daead_name_0 = "daead0";
     std::string daead_name_1 = "daead1";
@@ -94,13 +94,15 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     std::unique_ptr<DeterministicAead> daead(
         new DummyDeterministicAead(daead_name_0));
     auto entry_result =
-        daead_set->AddPrimitive(std::move(daead), keyset.key(0));
+        daead_set->AddPrimitive(std::move(daead), keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
     daead = absl::make_unique<DummyDeterministicAead>(daead_name_1);
-    entry_result = daead_set->AddPrimitive(std::move(daead), keyset.key(1));
+    entry_result =
+        daead_set->AddPrimitive(std::move(daead), keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
     daead = absl::make_unique<DummyDeterministicAead>(daead_name_2);
-    entry_result = daead_set->AddPrimitive(std::move(daead), keyset.key(2));
+    entry_result =
+        daead_set->AddPrimitive(std::move(daead), keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
     ASSERT_THAT(daead_set->set_primary(entry_result.ValueOrDie()), IsOk());

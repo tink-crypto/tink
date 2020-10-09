@@ -74,15 +74,18 @@ TEST_F(SignatureConfigTest, testBasic) {
 TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
   ASSERT_TRUE(SignatureConfig::Register().ok());
 
-  google::crypto::tink::Keyset::Key key;
-  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key.set_key_id(1234);
-  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  google::crypto::tink::KeysetInfo::KeyInfo key_info;
+  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key_info.set_key_id(1234);
+  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeySign>>();
-  ASSERT_THAT(primitive_set->set_primary(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"), key)
-          .ValueOrDie()), IsOk());
+  ASSERT_THAT(
+      primitive_set->set_primary(
+          primitive_set
+              ->AddPrimitive(absl::make_unique<DummyPublicKeySign>("dummy"),
+                             key_info)
+              .ValueOrDie()),
+      IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
@@ -90,9 +93,9 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
   auto signature_result = wrapped.ValueOrDie()->Sign("message");
   ASSERT_TRUE(signature_result.ok());
 
-  std::string prefix =
-      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
-          .ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(
+                           key_info.key_id(), key_info.output_prefix_type())
+                           .ValueOrDie();
   EXPECT_EQ(
       signature_result.ValueOrDie(),
       absl::StrCat(prefix,
@@ -105,20 +108,21 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
 TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
   ASSERT_TRUE(SignatureConfig::Register().ok());
 
-  google::crypto::tink::Keyset::Key key;
-  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key.set_key_id(1234);
-  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  google::crypto::tink::KeysetInfo::KeyInfo key_info;
+  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key_info.set_key_id(1234);
+  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeyVerify>>();
-  ASSERT_THAT(primitive_set->set_primary(
-                  primitive_set
-                      ->AddPrimitive(
-                          absl::make_unique<DummyPublicKeyVerify>("dummy"), key)
-                      .ValueOrDie()),
-              IsOk());
-  std::string prefix =
-      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type())
-          .ValueOrDie();
+  ASSERT_THAT(
+      primitive_set->set_primary(
+          primitive_set
+              ->AddPrimitive(absl::make_unique<DummyPublicKeyVerify>("dummy"),
+                             key_info)
+              .ValueOrDie()),
+      IsOk());
+  std::string prefix = CryptoFormat::GetOutputPrefix(
+                           key_info.key_id(), key_info.output_prefix_type())
+                           .ValueOrDie();
   std::string signature =
       DummyPublicKeySign("dummy").Sign("message").ValueOrDie();
 

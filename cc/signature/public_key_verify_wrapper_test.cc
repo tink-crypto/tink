@@ -26,7 +26,7 @@
 using ::crypto::tink::test::DummyPublicKeySign;
 using ::crypto::tink::test::DummyPublicKeyVerify;
 using ::crypto::tink::test::IsOk;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -64,26 +64,26 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
   }
 
   { // Correct pk_verify_set;
-    Keyset::Key* key;
-    Keyset keyset;
+    KeysetInfo::KeyInfo* key_info;
+    KeysetInfo keyset_info;
 
     uint32_t key_id_0 = 1234543;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::RAW);
-    key->set_key_id(key_id_0);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::RAW);
+    key_info->set_key_id(key_id_0);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_1 = 726329;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::LEGACY);
-    key->set_key_id(key_id_1);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::LEGACY);
+    key_info->set_key_id(key_id_1);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     uint32_t key_id_2 = 7213743;
-    key = keyset.add_key();
-    key->set_output_prefix_type(OutputPrefixType::TINK);
-    key->set_key_id(key_id_2);
-    key->set_status(KeyStatusType::ENABLED);
+    key_info = keyset_info.add_key_info();
+    key_info->set_output_prefix_type(OutputPrefixType::TINK);
+    key_info->set_key_id(key_id_2);
+    key_info->set_status(KeyStatusType::ENABLED);
 
     std::string signature_name_0 = "signature_0";
     std::string signature_name_1 = "signature_1";
@@ -93,18 +93,18 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
 
     std::unique_ptr<PublicKeyVerify> pk_verify(
         new DummyPublicKeyVerify(signature_name_0));
-    auto entry_result =
-        pk_verify_set->AddPrimitive(std::move(pk_verify), keyset.key(0));
+    auto entry_result = pk_verify_set->AddPrimitive(std::move(pk_verify),
+                                                    keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
 
     pk_verify.reset(new DummyPublicKeyVerify(signature_name_1));
-    entry_result =
-        pk_verify_set->AddPrimitive(std::move(pk_verify), keyset.key(1));
+    entry_result = pk_verify_set->AddPrimitive(std::move(pk_verify),
+                                               keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
 
     pk_verify.reset(new DummyPublicKeyVerify(signature_name_2));
-    entry_result =
-        pk_verify_set->AddPrimitive(std::move(pk_verify), keyset.key(2));
+    entry_result = pk_verify_set->AddPrimitive(std::move(pk_verify),
+                                               keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());
 
     // The last key is the primary.

@@ -72,6 +72,7 @@ using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
@@ -656,32 +657,35 @@ TEST_F(RegistryTest, WrapperFails) {
 
 // Tests that wrapping works as expected in the usual case.
 TEST_F(RegistryTest, UsualWrappingTest) {
-  Keyset keyset;
+  KeysetInfo keyset_info;
 
-  keyset.add_key();
-  keyset.mutable_key(0)->set_output_prefix_type(OutputPrefixType::TINK);
-  keyset.mutable_key(0)->set_key_id(1234543);
-  keyset.mutable_key(0)->set_status(KeyStatusType::ENABLED);
-  keyset.add_key();
-  keyset.mutable_key(1)->set_output_prefix_type(OutputPrefixType::LEGACY);
-  keyset.mutable_key(1)->set_key_id(726329);
-  keyset.mutable_key(1)->set_status(KeyStatusType::ENABLED);
-  keyset.add_key();
-  keyset.mutable_key(2)->set_output_prefix_type(OutputPrefixType::TINK);
-  keyset.mutable_key(2)->set_key_id(7213743);
-  keyset.mutable_key(2)->set_status(KeyStatusType::ENABLED);
+  keyset_info.add_key_info();
+  keyset_info.mutable_key_info(0)->set_output_prefix_type(
+      OutputPrefixType::TINK);
+  keyset_info.mutable_key_info(0)->set_key_id(1234543);
+  keyset_info.mutable_key_info(0)->set_status(KeyStatusType::ENABLED);
+  keyset_info.add_key_info();
+  keyset_info.mutable_key_info(1)->set_output_prefix_type(
+      OutputPrefixType::LEGACY);
+  keyset_info.mutable_key_info(1)->set_key_id(726329);
+  keyset_info.mutable_key_info(1)->set_status(KeyStatusType::ENABLED);
+  keyset_info.add_key_info();
+  keyset_info.mutable_key_info(2)->set_output_prefix_type(
+      OutputPrefixType::TINK);
+  keyset_info.mutable_key_info(2)->set_key_id(7213743);
+  keyset_info.mutable_key_info(2)->set_status(KeyStatusType::ENABLED);
 
   auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
-  ASSERT_TRUE(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyAead>("aead0"), keyset.key(0))
-          .ok());
-  ASSERT_TRUE(
-      primitive_set
-          ->AddPrimitive(absl::make_unique<DummyAead>("aead1"), keyset.key(1))
-          .ok());
+  ASSERT_TRUE(primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyAead>("aead0"),
+                                 keyset_info.key_info(0))
+                  .ok());
+  ASSERT_TRUE(primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyAead>("aead1"),
+                                 keyset_info.key_info(1))
+                  .ok());
   auto entry_result = primitive_set->AddPrimitive(
-      absl::make_unique<DummyAead>("primary_aead"), keyset.key(2));
+      absl::make_unique<DummyAead>("primary_aead"), keyset_info.key_info(2));
   ASSERT_THAT(primitive_set->set_primary(entry_result.ValueOrDie()), IsOk());
 
   EXPECT_TRUE(

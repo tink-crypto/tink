@@ -30,7 +30,7 @@
 using ::crypto::tink::test::DummyCordAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::google::crypto::tink::Keyset;
+using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -57,20 +57,21 @@ TEST(AeadSetWrapperTest, WrapEmpty) {
 }
 
 std::unique_ptr<PrimitiveSet<CordAead>> setup_keyset() {
-  Keyset::Key* key;
-  Keyset keyset;
+  KeysetInfo::KeyInfo* key_info;
+  KeysetInfo keyset_info;
 
   uint32_t key_id_0 = 1234543;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id_0);
-  key->set_status(KeyStatusType::ENABLED);
+  key_info = keyset_info.add_key_info();
+  key_info->set_output_prefix_type(OutputPrefixType::TINK);
+  key_info->set_key_id(key_id_0);
+  key_info->set_status(KeyStatusType::ENABLED);
   std::string aead_name_0 = "aead0";
   std::unique_ptr<PrimitiveSet<CordAead>> aead_set(
       new PrimitiveSet<CordAead>());
   std::unique_ptr<CordAead> aead =
       absl::make_unique<DummyCordAead>(aead_name_0);
-  auto entry_result = aead_set->AddPrimitive(std::move(aead), keyset.key(0));
+  auto entry_result =
+      aead_set->AddPrimitive(std::move(aead), keyset_info.key_info(0));
   auto aead_set_result = aead_set->set_primary(entry_result.ValueOrDie());
   return aead_set;
 }
@@ -113,16 +114,17 @@ TEST(AeadSetWrapperTest, WrapperEncryptDecryptMultipleKeys) {
   ciphertext.Append(encrypt_result.ValueOrDie());
 
   // Add a second key
-  Keyset::Key* key;
-  Keyset keyset;
+  KeysetInfo::KeyInfo* key_info;
+  KeysetInfo keyset_info;
   uint32_t key_id = 42;
-  key = keyset.add_key();
-  key->set_output_prefix_type(OutputPrefixType::TINK);
-  key->set_key_id(key_id);
-  key->set_status(KeyStatusType::ENABLED);
+  key_info = keyset_info.add_key_info();
+  key_info->set_output_prefix_type(OutputPrefixType::TINK);
+  key_info->set_key_id(key_id);
+  key_info->set_status(KeyStatusType::ENABLED);
   std::string aead_name = "aead1";
   std::unique_ptr<CordAead> aead = absl::make_unique<DummyCordAead>(aead_name);
-  auto entry_result = aead_set->AddPrimitive(std::move(aead), keyset.key(0));
+  auto entry_result =
+      aead_set->AddPrimitive(std::move(aead), keyset_info.key_info(0));
   EXPECT_TRUE(entry_result.ok()) << entry_result.status();
 
   // Wrap the primitive set

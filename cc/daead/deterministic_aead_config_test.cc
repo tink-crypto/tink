@@ -70,16 +70,16 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
 
   ASSERT_TRUE(DeterministicAeadConfig::Register().ok());
 
-  google::crypto::tink::Keyset::Key key;
-  key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key.set_key_id(1234);
-  key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  google::crypto::tink::KeysetInfo::KeyInfo key_info;
+  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key_info.set_key_id(1234);
+  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<DeterministicAead>>();
   ASSERT_THAT(
       primitive_set->set_primary(
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
-                             key)
+                             key_info)
               .ValueOrDie()),
       IsOk());
 
