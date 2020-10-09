@@ -69,12 +69,6 @@ class EncryptingStreamTest(absltest.TestCase):
         '_get_output_stream_adapter',
         new=fake_get_output_stream_adapter).start()
 
-  def test_non_writable_object(self):
-    f = mock.Mock()
-    f.writable = mock.Mock(return_value=False)
-    with self.assertRaisesRegex(ValueError, 'writable'):
-      get_raw_encrypting_stream(f, B_AAD_)
-
   def test_write(self):
     f = bytes_io.BytesIOWithValueAfterClose()
     with get_raw_encrypting_stream(f, B_AAD_) as es:

@@ -76,39 +76,6 @@ class DecryptingStreamTest(absltest.TestCase):
         '_get_input_stream_adapter',
         new=fake_get_input_stream_adapter).start()
 
-  def test_non_readable_object(self):
-    f = mock.Mock()
-    f.readable = mock.Mock(return_value=False)
-
-    with self.assertRaisesRegex(ValueError, 'readable'):
-      get_raw_decrypting_stream(f, B_AAD_)
-
-  def test_read(self):
-    f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
-
-    self.assertEqual(ds.read(9), B_SOMETHING_)
-
-  def test_readinto(self):
-    f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
-
-    b = bytearray(9)
-    self.assertEqual(ds.readinto(b), 9)
-    self.assertEqual(bytes(b), B_SOMETHING_)
-
-  def test_read_until_eof(self):
-    f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
-
-    self.assertEqual(ds.read(), B_SOMETHING_)
-
-  def test_read_eof_reached(self):
-    f = io.BytesIO()
-    ds = get_raw_decrypting_stream(f, B_AAD_)
-
-    self.assertEqual(ds.read(), b'')
-
   def test_unsupported_operation(self):
     f = io.BytesIO(B_SOMETHING_)
     ds = get_raw_decrypting_stream(f, B_AAD_)
@@ -125,28 +92,6 @@ class DecryptingStreamTest(absltest.TestCase):
       ds.writelines([b'data'])
     with self.assertRaises(io.UnsupportedOperation):
       ds.fileno()
-
-  def test_closed(self):
-    f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
-
-    self.assertFalse(ds.closed)
-    self.assertFalse(f.closed)
-    ds.close()
-    self.assertTrue(ds.closed)
-    self.assertTrue(f.closed)
-    ds.close()
-
-  def test_close_ciphertext_source_false(self):
-    f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_, close_ciphertext_source=False)
-
-    self.assertFalse(ds.closed)
-    self.assertFalse(f.closed)
-    ds.close()
-    self.assertTrue(ds.closed)
-    self.assertFalse(f.closed)
-    ds.close()
 
   def test_closed_methods_raise(self):
     f = io.BytesIO(B_SOMETHING_)

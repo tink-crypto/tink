@@ -99,5 +99,23 @@ class StreamingAeadTest(absltest.TestCase):
           self.assertEqual(text_line, text_lines[i])
       self.assertTrue(src.closed)
 
+  def test_encrypt_fails_on_nonwritable_stream(self):
+    primitive = get_primitive()
+    with tempfile.TemporaryDirectory() as tmpdirname:
+      filename = os.path.join(tmpdirname, 'file')
+      with open(filename, 'wb') as f:
+        f.write(b'data')
+      dest = open(filename, 'rb')  # dest is not writable
+      with self.assertRaises(ValueError):
+        primitive.new_encrypting_stream(dest, b'aad')
+
+  def test_decrypt_fails_on_nonreadable_stream(self):
+    primitive = get_primitive()
+    with tempfile.TemporaryDirectory() as tmpdirname:
+      # src not readable
+      src = open(os.path.join(tmpdirname, 'file2'), 'wb')
+      with self.assertRaises(ValueError):
+        primitive.new_decrypting_stream(src, b'aad')
+
 if __name__ == '__main__':
   absltest.main()
