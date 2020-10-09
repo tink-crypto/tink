@@ -38,31 +38,18 @@ def setUpModule():
 
 class StreamingAeadKeyManagerTest(parameterized.TestCase):
 
-  def setUp(self):
-    super(StreamingAeadKeyManagerTest, self).setUp()
-    self.key_manager_gcm = streaming_aead.key_manager_from_cc_registry(
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
-    self.key_manager_ctr = streaming_aead.key_manager_from_cc_registry(
-        'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey')
-
-  def test_primitive_class(self):
-    self.assertEqual(self.key_manager_gcm.primitive_class(),
-                     _raw_streaming_aead.RawStreamingAead)
-    self.assertEqual(self.key_manager_ctr.primitive_class(),
-                     _raw_streaming_aead.RawStreamingAead)
-
-  def test_key_type(self):
-    self.assertEqual(
-        self.key_manager_gcm.key_type(),
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
-    self.assertEqual(
-        self.key_manager_ctr.key_type(),
-        'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey')
+  def get_raw_primitive(self):
+    key_data = core.Registry.new_key_data(
+        streaming_aead.streaming_aead_key_templates
+        .AES128_CTR_HMAC_SHA256_4KB)
+    return core.Registry.primitive(key_data,
+                                   _raw_streaming_aead.RawStreamingAead)
 
   def test_new_aes_gcm_hkdf_key_data(self):
-    key_template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
-    key_data = self.key_manager_gcm.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager_gcm.key_type())
+    key_template = (
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB)
+    key_data = core.Registry.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
     key = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKey()
     key.ParseFromString(key_data.value)
@@ -73,9 +60,10 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
     self.assertEqual(key.params.ciphertext_segment_size, 4096)
 
   def test_new_aes_ctr_hmac_key_data(self):
-    key_template = streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB
-    key_data = self.key_manager_ctr.new_key_data(key_template)
-    self.assertEqual(key_data.type_url, self.key_manager_ctr.key_type())
+    key_template = (
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
+    key_data = core.Registry.new_key_data(key_template)
+    self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
     key = aes_ctr_hmac_streaming_pb2.AesCtrHmacStreamingKey()
     key.ParseFromString(key_data.value)
@@ -88,24 +76,23 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
     self.assertEqual(key.params.ciphertext_segment_size, 4096)
 
   def test_invalid_aes_gcm_hkdf_params_throw_exception(self):
-    key_template = streaming_aead.streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
+    tmpls = streaming_aead.streaming_aead_key_templates
+    key_template = tmpls.create_aes_gcm_hkdf_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, 55)
     with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
-      self.key_manager_gcm.new_key_data(key_template)
+      core.Registry.new_key_data(key_template)
 
   def test_invalid_aes_ctr_hmac_params_throw_exception(self):
-    key_template = streaming_aead.streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
+    tmpls = streaming_aead.streaming_aead_key_templates
+    key_template = tmpls.create_aes_ctr_hmac_streaming_key_template(
         63, common_pb2.HashType.SHA1, 65, common_pb2.HashType.SHA256, 55, 2)
     with self.assertRaisesRegex(core.TinkError,
                                 'key_size must not be smaller than'):
-      self.key_manager_ctr.new_key_data(key_template)
+      core.Registry.new_key_data(key_template)
 
   def test_raw_encrypt_decrypt_readall(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -127,10 +114,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(output, plaintext)
 
   def test_raw_encrypt_decrypt_read(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext'
     aad = b'aad'
 
@@ -145,10 +129,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(5), b'text')
 
   def test_raw_encrypt_decrypt_readinto(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext'
     aad = b'aad'
 
@@ -168,10 +149,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(data, b'textn')
 
   def test_raw_encrypt_decrypt_empty(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b''
     aad = b''
     ct_destination = bytes_io.BytesIOWithValueAfterClose()
@@ -184,10 +162,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(5), b'')
 
   def test_raw_read_after_eof_returns_empty_bytes(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -202,10 +177,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(100), b'')
 
   def test_raw_encrypt_decrypt_close(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -232,10 +204,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertTrue(ds.closed)
 
   def test_raw_encrypt_decrypt_wrong_aad(self):
-    raw_primitive = self.key_manager_ctr.primitive(
-        self.key_manager_ctr.new_key_data(
-            streaming_aead.streaming_aead_key_templates
-            .AES128_CTR_HMAC_SHA256_4KB))
+    raw_primitive = self.get_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
