@@ -24,8 +24,6 @@ class RewindableInputStream(io.RawIOBase):
   """Implements a readable io.RawIOBase wrapper that supports rewinding.
 
   The wrapped input_stream can either be a io.RawIOBase or io.BufferedIOBase.
-  input_stream.read may return None on some calls, but it is required to
-  eventually return some data, or return b'' if EOF is reached.
   """
 
   def __init__(self, input_stream: BinaryIO):
@@ -40,7 +38,8 @@ class RewindableInputStream(io.RawIOBase):
   def read(self, size: int = -1) -> Optional[bytes]:
     """Read and return up to size bytes when size >= 0.
 
-    This function may return None on some calls, but it will eventually return
+    If input_stream.read returns None to indicate "No data at the moment", this
+    function may return None as well. But it will eventually return
     some data, or return b'' if EOF is reached.
 
     Args:
@@ -76,15 +75,15 @@ class RewindableInputStream(io.RawIOBase):
       self._pos += len(data)
     return data
 
-  def rewind(self):
+  def rewind(self) -> None:
     if not self._rewindable:
       raise ValueError('rewind is disabled')
     self._pos = 0
 
-  def disable_rewind(self):
+  def disable_rewind(self) -> None:
     self._rewindable = False
 
-  def readable(self):
+  def readable(self) -> bool:
     return True
 
   def close(self) -> None:

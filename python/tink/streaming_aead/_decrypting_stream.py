@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-from typing import BinaryIO, Optional
+from typing import BinaryIO
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -31,8 +31,6 @@ class RawDecryptingStream(io.RawIOBase):
   """A file-like object which decrypts reads from an underlying object.
 
   It reads the ciphertext from the wrapped file-like object, and decrypts it.
-
-  Closing this wrapper also closes the underlying object.
   """
 
   def __init__(self, stream_aead: tink_bindings.StreamingAead,
@@ -71,16 +69,17 @@ class RawDecryptingStream(io.RawIOBase):
     """Implemented as a separate method to ensure correct error transform."""
     return self._input_stream_adapter.read(size)
 
-  def read(self, size=-1) -> Optional[bytes]:
+  def read(self, size=-1) -> bytes:
     """Read and return up to size bytes, where size is an int.
+
+    It blocks until at least one byte can be returned.
 
     Args:
       size: Maximum number of bytes to read. As a convenience, if size is
       unspecified or -1, all bytes until EOF are returned.
 
     Returns:
-      Bytes read. An empty bytes object is returned if the stream is already at
-      EOF. None is returned if no data is available at the moment.
+      Bytes read. If b'' is returned and size was not 0, this indicates EOF.
 
     Raises:
       TinkError if there was a permanent error.
@@ -113,7 +112,7 @@ class RawDecryptingStream(io.RawIOBase):
       else:
         raise e
 
-  def readinto(self, b: bytearray) -> Optional[int]:
+  def readinto(self, b: bytearray) -> int:
     """Read bytes into a pre-allocated bytes-like object b.
 
     Args:
@@ -127,8 +126,6 @@ class RawDecryptingStream(io.RawIOBase):
       TinkError if there was a permanent error.
     """
     data = self.read(len(b))
-    if data is None:
-      return None
     n = len(data)
     b[:n] = data
     return n

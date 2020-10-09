@@ -30,7 +30,7 @@ class _DecryptingStreamWrapper(io.RawIOBase):
 
   It uses a primitive set of streaming AEADs, and decrypts the stream with the
   matching key in the keyset. Closing this wrapper also closes
-  ciphertext_source. Currently, only seekable ciphertext_source are supported.
+  ciphertext_source.
   """
 
   def __init__(self, primitive_set: core.PrimitiveSet,

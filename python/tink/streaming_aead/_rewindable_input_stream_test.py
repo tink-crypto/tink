@@ -115,6 +115,18 @@ class RewindableInputStreamTest(parameterized.TestCase):
       f.disable_rewind()
       self.assertEqual(b'The quick brown fox', f.read())
 
+  def test_nonreadable_input_fail(self):
+    with tempfile.TemporaryFile('wb') as f:
+      with self.assertRaises(ValueError):
+        _ = _rewindable_input_stream.RewindableInputStream(cast(BinaryIO, f))
+
+
+class RewindableInputStreamSlowTest(parameterized.TestCase):
+  """Tests "slow" input streams where read returns None or BlockingIOError.
+
+  Normally, this should not happen in blocking streams.
+  """
+
   @parameterized.parameters([False, True])
   def test_read_slow(self, seekable):
     input_stream = bytes_io.SlowBytesIO(b'The quick brown fox', seekable)
@@ -154,11 +166,6 @@ class RewindableInputStreamTest(parameterized.TestCase):
       self.assertEqual(b'The quick ', f.readall())
       self.assertEqual(b'brown fox', f.readall())
       self.assertEqual(b'', f.readall())
-
-  def test_nonreadable_input_fail(self):
-    with tempfile.TemporaryFile('wb') as f:
-      with self.assertRaises(ValueError):
-        _ = _rewindable_input_stream.RewindableInputStream(cast(BinaryIO, f))
 
 
 if __name__ == '__main__':
