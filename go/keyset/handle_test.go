@@ -155,3 +155,18 @@ func TestWithNoSecretsFunctionsFailWithAsymmetricPrivateKeyMaterial(t *testing.T
 		t.Error("keyset.ReadWithNoSecrets should fail when importing secret key material")
 	}
 }
+
+func TestKeysetInfo(t *testing.T) {
+	kt := mac.HMACSHA256Tag128KeyTemplate()
+	kh, err := keyset.NewHandle(kt)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+	info := kh.KeysetInfo()
+	if info == nil {
+		t.Error("KeysetInfo must not be nil")
+	}
+	if info.PrimaryKeyId != info.KeyInfo[0].KeyId {
+		t.Errorf("Expected primary key id: %d, but got: %d", info.KeyInfo[0].KeyId, info.PrimaryKeyId)
+	}
+}
