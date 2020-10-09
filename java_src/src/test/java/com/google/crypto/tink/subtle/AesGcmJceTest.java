@@ -16,9 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
@@ -55,7 +55,7 @@ public class AesGcmJceTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    byte[] aad = new byte[] {1, 2, 3};
+    byte[] aad = generateAad();
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
       AesGcmJce gcm = new AesGcmJce(key);
@@ -65,6 +65,23 @@ public class AesGcmJceTest {
         byte[] decrypted = gcm.decrypt(ciphertext, aad);
         assertArrayEquals(message, decrypted);
       }
+    }
+  }
+
+  @Test
+  public void testEncryptWithAad_shouldFailOnAndroid19OrOlder() throws Exception {
+    if (!SubtleUtil.isAndroid() || SubtleUtil.androidApiLevel() > 19) {
+      return;
+    }
+    AesGcmJce gcm = new AesGcmJce(Random.randBytes(16));
+    byte[] message = Random.randBytes(20);
+    byte[] aad = Random.randBytes(20);
+
+    try {
+      gcm.encrypt(message, aad);
+      fail("Expected UnsupportedOperationException");
+    } catch (UnsupportedOperationException ex) {
+      // expected.
     }
   }
 
@@ -92,7 +109,7 @@ public class AesGcmJceTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
-    byte[] aad = Random.randBytes(33);
+    byte[] aad = generateAad();
     byte[] key = Random.randBytes(16);
     byte[] message = Random.randBytes(32);
     AesGcmJce gcm = new AesGcmJce(key);
@@ -115,21 +132,23 @@ public class AesGcmJceTest {
     }
 
     // Modify AAD
-    for (BytesMutation mutation : TestUtil.generateMutations(aad)) {
-      try {
-        byte[] unused = gcm.decrypt(ciphertext, mutation.value);
-        fail(
-            String.format(
-                "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
-                    + " description = %s",
-                Arrays.toString(ciphertext),
-                Arrays.toString(mutation.value),
-                mutation.description));
-      } catch (GeneralSecurityException ex) {
-        // This is expected.
-        // This could be a AeadBadTagException when the tag verification
-        // fails or some not yet specified Exception when the ciphertext is too short.
-        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
+    if (aad != null && aad.length != 0) {
+      for (BytesMutation mutation : TestUtil.generateMutations(aad)) {
+        try {
+          byte[] unused = gcm.decrypt(ciphertext, mutation.value);
+          fail(
+              String.format(
+                  "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
+                      + " description = %s",
+                  Arrays.toString(ciphertext),
+                  Arrays.toString(mutation.value),
+                  mutation.description));
+        } catch (GeneralSecurityException ex) {
+          // This is expected.
+          // This could be a AeadBadTagException when the tag verification
+          // fails or some not yet specified Exception when the ciphertext is too short.
+          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
+        }
       }
     }
   }
@@ -158,6 +177,10 @@ public class AesGcmJceTest {
         byte[] key = Hex.decode(testcase.getString("key"));
         byte[] msg = Hex.decode(testcase.getString("msg"));
         byte[] aad = Hex.decode(testcase.getString("aad"));
+        if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19 && aad.length != 0) {
+          cntSkippedTests++;
+          continue;
+        }
         byte[] ct = Hex.decode(testcase.getString("ct"));
         byte[] tag = Hex.decode(testcase.getString("tag"));
         byte[] ciphertext = Bytes.concat(iv, ct, tag);
@@ -205,7 +228,7 @@ public class AesGcmJceTest {
     for (int keySize : keySizeInBytes) {
       AesGcmJce gcm = new AesGcmJce(Random.randBytes(keySize));
       try {
-        byte[] aad = new byte[] {1, 2, 3};
+        byte[] aad = generateAad();
         byte[] unused = gcm.encrypt(null, aad);
         fail("Encrypting a null plaintext should fail");
       } catch (NullPointerException ex) {
@@ -218,7 +241,7 @@ public class AesGcmJceTest {
         // This is expected.
       }
       try {
-        byte[] aad = new byte[] {1, 2, 3};
+        byte[] aad = generateAad();
         byte[] unused = gcm.decrypt(null, aad);
         fail("Decrypting a null ciphertext should fail");
       } catch (NullPointerException ex) {
@@ -256,6 +279,8 @@ public class AesGcmJceTest {
             // This could be a AeadBadTagException when the tag verification
             // fails or some not yet specified Exception when the ciphertext is too short.
             // In all cases a GeneralSecurityException or a subclass of it must be thrown.
+          } catch (UnsupportedOperationException ex) {
+            // Android API level <= 19 would throw this exception, as expected.
           }
         }
         {  // encrypting with aad equal to null
@@ -273,6 +298,8 @@ public class AesGcmJceTest {
             // This could be a AeadBadTagException when the tag verification
             // fails or some not yet specified Exception when the ciphertext is too short.
             // In all cases a GeneralSecurityException or a subclass of it must be thrown.
+          } catch (UnsupportedOperationException ex) {
+            // Android API level <= 19 would throw this exception, as expected.
           }
         }
       }
@@ -288,14 +315,24 @@ public class AesGcmJceTest {
     final int samples = 1 << 17;
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
-    byte[] aad = new byte[0];
+    byte[] aad = generateAad();
     AesGcmJce gcm = new AesGcmJce(key);
-    HashSet<String> ciphertexts = new HashSet<String>();
+    HashSet<String> ciphertexts = new HashSet<>();
     for (int i = 0; i < samples; i++) {
       byte[] ct = gcm.encrypt(message, aad);
       String ctHex = TestUtil.hexEncode(ct);
-      assertFalse(ciphertexts.contains(ctHex));
+      assertThat(ciphertexts).doesNotContain(ctHex);
       ciphertexts.add(ctHex);
     }
+  }
+
+  private static byte[] generateAad() {
+    byte[] aad = Random.randBytes(20);
+    // AES-GCM on Android <= 19 doesn't support AAD. See last bullet point in
+    // https://github.com/google/tink/blob/master/docs/KNOWN-ISSUES.md#android.
+    if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19) {
+      aad = new byte[0];
+    }
+    return aad;
   }
 }

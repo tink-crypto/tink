@@ -89,6 +89,16 @@ public class SubtleUtil {
     }
   }
 
+  /** Returns the Android API level or -1 if Tink isn't running on Android */
+  public static int androidApiLevel() {
+    try {
+      Class<?> buildVersion = Class.forName("android.os.Build$VERSION");
+      return buildVersion.getDeclaredField("SDK_INT").getInt(null);
+    } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+      return -1;
+    }
+  }
+
   /**
    * Converts an byte array to a nonnegative integer
    * (https://tools.ietf.org/html/rfc8017#section-4.1).

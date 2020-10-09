@@ -117,19 +117,14 @@ public final class AesGcmJce implements Aead {
 
   private static AlgorithmParameterSpec getParams(final byte[] buf, int offset, int len)
       throws GeneralSecurityException {
-    try {
-      Class.forName("javax.crypto.spec.GCMParameterSpec");
-      return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, buf, offset, len);
-    } catch (ClassNotFoundException e) {
-      if (SubtleUtil.isAndroid()) {
-        // GCMParameterSpec should always be present in Java 7 or newer, but it's missing on Android
-        // devices with API level < 19. Fortunately, with a modern copy of Conscrypt (either through
-        // GMS or bundled with the app) we can initialize the cipher with just an IvParameterSpec.
-        // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
-        return new IvParameterSpec(buf, offset, len);
-      }
+    if (SubtleUtil.isAndroid() && SubtleUtil.androidApiLevel() <= 19) {
+      // GCMParameterSpec should always be present in Java 7 or newer, but it's unsupported on
+      // Android devices with API level <= 19. Fortunately, if a modern copy of Conscrypt is present
+      // (either through GMS Core or bundled with the app) we can initialize the cipher with just an
+      // IvParameterSpec.
+      // It will use a tag size of 128 bits. We'd double check the tag size in encrypt().
+      return new IvParameterSpec(buf, offset, len);
     }
-    throw new GeneralSecurityException(
-        "cannot use AES-GCM: javax.crypto.spec.GCMParameterSpec not found");
+    return new GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, buf, offset, len);
   }
 };
