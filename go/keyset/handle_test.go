@@ -163,9 +163,6 @@ func TestKeysetInfo(t *testing.T) {
 		t.Errorf("unexpected error: %s", err)
 	}
 	info := kh.KeysetInfo()
-	if info == nil {
-		t.Error("KeysetInfo must not be nil")
-	}
 	if info.PrimaryKeyId != info.KeyInfo[0].KeyId {
 		t.Errorf("Expected primary key id: %d, but got: %d", info.KeyInfo[0].KeyId, info.PrimaryKeyId)
 	}

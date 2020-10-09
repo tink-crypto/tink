@@ -116,8 +116,7 @@ func (h *Handle) Public() (*Handle, error) {
 // String returns a string representation of the managed keyset.
 // The result does not contain any sensitive key material.
 func (h *Handle) String() string {
-	info := getKeysetInfo(h.ks)
-	return proto.CompactTextString(info)
+	return proto.CompactTextString(getKeysetInfo(h.ks))
 }
 
 // KeysetInfo returns KeysetInfo representation of the managed keyset.
@@ -258,10 +257,9 @@ func encrypt(keyset *tinkpb.Keyset, masterKey tink.AEAD) (*tinkpb.EncryptedKeyse
 		return nil, fmt.Errorf("keyset.Handle: encrypted failed: %s", err)
 	}
 	// get keyset info
-	info := getKeysetInfo(keyset)
 	encryptedKeyset := &tinkpb.EncryptedKeyset{
 		EncryptedKeyset: encrypted,
-		KeysetInfo:      info,
+		KeysetInfo:      getKeysetInfo(keyset),
 	}
 	return encryptedKeyset, nil
 }
@@ -274,8 +272,7 @@ func getKeysetInfo(keyset *tinkpb.Keyset) *tinkpb.KeysetInfo {
 	nKey := len(keyset.Key)
 	keyInfos := make([]*tinkpb.KeysetInfo_KeyInfo, nKey)
 	for i, key := range keyset.Key {
-		info := getKeyInfo(key)
-		keyInfos[i] = info
+		keyInfos[i] = getKeyInfo(key)
 	}
 	return &tinkpb.KeysetInfo{
 		PrimaryKeyId: keyset.PrimaryKeyId,
