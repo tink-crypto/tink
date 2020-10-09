@@ -32,16 +32,15 @@ class _WrappedPrfSet(_prf_set.PrfSet):
 
   def all(self) -> Mapping[int, _prf_set.Prf]:
     return {
-        entry.key_id: entry.primitive.primary()
+        entry.key_id: entry.primitive
         for entry in self._primitive_set.raw_primitives()
     }
 
   def primary(self) -> _prf_set.Prf:
-    return self._primitive_set.primary().primitive.primary()
+    return self._primitive_set.primary().primitive
 
 
-# TODO(juerg): Change this into a wrapper from Prf to PrfSet.
-class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.PrfSet, _prf_set.PrfSet]):
+class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.Prf, _prf_set.PrfSet]):
   """A PrimitiveWrapper for the PrfSet primitive.
 
   The returned primitive works with a keyset (rather than a single key). To sign
@@ -55,5 +54,5 @@ class PrfSetWrapper(core.PrimitiveWrapper[_prf_set.PrfSet, _prf_set.PrfSet]):
   def primitive_class(self) -> Type[_prf_set.PrfSet]:
     return _prf_set.PrfSet
 
-  def input_primitive_class(self) -> Type[_prf_set.PrfSet]:
-    return _prf_set.PrfSet
+  def input_primitive_class(self) -> Type[_prf_set.Prf]:
+    return _prf_set.Prf
