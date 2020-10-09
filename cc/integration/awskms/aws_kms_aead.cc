@@ -111,6 +111,7 @@ StatusOr<std::string> AwsKmsAead::Encrypt(
 StatusOr<std::string> AwsKmsAead::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   Aws::KMS::Model::DecryptRequest req;
+  req.SetKeyId(key_arn_.c_str());
   Aws::Utils::ByteBuffer ciphertext_buffer(
       reinterpret_cast<const unsigned char*>(ciphertext.data()),
       ciphertext.length());
