@@ -30,3 +30,12 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:hkdf",
     ],
 )
+
+java_library(
+    name = "aead_or_daead",
+    srcs = ["AeadOrDaead.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:deterministic_aead",
+    ],
+)
