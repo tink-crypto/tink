@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# Placeholder for import for type annotations
 from __future__ import print_function
 
 from absl.testing import absltest
@@ -26,82 +27,104 @@ from tink import mac
 from tink.testing import helper
 
 
+MAC_TEMPLATE = mac.mac_key_templates.HMAC_SHA256_128BITTAG
+
+
+def setUpModule():
+  mac.register()
+
+
+def new_key(
+    template: tink_pb2.KeyTemplate,
+    key_id: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK,
+    status: tink_pb2.KeyStatusType = tink_pb2.ENABLED
+) -> tink_pb2.Keyset.Key:
+  return tink_pb2.Keyset.Key(
+      key_data=core.Registry.new_key_data(template),
+      key_id=key_id,
+      status=status,
+      output_prefix_type=output_prefix_type)
+
+
 class PrimitiveSetTest(absltest.TestCase):
 
   def test_primitive_returns_entry(self):
-    key = helper.fake_key(key_id=1)
-    fake_mac = helper.FakeMac('FakeMac')
+    key = new_key(MAC_TEMPLATE, key_id=1)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
     primitive_set = core.new_primitive_set(mac.Mac)
-    primitive_set.add_primitive(fake_mac, key)
+    primitive_set.add_primitive(primitive, key)
     entries = primitive_set.primitive(key)
     self.assertLen(entries, 1)
     entry = entries[0]
-    self.assertEqual(fake_mac, entry.primitive)
+    self.assertEqual(primitive, entry.primitive)
     self.assertEqual(tink_pb2.ENABLED, entry.status)
     self.assertEqual(core.crypto_format.output_prefix(key), entry.identifier)
     self.assertEqual(1, entry.key_id)
 
   def test_unknown_key_returns_empty_list(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    unknown_key = helper.fake_key(key_id=1)
+    unknown_key = new_key(MAC_TEMPLATE, key_id=1)
     self.assertEqual(primitive_set.primitive(unknown_key), [])
 
   def test_primitive_from_identifier_returns_entry(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key = helper.fake_key(key_id=1)
-    fake_mac = helper.FakeMac('FakeMac')
-    primitive_set.add_primitive(fake_mac, key)
+    key = new_key(MAC_TEMPLATE, key_id=1)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive, key)
 
     ident = core.crypto_format.output_prefix(key)
     entries = primitive_set.primitive_from_identifier(ident)
     self.assertLen(entries, 1)
     entry = entries[0]
-    self.assertEqual(fake_mac, entry.primitive)
+    self.assertEqual(primitive, entry.primitive)
     self.assertEqual(tink_pb2.ENABLED, entry.status)
     self.assertEqual(ident, entry.identifier)
     self.assertEqual(1, entry.key_id)
 
   def test_list_of_entries_can_be_modified(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key = helper.fake_key(key_id=1)
-    primitive_set.add_primitive(helper.FakeMac('FakeMac'), key)
+    key = new_key(MAC_TEMPLATE, key_id=1)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive, key)
     entries = primitive_set.primitive(key)
     entries.append('Something')
     self.assertLen(primitive_set.primitive(key), 1)
 
   def test_primary_returns_primary(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key = helper.fake_key(key_id=1)
-    fake_mac = helper.FakeMac('FakeMac')
-    entry = primitive_set.add_primitive(fake_mac, key)
+    key = new_key(MAC_TEMPLATE, key_id=1)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
+    entry = primitive_set.add_primitive(primitive, key)
     primitive_set.set_primary(entry)
 
     entry = primitive_set.primary()
-    self.assertEqual(fake_mac, entry.primitive)
+    self.assertEqual(primitive, entry.primitive)
     self.assertEqual(tink_pb2.ENABLED, entry.status)
     self.assertEqual(core.crypto_format.output_prefix(key), entry.identifier)
     self.assertEqual(1, entry.key_id)
 
   def test_primary_returns_none(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    primitive_set.add_primitive(
-        helper.FakeMac('FakeMac'), helper.fake_key(key_id=1))
+    key = new_key(MAC_TEMPLATE, key_id=1)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive, key)
     self.assertIsNone(primitive_set.primary())
 
   def test_same_key_id_and_prefix_type(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key1 = helper.fake_key(key_id=1, status=tink_pb2.ENABLED)
-    fake_mac1 = helper.FakeMac('FakeMac1')
-    primitive_set.add_primitive(fake_mac1, key1)
-    key2 = helper.fake_key(key_id=1, status=tink_pb2.DISABLED)
-    fake_mac2 = helper.FakeMac('FakeMac2')
-    primitive_set.add_primitive(fake_mac2, key2)
+    key1 = new_key(MAC_TEMPLATE, key_id=1)
+    primitive1 = core.Registry.primitive(key1.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive1, key1)
+    key2 = new_key(MAC_TEMPLATE, key_id=1, status=tink_pb2.DISABLED)
+    primitive2 = core.Registry.primitive(key2.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive2, key2)
 
     expected_ident = core.crypto_format.output_prefix(key1)
     entries = primitive_set.primitive(key1)
     self.assertLen(entries, 2)
-    self.assertEqual(fake_mac1, entries[0].primitive)
-    self.assertEqual(fake_mac2, entries[1].primitive)
+    self.assertEqual(primitive1, entries[0].primitive)
+    self.assertEqual(primitive2, entries[1].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries[0].status)
     self.assertEqual(tink_pb2.DISABLED, entries[1].status)
     self.assertEqual(expected_ident, entries[0].identifier)
@@ -112,16 +135,16 @@ class PrimitiveSetTest(absltest.TestCase):
 
   def test_same_key_id_but_different_prefix_type(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key1 = helper.fake_key(key_id=1, output_prefix_type=tink_pb2.TINK)
-    fake_mac1 = helper.FakeMac('FakeMac1')
-    primitive_set.add_primitive(fake_mac1, key1)
-    key2 = helper.fake_key(key_id=1, output_prefix_type=tink_pb2.LEGACY)
-    fake_mac2 = helper.FakeMac('FakeMac2')
-    primitive_set.add_primitive(fake_mac2, key2)
+    key1 = new_key(MAC_TEMPLATE, key_id=1, output_prefix_type=tink_pb2.TINK)
+    primitive1 = core.Registry.primitive(key1.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive1, key1)
+    key2 = new_key(MAC_TEMPLATE, key_id=1, output_prefix_type=tink_pb2.LEGACY)
+    primitive2 = core.Registry.primitive(key2.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive2, key2)
 
     entries1 = primitive_set.primitive(key1)
     self.assertLen(entries1, 1)
-    self.assertEqual(fake_mac1, entries1[0].primitive)
+    self.assertEqual(primitive1, entries1[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries1[0].status)
     self.assertEqual(core.crypto_format.output_prefix(key1),
                      entries1[0].identifier)
@@ -129,7 +152,7 @@ class PrimitiveSetTest(absltest.TestCase):
 
     entries2 = primitive_set.primitive(key2)
     self.assertLen(entries2, 1)
-    self.assertEqual(fake_mac2, entries2[0].primitive)
+    self.assertEqual(primitive2, entries2[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries2[0].status)
     self.assertEqual(core.crypto_format.output_prefix(key2),
                      entries2[0].identifier)
@@ -137,15 +160,17 @@ class PrimitiveSetTest(absltest.TestCase):
 
   def test_add_invalid_key_fails(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    key = helper.fake_key()
+    key = new_key(MAC_TEMPLATE, key_id=1)
     key.ClearField('output_prefix_type')
     with self.assertRaises(core.TinkError):
       primitive_set.add_primitive(helper.FakeMac(), key)
 
   def test_add_wrong_primitive_fails(self):
     primitive_set = core.new_primitive_set(aead.Aead)
+    key = new_key(MAC_TEMPLATE, key_id=1, output_prefix_type=tink_pb2.TINK)
+    primitive = core.Registry.primitive(key.key_data, mac.Mac)
     with self.assertRaises(core.TinkError):
-      primitive_set.add_primitive(helper.FakeMac(), helper.fake_key())
+      primitive_set.add_primitive(primitive, key)
 
   def test_primitive_class(self):
     primitive_set = core.new_primitive_set(mac.Mac)
@@ -153,24 +178,28 @@ class PrimitiveSetTest(absltest.TestCase):
 
   def test_raw_primitives(self):
     primitive_set = core.new_primitive_set(mac.Mac)
-    primitive_set.add_primitive(
-        helper.FakeMac('FakeMac1'), helper.fake_key(key_id=1))
-    key2 = helper.fake_key(key_id=1, output_prefix_type=tink_pb2.RAW)
-    fake_mac2 = helper.FakeMac('FakeMac2')
-    primitive_set.add_primitive(fake_mac2, key2)
-    key3 = helper.fake_key(
-        key_id=3, status=tink_pb2.DISABLED, output_prefix_type=tink_pb2.RAW)
-    fake_mac3 = helper.FakeMac('FakeMac3')
-    primitive_set.add_primitive(fake_mac3, key3)
+    key1 = new_key(MAC_TEMPLATE, key_id=1, output_prefix_type=tink_pb2.TINK)
+    primitive1 = core.Registry.primitive(key1.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive1, key1)
+    key2 = new_key(MAC_TEMPLATE, key_id=1, output_prefix_type=tink_pb2.RAW)
+    primitive2 = core.Registry.primitive(key2.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive2, key2)
+    key3 = new_key(
+        MAC_TEMPLATE,
+        key_id=3,
+        output_prefix_type=tink_pb2.RAW,
+        status=tink_pb2.DISABLED)
+    primitive3 = core.Registry.primitive(key3.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive3, key3)
 
     entries = primitive_set.raw_primitives()
     self.assertLen(entries, 2)
-    self.assertEqual(fake_mac2, entries[0].primitive)
+    self.assertEqual(primitive2, entries[0].primitive)
     self.assertEqual(tink_pb2.ENABLED, entries[0].status)
     self.assertEqual(core.crypto_format.RAW_PREFIX,
                      entries[0].identifier)
     self.assertEqual(1, entries[0].key_id)
-    self.assertEqual(fake_mac3, entries[1].primitive)
+    self.assertEqual(primitive3, entries[1].primitive)
     self.assertEqual(tink_pb2.DISABLED, entries[1].status)
     self.assertEqual(core.crypto_format.RAW_PREFIX,
                      entries[1].identifier)
