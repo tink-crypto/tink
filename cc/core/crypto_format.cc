@@ -49,14 +49,13 @@ const absl::string_view CryptoFormat::kRawPrefix = "";
 
 // static
 crypto::tink::util::StatusOr<std::string> CryptoFormat::GetOutputPrefix(
-    uint32_t key_id,
-    google::crypto::tink::OutputPrefixType output_prefix_type) {
-  switch (output_prefix_type) {
+    const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
+  switch (key_info.output_prefix_type()) {
     case OutputPrefixType::TINK: {
       std::string prefix;
       prefix.assign(reinterpret_cast<const char*>(&kTinkStartByte), 1);
       char key_id_buf[4];
-      uint32_as_big_endian(key_id, key_id_buf);
+      uint32_as_big_endian(key_info.key_id(), key_id_buf);
       prefix.append(key_id_buf, 4);
       return prefix;
     }
@@ -66,7 +65,7 @@ crypto::tink::util::StatusOr<std::string> CryptoFormat::GetOutputPrefix(
       std::string prefix;
       prefix.assign(reinterpret_cast<const char*>(&kLegacyStartByte), 1);
       char key_id_buf[4];
-      uint32_as_big_endian(key_id, key_id_buf);
+      uint32_as_big_endian(key_info.key_id(), key_id_buf);
       prefix.append(key_id_buf, 4);
       return prefix;
     }

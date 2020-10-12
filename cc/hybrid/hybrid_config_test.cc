@@ -99,9 +99,7 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
   auto encryption_result = wrapped.ValueOrDie()->Encrypt("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(
-                           key_info.key_id(), key_info.output_prefix_type())
-                           .ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
   EXPECT_EQ(
       encryption_result.ValueOrDie(),
       absl::StrCat(
@@ -135,9 +133,7 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 
   ASSERT_TRUE(wrapped.ok()) << wrapped.status();
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(
-                           key_info.key_id(), key_info.output_prefix_type())
-                           .ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
   std::string encryption =
       DummyHybridEncrypt("dummy").Encrypt("secret", "").ValueOrDie();
 

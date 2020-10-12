@@ -64,9 +64,7 @@ void access_primitives(PrimitiveSet<Mac>* primitive_set,
     key_info.set_output_prefix_type(OutputPrefixType::TINK);
     key_info.set_key_id(key_id);
     key_info.set_status(KeyStatusType::ENABLED);
-    std::string prefix = CryptoFormat::GetOutputPrefix(
-                             key_info.key_id(), key_info.output_prefix_type())
-                             .ValueOrDie();
+    std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
     auto get_result = primitive_set->get_primitives(prefix);
     EXPECT_TRUE(get_result.ok()) << get_result.status();
     EXPECT_GE(get_result.ValueOrDie()->size(), 1);
@@ -97,9 +95,7 @@ TEST_F(PrimitiveSetTest, ConcurrentOperations) {
     key_info.set_output_prefix_type(OutputPrefixType::TINK);
     key_info.set_key_id(key_id);
     key_info.set_status(KeyStatusType::ENABLED);
-    std::string prefix = CryptoFormat::GetOutputPrefix(
-                             key_info.key_id(), key_info.output_prefix_type())
-                             .ValueOrDie();
+    std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
     auto get_result = mac_set.get_primitives(prefix);
     EXPECT_TRUE(get_result.ok()) << get_result.status();
     auto macs = get_result.ValueOrDie();
@@ -222,9 +218,7 @@ TEST_F(PrimitiveSetTest, Basic) {
   }
 
   {  // Check Tink primitives.
-    std::string prefix = CryptoFormat::GetOutputPrefix(
-                             key_1.key_id(), key_1.output_prefix_type())
-                             .ValueOrDie();
+    std::string prefix = CryptoFormat::GetOutputPrefix(key_1).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(2, primitives.size());
     EXPECT_EQ(DummyMac(mac_name_1).ComputeMac(data).ValueOrDie(),
@@ -240,9 +234,7 @@ TEST_F(PrimitiveSetTest, Basic) {
   }
 
   {  // Check another Tink primitive.
-    std::string prefix = CryptoFormat::GetOutputPrefix(
-                             key_3.key_id(), key_3.output_prefix_type())
-                             .ValueOrDie();
+    std::string prefix = CryptoFormat::GetOutputPrefix(key_3).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(DummyMac(mac_name_3).ComputeMac(data).ValueOrDie(),
@@ -253,9 +245,7 @@ TEST_F(PrimitiveSetTest, Basic) {
   }
 
   {  // Check legacy primitive.
-    std::string prefix = CryptoFormat::GetOutputPrefix(
-                             key_2.key_id(), key_2.output_prefix_type())
-                             .ValueOrDie();
+    std::string prefix = CryptoFormat::GetOutputPrefix(key_2).ValueOrDie();
     auto& primitives = *(primitive_set.get_primitives(prefix).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
     EXPECT_EQ(DummyMac(mac_name_2).ComputeMac(data).ValueOrDie(),
@@ -326,9 +316,7 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
                 IsOk());
 
     std::string identifier =
-        CryptoFormat::GetOutputPrefix(key_info_1.key_id(),
-                                      key_info_1.output_prefix_type())
-            .ValueOrDie();
+        CryptoFormat::GetOutputPrefix(key_info_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());
@@ -358,9 +346,7 @@ TEST_F(PrimitiveSetTest, PrimaryKeyWithIdCollisions) {
                 IsOk());
 
     std::string identifier =
-        CryptoFormat::GetOutputPrefix(key_info_1.key_id(),
-                                      key_info_1.output_prefix_type())
-            .ValueOrDie();
+        CryptoFormat::GetOutputPrefix(key_info_1).ValueOrDie();
     const auto& primitives =
         *(primitive_set.get_primitives(identifier).ValueOrDie());
     EXPECT_EQ(1, primitives.size());

@@ -165,6 +165,7 @@ cc_test(
         "//:crypto_format",
         "//:deterministic_aead",
         "//:keyset_handle",
+        "//internal:key_info",
         "//proto:aes_siv_cc_proto",
         "//proto:tink_cc_proto",
         "//util:status",

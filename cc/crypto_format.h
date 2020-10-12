@@ -44,12 +44,10 @@ class CryptoFormat {
   static constexpr int kRawPrefixSize = 0;
   static const absl::string_view kRawPrefix;  // empty string
 
-  // Generates the prefix for the outputs handled with the given key_id and
-  // output prefix type. Returns an error if the prefix type
-  // 'output_prefix_type' is invalid.
+  // Generates the prefix for the outputs handled with the given key_info.
+  // Returns an error if the prefix type 'output_prefix_type' is invalid.
   static crypto::tink::util::StatusOr<std::string> GetOutputPrefix(
-      uint32_t key_id,
-      google::crypto::tink::OutputPrefixType output_prefix_type);
+      const google::crypto::tink::KeysetInfo::KeyInfo& key_info);
 };
 
 }  // namespace tink

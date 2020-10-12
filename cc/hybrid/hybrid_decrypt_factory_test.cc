@@ -111,13 +111,11 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   std::string plaintext = "some plaintext";
   std::string context_info = "some context info";
   auto ciphertext_1 =
-      CryptoFormat::GetOutputPrefix(keyset.key(0).key_id(),
-                                    keyset.key(0).output_prefix_type())
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(0)))
           .ValueOrDie() +
       ecies_1->Encrypt(plaintext, context_info).ValueOrDie();
   auto ciphertext_2 =
-      CryptoFormat::GetOutputPrefix(keyset.key(1).key_id(),
-                                    keyset.key(1).output_prefix_type())
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(1)))
           .ValueOrDie() +
       ecies_2->Encrypt(plaintext, context_info).ValueOrDie();
 

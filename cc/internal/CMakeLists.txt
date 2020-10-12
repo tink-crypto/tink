@@ -51,6 +51,6 @@ tink_cc_test(
   SRCS key_info_test.cc
   DEPS
     tink::internal::key_info
-    gmock
     tink::proto::tink_cc_proto
+    gmock
 )

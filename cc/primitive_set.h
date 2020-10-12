@@ -62,8 +62,7 @@ class PrimitiveSet {
         return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
                             "The key must be ENABLED.");
       }
-      auto identifier_result = CryptoFormat::GetOutputPrefix(
-          key_info.key_id(), key_info.output_prefix_type());
+      auto identifier_result = CryptoFormat::GetOutputPrefix(key_info);
       if (!identifier_result.ok()) return identifier_result.status();
       if (primitive == nullptr) {
         return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,

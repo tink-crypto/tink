@@ -180,6 +180,7 @@ cc_test(
         "//:crypto_format",
         "//:keyset_handle",
         "//:mac",
+        "//internal:key_info",
         "//proto:common_cc_proto",
         "//proto:hmac_cc_proto",
         "//proto:tink_cc_proto",

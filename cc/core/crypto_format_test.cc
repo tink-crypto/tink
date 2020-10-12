@@ -20,7 +20,7 @@
 #include "proto/tink.pb.h"
 
 
-using google::crypto::tink::Keyset;
+using google::crypto::tink::KeysetInfo;
 using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
@@ -29,17 +29,17 @@ namespace {
 
 // static
 
-void testNonRawPrefix(const Keyset::Key& key, int prefix_size,
+void TestNonRawPrefix(const KeysetInfo::KeyInfo& key_info, int prefix_size,
                       uint8_t prefix_first_byte) {
   auto prefix_result =
-      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type());
+      CryptoFormat::GetOutputPrefix(key_info);
   EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(prefix_size, prefix.length());
   EXPECT_EQ(prefix_first_byte, prefix[0]);
   // key_id should follow in BigEndian order
   for (int i = 1; i <= 4; i++) {
-    EXPECT_EQ(0xff & (key.key_id() >> ((4 - i) * 8)), 0xff & prefix[i])
+    EXPECT_EQ(0xff & (key_info.key_id() >> ((4 - i) * 8)), 0xff & prefix[i])
         << "Failed at byte " << i << ".";
   }
 }
@@ -57,41 +57,41 @@ TEST_F(CryptoFormatTest, testConstants) {
 
 TEST_F(CryptoFormatTest, testTinkPrefix) {
   uint32_t key_id = 263829;
-  Keyset::Key key;
-  key.set_output_prefix_type(OutputPrefixType::TINK);
-  key.set_key_id(key_id);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(OutputPrefixType::TINK);
+  key_info.set_key_id(key_id);
 
-  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+  TestNonRawPrefix(key_info, CryptoFormat::kNonRawPrefixSize,
                    CryptoFormat::kTinkStartByte);
 }
 
 TEST_F(CryptoFormatTest, testLegacyPrefix) {
   uint32_t key_id = 8327256;
-  Keyset::Key key;
-  key.set_output_prefix_type(OutputPrefixType::LEGACY);
-  key.set_key_id(key_id);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(OutputPrefixType::LEGACY);
+  key_info.set_key_id(key_id);
 
-  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+  TestNonRawPrefix(key_info, CryptoFormat::kNonRawPrefixSize,
                    CryptoFormat::kLegacyStartByte);
 }
 
 TEST_F(CryptoFormatTest, testCrunchyPrefix) {
   uint32_t key_id = 1223345;
-  Keyset::Key key;
-  key.set_output_prefix_type(OutputPrefixType::CRUNCHY);
-  key.set_key_id(key_id);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(OutputPrefixType::CRUNCHY);
+  key_info.set_key_id(key_id);
 
-  testNonRawPrefix(key, CryptoFormat::kNonRawPrefixSize,
+  TestNonRawPrefix(key_info, CryptoFormat::kNonRawPrefixSize,
                    CryptoFormat::kLegacyStartByte);
 }
 
 TEST_F(CryptoFormatTest, testRawPrefix) {
   uint32_t key_id = 7662387;
-  Keyset::Key key;
-  key.set_output_prefix_type(OutputPrefixType::RAW);
-  key.set_key_id(key_id);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_output_prefix_type(OutputPrefixType::RAW);
+  key_info.set_key_id(key_id);
   auto prefix_result =
-      CryptoFormat::GetOutputPrefix(key.key_id(), key.output_prefix_type());
+      CryptoFormat::GetOutputPrefix(key_info);
   EXPECT_TRUE(prefix_result.ok()) << prefix_result.status();
   auto prefix = prefix_result.ValueOrDie();
   EXPECT_EQ(CryptoFormat::kRawPrefixSize, prefix.length());

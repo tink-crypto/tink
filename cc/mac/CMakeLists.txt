@@ -156,6 +156,7 @@ tink_cc_test(
     tink::core::crypto_format
     tink::core::keyset_handle
     tink::core::mac
+    tink::internal::key_info
     tink::mac::hmac_key_manager
     tink::util::test_keyset_handle
     tink::util::status
