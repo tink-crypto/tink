@@ -19,7 +19,7 @@ package com.google.crypto.tink;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
-import java.nio.charset.Charset;
+import com.google.crypto.tink.subtle.Hex;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +49,6 @@ import java.util.concurrent.ConcurrentMap;
  * @since 1.0.0
  */
 public final class PrimitiveSet<P> {
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
   /**
    * A single entry in the set. In addition to the actual primitive it holds also some extra
    * information about the primitive.
@@ -117,7 +116,7 @@ public final class PrimitiveSet<P> {
 
   /** @return the entries with primitive identifed by {@code identifier}. */
   public List<Entry<P>> getPrimitive(final byte[] identifier) {
-    List<Entry<P>> found = primitives.get(new String(identifier, UTF_8));
+    List<Entry<P>> found = primitives.get(new Prefix(identifier));
     return found != null ? found : Collections.<Entry<P>>emptyList();
   }
 
@@ -136,8 +135,8 @@ public final class PrimitiveSet<P> {
    * prefix). This allows quickly retrieving the list of primitives sharing some particular prefix.
    * Because all RAW keys are using an empty prefix, this also quickly allows retrieving them.
    */
-  private ConcurrentMap<java.lang.String, List<Entry<P>>> primitives =
-      new ConcurrentHashMap<java.lang.String, List<Entry<P>>>();
+  private final ConcurrentMap<Prefix, List<Entry<P>>> primitives =
+      new ConcurrentHashMap<Prefix, List<Entry<P>>>();
 
   private Entry<P> primary;
   private final Class<P> primitiveClass;
@@ -185,8 +184,8 @@ public final class PrimitiveSet<P> {
             key.getKeyId());
     List<Entry<P>> list = new ArrayList<Entry<P>>();
     list.add(entry);
-    // Cannot use [] as keys in hash map, convert to string.
-    String identifier = new String(entry.getIdentifier(), UTF_8);
+    // Cannot use [] as keys in hash map, convert to Prefix wrapper class.
+    Prefix identifier = new Prefix(entry.getIdentifier());
     List<Entry<P>> existing = primitives.put(identifier, Collections.unmodifiableList(list));
     if (existing != null) {
       List<Entry<P>> newList = new ArrayList<Entry<P>>();
@@ -200,4 +199,45 @@ public final class PrimitiveSet<P> {
   public Class<P> getPrimitiveClass() {
     return primitiveClass;
   }
+
+  private static class Prefix implements Comparable<Prefix> {
+    private final byte[] prefix;
+
+    private Prefix(byte[] prefix) {
+      this.prefix = Arrays.copyOf(prefix, prefix.length);
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(prefix);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof Prefix)) {
+        return false;
+      }
+      Prefix other = (Prefix) o;
+      return Arrays.equals(prefix, other.prefix);
+    }
+
+    @Override
+    public int compareTo(Prefix o) {
+      if (prefix.length != o.prefix.length) {
+        return prefix.length - o.prefix.length;
+      }
+      for (int i = 0; i < prefix.length; i++) {
+        if (prefix[i] != o.prefix[i]) {
+          return prefix[i] - o.prefix[i];
+        }
+      }
+      return 0;
+    }
+
+    @Override
+    public String toString() {
+      return Hex.encode(prefix);
+    }
+  }
+
 }
