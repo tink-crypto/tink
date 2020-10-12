@@ -33,10 +33,10 @@ py_test(
     srcs = ["_encrypting_stream_test.py"],
     srcs_version = "PY3",
     deps = [
-        ":_encrypting_stream",
+        ":_raw_streaming_aead",
+        ":streaming_aead",
         requirement("absl-py"),
-        requirement("six"),
-        "//tink/cc/pybind:tink_bindings",
+        "//tink/core",
         "//tink/testing:bytes_io",
     ],
 )
@@ -57,10 +57,9 @@ py_test(
     srcs = ["_decrypting_stream_test.py"],
     srcs_version = "PY3",
     deps = [
-        ":_decrypting_stream",
+        ":_raw_streaming_aead",
+        ":streaming_aead",
         requirement("absl-py"),
-        requirement("six"),
-        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
     ],
 )

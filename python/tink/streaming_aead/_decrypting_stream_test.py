@@ -19,11 +19,10 @@ import io
 from typing import BinaryIO
 
 from absl.testing import absltest
-from absl.testing.absltest import mock
 
 from tink import core
-from tink.cc.pybind import tink_bindings
-from tink.streaming_aead import _decrypting_stream
+from tink import streaming_aead
+from tink.streaming_aead import _raw_streaming_aead
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -31,54 +30,30 @@ B_SOMETHING_ = b'somethin' + B_X80
 B_AAD_ = b'aa' + B_X80
 
 
-class FakeInputStreamAdapter(object):
-
-  def __init__(self, file_object_adapter):
-    self._adapter = file_object_adapter
-
-  @core.use_tink_errors
-  def read(self, size=-1):
-    try:
-      if size < 0:
-        size = 100
-      return self._adapter.read(size)
-    except EOFError:
-      not_ok = tink_bindings.StatusNotOk()
-      not_ok.status = tink_bindings.Status(
-          tink_bindings.ErrorCode.OUT_OF_RANGE,
-          'Reached end of stream.')
-      raise not_ok
+def setUpModule():
+  streaming_aead.register()
 
 
-def fake_get_input_stream_adapter(self, cc_primitive, aad, source):
-  del cc_primitive, aad, self  # unused
-  return FakeInputStreamAdapter(source)
+def get_raw_primitive():
+  key_data = core.Registry.new_key_data(
+      streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
+  return core.Registry.primitive(key_data, _raw_streaming_aead.RawStreamingAead)
 
 
 def get_raw_decrypting_stream(
     ciphertext_source: BinaryIO,
     aad: bytes,
     close_ciphertext_source: bool = True) -> io.RawIOBase:
-  return _decrypting_stream.RawDecryptingStream(
-      None, ciphertext_source, aad,
-      close_ciphertext_source=close_ciphertext_source)
+  return get_raw_primitive().new_raw_decrypting_stream(
+      ciphertext_source, aad, close_ciphertext_source=close_ciphertext_source)
 
 
 class DecryptingStreamTest(absltest.TestCase):
 
-  def setUp(self):
-    super(DecryptingStreamTest, self).setUp()
-    # Replace the DecryptingStream's staticmethod with a custom function to
-    # avoid the need for a Streaming AEAD primitive.
-    self.addCleanup(mock.patch.stopall)
-    mock.patch.object(
-        _decrypting_stream.RawDecryptingStream,
-        '_get_input_stream_adapter',
-        new=fake_get_input_stream_adapter).start()
-
   def test_unsupported_operation(self):
     f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
+    ds = get_raw_primitive().new_raw_decrypting_stream(
+        f, B_AAD_, close_ciphertext_source=True)
 
     with self.assertRaises(io.UnsupportedOperation):
       ds.seek(0, 0)
@@ -95,7 +70,8 @@ class DecryptingStreamTest(absltest.TestCase):
 
   def test_closed_methods_raise(self):
     f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
+    ds = get_raw_primitive().new_raw_decrypting_stream(
+        f, B_AAD_, close_ciphertext_source=True)
 
     ds.close()
     with self.assertRaisesRegex(ValueError, 'closed'):
@@ -105,19 +81,13 @@ class DecryptingStreamTest(absltest.TestCase):
 
   def test_inquiries(self):
     f = io.BytesIO(B_SOMETHING_)
-    ds = get_raw_decrypting_stream(f, B_AAD_)
+    ds = get_raw_primitive().new_raw_decrypting_stream(
+        f, B_AAD_, close_ciphertext_source=True)
 
     self.assertTrue(ds.readable())
     self.assertFalse(ds.writable())
     self.assertFalse(ds.seekable())
     self.assertFalse(ds.isatty())
-
-  def test_context_manager(self):
-    f = io.BytesIO(B_SOMETHING_)
-
-    with get_raw_decrypting_stream(f, B_AAD_) as ds:
-      self.assertEqual(ds.read(), B_SOMETHING_)
-    self.assertTrue(ds.closed)
 
 
 if __name__ == '__main__':

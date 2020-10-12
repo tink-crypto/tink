@@ -17,14 +17,13 @@ from __future__ import division
 from __future__ import print_function
 
 import io
-import sys
-from typing import cast, BinaryIO
+from typing import cast
 
 from absl.testing import absltest
-from absl.testing.absltest import mock
 
-from tink.streaming_aead import _encrypting_stream
-from tink.testing import bytes_io
+from tink import core
+from tink import streaming_aead
+from tink.streaming_aead import _raw_streaming_aead
 
 # Using malformed UTF-8 sequences to ensure there is no accidental decoding.
 B_X80 = b'\x80'
@@ -32,64 +31,33 @@ B_AAD_ = b'aa' + B_X80
 B_ASSOC_ = b'asso' + B_X80
 
 
-class FakeOutputStreamAdapter(object):
-
-  def __init__(self, destination):
-    self._destination = destination
-
-  def write(self, data):
-    return self._destination.write(data)
-
-  def close(self):
-    self._destination.close()
+def setUpModule():
+  streaming_aead.register()
 
 
-def fake_get_output_stream_adapter(self, cc_primitive, aad, destination):
-  del cc_primitive, aad, self  # unused
-  return FakeOutputStreamAdapter(destination)
-
-
-# We use the same return type as StreamingAead.new_decrypting_stream
-def get_raw_encrypting_stream(ciphertext_destination: BinaryIO,
-                              aad: bytes) -> BinaryIO:
-  raw = _encrypting_stream.RawEncryptingStream(
-      None, ciphertext_destination, aad)
-  return cast(BinaryIO, io.BufferedWriter(raw))
+def get_raw_primitive():
+  key_data = core.Registry.new_key_data(
+      streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
+  return core.Registry.primitive(key_data, _raw_streaming_aead.RawStreamingAead)
 
 
 class EncryptingStreamTest(absltest.TestCase):
 
-  def setUp(self):
-    super(EncryptingStreamTest, self).setUp()
-    # Replace the EncryptingStream's staticmethod with a custom function to
-    # avoid the need for a Streaming AEAD primitive.
-    self.addCleanup(mock.patch.stopall)
-    mock.patch.object(
-        _encrypting_stream.RawEncryptingStream,
-        '_get_output_stream_adapter',
-        new=fake_get_output_stream_adapter).start()
-
-  def test_write(self):
-    f = bytes_io.BytesIOWithValueAfterClose()
-    with get_raw_encrypting_stream(f, B_AAD_) as es:
-      es.write(b'Hello world!' + B_X80)
-    self.assertTrue(f.closed)
-    self.assertEqual(b'Hello world!' + B_X80, f.value_after_close())
-
-  @absltest.skipIf(sys.version_info[0] == 2, 'Python 2 strings are bytes')
   def test_write_non_bytes(self):
-    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_AAD_) as es:
+    f = io.BytesIO()
+    with get_raw_primitive().new_raw_encrypting_stream(f, B_AAD_) as es:
       with self.assertRaisesRegex(TypeError, 'bytes-like object is required'):
         es.write(cast(bytes, 'This is a string, not a bytes object'))
 
   def test_flush(self):
-    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
+    f = io.BytesIO()
+    with get_raw_primitive().new_raw_encrypting_stream(f, B_ASSOC_) as es:
       es.write(b'Hello world!' + B_X80)
       es.flush()
 
   def test_closed(self):
     f = io.BytesIO()
-    es = get_raw_encrypting_stream(f, B_ASSOC_)
+    es = get_raw_primitive().new_raw_encrypting_stream(f, B_ASSOC_)
     es.write(b'Hello world!' + B_X80)
     es.close()
 
@@ -98,7 +66,7 @@ class EncryptingStreamTest(absltest.TestCase):
 
   def test_closed_methods_raise(self):
     f = io.BytesIO()
-    es = get_raw_encrypting_stream(f, B_ASSOC_)
+    es = get_raw_primitive().new_raw_encrypting_stream(f, B_ASSOC_)
     es.write(b'Hello world!' + B_X80)
     es.close()
 
@@ -111,16 +79,18 @@ class EncryptingStreamTest(absltest.TestCase):
       es.flush()
 
   def test_unsupported_operation(self):
-    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
-      with self.assertRaisesRegex(io.UnsupportedOperation, 'seek'):
+    f = io.BytesIO()
+    with get_raw_primitive().new_raw_encrypting_stream(f, B_ASSOC_) as es:
+      with self.assertRaises(io.UnsupportedOperation):
         es.seek(0, 2)
-      with self.assertRaisesRegex(io.UnsupportedOperation, 'truncate'):
+      with self.assertRaises(io.UnsupportedOperation):
         es.truncate(0)
-      with self.assertRaisesRegex(io.UnsupportedOperation, 'read'):
+      with self.assertRaises(io.UnsupportedOperation):
         es.read(-1)
 
   def test_inquiries(self):
-    with io.BytesIO() as f, get_raw_encrypting_stream(f, B_ASSOC_) as es:
+    f = io.BytesIO()
+    with get_raw_primitive().new_raw_encrypting_stream(f, B_ASSOC_) as es:
       self.assertTrue(es.writable())
       self.assertFalse(es.readable())
       self.assertFalse(es.seekable())
@@ -134,7 +104,8 @@ class EncryptingStreamTest(absltest.TestCase):
     """
     ciphertext_destination = io.BytesIO()
     with self.assertRaisesRegex(ValueError, 'raised inside'):
-      with get_raw_encrypting_stream(ciphertext_destination, B_ASSOC_) as es:
+      with get_raw_primitive().new_raw_encrypting_stream(
+          ciphertext_destination, B_ASSOC_) as es:
         es.write(b'some message' + B_X80)
         raise ValueError('Error raised inside context manager')
     self.assertTrue(ciphertext_destination.closed)
