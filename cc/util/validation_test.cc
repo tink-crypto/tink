@@ -25,6 +25,8 @@ namespace {
 
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
+using google::crypto::tink::KeyData;
+using testing::Not;
 
 TEST(ValidateKey, ValidKey) {
   google::crypto::tink::Keyset::Key key;
@@ -94,6 +96,47 @@ TEST(ValidateKeyset, ValidMultipleKeys) {
   EXPECT_THAT(crypto::tink::ValidateKeyset(keyset), IsOk());
 }
 
+// Tests that a keyset with duplicate primary id is rejected
+TEST(ValidateKeyset, DuplicatePrimaryId) {
+  google::crypto::tink::Keyset keyset;
+  google::crypto::tink::Keyset::Key* key = keyset.add_key();
+  key->set_key_id(100);
+  key->mutable_key_data()->set_value("some value");
+  key->set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key = keyset.add_key();
+  key->set_key_id(100);
+  key->mutable_key_data()->set_value("some other value");
+  key->set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  keyset.set_primary_key_id(100);
+  EXPECT_THAT(crypto::tink::ValidateKeyset(keyset), Not(IsOk()));
+}
+
+// Tests that a keyset with public keys only doesn't need a primary id
+TEST(ValidateKeyset, OnlyPublicKeys) {
+  google::crypto::tink::Keyset keyset;
+  google::crypto::tink::Keyset::Key* key = keyset.add_key();
+  key->set_key_id(32);
+  key->mutable_key_data()->set_value("some value");
+  key->mutable_key_data()->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
+  key->set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key = keyset.add_key();
+  key->set_key_id(100);
+  key->mutable_key_data()->set_value("some other value");
+  key->mutable_key_data()->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
+  key->set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  key = keyset.add_key();
+  key->set_key_id(18);
+  key->mutable_key_data()->set_value("some third value");
+  key->mutable_key_data()->set_key_material_type(KeyData::ASYMMETRIC_PUBLIC);
+  key->set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
+  key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  EXPECT_THAT(crypto::tink::ValidateKeyset(keyset), IsOk());
+}
+
 TEST(ValidateKeyset, PrimaryIdNonExistent) {
   google::crypto::tink::Keyset keyset;
   google::crypto::tink::Keyset::Key* key = keyset.add_key();
@@ -105,7 +148,6 @@ TEST(ValidateKeyset, PrimaryIdNonExistent) {
   EXPECT_THAT(crypto::tink::ValidateKeyset(keyset),
               StatusIs(util::error::INVALID_ARGUMENT));
 }
-
 
 TEST(ValidateKeyset, ValidHighId) {
   google::crypto::tink::Keyset keyset;
