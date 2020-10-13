@@ -136,11 +136,9 @@ android_library(
     name = "json_keyset_writer-android",
     srcs = ["JsonKeysetWriter.java"],
     deps = [
-        ":keyset_writer",
         ":keyset_writer-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -198,7 +196,6 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:org_json_json",
     ],
 )
 
