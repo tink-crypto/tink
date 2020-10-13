@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface TINKDeterministicAeadConfig : TINKRegistryConfig
 
 /* Use -initWithError: to get an instance of TINKDeterministicAeadConfig. */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /* Returns config of Deterministic Aead implementations supported in the latest version of Tink. */
 - (nullable instancetype)initWithError:(NSError **)error

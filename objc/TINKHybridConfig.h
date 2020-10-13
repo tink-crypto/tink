@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface TINKHybridConfig : TINKRegistryConfig
 
 /* Use initWithError: to get an instance of TINKHybridConfig. */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /* Returns config of Hybrid implementations supported in the latest version of Tink. */
 - (nullable instancetype)initWithError:(NSError **)error NS_SWIFT_NAME(init())

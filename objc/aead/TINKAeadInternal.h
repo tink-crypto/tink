@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKAeadInternal : NSObject <TINKAead>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCAead:(std::unique_ptr<crypto::tink::Aead>)ccAead
     NS_DESIGNATED_INITIALIZER;

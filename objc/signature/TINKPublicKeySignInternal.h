@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKPublicKeySignInternal : NSObject <TINKPublicKeySign>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCPublicKeySign:
     (std::unique_ptr<crypto::tink::PublicKeySign>)ccPublicKeySign NS_DESIGNATED_INITIALIZER;

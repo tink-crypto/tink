@@ -78,7 +78,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKHybridKeyTemplate : TINKKeyTemplate
 
-- (nullable instancetype)init
+- (instancetype)init
     __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
 
 /**

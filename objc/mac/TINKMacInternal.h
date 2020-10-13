@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKMacInternal : NSObject <TINKMac>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCMac:(std::unique_ptr<crypto::tink::Mac>)ccMac
     NS_DESIGNATED_INITIALIZER;

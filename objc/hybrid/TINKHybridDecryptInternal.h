@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKHybridDecryptInternal : NSObject <TINKHybridDecrypt>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCHybridDecrypt:
     (std::unique_ptr<crypto::tink::HybridDecrypt>)ccHybridDecrypt NS_DESIGNATED_INITIALIZER;

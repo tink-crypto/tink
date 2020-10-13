@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is not meant to be instantiated directly; instead use one of the subclasses
  * (TINKAeadConfig, TINKAllConfig etc.) to get an instance.
  */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithError:(NSError **)error NS_SWIFT_NAME(init())
     NS_DESIGNATED_INITIALIZER;
