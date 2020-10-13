@@ -28,18 +28,3 @@ sh_test(
     ],
     tags = ["no_rbe"],
 )
-
-sh_test(
-    name = "streaming_aead_test",
-    size = "medium",
-    srcs = [
-        "streaming_aead_test.sh",
-    ],
-    data = [
-        ":test_lib",
-        "//testing:streaming_aead_cli_java",
-        "//testing/cc:streaming_aead_cli_cc",
-        "//testing/go:streaming_aead_cli_go",
-        "//tinkey",
-    ],
-)

@@ -115,17 +115,6 @@ generate_plaintext() {
        " named $plaintext_name just like that." > $plaintext_file
 }
 
-# Generates some example plaintext data, and stores it in $plaintext_file.
-generate_long_plaintext() {
-  local plaintext_name="$1"
-  local size_mb="$2"
-  local bytes_in_mb="$3"
-
-  plaintext_file="$TEST_TMPDIR/${plaintext_name}_plaintext.bin"
-  dd if=/dev/urandom of="$plaintext_file" bs="$bytes_in_mb" count="$size_mb"
-}
-
-
 # Checks that two files are equal.
 assert_files_equal() {
   local expected_file="$1"
