@@ -31,6 +31,13 @@ std::string Random::GetRandomBytes(size_t length) {
   // BoringSSL documentation says that it always returns 1; while
   // OpenSSL documentation says that it returns 1 on success, 0 otherwise. We
   // use BoringSSL, so we don't check the return value.
+  //
+  // In case of insufficient entropy at the time of the call, BoringSSL's
+  // RAND_bytes will behave in different ways depending on the operating system,
+  // version, and FIPS mode. For Linux with a semi-recent kernel, it will block
+  // until the system has collected at least 128 bits since boot. For old
+  // kernels without getrandom support (and not in FIPS mode), it will resort to
+  // /dev/urandom.
   RAND_bytes(buf.get(), length);
   return std::string(reinterpret_cast<const char *>(buf.get()), length);
 }
