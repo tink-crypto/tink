@@ -19,6 +19,8 @@ unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink
 export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH=/tmp/tink
+# Required to fix https://github.com/pypa/manylinux/issues/357.
+export LD_LIBRARY_PATH=/usr/local/lib
 
 # Build wheel for Python 3.7
 (

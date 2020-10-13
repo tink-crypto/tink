@@ -3,6 +3,8 @@
 set -euo pipefail
 
 export TINK_SRC_PATH=/tmp/tink
+# Required to fix https://github.com/pypa/manylinux/issues/357.
+export LD_LIBRARY_PATH=/usr/local/lib
 
 # This link is required on CentOS, as curl used in the AWS SDK looks for the
 # certificates in this location. Removing this line will cause the AWS KMS tests
