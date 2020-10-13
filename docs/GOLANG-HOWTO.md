@@ -562,7 +562,7 @@ func main() {
         if err != nil {
                 log.Fatal(err)
         }
-        masterKey := aead.NewKMSEnvelopeAEAD2(aead.AES256GCMKeyTemplate(), backend)
+        masterKey := aead.NewKMSEnvelopeAEAD(*aead.AES256GCMKeyTemplate(), backend)
 
         // An io.Reader and io.Writer implementation which simply writes to memory.
         memKeyset := &keyset.MemReaderWriter{}
