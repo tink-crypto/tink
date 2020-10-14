@@ -30,6 +30,7 @@
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "tink/version.h"
 
 namespace crypto {
 namespace tink {
@@ -39,14 +40,16 @@ namespace gcpkms {
 namespace {
 
 using crypto::tink::ToStatusF;
+using crypto::tink::Version;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::cloud::kms::v1::KeyManagementService;
-using grpc::Channel;
+using grpc::ChannelArguments;
 using grpc::ChannelCredentials;
 
 static constexpr char kKeyUriPrefix[] = "gcp-kms://";
 static constexpr char kGcpKmsServer[] = "cloudkms.googleapis.com";
+static constexpr char kTinkUserAgentPrefix[] = "Tink/";
 
 StatusOr<std::string> ReadFile(absl::string_view filename) {
   std::ifstream input_stream;
@@ -117,8 +120,11 @@ GcpKmsClient::New(absl::string_view key_uri,
   }
 
   // Create a KMS stub.
-  client->kms_stub_ = KeyManagementService::NewStub(
-      grpc::CreateChannel(kGcpKmsServer, creds_result.ValueOrDie()));
+  ChannelArguments args;
+  args.SetUserAgentPrefix(
+      absl::StrCat(kTinkUserAgentPrefix, Version::kTinkVersion, " CPP-Python"));
+  client->kms_stub_ = KeyManagementService::NewStub(grpc::CreateCustomChannel(
+      kGcpKmsServer, creds_result.ValueOrDie(), args));
   return std::move(client);
 }
 

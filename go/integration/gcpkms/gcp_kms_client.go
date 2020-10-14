@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"runtime"
 	"strings"
 
 	"google.golang.org/api/cloudkms/v1"
@@ -37,7 +38,8 @@ const (
 )
 
 var (
-	errCred = errors.New("invalid credential path")
+	errCred       = errors.New("invalid credential path")
+	tinkUserAgent = "Tink/" + tink.Version + " Golang/" + runtime.Version()
 )
 
 // gcpClient represents a client that connects to the GCP KMS backend.
@@ -95,6 +97,7 @@ func NewClientWithCredentials(uriPrefix string, credentialPath string) (registry
 	}
 	client := oauth2.NewClient(ctx, creds.TokenSource)
 	kmsService, err := cloudkms.New(client)
+	kmsService.UserAgent = tinkUserAgent
 	if err != nil {
 		return nil, err
 	}

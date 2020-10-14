@@ -9,12 +9,13 @@ cc_library(
     include_prefix = "tink/integration/gcpkms",
     visibility = ["//visibility:public"],
     deps = [
-        "@googleapis//google/cloud/kms/v1:kms_cc_grpc",
         "//:aead",
+        "//:version",
         "//util:errors",
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
+        "@googleapis//google/cloud/kms/v1:kms_cc_grpc",
     ],
 )
 

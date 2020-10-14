@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 
 /**
  * An implementation of {@code KmsClient} for <a href="https://cloud.google.com/kms/">Google Cloud
@@ -42,7 +43,9 @@ public final class GcpKmsClient implements KmsClient {
   /** The prefix of all keys stored in Google Cloud KMS. */
   public static final String PREFIX = "gcp-kms://";
 
-  private static final String APPLICATION_NAME = "Tink/" + Version.TINK_VERSION;
+  private static final String APPLICATION_NAME =
+      "Tink/" + Version.TINK_VERSION + " Java/" + System.getProperty("java.version");
+
   private CloudKMS client;
   private String keyUri;
 
@@ -51,23 +54,23 @@ public final class GcpKmsClient implements KmsClient {
 
   /** Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}. */
   public GcpKmsClient(String uri) {
-    if (!uri.toLowerCase().startsWith(PREFIX)) {
+    if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
     this.keyUri = uri;
   }
 
   /**
-   * @return @return true either if this client is a generic one and uri starts with {@link
-   *     GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the key identified
-   *     by {@code uri}
+   * Returns true either if this client is a generic one and uri starts with {@link
+   * GcpKmsClient#PREFIX}, or the client is a specific one that is bound to the key identified by
+   * {@code uri}
    */
   @Override
   public boolean doesSupport(String uri) {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
     }
-    return this.keyUri == null && uri.toLowerCase().startsWith(PREFIX);
+    return this.keyUri == null && uri.toLowerCase(Locale.US).startsWith(PREFIX);
   }
 
   /**
