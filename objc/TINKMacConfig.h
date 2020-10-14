@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface TINKMacConfig : TINKRegistryConfig
 
 /* Use -initWithError: to get an instance of TINKMacConfig. */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /* Returns config of Mac implementations supported in the latest version of Tink. */
 - (nullable instancetype)initWithError:(NSError **)error NS_SWIFT_NAME(init())

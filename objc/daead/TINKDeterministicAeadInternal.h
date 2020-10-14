@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKDeterministicAeadInternal : NSObject <TINKDeterministicAead>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCDeterministicAead:
     (std::unique_ptr<crypto::tink::DeterministicAead>)ccDeterministicAead NS_DESIGNATED_INITIALIZER;

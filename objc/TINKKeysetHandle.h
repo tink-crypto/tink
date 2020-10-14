@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Use -initWithKeysetReader:andKey:error: or -initWithTemplate:error: to get an instance of
  * TINKKeysetHandle.
  */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  * Creates a TINKKeysetHandle from an encrypted keyset obtained via @c reader using @c aeadKey to

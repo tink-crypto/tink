@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TINKJSONKeysetReader : TINKKeysetReader
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  * Initializes a TINKJSONKeysetReader using a serialized keyset in proto JSON wire format.

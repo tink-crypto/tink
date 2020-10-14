@@ -28,7 +28,7 @@
  */
 @interface TINKHybridEncryptInternal : NSObject <TINKHybridEncrypt>
 
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithCCHybridEncrypt:
     (std::unique_ptr<crypto::tink::HybridEncrypt>)ccHybridEncrypt NS_DESIGNATED_INITIALIZER;

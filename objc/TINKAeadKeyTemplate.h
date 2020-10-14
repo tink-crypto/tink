@@ -120,7 +120,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface TINKAeadKeyTemplate : TINKKeyTemplate
 
-- (nullable instancetype)init
+- (instancetype)init
     __attribute__((unavailable("Use -initWithKeyTemplate:error: instead.")));
 
 /**

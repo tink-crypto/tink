@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is not meant to be instantiated directly; instead use one of the subclasses
  * (TINKAeadKeyTemplate, TINKHybridKeyTemplate etc.) to get an instance.
  */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (nullable instancetype)initWithKeyTemplate:(id)keyTemplate error:(NSError **)error NS_UNAVAILABLE;
 
