@@ -187,7 +187,10 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#doesSupport-java.lang.String-">doesSupport</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#doesSupport-java.lang.String-">doesSupport</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</code>
+<div class="block">Returns true either if this client is a generic one and uri starts with <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#PREFIX"><code>PREFIX</code></a>, or the client is a specific one that is bound to the key identified by
+ <code>uri</code></div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
@@ -293,12 +296,13 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 <li class="blockList">
 <h4>doesSupport</h4>
 <pre>public&nbsp;boolean&nbsp;doesSupport(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</pre>
+<div class="block">Returns true either if this client is a generic one and uri starts with <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#PREFIX"><code>PREFIX</code></a>, or the client is a specific one that is bound to the key identified by
+ <code>uri</code></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html#doesSupport-java.lang.String-">doesSupport</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>@return true either if this client is a generic one and uri starts with <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#PREFIX"><code>PREFIX</code></a>, or the client is a specific one that is bound to the key identified
-     by <code>uri</code></dd>
+<dd>true if this client does support <code>keyUri</code></dd>
 </dl>
 </li>
 </ul>
