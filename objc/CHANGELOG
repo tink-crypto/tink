@@ -1,8 +1,10 @@
 Version 1.5.0
 ==================================
-No changes since 1.4.0.
+Added support for accessGropus to TINKKeysetHandle.
+Removed unused C++ dependencies.
+Merged https://github.com/google/tink/pull/434: fixing nullability issues.
 
-Version 1.5.0
+Version 1.4.0
 ==================================
 Obj-C protobufs removed.
 
