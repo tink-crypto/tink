@@ -9,7 +9,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Cross-language consistency tests for AEAD."""
+"""Cross-language consistency tests for AEAD.
+
+These tests generate different kind of AEAD keysets, some are valid, some are
+invalid. The test succeeds if all implementation treat the keyset consistently,
+so either encryption/decryption works as expected, or the keyset is rejected.
+"""
 
 import itertools
 
@@ -151,6 +156,12 @@ def aes_ctr_hmac_aead_key_test_cases():
 
 
 class AeadKeyConsistencyTest(parameterized.TestCase):
+  """Tests that all implementation treat all generated keyset in the same way.
+
+  We only consider keyset with single keys. This should be fine, since most
+  inconsistencies between languages will occur in the key validation, and
+  that is done for each key independently.
+  """
 
   @parameterized.parameters(
       itertools.chain(aes_eax_key_test_cases(),
