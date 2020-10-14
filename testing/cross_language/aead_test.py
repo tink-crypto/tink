@@ -9,7 +9,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Cross-language tests for the Aead primitive."""
+"""Cross-language tests for the Aead primitive.
+
+These tests check some basic AEAD properties, and that all implementations can
+interoperate with each other.
+"""
 
 # Placeholder for import for type annotations
 from typing import Iterable, Text, Tuple
@@ -26,18 +30,6 @@ from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['aead']
-TEMPLATE = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE)]
-
-
-def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
-  for enc_lang in SUPPORTED_LANGUAGES:
-    for dec_lang in SUPPORTED_LANGUAGES:
-      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -47,6 +39,13 @@ def setUpModule():
 
 def tearDownModule():
   testing_servers.stop()
+
+
+# To test all implementations of AEAD, we simply try all availalble default key
+# templates.
+# Note that in order to test keys not covered by key templates, the parameter
+# function would need to be rewritten to yield keyset instead of key template
+# names.
 
 
 def all_aead_key_template_names() -> Iterable[Text]:
@@ -92,6 +91,52 @@ class AeadPythonTest(parameterized.TestCase):
     for p in unsupported_aeads:
       with self.assertRaises(tink.TinkError):
         p.encrypt(b'plaintext', b'associated_data')
+
+  @parameterized.parameters(all_aead_key_template_names())
+  def test_decrypt_modified_ciphertext_fails(self, template_name):
+    """A basic test if the ciphertext is malleable with single bit-flips."""
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        template_name]
+    self.assertNotEmpty(supported_langs)
+    template = supported_key_types.KEY_TEMPLATE[template_name]
+    # Take the first supported language to generate the keyset.
+    keyset = testing_servers.new_keyset(supported_langs[0], template)
+    ciphertext = testing_servers.aead(supported_langs[0], keyset).encrypt(
+        b'plaintext', b'aad')
+    for lang in supported_langs:
+      primitive = testing_servers.aead(lang, keyset)
+      for i in range(len(ciphertext) * 8):
+        # flip the ith bit in the ciphertext.
+        modified_ciphertext = bytearray(ciphertext)
+        modified_ciphertext[i // 8] ^= 1 << (i % 8)
+        with self.assertRaises(
+            tink.TinkError,
+            msg='ciphertext with the %dth bit flipped did not cause a '
+            'decryption error in %s. keyset="%s", modified_ciphertext="%s"' %
+            (i, lang, keyset.hex(), bytes(modified_ciphertext).hex())):
+          primitive.decrypt(bytes(modified_ciphertext), b'aad')
+
+
+# If the implementations work fine for keysets with single keys, then key
+# rotation should work if the primitive wrapper is implemented correctly.
+# These wrappers do not depend on the key type, so it should be fine to always
+# test with the same key type. Since the AEAD wrapper needs to treat keys
+# with output prefix RAW differently, we also include such a template for that.
+TEMPLATE = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
+KEY_ROTATION_TEMPLATES = [TEMPLATE,
+                          keyset_builder.raw_template(TEMPLATE)]
+
+
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+
+
+class AeadKeyRotationTest(parameterized.TestCase):
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(self, enc_lang, dec_lang, old_key_tmpl, new_key_tmpl):

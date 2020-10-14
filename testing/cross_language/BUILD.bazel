@@ -73,6 +73,7 @@ py_test(
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
+        requirement("protobuf"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/proto:tink_py_pb2",
