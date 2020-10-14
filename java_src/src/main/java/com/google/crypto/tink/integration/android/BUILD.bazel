@@ -13,6 +13,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:kms_client",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 

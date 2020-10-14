@@ -30,6 +30,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.Arrays;
 import java.util.Locale;
+import javax.annotation.concurrent.GuardedBy;
 import javax.crypto.KeyGenerator;
 
 /**
@@ -42,12 +43,15 @@ import javax.crypto.KeyGenerator;
  */
 public final class AndroidKeystoreKmsClient implements KmsClient {
   private static final String TAG = AndroidKeystoreKmsClient.class.getSimpleName();
+  private static final int WAIT_TIME_MILLISECONDS_BEFORE_RETRY = 20;
 
   /** The prefix of all keys stored in Android Keystore. */
   public static final String PREFIX = "android-keystore://";
 
   private final String keyUri;
-  private final KeyStore keyStore;
+
+  @GuardedBy("this")
+  private KeyStore keyStore;
 
   public AndroidKeystoreKmsClient() throws GeneralSecurityException {
     this(new Builder());
@@ -81,7 +85,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
 
       try {
         this.keyStore = KeyStore.getInstance("AndroidKeyStore");
-        this.keyStore.load(null /* param */);
+        this.keyStore.load(/* param= */ null);
       } catch (GeneralSecurityException | IOException ex) {
         throw new IllegalStateException(ex);
       }
@@ -95,6 +99,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
       return this;
     }
 
+    /** This is for testing only */
     public Builder setKeyStore(KeyStore val) {
       if (val == null) {
         throw new IllegalArgumentException("val cannot be null");
@@ -114,7 +119,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    *     AndroidKeystoreKmsClient#PREFIX}.
    */
   @Override
-  public boolean doesSupport(String uri) {
+  public synchronized boolean doesSupport(String uri) {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
     }
@@ -148,7 +153,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
    * will incur a small performance penalty.
    */
   @Override
-  public Aead getAead(String uri) throws GeneralSecurityException {
+  public synchronized Aead getAead(String uri) throws GeneralSecurityException {
     if (this.keyUri != null && !this.keyUri.equals(uri)) {
       throw new GeneralSecurityException(
           String.format("this client is bound to %s, cannot load keys bound to %s",
@@ -161,15 +166,32 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
   }
 
   /** Deletes a key in Android Keystore. */
-  public void deleteKey(String keyUri) throws GeneralSecurityException {
+  public synchronized void deleteKey(String keyUri) throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    keyStore.deleteEntry(keyId);
+    this.keyStore.deleteEntry(keyId);
   }
 
   /** Returns whether a key exists in Android Keystore. */
-  boolean hasKey(String keyUri) throws GeneralSecurityException {
+  synchronized boolean hasKey(String keyUri) throws GeneralSecurityException {
     String keyId = Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, keyUri);
-    return keyStore.containsAlias(keyId);
+    try {
+      return this.keyStore.containsAlias(keyId);
+    } catch (NullPointerException ex1) {
+      // TODO(b/167402931): figure out how to test this.
+      Log.w(
+          TAG,
+          "Keystore is temporarily unavailable, wait 20ms, reinitialize Keystore and try again.");
+      try {
+        Thread.sleep(WAIT_TIME_MILLISECONDS_BEFORE_RETRY);
+        this.keyStore = KeyStore.getInstance("AndroidKeyStore");
+        this.keyStore.load(/* param= */ null);
+      } catch (IOException ex2) {
+        throw new GeneralSecurityException(ex2);
+      } catch (InterruptedException ex) {
+        // Ignored.
+      }
+      return this.keyStore.containsAlias(keyId);
+    }
   }
 
   /**
