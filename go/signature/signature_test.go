@@ -15,6 +15,8 @@
 package signature_test
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
 	"testing"
 
@@ -44,12 +46,17 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: save the private keyset to a safe location. DO NOT hardcode it in source code.
+	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
+	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
+
 	s, err := signature.NewSigner(kh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	a, err := s.Sign([]byte("this data needs to be signed"))
+	msg := []byte("this data needs to be signed")
+	sig, err := s.Sign(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,14 +66,17 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: share the public with the verifier.
+
 	v, err := signature.NewVerifier(pubkh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := v.Verify(a, []byte("this data needs to be signed")); err != nil {
+	if err := v.Verify(sig, msg); err != nil {
 		log.Fatal(err)
 	}
 
-	// Output:
+	fmt.Printf("Message: %s\n", msg)
+	fmt.Printf("Signature: %s\n", base64.StdEncoding.EncodeToString(sig))
 }

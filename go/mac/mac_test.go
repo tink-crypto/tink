@@ -15,6 +15,8 @@
 package mac_test
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
 	"testing"
 
@@ -41,19 +43,25 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
+	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
+
 	m, err := mac.New(kh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	mac, err := m.ComputeMAC([]byte("this data needs to be MACed"))
+	msg := []byte("this data needs to be authenticated")
+	tag, err := m.ComputeMAC(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if m.VerifyMAC(mac, []byte("this data needs to be MACed")); err != nil {
+	if m.VerifyMAC(tag, msg); err != nil {
 		log.Fatal(err)
 	}
 
-	// Output:
+	fmt.Printf("Message: %s\n", msg)
+	fmt.Printf("Authentication tag: %s\n", base64.StdEncoding.EncodeToString(tag))
 }

@@ -45,7 +45,6 @@ go_test(
     ],
     embed = [":go_default_library"],
     deps = [
-        "//aead:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//mac:go_default_library",

@@ -15,6 +15,8 @@
 package aead_test
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
 	"testing"
 
@@ -30,22 +32,30 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
+	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
+
 	a, err := aead.New(kh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct, err := a.Encrypt([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	msg := []byte("this message needs to be encrypted")
+	aad := []byte("this data needs to be authenticated, but not encrypted")
+	ct, err := a.Encrypt(msg, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = a.Decrypt(ct, []byte("this data needs to be authenticated, but not encrypted"))
+	pt, err := a.Decrypt(ct, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Output:
+	fmt.Printf("Ciphertext: %s\n", base64.StdEncoding.EncodeToString(ct))
+	fmt.Printf("Original  plaintext: %s\n", msg)
+	fmt.Printf("Decrypted Plaintext: %s\n", pt)
 }
 
 func TestAEADInit(t *testing.T) {

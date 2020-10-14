@@ -12,57 +12,35 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package hybrid_test
+package prf_test
 
 import (
 	"encoding/base64"
 	"fmt"
 	"log"
 
-	"github.com/google/tink/go/hybrid"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/prf"
 )
 
 func Example() {
-	khPriv, err := keyset.NewHandle(hybrid.ECIESHKDFAES128CTRHMACSHA256KeyTemplate())
+	kh, err := keyset.NewHandle(prf.HMACSHA256PRFKeyTemplate())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO: save the private keyset to a safe location. DO NOT hardcode it in source code.
+	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
 	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
 	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
 
-	khPub, err := khPriv.Public()
+	ps, err := prf.NewPRFSet(kh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO: share the public keyset with the sender.
+	msg := []byte("This is an ID needs to be redacted")
+	output, err := ps.ComputePrimaryPRF(msg, 16)
 
-	enc, err := hybrid.NewHybridEncrypt(khPub)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	msg := []byte("this data needs to be encrypted")
-	encryptionContext := []byte("encryption context")
-	ct, err := enc.Encrypt(msg, encryptionContext)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dec, err := hybrid.NewHybridDecrypt(khPriv)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pt, err := dec.Decrypt(ct, encryptionContext)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Ciphertext: %s\n", base64.StdEncoding.EncodeToString(ct))
-	fmt.Printf("Original  plaintext: %s\n", msg)
-	fmt.Printf("Decrypted Plaintext: %s\n", pt)
+	fmt.Printf("Message: %s\n", msg)
+	fmt.Printf("Redacted: %s\n", base64.StdEncoding.EncodeToString(output))
 }

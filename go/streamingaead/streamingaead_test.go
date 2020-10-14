@@ -15,7 +15,6 @@
 package streamingaead_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -23,7 +22,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/streamingaead"
 )
@@ -50,6 +48,12 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
+	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
+
+	// Encrypt file.
+
 	a, err := streamingaead.New(kh)
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +69,8 @@ func Example() {
 		log.Fatal(err)
 	}
 
-	w, err := a.NewEncryptingWriter(ctFile, []byte("associated data"))
+	aad := []byte("this data needs to be authenticated, but not encrypted")
+	w, err := a.NewEncryptingWriter(ctFile, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +90,7 @@ func Example() {
 		log.Fatal(err)
 	}
 
-	// Decrypt encrypted file.
+	// Decrypt file.
 
 	ctFile, err = os.Open(ctFilename)
 	if err != nil {
@@ -97,7 +102,7 @@ func Example() {
 		log.Fatal(err)
 	}
 
-	r, err := a.NewDecryptingReader(ctFile, []byte("associated data"))
+	r, err := a.NewDecryptingReader(ctFile, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,81 +119,11 @@ func Example() {
 	}
 
 	b, err := ioutil.ReadFile(dstFilename)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println(string(b))
-	// Output: this data needs to be encrypted
-}
-
-func Example_keyexport() {
-	// Create a master key which will be used to export/import streaming GCM HKDF key.
-	mkh, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
-	if err != nil {
-		log.Fatal(err)
-	}
-	masterKey, err := aead.New(mkh)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create a streaming GCM HDKF key.
-	kh, err := keyset.NewHandle(streamingaead.AES256GCMHKDF4KBKeyTemplate())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	a, err := streamingaead.New(kh)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Encrypt data using writer.
-	buf := &bytes.Buffer{}
-	w, err := a.NewEncryptingWriter(buf, []byte("associated data"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if _, err := w.Write([]byte("this data needs to be encrypted")); err != nil {
-		log.Fatal(err)
-	}
-	// The writer must be closed!
-	if err := w.Close(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Export the streaming GCM HKDF key.
-	// An io.Reader and io.Writer implementation which simply writes to memory.
-	memKeyset := &keyset.MemReaderWriter{}
-	if err := kh.Write(memKeyset, masterKey); err != nil {
-		log.Fatal(err)
-	}
-
-	// Import streaming GCM HKDF key.
-	kh, err = keyset.Read(memKeyset, masterKey)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	a, err = streamingaead.New(kh)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Decrypt the data using imported key.
-	r, err := a.NewDecryptingReader(buf, []byte("associated data"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	got := make([]byte, 256)
-	n, err := io.ReadFull(r, got)
-	if err != nil && err != io.ErrUnexpectedEOF {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(got[:n]))
 	// Output: this data needs to be encrypted
 }

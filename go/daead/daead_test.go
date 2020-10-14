@@ -16,6 +16,8 @@ package daead_test
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"testing"
 
@@ -31,22 +33,28 @@ func Example() {
 		log.Fatal(err)
 	}
 
+	// TODO: save the keyset to a safe location. DO NOT hardcode it in source code.
+	// Consider encrypting it with a remote key in Cloud KMS, AWS KMS or HashiCorp Vault.
+	// See https://github.com/google/tink/blob/master/docs/GOLANG-HOWTO.md#storing-and-loading-existing-keysets.
+
 	d, err := daead.New(kh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct1, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	msg := []byte("this data needs to be encrypted")
+	aad := []byte("this data needs to be authenticated, but not encrypted")
+	ct1, err := d.EncryptDeterministically(msg, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = d.DecryptDeterministically(ct1, []byte("this data needs to be authenticated, but not encrypted"))
+	pt, err := d.DecryptDeterministically(ct1, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ct2, err := d.EncryptDeterministically([]byte("this data needs to be encrypted"), []byte("this data needs to be authenticated, but not encrypted"))
+	ct2, err := d.EncryptDeterministically(msg, aad)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +63,9 @@ func Example() {
 		log.Fatal("ct1 != ct2")
 	}
 
-	// Output:
+	fmt.Printf("Ciphertext: %s\n", base64.StdEncoding.EncodeToString(ct1))
+	fmt.Printf("Original  plaintext: %s\n", msg)
+	fmt.Printf("Decrypted Plaintext: %s\n", pt)
 }
 
 func TestDeterministicAEADInit(t *testing.T) {
