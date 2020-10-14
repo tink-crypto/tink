@@ -4,6 +4,7 @@ package com.google.crypto.tink.integration.hcvault;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,8 @@ import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HcVaultKmsAeadTest {
-  public static final String uri = "transit/keys/key-1";
+  public static final String uri = "hcvault.corp.com:8200/transit/keys/key-1";
+  public static final String invalidUri = "transit,keys,key-1";
   public static final String encrypt = "transit/encrypt/key-1";
   public static final String decrypt = "transit/decrypt/key-1";
   @Mock
@@ -49,6 +51,16 @@ public class HcVaultKmsAeadTest {
   @Before
   public void setUp() throws Exception {
     when(mockKms.logical()).thenReturn(mockLogical);
+  }
+
+  @Test
+  public void testConstructor() throws Exception {
+    assertThrows(GeneralSecurityException.class, () -> new HcVaultKmsAead(mockKms, null));
+    assertThrows(GeneralSecurityException.class, () -> new HcVaultKmsAead(mockKms, ""));
+    assertThrows(GeneralSecurityException.class, () -> new HcVaultKmsAead(mockKms, invalidUri));
+
+    assertThat(new HcVaultKmsAead(mockKms, uri), isNotNull());
+
   }
 
   @Test

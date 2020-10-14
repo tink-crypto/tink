@@ -23,14 +23,12 @@ import java.security.GeneralSecurityException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HcVaultKmsClientTest {
-  public static final String defaultCreds = "hcvault://hcvault.corp.com:8200/transit/keys/key-1";
-  public static final String uri = "hcvault://transit/keys/key-1";
-
-  public static final String invalidUri = "hcvault://transit/keys/key-2";
+  public static final String uri = "hcvault://hcvault.corp.com:8200/transit/keys/key-1";
+  public static final String invalidUri = "vault://hcvault.corp.com:8200/transit/keys/key-2";
 
   @Test
-  public void testWithCredentials() throws Exception {
-    KmsClient client = new HcVaultKmsClient(uri).withCredentials(defaultCreds);
+  public void testWithDefaultCredentials() throws Exception {
+    KmsClient client = new HcVaultKmsClient(uri, "1234").withDefaultCredentials();
     HcVaultKmsClient hcvClient = (HcVaultKmsClient) client;
     assertThat(hcvClient.doesSupport(invalidUri), equalTo(false));
     assertThat(hcvClient.doesSupport(uri), equalTo(true));
@@ -38,14 +36,14 @@ public class HcVaultKmsClientTest {
 
   @Test
   public void testWithUri() throws Exception {
-    HcVaultKmsClient client = new HcVaultKmsClient(uri);
+    HcVaultKmsClient client = new HcVaultKmsClient(uri, "123");
     assertThat(client.doesSupport(invalidUri), equalTo(false));
     assertThat(client.doesSupport(uri), equalTo(true));
   }
 
   @Test
   public void testGetAead() throws Exception {
-    KmsClient client = new HcVaultKmsClient(uri);
+    KmsClient client = new HcVaultKmsClient(uri, "1234");
 
     assertThrows(GeneralSecurityException.class, () -> client.getAead(null));
     assertThrows(GeneralSecurityException.class, () -> client.getAead(""));

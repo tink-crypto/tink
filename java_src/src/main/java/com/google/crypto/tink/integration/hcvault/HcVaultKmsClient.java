@@ -18,20 +18,21 @@ import java.security.GeneralSecurityException;
  */
 @AutoService(KmsClient.class)
 public class HcVaultKmsClient implements KmsClient {
-
   public static final String PREFIX = "hcvault://";
 
   private String keyUri;
+  private String token;
   private Vault vault;
 
   public HcVaultKmsClient() {}
 
   /** Constructs a specific HcVaultKmsClient that is bound to a single key identified by {@code uri}. */
-  public HcVaultKmsClient(String uri) {
+  public HcVaultKmsClient(String uri, String token) {
     if (!uri.toLowerCase().startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
     this.keyUri = uri;
+    this.token = token;
   }
 
   /**
@@ -63,19 +64,21 @@ public class HcVaultKmsClient implements KmsClient {
     try {
       URI uri = new URI(credentialPath);
       VaultConfig config = new VaultConfig()
-          .address(uri.getHost());
+              .address(uri.getHost())
+              .token(this.token)
+              .build();
 
       this.vault = new Vault(config);
       return this;
-    } catch (URISyntaxException e) {
-      throw new GeneralSecurityException("invalid path provided", e);
+    } catch (URISyntaxException | VaultException e) {
+      throw new GeneralSecurityException("invalid path provided");
     }
   }
 
   /**
    * Loads default Vault config.
    *
-   * <p>Vault Address, Token and timeouts are loaded from environment variables
+   * <p>Vault Address, Token and timeouts can be loaded from environment variables.
    *
    * <ul>
    *     <li>Vault Address read from "VAULT_ADDR" environment variable</li>
@@ -88,9 +91,13 @@ public class HcVaultKmsClient implements KmsClient {
   @Override
   public KmsClient withDefaultCredentials() throws GeneralSecurityException {
     try {
-      this.vault = new Vault(new VaultConfig().build());
-    } catch (VaultException e) {
-      throw new GeneralSecurityException("unable to create config", e);
+      URI uri = new URI(this.keyUri);
+      this.vault = new Vault(new VaultConfig()
+              .address(uri.getHost())
+              .token(this.token)
+              .build());
+    } catch (URISyntaxException | VaultException e) {
+      throw new GeneralSecurityException("unable to create config");
     }
     return this;
   }
