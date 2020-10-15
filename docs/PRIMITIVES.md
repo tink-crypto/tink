@@ -218,7 +218,7 @@ Minimal properties:
   keys)
 - at least 80-bit authentication strength
 
-## Pseudo Random Function Families {#prfset}
+## Pseudo Random Function Families
 
 The PRF set primitive allows to redact data in a deterministic fashion, for
 example personal identifiable information or internal IDs, or to come up with a

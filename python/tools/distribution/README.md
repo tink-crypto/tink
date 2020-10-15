@@ -36,7 +36,7 @@ source distribution is tested on the machine which the script is run.
 
 The output generated in the previous step can directly be used for upload to
 PyPI. It is recommended to first upload it to the
-[https://test.pypi.org](test repository):
+[test repository](https://test.pypi.org):
 
 ```
 python3 -m twine upload --repository testpypi release/*
