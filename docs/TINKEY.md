@@ -5,6 +5,14 @@ decrypt keysets with master keys residing in a remote key management service
 (KMS). Out of the box it supports AWS KMS and Google Cloud KMS. Adding support
 for other KMS is easy, and doesn't require modifying Tinkey.
 
+Tinkey requires Java 8 or later to run.
+
+## Install from prebuilt binaries
+
+Download the latest version of Tinkey from
+https://storage.googleapis.com/tinkey/tinkey-1.5.0.tar.gz. This version should
+work well on Linux, macOS and Windows.
+
 ## Install with Homebrew
 
 ```sh

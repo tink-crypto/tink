@@ -47,8 +47,6 @@ fi
 
 readonly GCS_LOCATION="gs://tinkey/"
 
-readonly PLATFORM="$(uname -ms | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
-
 readonly TMP_DIR="$(mktemp -dt tinkey.XXXXXX)"
 
 do_command() {
@@ -97,17 +95,21 @@ build_tinkey() {
 java -jar "\$(dirname \$0)/tinkey_deploy.jar" "\$@"
 EOF
 
+  cat <<EOF > tinkey.bat
+java -jar "%~dp0\tinkey_deploy.jar" %*
+EOF
+
   chmod 755 tinkey
 
-  print_and_do tar -czvpf "tinkey-${PLATFORM}-${VERSION}.tar.gz" tinkey_deploy.jar tinkey
+  print_and_do tar -czvpf "tinkey-${VERSION}.tar.gz" tinkey_deploy.jar tinkey tinkey.bat
 }
 
 upload_to_gcs() {
   print_and_do cd "${TMP_DIR}"
 
-  shasum -a 256 "tinkey-${PLATFORM}-${VERSION}.tar.gz"
+  shasum -a 256 "tinkey-${VERSION}.tar.gz"
 
-  do_if_not_dry_run gsutil cp "tinkey-${PLATFORM}-${VERSION}.tar.gz" "${GCS_LOCATION}"
+  do_if_not_dry_run gsutil cp "tinkey-${VERSION}.tar.gz" "${GCS_LOCATION}"
 }
 
 main() {
