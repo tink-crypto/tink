@@ -88,9 +88,5 @@ func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	ret := make([]byte, 0, len(primary.Prefix)+len(signature))
-	ret = append(ret, primary.Prefix...)
-	ret = append(ret, signature...)
-	return ret, nil
+	return append([]byte(primary.Prefix), signature...), nil
 }

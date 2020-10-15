@@ -89,10 +89,7 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]byte, 0, len(primary.Prefix)+len(mac))
-	ret = append(ret, primary.Prefix...)
-	ret = append(ret, mac...)
-	return ret, nil
+	return append([]byte(primary.Prefix), mac...), nil
 }
 
 var errInvalidMAC = fmt.Errorf("mac_factory: invalid mac")

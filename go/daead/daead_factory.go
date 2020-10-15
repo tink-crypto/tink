@@ -75,11 +75,7 @@ func (d *wrappedDeterministicAEAD) EncryptDeterministically(pt, aad []byte) ([]b
 	if err != nil {
 		return nil, err
 	}
-
-	ret := make([]byte, 0, len(primary.Prefix)+len(ct))
-	ret = append(ret, primary.Prefix...)
-	ret = append(ret, ct...)
-	return ret, nil
+	return append([]byte(primary.Prefix), ct...), nil
 }
 
 // DecryptDeterministically deterministically decrypts ciphertext with additionalData as

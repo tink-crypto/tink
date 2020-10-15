@@ -52,6 +52,9 @@ func NewAESCTR(key []byte, ivSize int) (*AESCTR, error) {
 // The resulting ciphertext consists of two parts:
 // (1) the IV used for encryption and (2) the actual ciphertext.
 func (a *AESCTR) Encrypt(plaintext []byte) ([]byte, error) {
+	if len(plaintext) > maxInt-a.IVSize {
+		return nil, fmt.Errorf("aes_ctr: plaintext too long")
+	}
 	iv := a.newIV()
 	stream, err := newCipher(a.Key, iv)
 	if err != nil {

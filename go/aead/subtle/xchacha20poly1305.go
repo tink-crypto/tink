@@ -45,6 +45,9 @@ func NewXChaCha20Poly1305(key []byte) (*XChaCha20Poly1305, error) {
 // authenticated data. The resulting ciphertext consists of two parts:
 // (1) the nonce used for encryption and (2) the actual ciphertext.
 func (x *XChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
+	if len(pt) > maxInt-chacha20poly1305.NonceSizeX-poly1305TagSize {
+		return nil, fmt.Errorf("xchacha20poly1305: plaintext too long")
+	}
 	c, err := chacha20poly1305.NewX(x.Key)
 	if err != nil {
 		return nil, err
@@ -52,14 +55,15 @@ func (x *XChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
 
 	n := x.newNonce()
 	ct := c.Seal(nil, n, pt, aad)
-	var ret []byte
-	ret = append(ret, n...)
-	ret = append(ret, ct...)
-	return ret, nil
+	return append(n, ct...), nil
 }
 
 // Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
 func (x *XChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
+	if len(ct) < chacha20poly1305.NonceSizeX+poly1305TagSize {
+		return nil, fmt.Errorf("xchacha20poly1305: ciphertext too short")
+	}
+
 	c, err := chacha20poly1305.NewX(x.Key)
 	if err != nil {
 		return nil, err

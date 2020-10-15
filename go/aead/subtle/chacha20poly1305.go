@@ -23,6 +23,10 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
+const (
+	poly1305TagSize = 16
+)
+
 // ChaCha20Poly1305 is an implementation of AEAD interface.
 type ChaCha20Poly1305 struct {
 	Key []byte
@@ -45,6 +49,9 @@ func NewChaCha20Poly1305(key []byte) (*ChaCha20Poly1305, error) {
 // authenticated data. The resulting ciphertext consists of two parts:
 // (1) the nonce used for encryption and (2) the actual ciphertext.
 func (ca *ChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
+	if len(pt) > maxInt-chacha20poly1305.NonceSize-poly1305TagSize {
+		return nil, fmt.Errorf("chacha20poly1305: plaintext too long")
+	}
 	c, err := chacha20poly1305.New(ca.Key)
 	if err != nil {
 		return nil, err
@@ -52,14 +59,15 @@ func (ca *ChaCha20Poly1305) Encrypt(pt []byte, aad []byte) ([]byte, error) {
 
 	n := ca.newNonce()
 	ct := c.Seal(nil, n, pt, aad)
-	ret := make([]byte, 0, len(n)+len(ct))
-	ret = append(ret, n...)
-	ret = append(ret, ct...)
-	return ret, nil
+	return append(n, ct...), nil
 }
 
 // Decrypt decrypts {@code ct} with {@code aad} as the additionalauthenticated data.
 func (ca *ChaCha20Poly1305) Decrypt(ct []byte, aad []byte) ([]byte, error) {
+	if len(ct) < chacha20poly1305.NonceSize+poly1305TagSize {
+		return nil, fmt.Errorf("chacha20poly1305: ciphertext too short")
+	}
+
 	c, err := chacha20poly1305.New(ca.Key)
 	if err != nil {
 		return nil, err

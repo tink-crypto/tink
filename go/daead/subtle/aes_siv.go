@@ -56,8 +56,11 @@ type AESSIV struct {
 	Cipher cipher.Block
 }
 
-// AESSIVKeySize is the key size in bytes.
-const AESSIVKeySize = 64
+const (
+	// AESSIVKeySize is the key size in bytes.
+	AESSIVKeySize = 64
+	maxInt        = int(^uint(0) >> 1)
+)
 
 // NewAESSIV returns an AESSIV instance.
 func NewAESSIV(key []byte) (*AESSIV, error) {
@@ -105,6 +108,9 @@ func multiplyByX(block []byte) {
 // EncryptDeterministically deterministically encrypts plaintext with
 // additionalData as additional authenticated data.
 func (asc *AESSIV) EncryptDeterministically(pt, aad []byte) ([]byte, error) {
+	if len(pt) > maxInt-aes.BlockSize {
+		return nil, fmt.Errorf("aes_siv: plaintext too long")
+	}
 	siv := make([]byte, aes.BlockSize)
 	asc.s2v(pt, aad, siv)
 
