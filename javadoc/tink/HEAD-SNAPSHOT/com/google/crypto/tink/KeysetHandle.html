@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":41,"i3":9,"i4":10,"i5":10,"i6":10,"i7":10,"i8":9,"i9":9,"i10":9,"i11":10,"i12":10,"i13":10};
+var methods = {"i0":9,"i1":9,"i2":41,"i3":9,"i4":10,"i5":10,"i6":42,"i7":10,"i8":9,"i9":9,"i10":9,"i11":10,"i12":10,"i13":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -181,8 +181,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-com.google.crypto.tink.KeyManager-java.lang.Class-">getPrimitive</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)</code>
-<div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
- registry to get resources creating the primitive.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Register the keymanager and use the normal <code>getPrimitive</code>.</span></div>
+</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
@@ -491,9 +492,11 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getPrimitive</h4>
-<pre>public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
-                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)
-                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;customKeyManager,
+                                      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)
+                               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">Register the keymanager and use the normal <code>getPrimitive</code>.</span></div>
 <div class="block">Returns a primitive from this keyset, using the given <code>customKeyManager</code> and the global
  registry to get resources creating the primitive. The given keyManager will take precedence
  when creating primitives over the globally registered keyManagers.</div>
