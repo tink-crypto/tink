@@ -42,7 +42,7 @@
     <dependency>
       <groupId>com.google.crypto.tink</groupId>
       <artifactId>tink</artifactId>
-      <version>HEAD-SNAPSHOT</version>
+      <version>1.5.0</version>
     </dependency>
 
     <dependency>
