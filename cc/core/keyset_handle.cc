@@ -183,6 +183,11 @@ KeysetHandle::GetPublicKeysetHandle() const {
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     const google::crypto::tink::KeyTemplate& key_template,
     bool as_primary, Keyset* keyset) {
+  if (key_template.output_prefix_type() ==
+      google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "key template has unknown prefix");
+  }
   auto key_data_result = Registry::NewKeyData(key_template);
   if (!key_data_result.ok()) return key_data_result.status();
   auto key_data = std::move(key_data_result.ValueOrDie());

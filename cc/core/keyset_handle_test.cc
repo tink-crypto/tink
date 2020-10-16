@@ -272,10 +272,18 @@ TEST_F(KeysetHandleTest, GenerateNewKeysetHandle) {
 TEST_F(KeysetHandleTest, GenerateNewKeysetHandleErrors) {
   KeyTemplate templ;
   templ.set_type_url("type.googleapis.com/some.unknown.KeyType");
+  templ.set_output_prefix_type(OutputPrefixType::TINK);
 
   auto handle_result = KeysetHandle::GenerateNew(templ);
   EXPECT_FALSE(handle_result.ok());
   EXPECT_EQ(util::error::NOT_FOUND, handle_result.status().error_code());
+}
+
+TEST_F(KeysetHandleTest, UnknownPrefixIsInvalid) {
+  KeyTemplate templ(AeadKeyTemplates::Aes128Gcm());
+  templ.set_output_prefix_type(OutputPrefixType::UNKNOWN_PREFIX);
+  auto handle_result = KeysetHandle::GenerateNew(templ);
+  EXPECT_FALSE(handle_result.ok());
 }
 
 
