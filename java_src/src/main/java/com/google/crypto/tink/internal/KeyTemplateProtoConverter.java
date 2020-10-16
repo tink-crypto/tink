@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 public final class KeyTemplateProtoConverter {
 
   private static KeyTemplate.OutputPrefixType fromProto(
-      OutputPrefixType outputPrefixType) {
+      OutputPrefixType outputPrefixType) throws GeneralSecurityException {
     switch (outputPrefixType) {
       case TINK:
         return KeyTemplate.OutputPrefixType.TINK;
@@ -37,12 +37,12 @@ public final class KeyTemplateProtoConverter {
       case CRUNCHY:
         return KeyTemplate.OutputPrefixType.CRUNCHY;
       default:
-        throw new IllegalArgumentException("Unknown output prefix type");
+        throw new GeneralSecurityException("Unknown output prefix type");
     }
   }
 
   private static OutputPrefixType toProto(
-      KeyTemplate.OutputPrefixType outputPrefixType) {
+      KeyTemplate.OutputPrefixType outputPrefixType) throws GeneralSecurityException {
     switch (outputPrefixType) {
       case TINK:
         return OutputPrefixType.TINK;
@@ -53,10 +53,10 @@ public final class KeyTemplateProtoConverter {
       case CRUNCHY:
         return OutputPrefixType.CRUNCHY;
     }
-    throw new IllegalArgumentException("Unknown output prefix type");
+    throw new GeneralSecurityException("Unknown output prefix type");
   }
 
-  public static byte[] toByteArray(KeyTemplate keyTemplate) {
+  public static byte[] toByteArray(KeyTemplate keyTemplate) throws GeneralSecurityException {
     return com.google.crypto.tink.proto.KeyTemplate.newBuilder()
         .setTypeUrl(keyTemplate.getTypeUrl())
         .setValue(ByteString.copyFrom(keyTemplate.getValue()))

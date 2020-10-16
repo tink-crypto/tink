@@ -20,6 +20,8 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +39,22 @@ public final class KeyTemplateProtoConverterTest {
     assertThat(template.getTypeUrl()).isEqualTo(template2.getTypeUrl());
     assertThat(template.getValue()).isEqualTo(template2.getValue());
     assertThat(template.getOutputPrefixType()).isEqualTo(template2.getOutputPrefixType());
+  }
+
+  @Test
+  public void unknownOutputPrefix_throwsGeneralSecurityException() throws Exception {
+    byte[] templateBytes = KeyTemplateProtoConverter.toByteArray(
+        AesGcmKeyManager.aes128GcmTemplate());
+    com.google.crypto.tink.proto.KeyTemplate templateProto =
+          com.google.crypto.tink.proto.KeyTemplate.parseFrom(
+              templateBytes, ExtensionRegistryLite.getEmptyRegistry());
+    byte[] invalidTemplateBytes = templateProto.toBuilder()
+        .setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX).build().toByteArray();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> {
+          KeyTemplateProtoConverter.fromByteArray(invalidTemplateBytes);
+        });
   }
 
   @Test
