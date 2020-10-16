@@ -21,18 +21,16 @@ public class HcVaultKmsClient implements KmsClient {
   public static final String PREFIX = "hcvault://";
 
   private String keyUri;
-  private String token;
   private Vault vault;
 
   public HcVaultKmsClient() {}
 
   /** Constructs a specific HcVaultKmsClient that is bound to a single key identified by {@code uri}. */
-  public HcVaultKmsClient(String uri, String token) {
+  public HcVaultKmsClient(String uri) {
     if (!uri.toLowerCase().startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
     this.keyUri = uri;
-    this.token = token;
   }
 
   /**
@@ -49,23 +47,19 @@ public class HcVaultKmsClient implements KmsClient {
   }
 
   /**
-   * Loads Vault config with the host provided in the {@code credentialPath}.
+   * Loads Vault config with the provided {@code token}.
    *
-   * <p>If {@code credentialPath} is null, loads address from environment variables.</p>
+   * <p>If {@code token} is null, loads token from "VAULT_TOKEN" environment variables.</p>
    * <p>
    * All other configuration elements will also be read from environment variables.
    */
   @Override
-  public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
-    if (!credentialPath.toLowerCase().startsWith(PREFIX)) {
-      throw new IllegalArgumentException("key URI must starts with " + PREFIX);
-    }
-
+  public KmsClient withCredentials(String token) throws GeneralSecurityException {
     try {
-      URI uri = new URI(credentialPath);
+      URI uri = new URI(this.keyUri);
       VaultConfig config = new VaultConfig()
               .address(uri.getHost())
-              .token(this.token)
+              .token(token)
               .build();
 
       this.vault = new Vault(config);
@@ -94,7 +88,6 @@ public class HcVaultKmsClient implements KmsClient {
       URI uri = new URI(this.keyUri);
       this.vault = new Vault(new VaultConfig()
               .address(uri.getHost())
-              .token(this.token)
               .build());
     } catch (URISyntaxException | VaultException e) {
       throw new GeneralSecurityException("unable to create config");

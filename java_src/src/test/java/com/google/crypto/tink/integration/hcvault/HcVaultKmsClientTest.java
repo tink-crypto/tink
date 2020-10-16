@@ -28,7 +28,7 @@ public class HcVaultKmsClientTest {
 
   @Test
   public void testWithDefaultCredentials() throws Exception {
-    KmsClient client = new HcVaultKmsClient(uri, "1234").withDefaultCredentials();
+    KmsClient client = new HcVaultKmsClient(uri).withDefaultCredentials();
     HcVaultKmsClient hcvClient = (HcVaultKmsClient) client;
     assertThat(hcvClient.doesSupport(invalidUri), equalTo(false));
     assertThat(hcvClient.doesSupport(uri), equalTo(true));
@@ -36,14 +36,14 @@ public class HcVaultKmsClientTest {
 
   @Test
   public void testWithUri() throws Exception {
-    HcVaultKmsClient client = new HcVaultKmsClient(uri, "123");
+    HcVaultKmsClient client = new HcVaultKmsClient(uri);
     assertThat(client.doesSupport(invalidUri), equalTo(false));
     assertThat(client.doesSupport(uri), equalTo(true));
   }
 
   @Test
   public void testGetAead() throws Exception {
-    KmsClient client = new HcVaultKmsClient(uri, "1234");
+    KmsClient client = new HcVaultKmsClient(uri);
 
     assertThrows(GeneralSecurityException.class, () -> client.getAead(null));
     assertThrows(GeneralSecurityException.class, () -> client.getAead(""));
