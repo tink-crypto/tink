@@ -58,6 +58,9 @@ func checkHMACTemplate(template *tinkpb.KeyTemplate,
 	if template.TypeUrl != testutil.HMACTypeURL {
 		return fmt.Errorf("TypeUrl is incorrect")
 	}
+	if template.OutputPrefixType != tinkpb.OutputPrefixType_TINK {
+		return fmt.Errorf("OutputPrefixType is incorrect")
+	}
 	format := new(hmacpb.HmacKeyFormat)
 	if err := proto.Unmarshal(template.Value, format); err != nil {
 		return fmt.Errorf("unable to unmarshal serialized key format")

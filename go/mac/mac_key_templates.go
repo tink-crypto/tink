@@ -77,8 +77,9 @@ func createHMACKeyTemplate(keySize uint32,
 	}
 	serializedFormat, _ := proto.Marshal(&format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: hmacTypeURL,
-		Value:   serializedFormat,
+		TypeUrl:          hmacTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
 }
 
@@ -93,7 +94,8 @@ func createCMACKeyTemplate(keySize uint32, tagSize uint32) *tinkpb.KeyTemplate {
 	}
 	serializedFormat, _ := proto.Marshal(&format)
 	return &tinkpb.KeyTemplate{
-		TypeUrl: cmacTypeURL,
-		Value:   serializedFormat,
+		TypeUrl:          cmacTypeURL,
+		Value:            serializedFormat,
+		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
 }
