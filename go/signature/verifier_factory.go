@@ -32,6 +32,7 @@ func NewVerifier(h *keyset.Handle) (tink.Verifier, error) {
 }
 
 // NewVerifierWithKeyManager returns a Verifier primitive from the given keyset handle and custom key manager.
+// Deprecated: register the KeyManager and use New above.
 func NewVerifierWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.Verifier, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {

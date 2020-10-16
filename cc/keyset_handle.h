@@ -17,6 +17,7 @@
 #ifndef TINK_KEYSET_HANDLE_H_
 #define TINK_KEYSET_HANDLE_H_
 
+#include "absl/base/attributes.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
 #include "tink/key_manager.h"
@@ -84,6 +85,7 @@ class KeysetHandle {
   // global registry to create the primitive. The given KeyManager is used for
   // keys supported by it. For those, the registry is ignored.
   template <class P>
+  ABSL_DEPRECATED("Register the keymanager and use GetPrimitive")
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const KeyManager<P>* custom_manager) const;
 

@@ -459,6 +459,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::keyset_util
     tink::proto::tink_cc_proto
+    absl::base
     absl::memory
 )
 

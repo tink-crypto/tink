@@ -515,6 +515,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:keyset_util",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
     ],
 )

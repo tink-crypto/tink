@@ -30,6 +30,7 @@ func New(h *keyset.Handle) (tink.DeterministicAEAD, error) {
 }
 
 // NewWithKeyManager returns a DeterministicAEAD primitive from the given keyset handle and custom key manager.
+// Deprecated: register the KeyManager and use New above.
 func NewWithKeyManager(h *keyset.Handle, km registry.KeyManager) (tink.DeterministicAEAD, error) {
 	ps, err := h.PrimitivesWithKeyManager(km)
 	if err != nil {
