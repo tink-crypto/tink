@@ -1,3 +1,4 @@
+
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +18,7 @@
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "tink/jwt/jwt_algorithms.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -26,31 +28,26 @@ namespace tink {
 ///////////////////////////////////////////////////////////////////////////////
 // Registered claim names, as defined in
 // https://tools.ietf.org/html/rfc7519#section-4.1.
-// If update, please update validateClaim().
-class JwtNames {
- public:
-  // Claims
-  static constexpr absl::string_view kClaimIssuer = "iss";
-  static constexpr absl::string_view kClaimSubject = "sub";
-  static constexpr absl::string_view kClaimAudience = "aud";
-  static constexpr absl::string_view kClaimExpiration = "exp";
-  static constexpr absl::string_view kClaimNotBefore = "nbf";
-  static constexpr absl::string_view kClaimIssuedAt = "iat";
-  static constexpr absl::string_view kClaimJwtId = "jti";
+// If update, please update validateClaim() in jwt_object.cc.
+constexpr absl::string_view kJwtClaimIssuer = "iss";
+constexpr absl::string_view kJwtClaimSubject = "sub";
+constexpr absl::string_view kJwtClaimAudience = "aud";
+constexpr absl::string_view kJwtClaimExpiration = "exp";
+constexpr absl::string_view kJwtClaimNotBefore = "nbf";
+constexpr absl::string_view kJwtClaimIssuedAt = "iat";
+constexpr absl::string_view kJwtClaimJwtId = "jti";
 
-  // Supported protected headers, as described in
-  // https://tools.ietf.org/html/rfc7515#section-4.1
-  static constexpr absl::string_view kHeaderAlgorithm = "alg";
-  static constexpr absl::string_view kHeaderKeyId = "kid";
-  static constexpr absl::string_view kHeaderType = "typ";
-  static constexpr absl::string_view kHeaderContentType = "cty";
+// Supported protected headers, as described in
+// https://tools.ietf.org/html/rfc7515#section-4.1
+constexpr absl::string_view kJwtHeaderAlgorithm = "alg";
+constexpr absl::string_view kJwtHeaderKeyId = "kid";
+constexpr absl::string_view kJwtHeaderType = "typ";
+constexpr absl::string_view kJwtHeaderContentType = "cty";
 
-  virtual ~JwtNames() {}
-
- private:
-  static util::Status validate(absl::string_view name);
-  static bool isRegisteredName(absl::string_view name);
-};
+// Algorithms
+constexpr absl::string_view kJwtAlgorithmHs256 = "HS256";
+constexpr absl::string_view kJwtAlgorithmEs256 = "ES256";
+constexpr absl::string_view kJwtAlgorithmRs256 = "RS256";
 
 }  // namespace tink
 }  // namespace crypto

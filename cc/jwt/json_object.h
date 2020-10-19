@@ -29,12 +29,17 @@ namespace tink {
 // Utility getters and setters for a JSON object.
 // This class encapsulates a protobuf object
 // This is intended for internal use only.
+// The getter functions:
+// - return util::error::NOT_FOUND if the requested header
+// or claim does not exist.
+// - return util::error::INVALID_ARGUMENT if the type of
+// the requested header or claim does not match.
 class JsonObject {
  public:
   explicit JsonObject(const google::protobuf::Struct& proto);
   JsonObject();
 
-  // Getters
+  // Getters.
   util::StatusOr<std::string> GetValueAsString(absl::string_view name) const;
   util::StatusOr<absl::Time> GetValueAsTime(absl::string_view name) const;
   util::StatusOr<std::vector<std::string>> GetValueAsStringList(
@@ -44,7 +49,7 @@ class JsonObject {
   util::StatusOr<bool> GetValueAsBool(absl::string_view name) const;
   util::StatusOr<int> GetValueAsNumber(absl::string_view name) const;
 
-  // Setters
+  // Setters.
   util::Status SetValueAsTime(absl::string_view name, absl::Time value);
   util::Status SetValueAsNumber(absl::string_view name, int value);
   util::Status SetValueAsString(absl::string_view name,
@@ -56,11 +61,11 @@ class JsonObject {
                                        absl::string_view value);
   util::Status AppendValueToNumberList(absl::string_view name, int value);
 
-  // Serialize
+  // Serialize.
   util::StatusOr<std::string> ToString();
 
  private:
-  // Helper functions
+  // Helper functions.
   util::StatusOr<const google::protobuf::ListValue*> GetValueAsList(
       absl::string_view name) const;
 
