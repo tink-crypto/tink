@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import io
 from typing import BinaryIO, Mapping, Text
-from absl import logging
 
 import tink
 from tink import aead
@@ -83,26 +82,22 @@ class Aead(aead.Aead):
     self._keyset = keyset
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
-    logging.info('encrypt in lang %s.', self.lang)
     enc_request = testing_api_pb2.AeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.Encrypt(enc_request)
     if enc_response.err:
-      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
       raise tink.TinkError(enc_response.err)
     return enc_response.ciphertext
 
   def decrypt(self, ciphertext: bytes, associated_data: bytes) -> bytes:
-    logging.info('decrypt in lang %s.', self.lang)
     dec_request = testing_api_pb2.AeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.Decrypt(dec_request)
     if dec_response.err:
-      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return dec_response.plaintext
 
@@ -120,28 +115,24 @@ class DeterministicAead(daead.DeterministicAead):
   def encrypt_deterministically(self, plaintext: bytes,
                                 associated_data: bytes) -> bytes:
     """Encrypts."""
-    logging.info('encrypt in lang %s.', self.lang)
     enc_request = testing_api_pb2.DeterministicAeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext,
         associated_data=associated_data)
     enc_response = self._stub.EncryptDeterministically(enc_request)
     if enc_response.err:
-      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
       raise tink.TinkError(enc_response.err)
     return enc_response.ciphertext
 
   def decrypt_deterministically(self, ciphertext: bytes,
                                 associated_data: bytes) -> bytes:
     """Decrypts."""
-    logging.info('decrypt in lang %s.', self.lang)
     dec_request = testing_api_pb2.DeterministicAeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext,
         associated_data=associated_data)
     dec_response = self._stub.DecryptDeterministically(dec_request)
     if dec_response.err:
-      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return dec_response.plaintext
 
@@ -157,27 +148,23 @@ class StreamingAead(streaming_aead.StreamingAead):
 
   def new_encrypting_stream(self, plaintext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    logging.info('encrypt in lang %s.', self.lang)
     enc_request = testing_api_pb2.StreamingAeadEncryptRequest(
         keyset=self._keyset,
         plaintext=plaintext.read(),
         associated_data=associated_data)
     enc_response = self._stub.Encrypt(enc_request)
     if enc_response.err:
-      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
       raise tink.TinkError(enc_response.err)
     return io.BytesIO(enc_response.ciphertext)
 
   def new_decrypting_stream(self, ciphertext: BinaryIO,
                             associated_data: bytes) -> BinaryIO:
-    logging.info('decrypt in lang %s.', self.lang)
     dec_request = testing_api_pb2.StreamingAeadDecryptRequest(
         keyset=self._keyset,
         ciphertext=ciphertext.read(),
         associated_data=associated_data)
     dec_response = self._stub.Decrypt(dec_request)
     if dec_response.err:
-      logging.info('error decrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return io.BytesIO(dec_response.plaintext)
 
@@ -192,21 +179,17 @@ class Mac(mac.Mac):
     self._keyset = keyset
 
   def compute_mac(self, data: bytes) -> bytes:
-    logging.info('compute_mac in lang %s.', self.lang)
     request = testing_api_pb2.ComputeMacRequest(keyset=self._keyset, data=data)
     response = self._stub.ComputeMac(request)
     if response.err:
-      logging.info('error compute_mac in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
     return response.mac_value
 
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
-    logging.info('verify_mac in lang %s.', self.lang)
     request = testing_api_pb2.VerifyMacRequest(
         keyset=self._keyset, mac_value=mac_value, data=data)
     response = self._stub.VerifyMac(request)
     if response.err:
-      logging.info('error verify_mac in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
 
 
@@ -220,14 +203,12 @@ class HybridEncrypt(hybrid.HybridEncrypt):
     self._public_handle = public_handle
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
-    logging.info('hybrid Sencrypt in lang %s.', self.lang)
     enc_request = testing_api_pb2.HybridEncryptRequest(
         public_keyset=self._public_handle,
         plaintext=plaintext,
         context_info=context_info)
     enc_response = self._stub.Encrypt(enc_request)
     if enc_response.err:
-      logging.info('error encrypt in %s: %s', self.lang, enc_response.err)
       raise tink.TinkError(enc_response.err)
     return enc_response.ciphertext
 
@@ -242,14 +223,12 @@ class HybridDecrypt(hybrid.HybridDecrypt):
     self._private_handle = private_handle
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
-    logging.info('decrypt in lang %s.', self.lang)
     dec_request = testing_api_pb2.HybridDecryptRequest(
         private_keyset=self._private_handle,
         ciphertext=ciphertext,
         context_info=context_info)
     dec_response = self._stub.Decrypt(dec_request)
     if dec_response.err:
-      logging.info('error hybriddecrypt in %s: %s', self.lang, dec_response.err)
       raise tink.TinkError(dec_response.err)
     return dec_response.plaintext
 
@@ -264,12 +243,10 @@ class PublicKeySign(tink_signature.PublicKeySign):
     self._private_handle = private_handle
 
   def sign(self, data: bytes) -> bytes:
-    logging.info('compute_mac in lang %s.', self.lang)
     request = testing_api_pb2.SignatureSignRequest(
         private_keyset=self._private_handle, data=data)
     response = self._stub.Sign(request)
     if response.err:
-      logging.info('error signature sign in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
     return response.signature
 
@@ -284,12 +261,10 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
     self._public_handle = public_handle
 
   def verify(self, signature: bytes, data: bytes) -> None:
-    logging.info('signature verify in lang %s.', self.lang)
     request = testing_api_pb2.SignatureVerifyRequest(
         public_keyset=self._public_handle, signature=signature, data=data)
     response = self._stub.Verify(request)
     if response.err:
-      logging.info('error signature verify in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
 
 
@@ -304,7 +279,6 @@ class _Prf(prf.Prf):
     self._key_id = key_id
 
   def compute(self, input_data: bytes, output_length: int) -> bytes:
-    logging.info('Compute PRF in lang %s.', self.lang)
     request = testing_api_pb2.PrfSetComputeRequest(
         keyset=self._keyset,
         key_id=self._key_id,
@@ -312,7 +286,6 @@ class _Prf(prf.Prf):
         output_length=output_length)
     response = self._stub.Compute(request)
     if response.err:
-      logging.info('Error compute PRF in %s: %s', self.lang, response.err)
       raise tink.TinkError(response.err)
     return response.output
 
@@ -331,11 +304,9 @@ class PrfSet(prf.PrfSet):
 
   def _initialize_key_ids(self) -> None:
     if not self._key_ids_initialized:
-      logging.info('Get PrfSet key IDs in lang %s.', self.lang)
       request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=self._keyset)
       response = self._stub.KeyIds(request)
       if response.err:
-        logging.info('Error PrfSet KeyIds in %s: %s', self.lang, response.err)
         raise tink.TinkError(response.err)
       self._primary_key_id = response.output.primary_key_id
       self._prfs = {}
