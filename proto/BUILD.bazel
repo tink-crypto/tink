@@ -87,6 +87,48 @@ proto_library(
 )
 
 # -----------------------------------------------
+# jwt_rsa_ssa_pkcs1
+# -----------------------------------------------
+proto_library(
+    name = "jwt_rsa_ssa_pkcs1_proto",
+    srcs = [
+        "jwt_rsa_ssa_pkcs1.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
+# jwt_rsa_ssa_pss
+# -----------------------------------------------
+proto_library(
+    name = "jwt_rsa_ssa_pss_proto",
+    srcs = [
+        "jwt_rsa_ssa_pss.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
+# jwt_ecdsa
+# -----------------------------------------------
+proto_library(
+    name = "jwt_ecdsa_proto",
+    srcs = [
+        "jwt_ecdsa.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_proto",
+    ],
+)
+
+# -----------------------------------------------
 # ed25519
 # -----------------------------------------------
 proto_library(

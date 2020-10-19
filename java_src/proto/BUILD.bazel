@@ -136,6 +136,36 @@ java_lite_proto_library(
 )
 
 java_proto_library(
+    name = "jwt_ecdsa_java_proto",
+    deps = ["@tink_base//proto:jwt_ecdsa_proto"],
+)
+
+java_lite_proto_library(
+    name = "jwt_ecdsa_java_proto_lite",
+    deps = ["@tink_base//proto:jwt_ecdsa_proto"],
+)
+
+java_proto_library(
+    name = "jwt_rsa_ssa_pkcs1_java_proto",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pkcs1_proto"],
+)
+
+java_lite_proto_library(
+    name = "jwt_rsa_ssa_pkcs1_java_proto_lite",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pkcs1_proto"],
+)
+
+java_proto_library(
+    name = "jwt_rsa_ssa_pss_java_proto",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pss_proto"],
+)
+
+java_lite_proto_library(
+    name = "jwt_rsa_ssa_pss_java_proto_lite",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pss_proto"],
+)
+
+java_proto_library(
     name = "aes_ctr_java_proto",
     deps = ["@tink_base//proto:aes_ctr_proto"],
 )
