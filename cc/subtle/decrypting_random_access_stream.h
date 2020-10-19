@@ -64,11 +64,11 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
   // and writes the resulting plaintext bytes to pt_segment.
   // Uses the provided ct_buffer as a buffer for the ciphertext segment.
   crypto::tink::util::Status ReadAndDecryptSegment(
-      int segment_nr, crypto::tink::util::Buffer* ct_buffer,
+      int64_t segment_nr, crypto::tink::util::Buffer* ct_buffer,
       std::vector<uint8_t>* pt_segment);
   // Returns the segment number that contains the specified 'pt_position'.
-  int GetSegmentNr(int64_t pt_position);
-  // Returns the offset within a segment for the specified 'pt_position'
+  int64_t GetSegmentNr(int64_t pt_position);
+  // Returns the offset within a segment for the specified 'pt_position'.
   int GetPlaintextOffset(int64_t pt_position);
   // Initializes this stream (if not initialized yet or in a permantent error)
   // by reading the stream header from ct_source_ and using it initialize
@@ -84,7 +84,7 @@ class DecryptingRandomAccessStream : public crypto::tink::RandomAccessStream {
   int ct_segment_size_;
   int pt_segment_size_;
   int ct_segment_overhead_;
-  int segment_count_;
+  int64_t segment_count_;
   int64_t pt_size_;
 };
 

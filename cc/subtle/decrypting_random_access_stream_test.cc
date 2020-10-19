@@ -44,11 +44,34 @@ using crypto::tink::subtle::test::DummyStreamSegmentDecrypter;
 using crypto::tink::test::GetTestFileDescriptor;
 using crypto::tink::test::IsOk;
 using crypto::tink::test::StatusIs;
-using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyStatusType;
-using google::crypto::tink::OutputPrefixType;
 using subtle::test::WriteToStream;
 using testing::HasSubstr;
+
+// A dummy RandomAccessStream that fakes its size.
+class DummyRandomAccessStream : public RandomAccessStream {
+ public:
+  explicit DummyRandomAccessStream(int64_t size, int ct_offset)
+      : size_(size), ct_offset_(ct_offset) {}
+
+  crypto::tink::util::Status PRead(
+      int64_t position, int count,
+      crypto::tink::util::Buffer* dest_buffer) override {
+    if (position == ct_offset_) {
+      // Someone attempts to read the header, return the same dummy value that
+      // DummyStreamSegmentDecrypter expects.
+      auto status = dest_buffer->set_size(count);
+      if (!status.ok()) return status;
+      std::memset(dest_buffer->get_mem_block(), 'h', count);
+    }
+    return util::Status::OK;
+  }
+
+  crypto::tink::util::StatusOr<int64_t> size() override { return size_; }
+
+ private:
+  int64_t size_;
+  int ct_offset_;
+};
 
 // Creates a RandomAccessStream with the specified contents.
 std::unique_ptr<RandomAccessStream> GetRandomAccessStream(
@@ -106,6 +129,69 @@ util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
     position = contents->size();
   }
   return status;
+}
+
+TEST(DecryptingRandomAccessStreamTest, NegativeCiphertextOffset) {
+  int pt_segment_size = 100;
+  int header_size = 20;
+  int ct_offset = -1;
+  auto seg_decrypter = absl::make_unique<DummyStreamSegmentDecrypter>(
+      pt_segment_size, header_size, ct_offset);
+  int64_t ciphertext_size = 100;
+
+  EXPECT_THAT(
+      DecryptingRandomAccessStream::New(
+          std::move(seg_decrypter), absl::make_unique<DummyRandomAccessStream>(
+                                        ciphertext_size, ct_offset))
+          .status(),
+      StatusIs(util::error::INVALID_ARGUMENT,
+               HasSubstr("The ciphertext offset must be non-negative")));
+}
+
+TEST(DecryptingRandomAccessStreamTest,
+     SizeOfFirstSegmentIsSmallerOrEqualToZero) {
+  int header_size = 20;
+  int ct_offset = 0;
+  // Make pt_segment_size equal to ct_offset + header_size. This means size of
+  // the first segment is zero.
+  int pt_segment_size = ct_offset + header_size;
+  auto seg_decrypter = absl::make_unique<DummyStreamSegmentDecrypter>(
+      pt_segment_size, header_size, ct_offset);
+  int64_t ciphertext_size = 100;
+
+  EXPECT_THAT(
+      DecryptingRandomAccessStream::New(
+          std::move(seg_decrypter), absl::make_unique<DummyRandomAccessStream>(
+                                        ciphertext_size, ct_offset))
+          .status(),
+      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("greater than 0")));
+}
+
+TEST(DecryptingRandomAccessStreamTest, TooManySegments) {
+  int header_size = 1;
+  int ct_offset = 0;
+  // Use a valid pt_segment_size which is larger than ct_offset + header_size.
+  int pt_segment_size = ct_offset + header_size + 1;
+  auto seg_decrypter = absl::make_unique<DummyStreamSegmentDecrypter>(
+      pt_segment_size, header_size, ct_offset);
+
+  // Use an invalid segment_count larger than 2^32.
+  int64_t segment_count =
+      static_cast<int64_t>(std::numeric_limits<uint32_t>::max()) + 2;
+  // Based on this calculation:
+  // segment_count = ciphertext_size / ciphertext_segment_size
+  // -> ciphertext_size = segment_count * ciphertext_segment_size
+  int64_t ciphertext_size =
+      segment_count * seg_decrypter->get_ciphertext_segment_size();
+  auto dec_stream_result = DecryptingRandomAccessStream::New(
+      std::move(seg_decrypter),
+      absl::make_unique<DummyRandomAccessStream>(ciphertext_size, ct_offset));
+  EXPECT_THAT(dec_stream_result.status(), IsOk());
+  auto dec_stream = std::move(dec_stream_result.ValueOrDie());
+
+  auto result = dec_stream->size();
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_THAT(result.status().error_message(), HasSubstr("too many segments"));
 }
 
 TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {

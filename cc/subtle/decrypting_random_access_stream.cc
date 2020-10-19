@@ -22,6 +22,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/random_access_stream.h"
 #include "tink/subtle/stream_segment_decrypter.h"
@@ -57,11 +58,17 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
   absl::MutexLock lock(&(dec_stream->status_mutex_));
   dec_stream->segment_decrypter_ = std::move(segment_decrypter);
   dec_stream->ct_source_ = std::move(ciphertext_source);
+
+  if (dec_stream->segment_decrypter_->get_ciphertext_offset() < 0) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "The ciphertext offset must be non-negative");
+  }
   int first_segment_size =
-      dec_stream->segment_decrypter_->get_ciphertext_segment_size() -
-      dec_stream->segment_decrypter_->get_ciphertext_offset();
+      dec_stream->segment_decrypter_->get_plaintext_segment_size() -
+      dec_stream->segment_decrypter_->get_ciphertext_offset() -
+      dec_stream->segment_decrypter_->get_header_size();
   if (first_segment_size <= 0) {
-    return Status(util::error::INTERNAL,
+    return Status(util::error::INVALID_ARGUMENT,
                   "Size of the first segment must be greater than 0.");
   }
   dec_stream->status_ =
@@ -139,19 +146,33 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
   ct_segment_overhead_ = ct_segment_size_ - pt_segment_size_;
 
   // Calculate the number of segments and the plaintext size.
-  auto ct_size_result = ct_source_->size();
+  StatusOr<int64_t> ct_size_result = ct_source_->size();
   if (!ct_size_result.ok()) {
     status_ = ct_size_result.status();
     return;
   }
-  auto ct_size = ct_size_result.ValueOrDie();
-  auto full_segment_count = ct_size / ct_segment_size_;
-  auto remainder_size = ct_size % ct_segment_size_;
+  int64_t ct_size = ct_size_result.ValueOrDie();
+  // ct_segment_size_ is always larger than 1, thus full_segment_count is always
+  // smaller than std::numeric_limits<int64_t>::max().
+  int64_t full_segment_count = ct_size / ct_segment_size_;
+  int64_t remainder_size = ct_size % ct_segment_size_;
   if (remainder_size > 0) {
+    // This does not overflow because full_segment_count <
+    // std::numeric_limits<int64_t>::max().
     segment_count_ = full_segment_count + 1;
   } else {
     segment_count_ = full_segment_count;
   }
+  // Tink supports up to 2^32 segments.
+  if (segment_count_ - 1 > std::numeric_limits<uint32_t>::max()) {
+    status_ = Status(util::error::INVALID_ARGUMENT,
+                     absl::StrCat("too many segments: ", segment_count_));
+    return;
+  }
+
+  // This should not overflow because:
+  // * segment_count is int64 and smaller than 2^32, and
+  // * ct_segment_overhead_, ct_offset_ and header_size_ are small int numbers.
   auto overhead =
       ct_segment_overhead_ * segment_count_ + ct_offset_ + header_size_;
   if (overhead > ct_size) {
@@ -167,18 +188,28 @@ int DecryptingRandomAccessStream::GetPlaintextOffset(int64_t pt_position) {
   // Computed according to the formula:
   // (pt_position - (pt_segment_size_ - ct_offset_ - header_size_))
   //     % pt_segment_size_;
+  // pt_position + ct_offset_ + header_size_ is always smaller than size of
+  // the ciphertext, thus it should never overflow.
   return (pt_position + ct_offset_ + header_size_) % pt_segment_size_;
 }
 
-int DecryptingRandomAccessStream::GetSegmentNr(int64_t pt_position) {
+int64_t DecryptingRandomAccessStream::GetSegmentNr(int64_t pt_position) {
   return (pt_position + ct_offset_ + header_size_) / pt_segment_size_;
 }
 
 util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
-    int segment_nr, Buffer* ct_buffer, std::vector<uint8_t>* pt_segment) {
+    int64_t segment_nr, Buffer* ct_buffer, std::vector<uint8_t>* pt_segment) {
   int64_t ct_position = segment_nr * ct_segment_size_;
+  if (ct_position / ct_segment_size_ != segment_nr /* overflow occured! */) {
+    return Status(util::error::OUT_OF_RANGE,
+                  absl::StrCat("segment_nr * ct_segment_size too large: ",
+                               segment_nr, ct_segment_size_));
+  }
   int segment_size = ct_segment_size_;
   if (segment_nr == 0) {
+    // The sum of ct_offset_ and header_size is always smaller than
+    // ct_segment_size_, which is an int, therefore the next two statements
+    // should never overflow.
     ct_position = ct_offset_ + header_size_;
     segment_size = ct_segment_size_ - ct_position;
   }
@@ -207,6 +238,14 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
       || count > dest_buffer->allocated_size() || dest_buffer->size() != 0) {
     return Status(util::error::INTERNAL,
                   "Invalid parameters to PReadAndDecrypt");
+  }
+
+  if (position > std::numeric_limits<int64_t>::max() - count) {
+    return Status(
+        util::error::OUT_OF_RANGE,
+        absl::StrCat(
+            "Invalid parameters to PReadAndDecrypt; position too large: ",
+            position));
   }
 
   auto pt_size_result = size();

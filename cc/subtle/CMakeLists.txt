@@ -703,6 +703,7 @@ tink_cc_library(
   DEPS
     absl::core_headers
     absl::memory
+    absl::strings
     absl::synchronization
     tink::subtle::stream_segment_decrypter
     tink::core::random_access_stream
