@@ -48,20 +48,19 @@ func (km *Manager) Rotate(kt *tinkpb.KeyTemplate) error {
 	if kt == nil {
 		return fmt.Errorf("keyset_manager: cannot rotate, need key template")
 	}
+	if kt.OutputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
+		return fmt.Errorf("keyset_manager: unknown output prefix type")
+	}
 	keyData, err := registry.NewKeyData(kt)
 	if err != nil {
 		return fmt.Errorf("keyset_manager: cannot create KeyData: %s", err)
 	}
 	keyID := km.newKeyID()
-	outputPrefixType := kt.OutputPrefixType
-	if outputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
-		outputPrefixType = tinkpb.OutputPrefixType_TINK
-	}
 	key := &tinkpb.Keyset_Key{
 		KeyData:          keyData,
 		Status:           tinkpb.KeyStatusType_ENABLED,
 		KeyId:            keyID,
-		OutputPrefixType: outputPrefixType,
+		OutputPrefixType: kt.OutputPrefixType,
 	}
 	// Set the new key as the primary key
 	km.ks.Key = append(km.ks.Key, key)

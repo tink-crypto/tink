@@ -82,3 +82,13 @@ func TestExistingKeyset(t *testing.T) {
 		t.Errorf("expect the second key to be primary")
 	}
 }
+
+func TestUnknowOutputPrefixTypeFails(t *testing.T) {
+	ksm1 := keyset.NewManager()
+	kt := mac.HMACSHA256Tag128KeyTemplate()
+	kt.OutputPrefixType = tinkpb.OutputPrefixType_UNKNOWN_PREFIX
+	err := ksm1.Rotate(kt)
+	if err == nil {
+		t.Errorf("ksm1.Rotate(kt) where kt has an unknown prefix succeeded, want error")
+	}
+}
