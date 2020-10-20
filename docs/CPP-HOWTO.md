@@ -57,7 +57,8 @@ The registration of custom key managers can proceed directly via
    #include "custom_project/custom_aead_key_manager.h"
 
    // ...
-   auto status = Registry::RegisterKeyManager(new CustomAeadKeyManager());
+   auto status =
+       Registry::RegisterKeyManager(absl::make_unique<CustomAeadKeyManager>());
    if (!status.ok()) /* ... handle failure */;
 ```
 
