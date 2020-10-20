@@ -158,8 +158,7 @@ public final class KeysetManager {
       if (key.getKeyId() == keyId) {
         if (key.getStatus() != KeyStatusType.ENABLED
             && key.getStatus() != KeyStatusType.DISABLED) {
-          throw new GeneralSecurityException(
-              "cannot enable key with id " + keyId + " and status " + key.getStatus());
+          throw new GeneralSecurityException("cannot enable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.ENABLED).build());
         return this;
@@ -183,8 +182,7 @@ public final class KeysetManager {
       if (key.getKeyId() == keyId) {
         if (key.getStatus() != KeyStatusType.ENABLED
             && key.getStatus() != KeyStatusType.DISABLED) {
-          throw new GeneralSecurityException(
-              "cannot disable key with id " + keyId + " and status " + key.getStatus());
+          throw new GeneralSecurityException("cannot disable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.DISABLED).build());
         return this;
@@ -229,8 +227,7 @@ public final class KeysetManager {
         if (key.getStatus() != KeyStatusType.ENABLED
             && key.getStatus() != KeyStatusType.DISABLED
             && key.getStatus() != KeyStatusType.DESTROYED) {
-          throw new GeneralSecurityException(
-              "cannot destroy key with id " + keyId + " and status " + key.getStatus());
+          throw new GeneralSecurityException("cannot destroy key with id " + keyId);
         }
         keysetBuilder.setKey(
             i, key.toBuilder().setStatus(KeyStatusType.DESTROYED).clearKeyData().build());
@@ -246,7 +243,7 @@ public final class KeysetManager {
     int keyId = newKeyId();
     OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
     if (outputPrefixType == OutputPrefixType.UNKNOWN_PREFIX) {
-      outputPrefixType = OutputPrefixType.TINK;
+      throw new GeneralSecurityException("unknown output prefix type");
     }
     return Keyset.Key.newBuilder()
         .setKeyData(keyData)

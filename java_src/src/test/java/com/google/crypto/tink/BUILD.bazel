@@ -95,6 +95,7 @@ java_test(
     srcs = ["KeysetManagerTest.java"],
     deps = [
         "//proto:aes_gcm_java_proto",
+        "//proto:common_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:registry_cluster",

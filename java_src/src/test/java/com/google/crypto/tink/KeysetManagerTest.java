@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -25,6 +26,7 @@ import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
@@ -572,6 +574,17 @@ public class KeysetManagerTest {
     } catch (GeneralSecurityException e) {
       TestUtil.assertExceptionContains(e, "No key manager found for key type");
     }
+  }
+
+  @Test
+  public void testAdd_protoKeyTemplateWithoutPrefix_shouldThrowException() throws Exception {
+    com.google.crypto.tink.proto.KeyTemplate templateWithoutPrefix =
+        MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256).toBuilder()
+            .setOutputPrefixType(OutputPrefixType.UNKNOWN_PREFIX)
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetManager.withEmptyKeyset().add(templateWithoutPrefix));
   }
 
   @Test
