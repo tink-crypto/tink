@@ -28,6 +28,13 @@ from tink.cc.pybind import tink_bindings
 from tink.util import file_object_adapter
 
 
+@core.use_tink_errors
+def _new_cc_encrypting_stream(cc_primitive, aad, destination):
+  """Implemented as a separate function to ensure correct error transform."""
+  return tink_bindings.new_cc_encrypting_stream(
+      cc_primitive, aad, destination)
+
+
 class RawEncryptingStream(io.RawIOBase):
   """A file-like object which wraps writes to an underlying file-like object.
 
@@ -55,23 +62,16 @@ class RawEncryptingStream(io.RawIOBase):
       raise ValueError('ciphertext_destination must be writable')
     cc_ciphertext_destination = file_object_adapter.FileObjectAdapter(
         ciphertext_destination)
-    self._output_stream_adapter = self._get_output_stream_adapter(
+    self._cc_encrypting_stream = _new_cc_encrypting_stream(
         stream_aead, associated_data, cc_ciphertext_destination)
 
-  @staticmethod
   @core.use_tink_errors
-  def _get_output_stream_adapter(cc_primitive, aad, destination):
-    """Implemented as a separate method to ensure correct error transform."""
-    return tink_bindings.new_cc_encrypting_stream(
-        cc_primitive, aad, destination)
+  def _write_to_cc_encrypting_stream(self, b: bytes) -> int:
+    return self._cc_encrypting_stream.write(bytes(b))
 
   @core.use_tink_errors
-  def _write_to_output_stream_adapter(self, b: bytes) -> int:
-    return self._output_stream_adapter.write(bytes(b))
-
-  @core.use_tink_errors
-  def _close_output_stream_adapter(self) -> None:
-    self._output_stream_adapter.close()
+  def _close_cc_encrypting_stream(self) -> None:
+    self._cc_encrypting_stream.close()
 
   def readinto(self, b: bytearray) -> Optional[int]:
     raise io.UnsupportedOperation()
@@ -94,7 +94,7 @@ class RawEncryptingStream(io.RawIOBase):
     if not isinstance(b, (bytes, memoryview, bytearray)):
       raise TypeError('a bytes-like object is required, not {}'.format(
           type(b).__name__))
-    written = self._write_to_output_stream_adapter(b)
+    written = self._write_to_cc_encrypting_stream(b)
     if written < 0 or written > len(b):
       raise core.TinkError('Incorrect number of bytes written')
     return written
@@ -104,7 +104,7 @@ class RawEncryptingStream(io.RawIOBase):
     if self.closed:  # pylint:disable=using-constant-test
       return
     self.flush()
-    self._close_output_stream_adapter()
+    self._close_cc_encrypting_stream()
     super(RawEncryptingStream, self).close()
 
   def writable(self) -> bool:
