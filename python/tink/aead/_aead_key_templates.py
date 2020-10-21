@@ -38,8 +38,6 @@ _AES_GCM_SIV_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesGcmSivKey')
 _AES_CTR_HMAC_AEAD_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey')
-_CHACHA20_POLY1305_KEY_TYPE_URL = (
-    'type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key')
 _XCHACHA20_POLY1305_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key')
 
