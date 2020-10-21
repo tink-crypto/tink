@@ -36,14 +36,15 @@ def setUpModule():
   streaming_aead.register()
 
 
-class StreamingAeadKeyManagerTest(parameterized.TestCase):
+def new_raw_primitive():
+  key_data = core.Registry.new_key_data(
+      streaming_aead.streaming_aead_key_templates
+      .AES128_CTR_HMAC_SHA256_4KB)
+  return core.Registry.primitive(key_data,
+                                 _raw_streaming_aead.RawStreamingAead)
 
-  def get_raw_primitive(self):
-    key_data = core.Registry.new_key_data(
-        streaming_aead.streaming_aead_key_templates
-        .AES128_CTR_HMAC_SHA256_4KB)
-    return core.Registry.primitive(key_data,
-                                   _raw_streaming_aead.RawStreamingAead)
+
+class StreamingAeadKeyManagerTest(parameterized.TestCase):
 
   def test_new_aes_gcm_hkdf_key_data(self):
     key_template = (
@@ -92,7 +93,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       core.Registry.new_key_data(key_template)
 
   def test_raw_encrypt_decrypt_readall(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -114,7 +115,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(output, plaintext)
 
   def test_raw_encrypt_decrypt_read(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext'
     aad = b'aad'
 
@@ -129,7 +130,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(5), b'text')
 
   def test_raw_encrypt_decrypt_readinto(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext'
     aad = b'aad'
 
@@ -149,7 +150,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(data, b'textn')
 
   def test_raw_encrypt_decrypt_empty(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b''
     aad = b''
     ct_destination = bytes_io.BytesIOWithValueAfterClose()
@@ -162,7 +163,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(5), b'')
 
   def test_raw_read_after_eof_returns_empty_bytes(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -177,7 +178,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertEqual(ds.read(100), b'')
 
   def test_raw_encrypt_decrypt_close(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
@@ -204,7 +205,7 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
       self.assertTrue(ds.closed)
 
   def test_raw_encrypt_decrypt_wrong_aad(self):
-    raw_primitive = self.get_raw_primitive()
+    raw_primitive = new_raw_primitive()
     plaintext = b'plaintext' + B_X80
     aad = b'associated_data' + B_X80
 
