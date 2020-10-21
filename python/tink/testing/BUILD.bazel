@@ -24,10 +24,11 @@ py_library(
 py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
-    srcs_version = "PY3",
     data = [
         "@tink_base//testdata:credentials",
+        "@tink_base//testdata/templates",
     ],
+    srcs_version = "PY3",
     deps = [
         ":helper",
         requirement("absl-py"),
@@ -62,9 +63,9 @@ py_library(
         "keyset_builder.py",
     ],
     deps = [
+        "//tink/proto:tink_py_pb2",
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
-        "//tink/proto:tink_py_pb2",
     ],
 )
 

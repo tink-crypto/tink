@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
+value: "\n\002\010\020\020 "
+output_prefix_type: TINK

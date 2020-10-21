@@ -1,0 +1,2 @@
+type_url: "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key"
+output_prefix_type: TINK

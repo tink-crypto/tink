@@ -30,9 +30,10 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature as pk_signature
+from google.protobuf import text_format
 
 
-def tink_root_path():
+def tink_root_path() -> Text:
   """Returns the path to the Tink root directory used for the test enviroment.
 
      The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
@@ -54,6 +55,14 @@ def tink_root_path():
       return root_path
   raise ValueError('Could not find path to Tink root directory. Make sure that '
                    'TINK_SRC_PATH is set.')
+
+
+def template_from_testdata(template_name: Text) -> tink_pb2.KeyTemplate:
+  """Reads a template from the testdata."""
+  path = os.path.join(tink_root_path(), 'testdata/templates', template_name)
+  with open(path, mode='rt') as f:
+    data = f.read()
+  return text_format.Parse(data, tink_pb2.KeyTemplate())
 
 
 def fake_key(value: bytes = b'fakevalue',

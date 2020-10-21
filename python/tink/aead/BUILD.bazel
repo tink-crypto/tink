@@ -99,6 +99,9 @@ py_library(
 py_test(
     name = "_aead_key_templates_test",
     srcs = ["_aead_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     srcs_version = "PY3",
     deps = [
         ":aead",
@@ -109,6 +112,7 @@ py_test(
         "//tink/proto:aes_gcm_siv_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )
 
