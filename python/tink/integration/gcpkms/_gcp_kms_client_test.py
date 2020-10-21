@@ -25,7 +25,7 @@ from tink.integration import gcpkms
 from tink.testing import helper
 
 
-CREDENTIAL_PATH = os.path.join(helper.get_tink_src_path(),
+CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
                                'testdata/credential.json')
 
 

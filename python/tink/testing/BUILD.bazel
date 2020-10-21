@@ -25,6 +25,9 @@ py_test(
     name = "helper_test",
     srcs = ["helper_test.py"],
     srcs_version = "PY3",
+    data = [
+        "@tink_base//testdata:credentials",
+    ],
     deps = [
         ":helper",
         requirement("absl-py"),

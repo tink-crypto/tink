@@ -25,7 +25,7 @@ from tink import core
 from tink.integration import gcpkms
 from tink.testing import helper
 
-CREDENTIAL_PATH = os.path.join(helper.get_tink_src_path(),
+CREDENTIAL_PATH = os.path.join(helper.tink_root_path(),
                                'testdata/credential.json')
 KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key'
 LOCAL_KEY_URI = 'gcp-kms://projects/tink-test-infrastructure/locations/europe-west1/keyRings/unit-and-integration-test/cryptoKeys/aead-key'
