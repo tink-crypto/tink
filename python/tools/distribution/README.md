@@ -6,10 +6,10 @@ Python package.
 ## Building the release
 
 In order to generate a release run `./tools/distribution/create_release.sh` from
-the `python/` folder. Note that this requires [https://www.docker.com](Docker)
+the `python/` folder. Note that this requires [Docker](https://www.docker.com)
 to be installed, as it makes use of the
-[https://github.com/pypa/manylinux](pypa images) to build
-[https://www.python.org/dev/peps/pep-0599/](PEP 599) conform wheels.
+[pypa images](https://github.com/pypa/manylinux) to build
+[PEP 599](https://www.python.org/dev/peps/pep-0599/) conform wheels.
 
 This will carry out the following three steps:
 
