@@ -102,6 +102,9 @@ py_library(
 py_test(
     name = "_hybrid_key_templates_test",
     srcs = ["_hybrid_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     srcs_version = "PY3",
     deps = [
         ":hybrid",
@@ -110,5 +113,6 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )

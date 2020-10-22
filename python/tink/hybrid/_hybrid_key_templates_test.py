@@ -19,43 +19,25 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import hybrid
+from tink.testing import helper
 
 
-class HybridKeyTemplatesTest(absltest.TestCase):
+class HybridKeyTemplatesTest(parameterized.TestCase):
 
-  def test_ecies_p256_hkdf_hmac_sha256_aes128_gcm(self):
-    template = (
-        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
-    key_format.ParseFromString(template.value)
-    self.assertEqual(key_format.params.kem_params.curve_type,
-                     common_pb2.NIST_P256)
-    self.assertEqual(key_format.params.dem_params.aead_dem,
-                     aead.aead_key_templates.AES128_GCM)
-
-  def test_ecies_p256_hkdf_hmac_sha256_aes128_ctr_hmac_sha256(self):
-    template = (
-        hybrid.hybrid_key_templates
-        .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
-    key_format.ParseFromString(template.value)
-    self.assertEqual(key_format.params.kem_params.curve_type,
-                     common_pb2.NIST_P256)
-    self.assertEqual(key_format.params.dem_params.aead_dem,
-                     aead.aead_key_templates.AES128_CTR_HMAC_SHA256)
+  @parameterized.parameters([
+      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
+       hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM),
+      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256', hybrid
+       .hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
+  ])
+  def test_template(self, template_name, template):
+    self.assertEqual(template, helper.template_from_testdata(template_name))
 
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
