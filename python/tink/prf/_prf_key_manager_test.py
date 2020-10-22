@@ -24,6 +24,7 @@ from tink.proto import tink_pb2
 import tink
 from tink import core
 from tink import prf
+from tink.testing import helper
 
 
 def setUpModule():
@@ -31,6 +32,15 @@ def setUpModule():
 
 
 class PrfSetKeyManagerTest(parameterized.TestCase):
+
+  @parameterized.parameters([
+      ('AES_CMAC_PRF', prf.prf_key_templates.AES_CMAC),
+      ('HMAC_PRF_SHA256', prf.prf_key_templates.HMAC_SHA256),
+      ('HMAC_PRF_SHA512', prf.prf_key_templates.HMAC_SHA512),
+      ('HKDF_PRF_SHA256', prf.prf_key_templates.HKDF_SHA256)
+  ])
+  def test_template(self, template_name, template):
+    self.assertEqual(template, helper.template_from_testdata(template_name))
 
   def test_new_key_data_success(self):
     key_template = prf.prf_key_templates._create_hmac_key_template(

@@ -92,11 +92,15 @@ py_library(
 py_test(
     name = "_mac_key_templates_test",
     srcs = ["_mac_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     deps = [
         ":mac",
         requirement("absl-py"),
         "//tink/proto:common_py_pb2",
         "//tink/proto:hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )

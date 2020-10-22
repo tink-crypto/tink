@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.AesCmacPrfKey"
+value: "\010 "
+output_prefix_type: RAW

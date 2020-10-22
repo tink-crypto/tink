@@ -39,6 +39,9 @@ py_library(
 py_test(
     name = "_prf_key_manager_test",
     srcs = ["_prf_key_manager_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     srcs_version = "PY3",
     deps = [
         ":prf",
@@ -49,6 +52,7 @@ py_test(
         "//tink/proto:hkdf_prf_py_pb2",
         "//tink/proto:hmac_prf_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )
 

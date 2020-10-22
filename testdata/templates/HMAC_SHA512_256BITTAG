@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.HmacKey"
+value: "\n\004\010\004\020 \020@"
+output_prefix_type: TINK
