@@ -131,6 +131,9 @@ py_test(
     name = "_streaming_aead_key_templates_test",
     timeout = "short",
     srcs = ["_streaming_aead_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     srcs_version = "PY3",
     deps = [
         ":streaming_aead",
@@ -139,6 +142,7 @@ py_test(
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )
 

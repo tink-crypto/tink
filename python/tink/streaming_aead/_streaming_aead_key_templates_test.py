@@ -16,97 +16,32 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_streaming_pb2
 from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import streaming_aead
+from tink.testing import helper
 
 
-class StreamingAeadKeyTemplatesTest(absltest.TestCase):
+class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
 
-  def test_aes128_gcm_hkdf_4kb(self):
-    template = streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB
+  @parameterized.parameters([
+      ('AES128_GCM_HKDF_4KB',
+       streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB),
+      ('AES256_GCM_HKDF_4KB',
+       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB),
+      ('AES256_GCM_HKDF_1MB',
+       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB),
+      ('AES128_CTR_HMAC_SHA256_4KB',
+       streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB),
+      ('AES256_CTR_HMAC_SHA256_4KB',
+       streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB),
+  ])
+  def test_template(self, template_name, template):
     self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
-    key_format = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKeyFormat()
-    key_format.ParseFromString(template.value)
-
-    self.assertEqual(16, key_format.key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hkdf_hash_type)
-    self.assertEqual(16, key_format.params.derived_key_size)
-    self.assertEqual(4096, key_format.params.ciphertext_segment_size)
-
-  def test_aes256_gcm_hkdf_4kb(self):
-    template = streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
-    key_format = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKeyFormat()
-    key_format.ParseFromString(template.value)
-
-    self.assertEqual(32, key_format.key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hkdf_hash_type)
-    self.assertEqual(32, key_format.params.derived_key_size)
-    self.assertEqual(4096, key_format.params.ciphertext_segment_size)
-
-  def test_aes256_gcm_hkdf_1mb(self):
-    template = streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
-    key_format = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKeyFormat()
-    key_format.ParseFromString(template.value)
-
-    self.assertEqual(32, key_format.key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hkdf_hash_type)
-    self.assertEqual(32, key_format.params.derived_key_size)
-    self.assertEqual(1048576, key_format.params.ciphertext_segment_size)
-
-  def test_aes128_ctr_hmac_sha256_4kb(self):
-    template = (
-        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB)
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
-    key_format = aes_ctr_hmac_streaming_pb2.AesCtrHmacStreamingKeyFormat()
-    key_format.ParseFromString(template.value)
-
-    self.assertEqual(16, key_format.key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hkdf_hash_type)
-    self.assertEqual(16, key_format.params.derived_key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hmac_params.hash)
-    self.assertEqual(32, key_format.params.hmac_params.tag_size)
-    self.assertEqual(4096, key_format.params.ciphertext_segment_size)
-
-  def test_aes256_ctr_hmac_sha256_4kb(self):
-    template = (
-        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB)
-    self.assertEqual(
-        'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey',
-        template.type_url)
-    self.assertEqual(tink_pb2.RAW, template.output_prefix_type)
-    key_format = aes_ctr_hmac_streaming_pb2.AesCtrHmacStreamingKeyFormat()
-    key_format.ParseFromString(template.value)
-
-    self.assertEqual(32, key_format.key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hkdf_hash_type)
-    self.assertEqual(32, key_format.params.derived_key_size)
-    self.assertEqual(common_pb2.HashType.SHA256,
-                     key_format.params.hmac_params.hash)
-    self.assertEqual(32, key_format.params.hmac_params.tag_size)
-    self.assertEqual(4096, key_format.params.ciphertext_segment_size)
+        template, helper.template_from_testdata(template_name, 'streamingaead'))
 
   def test_create_aes_gcm_hkdf_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey"
+value: "\n\r\010\200 \020\020\030\003\"\004\010\003\020 \020\020"
+output_prefix_type: RAW

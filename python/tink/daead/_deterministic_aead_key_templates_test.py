@@ -19,21 +19,21 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink import daead
+from tink.testing import helper
 
 
-class DeterministicAeadKeyTemplatesTest(absltest.TestCase):
+class DeterministicAeadKeyTemplatesTest(parameterized.TestCase):
 
-  def test_aes256_siv(self):
-    template = daead.deterministic_aead_key_templates.AES256_SIV
-    self.assertEqual('type.googleapis.com/google.crypto.tink.AesSivKey',
-                     template.type_url)
-    self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = aes_siv_pb2.AesSivKeyFormat()
-    key_format.ParseFromString(template.value)
-    self.assertEqual(64, key_format.key_size)
+  @parameterized.parameters([
+      ('AES256_SIV', daead.deterministic_aead_key_templates.AES256_SIV),
+  ])
+  def test_template(self, template_name, template):
+    self.assertEqual(template,
+                     helper.template_from_testdata(template_name, 'daead'))
 
   def test_create_aes_siv_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

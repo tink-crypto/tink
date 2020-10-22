@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from typing import Text, Mapping
+from typing import Text, Mapping, Optional
 
 from tink.proto import tink_pb2
 from tink import aead
@@ -57,9 +57,15 @@ def tink_root_path() -> Text:
                    'TINK_SRC_PATH is set.')
 
 
-def template_from_testdata(template_name: Text) -> tink_pb2.KeyTemplate:
+def template_from_testdata(
+    template_name: Text,
+    dir_name: Optional[Text] = None) -> tink_pb2.KeyTemplate:
   """Reads a template from the testdata."""
-  path = os.path.join(tink_root_path(), 'testdata/templates', template_name)
+  if dir_name:
+    path = os.path.join(tink_root_path(), 'testdata/templates', dir_name,
+                        template_name)
+  else:
+    path = os.path.join(tink_root_path(), 'testdata/templates', template_name)
   with open(path, mode='rt') as f:
     data = f.read()
   return text_format.Parse(data, tink_pb2.KeyTemplate())
