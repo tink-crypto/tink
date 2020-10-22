@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey"
+value: "\022\006\010\004\020\004\030\002"
+output_prefix_type: TINK

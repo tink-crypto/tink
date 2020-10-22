@@ -1,0 +1,3 @@
+type_url: "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey"
+value: "\n\006\010\003\020\003\030 \020\200\030\032\003\001\000\001"
+output_prefix_type: TINK

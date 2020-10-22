@@ -13,8 +13,8 @@ py_library(
     deps = [
         ":_public_key_sign",
         ":_public_key_verify",
-        ":_signature_key_templates",
         ":_signature_key_manager",
+        ":_signature_key_templates",
     ],
 )
 
@@ -102,6 +102,9 @@ py_library(
 py_test(
     name = "_signature_key_templates_test",
     srcs = ["_signature_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
     srcs_version = "PY3",
     deps = [
         ":signature",
@@ -112,5 +115,6 @@ py_test(
         "//tink/proto:rsa_ssa_pkcs1_py_pb2",
         "//tink/proto:rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
+        "//tink/testing:helper",
     ],
 )
