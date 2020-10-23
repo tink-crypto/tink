@@ -46,7 +46,8 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
       ('XCHACHA20_POLY1305', aead.aead_key_templates.XCHACHA20_POLY1305)
   ])
   def test_template(self, template_name, template):
-    self.assertEqual(template, helper.template_from_testdata(template_name))
+    self.assertEqual(template,
+                     helper.template_from_testdata(template_name, 'aead'))
 
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

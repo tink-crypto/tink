@@ -40,7 +40,8 @@ class PrfSetKeyManagerTest(parameterized.TestCase):
       ('HKDF_PRF_SHA256', prf.prf_key_templates.HKDF_SHA256)
   ])
   def test_template(self, template_name, template):
-    self.assertEqual(template, helper.template_from_testdata(template_name))
+    self.assertEqual(template,
+                     helper.template_from_testdata(template_name, 'prf'))
 
   def test_new_key_data_success(self):
     key_template = prf.prf_key_templates._create_hmac_key_template(

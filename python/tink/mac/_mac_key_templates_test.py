@@ -36,7 +36,8 @@ class MacKeyTemplatesTest(parameterized.TestCase):
       ('HMAC_SHA512_512BITTAG', mac.mac_key_templates.HMAC_SHA512_512BITTAG)
   ])
   def test_template(self, template_name, template):
-    self.assertEqual(template, helper.template_from_testdata(template_name))
+    self.assertEqual(template,
+                     helper.template_from_testdata(template_name, 'mac'))
 
   def test_create_hmac_key_template(self):
     # Intentionally using "weird" or invalid values for parameters,
