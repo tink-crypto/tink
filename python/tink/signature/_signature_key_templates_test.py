@@ -80,7 +80,8 @@ class SignatureKeyTemplatesTest(parameterized.TestCase):
        signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4)
   ])
   def test_template(self, template_name, template):
-    self.assertEqual(template, helper.template_from_testdata(template_name))
+    self.assertEqual(template,
+                     helper.template_from_testdata(template_name, 'signature'))
 
 
 if __name__ == '__main__':
