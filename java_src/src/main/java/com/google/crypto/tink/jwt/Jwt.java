@@ -72,7 +72,7 @@ public final class Jwt {
    * @throws JwtNotBeforeException when this token can't be used yet
    */
   public String getIssuer() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaim(JwtNames.CLAIM_ISSUER);
+    return (String) getClaimWithNoValidation(JwtNames.CLAIM_ISSUER);
   }
 
   /**
@@ -83,7 +83,7 @@ public final class Jwt {
    * @throws JwtNotBeforeException when this token can't be used yet
    */
   public String getSubject() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaim(JwtNames.CLAIM_SUBJECT);
+    return (String) getClaimWithNoValidation(JwtNames.CLAIM_SUBJECT);
   }
 
   /**
@@ -94,7 +94,7 @@ public final class Jwt {
    * @throws JwtNotBeforeException when this token can't be used yet
    */
   public List<String> getAudiences() throws JwtExpiredException, JwtNotBeforeException {
-    JSONArray audiences = (JSONArray) getClaim(JwtNames.CLAIM_AUDIENCE);
+    JSONArray audiences = (JSONArray) getClaimWithNoValidation(JwtNames.CLAIM_AUDIENCE);
     if (audiences == null) {
       return null;
     }
@@ -119,7 +119,7 @@ public final class Jwt {
    * @throws JwtNotBeforeException when this token can't be used yet
    */
   public String getJwtId() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaim(JwtNames.CLAIM_JWT_ID);
+    return (String) getClaimWithNoValidation(JwtNames.CLAIM_JWT_ID);
   }
 
   /**
@@ -164,7 +164,8 @@ public final class Jwt {
    * @throws JwtExpiredException when this token has been expired
    * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public Object getClaim(String name) throws JwtExpiredException, JwtNotBeforeException {
+  public Object getClaimWithNoValidation(String name)
+      throws JwtExpiredException, JwtNotBeforeException {
     validateTimestampClaims();
 
     try {
@@ -172,6 +173,18 @@ public final class Jwt {
     } catch (JSONException ex) {
       return null;
     }
+  }
+
+  /**
+   * Returns the claim of name {@code name} or {@code null} for none.
+   *
+   * @throws JwtExpiredException when this token has been expired
+   * @throws JwtNotBeforeException when this token can't be used yet
+   */
+  public Object getClaim(String name)
+      throws JwtExpiredException, JwtNotBeforeException {
+    JwtNames.validate(name);
+    return getClaimWithNoValidation(name);
   }
 
   /**

@@ -183,6 +183,43 @@ public final class JwtTest {
     assertThrows(JwtExpiredException.class, expiredToken::getKeyId);
   }
 
+ @Test
+  public void getRegisteredClaim_shouldThrow() throws Exception {
+    JSONObject payload = new JSONObject();
+    payload.put(JwtNames.CLAIM_EXPIRATION, Instant.now().getEpochSecond());
+    payload.put(JwtNames.CLAIM_ISSUER, "issuer");
+    payload.put(JwtNames.CLAIM_SUBJECT, "subject");
+    payload.put(JwtNames.CLAIM_AUDIENCE, "audience");
+    payload.put(JwtNames.CLAIM_ISSUED_AT, Instant.now().getEpochSecond());
+    payload.put(JwtNames.CLAIM_NOT_BEFORE, Instant.now().getEpochSecond());
+    payload.put(JwtNames.CLAIM_JWT_ID, "id");
+    Jwt token = new Jwt(new JSONObject(), payload, Clock.systemUTC(), Duration.ZERO);
+
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_EXPIRATION));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_ISSUER));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_SUBJECT));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_AUDIENCE));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_ISSUED_AT));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_JWT_ID));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_NOT_BEFORE));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_EXPIRATION));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_EXPIRATION));
+    assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_EXPIRATION));
+  }
+
+  @Test
+  public void getNotRegisteredClaim_success() throws Exception {
+    JSONObject payload = new JSONObject();
+    payload.put("string", "issuer");
+    payload.put("int", 123);
+    payload.put("bool", true);
+
+    Jwt token = new Jwt(new JSONObject(), payload, Clock.systemUTC(), Duration.ZERO);
+    assertThat(token.getClaim("bool")).isEqualTo(true);
+    assertThat(token.getClaim("string")).isEqualTo("issuer");
+    assertThat(token.getClaim("int")).isEqualTo(123);
+  }
+
   @Test
   public void nonExpiredToken_success() throws Exception {
     JSONObject payload = new JSONObject();
