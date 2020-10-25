@@ -24,7 +24,9 @@ import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Version;
+import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
 import java.io.FileInputStream;
@@ -130,5 +132,15 @@ public final class GcpKmsClient implements KmsClient {
               this.keyUri, uri));
     }
     return new GcpKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
+  }
+
+  @Override
+  public PublicKeySign getPublicKeySign(String uri, HashType hashAlgorithm) throws GeneralSecurityException {
+    if (this.keyUri != null && !this.keyUri.equals(uri)) {
+      throw new GeneralSecurityException(
+          String.format("this client is bound to %s, cannot load keys bound to %s",
+              this.keyUri, uri));
+    }
+    return new GcpKmsSignature(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri), hashAlgorithm);
   }
 }

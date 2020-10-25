@@ -16,6 +16,8 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.proto.HashType;
+
 import java.security.GeneralSecurityException;
 
 /**
@@ -42,4 +44,18 @@ public interface KmsClient {
    * @throws GeneralSecurityException if the URI is not supported or invalid
    */
   public Aead getAead(String keyUri) throws GeneralSecurityException;
+
+  /**
+   * Gets a {@code PublicKeySign} implementation backed by {@code keyUri}, where supported. Data is
+   * expected to be pre-hashed with {@code hashAlgorithm}.
+   *
+   * @param keyUri URI for the key to use.
+   * @param hashAlgorithm Hash algorithm corresponding to the key.
+   * @return Implementation of {@link PublicKeySign} backed by {@code keyUri}.
+   * @throws GeneralSecurityException if the URI is not supported or invalid, or the hash algorithm is not supported.
+   * @throws UnsupportedOperationException if the underlying KMS implementation does not support asymmetric signing.
+   */
+  default public PublicKeySign getPublicKeySign(String keyUri, HashType hashAlgorithm) throws GeneralSecurityException {
+    throw new UnsupportedOperationException("Not supported.");
+  }
 }

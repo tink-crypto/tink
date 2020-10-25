@@ -10,8 +10,11 @@ java_library(
     ],
     deps = [
         ":gcp_kms_aead",
+        ":gcp_kms_signature",
+        "//proto:common_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:version",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_google_api_client_google_api_client",
@@ -29,6 +32,21 @@ java_library(
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
         "@maven//:com_google_apis_google_api_services_cloudkms",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:com_google_http_client_google_http_client_jackson2",
+    ],
+)
+
+java_library(
+    name = "gcp_kms_signature",
+    srcs = ["GcpKmsSignature.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "@maven//:com_google_apis_google_api_services_cloudkms",
+        "@maven//:com_google_http_client_google_http_client",
+        "@maven//:com_google_http_client_google_http_client_jackson2",
     ],
 )
 

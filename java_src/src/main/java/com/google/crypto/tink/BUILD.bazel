@@ -82,7 +82,11 @@ android_library(
 java_library(
     name = "kms_client",
     srcs = ["KmsClient.java"],
-    deps = [":aead"],
+    deps = [
+        ":aead",
+        ":public_key_sign",
+        "//proto:common_java_proto",
+    ],
 )
 
 java_library(
