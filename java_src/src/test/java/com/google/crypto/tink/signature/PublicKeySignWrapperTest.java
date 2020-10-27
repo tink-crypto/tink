@@ -118,7 +118,7 @@ public class PublicKeySignWrapperTest {
       // Signs with the primary private key.
       PublicKeySign signer =
           new PublicKeySignWrapper()
-              .wrap(Registry.getPrimitives(keysetHandle, PublicKeySign.class));
+              .wrap(Registry.getPrimitives(keysetHandle, null, PublicKeySign.class));
       byte[] plaintext = Random.randBytes(1211);
       byte[] sig = signer.sign(plaintext);
       if (keys[i].getOutputPrefixType() != OutputPrefixType.RAW) {

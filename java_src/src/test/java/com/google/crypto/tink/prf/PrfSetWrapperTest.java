@@ -56,7 +56,7 @@ public class PrfSetWrapperTest {
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, Prf.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, null, Prf.class));
     byte[] prs = prfSet.computePrimary(plaintext, 12);
     byte[] prs2 = prfSet.getPrfs().get(5).compute(plaintext, 12);
 
@@ -86,7 +86,7 @@ public class PrfSetWrapperTest {
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, secondary));
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, Prf.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, null, Prf.class));
     byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
     byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
     byte[] prs6 = prfSet.getPrfs().get(6).compute(plaintext, 12);

@@ -444,124 +444,6 @@ public class RegistryTest {
   }
 
   @Test
-  public void testGetPrimitives_legacy_shouldWork() throws Exception {
-    // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
-    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeyData key1 = Registry.newKeyData(template1);
-    KeyData key2 = Registry.newKeyData(template1);
-    KeyData key3 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle =
-        KeysetHandle.fromKeyset(
-            Keyset.newBuilder()
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key1)
-                        .setKeyId(1)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key2)
-                        .setKeyId(2)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key3)
-                        .setKeyId(3)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .setPrimaryKeyId(2)
-                .build());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
-
-    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
-  public void testGetPrimitives_shouldWork() throws Exception {
-    // Create a keyset, and get a PrimitiveSet.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
-    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeyData key1 = Registry.newKeyData(template1);
-    KeyData key2 = Registry.newKeyData(template1);
-    KeyData key3 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle =
-        KeysetHandle.fromKeyset(
-            Keyset.newBuilder()
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key1)
-                        .setKeyId(1)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key2)
-                        .setKeyId(2)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key3)
-                        .setKeyId(3)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .setPrimaryKeyId(2)
-                .build());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
-
-    assertThat(aeadSet.getPrimary().getPrimitive().getClass()).isEqualTo(AesEaxJce.class);
-  }
-
-  @Test
-  public void testGetPrimitives_WithSomeNonEnabledKeys_shouldWork() throws Exception {
-    // Try a keyset with some keys non-ENABLED.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
-    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeyData key1 = Registry.newKeyData(template1);
-    KeyData key2 = Registry.newKeyData(template1);
-    KeyData key3 = Registry.newKeyData(template2);
-    KeysetHandle keysetHandle =
-        KeysetHandle.fromKeyset(
-            Keyset.newBuilder()
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key1)
-                        .setKeyId(1)
-                        .setStatus(KeyStatusType.DESTROYED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key2)
-                        .setKeyId(2)
-                        .setStatus(KeyStatusType.DISABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .addKey(
-                    Keyset.Key.newBuilder()
-                        .setKeyData(key3)
-                        .setKeyId(3)
-                        .setStatus(KeyStatusType.ENABLED)
-                        .setOutputPrefixType(OutputPrefixType.TINK)
-                        .build())
-                .setPrimaryKeyId(3)
-                .build());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, Aead.class);
-
-    assertThat(aeadSet.getPrimary().getPrimitive().getClass())
-        .isEqualTo(EncryptThenAuthenticate.class);
-  }
-
-  @Test
   public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
     KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
@@ -606,7 +488,8 @@ public class RegistryTest {
   public void testGetPrimitives_EmptyKeyset_shouldThrowException() throws Exception {
     // Empty keyset.
     try {
-      Registry.getPrimitives(KeysetHandle.fromKeyset(Keyset.getDefaultInstance()), Aead.class);
+      Registry.getPrimitives(
+          KeysetHandle.fromKeyset(Keyset.getDefaultInstance()), null, Aead.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "empty keyset");
@@ -631,7 +514,7 @@ public class RegistryTest {
 
     // No primary key.
     try {
-      Registry.getPrimitives(keysetHandle, Aead.class);
+      Registry.getPrimitives(keysetHandle, null, Aead.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
@@ -664,7 +547,7 @@ public class RegistryTest {
                 .build());
 
     try {
-      Registry.getPrimitives(keysetHandle, Mac.class);
+      Registry.getPrimitives(keysetHandle, null, Mac.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset doesn't contain a valid primary key");
@@ -697,7 +580,7 @@ public class RegistryTest {
                 .build());
 
     try {
-      Registry.getPrimitives(keysetHandle, Mac.class);
+      Registry.getPrimitives(keysetHandle, null, Mac.class);
       fail("Invalid keyset. Expect GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains multiple primary keys");
@@ -738,7 +621,7 @@ public class RegistryTest {
                 .setPrimaryKeyId(3)
                 .build());
     try {
-      Registry.getPrimitives(keysetHandle, Aead.class);
+      Registry.getPrimitives(keysetHandle, null, Aead.class);
       fail("Non Aead keys. Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "com.google.crypto.tink.Mac");

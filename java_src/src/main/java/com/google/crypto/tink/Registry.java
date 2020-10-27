@@ -940,21 +940,6 @@ public final class Registry {
 
   /**
    * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
-   * in {@code keysetHandle}, assuming all the corresponding key managers are present (keys with
-   * status!=ENABLED are skipped).
-   *
-   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
-   * Primitive-interface.
-   *
-   * @return a PrimitiveSet with all instantiated primitives
-   */
-  public static <P> PrimitiveSet<P> getPrimitives(
-      KeysetHandle keysetHandle, Class<P> primitiveClass) throws GeneralSecurityException {
-    return getPrimitives(keysetHandle, /* customManager= */ null, primitiveClass);
-  }
-
-  /**
-   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
    * in {@code keysetHandle}, using {@code customManager} (instead of registered key managers) for
    * keys supported by it. Keys not supported by {@code customManager} are handled by matching
    * registered key managers (if present), and keys with status!=ENABLED are skipped.

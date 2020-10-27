@@ -62,7 +62,8 @@ public class StreamingAeadWrapperTest {
                     KeyStatusType.ENABLED,
                     OutputPrefixType.RAW)));
     StreamingAead streamingAead =
-        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, StreamingAead.class));
+        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, null,
+                                            StreamingAead.class));
     StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
   }
 
@@ -81,7 +82,8 @@ public class StreamingAeadWrapperTest {
                     KeyStatusType.ENABLED,
                     OutputPrefixType.RAW)));
     StreamingAead streamingAead =
-        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, StreamingAead.class));
+        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, null,
+                                            StreamingAead.class));
     StreamingTestUtil.testEncryptionAndDecryption(streamingAead);
   }
 
@@ -116,25 +118,26 @@ public class StreamingAeadWrapperTest {
     KeysetHandle keysetHandle =
         TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryKey, otherKey, anotherKey));
     StreamingAead streamingAead =
-        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, StreamingAead.class));
+        new StreamingAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, null,
+                                            StreamingAead.class));
 
     StreamingAead primaryAead =
         new StreamingAeadWrapper()
             .wrap(
                 Registry.getPrimitives(
-                    TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryKey)),
+                    TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryKey)), null,
                     StreamingAead.class));
     StreamingAead otherAead =
         new StreamingAeadWrapper()
             .wrap(
                 Registry.getPrimitives(
-                    TestUtil.createKeysetHandle(TestUtil.createKeyset(otherKey)),
+                    TestUtil.createKeysetHandle(TestUtil.createKeyset(otherKey)), null,
                     StreamingAead.class));
     StreamingAead anotherAead =
         new StreamingAeadWrapper()
             .wrap(
                 Registry.getPrimitives(
-                    TestUtil.createKeysetHandle(TestUtil.createKeyset(anotherKey)),
+                    TestUtil.createKeysetHandle(TestUtil.createKeyset(anotherKey)), null,
                     StreamingAead.class));
 
     StreamingTestUtil.testEncryptionAndDecryption(streamingAead, streamingAead);

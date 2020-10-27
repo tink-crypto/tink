@@ -306,7 +306,7 @@ public final class KeysetHandle {
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
     PrimitiveSet<B> primitiveSet =
-        Registry.getPrimitives(this, inputPrimitiveClassObject);
+        Registry.getPrimitives(this, null, inputPrimitiveClassObject);
     return Registry.wrap(primitiveSet, classObject);
   }
 
