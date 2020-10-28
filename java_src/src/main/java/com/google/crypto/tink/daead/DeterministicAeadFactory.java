@@ -17,7 +17,6 @@
 package com.google.crypto.tink.daead;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
@@ -49,23 +48,9 @@ public final class DeterministicAeadFactory {
   @Deprecated
   public static DeterministicAead getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */ null);
-  }
-
-  /**
-   * @return a DeterministicAead primitive from a {@code keysetHandle} and a custom {@code
-   *     keyManager}.
-   * @throws GeneralSecurityException
-   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, DeterministicAead.class)} after
-   *     registering the {@code DeterministicAeadWrapper} instead.
-   */
-  @Deprecated
-  public static DeterministicAead getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<DeterministicAead> keyManager)
-      throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
     final PrimitiveSet<DeterministicAead> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager, DeterministicAead.class);
+        Registry.getPrimitives(keysetHandle, null, DeterministicAead.class);
     return Registry.wrap(primitives);
   }
 }
