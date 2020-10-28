@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -27,11 +28,14 @@ import java.security.interfaces.RSAPublicKey;
  * RsaSsaPkcs1 (i.e. RSA Signature Schemes with Appendix (SSA) using PKCS1-v1_5 encoding) verifying
  * with JCE.
  */
+@Immutable
 public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
   private static final String ASN_PREFIX_SHA256 = "3031300d060960864801650304020105000420";
   private static final String ASN_PREFIX_SHA512 = "3051300d060960864801650304020305000440";
 
+  @SuppressWarnings("Immutable")
   private final RSAPublicKey publicKey;
+
   private final HashType hash;
 
   public RsaSsaPkcs1VerifyJce(final RSAPublicKey pubKey, HashType hash)
