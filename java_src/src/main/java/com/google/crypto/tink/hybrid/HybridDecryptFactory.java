@@ -16,7 +16,6 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
-import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
@@ -48,21 +47,9 @@ public final class HybridDecryptFactory {
   @Deprecated
   public static HybridDecrypt getPrimitive(KeysetHandle keysetHandle)
       throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */ null);
-  }
-  /**
-   * @return a HybridDecrypt primitive from a {@code keysetHandle} and a custom {@code keyManager}.
-   * @throws GeneralSecurityException
-   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, HybridDecrypt.class)} after
-   *     registering the {@code HybridDecryptWrapper} instead.
-   */
-  @Deprecated
-  public static HybridDecrypt getPrimitive(
-      KeysetHandle keysetHandle, final KeyManager<HybridDecrypt> keyManager)
-      throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
     final PrimitiveSet<HybridDecrypt> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager, HybridDecrypt.class);
+        Registry.getPrimitives(keysetHandle, null, HybridDecrypt.class);
     return Registry.wrap(primitives);
   }
 }
