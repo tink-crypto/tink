@@ -4,10 +4,15 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
+    testonly = 1,
     srcs = [
         "constant.go",
+        "testdata.go",
         "testutil.go",
         "wycheproofutil.go",
+    ],
+    data = [
+        "@tink_base//testdata/templates",
     ],
     importpath = "github.com/google/tink/go/testutil",
     deps = [
@@ -44,6 +49,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "testdata_test.go",
         "testutil_test.go",
         "wycheproofutil_test.go",
     ],
@@ -51,6 +57,7 @@ go_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//aead:go_default_library",
         "//subtle/random:go_default_library",
         "//testutil:go_default_library",
         "//tink:go_default_library",
