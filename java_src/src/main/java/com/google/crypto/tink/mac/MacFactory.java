@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.mac;
 
-import com.google.crypto.tink.KeyManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.PrimitiveSet;
@@ -50,21 +49,9 @@ public final class MacFactory {
    */
   @Deprecated
   public static Mac getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
-    return getPrimitive(keysetHandle, /* keyManager= */ null);
-  }
-
-  /**
-   * @return a Mac primitive from a {@code keysetHandle} and a custom {@code keyManager}.
-   * @throws GeneralSecurityException
-   * @deprecated Use {@code keysetHandle.GetPrimitive(keyManager, Mac.class)} after registering the
-   *     {@code MacWrapper} instead.
-   */
-  @Deprecated
-  public static Mac getPrimitive(KeysetHandle keysetHandle, final KeyManager<Mac> keyManager)
-      throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new MacWrapper());
     final PrimitiveSet<Mac> primitives =
-        Registry.getPrimitives(keysetHandle, keyManager, Mac.class);
+        Registry.getPrimitives(keysetHandle, null, Mac.class);
     return Registry.wrap(primitives);
   }
 }
