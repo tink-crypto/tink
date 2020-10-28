@@ -16,48 +16,50 @@ package daead_test
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/daead"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"
-	"github.com/google/tink/go/tink"
 
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestAESSIVKeyTemplate(t *testing.T) {
-	template := daead.AESSIVKeyTemplate()
-	if template.TypeUrl != testutil.AESSIVTypeURL {
-		t.Errorf("incorrect type url: %v, expected %v", template.TypeUrl, testutil.AESSIVTypeURL)
+func TestKeyTemplates(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{name: "AES256_SIV",
+			template: daead.AESSIVKeyTemplate()},
 	}
-	if err := testEncryptDecrypt(template); err != nil {
-		t.Errorf("%v", err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want, err := testutil.KeyTemplateProto("daead", tc.name)
+			if err != nil {
+				t.Fatalf("testutil.KeyTemplateProto('daead', tc.name) failed: %s", err)
+			}
+			if !proto.Equal(want, tc.template) {
+				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
+			}
+			if err := testEncryptDecrypt(tc.template); err != nil {
+				t.Errorf("%v", err)
+			}
+		})
 	}
 }
 
 func testEncryptDecrypt(template *tinkpb.KeyTemplate) error {
-	key, err := registry.NewKey(template)
+	handle, err := keyset.NewHandle(template)
 	if err != nil {
-		return fmt.Errorf("failed to get key from template, error: %v", err)
+		return fmt.Errorf("keyset.NewHandle(template) failed: %v", err)
 	}
 
-	sk, err := proto.Marshal(key)
+	primitive, err := daead.New(handle)
 	if err != nil {
-		return fmt.Errorf("failed to serialize key, error: %v", err)
-	}
-
-	p, err := registry.Primitive(template.TypeUrl, sk)
-	if err != nil {
-		return fmt.Errorf("failed to get primitive from serialized key, error: %v", err)
-	}
-
-	primitive, ok := p.(tink.DeterministicAEAD)
-	if !ok {
-		return errors.New("failed to convert DeterministicAEAD primitive")
+		return fmt.Errorf("daead.New(handle) failed: %v", err)
 	}
 
 	plaintext := []byte("some data to encrypt")
