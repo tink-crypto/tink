@@ -322,22 +322,4 @@ public final class KeysetHandle {
     }
     return getPrimitiveWithKnownInputPrimitive(targetClassObject, inputPrimitiveClassObject);
   }
-
-  /**
-   * Returns a primitive from this keyset, using the given {@code customKeyManager} and the global
-   * registry to get resources creating the primitive. The given keyManager will take precedence
-   * when creating primitives over the globally registered keyManagers.
-   *
-   * @deprecated Register the keymanager and use the normal {@code getPrimitive}.
-   */
-  @Deprecated
-  public <P> P getPrimitive(KeyManager<P> customKeyManager, Class<P> targetClassObject)
-      throws GeneralSecurityException {
-    if (customKeyManager == null) {
-      throw new IllegalArgumentException("customKeyManager must be non-null.");
-    }
-    PrimitiveSet<P> primitiveSet =
-        Registry.getPrimitives(this, customKeyManager, targetClassObject);
-    return Registry.wrap(primitiveSet);
-  }
 }

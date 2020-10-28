@@ -42,7 +42,6 @@ import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
-import com.google.crypto.tink.testing.TestUtil.DummyAead;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -336,56 +335,6 @@ public class KeysetHandleTest {
     Aead aead = handle.getPrimitive(Aead.class);
     assertArrayEquals(aead.decrypt(aeadToEncrypt.encrypt(message, aad), aad), message);
   }
-
-  @Test
-  public void testGetPrimitive_customKeyManager() throws Exception {
-    Keyset keyset =
-        TestUtil.createKeyset(
-            TestUtil.createKey(
-                Registry.newKeyData(AeadKeyTemplates.AES128_GCM),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK));
-    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
-    // A key manager which accepts AES_GCM keys, but which creates a DummyAead primitive which
-    // always fails.
-    KeyManager<Aead> manager =
-        new KeyManagerImpl<>(
-            new TestKeyTypeManager(
-                new KeyTypeManager.PrimitiveFactory<Aead, AesGcmKey>(Aead.class) {
-                  @Override
-                  public Aead getPrimitive(AesGcmKey key) {
-                    return new DummyAead();
-                  }
-                }),
-            Aead.class);
-    Aead aead = handle.getPrimitive(manager, Aead.class);
-    try {
-      aead.encrypt(new byte[0], new byte[0]);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "dummy");
-    }
-  }
-
-  @Test
-  public void testGetPrimitive_nullKeyManager_throwsInvalidArgument() throws Exception {
-    Keyset keyset =
-        TestUtil.createKeyset(
-            TestUtil.createKey(
-                Registry.newKeyData(AeadKeyTemplates.AES128_EAX),
-                42,
-                KeyStatusType.ENABLED,
-                OutputPrefixType.TINK));
-    KeysetHandle handle = KeysetHandle.fromKeyset(keyset);
-    try {
-      handle.getPrimitive(null, Aead.class);
-      fail("Expected GeneralSecurityException");
-    } catch (IllegalArgumentException e) {
-      assertExceptionContains(e, "customKeyManager");
-    }
-  }
-
 
   @Test
   public void testGetPrimitive_differentPrimitive_works() throws Exception {
