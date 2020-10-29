@@ -19,170 +19,96 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/testutil"
-	commonpb "github.com/google/tink/go/proto/common_go_proto"
-	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestECDSAKeyTemplates(t *testing.T) {
-	var flagTests = []struct {
-		tcName      string
-		typeURL     string
-		sigTemplate *tinkpb.KeyTemplate
-		curveType   commonpb.EllipticCurveType
-		hashType    commonpb.HashType
-		sigEncoding ecdsapb.EcdsaSignatureEncoding
-		prefixType  tinkpb.OutputPrefixType
+func TestKeyTemplates(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
 	}{
-		{
-			tcName:      "P-256 with SHA256, DER format and TINK output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP256KeyTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P256,
-			hashType:    commonpb.HashType_SHA256,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_TINK,
-		},
-		{
-			tcName:      "P-384 with SHA512, DER format and TINK output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP384KeyTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P384,
-			hashType:    commonpb.HashType_SHA512,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_TINK,
-		},
-		{
-			tcName:      "P-521 with SHA512, DER format and TINK output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP521KeyTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P521,
-			hashType:    commonpb.HashType_SHA512,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_TINK,
-		},
-		{
-			tcName:      "P-256 with SHA256, DER format and RAW output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP256KeyWithoutPrefixTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P256,
-			hashType:    commonpb.HashType_SHA256,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_RAW,
-		},
-		{
-			tcName:      "P-384 with SHA512, DER format and RAW output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP384KeyWithoutPrefixTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P384,
-			hashType:    commonpb.HashType_SHA512,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_RAW,
-		},
-		{
-			tcName:      "P-521 with SHA512, DER format and RAW output prefix",
-			typeURL:     testutil.ECDSASignerTypeURL,
-			sigTemplate: signature.ECDSAP521KeyWithoutPrefixTemplate(),
-			curveType:   commonpb.EllipticCurveType_NIST_P521,
-			hashType:    commonpb.HashType_SHA512,
-			sigEncoding: ecdsapb.EcdsaSignatureEncoding_DER,
-			prefixType:  tinkpb.OutputPrefixType_RAW,
-		},
+		{name: "ECDSA_P256",
+			template: signature.ECDSAP256KeyTemplate()},
+		{name: "ECDSA_P384",
+			template: signature.ECDSAP384KeyTemplate()},
+		{name: "ECDSA_P521",
+			template: signature.ECDSAP521KeyTemplate()},
 	}
-
-	for _, tt := range flagTests {
-		t.Run("test ECDSA - "+tt.tcName, func(t *testing.T) {
-			err := checkECDSAKeyTemplate(tt.sigTemplate,
-				tt.typeURL,
-				tt.hashType,
-				tt.curveType,
-				tt.sigEncoding,
-				tt.prefixType)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want, err := testutil.KeyTemplateProto("signature", tc.name)
 			if err != nil {
-				t.Errorf("failed %s: %s", tt.tcName, err)
+				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
+			}
+			if !proto.Equal(want, tc.template) {
+				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
+			}
+			if err := testSignVerify(tc.template); err != nil {
+				t.Errorf("%v", err)
 			}
 		})
 	}
 }
 
-func TestED25519KeyTemplates(t *testing.T) {
-	var flagTests = []struct {
-		tcName      string
-		typeURL     string
-		sigTemplate *tinkpb.KeyTemplate
-		prefixType  tinkpb.OutputPrefixType
+func TestKeyWithoutPrefixTemplates(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
 	}{
-		{
-			tcName:      "ED25519 with TINK output prefix",
-			typeURL:     testutil.ED25519SignerTypeURL,
-			sigTemplate: signature.ED25519KeyTemplate(),
-			prefixType:  tinkpb.OutputPrefixType_TINK,
-		},
-		{
-			tcName:      "ED25519 with RAW output prefix",
-			typeURL:     testutil.ED25519SignerTypeURL,
-			sigTemplate: signature.ED25519KeyWithoutPrefixTemplate(),
-			prefixType:  tinkpb.OutputPrefixType_RAW,
-		},
+		{name: "ECDSA_P256",
+			template: signature.ECDSAP256KeyWithoutPrefixTemplate()},
+		{name: "ECDSA_P384",
+			template: signature.ECDSAP384KeyWithoutPrefixTemplate()},
+		{name: "ECDSA_P521",
+			template: signature.ECDSAP521KeyWithoutPrefixTemplate()},
 	}
-
-	for _, tt := range flagTests {
-		t.Run("Test ED25519 - "+tt.tcName, func(t *testing.T) {
-			err := checkKeyTypeAndOutputPrefix(tt.sigTemplate,
-				tt.typeURL,
-				tt.prefixType)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want, err := testutil.KeyTemplateProto("signature", tc.name)
 			if err != nil {
-				t.Errorf("failed %s: %s", tt.tcName, err)
+				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
+			}
+			want.OutputPrefixType = tinkpb.OutputPrefixType_RAW
+			if !proto.Equal(want, tc.template) {
+				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
+			}
+			if err := testSignVerify(tc.template); err != nil {
+				t.Errorf("%v", err)
 			}
 		})
 	}
 }
 
-func checkECDSAKeyTemplate(template *tinkpb.KeyTemplate,
-	typeURL string,
-	hashType commonpb.HashType,
-	curve commonpb.EllipticCurveType,
-	encoding ecdsapb.EcdsaSignatureEncoding,
-	prefixType tinkpb.OutputPrefixType) error {
-	err := checkKeyTypeAndOutputPrefix(template, typeURL, prefixType)
+func testSignVerify(template *tinkpb.KeyTemplate) error {
+	privateHandle, err := keyset.NewHandle(template)
 	if err != nil {
-		return err
+		return fmt.Errorf("keyset.NewHandle(tc.template) failed: %s", err)
 	}
 
-	format := new(ecdsapb.EcdsaKeyFormat)
-	err = proto.Unmarshal(template.Value, format)
+	signer, err := signature.NewSigner(privateHandle)
 	if err != nil {
-		return fmt.Errorf("cannot unmarshak key format: %s", err)
+		return fmt.Errorf("signature.NewSigner(privateHandle) failed: %s", err)
+	}
+	msg := []byte("this data needs to be signed")
+	sig, err := signer.Sign(msg)
+	if err != nil {
+		return fmt.Errorf("signer.Sign(msg) failed: %s", err)
 	}
 
-	params := format.Params
-	if params.HashType != hashType {
-		return fmt.Errorf("incorrect hash type: expect %d, got %d", hashType, params.HashType)
+	publicHandle, err := privateHandle.Public()
+	if err != nil {
+		return fmt.Errorf("privateHandle.Public() failed: %s", err)
+	}
+	verifier, err := signature.NewVerifier(publicHandle)
+	if err != nil {
+		return fmt.Errorf("signature.NewVerifier(publicHandle) failed: %s", err)
 	}
 
-	if params.Curve != curve {
-		return fmt.Errorf("incorrect curve: expect %d, got %d", curve, params.Curve)
+	if err := verifier.Verify(sig, msg); err != nil {
+		return fmt.Errorf("verifier.Verify(sig, msg) failed: %s", err)
 	}
-
-	if params.Encoding != encoding {
-		return fmt.Errorf("incorrect encoding: expect %d, got %d", encoding, params.Encoding)
-	}
-
-	return nil
-}
-
-func checkKeyTypeAndOutputPrefix(template *tinkpb.KeyTemplate,
-	typeURL string,
-	prefixType tinkpb.OutputPrefixType) error {
-	if template.TypeUrl != typeURL {
-		return fmt.Errorf("incorrect typeurl: expect %s, got %s", typeURL, template.TypeUrl)
-	}
-
-	if template.OutputPrefixType != prefixType {
-		return fmt.Errorf("incorrect outputPrefixType: expect: %v, got %v", prefixType, template.OutputPrefixType)
-	}
-
 	return nil
 }
