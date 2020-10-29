@@ -24,8 +24,8 @@ import (
 )
 
 func tinkRootPath() (string, error) {
-	root := os.Getenv("TEST_SRCDIR")
-	if root == "" {
+	root, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
 		return "", errors.New("TEST_SRCDIR not found")
 	}
 	path := root + "/google3/third_party/tink"
