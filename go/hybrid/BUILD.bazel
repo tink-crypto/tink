@@ -47,7 +47,6 @@ go_test(
         "//keyset:go_default_library",
         "//mac:go_default_library",
         "//proto:common_go_proto",
-        "//proto:ecies_aead_hkdf_go_proto",
         "//proto:tink_go_proto",
         "//signature:go_default_library",
         "//subtle/random:go_default_library",
