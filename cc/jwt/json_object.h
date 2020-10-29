@@ -16,9 +16,11 @@
 #define TINK_JWT_JSON_OBJECT_H_
 
 #include "google/protobuf/struct.pb.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "tink/jwt/json_field_types.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -63,6 +65,10 @@ class JsonObject {
 
   // Serialize.
   util::StatusOr<std::string> ToString();
+
+  // List of field names and their type.
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+  getFieldNamesAndTypes();
 
  private:
   // Helper functions.

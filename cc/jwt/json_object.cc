@@ -195,5 +195,74 @@ util::StatusOr<std::string> JsonObject::ToString() {
   return JsonStructBuilder::ToString(json_proto_);
 }
 
+util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+JsonObject::getFieldNamesAndTypes() {
+  const google::protobuf::Struct* proto = &json_proto_;
+  absl::flat_hash_map<std::string, enum JsonFieldType> ret;
+  enum JsonFieldType fieldType;
+
+  for (auto& v : proto->fields()) {
+    auto value = v.second;
+    switch (value.kind_case()) {
+      case google::protobuf::Value::kNumberValue: {
+        fieldType = JsonFieldType::kNumber;
+        break;
+      }
+      case google::protobuf::Value::kBoolValue: {
+        fieldType = JsonFieldType::kBool;
+        break;
+      }
+      case google::protobuf::Value::kStringValue: {
+        fieldType = JsonFieldType::kString;
+        break;
+      }
+      case google::protobuf::Value::kListValue: {
+        auto values = value.list_value();
+        size_t len = values.values().size();
+        if (len == 0) {
+          fieldType = JsonFieldType::kNull;
+        } else {
+          auto& lv = values.values()[0];
+          google::protobuf::Value::KindCase kind_case = lv.kind_case();
+          // Convert kind to type for the first element.
+          switch (kind_case) {
+            case google::protobuf::Value::kNumberValue: {
+              fieldType = JsonFieldType::kNumberList;
+              break;
+            }
+            case google::protobuf::Value::kStringValue: {
+              fieldType = JsonFieldType::kStringList;
+              break;
+            }
+            default: {
+              return crypto::tink::util::Status(
+                  util::error::UNIMPLEMENTED,
+                  absl::Substitute("field '$0' not supported within lists",
+                                   kind_case));
+            }
+          }
+          // Check all values have the same type.
+          for (const auto& elt : values.values()) {
+            if (elt.kind_case() != kind_case) {
+              return crypto::tink::util::Status(
+                  util::error::UNIMPLEMENTED,
+                  absl::Substitute("list '$0' contains different types",
+                                   v.first));
+            }
+          }
+        }
+        break;
+      }
+      default: {
+        return crypto::tink::util::Status(
+            util::error::UNIMPLEMENTED,
+            absl::Substitute("field '$0' not supported", value.kind_case()));
+      }
+    }
+    ret.insert(std::make_pair(v.first, fieldType));
+  }
+  return ret;
+}
+
 }  // namespace tink
 }  // namespace crypto

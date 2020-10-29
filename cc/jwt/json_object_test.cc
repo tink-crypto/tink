@@ -128,6 +128,85 @@ TEST(JsonObject, KeyStringListValueOk) {
   ASSERT_THAT(json.GetValueAsStringList("other_key"), IsOkAndHolds(list2));
 }
 
+TEST(JsonObject, KeyStringListFieldNamesAndTypesOk) {
+  google::protobuf::Struct proto;
+  JsonStructBuilder proto_builder(&proto);
+  proto_builder["some_key"].append("value1");
+  proto_builder["some_key"].append("value2");
+  proto_builder["some_key"].append("value3");
+  auto json = JsonObject(proto);
+
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+      fields_or = json.getFieldNamesAndTypes();
+  ASSERT_THAT(fields_or.status(), IsOk());
+  auto fields = fields_or.ValueOrDie();
+  ASSERT_EQ(fields.size(), 1);
+  ASSERT_EQ(fields.count("some_key"), 1);
+  ASSERT_EQ(fields.at("some_key"), JsonFieldType::kStringList);
+}
+
+TEST(JsonObject, KeyNumberListFieldNamesAndTypesOk) {
+  google::protobuf::Struct proto;
+  JsonStructBuilder proto_builder(&proto);
+  proto_builder["some_key"].append(1);
+  proto_builder["some_key"].append(2);
+  proto_builder["some_key"].append(3);
+  auto json = JsonObject(proto);
+
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+      fields_or = json.getFieldNamesAndTypes();
+  ASSERT_THAT(fields_or.status(), IsOk());
+  auto fields = fields_or.ValueOrDie();
+  ASSERT_EQ(fields.size(), 1);
+  ASSERT_EQ(fields.count("some_key"), 1);
+  ASSERT_EQ(fields.at("some_key"), JsonFieldType::kNumberList);
+}
+
+TEST(JsonObject, KeyNumberFieldNamesAndTypesOk) {
+  google::protobuf::Struct proto;
+  JsonStructBuilder proto_builder(&proto);
+  proto_builder["some_key"] = 123;
+  auto json = JsonObject(proto);
+
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+      fields_or = json.getFieldNamesAndTypes();
+  ASSERT_THAT(fields_or.status(), IsOk());
+  auto fields = fields_or.ValueOrDie();
+  ASSERT_EQ(fields.size(), 1);
+  ASSERT_EQ(fields.count("some_key"), 1);
+  ASSERT_EQ(fields.at("some_key"), JsonFieldType::kNumber);
+}
+
+TEST(JsonObject, KeyStringFieldNamesAndTypesOk) {
+  google::protobuf::Struct proto;
+  JsonStructBuilder proto_builder(&proto);
+  proto_builder["some_key"] = "bla";
+  auto json = JsonObject(proto);
+
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+      fields_or = json.getFieldNamesAndTypes();
+  ASSERT_THAT(fields_or.status(), IsOk());
+  auto fields = fields_or.ValueOrDie();
+  ASSERT_EQ(fields.size(), 1);
+  ASSERT_EQ(fields.count("some_key"), 1);
+  ASSERT_EQ(fields.at("some_key"), JsonFieldType::kString);
+}
+
+TEST(JsonObject, KeyBoolFieldNamesAndTypesOk) {
+  google::protobuf::Struct proto;
+  JsonStructBuilder proto_builder(&proto);
+  proto_builder["some_key"] = false;
+  auto json = JsonObject(proto);
+
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+      fields_or = json.getFieldNamesAndTypes();
+  ASSERT_THAT(fields_or.status(), IsOk());
+  auto fields = fields_or.ValueOrDie();
+  ASSERT_EQ(fields.size(), 1);
+  ASSERT_EQ(fields.count("some_key"), 1);
+  ASSERT_EQ(fields.at("some_key"), JsonFieldType::kBool);
+}
+
 TEST(JsonObject, EmptyStringToListInvalidArgument) {
   google::protobuf::Struct proto;
   JsonStructBuilder proto_builder(&proto);
