@@ -280,8 +280,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
         "//src/main/java/com/google/crypto/tink:binary_keyset_writer",
         "//src/main/java/com/google/crypto/tink:config",
-        "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:key_manager_impl",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:keyset_reader",

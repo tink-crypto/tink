@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.EncryptedKeyset;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.protobuf.ByteString;
@@ -305,9 +306,19 @@ public final class KeysetHandle {
   /** Helper function to allow us to have a a name {@code B} for the base primitive. */
   private <B, P> P getPrimitiveWithKnownInputPrimitive(
       Class<P> classObject, Class<B> inputPrimitiveClassObject) throws GeneralSecurityException {
-    PrimitiveSet<B> primitiveSet =
-        Registry.getPrimitives(this, null, inputPrimitiveClassObject);
-    return Registry.wrap(primitiveSet, classObject);
+    Util.validateKeyset(keyset);
+    PrimitiveSet<B> primitives = PrimitiveSet.newPrimitiveSet(inputPrimitiveClassObject);
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getStatus() == KeyStatusType.ENABLED) {
+        B primitive = Registry.getPrimitive(key.getKeyData(), inputPrimitiveClassObject);
+        PrimitiveSet.Entry<B> entry = primitives.addPrimitive(primitive, key);
+        if (key.getKeyId() == keyset.getPrimaryKeyId()) {
+          primitives.setPrimary(entry);
+        }
+      }
+    }
+
+    return Registry.wrap(primitives, classObject);
   }
 
   /**
