@@ -15,115 +15,56 @@
 package prf_test
 
 import (
-	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/testutil"
-	cmacpb "github.com/google/tink/go/proto/aes_cmac_prf_go_proto"
-	commonpb "github.com/google/tink/go/proto/common_go_proto"
-	hkdfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"
-	hmacpb "github.com/google/tink/go/proto/hmac_prf_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestTemplates(t *testing.T) {
-	template := prf.HMACSHA256PRFKeyTemplate()
-	if err := checkHMACTemplate(template, 32, commonpb.HashType_SHA256); err != nil {
-		t.Errorf("incorrect HMACSHA256PRFKeyTemplate: %s", err)
+func TestKeyTemplates(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{name: "HMAC_PRF_SHA256",
+			template: prf.HMACSHA256PRFKeyTemplate()},
+		{name: "HMAC_PRF_SHA512",
+			template: prf.HMACSHA512PRFKeyTemplate()},
+		{name: "HKDF_PRF_SHA256",
+			template: prf.HKDFSHA256PRFKeyTemplate()},
+		{name: "AES_CMAC_PRF",
+			template: prf.AESCMACPRFKeyTemplate()},
 	}
-	template = prf.HMACSHA512PRFKeyTemplate()
-	if err := checkHMACTemplate(template, 64, commonpb.HashType_SHA512); err != nil {
-		t.Errorf("incorrect HMACSHA512PRFKeyTemplate: %s", err)
-	}
-	template = prf.HKDFSHA256PRFKeyTemplate()
-	if err := checkHKDFTemplate(template, 32, make([]byte, 0), commonpb.HashType_SHA256); err != nil {
-		t.Errorf("incorrect HKDFSHA256PRFKeyTemplate: %s", err)
-	}
-	template = prf.AESCMACPRFKeyTemplate()
-	if err := checkCMACTemplate(template, 32); err != nil {
-		t.Errorf("incorrect AESCMACSPRFKeyTemplate: %s", err)
-	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			want, err := testutil.KeyTemplateProto("prf", tc.name)
+			if err != nil {
+				t.Fatalf("testutil.KeyTemplateProto('prf', tc.name) failed: %s", err)
+			}
+			if !proto.Equal(want, tc.template) {
+				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
+			}
 
-}
+			handle, err := keyset.NewHandle(tc.template)
+			if err != nil {
+				t.Errorf("keyset.NewHandle(tc.template) failed: %s", err)
+			}
+			prfset, err := prf.NewPRFSet(handle)
+			if err != nil {
+				t.Errorf("prf.NewPRFSet(handle) failed: %s", err)
+			}
 
-func checkHMACTemplate(template *tinkpb.KeyTemplate, keySize uint32, hashType commonpb.HashType) error {
-	if template.TypeUrl != testutil.HMACPRFTypeURL {
-		return fmt.Errorf("TypeUrl is incorrect")
+			msg := []byte("This is an ID needs to be redacted")
+			output, err := prfset.ComputePrimaryPRF(msg, 16)
+			if err != nil {
+				t.Errorf("prfset.ComputePrimaryPRF(msg, 16) failed: %s", err)
+			}
+			if len(output) != 16 {
+				t.Errorf("len(output) = %d, want 16", len(output))
+			}
+		})
 	}
-	if template.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
-		return fmt.Errorf("Not RAW output prefix")
-	}
-	format := new(hmacpb.HmacPrfKeyFormat)
-	if err := proto.Unmarshal(template.Value, format); err != nil {
-		return fmt.Errorf("unable to unmarshal serialized key format")
-	}
-	if format.KeySize != keySize ||
-		format.Params.Hash != hashType {
-		return fmt.Errorf("KeyFormat is incorrect")
-	}
-	keymanager, err := registry.GetKeyManager(testutil.HMACPRFTypeURL)
-	if err != nil {
-		return fmt.Errorf("Could not obtain HMAC key manager: %v", err)
-	}
-	_, err = keymanager.NewKey(template.Value)
-	if err != nil {
-		return fmt.Errorf("HMAC key manager cannot create key: %v", err)
-	}
-	return nil
-}
-
-func checkHKDFTemplate(template *tinkpb.KeyTemplate, keySize uint32, salt []byte, hashType commonpb.HashType) error {
-	if template.TypeUrl != testutil.HKDFPRFTypeURL {
-		return fmt.Errorf("TypeUrl is incorrect")
-	}
-	if template.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
-		return fmt.Errorf("Not RAW output prefix")
-	}
-	format := new(hkdfpb.HkdfPrfKeyFormat)
-	if err := proto.Unmarshal(template.Value, format); err != nil {
-		return fmt.Errorf("unable to unmarshal serialized key format")
-	}
-	if format.KeySize != keySize ||
-		format.Params.Hash != hashType ||
-		hex.EncodeToString(salt) != hex.EncodeToString(format.Params.Salt) {
-		return fmt.Errorf("KeyFormat is incorrect")
-	}
-	keymanager, err := registry.GetKeyManager(testutil.HKDFPRFTypeURL)
-	if err != nil {
-		return fmt.Errorf("Could not obtain HKDF key manager: %v", err)
-	}
-	_, err = keymanager.NewKey(template.Value)
-	if err != nil {
-		return fmt.Errorf("HKDF key manager cannot create key: %v", err)
-	}
-	return nil
-}
-
-func checkCMACTemplate(template *tinkpb.KeyTemplate, keySize uint32) error {
-	if template.TypeUrl != testutil.AESCMACPRFTypeURL {
-		return fmt.Errorf("TypeUrl is incorrect")
-	}
-	if template.OutputPrefixType != tinkpb.OutputPrefixType_RAW {
-		return fmt.Errorf("Not RAW output prefix")
-	}
-	format := new(cmacpb.AesCmacPrfKeyFormat)
-	if err := proto.Unmarshal(template.Value, format); err != nil {
-		return fmt.Errorf("unable to unmarshal serialized key format")
-	}
-	if format.KeySize != keySize {
-		return fmt.Errorf("KeyFormat is incorrect")
-	}
-	keymanager, err := registry.GetKeyManager(testutil.AESCMACPRFTypeURL)
-	if err != nil {
-		return fmt.Errorf("Could not obtain AES-CMAC key manager: %v", err)
-	}
-	_, err = keymanager.NewKey(template.Value)
-	if err != nil {
-		return fmt.Errorf("AES-CMAC key manager cannot create key: %v", err)
-	}
-	return nil
 }
