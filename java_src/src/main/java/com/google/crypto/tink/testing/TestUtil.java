@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.PrimitiveSet;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
@@ -132,6 +134,22 @@ public class TestUtil {
     public byte[] decrypt(byte[] ciphertext, byte[] aad) throws GeneralSecurityException {
       throw new GeneralSecurityException("dummy");
     }
+  }
+
+  /** @return a {@code PrimitiveSet} from a {@code KeySet} */
+  public static <P> PrimitiveSet<P> createPrimitiveSet(Keyset keyset, Class<P> inputClass)
+      throws GeneralSecurityException {
+    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet(inputClass);
+    for (Keyset.Key key : keyset.getKeyList()) {
+      if (key.getStatus() == KeyStatusType.ENABLED) {
+        P primitive = Registry.getPrimitive(key.getKeyData(), inputClass);
+        PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
+        if (key.getKeyId() == keyset.getPrimaryKeyId()) {
+          primitives.setPrimary(entry);
+        }
+      }
+    }
+    return primitives;
   }
 
   /** @return a {@code Keyset} from a {@code handle}. */
