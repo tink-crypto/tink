@@ -47,9 +47,7 @@ java_library(
     srcs = ["MacFactory.java"],
     deps = [
         ":mac_wrapper",
-        "//src/main/java/com/google/crypto/tink:key_manager",
         "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -59,9 +57,7 @@ android_library(
     srcs = ["MacFactory.java"],
     deps = [
         ":mac_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:key_manager-android",
         "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )

@@ -18,7 +18,6 @@ package com.google.crypto.tink.mac;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 
@@ -50,8 +49,6 @@ public final class MacFactory {
   @Deprecated
   public static Mac getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new MacWrapper());
-    final PrimitiveSet<Mac> primitives =
-        Registry.getPrimitives(keysetHandle, null, Mac.class);
-    return Registry.wrap(primitives);
+    return keysetHandle.getPrimitive(Mac.class);
   }
 }
