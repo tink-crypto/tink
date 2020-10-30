@@ -18,7 +18,6 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.Registry;
 import java.security.GeneralSecurityException;
 
@@ -49,7 +48,6 @@ public final class AeadFactory {
   @Deprecated
   public static Aead getPrimitive(KeysetHandle keysetHandle) throws GeneralSecurityException {
     Registry.registerPrimitiveWrapper(new AeadWrapper());
-    PrimitiveSet<Aead> aeadSet = Registry.getPrimitives(keysetHandle, null, Aead.class);
-    return Registry.wrap(aeadSet);
+    return keysetHandle.getPrimitive(Aead.class);
   }
 }
