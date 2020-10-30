@@ -20,10 +20,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
-import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
@@ -111,14 +110,13 @@ public class PublicKeySignWrapperTest {
 
     int j = keys.length;
     for (int i = 0; i < j; i++) {
-      KeysetHandle keysetHandle =
-          TestUtil.createKeysetHandle(
+      PrimitiveSet<PublicKeySign> primitives =
+          TestUtil.createPrimitiveSet(
               TestUtil.createKeyset(
-                  keys[i], keys[(i + 1) % j], keys[(i + 2) % j], keys[(i + 3) % j]));
+                  keys[i], keys[(i + 1) % j], keys[(i + 2) % j], keys[(i + 3) % j]),
+              PublicKeySign.class);
       // Signs with the primary private key.
-      PublicKeySign signer =
-          new PublicKeySignWrapper()
-              .wrap(Registry.getPrimitives(keysetHandle, null, PublicKeySign.class));
+      PublicKeySign signer = new PublicKeySignWrapper().wrap(primitives);
       byte[] plaintext = Random.randBytes(1211);
       byte[] sig = signer.sign(plaintext);
       if (keys[i].getOutputPrefixType() != OutputPrefixType.RAW) {
