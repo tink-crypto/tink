@@ -173,8 +173,6 @@ java_library(
     srcs = ["PublicKeySignFactory.java"],
     deps = [
         ":public_key_sign_wrapper",
-        "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
@@ -264,8 +262,6 @@ java_library(
     srcs = ["PublicKeyVerifyFactory.java"],
     deps = [
         ":public_key_verify_wrapper",
-        "//src/main/java/com/google/crypto/tink:key_manager",
-        "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
@@ -456,8 +452,6 @@ android_library(
     srcs = ["PublicKeySignFactory.java"],
     deps = [
         ":public_key_sign_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:key_manager-android",
-        "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
@@ -547,8 +541,6 @@ android_library(
     srcs = ["PublicKeyVerifyFactory.java"],
     deps = [
         ":public_key_verify_wrapper-android",
-        "//src/main/java/com/google/crypto/tink:key_manager-android",
-        "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
