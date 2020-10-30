@@ -69,7 +69,7 @@ java_test(
     srcs = ["StreamingAeadWrapperTest.java"],
     deps = [
         "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
