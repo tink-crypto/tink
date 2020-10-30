@@ -20,8 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.daead.DeterministicAeadConfig;
 import com.google.crypto.tink.proto.EcPointFormat;
@@ -106,16 +105,13 @@ public class HybridEncryptWrapperTest {
             43,
             KeyStatusType.ENABLED,
             OutputPrefixType.RAW);
-    KeysetHandle keysetHandlePub =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPub, rawPub));
-    KeysetHandle keysetHandlePriv =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primaryPriv, rawPriv));
-    HybridEncrypt hybridEncrypt =
-        new HybridEncryptWrapper()
-            .wrap(Registry.getPrimitives(keysetHandlePub, null, HybridEncrypt.class));
-    HybridDecrypt hybridDecrypt =
-        new HybridDecryptWrapper()
-            .wrap(Registry.getPrimitives(keysetHandlePriv, null, HybridDecrypt.class));
+    PrimitiveSet<HybridEncrypt> primitiveSetPub =
+        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primaryPub, rawPub), HybridEncrypt.class);
+    PrimitiveSet<HybridDecrypt> primitiveSetPriv =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(primaryPriv, rawPriv), HybridDecrypt.class);
+    HybridEncrypt hybridEncrypt = new HybridEncryptWrapper().wrap(primitiveSetPub);
+    HybridDecrypt hybridDecrypt = new HybridDecryptWrapper().wrap(primitiveSetPriv);
     byte[] plaintext = Random.randBytes(20);
     byte[] contextInfo = Random.randBytes(20);
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, contextInfo);
