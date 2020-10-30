@@ -19,9 +19,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -53,10 +51,11 @@ public class PrfSetWrapperTest {
             /* keyId= */ 5,
             KeyStatusType.ENABLED,
             OutputPrefixType.RAW);
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
+    PrimitiveSet<Prf> primitives =
+        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primary), Prf.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, null, Prf.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
     byte[] prs = prfSet.computePrimary(plaintext, 12);
     byte[] prs2 = prfSet.getPrfs().get(5).compute(plaintext, 12);
 
@@ -82,11 +81,11 @@ public class PrfSetWrapperTest {
             /* keyId= */ 6,
             KeyStatusType.ENABLED,
             OutputPrefixType.RAW);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, secondary));
+    PrimitiveSet<Prf> primitives =
+        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primary, secondary), Prf.class);
     byte[] plaintext = "blah".getBytes(UTF_8);
 
-    PrfSet prfSet = new PrfSetWrapper().wrap(Registry.getPrimitives(keysetHandle, null, Prf.class));
+    PrfSet prfSet = new PrfSetWrapper().wrap(primitives);
     byte[] prsPrimary = prfSet.computePrimary(plaintext, 12);
     byte[] prs5 = prfSet.getPrfs().get(5).compute(plaintext, 12);
     byte[] prs6 = prfSet.getPrfs().get(6).compute(plaintext, 12);

@@ -23,7 +23,6 @@ java_test(
     deps = [
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:primitive_set",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/prf:prf_config",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/prf:prf_set_wrapper",
