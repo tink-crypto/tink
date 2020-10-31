@@ -249,19 +249,6 @@ func NewRandomECDSAPrivateKey(hashType commonpb.HashType, curve commonpb.Ellipti
 	return NewECDSAPrivateKey(ECDSASignerKeyVersion, publicKey, priv.D.Bytes())
 }
 
-// NewRandomECDSAPrivateKeyData creates a KeyData containing an ECDSAPrivateKey with randomly generated key material.
-func NewRandomECDSAPrivateKeyData(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *tinkpb.KeyData {
-	serializedKey, err := proto.Marshal(NewRandomECDSAPrivateKey(hashType, curve))
-	if err != nil {
-		log.Fatalf("failed serializing proto: %v", err)
-	}
-	return &tinkpb.KeyData{
-		TypeUrl:         ECDSASignerTypeURL,
-		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
-	}
-}
-
 // NewRandomECDSAPublicKey creates an ECDSAPublicKey with randomly generated key material.
 func NewRandomECDSAPublicKey(hashType commonpb.HashType, curve commonpb.EllipticCurveType) *ecdsapb.EcdsaPublicKey {
 	return NewRandomECDSAPrivateKey(hashType, curve).PublicKey
@@ -290,19 +277,6 @@ func NewED25519PrivateKey() *ed25519pb.Ed25519PrivateKey {
 	}
 }
 
-// NewED25519PrivateKeyData creates a KeyData containing an ED25519PrivateKey with randomly generated key material.
-func NewED25519PrivateKeyData() *tinkpb.KeyData {
-	serializedKey, err := proto.Marshal(NewED25519PrivateKey())
-	if err != nil {
-		log.Fatalf("failed serializing proto: %v", err)
-	}
-	return &tinkpb.KeyData{
-		TypeUrl:         ED25519SignerTypeURL,
-		Value:           serializedKey,
-		KeyMaterialType: tinkpb.KeyData_ASYMMETRIC_PRIVATE,
-	}
-}
-
 // NewED25519PublicKey creates an ED25519PublicKey with randomly generated key material.
 func NewED25519PublicKey() *ed25519pb.Ed25519PublicKey {
 	return NewED25519PrivateKey().PublicKey
@@ -324,15 +298,6 @@ func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
 		log.Fatalf("failed serializing proto: %v", err)
 	}
 	return NewKeyData(AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
-}
-
-// NewSerializedAESGCMKey creates a AESGCMKey with randomly generated key material.
-func NewSerializedAESGCMKey(keySize uint32) []byte {
-	serializedKey, err := proto.Marshal(NewAESGCMKey(AESGCMKeyVersion, keySize))
-	if err != nil {
-		panic(fmt.Sprintf("cannot marshal AESGCMKey: %s", err))
-	}
-	return serializedKey
 }
 
 // NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
@@ -417,23 +382,6 @@ func NewAESCTRHMACKey(
 			},
 		},
 	}
-}
-
-// NewAESCTRHMACKeyData creates a KeyData containing a randomly generated AESCTRHMACKey.
-func NewAESCTRHMACKeyData(
-	keySize uint32,
-	hkdfHashType commonpb.HashType,
-	derivedKeySize uint32,
-	hashType commonpb.HashType,
-	tagSize uint32,
-	ciphertextSegmentSize uint32,
-) *tinkpb.KeyData {
-	key := NewAESCTRHMACKey(AESCTRHMACKeyVersion, keySize, hkdfHashType, derivedKeySize, hashType, tagSize, ciphertextSegmentSize)
-	serializedKey, err := proto.Marshal(key)
-	if err != nil {
-		log.Fatalf("failed serializing proto: %v", err)
-	}
-	return NewKeyData(AESCTRHMACTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
 }
 
 // NewAESCTRHMACKeyFormat returns a new AESCTRHMACKeyFormat.
@@ -645,14 +593,6 @@ func NewKeyset(primaryKeyID uint32,
 	return &tinkpb.Keyset{
 		PrimaryKeyId: primaryKeyID,
 		Key:          keys,
-	}
-}
-
-// NewEncryptedKeyset creates a new EncryptedKeyset with a specified parameters.
-func NewEncryptedKeyset(encryptedKeySet []byte, info *tinkpb.KeysetInfo) *tinkpb.EncryptedKeyset {
-	return &tinkpb.EncryptedKeyset{
-		EncryptedKeyset: encryptedKeySet,
-		KeysetInfo:      info,
 	}
 }
 
