@@ -17,9 +17,7 @@
 package com.google.crypto.tink;
 
 import com.google.crypto.tink.proto.KeyData;
-import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.proto.Keyset;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -936,51 +934,6 @@ public final class Registry {
   public static <P> P getPrimitive(KeyData keyData, Class<P> primitiveClass)
       throws GeneralSecurityException {
     return getPrimitive(keyData.getTypeUrl(), keyData.getValue(), primitiveClass);
-  }
-
-  /**
-   * Creates a set of primitives corresponding to the keys with status=ENABLED in the keyset given
-   * in {@code keysetHandle}, using {@code customManager} (instead of registered key managers) for
-   * keys supported by it. Keys not supported by {@code customManager} are handled by matching
-   * registered key managers (if present), and keys with status!=ENABLED are skipped.
-   *
-   * <p>This enables custom treatment of keys, for example providing extra context (e.g.,
-   * credentials for accessing keys managed by a KMS), or gathering custom monitoring/profiling
-   * information.
-   *
-   * <p>The returned set is usually later "wrapped" into a class that implements the corresponding
-   * Primitive-interface.
-   *
-   * @return a PrimitiveSet with all instantiated primitives
-   */
-  public static <P> PrimitiveSet<P> getPrimitives(
-      KeysetHandle keysetHandle, final KeyManager<P> customManager, Class<P> primitiveClass)
-      throws GeneralSecurityException {
-    return getPrimitivesInternal(keysetHandle, customManager, checkNotNull(primitiveClass));
-  }
-
-  private static <P> PrimitiveSet<P> getPrimitivesInternal(
-      KeysetHandle keysetHandle, final KeyManager<P> customManager, Class<P> primitiveClass)
-      throws GeneralSecurityException {
-    Util.validateKeyset(keysetHandle.getKeyset());
-    PrimitiveSet<P> primitives = PrimitiveSet.newPrimitiveSet(primitiveClass);
-    for (Keyset.Key key : keysetHandle.getKeyset().getKeyList()) {
-      if (key.getStatus() == KeyStatusType.ENABLED) {
-        P primitive;
-        if (customManager != null && customManager.doesSupport(key.getKeyData().getTypeUrl())) {
-          primitive = customManager.getPrimitive(key.getKeyData().getValue());
-        } else {
-          primitive =
-              getPrimitiveInternal(
-                  key.getKeyData().getTypeUrl(), key.getKeyData().getValue(), primitiveClass);
-        }
-        PrimitiveSet.Entry<P> entry = primitives.addPrimitive(primitive, key);
-        if (key.getKeyId() == keysetHandle.getKeyset().getPrimaryKeyId()) {
-          primitives.setPrimary(entry);
-        }
-      }
-    }
-    return primitives;
   }
 
   /**
