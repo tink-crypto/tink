@@ -403,9 +403,9 @@ public class RegistryTest {
 
   @Test
   public void testGetPrimitive_AesGcm_shouldWork() throws Exception {
-    KeyTemplate template = AeadKeyTemplates.AES128_EAX;
-    AesEaxKey aesEaxKey = (AesEaxKey) Registry.newKey(template);
-    KeyData aesEaxKeyData = Registry.newKeyData(template);
+    AesEaxKey aesEaxKey =
+        (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
+    KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
     Aead aead = Registry.getPrimitive(aesEaxKeyData, Aead.class);
 
     assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
