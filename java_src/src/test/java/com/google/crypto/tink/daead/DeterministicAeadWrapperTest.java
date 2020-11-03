@@ -23,8 +23,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
@@ -63,10 +62,17 @@ public class DeterministicAeadWrapperTest {
 
   @Test
   public void testEncrytDecrypt() throws Exception {
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
-    DeterministicAead aead =
-        new DeterministicAeadWrapper().wrap(Registry.getPrimitives(keysetHandle, null,
-                                                DeterministicAead.class));
+    PrimitiveSet<DeterministicAead> primitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(
+                TestUtil.createKey(
+                    TestUtil.createAesSivKeyData(64),
+                    42,
+                    KeyStatusType.ENABLED,
+                    OutputPrefixType.TINK)),
+            DeterministicAead.class);
+    DeterministicAead aead = new DeterministicAeadWrapper().wrap(primitives);
+
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = aead.encryptDeterministically(plaintext, associatedData);
@@ -108,12 +114,11 @@ public class DeterministicAeadWrapperTest {
             45,
             KeyStatusType.ENABLED,
             OutputPrefixType.TINK);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy, tink));
+    PrimitiveSet<DeterministicAead> primitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(primary, raw, legacy, tink), DeterministicAead.class);
 
-    DeterministicAead daead =
-        new DeterministicAeadWrapper()
-            .wrap(Registry.getPrimitives(keysetHandle, null, DeterministicAead.class));
+    DeterministicAead daead = new DeterministicAeadWrapper().wrap(primitives);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
@@ -123,11 +128,10 @@ public class DeterministicAeadWrapperTest {
     assertEquals(CryptoFormat.NON_RAW_PREFIX_SIZE + plaintext.length + 16, ciphertext.length);
 
     // encrypt with a non-primary RAW key and decrypt with the keyset
-    KeysetHandle keysetHandle2 =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(raw, legacy, tink));
-    DeterministicAead daead2 =
-        new DeterministicAeadWrapper()
-            .wrap(Registry.getPrimitives(keysetHandle2, null, DeterministicAead.class));
+    PrimitiveSet<DeterministicAead> primitives2 =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(raw, legacy, tink), DeterministicAead.class);
+    DeterministicAead daead2 = new DeterministicAeadWrapper().wrap(primitives2);
     ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
     assertArrayEquals(plaintext, daead.decryptDeterministically(ciphertext, associatedData));
 
@@ -138,10 +142,9 @@ public class DeterministicAeadWrapperTest {
             44,
             KeyStatusType.ENABLED,
             OutputPrefixType.TINK);
-    keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
-    daead2 =
-        new DeterministicAeadWrapper()
-            .wrap(Registry.getPrimitives(keysetHandle2, null, DeterministicAead.class));
+    primitives2 =
+        TestUtil.createPrimitiveSet(TestUtil.createKeyset(random), DeterministicAead.class);
+    daead2 = new DeterministicAeadWrapper().wrap(primitives2);
     ciphertext = daead2.encryptDeterministically(plaintext, associatedData);
     try {
       daead.decryptDeterministically(ciphertext, associatedData);
@@ -171,12 +174,11 @@ public class DeterministicAeadWrapperTest {
             44,
             KeyStatusType.ENABLED,
             OutputPrefixType.LEGACY);
-    KeysetHandle keysetHandle =
-        TestUtil.createKeysetHandle(TestUtil.createKeyset(primary, raw, legacy));
+    PrimitiveSet<DeterministicAead> primitives =
+        TestUtil.createPrimitiveSet(
+            TestUtil.createKeyset(primary, raw, legacy), DeterministicAead.class);
 
-    DeterministicAead daead =
-        new DeterministicAeadWrapper()
-            .wrap(Registry.getPrimitives(keysetHandle, null, DeterministicAead.class));
+    DeterministicAead daead = new DeterministicAeadWrapper().wrap(primitives);
     byte[] plaintext = Random.randBytes(20);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
@@ -196,11 +198,10 @@ public class DeterministicAeadWrapperTest {
     Key primary =
         TestUtil.createKey(
             TestUtil.createAesSivKeyData(keySize), 42, KeyStatusType.ENABLED, OutputPrefixType.RAW);
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(primary));
+    PrimitiveSet<DeterministicAead> primitives =
+        TestUtil.createPrimitiveSet(TestUtil.createKeyset(primary), DeterministicAead.class);
 
-    DeterministicAead daead =
-        new DeterministicAeadWrapper()
-            .wrap(Registry.getPrimitives(keysetHandle, null, DeterministicAead.class));
+    DeterministicAead daead = new DeterministicAeadWrapper().wrap(primitives);
     byte[] plaintext = Random.randBytes(1);
     byte[] associatedData = Random.randBytes(20);
     byte[] ciphertext = daead.encryptDeterministically(plaintext, associatedData);
