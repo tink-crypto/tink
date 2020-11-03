@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesCtrHmacAeadKeyManager;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacConfig;
@@ -447,9 +447,8 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
-    KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     KeyData key1 = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
-    KeyData key2 = Registry.newKeyData(template2);
+    KeyData key2 = Registry.newKeyData(AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template());
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
             Keyset.newBuilder()
