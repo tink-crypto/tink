@@ -590,10 +590,10 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_KeysetWithKeyForWrongPrimitive_shouldThrowException()
       throws Exception {
-    KeyData key1 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key1 = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     // This MAC key should cause an exception.
     KeyData key2 = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    KeyData key3 = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key3 = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
             Keyset.newBuilder()
@@ -1558,7 +1558,7 @@ public class RegistryTest {
 
   @Test
   public void testWrap_wrapperRegistered() throws Exception {
-    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
             Keyset.newBuilder()
@@ -1580,7 +1580,7 @@ public class RegistryTest {
 
   @Test
   public void testWrap_noWrapperRegistered_throws() throws Exception {
-    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     Registry.reset();
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
@@ -1609,7 +1609,7 @@ public class RegistryTest {
 
   @Test
   public void testWrap_wrapAsEncryptOnly() throws Exception {
-    KeyData key = Registry.newKeyData(AeadKeyTemplates.AES128_EAX);
+    KeyData key = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
             Keyset.newBuilder()
