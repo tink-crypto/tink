@@ -447,9 +447,8 @@ public class RegistryTest {
   @Test
   public void testGetPrimitives_CustomManager_shouldWork() throws Exception {
     // Create a keyset.
-    KeyTemplate template1 = AeadKeyTemplates.AES128_EAX;
     KeyTemplate template2 = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeyData key1 = Registry.newKeyData(template1);
+    KeyData key1 = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
     KeyData key2 = Registry.newKeyData(template2);
     KeysetHandle keysetHandle =
         KeysetHandle.fromKeyset(
