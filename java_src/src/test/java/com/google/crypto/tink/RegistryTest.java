@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
@@ -389,9 +390,9 @@ public class RegistryTest {
 
   @Test
   public void testGetPrimitive_legacy_AesGcm_shouldWork() throws Exception {
-    KeyTemplate template = AeadKeyTemplates.AES128_EAX;
-    AesEaxKey aesEaxKey = (AesEaxKey) Registry.newKey(template);
-    KeyData aesEaxKeyData = Registry.newKeyData(template);
+    AesEaxKey aesEaxKey =
+        (AesEaxKey) Registry.newKey(AesEaxKeyManager.aes128EaxTemplate().getProto());
+    KeyData aesEaxKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto());
     Aead aead = Registry.getPrimitive(aesEaxKeyData);
 
     assertThat(aesEaxKey.getKeyValue().size()).isEqualTo(16);
