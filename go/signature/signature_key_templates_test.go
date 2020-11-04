@@ -39,7 +39,7 @@ func TestKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("signature", tc.name)
+			want, err := testutil.KeyTemplateProto(t, "signature", tc.name)
 			if err != nil {
 				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
 			}
@@ -67,7 +67,7 @@ func TestKeyWithoutPrefixTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("signature", tc.name)
+			want, err := testutil.KeyTemplateProto(t, "signature", tc.name)
 			if err != nil {
 				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
 			}

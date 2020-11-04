@@ -36,7 +36,7 @@ func TestKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("hybrid", tc.name)
+			want, err := testutil.KeyTemplateProto(t, "hybrid", tc.name)
 			if err != nil {
 				t.Fatalf("testutil.KeyTemplateProto('hybrid', tc.name) failed: %s", err)
 			}

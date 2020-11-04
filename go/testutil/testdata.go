@@ -18,15 +18,17 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"testing"
 
 	"github.com/golang/protobuf/proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func tinkRootPath() (string, error) {
+func tinkRootPath(t *testing.T) (string, error) {
+	t.Helper()
 	root, ok := os.LookupEnv("TEST_SRCDIR")
 	if !ok {
-		return "", errors.New("TEST_SRCDIR not found")
+		t.Skip("TEST_SRCDIR not found")
 	}
 	path := root + "/google3/third_party/tink"
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
@@ -40,8 +42,10 @@ func tinkRootPath() (string, error) {
 }
 
 // KeyTemplateProto reads a KeyTemplate from tink/testdata/templates.
-func KeyTemplateProto(dir string, name string) (*tinkpb.KeyTemplate, error) {
-	root, err := tinkRootPath()
+// Tests will be skipped if TEST_SRCDIR is not set in the environment.
+func KeyTemplateProto(t *testing.T, dir string, name string) (*tinkpb.KeyTemplate, error) {
+	t.Helper()
+	root, err := tinkRootPath(t)
 	if err != nil {
 		return nil, err
 	}

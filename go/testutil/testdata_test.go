@@ -21,7 +21,7 @@ import (
 )
 
 func TestKeyTemplateProto(t *testing.T) {
-	template, err := testutil.KeyTemplateProto("aead", "AES256_GCM")
+	template, err := testutil.KeyTemplateProto(t, "aead", "AES256_GCM")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -29,7 +29,7 @@ func TestKeyTemplateProto(t *testing.T) {
 		t.Errorf("Got template.GetTypeUrl()=%s, want 'type.googleapis.com/google.crypto.tink.AesGcmKey'", template.GetTypeUrl())
 	}
 
-	if _, err = testutil.KeyTemplateProto("aead", "UNKNOWN"); err == nil {
+	if _, err = testutil.KeyTemplateProto(t, "aead", "UNKNOWN"); err == nil {
 		t.Errorf("KeyTemplateProto(aead, UNKNOWN) succeeded, want fail.")
 	}
 }
