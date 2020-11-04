@@ -148,8 +148,6 @@ public class JwtMacWrapperTest {
 
     assertThrows(GeneralSecurityException.class, () -> mac1.verifyCompact(compact, validator));
     assertThat(token.getJwtId()).isEqualTo("blah");
-    assertThat(token.getAlgorithm()).isEqualTo("HS256");
     assertThat(token2.getJwtId()).isEqualTo("blah");
-    assertThat(token2.getAlgorithm()).isEqualTo("HS256");
   }
 }

@@ -246,7 +246,7 @@ public final class JwtValidator {
               audience, audiences));
     }
 
-    return new Jwt(target.getHeader(), target.getPayload(), this.clock, this.clockSkew);
+    return new Jwt(target.getPayload());
   }
 
   private void validateTimestampClaims(ToBeSignedJwt target)

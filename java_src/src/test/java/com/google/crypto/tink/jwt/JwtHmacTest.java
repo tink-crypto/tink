@@ -15,6 +15,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Base64;
@@ -75,8 +76,6 @@ public final class JwtHmacTest {
     double value = (double) token.getClaim("amount");
 
     assertThat(value).isEqualTo(amount);
-    assertThat(token.getAlgorithm()).isEqualTo(algo);
-    assertThat(token.getType()).isEqualTo(type);
     assertThat(token.getIssuer()).isEqualTo(issuer);
     assertThat(token.getAudiences()).containsExactly(audience);
     assertThat(token.getJwtId()).isEqualTo(jwtId);
@@ -191,7 +190,7 @@ public final class JwtHmacTest {
     JwtValidator validator = new JwtValidator.Builder().build();
     Jwt token = mac.verifyCompact(compact, validator);
 
-    assertThat(token.getExpiration().getEpochSecond()).isEqualTo(expiration.getEpochSecond());
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
 
   @Test
@@ -211,7 +210,7 @@ public final class JwtHmacTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     Jwt token = mac.verifyCompact(compact, validator);
 
-    assertThat(token.getExpiration().getEpochSecond()).isEqualTo(expiration.getEpochSecond());
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
 
   @Test
@@ -250,7 +249,7 @@ public final class JwtHmacTest {
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
     Jwt token = mac.verifyCompact(compact, validator);
 
-    assertThat(token.getNotBefore().getEpochSecond()).isEqualTo(notBefore.getEpochSecond());
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
 
   @Test
@@ -270,7 +269,7 @@ public final class JwtHmacTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     Jwt token = mac.verifyCompact(compact, validator);
 
-    assertThat(token.getNotBefore().getEpochSecond()).isEqualTo(notBefore.getEpochSecond());
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
 
   @Test
@@ -389,8 +388,6 @@ public final class JwtHmacTest {
 
     Jwt token = mac.verifyCompact(compact, validator);
 
-    assertThat(token.getAlgorithm()).isEqualTo(algo);
-    assertThat(token.getType()).isEqualTo("JWT");
     assertThat(token.getIssuer()).isEqualTo("joe");
     boolean value = (boolean) token.getClaim("http://example.com/is_root");
 

@@ -15,8 +15,6 @@
 package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
-import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,71 +28,43 @@ import org.json.JSONObject;
  * (JWT).
  *
  * <p>A new instance of this class is returned as the result of a sucessfully verification of a JWT.
- *
  * @see {@link JwsMac#verifyMac}
+ *
+ * It contains the payload of the token, but no header information (typ, cty, alg and kid).
  */
 @Immutable
 public final class Jwt {
 
-  @SuppressWarnings("Immutable") // We do not mutate the header.
-  private final JSONObject header;
-
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JSONObject payload;
 
-  @SuppressWarnings("Immutable") // We do not mutate the clock.
-  private final Clock clock;
 
-  private final Duration clockSkew;
-
-  Jwt(JSONObject header, JSONObject payload, Clock clock, Duration clockSkew) {
-    this.header = header;
+  Jwt(JSONObject payload) {
     this.payload = payload;
-    this.clock = clock;
-    this.clockSkew = clockSkew;
-  }
-
-  private String getHeader(String name) throws JwtExpiredException, JwtNotBeforeException {
-    validateTimestampClaims();
-
-    try {
-      return header.getString(name);
-    } catch (JSONException ex) {
-      return null;
-    }
   }
 
   /**
    * Returns the {@code iss} claim that identifies the principal that issued the JWT or {@code null}
    * for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public String getIssuer() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaimWithNoValidation(JwtNames.CLAIM_ISSUER);
+  public String getIssuer() {
+    return (String) getClaimWithoutValidation(JwtNames.CLAIM_ISSUER);
   }
 
   /**
    * Returns the {@code sub} claim identifying the principal that is the subject of the JWT or
    * {@code null} for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public String getSubject() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaimWithNoValidation(JwtNames.CLAIM_SUBJECT);
+  public String getSubject() {
+    return (String) getClaimWithoutValidation(JwtNames.CLAIM_SUBJECT);
   }
 
   /**
    * Returns the {@code aud} claim identifying the principals that are the audience of the JWT or
    * {@code null} for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public List<String> getAudiences() throws JwtExpiredException, JwtNotBeforeException {
-    JSONArray audiences = (JSONArray) getClaimWithNoValidation(JwtNames.CLAIM_AUDIENCE);
+  public List<String> getAudiences() {
+    JSONArray audiences = (JSONArray) getClaimWithoutValidation(JwtNames.CLAIM_AUDIENCE);
     if (audiences == null) {
       return null;
     }
@@ -114,12 +84,9 @@ public final class Jwt {
   /**
    * Returns the {@code jti} claim that provides a unique identifier for the JWT or {@code null} for
    * none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public String getJwtId() throws JwtExpiredException, JwtNotBeforeException {
-    return (String) getClaimWithNoValidation(JwtNames.CLAIM_JWT_ID);
+  public String getJwtId() {
+    return (String) getClaimWithoutValidation(JwtNames.CLAIM_JWT_ID);
   }
 
   /**
@@ -160,14 +127,8 @@ public final class Jwt {
 
   /**
    * Returns the claim of name {@code name} or {@code null} for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public Object getClaimWithNoValidation(String name)
-      throws JwtExpiredException, JwtNotBeforeException {
-    validateTimestampClaims();
-
+  public Object getClaimWithoutValidation(String name) {
     try {
       return payload.get(name);
     } catch (JSONException ex) {
@@ -177,81 +138,18 @@ public final class Jwt {
 
   /**
    * Returns the claim of name {@code name} or {@code null} for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
    */
-  public Object getClaim(String name)
-      throws JwtExpiredException, JwtNotBeforeException {
+  public Object getClaim(String name) {
     JwtNames.validate(name);
-    return getClaimWithNoValidation(name);
+    return getClaimWithoutValidation(name);
   }
 
-  /**
-   * Returns the type of this JWT.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
-   */
-  public String getType() throws JwtExpiredException, JwtNotBeforeException {
-    return getHeader(JwtNames.HEADER_TYPE);
-  }
-
-  /**
-   * Returns the content type header parameter used to declare structural information about the JWT.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
-   */
-  public String getContentType() throws JwtExpiredException, JwtNotBeforeException {
-    return getHeader(JwtNames.HEADER_CONTENT_TYPE);
-  }
-
-  /**
-   * Returns the name of the algorithm used to sign or authenticate the JWT.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
-   */
-  public String getAlgorithm() throws JwtExpiredException, JwtNotBeforeException {
-    validateTimestampClaims();
-
-    try {
-      return header.getString(JwtNames.HEADER_ALGORITHM);
-    } catch (JSONException ex) {
-      throw new IllegalStateException("an alg header is required, but not found", ex);
-    }
-  }
-
-  /**
-   * Returns the ID of the key used to sign or authenticate the JWT or {@code null} for none.
-   *
-   * @throws JwtExpiredException when this token has been expired
-   * @throws JwtNotBeforeException when this token can't be used yet
-   */
-  public String getKeyId() throws JwtExpiredException, JwtNotBeforeException {
-    return getHeader(JwtNames.HEADER_KEY_ID);
-  }
 
   private Instant getInstant(String name) {
     try {
       return Instant.ofEpochSecond(payload.getLong(name));
     } catch (JSONException ex) {
       return null;
-    }
-  }
-
-  private void validateTimestampClaims() throws JwtExpiredException, JwtNotBeforeException {
-    Instant now = this.clock.instant();
-
-    Instant exp = this.getExpiration();
-    if (exp != null && exp.isBefore(now.minus(this.clockSkew))) {
-      throw new JwtExpiredException("token has expired since " + exp);
-    }
-
-    Instant nbf = this.getNotBefore();
-    if (nbf != null && nbf.isAfter(now.plus(this.clockSkew))) {
-      throw new JwtNotBeforeException("token cannot be used before " + nbf);
     }
   }
 }

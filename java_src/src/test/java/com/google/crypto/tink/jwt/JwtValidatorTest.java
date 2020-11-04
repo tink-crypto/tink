@@ -15,6 +15,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -53,9 +54,7 @@ public final class JwtValidatorTest {
     String algo = "HS256";
     JwtValidator validator = new JwtValidator.Builder().build();
     ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setAlgorithm(algo).build();
-    Jwt token = validator.validate(algo, unverified);
-
-    assertThat(token.getAlgorithm()).isEqualTo(algo);
+    validator.validate(algo, unverified);
   }
 
   @Test
@@ -87,7 +86,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = new JwtValidator.Builder().build();
     Jwt token = validator.validate(algo, unverified);
 
-    assertThat(token.getExpiration().getEpochSecond()).isEqualTo(expiration.getEpochSecond());
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
 
   @Test
@@ -102,7 +101,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     Jwt token = validator.validate(algo, unverified);
 
-    assertThat(token.getExpiration().getEpochSecond()).isEqualTo(expiration.getEpochSecond());
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
 
   @Test
@@ -131,7 +130,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
     Jwt token = validator.validate(algo, unverified);
 
-    assertThat(token.getNotBefore().getEpochSecond()).isEqualTo(notBefore.getEpochSecond());
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
 
   @Test
@@ -146,7 +145,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     Jwt token = validator.validate(algo, unverified);
 
-    assertThat(token.getNotBefore().getEpochSecond()).isEqualTo(notBefore.getEpochSecond());
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
 
   @Test
@@ -170,9 +169,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setAlgorithm("HS256").setType("JWT").build();
     JwtValidator validator = new JwtValidator.Builder().setType("JWT").build();
-    Jwt token = validator.validate("HS256", unverified);
-
-    assertThat(token.getType()).isEqualTo("JWT");
+    validator.validate("HS256", unverified);
   }
 
   @Test
@@ -197,9 +194,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setAlgorithm("HS256").setContentType("foo").build();
     JwtValidator validator = new JwtValidator.Builder().setContentType("foo").build();
-    Jwt token = validator.validate("HS256", unverified);
-
-    assertThat(token.getContentType()).isEqualTo("foo");
+    validator.validate("HS256", unverified);
   }
 
   @Test
@@ -224,9 +219,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setAlgorithm("HS256").setKeyId("123").build();
     JwtValidator validator = new JwtValidator.Builder().setKeyId("123").build();
-    Jwt token = validator.validate("HS256", unverified);
-
-    assertThat(token.getKeyId()).isEqualTo("123");
+    validator.validate("HS256", unverified);
   }
 
   @Test
