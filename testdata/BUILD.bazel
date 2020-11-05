@@ -18,6 +18,7 @@ filegroup(
         "credential.json",
         "credentials_aws.csv",
         "credentials_aws.cred",
+        "credentials_aws.ini",
         "README_AWS.txt",
 ],
 )

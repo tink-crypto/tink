@@ -130,3 +130,10 @@ func GetKMSClient(keyURI string) (KMSClient, error) {
 	}
 	return nil, fmt.Errorf("KMS client supporting %s not found", keyURI)
 }
+
+// ClearKMSClients removes all registered KMS clients.
+func ClearKMSClients() {
+	kmsClientsMu.Lock()
+	defer kmsClientsMu.Unlock()
+	kmsClients = []KMSClient{}
+}

@@ -37,7 +37,7 @@ const (
 
 var (
 	credFile    = "tink_base/testdata/credentials_aws.csv"
-	credINIFile = "tink_base/testdata/credentials_aws.cred"
+	credINIFile = "tink_base/testdata/credentials_aws.ini"
 )
 
 func init() {
@@ -52,6 +52,10 @@ func setupKMS(t *testing.T, cf string) {
 	if err != nil {
 		t.Fatalf("error setting up aws client: %v", err)
 	}
+	// The registry will return the first KMS client that claims support for
+	// the keyURI.  The tests re-use the same keyURI, so clear any clients
+	// registered by earlier tests before registering the new client.
+	registry.ClearKMSClients()
 	registry.RegisterKMSClient(g)
 }
 
