@@ -28,35 +28,36 @@ import portpicker
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
+from tink.testing import helper
 from util import _primitives
 
-# Server paths are relative to os.environ['testing_dir'], which can be set by:
-# bazel test util:testing_servers_test --test_env testing_dir=/tmp/tink/testing
-# If not set, the testing_dir is calcuated from os.path.abspath(__file__).
+# Server paths are relative to tink_root_path(), which can be set manually by:
+# bazel test util:testing_servers_test --test_env TINK_SRC_PATH=/tmp/tink
 _SERVER_PATHS = {
     'cc': [
-        'cc/bazel-bin/testing_server',
-        'cc/testing_server'
+        'testing/cc/bazel-bin/testing_server',
+        'testing/cc/testing_server'
     ],
     'go': [
-        'go/bazel-bin/linux_amd64_stripped/testing_server',
-        'go/testing_server'
+        'testing/go/bazel-bin/linux_amd64_stripped/testing_server',
+        'testing/go/testing_server'
     ],
     'java': [
-        'java_src/bazel-bin/testing_server_deploy.jar',
-        'java_src/testing_server'
+        'testing/java_src/bazel-bin/testing_server_deploy.jar',
+        'testing/java_src/testing_server'
     ],
     'python': [
-        'python/bazel-bin/testing_server',
-        'python/testing_server',
+        'testing/python/bazel-bin/testing_server',
+        'testing/python/testing_server',
     ]
 }
 
 # All languages that have a testing server
 LANGUAGES = list(_SERVER_PATHS.keys())
 
-# location of the testing_server java binary, relative to testing_dir
-_JAVA_PATH = 'java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java'
+# location of the testing_server java binary, relative to tink_root_path()
+_JAVA_PATH = (
+    'testing/java_src/bazel-bin/testing_server.runfiles/local_jdk/bin/java')
 
 _PRIMITIVE_STUBS = {
     'aead': testing_api_pb2_grpc.AeadStub,
@@ -84,13 +85,9 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
 
 def _server_path(lang: Text) -> Text:
   """Returns the path where the server binary is located."""
-  if os.environ.get('testing_dir'):
-    testing_dir = os.environ.get('testing_dir')
-  else:
-    util_dir = os.path.dirname(os.path.abspath(__file__))
-    testing_dir = os.path.dirname(os.path.dirname(util_dir))
+  root_dir = helper.tink_root_path()
   for relative_server_path in _SERVER_PATHS[lang]:
-    server_path = os.path.join(testing_dir, relative_server_path)
+    server_path = os.path.join(root_dir, relative_server_path)
     logging.info('try path: %s', server_path)
     if os.path.exists(server_path):
       return server_path
@@ -100,7 +97,7 @@ def _server_path(lang: Text) -> Text:
 def _server_cmd(lang: Text, port: int) -> List[Text]:
   server_path = _server_path(lang)
   if lang == 'java' and server_path.endswith('.jar'):
-    java_path = os.path.join(os.environ.get('testing_dir'), _JAVA_PATH)
+    java_path = os.path.join(helper.tink_root_path(), _JAVA_PATH)
     return [java_path, '-jar', server_path, '--port', '%d' % port]
   else:
     return [server_path, '--port', '%d' % port]
