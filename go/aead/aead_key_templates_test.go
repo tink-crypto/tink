@@ -27,6 +27,7 @@ import (
 )
 
 func TestKeyTemplates(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	var testCases = []struct {
 		name     string
 		template *tinkpb.KeyTemplate
@@ -53,7 +54,7 @@ func TestKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto(t, "aead", tc.name)
+			want, err := testutil.KeyTemplateProto("aead", tc.name)
 			if err != nil {
 				t.Fatalf(err.Error())
 			}
@@ -68,6 +69,7 @@ func TestKeyTemplates(t *testing.T) {
 }
 
 func TestNoPrefixKeyTemplates(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	var testCases = []struct {
 		name     string
 		template *tinkpb.KeyTemplate
@@ -79,7 +81,7 @@ func TestNoPrefixKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto(t, "aead", tc.name)
+			want, err := testutil.KeyTemplateProto("aead", tc.name)
 			if err != nil {
 				t.Fatalf("testutil.KeyTemplateProto('aead', tc.name) failed: %s", err)
 			}
