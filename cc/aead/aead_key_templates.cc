@@ -49,11 +49,12 @@ KeyTemplate* NewAesEaxKeyTemplate(int key_size_in_bytes, int iv_size_in_bytes) {
   return key_template;
 }
 
-KeyTemplate* NewAesGcmKeyTemplate(int key_size_in_bytes) {
+KeyTemplate* NewAesGcmKeyTemplate(int key_size_in_bytes,
+                                  OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.AesGcmKey");
-  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  key_template->set_output_prefix_type(output_prefix_type);
   AesGcmKeyFormat key_format;
   key_format.set_key_size(key_size_in_bytes);
   key_format.SerializeToString(key_template->mutable_value());
@@ -121,14 +122,21 @@ const KeyTemplate& AeadKeyTemplates::Aes256Eax() {
 // static
 const KeyTemplate& AeadKeyTemplates::Aes128Gcm() {
   static const KeyTemplate* key_template =
-      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 16);
+      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 16, OutputPrefixType::TINK);
   return *key_template;
 }
 
 // static
 const KeyTemplate& AeadKeyTemplates::Aes256Gcm() {
   static const KeyTemplate* key_template =
-      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 32);
+      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 32, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+// static
+const KeyTemplate& AeadKeyTemplates::Aes256GcmNoPrefix() {
+  static const KeyTemplate* key_template =
+      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 32, OutputPrefixType::RAW);
   return *key_template;
 }
 

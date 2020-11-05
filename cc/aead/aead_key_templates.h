@@ -67,6 +67,14 @@ class AeadKeyTemplates {
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& Aes256Gcm();
 
+  // Returns a KeyTemplate that generates new instances of AesGcmKey
+  // with the following parameters:
+  //   - key size: 32 bytes
+  //   - IV size: 12 bytes
+  //   - tag size: 16 bytes
+  //   - OutputPrefixType: RAW
+  static const google::crypto::tink::KeyTemplate& Aes256GcmNoPrefix();
+
   // Returns a KeyTemplate that generates new instances of AesGcmSivKey
   // with the following parameters:
   //   - key size: 16 bytes
