@@ -30,7 +30,9 @@ import java.security.interfaces.RSAPublicKey;
  */
 @Immutable
 public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
+  // See definitions in https://tools.ietf.org/html/rfc3447#page-43
   private static final String ASN_PREFIX_SHA256 = "3031300d060960864801650304020105000420";
+  private static final String ASN_PREFIX_SHA384 = "3041300d060960864801650304020205000430";
   private static final String ASN_PREFIX_SHA512 = "3051300d060960864801650304020305000440";
 
   @SuppressWarnings("Immutable")
@@ -107,6 +109,8 @@ public final class RsaSsaPkcs1VerifyJce implements PublicKeyVerify {
     switch (hash) {
       case SHA256:
         return Hex.decode(ASN_PREFIX_SHA256);
+      case SHA384:
+        return Hex.decode(ASN_PREFIX_SHA384);
       case SHA512:
         return Hex.decode(ASN_PREFIX_SHA512);
       default:

@@ -26,7 +26,7 @@ def tink_java_deps_init():
             "com.google.http-client:google-http-client:1.31.0",
             "com.google.http-client:google-http-client-jackson2:1.31.0",
             "com.google.oauth-client:google-oauth-client:1.30.1",
-            "com.google.truth:truth:0.42",
+            "com.google.truth:truth:0.44",
             "org.json:json:20170516",
             "joda-time:joda-time:2.10.3",
             "junit:junit:4.13",
@@ -35,6 +35,7 @@ def tink_java_deps_init():
             "org.ow2.asm:asm:7.0",
             "org.ow2.asm:asm-commons:7.0",
             "org.pantsbuild:jarjar:1.7.2",
+            "pl.pragmatists:JUnitParams:1.1.1",
         ],
         repositories = [
             "https://jcenter.bintray.com/",
