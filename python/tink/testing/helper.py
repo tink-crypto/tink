@@ -46,9 +46,8 @@ def tink_root_path() -> Text:
   if 'TEST_SRCDIR' in os.environ:
     # Bazel enviroment
     root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
-  # try to calculate the path relative to the __file__ path.
-  root_paths.append(os.path.dirname(os.path.dirname(os.path.dirname(
-      os.path.dirname(os.path.abspath(__file__))))))
+    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
+                                   'google3/third_party/tink'))
   for root_path in root_paths:
     # return the first root path that exists.
     if os.path.exists(root_path):
