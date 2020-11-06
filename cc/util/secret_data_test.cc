@@ -23,6 +23,7 @@ namespace tink {
 namespace util {
 namespace {
 
+using ::testing::AnyOf;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
 
@@ -70,7 +71,43 @@ TEST(SecretDataTest, SecretDataCopy) {
   EXPECT_THAT(data_copy, ElementsAreArray(kContents));
 }
 
+TEST(SecretValueTest, DefaultConstructor) {
+  SecretValue<int> s;
+  EXPECT_THAT(s.value(), Eq(0));
+}
 
+TEST(SecretValueTest, Constructor) {
+  SecretValue<int> s(102);
+  EXPECT_THAT(s.value(), Eq(102));
+}
+
+TEST(SecretValueTest, CopyConstructor) {
+  SecretValue<int> s(102);
+  SecretValue<int> t(s);
+  EXPECT_THAT(t.value(), Eq(102));
+}
+
+TEST(SecretValueTest, AssignmentOperator) {
+  SecretValue<int> s(102);
+  SecretValue<int> t(101);
+  t = s;
+  EXPECT_THAT(t.value(), Eq(102));
+}
+
+TEST(SecretValueTest, MoveConstructor) {
+  SecretValue<int> s(102);
+  SecretValue<int> t(std::move(s));
+  EXPECT_THAT(t.value(), Eq(102));
+  EXPECT_THAT(s.value(), AnyOf(Eq(0), Eq(102)));
+}
+
+TEST(SecretValueTest, MoveAssignment) {
+  SecretValue<int> s(102);
+  SecretValue<int> t;
+  t = std::move(s);
+  EXPECT_THAT(t.value(), Eq(102));
+  EXPECT_THAT(s.value(), AnyOf(Eq(0), Eq(102)));
+}
 
 }  // namespace
 }  // namespace util
