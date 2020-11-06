@@ -424,6 +424,7 @@ cc_test(
     srcs = ["secret_data_test.cc"],
     deps = [
         ":secret_data",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

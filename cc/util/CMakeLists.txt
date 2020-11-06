@@ -393,6 +393,7 @@ tink_cc_test(
   NAME secret_data_test
   SRCS secret_data_test.cc
   DEPS
+    absl::strings
     tink::util::secret_data
     gmock
 )
