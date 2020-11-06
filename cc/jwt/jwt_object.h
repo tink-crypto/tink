@@ -16,9 +16,11 @@
 #define TINK_JWT_JWT_OBJECT_H_
 
 #include "google/protobuf/struct.pb.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "tink/jwt/json_field_types.h"
 #include "tink/jwt/json_object.h"
 #include "tink/jwt/jwt_names.h"
 #include "tink/util/status.h"
@@ -113,6 +115,12 @@ class JwtObject {
   util::Status AppendClaimToStringList(absl::string_view name,
                                        absl::string_view value);
   util::Status AppendClaimToNumberList(absl::string_view name, int value);
+
+  // List of field names and their type.
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+  getClaimNamesAndTypes();
+  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+  getHeaderNamesAndTypes();
 
  private:
   util::StatusOr<absl::string_view> AlgorithmTypeToString(

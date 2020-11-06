@@ -15,13 +15,17 @@
 #include "tink/jwt/jwt_object.h"
 
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/escaping.h"
+#include "tink/jwt/json_field_types.h"
+#include "tink/jwt/jwt_names.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
+using ::testing::Pair;
 
 namespace crypto {
 namespace tink {
@@ -56,8 +60,7 @@ TEST(JwtObject, AlgorithmHS256OK) {
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kHs256), IsOk());
 
-  ASSERT_THAT(jwt.GetAlgorithm(),
-              IsOkAndHolds(JwtAlgorithm::kHs256));
+  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kHs256));
 }
 
 TEST(JwtObject, AlgorithmES256OK) {
@@ -68,8 +71,7 @@ TEST(JwtObject, AlgorithmES256OK) {
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kRs256), IsOk());
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
 
-  ASSERT_THAT(jwt.GetAlgorithm(),
-              IsOkAndHolds(JwtAlgorithm::kEs256));
+  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kEs256));
 }
 
 TEST(JwtObject, AlgorithmRS256OK) {
@@ -80,8 +82,7 @@ TEST(JwtObject, AlgorithmRS256OK) {
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
   ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kRs256), IsOk());
 
-  ASSERT_THAT(jwt.GetAlgorithm(),
-              IsOkAndHolds(JwtAlgorithm::kRs256));
+  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kRs256));
 }
 
 TEST(JwtObject, KeyidOK) {
@@ -186,6 +187,66 @@ TEST(JwtObject, AudiencesOK) {
   auto value_or = jwt.GetAudiences();
   std::vector<std::string> list = {"aud1", "aud2", "aud3"};
   ASSERT_THAT(jwt.GetAudiences(), IsOkAndHolds(list));
+}
+
+TEST(JwtObject, ListHeaderNameAndTypesOK) {
+  JsonObject header;
+  JsonObject payload;
+  auto jwt = JwtObject(header, payload);
+
+  // Header fields.
+  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
+  ASSERT_THAT(jwt.SetKeyId("key-xxx"), IsOk());
+  ASSERT_THAT(jwt.SetContentType("xxx"), IsOk());
+  ASSERT_THAT(jwt.SetType("xxx"), IsOk());
+
+  auto headers_or = jwt.getHeaderNamesAndTypes();
+  ASSERT_THAT(headers_or.status(), IsOk());
+  absl::flat_hash_map<std::string, enum JsonFieldType> headers =
+      headers_or.ValueOrDie();
+
+  EXPECT_THAT(headers,
+              testing::UnorderedElementsAre(
+                  Pair(kJwtHeaderAlgorithm, JsonFieldType::kString),
+                  Pair(kJwtHeaderType, JsonFieldType::kString),
+                  Pair(kJwtHeaderContentType, JsonFieldType::kString),
+                  Pair(kJwtHeaderKeyId, JsonFieldType::kString)));
+}
+
+TEST(JwtObject, ListClaimNameAndTypesOK) {
+  JsonObject header;
+  JsonObject payload;
+  auto jwt = JwtObject(header, payload);
+
+  // Payload claims.
+  ASSERT_THAT(jwt.AddAudience("aud1"), IsOk());
+  ASSERT_THAT(jwt.AddAudience("aud2"), IsOk());
+  ASSERT_THAT(jwt.AddAudience("aud3"), IsOk());
+  ASSERT_THAT(jwt.SetClaimAsString("sClaim", "xxx"), IsOk());
+  ASSERT_THAT(jwt.SetClaimAsNumber("nClaim", 123), IsOk());
+  ASSERT_THAT(jwt.SetClaimAsBool("bClaim", true), IsOk());
+  ASSERT_THAT(jwt.SetSubject("xxx"), IsOk());
+  ASSERT_THAT(jwt.SetIssuer("xxx"), IsOk());
+  absl::Time now = absl::Now();
+  ASSERT_THAT(jwt.SetIssuedAt(now), IsOk());
+  ASSERT_THAT(jwt.SetNotBefore(now), IsOk());
+  ASSERT_THAT(jwt.SetExpiration(now), IsOk());
+
+  auto claims_or = jwt.getClaimNamesAndTypes();
+  ASSERT_THAT(claims_or.status(), IsOk());
+  absl::flat_hash_map<std::string, enum JsonFieldType> claims =
+      claims_or.ValueOrDie();
+  EXPECT_THAT(claims,
+              testing::UnorderedElementsAre(
+                  Pair(kJwtClaimAudience, JsonFieldType::kStringList),
+                  Pair("sClaim", JsonFieldType::kString),
+                  Pair("nClaim", JsonFieldType::kNumber),
+                  Pair("bClaim", JsonFieldType::kBool),
+                  Pair(kJwtClaimSubject, JsonFieldType::kString),
+                  Pair(kJwtClaimIssuer, JsonFieldType::kString),
+                  Pair(kJwtClaimIssuedAt, JsonFieldType::kNumber),
+                  Pair(kJwtClaimNotBefore, JsonFieldType::kNumber),
+                  Pair(kJwtClaimExpiration, JsonFieldType::kNumber)));
 }
 
 TEST(JwtObject, ClaimStringOK) {

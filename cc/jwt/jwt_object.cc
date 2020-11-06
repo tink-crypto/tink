@@ -234,6 +234,16 @@ util::StatusOr<absl::string_view> JwtObject::AlgorithmTypeToString(
   }
 }
 
+util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+JwtObject::getClaimNamesAndTypes() {
+  return payload_.getFieldNamesAndTypes();
+}
+
+util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
+JwtObject::getHeaderNamesAndTypes() {
+  return header_.getFieldNamesAndTypes();
+}
+
 util::StatusOr<enum JwtAlgorithm> JwtObject::AlgorithmStringToType(
     absl::string_view algo_name) const {
   if (algo_name == kJwtAlgorithmHs256) {
@@ -284,7 +294,6 @@ bool JwtObject::IsRegisteredPayloadName(absl::string_view name) {
          name == kJwtClaimNotBefore || name == kJwtClaimIssuedAt ||
          name == kJwtClaimJwtId;
 }
-
 
 }  // namespace tink
 }  // namespace crypto
