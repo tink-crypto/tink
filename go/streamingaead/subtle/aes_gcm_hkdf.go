@@ -200,16 +200,6 @@ func (d aesGCMHKDFSegmentDecrypter) DecryptSegment(segment, nonce []byte) ([]byt
 // aesGCMHKDFReader works as a wrapper around underlying io.Reader.
 type aesGCMHKDFReader struct {
 	*noncebased.Reader
-	aesGCMHKDF        *AESGCMHKDF
-	decryptedSegments uint64
-	noncePrefix       []byte
-	cipher            cipher.AEAD
-	underlyingReader  io.Reader
-
-	pt    []byte
-	ptPos int
-	ct    []byte
-	ctPos int
 }
 
 // NewDecryptingReader returns a wrapper around underlying io.Reader, such that
