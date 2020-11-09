@@ -25,9 +25,6 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestXxx(t *testing.T) {
-}
-
 func modifyDecrypt(t *testing.T, c string, k *tinkpb.KeyTemplate) {
 	t.Helper()
 	curve, err := subtle.GetCurve(c)
