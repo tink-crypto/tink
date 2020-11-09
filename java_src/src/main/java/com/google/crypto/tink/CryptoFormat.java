@@ -27,7 +27,7 @@ import java.security.GeneralSecurityException;
  */
 public final class CryptoFormat {
 
-  /** Prefix size of Tink and Legacy key types. */
+  /** Prefix size of Tink, Legacy and Crunchy output prefix types. */
   public static final int NON_RAW_PREFIX_SIZE = 5;
 
   /** Legacy or Crunchy prefix starts with \x00 and followed by a 4-byte key id. */
@@ -73,4 +73,6 @@ public final class CryptoFormat {
         throw new GeneralSecurityException("unknown output prefix type");
     }
   }
+
+  private CryptoFormat() {}
 }
