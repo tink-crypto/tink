@@ -76,7 +76,8 @@ class HybridEncryptionTest(parameterized.TestCase):
         for lang in SUPPORTED_LANGUAGES
         if lang not in supported_langs
     ]
-    public_keyset = testing_servers.public_keyset('java', private_keyset)
+    public_keyset = testing_servers.public_keyset(supported_langs[0],
+                                                  private_keyset)
     supported_encs = [
         testing_servers.hybrid_encrypt(lang, public_keyset)
         for lang in supported_langs

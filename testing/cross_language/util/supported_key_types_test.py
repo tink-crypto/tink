@@ -34,6 +34,15 @@ class SupportedKeyTypesTest(absltest.TestCase):
         list(all_key_template_names()),
         list(supported_key_types.KEY_TEMPLATE.keys()))
 
+  def test_supported_langauges_by_template_name(self):
+    self.assertEqual(
+        supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+            'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM'],
+        ['cc', 'java', 'go', 'python'])
+    self.assertEqual(
+        supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+            'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305'], ['cc', 'python'])
+
 
 if __name__ == '__main__':
   absltest.main()

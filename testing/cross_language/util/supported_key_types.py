@@ -13,6 +13,8 @@
 
 # Placeholder for import for type annotations
 
+from typing import List, Text
+
 from tink import aead
 from tink import daead
 from tink import hybrid
@@ -21,6 +23,7 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.proto import common_pb2
 from tink.proto import tink_pb2
 
 # All languages supported by cross-language tests.
@@ -108,7 +111,8 @@ KEY_TEMPLATE_NAMES = {
     ],
     'EciesAeadHkdfPrivateKey': [
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
-        'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256'
+        'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
+        'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305'
     ],
     'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
@@ -175,6 +179,12 @@ KEY_TEMPLATE = {
     'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
         hybrid.hybrid_key_templates
         .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305':
+        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+            curve_type=common_pb2.NIST_P256,
+            ec_point_format=common_pb2.UNCOMPRESSED,
+            hash_type=common_pb2.SHA256,
+            dem_key_template=aead.aead_key_templates.XCHACHA20_POLY1305),
     'AES_CMAC':
         mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':
@@ -221,7 +231,22 @@ KEY_TEMPLATE = {
         prf.prf_key_templates.HKDF_SHA256,
 }
 
+
+# Key template names for which the list of supported languages is different from
+# the list of supported languages of the whole key type.
+_CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
+    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python']
+}
+
+
+def _supported_languages_by_template(
+    template_name: Text, template: tink_pb2.KeyTemplate) -> List[Text]:
+  if template_name in _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME:
+    return _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[template_name]
+  return SUPPORTED_LANGUAGES[KEY_TYPE_FROM_URL[template.type_url]]
+
+
 SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
-    name: SUPPORTED_LANGUAGES[KEY_TYPE_FROM_URL[template.type_url]]
+    name: _supported_languages_by_template(name, template)
     for name, template in KEY_TEMPLATE.items()
 }
