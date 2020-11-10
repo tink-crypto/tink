@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,15 +60,6 @@ public final class JwtValidator {
       payload = new JSONObject();
     }
 
-    private Builder setHeader(String name, String value) {
-      try {
-        header.put(name, value);
-        return this;
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException(ex);
-      }
-    }
-
     private Builder setPayload(String name, Object value) {
       try {
         payload.put(name, value);
@@ -75,29 +67,6 @@ public final class JwtValidator {
       } catch (JSONException ex) {
         throw new IllegalArgumentException(ex);
       }
-    }
-
-    /**
-     * Sets the expected type.
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-5.1
-     */
-    public Builder setType(String value) {
-      return setHeader(JwtNames.HEADER_TYPE, value);
-    }
-
-    /**
-     * Sets the expected content type.
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-5.2
-     */
-    public Builder setContentType(String value) {
-      return setHeader(JwtNames.HEADER_CONTENT_TYPE, value);
-    }
-
-    /** Sets the expected ID of the key used to sign or authenticate the JWT. */
-    public Builder setKeyId(String value) {
-      return setHeader(JwtNames.HEADER_KEY_ID, value);
     }
 
     /**
@@ -202,6 +171,14 @@ public final class JwtValidator {
       throw new InvalidAlgorithmParameterException(
           String.format(
               "invalid algorithm; expected %s, got %s", algorithm, target.getAlgorithm()));
+    }
+
+    String headerType = target.getHeader(JwtNames.HEADER_TYPE);
+    if ((headerType != null)
+        && !headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
+      throw new InvalidAlgorithmParameterException(
+          String.format(
+              "invalid header type; expected %s, got %s", JwtNames.HEADER_TYPE_VALUE, headerType));
     }
 
     Iterator<String> headerIterator = this.header.keys();

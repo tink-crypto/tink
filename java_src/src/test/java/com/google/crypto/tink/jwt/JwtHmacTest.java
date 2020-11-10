@@ -15,10 +15,14 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.PrfHmacJce;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
@@ -29,6 +33,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -57,14 +62,12 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    String type = "JWT";
     String issuer = "google";
     String audience = "mybank";
     String jwtId = "user123";
     double amount = 0.1;
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder()
-            .setType(type)
             .setIssuer(issuer)
             .addAudience(audience)
             .setJwtId(jwtId)
@@ -82,14 +85,29 @@ public final class JwtHmacTest {
   }
 
   @Test
+  public void badAlgorithm_shouldThrow() throws Exception {
+    String algo = "HS257";
+    SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
+    assertThrows(
+        IllegalArgumentException.class, () -> new JwtHmac(algo, secretKey));
+  }
+
+  @Test
+  public void validAlgorithm_createSuccessful() throws Exception {
+    SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
+    new JwtHmac("HS256", secretKey);
+    new JwtHmac("HS384", secretKey);
+    new JwtHmac("HS512", secretKey);
+  }
+
+  @Test
   public void verifyCompact_modifiedHeader_shouldThrow() throws Exception {
     String algo = "HS256";
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    String type = "JWT";
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setType(type).setJwtId(jwtId).build();
+    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -111,9 +129,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    String type = "JWT";
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setType(type).setJwtId(jwtId).build();
+    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -135,9 +152,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    String type = "JWT";
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setType(type).setJwtId(jwtId).build();
+    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -392,5 +408,110 @@ public final class JwtHmacTest {
     boolean value = (boolean) token.getClaim("http://example.com/is_root");
 
     assertThat(value).isTrue();
+  }
+
+  // Creates a compact with a valid mac_tag and a custom header
+  private static String createCompactWithCustomHeader(
+      String prfAlgorithm, SecretKey secretKey, JSONObject header, ToBeSignedJwt toBeSignedJwt)
+      throws GeneralSecurityException {
+    String headerStr = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
+    String payloadStr = Base64.urlSafeEncode(toBeSignedJwt.getPayload().toString().getBytes(UTF_8));
+    PrfHmacJce prf = new PrfHmacJce(prfAlgorithm, secretKey);
+    PrfMac mac = new PrfMac(prf, prf.getMaxOutputLength());
+    String signable = headerStr + "." + payloadStr;
+    String tag = Base64.urlSafeEncode(mac.computeMac(signable.getBytes(US_ASCII)));
+    return signable + "." + tag;
+  }
+
+  @Test
+  public void acceptableHeader_verificationSucceeds() throws Exception {
+    // The header verification should be less strict that header construction.
+    String key =
+        "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
+    SecretKey secretKey = new SecretKeySpec(Base64.urlSafeDecode(key), "HMAC");
+    JwtHmac jwthmac = new JwtHmac("HS256", secretKey);
+    Clock clock = Clock.fixed(Instant.parse("2011-03-22T18:42:00Z"), ZoneOffset.UTC);
+    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt
+        .Builder()
+        .setAlgorithm("HS256")
+        .build();
+    String prfAlgo = "HMACSHA256";
+
+    JSONObject correctHeader = new JSONObject();
+    correctHeader.put("alg", "HS256");
+    correctHeader.put("typ", "JWT");
+    String correctCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, correctHeader, toBeSignedJwt);
+    jwthmac.verifyCompact(correctCompact, validator);
+
+    JSONObject lowercaseTypHeader = new JSONObject();
+    lowercaseTypHeader.put("alg", "HS256");
+    lowercaseTypHeader.put("typ", "jwt");
+    String lowercaseTypCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, correctHeader, toBeSignedJwt);
+    jwthmac.verifyCompact(lowercaseTypCompact, validator);
+
+    JSONObject noTypHeader = new JSONObject();
+    noTypHeader.put("alg", "HS256");
+    String noTypCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, noTypHeader, toBeSignedJwt);
+    jwthmac.verifyCompact(noTypCompact, validator);
+  }
+
+  @Test
+  public void badTypeInHeader_verificationFails() throws Exception {
+    String key =
+        "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
+    SecretKey secretKey = new SecretKeySpec(Base64.urlSafeDecode(key), "HMAC");
+    JwtHmac jwthmac = new JwtHmac("HS256", secretKey);
+    Clock clock = Clock.fixed(Instant.parse("2011-03-22T18:42:00Z"), ZoneOffset.UTC);
+    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt
+        .Builder()
+        .setAlgorithm("HS256")
+        .build();
+    String prfAlgo = "HMACSHA256";
+
+    JSONObject wrongAlgorithmHeader = new JSONObject();
+    wrongAlgorithmHeader.put("alg", "HS256");
+    wrongAlgorithmHeader.put("typ", "IWT");  // bad type
+    String wrongAlgorithmCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, wrongAlgorithmHeader, toBeSignedJwt);
+    assertThrows(
+        InvalidAlgorithmParameterException.class,
+        () -> jwthmac.verifyCompact(wrongAlgorithmCompact, validator));
+  }
+
+  @Test
+  public void badAlgorithmInHeader_verificationFails() throws Exception {
+    String key =
+        "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
+    SecretKey secretKey = new SecretKeySpec(Base64.urlSafeDecode(key), "HMAC");
+    JwtHmac jwthmac = new JwtHmac("HS256", secretKey);
+    Clock clock = Clock.fixed(Instant.parse("2011-03-22T18:42:00Z"), ZoneOffset.UTC);
+    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt
+        .Builder()
+        .setAlgorithm("HS256")
+        .build();
+    String prfAlgo = "HMACSHA256";
+
+    JSONObject wrongAlgorithmHeader = new JSONObject();
+    wrongAlgorithmHeader.put("alg", "HS384");
+    wrongAlgorithmHeader.put("typ", "JWT");
+    String wrongAlgorithmCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, wrongAlgorithmHeader, toBeSignedJwt);
+    assertThrows(
+        InvalidAlgorithmParameterException.class,
+        () -> jwthmac.verifyCompact(wrongAlgorithmCompact, validator));
+
+    JSONObject noAlgorithmHeader = new JSONObject();
+    noAlgorithmHeader.put("typ", "JWT");
+    String noAlgorithmCompact =
+        createCompactWithCustomHeader(prfAlgo, secretKey, noAlgorithmHeader, toBeSignedJwt);
+    assertThrows(
+        IllegalStateException.class,
+        () -> jwthmac.verifyCompact(noAlgorithmCompact, validator));
   }
 }

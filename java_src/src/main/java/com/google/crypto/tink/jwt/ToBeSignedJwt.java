@@ -92,23 +92,6 @@ public final class ToBeSignedJwt {
       }
     }
 
-    /**
-     * Sets the type of this JWT.
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-5.1
-     */
-    public Builder setType(String value) {
-      return setHeader(JwtNames.HEADER_TYPE, value);
-    }
-
-    /**
-     * Sets the content type header parameter used to declare structural information about the JWT.
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-5.2
-     */
-    public Builder setContentType(String value) {
-      return setHeader(JwtNames.HEADER_CONTENT_TYPE, value);
-    }
 
     /**
      * Sets the name of the algorithm used to sign or authenticate the JWT.
@@ -131,15 +114,6 @@ public final class ToBeSignedJwt {
         default:
           throw new IllegalArgumentException("invalid algorithm: " + algo);
       }
-    }
-
-    /**
-     * Sets the ID of the key used to sign or authenticate the JWT.
-     *
-     * <p>While Tink ignores this ID, other implementations might require it.
-     */
-    public Builder setKeyId(String value) {
-      return setHeader(JwtNames.HEADER_KEY_ID, value);
     }
 
     /**

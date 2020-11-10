@@ -15,6 +15,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
@@ -34,45 +35,10 @@ public final class ToBeSignedJwtTest {
   }
 
   @Test
-  public void setType_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setType("JWT").build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_TYPE)).isEqualTo("JWT");
-  }
-
-  @Test
-  public void noContentType_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_CONTENT_TYPE)).isNull();
-  }
-
-  @Test
-  public void setContentType_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setContentType("foo").build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_CONTENT_TYPE)).isEqualTo("foo");
-  }
-
-  @Test
   public void noAlgorithm_success() throws Exception {
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
 
     assertThat(token.getHeader(JwtNames.HEADER_ALGORITHM)).isNull();
-  }
-
-  @Test
-  public void noKeyId_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_KEY_ID)).isNull();
-  }
-
-  @Test
-  public void setKeyId_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setKeyId("123").build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_KEY_ID)).isEqualTo("123");
   }
 
   @Test
@@ -244,7 +210,7 @@ public final class ToBeSignedJwtTest {
     Instant instant = Instant.now();
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().setExpiration(instant).build();
 
-    assertThat(token.getExpiration().getEpochSecond()).isEqualTo(instant.getEpochSecond());
+    assertThat(token.getExpiration()).isEqualTo(instant.truncatedTo(SECONDS));
   }
 
   @Test
@@ -259,7 +225,7 @@ public final class ToBeSignedJwtTest {
     Instant instant = Instant.now();
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().setNotBefore(instant).build();
 
-    assertThat(token.getNotBefore().getEpochSecond()).isEqualTo(instant.getEpochSecond());
+    assertThat(token.getNotBefore()).isEqualTo(instant.truncatedTo(SECONDS));
   }
 
   @Test
@@ -274,7 +240,7 @@ public final class ToBeSignedJwtTest {
     Instant instant = Instant.now();
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().setIssuedAt(instant).build();
 
-    assertThat(token.getIssuedAt().getEpochSecond()).isEqualTo(instant.getEpochSecond());
+    assertThat(token.getIssuedAt()).isEqualTo(instant.truncatedTo(SECONDS));
   }
 
   @Test
@@ -286,5 +252,15 @@ public final class ToBeSignedJwtTest {
     String compact = token.compact("HS256");
 
     assertThat(compact).isEqualTo(expectedToken);
+  }
+
+  @Test
+  public void createParseCompact_success() throws Exception {
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setJwtId("blah").build();
+    String compact = token.compact("HS256");
+    ToBeSignedJwt token2 = new ToBeSignedJwt.Builder(compact).build();
+
+    assertThat(token2.getHeader().getString("alg")).isEqualTo("HS256");
+    assertThat(token2.getPayload().getString("jti")).isEqualTo("blah");
   }
 }

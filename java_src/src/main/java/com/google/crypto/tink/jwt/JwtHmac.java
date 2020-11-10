@@ -14,19 +14,19 @@
 
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.errorprone.annotations.Immutable;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 
 /** An implementation of {@link JwtMac} using HMAC. */
 @Immutable
 public final class JwtHmac implements JwtMac {
-  private static final Charset ASCII = Charset.forName("US-ASCII");
   private static final int MIN_KEY_SIZE_IN_BYTES = 32;
 
   @SuppressWarnings("Immutable") // We do not mutate the mac.
@@ -48,7 +48,7 @@ public final class JwtHmac implements JwtMac {
   @Override
   public String createCompact(ToBeSignedJwt token) throws GeneralSecurityException {
     String signable = token.compact(this.algo);
-    String tag = Base64.urlSafeEncode(mac.computeMac(signable.getBytes(ASCII)));
+    String tag = Base64.urlSafeEncode(mac.computeMac(signable.getBytes(US_ASCII)));
     return signable + "." + tag;
   }
 
@@ -62,7 +62,7 @@ public final class JwtHmac implements JwtMac {
 
     String input = parts[0] + "." + parts[1];
     byte[] expectedTag = Base64.urlSafeDecode(parts[2]);
-    mac.verifyMac(expectedTag, input.getBytes(ASCII));
+    mac.verifyMac(expectedTag, input.getBytes(US_ASCII));
 
     ToBeSignedJwt token = new ToBeSignedJwt.Builder(input).build();
     return validator.validate(this.algo, token);
