@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -30,9 +31,14 @@ import javax.crypto.Cipher;
 /**
  * RsaSsaPss (i.e. RSA Signature Schemes with Appendix (SSA) with PSS encoding) signing with JCE.
  */
+@Immutable
 public final class RsaSsaPssSignJce implements PublicKeySign {
+  @SuppressWarnings("Immutable")
   private final RSAPrivateCrtKey privateKey;
+
+  @SuppressWarnings("Immutable")
   private final RSAPublicKey publicKey;
+
   private final HashType sigHash;
   private final HashType mgf1Hash;
   private final int saltLength;

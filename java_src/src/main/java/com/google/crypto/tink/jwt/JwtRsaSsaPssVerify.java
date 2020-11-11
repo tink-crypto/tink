@@ -16,25 +16,26 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.subtle.Enums;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
+import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPublicKey;
 
-/** An implementation of {@link JwtPublicKeyVerify} using RSA PKCS1. */
+/** An implementation of {@link JwtPublicKeyVerify} using RSA PSS. */
 @Immutable
-public final class JwtRsaSsaPkcs1Verify implements JwtPublicKeyVerify {
+public final class JwtRsaSsaPssVerify implements JwtPublicKeyVerify {
 
-  private final RsaSsaPkcs1VerifyJce pkv;
+  private final RsaSsaPssVerifyJce verifier;
 
   private final String algorithmName;
 
-  public JwtRsaSsaPkcs1Verify(RSAPublicKey publickey, String algorithm)
+  public JwtRsaSsaPssVerify(RSAPublicKey publickey, String algorithm)
       throws GeneralSecurityException {
     // This function also validates the algorithm.
-    Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+    Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
+    int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
     this.algorithmName = algorithm;
-    this.pkv = new RsaSsaPkcs1VerifyJce(publickey, hash);
+    this.verifier = new RsaSsaPssVerifyJce(publickey, hash, hash, saltLength);
   }
 
   @Override
@@ -49,9 +50,8 @@ public final class JwtRsaSsaPkcs1Verify implements JwtPublicKeyVerify {
     String unsignedCompact = parts[0] + "." + parts[1];
     byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
-    this.pkv.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
+    this.verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
     ToBeSignedJwt token = new ToBeSignedJwt.Builder(unsignedCompact).build();
     return validator.validate(this.algorithmName, token);
   }
-
 }

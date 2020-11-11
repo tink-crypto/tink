@@ -34,4 +34,39 @@ final class JwtSigUtil {
     }
     throw new GeneralSecurityException("unknown algorithm " + algorithm);
   }
+
+  public static Enums.HashType hashForPssAlgorithm(String algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case "PS256":
+        return Enums.HashType.SHA256;
+      case "PS384":
+        return Enums.HashType.SHA384;
+      case "PS512":
+        return Enums.HashType.SHA512;
+      default: // fall out
+    }
+    throw new GeneralSecurityException("unknown algorithm " + algorithm);
+  }
+
+  public static int saltLengthForPssAlgorithm(String algorithm) throws GeneralSecurityException {
+    switch (algorithm) {
+      case "PS256":
+        return 32;
+      case "PS384":
+        return 48;
+      case "PS512":
+        return 64;
+      default: // fall out
+    }
+    throw new GeneralSecurityException("unknown algorithm " + algorithm);
+  }
+
+  public static void validateASCII(String data) throws GeneralSecurityException {
+    for (char c : data.toCharArray()) {
+      if ((c & 0x80) > 0) {
+        throw new GeneralSecurityException("Non ascii character");
+      }
+    }
+  }
 }

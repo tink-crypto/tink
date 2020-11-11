@@ -232,6 +232,7 @@ java_library(
         ":enums",
         ":subtle_util_cluster",
         ":validators",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
     ],
 )
@@ -396,6 +397,7 @@ java_library(
         ":random",
         ":subtle_util_cluster",
         ":validators",
+        "@maven//:com_google_errorprone_error_prone_annotations",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
     ],
 )
