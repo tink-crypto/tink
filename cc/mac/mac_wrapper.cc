@@ -16,6 +16,7 @@
 
 #include "tink/mac/mac_wrapper.h"
 
+#include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
@@ -92,15 +93,16 @@ util::Status MacSetWrapper::VerifyMac(
     if (primitives_result.ok()) {
       absl::string_view raw_mac_value =
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
-      std::string local_data;
       for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
+        std::string legacy_data;
+        absl::string_view view_on_data_or_legacy_data = data;
         if (mac_entry->get_output_prefix_type() == OutputPrefixType::LEGACY) {
-          local_data = std::string(data);
-          local_data.append(1, CryptoFormat::kLegacyStartByte);
-          data = local_data;
+          legacy_data = absl::StrCat(data, std::string("\x00", 1));
+          view_on_data_or_legacy_data = legacy_data;
         }
         Mac& mac = mac_entry->get_primitive();
-        util::Status status = mac.VerifyMac(raw_mac_value, data);
+        util::Status status =
+            mac.VerifyMac(raw_mac_value, view_on_data_or_legacy_data);
         if (status.ok()) {
           return status;
         } else {
@@ -114,8 +116,8 @@ util::Status MacSetWrapper::VerifyMac(
   auto raw_primitives_result = mac_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& mac_entry : *(raw_primitives_result.ValueOrDie())) {
-        Mac& mac = mac_entry->get_primitive();
-        util::Status status = mac.VerifyMac(mac_value, data);
+      Mac& mac = mac_entry->get_primitive();
+      util::Status status = mac.VerifyMac(mac_value, data);
       if (status.ok()) {
         return status;
       }

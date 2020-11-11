@@ -17,6 +17,7 @@
 #include "tink/mac/mac_wrapper.h"
 
 #include "gtest/gtest.h"
+#include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
@@ -152,6 +153,57 @@ TEST(MacWrapperTest, testLegacyAuthentication) {
   legacy_data.append(1, CryptoFormat::kLegacyStartByte);
   status = raw_mac->VerifyMac(raw_mac_value, legacy_data);
   EXPECT_TRUE(status.ok()) << status;
+}
+
+// Produces a mac which starts in the same way as a legacy non-raw signature.
+class TryBreakLegacyMac : public Mac {
+ public:
+  crypto::tink::util::StatusOr<std::string> ComputeMac(
+      absl::string_view data) const override {
+    return absl::StrCat(std::string("\x00", 1), "\xff\xff\xff\xff", data);
+  }
+
+  crypto::tink::util::Status VerifyMac(absl::string_view mac,
+                                       absl::string_view data) const override {
+    if (mac != ComputeMac(data).ValueOrDie()) {
+      return absl::InvalidArgumentError("Wrong mac");
+    }
+    return util::OkStatus();
+  }
+};
+
+// Checks that a raw tag can be verified after a legacy tag is verified with
+// the same output prefix. (To prevent regression of b/173013224).
+TEST(MacWrapperTest, VerifyRawAfterLegacy) {
+  std::unique_ptr<PrimitiveSet<Mac>> mac_set(new PrimitiveSet<Mac>());
+
+  KeysetInfo::KeyInfo key_info_0;
+  key_info_0.set_output_prefix_type(OutputPrefixType::RAW);
+  key_info_0.set_key_id(1234);
+  key_info_0.set_status(KeyStatusType::ENABLED);
+  ASSERT_THAT(
+      mac_set->AddPrimitive(absl::make_unique<TryBreakLegacyMac>(), key_info_0)
+          .status(),
+      IsOk());
+
+  KeysetInfo::KeyInfo key_info_1;
+  key_info_1.set_output_prefix_type(OutputPrefixType::LEGACY);
+  key_info_1.set_key_id(0xffffffff);
+  key_info_1.set_status(KeyStatusType::ENABLED);
+
+  auto entry1 =
+      mac_set->AddPrimitive(absl::make_unique<DummyMac>(""), key_info_1);
+  ASSERT_THAT(entry1.status(), IsOk());
+  ASSERT_THAT(mac_set->set_primary(entry1.ValueOrDie()), IsOk());
+
+  // Wrap mac_set and test the resulting Mac.
+  auto wrapped_mac = MacWrapper().Wrap(std::move(mac_set));
+  EXPECT_THAT(wrapped_mac.status(), IsOk());
+
+  std::string data = "some data";
+  std::string mac_tag = TryBreakLegacyMac().ComputeMac(data).ValueOrDie();
+  EXPECT_THAT(wrapped_mac.ValueOrDie()->VerifyMac(mac_tag, data),
+              IsOk());
 }
 
 }  // namespace
