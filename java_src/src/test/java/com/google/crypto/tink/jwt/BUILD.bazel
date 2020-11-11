@@ -133,3 +133,18 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
     ],
 )
+
+java_test(
+    name = "JwtFormatTest",
+    size = "small",
+    srcs = ["JwtFormatTest.java"],
+    deps = [
+        "@maven//:org_json_json",
+        "@maven//:junit_junit",
+        "@maven//:com_google_truth_truth",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_expired_exception",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_not_before_exception",
+    ],
+)

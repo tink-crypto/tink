@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,9 +28,6 @@ import org.json.JSONObject;
 @Immutable
 public final class JwtValidator {
   private static final Duration MAX_CLOCK_SKEW = Duration.ofMinutes(10);
-
-  @SuppressWarnings("Immutable") // We do not mutate the header.
-  private final JSONObject header;
 
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JSONObject payload;
@@ -42,7 +38,6 @@ public final class JwtValidator {
   private final Duration clockSkew;
 
   private JwtValidator(Builder builder) {
-    this.header = builder.header;
     this.payload = builder.payload;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
@@ -50,13 +45,11 @@ public final class JwtValidator {
 
   /** Builder for JwtValidator */
   public static final class Builder {
-    private final JSONObject header;
     private final JSONObject payload;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
     public Builder() {
-      header = new JSONObject();
       payload = new JSONObject();
     }
 
@@ -136,14 +129,6 @@ public final class JwtValidator {
     }
   }
 
-  private String getHeader(String name) {
-    try {
-      return header.getString(name);
-    } catch (JSONException ex) {
-      return null;
-    }
-  }
-
   private Object getClaim(String name) {
     try {
       return payload.get(name);
@@ -167,34 +152,7 @@ public final class JwtValidator {
           JwtInvalidException {
     validateTimestampClaims(target);
 
-    if (!target.getAlgorithm().equals(algorithm)) {
-      throw new InvalidAlgorithmParameterException(
-          String.format(
-              "invalid algorithm; expected %s, got %s", algorithm, target.getAlgorithm()));
-    }
-
-    String headerType = target.getHeader(JwtNames.HEADER_TYPE);
-    if ((headerType != null)
-        && !headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
-      throw new InvalidAlgorithmParameterException(
-          String.format(
-              "invalid header type; expected %s, got %s", JwtNames.HEADER_TYPE_VALUE, headerType));
-    }
-
-    Iterator<String> headerIterator = this.header.keys();
-    while (headerIterator.hasNext()) {
-      String name = headerIterator.next();
-      if (name.equals(JwtNames.HEADER_ALGORITHM)) {
-        continue;
-      }
-      String value = target.getHeader(name);
-      if (value == null || !value.equals(this.getHeader(name))) {
-        throw new JwtInvalidException(
-            String.format(
-                "invalid JWT; expected header '%s' with value %s, but got %s",
-                name, value, this.getHeader(name)));
-      }
-    }
+    JwtFormat.validateHeader(algorithm, target.getHeader());
 
     Iterator<String> payloadIterator = this.payload.keys();
     while (payloadIterator.hasNext()) {

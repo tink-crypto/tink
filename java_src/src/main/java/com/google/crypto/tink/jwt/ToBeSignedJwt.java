@@ -14,9 +14,8 @@
 
 package com.google.crypto.tink.jwt;
 
-import com.google.crypto.tink.subtle.Base64;
 import com.google.errorprone.annotations.Immutable;
-import java.nio.charset.Charset;
+import java.security.InvalidAlgorithmParameterException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +30,6 @@ import org.json.JSONObject;
  */
 @Immutable
 public final class ToBeSignedJwt {
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   @SuppressWarnings("Immutable") // We do not mutate the header.
   private final JSONObject header;
@@ -54,24 +52,14 @@ public final class ToBeSignedJwt {
       payload = new JSONObject();
     }
 
-    Builder(String compact) {
+    Builder(String compact) throws JwtInvalidException {
       String[] parts = compact.split("\\.");
       if (parts.length != 2) {
         throw new IllegalArgumentException(
             "invalid compact JWT; must contain exactly 1 dot, but got " + compact);
       }
-
-      try {
-        this.header = new JSONObject(new String(Base64.urlSafeDecode(parts[0]), UTF_8));
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException("invalid JWT header: " + ex);
-      }
-
-      try {
-        this.payload = new JSONObject(new String(Base64.urlSafeDecode(parts[1]), UTF_8));
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException("invalid JWT payload: " + ex);
-      }
+      this.header = JwtFormat.decodeHeader(parts[0]);
+      this.payload = JwtFormat.decodePayload(parts[1]);
     }
 
     private Builder setHeader(String name, String value) {
@@ -288,19 +276,7 @@ public final class ToBeSignedJwt {
    * Serializes the token in the JWS compact serialization format, described in
    * https://tools.ietf.org/html/rfc7515#section-3.1.
    */
-  String compact(String alg) {
-    JSONObject copy;
-
-    try {
-      copy = new JSONObject(this.header.toString());
-      copy.put(JwtNames.HEADER_ALGORITHM, alg);
-    } catch (JSONException ex) {
-      // Should never happen.
-      throw new IllegalStateException(ex);
-    }
-
-    String headerStr = Base64.urlSafeEncode(copy.toString().getBytes(UTF_8));
-    String payloadStr = Base64.urlSafeEncode(this.payload.toString().getBytes(UTF_8));
-    return headerStr + "." + payloadStr;
+  String compact(String alg) throws InvalidAlgorithmParameterException {
+    return JwtFormat.createUnsignedCompact(alg, this.payload);
   }
 }

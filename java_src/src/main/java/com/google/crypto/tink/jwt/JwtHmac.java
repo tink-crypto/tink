@@ -17,7 +17,6 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import com.google.crypto.tink.Mac;
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.PrfHmacJce;
 import com.google.crypto.tink.subtle.PrfMac;
 import com.google.errorprone.annotations.Immutable;
@@ -47,9 +46,9 @@ public final class JwtHmac implements JwtMac {
 
   @Override
   public String createCompact(ToBeSignedJwt token) throws GeneralSecurityException {
-    String signable = token.compact(this.algo);
-    String tag = Base64.urlSafeEncode(mac.computeMac(signable.getBytes(US_ASCII)));
-    return signable + "." + tag;
+    String unsignedCompact = JwtFormat.createUnsignedCompact(this.algo, token.getPayload());
+    return JwtFormat.createSignedCompact(
+        unsignedCompact, mac.computeMac(unsignedCompact.getBytes(US_ASCII)));
   }
 
   @Override
@@ -60,11 +59,11 @@ public final class JwtHmac implements JwtMac {
           "only tokens in JWS compact serialization format are supported");
     }
 
-    String input = parts[0] + "." + parts[1];
-    byte[] expectedTag = Base64.urlSafeDecode(parts[2]);
-    mac.verifyMac(expectedTag, input.getBytes(US_ASCII));
+    String unsignedCompact = parts[0] + "." + parts[1];
+    byte[] expectedTag = JwtFormat.decodeSignature(parts[2]);
+    mac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
 
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(input).build();
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder(unsignedCompact).build();
     return validator.validate(this.algo, token);
   }
 

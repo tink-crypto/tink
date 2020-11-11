@@ -15,7 +15,6 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.errorprone.annotations.Immutable;
@@ -40,8 +39,9 @@ public final class JwtRsaSsaPkcs1Sign implements JwtPublicKeySign {
 
   @Override
   public String sign(ToBeSignedJwt token) throws GeneralSecurityException {
-    String signable = token.compact(this.algorithmName);
-    String tag = Base64.urlSafeEncode(pks.sign(signable.getBytes(US_ASCII)));
-    return signable + "." + tag;
+    String unsignedCompact =
+        JwtFormat.createUnsignedCompact(this.algorithmName, token.getPayload());
+    return JwtFormat.createSignedCompact(
+        unsignedCompact, pks.sign(unsignedCompact.getBytes(US_ASCII)));
   }
 }

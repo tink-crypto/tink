@@ -15,7 +15,6 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.errorprone.annotations.Immutable;
@@ -48,11 +47,11 @@ public final class JwtRsaSsaPkcs1Verify implements JwtPublicKeyVerify {
       throw new JwtInvalidException(
           "only tokens in JWS compact serialization format are supported");
     }
-    String input = parts[0] + "." + parts[1];
-    byte[] expectedSignature = Base64.urlSafeDecode(parts[2]);
+    String unsignedCompact = parts[0] + "." + parts[1];
+    byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
-    this.pkv.verify(expectedSignature, input.getBytes(US_ASCII));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(input).build();
+    this.pkv.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder(unsignedCompact).build();
     return validator.validate(this.algorithmName, token);
   }
 
