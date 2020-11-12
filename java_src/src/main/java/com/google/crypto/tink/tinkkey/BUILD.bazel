@@ -30,6 +30,15 @@ java_library(
     ],
 )
 
+java_library(
+    name = "key_handle",
+    srcs = ["KeyHandle.java"],
+    deps = [
+        ":key_access",
+        ":tink_key",
+    ],
+)
+
 android_library(
     name = "tink_key-android",
     srcs = ["TinkKey.java"],
@@ -52,4 +61,14 @@ android_library(
     name = "key_access-android",
     srcs = ["KeyAccess.java"],
     deps = [ "@maven//:com_google_errorprone_error_prone_annotations" ]
+)
+
+
+java_library(
+    name = "key_handle-android",
+    srcs = ["KeyHandle.java"],
+    deps = [
+        ":key_access",
+        ":tink_key",
+    ],
 )
