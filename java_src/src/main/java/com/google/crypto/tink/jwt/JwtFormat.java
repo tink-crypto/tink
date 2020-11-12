@@ -64,7 +64,7 @@ final class JwtFormat {
     validateAlgorithm(expectedAlgorithm);
     try {
       if (!header.has(JwtNames.HEADER_ALGORITHM)) {
-        throw new IllegalStateException("missing algorithm in header");
+        throw new JwtInvalidException("missing algorithm in header");
       }
       Iterator<String> headerIterator = header.keys();
       while (headerIterator.hasNext()) {
@@ -79,13 +79,13 @@ final class JwtFormat {
         } else if (name.equals(JwtNames.HEADER_TYPE)) {
           String headerType = header.getString(JwtNames.HEADER_TYPE);
           if (!headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
-            throw new InvalidAlgorithmParameterException(
+            throw new JwtInvalidException(
                 String.format(
                     "invalid header type; expected %s, got %s",
                     JwtNames.HEADER_TYPE_VALUE, headerType));
           }
         } else {
-          throw new InvalidAlgorithmParameterException(
+          throw new JwtInvalidException(
               String.format("invalid JWT header: unexpected header %s", name));
         }
       }

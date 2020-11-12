@@ -102,7 +102,7 @@ public final class JwtFormatTest {
     header.put("alg", "HS256");
     header.put("typ", "IWT");
     assertThrows(
-        InvalidAlgorithmParameterException.class,
+        JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", header));
   }
 
@@ -112,7 +112,7 @@ public final class JwtFormatTest {
     header.put("alg", "HS256");
     header.put("unknown", "header");
     assertThrows(
-        InvalidAlgorithmParameterException.class,
+        JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", header));
   }
 
@@ -120,7 +120,7 @@ public final class JwtFormatTest {
   public void validateEmptyHeader_fails() throws Exception {
     JSONObject emptyHeader = new JSONObject();
     assertThrows(
-        IllegalStateException.class,
+        JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", emptyHeader));
   }
 

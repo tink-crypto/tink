@@ -36,7 +36,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = new JwtValidator.Builder().build();
     ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().build();
 
-    assertThrows(IllegalStateException.class, () -> validator.validate(algo, unverified));
+    assertThrows(JwtInvalidException.class, () -> validator.validate(algo, unverified));
   }
 
   @Test
