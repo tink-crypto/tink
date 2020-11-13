@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
@@ -29,8 +30,11 @@ import java.security.spec.EllipticCurve;
  *
  * @since 1.0.0
  */
+@Immutable
 public final class EcdsaSignJce implements PublicKeySign {
+  @SuppressWarnings("Immutable")
   private final ECPrivateKey privateKey;
+
   private final String signatureAlgorithm;
   private final EcdsaEncoding encoding;
 

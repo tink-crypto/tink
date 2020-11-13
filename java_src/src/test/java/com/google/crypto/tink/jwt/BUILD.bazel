@@ -158,6 +158,23 @@ java_test(
 )
 
 java_test(
+    name = "JwtEcdsaSignVerifyTest",
+    size = "enormous",
+    srcs = ["JwtEcdsaSignVerifyTest.java"],
+    deps = [
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:pl_pragmatists_JUnitParams",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "//src/main/java/com/google/crypto/tink/jwt:to_be_signed_jwt",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+    ],
+)
+
+java_test(
     name = "JwtFormatTest",
     size = "small",
     srcs = ["JwtFormatTest.java"],

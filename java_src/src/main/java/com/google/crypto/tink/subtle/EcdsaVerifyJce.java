@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
@@ -29,8 +30,11 @@ import java.security.spec.EllipticCurve;
  *
  * @since 1.0.0
  */
+@Immutable
 public final class EcdsaVerifyJce implements PublicKeyVerify {
+  @SuppressWarnings("Immutable")
   private final ECPublicKey publicKey;
+
   private final String signatureAlgorithm;
   private final EcdsaEncoding encoding;
 

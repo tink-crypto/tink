@@ -237,6 +237,40 @@ java_library(
 )
 
 java_library(
+    name = "jwt_ecdsa_sign",
+    srcs = ["JwtEcdsaSign.java"],
+    deps = [
+        ":jwt_format",
+        ":jwt_public_key_sign",
+        ":jwt_sig_util",
+        ":to_be_signed_jwt",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+    ],
+)
+
+java_library(
+    name = "jwt_ecdsa_verify",
+    srcs = ["JwtEcdsaVerify.java"],
+    deps = [
+        ":jwt",
+        ":jwt_format",
+        ":jwt_invalid_exception",
+        ":jwt_public_key_verify",
+        ":jwt_sig_util",
+        ":jwt_validator",
+        ":to_be_signed_jwt",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+    ],
+)
+
+
+java_library(
     name = "jwt_sig_util",
     srcs = ["JwtSigUtil.java"],
     deps = [
@@ -422,6 +456,39 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "jwt_ecdsa_sign-android",
+    srcs = ["JwtEcdsaSign.java"],
+    deps = [
+        ":jwt_format-android",
+        ":jwt_public_key_sign-android",
+        ":jwt_sig_util-android",
+        ":to_be_signed_jwt-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+    ],
+)
+
+android_library(
+    name = "jwt_ecdsa_verify-android",
+    srcs = ["JwtEcdsaVerify.java"],
+    deps = [
+        ":jwt-android",
+        ":jwt_format-android",
+        ":jwt_invalid_exception",
+        ":jwt_public_key_verify-android",
+        ":jwt_sig_util-android",
+        ":jwt_validator-android",
+        ":to_be_signed_jwt-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
     ],
 )
 
