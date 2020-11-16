@@ -15,7 +15,6 @@
 package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
-import java.security.InvalidAlgorithmParameterException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,44 +30,23 @@ import org.json.JSONObject;
 @Immutable
 public final class ToBeSignedJwt {
 
-  @SuppressWarnings("Immutable") // We do not mutate the header.
-  private final JSONObject header;
-
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JSONObject payload;
 
   private ToBeSignedJwt(Builder builder) {
-    this.header = builder.header;
     this.payload = builder.payload;
   }
 
   /** Builder for ToBeSignedJwt */
   public static final class Builder {
-    private final JSONObject header;
     private final JSONObject payload;
 
     public Builder() {
-      header = new JSONObject();
       payload = new JSONObject();
     }
 
-    Builder(String compact) throws JwtInvalidException {
-      String[] parts = compact.split("\\.");
-      if (parts.length != 2) {
-        throw new IllegalArgumentException(
-            "invalid compact JWT; must contain exactly 1 dot, but got " + compact);
-      }
-      this.header = JwtFormat.decodeHeader(parts[0]);
-      this.payload = JwtFormat.decodePayload(parts[1]);
-    }
-
-    private Builder setHeader(String name, String value) {
-      try {
-        header.put(name, value);
-        return this;
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException(ex);
-      }
+    Builder(JSONObject payload) {
+      this.payload = payload;
     }
 
     private Builder setPayload(String name, Object value) {
@@ -80,29 +58,6 @@ public final class ToBeSignedJwt {
       }
     }
 
-
-    /**
-     * Sets the name of the algorithm used to sign or authenticate the JWT.
-     *
-     * <p>This is not a public method because Tink will add the correct algorithm name based on the
-     * key type.
-     */
-    Builder setAlgorithm(String value) {
-      return setHeader(JwtNames.HEADER_ALGORITHM, validateAlgorithm(value));
-    }
-
-    private static String validateAlgorithm(String algo) {
-      switch (algo) {
-        case "HS256":
-        case "HS384":
-        case "HS512":
-        case "ES256":
-        case "RS256":
-          return algo;
-        default:
-          throw new IllegalArgumentException("invalid algorithm: " + algo);
-      }
-    }
 
     /**
      * Sets the issuer claim that identifies the principal that issued the JWT.
@@ -199,20 +154,6 @@ public final class ToBeSignedJwt {
     }
   }
 
-  // These getter methods are not public because we don't want users to accidentally get claims or
-  // headers from untrusted JWTs.
-
-  String getHeader(String name) {
-    try {
-      return header.getString(name);
-    } catch (JSONException ex) {
-      return null;
-    }
-  }
-
-  JSONObject getHeader() {
-    return header;
-  }
 
   JSONObject getPayload() {
     return payload;
@@ -226,13 +167,6 @@ public final class ToBeSignedJwt {
     }
   }
 
-  String getAlgorithm() {
-    try {
-      return header.getString(JwtNames.HEADER_ALGORITHM);
-    } catch (JSONException ex) {
-      throw new IllegalStateException("an alg header is required, but not found", ex);
-    }
-  }
 
   List<String> getAudiences() {
     JSONArray audiences = (JSONArray) getClaim(JwtNames.CLAIM_AUDIENCE);
@@ -272,11 +206,4 @@ public final class ToBeSignedJwt {
     return getInstant(JwtNames.CLAIM_ISSUED_AT);
   }
 
-  /**
-   * Serializes the token in the JWS compact serialization format, described in
-   * https://tools.ietf.org/html/rfc7515#section-3.1.
-   */
-  String compact(String alg) throws InvalidAlgorithmParameterException {
-    return JwtFormat.createUnsignedCompact(alg, this.payload);
-  }
 }

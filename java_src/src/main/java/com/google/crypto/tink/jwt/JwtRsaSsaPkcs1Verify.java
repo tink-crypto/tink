@@ -20,6 +20,7 @@ import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPublicKey;
+import org.json.JSONObject;
 
 /** An implementation of {@link JwtPublicKeyVerify} using RSA PKCS1. */
 @Immutable
@@ -50,8 +51,10 @@ public final class JwtRsaSsaPkcs1Verify implements JwtPublicKeyVerify {
     byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
     this.pkv.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(unsignedCompact).build();
-    return validator.validate(this.algorithmName, token);
+    JwtFormat.validateHeader(this.algorithmName, JwtFormat.decodeHeader(parts[0]));
+    JSONObject payload = JwtFormat.decodePayload(parts[1]);
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder(payload).build();
+    return validator.validate(token);
   }
 
 }

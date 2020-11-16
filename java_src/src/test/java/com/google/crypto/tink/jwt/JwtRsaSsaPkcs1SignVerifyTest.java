@@ -14,8 +14,12 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -24,8 +28,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+//
 
 /** Unit tests for JwtRsaSsaPkcs1Sign and JwtRsaSsaPkcs1Verify. */
 @RunWith(JUnitParamsRunner.class)
@@ -213,5 +219,32 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
         GeneralSecurityException.class,
         () -> new JwtRsaSsaPkcs1Verify(pub, algo));
 
+  }
+
+  @Test
+  public void badHeader_verificationFails() throws Exception {
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+    keyGen.initialize(2048);
+    KeyPair keyPair = keyGen.generateKeyPair();
+
+    // Construct a token with a valid Signature, but with an invalid header.
+    RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(
+        (RSAPrivateCrtKey) keyPair.getPrivate(), JwtSigUtil.hashForPkcs1Algorithm("RS256"));
+    ToBeSignedJwt emptyToBeSignedJwt = new ToBeSignedJwt.Builder().build();
+    JSONObject wrongTypeHeader = new JSONObject();
+    wrongTypeHeader.put("alg", "RS256");
+    wrongTypeHeader.put("typ", "IWT");  // bad type
+    String headerStr = Base64.urlSafeEncode(wrongTypeHeader.toString().getBytes(UTF_8));
+    String payloadStr = JwtFormat.encodePayload(emptyToBeSignedJwt.getPayload());
+    String unsignedCompact = headerStr + "." + payloadStr;
+    String tag = JwtFormat.encodeSignature(signer.sign(unsignedCompact.getBytes(US_ASCII)));
+    String signedCompact = unsignedCompact + "." + tag;
+
+    JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(
+        (RSAPublicKey) keyPair.getPublic(), "RS256");
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(
+        JwtInvalidException.class,
+        () -> verifier.verify(signedCompact, validator));
   }
 }

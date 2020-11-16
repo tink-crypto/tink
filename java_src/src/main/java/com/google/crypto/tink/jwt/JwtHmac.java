@@ -22,6 +22,7 @@ import com.google.crypto.tink.subtle.PrfMac;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
+import org.json.JSONObject;
 
 /** An implementation of {@link JwtMac} using HMAC. */
 @Immutable
@@ -62,9 +63,10 @@ public final class JwtHmac implements JwtMac {
     String unsignedCompact = parts[0] + "." + parts[1];
     byte[] expectedTag = JwtFormat.decodeSignature(parts[2]);
     mac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
-
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(unsignedCompact).build();
-    return validator.validate(this.algo, token);
+    JwtFormat.validateHeader(this.algo, JwtFormat.decodeHeader(parts[0]));
+    JSONObject payload = JwtFormat.decodePayload(parts[1]);
+    ToBeSignedJwt token = new ToBeSignedJwt.Builder(payload).build();
+    return validator.validate(token);
   }
 
   private static String getHmacAlgo(String algo) {

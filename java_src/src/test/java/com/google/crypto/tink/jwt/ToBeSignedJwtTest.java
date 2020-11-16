@@ -20,6 +20,7 @@ import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -27,19 +28,6 @@ import org.junit.runners.JUnit4;
 /** Unit tests for ToBeSignedJwt */
 @RunWith(JUnit4.class)
 public final class ToBeSignedJwtTest {
-  @Test
-  public void noType_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_TYPE)).isNull();
-  }
-
-  @Test
-  public void noAlgorithm_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
-
-    assertThat(token.getHeader(JwtNames.HEADER_ALGORITHM)).isNull();
-  }
 
   @Test
   public void noIssuer_success() throws Exception {
@@ -244,23 +232,9 @@ public final class ToBeSignedJwtTest {
   }
 
   @Test
-  public void compact_success() throws Exception {
-    // The encoded header -- the part before the first dot -- is copied from
-    // https://tools.ietf.org/html/rfc7797#section-4.1.
-    String expectedToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJibGFoIn0";
+  public void getPayload_success() throws Exception {
     ToBeSignedJwt token = new ToBeSignedJwt.Builder().setJwtId("blah").build();
-    String compact = token.compact("HS256");
-
-    assertThat(compact).isEqualTo(expectedToken);
-  }
-
-  @Test
-  public void createParseCompact_success() throws Exception {
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().setJwtId("blah").build();
-    String compact = token.compact("HS256");
-    ToBeSignedJwt token2 = new ToBeSignedJwt.Builder(compact).build();
-
-    assertThat(token2.getHeader().getString("alg")).isEqualTo("HS256");
-    assertThat(token2.getPayload().getString("jti")).isEqualTo("blah");
+    JSONObject playload = token.getPayload();
+    assertThat(playload.get(JwtNames.CLAIM_JWT_ID)).isEqualTo("blah");
   }
 }

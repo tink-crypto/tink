@@ -15,7 +15,6 @@
 package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
-import java.security.InvalidAlgorithmParameterException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -141,18 +140,14 @@ public final class JwtValidator {
    * Validates that {@code target} was signed with {@code algorithm}, and every claim in this
    * validator is also in {@code target}.
    *
-   * @throws InvalidAlgorithmParameterException if {@code target} wasn't signed with {@code
-   *     algorithm}
    * @throws JwtExpiredException when {@code target} has been expired
    * @throws JwtNotBeforeException when {@code target} can't be used yet
    * @throws JwtInvalidException when {@code target} contains an invalid claim or header
    */
-  Jwt validate(String algorithm, ToBeSignedJwt target)
-      throws InvalidAlgorithmParameterException, JwtExpiredException, JwtNotBeforeException,
-          JwtInvalidException {
+  Jwt validate(ToBeSignedJwt target)
+      throws JwtExpiredException, JwtNotBeforeException, JwtInvalidException {
     validateTimestampClaims(target);
 
-    JwtFormat.validateHeader(algorithm, target.getHeader());
 
     Iterator<String> payloadIterator = this.payload.keys();
     while (payloadIterator.hasNext()) {
