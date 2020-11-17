@@ -32,8 +32,10 @@
 #include <sstream>
 #include <string>
 
+#include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/binary_keyset_reader.h"
+#include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/keyset_handle.h"
 #include "tink/util/status.h"
@@ -357,6 +359,27 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
     return nil;
   }
   return [[TINKKeysetHandle alloc] initWithCCKeysetHandle:std::move(status.ValueOrDie())];
+}
+
+- (NSData *)serializedKeysetNoSecret:(NSError **)error {
+  std::stringbuf buffer;
+  auto writerResult = crypto::tink::BinaryKeysetWriter::New(
+      absl::make_unique<std::ostream>(&buffer));
+  if (!writerResult.ok()) {
+    if (error) {
+      *error = TINKStatusToError(writerResult.status());
+    }
+    return nil;
+  }
+  auto writer = std::move(writerResult.ValueOrDie());
+  auto writeNoSecretStatus = self.ccKeysetHandle->WriteNoSecret(writer.get());
+  if (!writeNoSecretStatus.ok()) {
+    if (error) {
+      *error = TINKStatusToError(writeNoSecretStatus);
+    }
+    return nil;
+  }
+  return TINKStringToNSData(buffer.str());
 }
 
 @end

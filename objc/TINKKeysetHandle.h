@@ -106,6 +106,18 @@ NS_ASSUME_NONNULL_BEGIN
                                                 error:(NSError **)error;
 
 /**
+ * Returns the serialized Keyset-proto for this TINKKeysetHandle if it contains
+ * no sensitive key material.
+ *
+ * @param error  If non-nil it will be populated with a descriptive error
+ *               message.
+ * return        A serialized Keyset-proto if the instance contains no secret
+ *               key material or nil in case of error.
+ */
+- (NSData *)serializedKeysetNoSecret:(NSError **)error;
+
+
+/**
  * Writes the underlying keyset to the iOS keychain under the name specified by @c keysetName.
  * The keyset can be retrieved from the keychain by using -initFromKeychainWithName:error:.
  *

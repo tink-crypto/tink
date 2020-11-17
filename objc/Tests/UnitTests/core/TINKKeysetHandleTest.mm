@@ -525,5 +525,50 @@ static Keyset *gKeyset;
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
 
-@end
+- (void)testSerializedKeysetNoSecret {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *keyTemplate =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP256 error:&error];
+  XCTAssertNotNil(keyTemplate);
+  XCTAssertNil(error);
 
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initWithKeyTemplate:keyTemplate error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *publicHandle = [TINKKeysetHandle publicKeysetHandleWithHandle:handle
+                                                                            error:&error];
+  XCTAssertNotNil(publicHandle);
+  XCTAssertNil(error);
+
+  NSData *serializedKeysetNoSecret = [publicHandle serializedKeysetNoSecret:&error];
+  XCTAssertNotNil(serializedKeysetNoSecret);
+  XCTAssertNil(error);
+
+  auto testKeysetHandle = crypto::tink::TestKeysetHandle::GetKeyset(*publicHandle.ccKeysetHandle);
+  NSData *testSerializedKeyset = TINKStringToNSData(testKeysetHandle.SerializeAsString());
+  XCTAssertEqualObjects(serializedKeysetNoSecret, testSerializedKeyset);
+}
+
+- (void)testSerializedKeysetNoSecretFailsWithSecretMaterial {
+  NSError *error = nil;
+  TINKSignatureKeyTemplate *keyTemplate =
+      [[TINKSignatureKeyTemplate alloc] initWithKeyTemplate:TINKEcdsaP256 error:&error];
+  XCTAssertNotNil(keyTemplate);
+  XCTAssertNil(error);
+
+  TINKKeysetHandle *handle =
+      [[TINKKeysetHandle alloc] initWithKeyTemplate:keyTemplate error:&error];
+  XCTAssertNotNil(handle);
+  XCTAssertNil(error);
+
+  NSData *serializedKeysetNoSecret = [handle serializedKeysetNoSecret:&error];
+  XCTAssertNil(serializedKeysetNoSecret);
+  XCTAssertNotNil(error);
+  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertTrue([error.localizedFailureReason
+      containsString:@"Cannot create KeysetHandle with secret key material"]);
+}
+
+@end
