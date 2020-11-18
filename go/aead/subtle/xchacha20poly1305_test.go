@@ -17,7 +17,10 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"golang.org/x/crypto/chacha20poly1305"
@@ -192,6 +195,89 @@ func TestXChaCha20Poly1305RandomNonce(t *testing.T) {
 			t.Errorf("TestRandomNonce failed: %v", err)
 		} else {
 			cts[ctHex] = true
+		}
+	}
+}
+
+func TestXChaCha20Poly1305WycheproofVectors(t *testing.T) {
+	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
+	if !ok {
+		t.Skip("TEST_SRCDIR not set")
+	}
+	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/xchacha20_poly1305_test.json"))
+	if err != nil {
+		t.Fatalf("cannot open file: %s", err)
+	}
+	parser := json.NewDecoder(f)
+	data := new(testdata)
+	if err := parser.Decode(data); err != nil {
+		t.Fatalf("cannot decode test data: %s", err)
+	}
+
+	for _, g := range data.TestGroups {
+		if g.KeySize/8 != chacha20poly1305.KeySize {
+			continue
+		}
+		if g.IvSize/8 != chacha20poly1305.NonceSizeX {
+			continue
+		}
+
+		for _, tc := range g.Tests {
+			key, err := hex.DecodeString(tc.Key)
+			if err != nil {
+				t.Errorf("#%d, cannot decode key: %s", tc.TcID, err)
+			}
+			aad, err := hex.DecodeString(tc.Aad)
+			if err != nil {
+				t.Errorf("#%d, cannot decode aad: %s", tc.TcID, err)
+			}
+			msg, err := hex.DecodeString(tc.Msg)
+			if err != nil {
+				t.Errorf("#%d, cannot decode msg: %s", tc.TcID, err)
+			}
+			ct, err := hex.DecodeString(tc.Ct)
+			if err != nil {
+				t.Errorf("#%d, cannot decode ct: %s", tc.TcID, err)
+			}
+			nonce, err := hex.DecodeString(tc.Iv)
+			if err != nil {
+				t.Errorf("#%d, cannot decode nonce: %s", tc.TcID, err)
+			}
+			tag, err := hex.DecodeString(tc.Tag)
+			if err != nil {
+				t.Errorf("#%d, cannot decode tag: %s", tc.TcID, err)
+			}
+
+			var combinedCt []byte
+			combinedCt = append(combinedCt, nonce...)
+			combinedCt = append(combinedCt, ct...)
+			combinedCt = append(combinedCt, tag...)
+
+			ca, err := subtle.NewXChaCha20Poly1305(key)
+			if err != nil {
+				t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", tc.TcID, err)
+				continue
+			}
+
+			_, err = ca.Encrypt(msg, aad)
+			if err != nil {
+				t.Errorf("#%d, unexpected encryption error: %s", tc.TcID, err)
+				continue
+			}
+
+			decrypted, err := ca.Decrypt(combinedCt, aad)
+			if err != nil {
+				if tc.Result == "valid" {
+					t.Errorf("#%d, unexpected error: %s", tc.TcID, err)
+				}
+			} else {
+				if tc.Result == "invalid" {
+					t.Errorf("#%d, decrypted invalid", tc.TcID)
+				}
+				if !bytes.Equal(decrypted, msg) {
+					t.Errorf("#%d, incorrect decryption", tc.TcID)
+				}
+			}
 		}
 	}
 }
