@@ -42,7 +42,7 @@ public final class JwtValidatorTest {
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
 
-    assertThrows(JwtExpiredException.class, () -> validator.validate(token));
+    assertThrows(JwtInvalidException.class, () -> validator.validate(token));
   }
 
   @Test
@@ -81,7 +81,7 @@ public final class JwtValidatorTest {
         new ToBeSignedJwt.Builder().setNotBefore(notBefore).build();
     JwtValidator validator = new JwtValidator.Builder().build();
 
-    assertThrows(JwtNotBeforeException.class, () -> validator.validate(token));
+    assertThrows(JwtInvalidException.class, () -> validator.validate(token));
   }
 
   @Test

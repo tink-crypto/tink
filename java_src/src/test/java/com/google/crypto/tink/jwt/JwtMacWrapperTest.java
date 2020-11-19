@@ -18,13 +18,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Random;
 import java.security.GeneralSecurityException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import javax.crypto.spec.SecretKeySpec;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,6 +38,11 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class JwtMacWrapperTest {
   private final JwtMacWrapper wrapper = new JwtMacWrapper();
+
+  @Before
+  public void setUp() throws GeneralSecurityException {
+    JwtMacConfig.register();
+  }
 
   @Test
   public void test_wrapEmpty_throws() throws Exception {
@@ -149,5 +159,60 @@ public class JwtMacWrapperTest {
     assertThrows(GeneralSecurityException.class, () -> mac1.verifyCompact(compact, validator));
     assertThat(token.getJwtId()).isEqualTo("blah");
     assertThat(token2.getJwtId()).isEqualTo("blah");
+  }
+
+  @Test
+  public void wrongKey_throwsInvalidSignatureException() throws Exception {
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
+    JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
+    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt.Builder().build();
+    String compact = jwtMac.createCompact(toBeSignedJwt);
+    JwtValidator validator = new JwtValidator.Builder().build();
+
+    KeysetHandle wrongKeysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
+    JwtMac wrongJwtMac = wrongKeysetHandle.getPrimitive(JwtMac.class);
+    assertThrows(
+        GeneralSecurityException.class, () -> wrongJwtMac.verifyCompact(compact, validator));
+  }
+
+  @Test
+  public void wrongIssuer_throwsInvalidException() throws Exception {
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
+    JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
+    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt.Builder().setIssuer("Justus").build();
+    String compact = jwtMac.createCompact(toBeSignedJwt);
+    JwtValidator validator = new JwtValidator.Builder().setIssuer("Peter").build();
+    assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
+  }
+
+  @Test
+  public void expiredCompact_throwsExpiredException() throws Exception {
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
+    JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
+    Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
+    ToBeSignedJwt toBeSignedJwt =
+        new ToBeSignedJwt.Builder()
+            .setExpiration(now.minusSeconds(100)) // exipired 100 seconds ago
+            .setIssuedAt(now.minusSeconds(200))
+            .build();
+    String compact = jwtMac.createCompact(toBeSignedJwt);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
+  }
+
+  @Test
+  public void notYetValidCompact_throwsNotBeforeException() throws Exception {
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
+    JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
+
+    Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
+    ToBeSignedJwt toBeSignedJwt =
+        new ToBeSignedJwt.Builder()
+            .setNotBefore(now.plusSeconds(3600)) // is valid in 1 hour, but not before
+            .setIssuedAt(now)
+            .build();
+    String compact = jwtMac.createCompact(toBeSignedJwt);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
   }
 }

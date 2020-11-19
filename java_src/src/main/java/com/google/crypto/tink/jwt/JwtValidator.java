@@ -140,12 +140,9 @@ public final class JwtValidator {
    * Validates that {@code target} was signed with {@code algorithm}, and every claim in this
    * validator is also in {@code target}.
    *
-   * @throws JwtExpiredException when {@code target} has been expired
-   * @throws JwtNotBeforeException when {@code target} can't be used yet
    * @throws JwtInvalidException when {@code target} contains an invalid claim or header
    */
-  Jwt validate(ToBeSignedJwt target)
-      throws JwtExpiredException, JwtNotBeforeException, JwtInvalidException {
+  Jwt validate(ToBeSignedJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
 
 
@@ -179,18 +176,17 @@ public final class JwtValidator {
     return new Jwt(target.getPayload());
   }
 
-  private void validateTimestampClaims(ToBeSignedJwt target)
-      throws JwtExpiredException, JwtNotBeforeException {
+  private void validateTimestampClaims(ToBeSignedJwt target) throws JwtInvalidException {
     Instant now = this.clock.instant();
 
     Instant exp = target.getExpiration();
     if (exp != null && exp.isBefore(now.minus(this.clockSkew))) {
-      throw new JwtExpiredException("token has expired since " + exp);
+      throw new JwtInvalidException("token has expired since " + exp);
     }
 
     Instant nbf = target.getNotBefore();
     if (nbf != null && nbf.isAfter(now.plus(this.clockSkew))) {
-      throw new JwtNotBeforeException("token cannot be used before " + nbf);
+      throw new JwtInvalidException("token cannot be used before " + nbf);
     }
   }
 }

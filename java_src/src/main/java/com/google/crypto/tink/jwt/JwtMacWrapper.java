@@ -53,14 +53,21 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
         throws GeneralSecurityException {
       // All JWT keys are raw.
       List<PrimitiveSet.Entry<JwtMac>> entries = primitives.getRawPrimitives();
+      GeneralSecurityException interestingException = null;
       for (PrimitiveSet.Entry<JwtMac> entry : entries) {
         try {
           return entry.getPrimitive().verifyCompact(compact, validator);
-        } catch (GeneralSecurityException ignored) {
+        } catch (GeneralSecurityException e) {
+          if (e instanceof JwtInvalidException) {
+            // Keep this exception so that we are able to throw a meaningful message in the end
+            interestingException = e;
+          }
           // Ignored as we want to continue verification with other raw keys.
         }
       }
-      // nothing works.
+      if (interestingException != null) {
+        throw interestingException;
+      }
       throw new GeneralSecurityException("invalid MAC");
     }
   }

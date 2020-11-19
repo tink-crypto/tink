@@ -187,7 +187,7 @@ public final class JwtHmacTest {
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
 
-    assertThrows(JwtExpiredException.class, () -> mac.verifyCompact(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> mac.verifyCompact(compact, validator));
   }
 
   @Test
@@ -243,7 +243,7 @@ public final class JwtHmacTest {
 
     JwtValidator validator = new JwtValidator.Builder().build();
 
-    assertThrows(JwtNotBeforeException.class, () -> mac.verifyCompact(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> mac.verifyCompact(compact, validator));
   }
 
   @Test
@@ -377,7 +377,7 @@ public final class JwtHmacTest {
     JwtHmac mac = new JwtHmac(algo, secretKey);
     JwtValidator validator = new JwtValidator.Builder().build();
 
-    assertThrows(JwtExpiredException.class, () -> mac.verifyCompact(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> mac.verifyCompact(compact, validator));
   }
 
   // Test vectors copied from https://tools.ietf.org/html/rfc7515#appendix-A.1.

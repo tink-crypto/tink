@@ -42,11 +42,8 @@ public interface JwtMac {
    * will also be validated. {@code validator} allows to set a clock skew, to deal with small clock
    * differences among different machines.
    *
-   * @throws InvalidAlgorithmParameterException if {@code compact} was signed with an invalid
-   *     algorithm
-   * @throws JwtExpiredException when the token has been expired
-   * @throws JwtNotBeforeException when the token can't be used yet
-   * @throws JwtInvalidException when the token contains an invalid claim or header
+   * @throws GeneralSecurityException when the signature of the token could not be verified, the
+   *   token contains an invalid claim or header, the token has been expired or can't be used yet
    */
   Jwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException;
 }

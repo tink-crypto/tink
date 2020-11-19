@@ -196,7 +196,9 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
       for (int b = 0; b < 8; ++b) {
         char[] invalidJwt = Arrays.copyOf(validJwt, result.length());
         invalidJwt[i] = (char) (validJwt[i] ^ (1 << b));
-        assertThrows(Exception.class, () -> verifier.verify(new String(invalidJwt), validator));
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> verifier.verify(new String(invalidJwt), validator));
       }
     }
   }
