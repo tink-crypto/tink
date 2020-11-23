@@ -26,18 +26,6 @@ from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['hybrid']
-TEMPLATE = hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE)]
-
-
-def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
-  for enc_lang in SUPPORTED_LANGUAGES:
-    for dec_lang in SUPPORTED_LANGUAGES:
-      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -105,6 +93,30 @@ class HybridEncryptionTest(parameterized.TestCase):
     for enc in unsupported_encs:
       with self.assertRaises(tink.TinkError):
         enc.encrypt(b'plaintext', b'context_info')
+
+
+# If the implementations work fine for keysets with single keys, then key
+# rotation should work if the primitive wrapper is implemented correctly.
+# These wrappers do not depend on the key type, so it should be fine to always
+# test with the same key type. But since the wrapper needs to treat keys
+# with output prefix RAW differently, we also include such a template for that.
+KEY_ROTATION_TEMPLATES = [
+    hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM,
+    keyset_builder.raw_template(
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM)
+]
+
+
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+
+
+class HybridEncryptionKeyRotationTest(parameterized.TestCase):
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(self, enc_lang, dec_lang, old_key_tmpl, new_key_tmpl):

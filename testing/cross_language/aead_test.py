@@ -148,9 +148,10 @@ class AeadPythonTest(parameterized.TestCase):
 # These wrappers do not depend on the key type, so it should be fine to always
 # test with the same key type. Since the AEAD wrapper needs to treat keys
 # with output prefix RAW differently, we also include such a template for that.
-TEMPLATE = aead.aead_key_templates.AES128_CTR_HMAC_SHA256
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE)]
+KEY_ROTATION_TEMPLATES = [
+    aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+    keyset_builder.raw_template(aead.aead_key_templates.AES128_CTR_HMAC_SHA256)
+]
 
 
 def key_rotation_test_cases(

@@ -24,17 +24,6 @@ from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['daead']
-TEMPLATE = daead.deterministic_aead_key_templates.AES256_SIV
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE)]
-
-
-def key_rotation_test_cases():
-  for enc_lang in SUPPORTED_LANGUAGES:
-    for dec_lang in SUPPORTED_LANGUAGES:
-      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -95,6 +84,29 @@ class DeterministicAeadTest(parameterized.TestCase):
     for p in unsupported_daeads:
       with self.assertRaises(tink.TinkError):
         p.encrypt_deterministically(b'plaintext', b'associated_data')
+
+
+# If the implementations work fine for keysets with single keys, then key
+# rotation should work if the primitive wrapper is implemented correctly.
+# These wrappers do not depend on the key type, so it should be fine to always
+# test with the same key type. But since the wrapper needs to treat keys
+# with output prefix RAW differently, we also include such a template for that.
+KEY_ROTATION_TEMPLATES = [
+        daead.deterministic_aead_key_templates.AES256_SIV,
+        keyset_builder.raw_template(
+            daead.deterministic_aead_key_templates.AES256_SIV)
+]
+
+
+def key_rotation_test_cases():
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+
+
+class DaeadKeyRotationTest(parameterized.TestCase):
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(self, enc_lang, dec_lang, old_key_tmpl, new_key_tmpl):

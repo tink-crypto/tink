@@ -26,27 +26,6 @@ from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['mac']
-TEMPLATE = mac.mac_key_templates.HMAC_SHA512_512BITTAG
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE),
-                          keyset_builder.legacy_template(TEMPLATE)]
-KEY_ROTATION_TEMPLATES_NO_LEGACY = [TEMPLATE,
-                                    keyset_builder.raw_template(TEMPLATE)]
-
-
-def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
-  for compute_lang in SUPPORTED_LANGUAGES:
-    for verify_lang in SUPPORTED_LANGUAGES:
-      if compute_lang == 'go' or verify_lang == 'go':
-        # TODO(b/168188126) Enable tests for Go when LEGACY is supported.
-        for old_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
-          for new_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
-            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
-      else:
-        for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-          for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -98,6 +77,41 @@ class MacTest(parameterized.TestCase):
     for p in unsupported_macs:
       with self.assertRaises(tink.TinkError):
         p.compute_mac(data)
+
+
+# If the implementations work fine for keysets with single keys, then key
+# rotation should work if the primitive wrapper is implemented correctly.
+# These wrappers do not depend on the key type, so it should be fine to always
+# test with the same key type. The wrapper needs to treat keys with output
+# prefix RAW and LEGACY differently, so we also test templates with these
+# prefixes.
+KEY_ROTATION_TEMPLATES = [
+    mac.mac_key_templates.HMAC_SHA512_512BITTAG,
+    keyset_builder.raw_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG),
+    keyset_builder.legacy_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG)
+]
+KEY_ROTATION_TEMPLATES_NO_LEGACY = [
+    mac.mac_key_templates.HMAC_SHA512_512BITTAG,
+    keyset_builder.raw_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG)
+]
+
+
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+  for compute_lang in SUPPORTED_LANGUAGES:
+    for verify_lang in SUPPORTED_LANGUAGES:
+      if compute_lang == 'go' or verify_lang == 'go':
+        # TODO(b/168188126) Enable tests for Go when LEGACY is supported.
+        for old_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
+          for new_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
+            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
+      else:
+        for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+          for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
+
+
+class MacKeyRotationTest(parameterized.TestCase):
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(

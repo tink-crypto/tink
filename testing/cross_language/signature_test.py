@@ -27,19 +27,6 @@ from util import testing_servers
 
 SUPPORTED_LANGUAGES = (testing_servers
                        .SUPPORTED_LANGUAGES_BY_PRIMITIVE['signature'])
-TEMPLATE = signature.signature_key_templates.ECDSA_P256
-KEY_ROTATION_TEMPLATES = [TEMPLATE,
-                          keyset_builder.raw_template(TEMPLATE),
-                          keyset_builder.legacy_template(TEMPLATE)]
-
-
-def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
-  for enc_lang in SUPPORTED_LANGUAGES:
-    for dec_lang in SUPPORTED_LANGUAGES:
-      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
 
 
 def setUpModule():
@@ -58,7 +45,7 @@ def all_signature_private_key_template_names() -> Iterable[Text]:
       yield key_template_name
 
 
-class SignaturePythonTest(parameterized.TestCase):
+class SignatureTest(parameterized.TestCase):
 
   @parameterized.parameters(all_signature_private_key_template_names())
   def test_sign_verify(self, key_template_name):
@@ -101,6 +88,31 @@ class SignaturePythonTest(parameterized.TestCase):
     for signer in unsupported_signers:
       with self.assertRaises(tink.TinkError):
         _ = signer.sign(message)
+
+
+# If the implementations work fine for keysets with single keys, then key
+# rotation should work if the primitive wrapper is implemented correctly.
+# The wrapper does not depend on the key type, so it should be fine to always
+# test with the same key type. The wrapper needs to treat keys with output
+# prefix RAW and LEGACY differently, so we also test templates with these
+# prefixes.
+KEY_ROTATION_TEMPLATES = [
+    signature.signature_key_templates.ECDSA_P256,
+    keyset_builder.raw_template(signature.signature_key_templates.ECDSA_P256),
+    keyset_builder.legacy_template(signature.signature_key_templates.ECDSA_P256)
+]
+
+
+def key_rotation_test_cases(
+) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+  for enc_lang in SUPPORTED_LANGUAGES:
+    for dec_lang in SUPPORTED_LANGUAGES:
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (enc_lang, dec_lang, old_key_tmpl, new_key_tmpl)
+
+
+class SignatureKeyRotationTest(parameterized.TestCase):
 
   @parameterized.parameters(key_rotation_test_cases())
   def test_key_rotation(self, enc_lang, dec_lang, old_key_tmpl, new_key_tmpl):
