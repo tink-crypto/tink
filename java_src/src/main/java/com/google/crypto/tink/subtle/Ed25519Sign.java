@@ -88,5 +88,11 @@ public final class Ed25519Sign implements PublicKeySign {
       byte[] publicKey = Ed25519.scalarMultWithBaseToBytes(Ed25519.getHashedScalar(privateKey));
       return new KeyPair(publicKey, privateKey);
     }
+
+    /** Creates <publicKey, privateKey> KeyPair with a given private key. */
+    public static KeyPair createKeyPair(byte[] privateKey) throws GeneralSecurityException {
+      byte[] publicKey = Ed25519.scalarMultWithBaseToBytes(Ed25519.getHashedScalar(privateKey));
+      return new KeyPair(publicKey, privateKey);
+    }
   }
 }
