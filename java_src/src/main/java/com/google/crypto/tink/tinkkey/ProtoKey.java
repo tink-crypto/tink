@@ -1,0 +1,63 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+////////////////////////////////////////////////////////////////////////////////
+package com.google.crypto.tink.tinkkey;
+
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.proto.KeyData;
+import com.google.errorprone.annotations.Immutable;
+
+/**
+ * Wraps the proto {@code KeyData} as an implementation of a {@code TinkKey}. The underlying {@code
+ * KeyData} determines whether this ProtoKey has a secret.
+ *
+ * <p>ProtoKey is not part of Tink's public API.
+ */
+@Immutable
+final class ProtoKey implements TinkKey {
+  private final KeyData keyData;
+  private final boolean hasSecret;
+
+  /**
+   * Constructs a ProtoKey with {@code hasSecret()} returning true if the input {@code KeyData} has
+   * key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
+   */
+  ProtoKey(KeyData keyData) {
+    this.hasSecret = isSecret(keyData);
+    this.keyData = keyData;
+  }
+
+  private static boolean isSecret(KeyData keyData) {
+    return keyData.getKeyMaterialType() == KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL
+        || keyData.getKeyMaterialType() == KeyData.KeyMaterialType.SYMMETRIC
+        || keyData.getKeyMaterialType() == KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE;
+  }
+
+  public KeyData getProtoKey() {
+    return keyData;
+  }
+
+  @Override
+  public boolean hasSecret() {
+    return hasSecret;
+  }
+
+  /**
+   * @throws UnsupportedOperationException There is currently no direct way of getting a {@code
+   *     KeyTemplate} from {@code KeyData}.
+   */
+  @Override
+  public KeyTemplate getKeyTemplate() {
+    throw new UnsupportedOperationException();
+  }
+}

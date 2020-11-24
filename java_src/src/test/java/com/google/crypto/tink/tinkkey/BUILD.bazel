@@ -5,9 +5,9 @@ java_test(
     size = "small",
     srcs = ["SecretKeyAccessTest.java"],
     deps = [
-        "@maven//:junit_junit",
-        "@maven//:com_google_truth_truth",
         "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
 
@@ -16,25 +16,40 @@ java_test(
     size = "small",
     srcs = ["KeyAccessTest.java"],
     deps = [
-        "@maven//:junit_junit",
-        "@maven//:com_google_truth_truth",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
-
 
 java_test(
     name = "KeyHandleTest",
     size = "small",
     srcs = ["KeyHandleTest.java"],
     deps = [
-        "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:junit_junit",
-        "@maven//:com_google_truth_truth",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
         "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
         "//src/main/java/com/google/crypto/tink/tinkkey:tink_key",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "ProtoKeyTest",
+    size = "small",
+    srcs = ["ProtoKeyTest.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
+        "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/tinkkey:proto_key",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
     ],
 )
