@@ -17,6 +17,7 @@ tink_cc_library(
     tink::internal::key_info
     tink::internal::keyset_wrapper
     tink::core::primitive_set
+    tink::core::primitive_wrapper
     tink::util::statusor
     tink::util::validation
     tink::proto::tink_cc_proto
@@ -38,6 +39,7 @@ tink_cc_test(
   DEPS
     tink::internal::keyset_wrapper
     tink::internal::keyset_wrapper_impl
+    tink::core::primitive_wrapper
     tink::util::statusor
     tink::util::test_util
     tink::proto::tink_cc_proto

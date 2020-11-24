@@ -34,7 +34,8 @@ namespace tink {
 //     instance from the set
 //   * DeterministicAead::DecryptDeterministically(...) uses the instance
 //     that matches the ciphertext prefix.
-class DeterministicAeadWrapper : public PrimitiveWrapper<DeterministicAead> {
+class DeterministicAeadWrapper
+    : public PrimitiveWrapper<DeterministicAead, DeterministicAead> {
  public:
   // Returns a DeterministicAead-primitive that uses Daead-instances provided
   // in 'daead_set', which must be non-NULL and must contain a primary instance.

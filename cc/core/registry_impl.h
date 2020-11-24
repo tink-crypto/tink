@@ -103,7 +103,7 @@ class RegistryImpl {
   // Takes ownership of 'wrapper', which must be non-nullptr.
   template <class P>
   crypto::tink::util::Status RegisterPrimitiveWrapper(
-      PrimitiveWrapper<P>* wrapper) ABSL_LOCKS_EXCLUDED(maps_mutex_);
+      PrimitiveWrapper<P, P>* wrapper) ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
@@ -314,8 +314,8 @@ class RegistryImpl {
   };
 
   template <class P>
-  crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*> get_wrapper() const
-      ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*> get_wrapper()
+      const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Returns the key type info for a given type URL. Since we never replace
   // key type infos, the pointers will stay valid for the lifetime of the
@@ -563,7 +563,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
-    PrimitiveWrapper<P>* wrapper) {
+    PrimitiveWrapper<P, P>* wrapper) {
   if (wrapper == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
@@ -575,9 +575,9 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it != primitive_to_wrapper_.end()) {
     if (std::type_index(
-            typeid(*static_cast<PrimitiveWrapper<P>*>(it->second.get()))) !=
+            typeid(*static_cast<PrimitiveWrapper<P, P>*>(it->second.get()))) !=
         std::type_index(
-            typeid(*static_cast<PrimitiveWrapper<P>*>(entry.get())))) {
+            typeid(*static_cast<PrimitiveWrapper<P, P>*>(entry.get())))) {
       return util::Status(
           crypto::tink::util::error::ALREADY_EXISTS,
           "A wrapper named for this primitive has already been added.");
@@ -622,7 +622,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
 }
 
 template <class P>
-crypto::tink::util::StatusOr<const PrimitiveWrapper<P>*>
+crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*>
 RegistryImpl::get_wrapper() const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
@@ -631,7 +631,7 @@ RegistryImpl::get_wrapper() const {
         util::error::INVALID_ARGUMENT,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
-  return static_cast<PrimitiveWrapper<P>*>(it->second.get());
+  return static_cast<PrimitiveWrapper<P, P>*>(it->second.get());
 }
 
 template <class P>
@@ -642,7 +642,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'primitive_set' must be non-null.");
   }
-  util::StatusOr<const PrimitiveWrapper<P>*> wrapper_result = get_wrapper<P>();
+  util::StatusOr<const PrimitiveWrapper<P, P>*> wrapper_result =
+      get_wrapper<P>();
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }

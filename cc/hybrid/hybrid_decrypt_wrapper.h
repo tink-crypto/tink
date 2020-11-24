@@ -30,7 +30,8 @@ namespace tink {
 // Wraps a set of HybridDecrypt-instances that correspond to a keyset,
 // and combines them into a single HybridDecrypt-primitive, that for
 // actual decryption uses the instance that matches the ciphertext prefix.
-class HybridDecryptWrapper : public PrimitiveWrapper<HybridDecrypt> {
+class HybridDecryptWrapper
+    : public PrimitiveWrapper<HybridDecrypt, HybridDecrypt> {
  public:
   util::StatusOr<std::unique_ptr<HybridDecrypt>> Wrap(
       std::unique_ptr<PrimitiveSet<HybridDecrypt>> primitive_set)

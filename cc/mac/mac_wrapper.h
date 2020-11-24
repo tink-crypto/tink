@@ -33,7 +33,7 @@ namespace tink {
 // instances, depending on the context:
 //   * Mac::ComputeMac(...) uses the primary instance from the set
 //   * Mac::VerifyMac(...) uses the instance that matches the MAC prefix.
-class MacWrapper : public PrimitiveWrapper<Mac> {
+class MacWrapper : public PrimitiveWrapper<Mac, Mac> {
  public:
   util::StatusOr<std::unique_ptr<Mac>> Wrap(
       std::unique_ptr<PrimitiveSet<Mac>> mac_set) const override;

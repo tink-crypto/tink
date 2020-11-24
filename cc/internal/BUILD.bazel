@@ -20,6 +20,7 @@ cc_library(
         ":key_info",
         ":keyset_wrapper",
         "//:primitive_set",
+        "//:primitive_wrapper",
         "//proto:tink_cc_proto",
         "//util:statusor",
         "//util:validation",
@@ -41,6 +42,7 @@ cc_test(
     srcs = ["keyset_wrapper_impl_test.cc"],
     deps = [
         ":keyset_wrapper_impl",
+        "//:primitive_wrapper",
         "//proto:tink_cc_proto",
         "//util:test_matchers",
         "//util:test_util",

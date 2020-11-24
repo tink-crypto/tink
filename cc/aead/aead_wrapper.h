@@ -32,7 +32,7 @@ namespace tink {
 // instances, depending on the context:
 //   * Aead::Encrypt(...) uses the primary instance from the set
 //   * Aead::Decrypt(...) uses the instance that matches the ciphertext prefix.
-class AeadWrapper : public PrimitiveWrapper<Aead> {
+class AeadWrapper : public PrimitiveWrapper<Aead, Aead> {
  public:
   // Returns an Aead-primitive that uses Aead-instances provided in 'aead_set',
   // which must be non-NULL and must contain a primary instance.

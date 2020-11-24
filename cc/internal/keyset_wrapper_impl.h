@@ -17,6 +17,7 @@
 #include "tink/internal/key_info.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/primitive_set.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/tink.pb.h"
@@ -24,24 +25,13 @@
 namespace crypto {
 namespace tink {
 
-// The TransformingPrimitiveWrapper is a generalization of PrimitiveWrapper
-// which can change the type of the primitive. We will later replace
-// PrimitiveWrapper with this.
-template <typename InputPrimitive, typename Primitive>
-class TransformingPrimitiveWrapper {
- public:
-  virtual ~TransformingPrimitiveWrapper() {}
-  virtual crypto::tink::util::StatusOr<std::unique_ptr<Primitive>> Wrap(
-      std::unique_ptr<PrimitiveSet<InputPrimitive>> primitive_set) const = 0;
-};
-
 template <typename P, typename Q>
 class KeysetWrapperImpl : public KeysetWrapper<Q> {
  public:
   // We allow injection of a function creating the P primitive from KeyData for
   // testing -- later, this function will just be Registry::GetPrimitive().
   explicit KeysetWrapperImpl(
-      const TransformingPrimitiveWrapper<P, Q>* transforming_wrapper,
+      const PrimitiveWrapper<P, Q>* transforming_wrapper,
       std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
           const google::crypto::tink::KeyData& key_data)>
           primitive_getter)
@@ -75,7 +65,7 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
   const std::function<crypto::tink::util::StatusOr<std::unique_ptr<P>>(
       const google::crypto::tink::KeyData& key_data)>
       primitive_getter_;
-  const TransformingPrimitiveWrapper<P, Q>& transforming_wrapper_;
+  const PrimitiveWrapper<P, Q>& transforming_wrapper_;
 };
 
 }  // namespace tink

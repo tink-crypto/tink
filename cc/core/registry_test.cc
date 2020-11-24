@@ -149,7 +149,7 @@ class TestAeadKeyManager : public KeyManager<Aead> {
 };
 
 template <typename P>
-class TestWrapper : public PrimitiveWrapper<P> {
+class TestWrapper : public PrimitiveWrapper<P, P> {
  public:
   TestWrapper() {}
   crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(

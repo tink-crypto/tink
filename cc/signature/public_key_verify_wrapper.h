@@ -32,7 +32,8 @@ namespace tink {
 // and combines them into a single PublicKeyVerify-primitive,
 // that for the actual verification uses the instance that matches the
 // signature prefix.
-class PublicKeyVerifyWrapper : public PrimitiveWrapper<PublicKeyVerify> {
+class PublicKeyVerifyWrapper
+    : public PrimitiveWrapper<PublicKeyVerify, PublicKeyVerify> {
  public:
   // Returns an PublicKeyVerify-primitive that uses the primary
   // PublicKeyVerify-instance provided in 'public_key_verify_set',

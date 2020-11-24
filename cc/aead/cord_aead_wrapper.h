@@ -31,7 +31,7 @@ namespace tink {
 //   * CordAead::Encrypt(...) uses the primary instance from the set
 //   * CordAead::Decrypt(...) uses the instance that matches the ciphertext
 //   prefix.
-class CordAeadWrapper : public PrimitiveWrapper<CordAead> {
+class CordAeadWrapper : public PrimitiveWrapper<CordAead, CordAead> {
  public:
   // Returns an Aead-primitive that uses Aead-instances provided in 'aead_set',
   // which must be non-NULL and must contain a primary instance.

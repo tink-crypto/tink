@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/match.h"
+#include "tink/primitive_wrapper.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -39,8 +40,7 @@ using OutputPrimitive = std::vector<std::pair<int, std::string>>;
 // This "Wrapper" wraps primitives of type std::string into primitives of type
 // std::vector<int, std::string> simply by returning pairs {key_id, string}.
 // It appends " (primary)" to the string for the primary id.
-class Wrapper
-    : public TransformingPrimitiveWrapper<InputPrimitive, OutputPrimitive> {
+class Wrapper : public PrimitiveWrapper<InputPrimitive, OutputPrimitive> {
  public:
   crypto::tink::util::StatusOr<std::unique_ptr<OutputPrimitive>> Wrap(
       std::unique_ptr<PrimitiveSet<InputPrimitive>> primitive_set)

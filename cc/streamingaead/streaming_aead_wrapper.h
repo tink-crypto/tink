@@ -34,7 +34,8 @@ namespace tink {
 //     from the set
 //   * StreamingAead::NewDecryptingStream(...) uses the instance that matches
 //     the ciphertext prefix.
-class StreamingAeadWrapper : public PrimitiveWrapper<StreamingAead> {
+class StreamingAeadWrapper
+    : public PrimitiveWrapper<StreamingAead, StreamingAead> {
  public:
   // Returns a StreamingAead-primitive that uses StreamingAead-instances
   // provided in 'streaming_aead_set', which must be non-NULL and must contain

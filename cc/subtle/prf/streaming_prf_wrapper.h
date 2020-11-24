@@ -28,7 +28,8 @@ namespace tink {
 //
 // It is unclear how key rotation should work for Prfs; we use this one to
 // produce a single one in case the keyset is compatible, and fail otherwise.
-class StreamingPrfWrapper : public PrimitiveWrapper<StreamingPrf> {
+class StreamingPrfWrapper
+    : public PrimitiveWrapper<StreamingPrf, StreamingPrf> {
  public:
   util::StatusOr<std::unique_ptr<StreamingPrf>> Wrap(
       std::unique_ptr<PrimitiveSet<StreamingPrf>> streaming_prf_set)
