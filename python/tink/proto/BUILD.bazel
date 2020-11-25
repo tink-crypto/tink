@@ -253,3 +253,14 @@ py_proto_library(
         ":tink_py_pb2",
     ],
 )
+
+py_proto_library(
+    name = "jwt_hmac_py_pb2",
+    srcs = [
+        "jwt_hmac.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_py_pb2",
+    ],
+)
