@@ -96,17 +96,12 @@ static EciesAeadHkdfPrivateKey getNewEciesPrivateKey() {
 }
 
 - (void)testPrimitiveWithEmptyKeyset {
-  NSError *error = nil;
-  TINKHybridConfig *hybridConfig = [[TINKHybridConfig alloc] initWithError:&error];
-  XCTAssertNotNil(hybridConfig);
-  XCTAssertNil(error);
-
   google::crypto::tink::Keyset keyset;
   TINKKeysetHandle *keysetHandle =
       [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
-  error = nil;
+  NSError *error = nil;
   id<TINKHybridDecrypt> primitive =
       [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
 

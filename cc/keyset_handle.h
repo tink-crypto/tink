@@ -165,7 +165,11 @@ KeysetHandle::GetPrimitives(const KeyManager<P>* custom_manager) const {
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive()
     const {
-  return RegistryImpl::GlobalInstance().WrapKeyset<P>(keyset_);
+  auto primitives_result = this->GetPrimitives<P>(nullptr);
+  if (!primitives_result.ok()) {
+    return primitives_result.status();
+  }
+  return Registry::Wrap<P>(std::move(primitives_result.ValueOrDie()));
 }
 
 template <class P>

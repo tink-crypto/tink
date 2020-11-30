@@ -468,8 +468,6 @@ cc_library(
         ":key_manager",
         ":primitive_set",
         ":primitive_wrapper",
-        "//internal:keyset_wrapper",
-        "//internal:keyset_wrapper_impl",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:protobuf_helper",
