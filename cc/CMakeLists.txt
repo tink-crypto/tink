@@ -422,6 +422,8 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::internal::keyset_wrapper
+    tink::internal::keyset_wrapper_impl
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status

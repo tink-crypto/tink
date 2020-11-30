@@ -79,6 +79,7 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::portable_proto::MessageLite;
 using ::testing::Eq;
 using ::testing::HasSubstr;
+using ::testing::Not;
 using ::testing::SizeIs;
 
 class RegistryTest : public ::testing::Test {
@@ -148,13 +149,116 @@ class TestAeadKeyManager : public KeyManager<Aead> {
   TestKeyFactory key_factory_;
 };
 
-template <typename P>
-class TestWrapper : public PrimitiveWrapper<P, P> {
+// A class for testing. We will construct objects from an aead key, so that we
+// can check that a keymanager can handle multiple primitives. It is really
+// insecure, as it does nothing except provide access to the key.
+class AeadVariant {
+ public:
+  explicit AeadVariant(std::string s) : s_(s) {}
+
+  std::string get() { return s_; }
+
+ private:
+  std::string s_;
+};
+
+class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                    List<Aead, AeadVariant>> {
+ public:
+  class AeadFactory : public PrimitiveFactory<Aead> {
+   public:
+    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
+        const AesGcmKey& key) const override {
+      // Ignore the key and returned one with a fixed size for this test.
+      return {subtle::AesGcmBoringSsl::New(
+          util::SecretDataFromStringView(key.key_value()))};
+    }
+  };
+
+  class AeadVariantFactory : public PrimitiveFactory<AeadVariant> {
+   public:
+    crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> Create(
+        const AesGcmKey& key) const override {
+      return absl::make_unique<AeadVariant>(key.key_value());
+    }
+  };
+
+  ExampleKeyTypeManager()
+      : KeyTypeManager(absl::make_unique<AeadFactory>(),
+                       absl::make_unique<AeadVariantFactory>()) {}
+
+  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
+      const override {
+    return google::crypto::tink::KeyData::SYMMETRIC;
+  }
+
+  uint32_t get_version() const override { return kVersion; }
+
+  const std::string& get_key_type() const override { return kKeyType; }
+
+  crypto::tink::util::Status ValidateKey(const AesGcmKey& key) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::Status ValidateKeyFormat(
+      const AesGcmKeyFormat& key_format) const override {
+    return util::OkStatus();
+  }
+
+  crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
+      const AesGcmKeyFormat& key_format) const override {
+    AesGcmKey result;
+    result.set_key_value(subtle::Random::GetRandomBytes(key_format.key_size()));
+    return result;
+  }
+
+  crypto::tink::util::StatusOr<AesGcmKey> DeriveKey(
+      const AesGcmKeyFormat& key_format,
+      InputStream* input_stream) const override {
+    // Note: in an actual key type manager we need to do more work, e.g., test
+    // that the generated key is long enough.
+    crypto::tink::util::StatusOr<std::string> randomness =
+        ReadBytesFromStream(key_format.key_size(), input_stream);
+    if (!randomness.status().ok()) {
+      return randomness.status();
+    }
+    AesGcmKey key;
+    key.set_key_value(randomness.ValueOrDie());
+    return key;
+  }
+
+ private:
+  static constexpr int kVersion = 0;
+  const std::string kKeyType =
+      "type.googleapis.com/google.crypto.tink.AesGcmKey";
+};
+
+template <typename P, typename Q = P>
+class TestWrapper : public PrimitiveWrapper<P, Q> {
  public:
   TestWrapper() {}
-  crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
+  crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
     return util::Status(util::error::UNIMPLEMENTED, "This is a test wrapper.");
+  }
+};
+
+class AeadVariantWrapper : public PrimitiveWrapper<AeadVariant, AeadVariant> {
+ public:
+  crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> Wrap(
+      std::unique_ptr<PrimitiveSet<AeadVariant>> primitive_set) const override {
+    return absl::make_unique<AeadVariant>(
+        primitive_set->get_primary()->get_primitive().get());
+  }
+};
+
+class AeadVariantToStringWrapper
+    : public PrimitiveWrapper<AeadVariant, std::string> {
+ public:
+  crypto::tink::util::StatusOr<std::unique_ptr<std::string>> Wrap(
+      std::unique_ptr<PrimitiveSet<AeadVariant>> primitive_set) const override {
+    return absl::make_unique<std::string>(
+        primitive_set->get_primary()->get_primitive().get());
   }
 };
 
@@ -602,6 +706,45 @@ TEST_F(RegistryTest, RegisterWrapperTwice) {
           .ok());
 }
 
+// Tests that if we register the same type of wrapper twice, the second call
+// succeeds.
+TEST_F(RegistryTest, RegisterTransformingWrapperTwice) {
+  EXPECT_TRUE(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantToStringWrapper>())
+                  .ok());
+  EXPECT_TRUE(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantToStringWrapper>())
+                  .ok());
+}
+
+// Test that if we register a second wrapper, wrapping to the same type as a
+// previous wrapper it will fail.
+TEST_F(RegistryTest, RegisterTransformingWrapperTwiceMixing) {
+  EXPECT_TRUE(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantToStringWrapper>())
+                  .ok());
+  // We cannot register a different wrapper creating a std::string.
+  EXPECT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<TestWrapper<std::string>>()),
+              Not(IsOk()));
+  // But one creating an Aead.
+  EXPECT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<TestWrapper<AeadVariant>>()),
+              IsOk());
+}
+
+// Test that if we register a second wrapper, wrapping to the same type as a
+// previous wrapper it will fail (order swapped).
+TEST_F(RegistryTest, RegisterTransformingWrapperTwiceMixingBackwards) {
+  EXPECT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<TestWrapper<std::string>>()),
+              IsOk());
+  // We cannot register another wrapper producing strings.
+  EXPECT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantToStringWrapper>()),
+              Not(IsOk()));
+}
+
 // Tests that if we register different wrappers for the same primitive twice,
 // the second call fails.
 TEST_F(RegistryTest, RegisterDifferentWrappers) {
@@ -715,6 +858,91 @@ TEST_F(RegistryTest, UsualWrappingTest) {
                       decrypt_result.status().error_message());
 }
 
+std::string AddAesGcmKey(uint32_t key_id, OutputPrefixType output_prefix_type,
+                         KeyStatusType key_status_type,
+                         Keyset& modified_keyset) {
+  AesGcmKey key;
+  key.set_version(0);
+  key.set_key_value(subtle::Random::GetRandomBytes(16));
+  KeyData key_data;
+  key_data.set_value(key.SerializeAsString());
+  key_data.set_type_url("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  test::AddKeyData(key_data, key_id, output_prefix_type, key_status_type,
+                   &modified_keyset);
+  return key.key_value();
+}
+
+// Tests that wrapping of a keyset works in the usual case.
+TEST_F(RegistryTest, KeysetWrappingTest) {
+  Keyset keyset;
+  std::string raw_key =
+      AddAesGcmKey(13, OutputPrefixType::TINK, KeyStatusType::ENABLED, keyset);
+  keyset.set_primary_key_id(13);
+
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantWrapper>()),
+              IsOk());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> aead_variant =
+      RegistryImpl::GlobalInstance().WrapKeyset<AeadVariant>(keyset);
+  EXPECT_THAT(aead_variant.status(), IsOk());
+  EXPECT_THAT(aead_variant.ValueOrDie()->get(), Eq(raw_key));
+}
+
+// Tests that wrapping of a keyset works.
+TEST_F(RegistryTest, TransformingKeysetWrappingTest) {
+  Keyset keyset;
+  std::string raw_key =
+      AddAesGcmKey(13, OutputPrefixType::TINK, KeyStatusType::ENABLED, keyset);
+  keyset.set_primary_key_id(13);
+
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<AeadVariantToStringWrapper>()),
+              IsOk());
+
+  crypto::tink::util::StatusOr<std::unique_ptr<std::string>> string_primitive =
+      RegistryImpl::GlobalInstance().WrapKeyset<std::string>(keyset);
+  EXPECT_THAT(string_primitive.status(), IsOk());
+  EXPECT_THAT(*string_primitive.ValueOrDie(), Eq(raw_key));
+}
+
+// Tests that when we ask the registry to wrap a PrimitiveSet<Aead> into an
+// Aead, but the wrapper is in fact from something else into Aead, we give a
+// correct error message.
+TEST_F(RegistryTest, TransformingPrimitiveWrapperCustomKeyManager) {
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<ExampleKeyTypeManager>(), true),
+              IsOk());
+  // Register a transforming wrapper taking strings and making Aeads.
+  ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
+                  absl::make_unique<TestWrapper<std::string, Aead>>()),
+              IsOk());
+
+  KeysetInfo keyset_info;
+  keyset_info.add_key_info();
+  keyset_info.mutable_key_info(0)->set_output_prefix_type(
+      OutputPrefixType::TINK);
+  keyset_info.mutable_key_info(0)->set_key_id(1234543);
+  keyset_info.mutable_key_info(0)->set_status(KeyStatusType::ENABLED);
+  keyset_info.set_primary_key_id(1234543);
+
+  auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
+  ASSERT_TRUE(primitive_set
+                  ->AddPrimitive(absl::make_unique<DummyAead>("aead0"),
+                                 keyset_info.key_info(0))
+                  .ok());
+
+  EXPECT_THAT(Registry::Wrap<Aead>(std::move(primitive_set)).status(),
+              StatusIs(util::error::FAILED_PRECONDITION,
+                       HasSubstr("custom key manager")));
+}
+
 // Tests that the error message in GetKeyManager contains the type_id.name() of
 // the primitive for which the key manager was actually registered.
 TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
@@ -732,90 +960,6 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   // update fails it, one can delete it.
   EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
 }
-
-// A class for testing. We will construct objects from an aead key, so that we
-// can check that a keymanager can handle multiple primitives. It is really
-// insecure, as it does nothing except provide access to the key.
-class AeadVariant {
- public:
-  explicit AeadVariant(std::string s) : s_(s) {}
-
-  std::string get() { return s_; }
-
- private:
-  std::string s_;
-};
-
-class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
-                                                    List<Aead, AeadVariant>> {
- public:
-  class AeadFactory : public PrimitiveFactory<Aead> {
-   public:
-    crypto::tink::util::StatusOr<std::unique_ptr<Aead>> Create(
-        const AesGcmKey& key) const override {
-      // Ignore the key and returned one with a fixed size for this test.
-      return {subtle::AesGcmBoringSsl::New(
-          util::SecretDataFromStringView(key.key_value()))};
-    }
-  };
-
-  class AeadVariantFactory : public PrimitiveFactory<AeadVariant> {
-   public:
-    crypto::tink::util::StatusOr<std::unique_ptr<AeadVariant>> Create(
-        const AesGcmKey& key) const override {
-      return absl::make_unique<AeadVariant>(key.key_value());
-    }
-  };
-
-  ExampleKeyTypeManager()
-      : KeyTypeManager(absl::make_unique<AeadFactory>(),
-                       absl::make_unique<AeadVariantFactory>()) {}
-
-  google::crypto::tink::KeyData::KeyMaterialType key_material_type()
-      const override {
-    return google::crypto::tink::KeyData::SYMMETRIC;
-  }
-
-  uint32_t get_version() const override { return kVersion; }
-
-  const std::string& get_key_type() const override { return kKeyType; }
-
-  crypto::tink::util::Status ValidateKey(const AesGcmKey& key) const override {
-    return util::OkStatus();
-  }
-
-  crypto::tink::util::Status ValidateKeyFormat(
-      const AesGcmKeyFormat& key_format) const override {
-    return util::OkStatus();
-  }
-
-  crypto::tink::util::StatusOr<AesGcmKey> CreateKey(
-      const AesGcmKeyFormat& key_format) const override {
-    AesGcmKey result;
-    result.set_key_value(subtle::Random::GetRandomBytes(key_format.key_size()));
-    return result;
-  }
-
-  crypto::tink::util::StatusOr<AesGcmKey> DeriveKey(
-      const AesGcmKeyFormat& key_format,
-      InputStream* input_stream) const override {
-    // Note: in an actual key type manager we need to do more work, e.g., test
-    // that the generated key is long enough.
-    crypto::tink::util::StatusOr<std::string> randomness =
-        ReadBytesFromStream(key_format.key_size(), input_stream);
-    if (!randomness.status().ok()) {
-      return randomness.status();
-    }
-    AesGcmKey key;
-    key.set_key_value(randomness.ValueOrDie());
-    return key;
-  }
-
- private:
-  static constexpr int kVersion = 0;
-  const std::string kKeyType =
-      "type.googleapis.com/google.crypto.tink.AesGcmKey";
-};
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
