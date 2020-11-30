@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
@@ -67,7 +67,7 @@ public final class EciesAeadHkdfHybridEncrypt implements HybridEncrypt {
             contextInfo,
             demHelper.getSymmetricKeySizeInBytes(),
             ecPointFormat);
-    Aead aead = demHelper.getAead(kemKey.getSymmetricKey());
+    AeadOrDaead aead = demHelper.getAeadOrDaead(kemKey.getSymmetricKey());
     byte[] ciphertext = aead.encrypt(plaintext, EMPTY_AAD);
     byte[] header = kemKey.getKemBytes();
     return ByteBuffer.allocate(header.length + ciphertext.length)

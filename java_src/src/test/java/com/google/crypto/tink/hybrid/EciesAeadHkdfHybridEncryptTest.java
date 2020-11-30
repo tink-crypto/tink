@@ -23,6 +23,7 @@ import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
@@ -97,6 +98,8 @@ public class EciesAeadHkdfHybridEncryptTest {
     testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
     testBasicMultipleEncrypts(CurveType.NIST_P384, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
     testBasicMultipleEncrypts(CurveType.NIST_P521, AeadKeyTemplates.AES128_CTR_HMAC_SHA256);
+
+    testBasicMultipleEncrypts(CurveType.NIST_P521, DeterministicAeadKeyTemplates.AES256_SIV);
 
     if (!TestUtil.isAndroid()) {
       testBasicMultipleEncrypts(CurveType.NIST_P256, AeadKeyTemplates.AES128_GCM);

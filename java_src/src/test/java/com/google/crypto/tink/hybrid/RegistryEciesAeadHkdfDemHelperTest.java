@@ -21,10 +21,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
+import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
@@ -59,7 +60,8 @@ public class RegistryEciesAeadHkdfDemHelperTest {
             AeadKeyTemplates.AES128_GCM,
             AeadKeyTemplates.AES256_GCM,
             AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-            AeadKeyTemplates.AES256_CTR_HMAC_SHA256
+            AeadKeyTemplates.AES256_CTR_HMAC_SHA256,
+            DeterministicAeadKeyTemplates.AES256_SIV
           };
     }
   }
@@ -138,7 +140,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
     for (KeyTemplate template : keyTemplates) {
       RegistryEciesAeadHkdfDemHelper helper = new RegistryEciesAeadHkdfDemHelper(template);
       byte[] symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes());
-      Aead aead = helper.getAead(symmetricKey);
+      AeadOrDaead aead = helper.getAeadOrDaead(symmetricKey);
       byte[] ciphertext = aead.encrypt(plaintext, associatedData);
       byte[] decrypted = aead.decrypt(ciphertext, associatedData);
       assertArrayEquals(plaintext, decrypted);
@@ -146,7 +148,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
       // Try using a symmetric key that is too short.
       symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes() - 1);
       try {
-        aead = helper.getAead(symmetricKey);
+        aead = helper.getAeadOrDaead(symmetricKey);
         fail("Symmetric key too short, should have thrown exception:\n" + template.toString());
       } catch (GeneralSecurityException e) {
         // Expected.
@@ -156,7 +158,7 @@ public class RegistryEciesAeadHkdfDemHelperTest {
       // Try using a symmetric key that is too long.
       symmetricKey = Random.randBytes(helper.getSymmetricKeySizeInBytes() + 1);
       try {
-        aead = helper.getAead(symmetricKey);
+        aead = helper.getAeadOrDaead(symmetricKey);
         fail("Symmetric key too long, should have thrown exception:\n" + template.toString());
       } catch (GeneralSecurityException e) {
         // Expected.

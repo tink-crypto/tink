@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
 import java.security.GeneralSecurityException;
 
 /**
@@ -29,10 +29,10 @@ public interface EciesAeadHkdfDemHelper {
   public int getSymmetricKeySizeInBytes();
 
   /**
-   * Creates a new {@code Aead}-primitive that uses the key material given in 'symmetric_key', which
-   * must be of length dem_key_size_in_bytes().
+   * Creates a new {@code AeadOrDaead}-primitive that uses the key material given in
+   * 'symmetric_key', which must be of length dem_key_size_in_bytes().
    *
-   * @return the newly created {@code Aead}-primitive.
+   * @return the newly created {@code AeadOrDaead}-primitive.
    */
-  public Aead getAead(final byte[] symmetricKeyValue) throws GeneralSecurityException;
+  public AeadOrDaead getAeadOrDaead(final byte[] symmetricKeyValue) throws GeneralSecurityException;
 }

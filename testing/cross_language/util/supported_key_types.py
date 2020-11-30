@@ -112,7 +112,8 @@ KEY_TEMPLATE_NAMES = {
     'EciesAeadHkdfPrivateKey': [
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
-        'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305'
+        'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305',
+        'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV'
     ],
     'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
@@ -185,6 +186,12 @@ KEY_TEMPLATE = {
             ec_point_format=common_pb2.UNCOMPRESSED,
             hash_type=common_pb2.SHA256,
             dem_key_template=aead.aead_key_templates.XCHACHA20_POLY1305),
+    'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV':
+        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+            curve_type=common_pb2.NIST_P256,
+            ec_point_format=common_pb2.COMPRESSED,
+            hash_type=common_pb2.SHA256,
+            dem_key_template=daead.deterministic_aead_key_templates.AES256_SIV),
     'AES_CMAC':
         mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':
@@ -235,7 +242,8 @@ KEY_TEMPLATE = {
 # Key template names for which the list of supported languages is different from
 # the list of supported languages of the whole key type.
 _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
-    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python']
+    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python'],
+    'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV': ['cc', 'java', 'python'],
 }
 
 

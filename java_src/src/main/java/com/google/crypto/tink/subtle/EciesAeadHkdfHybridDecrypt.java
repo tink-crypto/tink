@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.HybridDecrypt;
+import com.google.crypto.tink.hybrid.subtle.AeadOrDaead;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.EllipticCurve;
@@ -70,7 +70,7 @@ public final class EciesAeadHkdfHybridDecrypt implements HybridDecrypt {
             contextInfo,
             demHelper.getSymmetricKeySizeInBytes(),
             ecPointFormat);
-    Aead aead = demHelper.getAead(symmetricKey);
+    AeadOrDaead aead = demHelper.getAeadOrDaead(symmetricKey);
     return aead.decrypt(Arrays.copyOfRange(ciphertext, headerSize, ciphertext.length), EMPTY_AAD);
   }
 }
