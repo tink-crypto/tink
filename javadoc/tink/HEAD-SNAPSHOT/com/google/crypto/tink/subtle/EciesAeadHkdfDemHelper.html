@@ -125,10 +125,10 @@ var activeTableTab = "activeTableTab";
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAead-byte:A-">getAead</a></span>(byte[]&nbsp;symmetricKeyValue)</code>
-<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in 'symmetric_key', which
- must be of length dem_key_size_in_bytes().</div>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAeadOrDaead-byte:A-">getAeadOrDaead</a></span>(byte[]&nbsp;symmetricKeyValue)</code>
+<div class="block">Creates a new <code>AeadOrDaead</code>-primitive that uses the key material given in
+ 'symmetric_key', which must be of length dem_key_size_in_bytes().</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -163,19 +163,19 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="getAead-byte:A-">
+<a name="getAeadOrDaead-byte:A-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>getAead</h4>
-<pre><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;getAead(byte[]&nbsp;symmetricKeyValue)
-      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in 'symmetric_key', which
- must be of length dem_key_size_in_bytes().</div>
+<h4>getAeadOrDaead</h4>
+<pre><a href="../../../../../com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a>&nbsp;getAeadOrDaead(byte[]&nbsp;symmetricKeyValue)
+                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Creates a new <code>AeadOrDaead</code>-primitive that uses the key material given in
+ 'symmetric_key', which must be of length dem_key_size_in_bytes().</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the newly created <code>Aead</code>-primitive.</dd>
+<dd>the newly created <code>AeadOrDaead</code>-primitive.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>

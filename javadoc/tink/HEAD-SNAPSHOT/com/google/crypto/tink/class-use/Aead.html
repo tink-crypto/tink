@@ -94,6 +94,10 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.hybrid.subtle">com.google.crypto.tink.hybrid.subtle</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -261,6 +265,22 @@
 </tbody>
 </table>
 </li>
+<li class="blockList"><a name="com.google.crypto.tink.hybrid.subtle">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a> in <a href="../../../../../com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing constructors, and an explanation">
+<caption><span>Constructors in <a href="../../../../../com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a> with parameters of type <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html#AeadOrDaead-com.google.crypto.tink.Aead-">AeadOrDaead</a></span>(<a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;aead)</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.subtle">
 <!--   -->
 </a>
@@ -315,13 +335,6 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
-<td class="colLast"><span class="typeNameLabel">EciesAeadHkdfDemHelper.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAead-byte:A-">getAead</a></span>(byte[]&nbsp;symmetricKeyValue)</code>
-<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in 'symmetric_key', which
- must be of length dem_key_size_in_bytes().</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></td>
 <td class="colLast"><span class="typeNameLabel">EncryptThenAuthenticate.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EncryptThenAuthenticate.html#newAesCtrHmac-byte:A-int-java.lang.String-byte:A-int-">newAesCtrHmac</a></span>(byte[]&nbsp;aesCtrKey,
              int&nbsp;ivSize,
