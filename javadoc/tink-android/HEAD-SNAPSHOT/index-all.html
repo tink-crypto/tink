@@ -146,6 +146,15 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle"><span class="typeNameLink">AeadOrDaead</span></a> - Class in <a href="com/google/crypto/tink/hybrid/subtle/package-summary.html">com.google.crypto.tink.hybrid.subtle</a></dt>
+<dd>
+<div class="block">A wrapper class that provides the functionality of an underlying Aead or Deterministic Aead
+ primitive.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html#AeadOrDaead-com.google.crypto.tink.Aead-">AeadOrDaead(Aead)</a></span> - Constructor for class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html#AeadOrDaead-com.google.crypto.tink.DeterministicAead-">AeadOrDaead(DeterministicAead)</a></span> - Constructor for class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/AeadWrapper.html" title="class in com.google.crypto.tink.aead"><span class="typeNameLink">AeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a></dt>
 <dd>
 <div class="block">AeadWrapper is the implementation of SetWrapper for the Aead primitive.</div>
@@ -819,6 +828,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></dt>
+<dd>
+<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridDecrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridDecrypt</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/HybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/HybridDecrypt.html" title="interface in com.google.crypto.tink">HybridDecrypt</a></dt>
@@ -1247,6 +1260,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/AeadOrDaead.html" title="class in com.google.crypto.tink.hybrid.subtle">AeadOrDaead</a></dt>
+<dd>
+<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.subtle.<a href="com/google/crypto/tink/hybrid/subtle/RsaKemHybridEncrypt.html" title="class in com.google.crypto.tink.hybrid.subtle">RsaKemHybridEncrypt</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/HybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/HybridEncrypt.html" title="interface in com.google.crypto.tink">HybridEncrypt</a></dt>
@@ -1427,10 +1444,10 @@
 <dd>
 <div class="block">Gets an <code>Aead</code> backed by <code>keyUri</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAead-byte:A-">getAead(byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html" title="interface in com.google.crypto.tink.subtle">EciesAeadHkdfDemHelper</a></dt>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getAeadOrDaead-byte:A-">getAeadOrDaead(byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html" title="interface in com.google.crypto.tink.subtle">EciesAeadHkdfDemHelper</a></dt>
 <dd>
-<div class="block">Creates a new <code>Aead</code>-primitive that uses the key material given in 'symmetric_key', which
- must be of length dem_key_size_in_bytes().</div>
+<div class="block">Creates a new <code>AeadOrDaead</code>-primitive that uses the key material given in
+ 'symmetric_key', which must be of length dem_key_size_in_bytes().</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.html#getAll--">getAll()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a></dt>
 <dd>&nbsp;</dd>
