@@ -17,21 +17,25 @@
 #define TINK_CORE_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <tuple>
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 
 #include "absl/base/thread_annotations.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "absl/types/optional.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
 #include "tink/catalogue.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/internal/keyset_wrapper.h"
+#include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
@@ -101,9 +105,9 @@ class RegistryImpl {
       const std::string& type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'wrapper', which must be non-nullptr.
-  template <class P>
+  template <class P, class Q>
   crypto::tink::util::Status RegisterPrimitiveWrapper(
-      PrimitiveWrapper<P, P>* wrapper) ABSL_LOCKS_EXCLUDED(maps_mutex_);
+      PrimitiveWrapper<P, Q>* wrapper) ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
@@ -127,6 +131,11 @@ class RegistryImpl {
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  template <class P>
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> WrapKeyset(
+      const google::crypto::tink::Keyset& keyset) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<google::crypto::tink::KeyData> DeriveKey(
@@ -297,6 +306,76 @@ class RegistryImpl {
     const std::shared_ptr<void> key_type_manager_;
   };
 
+  class WrapperInfo {
+   public:
+    template <typename P, typename Q>
+    explicit WrapperInfo(std::unique_ptr<PrimitiveWrapper<P, Q>> wrapper)
+        : is_same_primitive_wrapping_(std::is_same<P, Q>::value),
+          wrapper_type_index_(std::type_index(typeid(*wrapper))),
+          q_type_index_(std::type_index(typeid(Q))) {
+      auto keyset_wrapper_unique_ptr =
+          absl::make_unique<KeysetWrapperImpl<P, Q>>(
+              wrapper.get(), [](const google::crypto::tink::KeyData& key_data) {
+                return RegistryImpl::GlobalInstance().GetPrimitive<P>(key_data);
+              });
+      keyset_wrapper_ = std::move(keyset_wrapper_unique_ptr);
+      original_wrapper_ = std::move(wrapper);
+    }
+
+    template <typename Q>
+    crypto::tink::util::StatusOr<const KeysetWrapper<Q>*> GetKeysetWrapper()
+        const {
+      if (q_type_index_ != std::type_index(typeid(Q))) {
+        return crypto::tink::util::Status(
+            crypto::tink::util::error::INTERNAL,
+            "RegistryImpl::KeysetWrapper() called with wrong type");
+      }
+      return static_cast<KeysetWrapper<Q>*>(keyset_wrapper_.get());
+    }
+
+    template <typename P>
+    crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*>
+    GetLegacyWrapper() const {
+      if (!is_same_primitive_wrapping_) {
+        // This happens if a user uses a legacy method (like Registry::Wrap)
+        // directly or has a custom key manager for a primitive which has a
+        // PrimitiveWrapper<P,Q> with P != Q.
+        return crypto::tink::util::Status(
+            crypto::tink::util::error::FAILED_PRECONDITION,
+            absl::StrCat("Cannot use primitive type ", typeid(P).name(),
+                         " with a custom key manager."));
+      }
+      if (q_type_index_ != std::type_index(typeid(P))) {
+        return crypto::tink::util::Status(
+            crypto::tink::util::error::INTERNAL,
+            "RegistryImpl::LegacyWrapper() called with wrong type");
+      }
+      return static_cast<const PrimitiveWrapper<P, P>*>(
+          original_wrapper_.get());
+    }
+
+    // Returns true if the PrimitiveWrapper is the same class as the one used
+    // to construct this WrapperInfo
+    template <typename P, typename Q>
+    bool HasSameType(const PrimitiveWrapper<P, Q>& wrapper) {
+      return wrapper_type_index_ == std::type_index(typeid(wrapper));
+    }
+
+   private:
+    bool is_same_primitive_wrapping_;
+    // dynamic std::type_index of the actual PrimitiveWrapper<P,Q> class for
+    // which this key was inserted.
+    std::type_index wrapper_type_index_;
+    // dynamic std::type_index of Q, when PrimitiveWrapper<P,Q> was inserted.
+    std::type_index q_type_index_;
+    // The primitive_wrapper passed in. We use a shared_ptr because
+    // unique_ptr<void> is invalid.
+    std::shared_ptr<void> original_wrapper_;
+    // The keyset_wrapper_. We use a shared_ptr because unique_ptr<void> is
+    // invalid.
+    std::shared_ptr<void> keyset_wrapper_;
+  };
+
   // All information for a given primitive label.
   struct LabelInfo {
     LabelInfo(std::shared_ptr<void> catalogue, std::type_index type_index,
@@ -314,8 +393,12 @@ class RegistryImpl {
   };
 
   template <class P>
-  crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*> get_wrapper()
+  crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*> GetLegacyWrapper()
       const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  template <class P>
+  crypto::tink::util::StatusOr<const KeysetWrapper<P>*> GetKeysetWrapper() const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Returns the key type info for a given type URL. Since we never replace
   // key type infos, the pointers will stay valid for the lifetime of the
@@ -341,10 +424,9 @@ class RegistryImpl {
   // returns a pointer which needs to stay alive.
   std::unordered_map<std::string, KeyTypeInfo> type_url_to_info_
       ABSL_GUARDED_BY(maps_mutex_);
-  // A map from the type_id to the corresponding wrapper. We use a shared_ptr
-  // because shared_ptr<void> is valid (as opposed to unique_ptr<void>).
-  std::unordered_map<std::type_index, std::shared_ptr<void>>
-      primitive_to_wrapper_ ABSL_GUARDED_BY(maps_mutex_);
+  // A map from the type_id to the corresponding wrapper.
+  std::unordered_map<std::type_index, WrapperInfo> primitive_to_wrapper_
+      ABSL_GUARDED_BY(maps_mutex_);
 
   std::unordered_map<std::string, LabelInfo> name_to_catalogue_map_
       ABSL_GUARDED_BY(maps_mutex_);
@@ -561,31 +643,30 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   return util::OkStatus();
 }
 
-template <class P>
+template <class P, class Q>
 crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
-    PrimitiveWrapper<P, P>* wrapper) {
+    PrimitiveWrapper<P, Q>* wrapper) {
   if (wrapper == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
         "Parameter 'wrapper' must be non-null.");
   }
-  std::shared_ptr<void> entry(wrapper);
+  std::unique_ptr<PrimitiveWrapper<P, Q>> entry(wrapper);
 
   absl::MutexLock lock(&maps_mutex_);
-  auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
+  auto it = primitive_to_wrapper_.find(std::type_index(typeid(Q)));
   if (it != primitive_to_wrapper_.end()) {
-    if (std::type_index(
-            typeid(*static_cast<PrimitiveWrapper<P, P>*>(it->second.get()))) !=
-        std::type_index(
-            typeid(*static_cast<PrimitiveWrapper<P, P>*>(entry.get())))) {
+    if (!it->second.HasSameType(*wrapper)) {
       return util::Status(
           crypto::tink::util::error::ALREADY_EXISTS,
           "A wrapper named for this primitive has already been added.");
     }
     return crypto::tink::util::Status::OK;
   }
-  primitive_to_wrapper_.insert(
-      std::make_pair(std::type_index(typeid(P)), std::move(entry)));
+  primitive_to_wrapper_.emplace(
+      std::piecewise_construct,
+      std::forward_as_tuple(std::type_index(typeid(Q))),
+      std::forward_as_tuple(std::move(entry)));
   return crypto::tink::util::Status::OK;
 }
 
@@ -623,15 +704,28 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
 
 template <class P>
 crypto::tink::util::StatusOr<const PrimitiveWrapper<P, P>*>
-RegistryImpl::get_wrapper() const {
+RegistryImpl::GetLegacyWrapper() const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        util::error::NOT_FOUND,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
-  return static_cast<PrimitiveWrapper<P, P>*>(it->second.get());
+  return it->second.GetLegacyWrapper<P>();
+}
+
+template <class P>
+crypto::tink::util::StatusOr<const KeysetWrapper<P>*>
+RegistryImpl::GetKeysetWrapper() const {
+  absl::MutexLock lock(&maps_mutex_);
+  auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
+  if (it == primitive_to_wrapper_.end()) {
+    return util::Status(
+        util::error::NOT_FOUND,
+        absl::StrCat("No wrapper registered for type ", typeid(P).name()));
+  }
+  return it->second.GetKeysetWrapper<P>();
 }
 
 template <class P>
@@ -643,12 +737,25 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
         "Parameter 'primitive_set' must be non-null.");
   }
   util::StatusOr<const PrimitiveWrapper<P, P>*> wrapper_result =
-      get_wrapper<P>();
+      GetLegacyWrapper<P>();
   if (!wrapper_result.ok()) {
     return wrapper_result.status();
   }
   crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
       wrapper_result.ValueOrDie()->Wrap(std::move(primitive_set));
+  return std::move(primitive_result);
+}
+
+template <class P>
+crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
+    const google::crypto::tink::Keyset& keyset) const {
+  util::StatusOr<const KeysetWrapper<P>*> wrapper_result =
+      GetKeysetWrapper<P>();
+  if (!wrapper_result.ok()) {
+    return wrapper_result.status();
+  }
+  crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
+      wrapper_result.ValueOrDie()->Wrap(keyset);
   return std::move(primitive_result);
 }
 

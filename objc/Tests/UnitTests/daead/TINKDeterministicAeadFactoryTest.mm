@@ -55,12 +55,18 @@ using google::crypto::tink::KeyStatusType;
 @implementation TINKDeterministicAeadFactoryTest
 
 - (void)testEmptyKeyset {
+  NSError *error = nil;
+  TINKDeterministicAeadConfig *aeadConfig =
+      [[TINKDeterministicAeadConfig alloc] initWithError:&error];
+  XCTAssertNotNil(aeadConfig);
+  XCTAssertNil(error);
+
   Keyset keyset;
   TINKKeysetHandle *handle =
       [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
-  NSError *error = nil;
+  error = nil;
   id<TINKDeterministicAead> aead = [TINKDeterministicAeadFactory primitiveWithKeysetHandle:handle
                                                                                      error:&error];
   XCTAssertNil(aead);
