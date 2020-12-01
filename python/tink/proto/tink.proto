@@ -49,13 +49,17 @@ option go_package = "github.com/google/tink/proto/tink_go_proto";
 // to the name of the *Key-proto from type_url-field suffixed with "Format".
 
 message KeyTemplate {
-  // Required.
-  string type_url = 1;  // in format type.googleapis.com/packagename.messagename
-  // Optional.
-  // If missing, it means the key type doesn't require a *KeyFormat proto.
-  bytes value = 2;  // contains specific serialized *KeyFormat proto
-  // Optional.
-  // If missing, uses OutputPrefixType.TINK.
+  // Required. The type_url of the key type in format
+  // type.googleapis.com/packagename.messagename -- see above for details.
+  // This is typically the protobuf type URL of the *Key proto. In particular,
+  // this is different of the protobuf type URL of the *KeyFormat proto.
+  string type_url = 1;
+
+  // Required. The serialized *KeyFormat proto.
+  bytes value = 2;
+
+  // Required. The type of prefix used when computing some primitives to
+  // identify the ciphertext/signature, etc.
   OutputPrefixType output_prefix_type = 3;
 }
 
