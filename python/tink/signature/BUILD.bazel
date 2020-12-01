@@ -1,4 +1,4 @@
-load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -53,7 +53,6 @@ py_test(
     deps = [
         ":signature",
         requirement("absl-py"),
-        "//tink:tink_config",
         "//tink:tink_python",
         "//tink/core",
         "//tink/proto:common_py_pb2",
@@ -69,6 +68,7 @@ py_library(
     deps = [
         ":_public_key_sign",
         ":_public_key_verify",
+        requirement("absl-py"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -109,7 +109,6 @@ py_test(
     deps = [
         ":signature",
         requirement("absl-py"),
-        "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:rsa_ssa_pkcs1_py_pb2",

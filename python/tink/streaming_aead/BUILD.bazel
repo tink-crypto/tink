@@ -1,4 +1,4 @@
-load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -65,15 +65,15 @@ py_test(
 )
 
 py_library(
-    name = "_streaming_aead",
-    srcs = ["_streaming_aead.py"],
+    name = "_raw_streaming_aead",
+    srcs = ["_raw_streaming_aead.py"],
     srcs_version = "PY3",
     deps = [requirement("six")],
 )
 
 py_library(
-    name = "_raw_streaming_aead",
-    srcs = ["_raw_streaming_aead.py"],
+    name = "_streaming_aead",
+    srcs = ["_streaming_aead.py"],
     srcs_version = "PY3",
     deps = [requirement("six")],
 )
@@ -90,7 +90,6 @@ py_library(
         requirement("six"),
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
-        "//tink/proto:tink_py_pb2",
     ],
 )
 
@@ -105,7 +104,6 @@ py_test(
         requirement("absl-py"),
         "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
-        "//tink/cc/pybind:tink_bindings",
         "//tink/core",
         "//tink/proto:aes_ctr_hmac_streaming_py_pb2",
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
@@ -155,7 +153,6 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         "//tink:tink_python",
-        "//tink/cc/pybind:tink_bindings",
         "//tink/testing:bytes_io",
     ],
 )
@@ -181,7 +178,6 @@ py_test(
         ":streaming_aead",
         requirement("absl-py"),
         "//tink:tink_python",
-        "//tink/core",
         "//tink/testing:bytes_io",
         "//tink/testing:keyset_builder",
     ],

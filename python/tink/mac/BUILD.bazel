@@ -1,4 +1,4 @@
-load("@rules_python//python:defs.bzl", "py_library")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
 load("@tink_py_pip_deps//:requirements.bzl", "requirement")
 
 package(default_visibility = ["//:__subpackages__"])
@@ -95,6 +95,7 @@ py_test(
     data = [
         "@tink_base//testdata/templates",
     ],
+    srcs_version = "PY3",
     deps = [
         ":mac",
         requirement("absl-py"),
