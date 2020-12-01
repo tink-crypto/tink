@@ -163,10 +163,10 @@ TEST(HmacPrfKeyManagerTest, GetPrimitive) {
   key_format.mutable_params()->set_hash(HashType::SHA256);
   key_format.set_key_size(16);
   HmacPrfKey key = HmacPrfKeyManager().CreateKey(key_format).ValueOrDie();
-  auto manager_mac_or = HmacPrfKeyManager().GetPrimitive<PrfSet>(key);
+  auto manager_mac_or = HmacPrfKeyManager().GetPrimitive<Prf>(key);
   ASSERT_THAT(manager_mac_or.status(), IsOk());
   auto prf_value_or =
-      manager_mac_or.ValueOrDie()->ComputePrimary("some plaintext", 16);
+      manager_mac_or.ValueOrDie()->Compute("some plaintext", 16);
   ASSERT_THAT(prf_value_or.status(), IsOk());
 
   auto direct_prf_or = subtle::HmacBoringSsl::New(

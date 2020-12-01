@@ -42,24 +42,21 @@ namespace tink {
 
 class HmacPrfKeyManager
     : public KeyTypeManager<google::crypto::tink::HmacPrfKey,
-                            google::crypto::tink::HmacPrfKeyFormat,
-                            List<PrfSet>> {
+                            google::crypto::tink::HmacPrfKeyFormat, List<Prf>> {
  public:
-  class PrfSetFactory : public PrimitiveFactory<PrfSet> {
-    crypto::tink::util::StatusOr<std::unique_ptr<PrfSet>> Create(
+  class PrfFactory : public PrimitiveFactory<Prf> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Prf>> Create(
         const google::crypto::tink::HmacPrfKey& key) const override {
-      return subtle::CreatePrfSetFromPrf(
-          subtle::CreatePrfFromStatefulMacFactory(
-              absl::make_unique<subtle::StatefulHmacBoringSslFactory>(
-                  util::Enums::ProtoToSubtle(key.params().hash()),
-                  MaxOutputLength(
-                      util::Enums::ProtoToSubtle(key.params().hash())),
-                  util::SecretDataFromStringView(key.key_value()))));
+      return subtle::CreatePrfFromStatefulMacFactory(
+          absl::make_unique<subtle::StatefulHmacBoringSslFactory>(
+              util::Enums::ProtoToSubtle(key.params().hash()),
+              MaxOutputLength(util::Enums::ProtoToSubtle(key.params().hash())),
+              util::SecretDataFromStringView(key.key_value())));
     }
   };
 
   HmacPrfKeyManager()
-      : KeyTypeManager(absl::make_unique<HmacPrfKeyManager::PrfSetFactory>()) {}
+      : KeyTypeManager(absl::make_unique<HmacPrfKeyManager::PrfFactory>()) {}
 
   uint32_t get_version() const override { return 0; }
 

@@ -41,16 +41,15 @@ namespace tink {
 class AesCmacPrfKeyManager
     : public KeyTypeManager<google::crypto::tink::AesCmacPrfKey,
                             google::crypto::tink::AesCmacPrfKeyFormat,
-                            List<PrfSet>> {
+                            List<Prf>> {
  public:
-  class PrfSetFactory : public PrimitiveFactory<PrfSet> {
-    crypto::tink::util::StatusOr<std::unique_ptr<PrfSet>> Create(
+  class PrfSetFactory : public PrimitiveFactory<Prf> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Prf>> Create(
         const google::crypto::tink::AesCmacPrfKey& key) const override {
-      return subtle::CreatePrfSetFromPrf(
-          subtle::CreatePrfFromStatefulMacFactory(
-              absl::make_unique<subtle::StatefulCmacBoringSslFactory>(
-                  AesCmacPrfKeyManager::MaxOutputLength(),
-                  util::SecretDataFromStringView(key.key_value()))));
+      return subtle::CreatePrfFromStatefulMacFactory(
+          absl::make_unique<subtle::StatefulCmacBoringSslFactory>(
+              AesCmacPrfKeyManager::MaxOutputLength(),
+              util::SecretDataFromStringView(key.key_value())));
     }
   };
 

@@ -11,17 +11,17 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_PYTHON_TINK_CC_PYBIND_PRF_SET_H_
-#define TINK_PYTHON_TINK_CC_PYBIND_PRF_SET_H_
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_PRF_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_PRF_H_
 
 #include "pybind11/pybind11.h"
 
 namespace crypto {
 namespace tink {
 
-void PybindRegisterPrfSet(pybind11::module* module);
+void PybindRegisterPrf(pybind11::module* module);
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_TINK_CC_PYBIND_PRF_SET_H_
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_PRF_H_

@@ -88,41 +88,6 @@ std::unique_ptr<InputStream> GetInputStreamForString(const std::string& input) {
       absl::make_unique<std::stringstream>(input));
 }
 
-class SinglePrfTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-    auto mock_prf = absl::make_unique<NiceMock<MockPrf>>();
-    ON_CALL(*mock_prf, Compute(Eq("input"), Eq(6)))
-        .WillByDefault(Return(std::string("output")));
-    ON_CALL(*mock_prf, Compute(Eq("input"), Gt(6)))
-        .WillByDefault(Return(util::Status(util::error::INVALID_ARGUMENT,
-                                           "Too much output requested")));
-    auto prf_ptr = mock_prf.get();
-    prf_set_ = CreatePrfSetFromPrf(std::move(mock_prf));
-    uint32_t primary_id = prf_set_->GetPrimaryId();
-    auto prfs = prf_set_->GetPrfs();
-    EXPECT_THAT(prfs, Contains(Pair(Eq(primary_id), Eq(prf_ptr))));
-  }
-  PrfSet* prf_set() { return prf_set_.get(); }
-
- private:
-  std::unique_ptr<PrfSet> prf_set_;
-};
-
-TEST_F(SinglePrfTest, PrfSetWorks) {
-  auto output_result = prf_set()->ComputePrimary("input", 6);
-  ASSERT_THAT(output_result.status(), IsOk());
-  EXPECT_THAT(output_result.ValueOrDie(), StrEq("output"));
-}
-
-TEST_F(SinglePrfTest, PrfSetTooMuchOutput) {
-  auto output_result = prf_set()->ComputePrimary("input", 100);
-  EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
-                       StrEq("Too much output requested")));
-}
-
 class PrfFromStatefulMacFactoryTest : public ::testing::Test {
  protected:
   void SetUpWithResult(util::Status update_status,

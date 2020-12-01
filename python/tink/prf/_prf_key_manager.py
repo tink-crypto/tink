@@ -24,15 +24,14 @@ from tink.prf import _prf_set_wrapper
 
 
 class PrfCcToPyWrapper(_prf_set.Prf):
-  """Transforms C++ PrfSet primitive into a Python Prf primitive."""
+  """Transforms C++ Prf primitive into a Python Prf primitive."""
 
-  def __init__(self, cc_primitive: tink_bindings.PrfSet):
-    # cc_primitive is a PrfSet that only contains one PRF.
+  def __init__(self, cc_primitive: tink_bindings.Prf):
     self._cc_primitive = cc_primitive
 
   @core.use_tink_errors
   def compute(self, input_data: bytes, output_length: int) -> bytes:
-    return self._cc_primitive.compute_primary(input_data, output_length)
+    return self._cc_primitive.compute(input_data, output_length)
 
 
 def register() -> None:
@@ -45,7 +44,7 @@ def register() -> None:
   ):
     type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
     key_manager = core.KeyManagerCcToPyWrapper(
-        tink_bindings.PrfSetKeyManager.from_cc_registry(type_url),
+        tink_bindings.PrfKeyManager.from_cc_registry(type_url),
         _prf_set.Prf, PrfCcToPyWrapper)
     core.Registry.register_key_manager(key_manager, new_key_allowed=True)
   core.Registry.register_primitive_wrapper(_prf_set_wrapper.PrfSetWrapper())

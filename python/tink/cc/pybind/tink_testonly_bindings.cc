@@ -25,7 +25,7 @@
 #include "tink/cc/pybind/input_stream_adapter.h"
 #include "tink/cc/pybind/mac.h"
 #include "tink/cc/pybind/output_stream_adapter.h"
-#include "tink/cc/pybind/prf_set.h"
+#include "tink/cc/pybind/prf.h"
 #include "tink/cc/pybind/public_key_sign.h"
 #include "tink/cc/pybind/public_key_verify.h"
 #include "tink/cc/pybind/python_file_object_adapter.h"
@@ -46,7 +46,7 @@ PYBIND11_MODULE(tink_testonly_bindings, m) {
   PybindRegisterDeterministicAead(&m);
   PybindRegisterPublicKeySign(&m);
   PybindRegisterMac(&m);
-  PybindRegisterPrfSet(&m);
+  PybindRegisterPrf(&m);
   pybind11::test::PybindRegisterStatusInjector(&m);
   pybind11::google_tink::PybindRegisterStatus(&m);
   PybindRegisterHybridDecrypt(&m);

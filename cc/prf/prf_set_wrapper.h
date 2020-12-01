@@ -29,10 +29,10 @@ namespace tink {
 // and combines them into a single PrfSet-primitive, that uses the provided
 // instances, by using the keysets key ID as Prf ID and computing the union of
 // the provided PRFs.
-class PrfSetWrapper : public PrimitiveWrapper<PrfSet, PrfSet> {
+class PrfSetWrapper : public PrimitiveWrapper<Prf, PrfSet> {
  public:
   util::StatusOr<std::unique_ptr<PrfSet>> Wrap(
-      std::unique_ptr<PrimitiveSet<PrfSet>> prf_set) const override;
+      std::unique_ptr<PrimitiveSet<Prf>> prf_set) const override;
 };
 
 }  // namespace tink

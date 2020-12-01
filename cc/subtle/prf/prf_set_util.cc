@@ -27,20 +27,6 @@ namespace tink {
 namespace subtle {
 namespace {
 
-constexpr uint32_t kId = 0;
-
-class SinglePrf : public PrfSet {
- public:
-  explicit SinglePrf(std::unique_ptr<Prf> prf)
-      : prf_(std::move(prf)), prf_map_({{kId, prf_.get()}}) {}
-  uint32_t GetPrimaryId() const override { return kId; }
-  const std::map<uint32_t, Prf*>& GetPrfs() const override { return prf_map_; }
-
- private:
-  std::unique_ptr<Prf> prf_;
-  std::map<uint32_t, Prf*> prf_map_;
-};
-
 class PrfFromStreamingPrf : public Prf {
  public:
   explicit PrfFromStreamingPrf(std::unique_ptr<StreamingPrf> streaming_prf)
@@ -95,10 +81,6 @@ class PrfFromStatefulMacFactory : public Prf {
 };
 
 }  // namespace
-
-std::unique_ptr<PrfSet> CreatePrfSetFromPrf(std::unique_ptr<Prf> prf) {
-  return absl::make_unique<SinglePrf>(std::move(prf));
-}
 
 std::unique_ptr<Prf> CreatePrfFromStreamingPrf(
     std::unique_ptr<StreamingPrf> streaming_prf) {

@@ -129,10 +129,10 @@ TEST(AesCmacPrfKeyManagerTest, ValidateKeyShortKey) {
 TEST(AesCmacPrfKeyManagerTest, GetPrimitive) {
   AesCmacPrfKeyFormat format = ValidKeyFormat();
   AesCmacPrfKey key = AesCmacPrfKeyManager().CreateKey(format).ValueOrDie();
-  auto manager_prf_or = AesCmacPrfKeyManager().GetPrimitive<PrfSet>(key);
+  auto manager_prf_or = AesCmacPrfKeyManager().GetPrimitive<Prf>(key);
   ASSERT_THAT(manager_prf_or.status(), IsOk());
   auto prf_value_or =
-      manager_prf_or.ValueOrDie()->ComputePrimary("some plaintext", 16);
+      manager_prf_or.ValueOrDie()->Compute("some plaintext", 16);
   ASSERT_THAT(prf_value_or.status(), IsOk());
 
   auto direct_prf_or = subtle::AesCmacBoringSsl::New(

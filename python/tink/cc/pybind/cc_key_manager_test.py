@@ -253,11 +253,11 @@ class MacKeyManagerTest(absltest.TestCase):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
 
 
-class PrfSetKeyManagerTest(absltest.TestCase):
+class PrfKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(PrfSetKeyManagerTest, self).setUp()
-    self.key_manager = tink_bindings.PrfSetKeyManager.from_cc_registry(
+    super(PrfKeyManagerTest, self).setUp()
+    self.key_manager = tink_bindings.PrfKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacPrfKey')
 
   def new_hmac_prf_key_template(self, hash_type, key_size):
@@ -293,22 +293,21 @@ class PrfSetKeyManagerTest(absltest.TestCase):
       self.key_manager.new_key_data(key_template)
 
   def test_prf_success(self):
-    prfset = self.key_manager.primitive(
+    prf = self.key_manager.primitive(
         self.key_manager.new_key_data(
             self.new_hmac_prf_key_template(
                 hash_type=common_pb2.SHA256, key_size=16)))
-    output = prfset.compute_primary(b'input_data', output_length=31)
+    output = prf.compute(b'input_data', output_length=31)
     self.assertLen(output, 31)
-    self.assertEqual(
-        prfset.compute_primary(b'input_data', output_length=31), output)
+    self.assertEqual(prf.compute(b'input_data', output_length=31), output)
 
   def test_prf_bad_output_length(self):
-    prfset = self.key_manager.primitive(
+    prf = self.key_manager.primitive(
         self.key_manager.new_key_data(
             self.new_hmac_prf_key_template(
                 hash_type=common_pb2.SHA256, key_size=16)))
     with self.assertRaises(tink_bindings.StatusNotOk):
-      _ = prfset.compute_primary(b'input_data', output_length=12345)
+      _ = prf.compute(b'input_data', output_length=12345)
 
 
 class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):

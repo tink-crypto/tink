@@ -80,8 +80,8 @@ void PybindRegisterCcKeyManager(pybind11::module* module) {
   py_thin_wrappers::WrapCcKeyManager<Mac>(
       m, "MacKeyManager", "Key Manager for MAC (message authentication code).",
       "mac");
-  py_thin_wrappers::WrapCcKeyManager<PrfSet>(
-      m, "PrfSetKeyManager", "Key Manager for PrfSet.", "prf_set");
+  py_thin_wrappers::WrapCcKeyManager<Prf>(
+      m, "PrfKeyManager", "Key Manager for Prf.", "prf");
   py_thin_wrappers::WrapCcKeyManager<PublicKeySign>(
       m, "PublicKeySignKeyManager", "Key Manager for Public Key signing.",
       "public_key_sign")

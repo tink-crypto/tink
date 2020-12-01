@@ -24,9 +24,6 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// Creates a PrfSet that contains only a single given Prf, taking ownership of
-// that Prf.
-std::unique_ptr<PrfSet> CreatePrfSetFromPrf(std::unique_ptr<Prf> prf);
 // Creates a Prf from a StreamingPrf, taking ownership of the StreamingPrf.
 std::unique_ptr<Prf> CreatePrfFromStreamingPrf(
     std::unique_ptr<StreamingPrf> streaming_prf);

@@ -253,9 +253,9 @@ tink_pybind_library(
 )
 
 tink_pybind_library(
-    name = "prf_set",
-    srcs = ["prf_set.cc"],
-    hdrs = ["prf_set.h"],
+    name = "prf",
+    srcs = ["prf.cc"],
+    hdrs = ["prf.h"],
     deps = [
         ":status_casters",
         "@pybind11",
@@ -329,7 +329,7 @@ tink_pybind_extension(
         ":input_stream_adapter",
         ":mac",
         ":output_stream_adapter",
-        ":prf_set",
+        ":prf",
         ":public_key_sign",
         ":public_key_verify",
         ":python_file_object_adapter",
@@ -368,7 +368,7 @@ tink_pybind_extension(
         ":input_stream_adapter",
         ":mac",
         ":output_stream_adapter",
-        ":prf_set",
+        ":prf",
         ":public_key_sign",
         ":public_key_verify",
         ":python_file_object_adapter",

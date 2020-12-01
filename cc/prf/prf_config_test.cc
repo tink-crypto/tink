@@ -41,15 +41,13 @@ class PrfConfigTest : public ::testing::Test {
 };
 
 TEST_F(PrfConfigTest, RegisterWorks) {
-  EXPECT_THAT(
-      Registry::get_key_manager<PrfSet>(HmacPrfKeyManager().get_key_type())
-          .status(),
-      StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<Prf>(HmacPrfKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
   EXPECT_THAT(PrfConfig::Register(), IsOk());
-  EXPECT_THAT(
-      Registry::get_key_manager<PrfSet>(HmacPrfKeyManager().get_key_type())
-          .status(),
-      IsOk());
+  EXPECT_THAT(Registry::get_key_manager<Prf>(HmacPrfKeyManager().get_key_type())
+                  .status(),
+              IsOk());
 }
 
 // FIPS-only mode tests

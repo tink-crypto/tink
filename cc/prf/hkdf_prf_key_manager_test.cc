@@ -289,8 +289,8 @@ TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
   auto key_or = HkdfPrfKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
 
-  StatusOr<std::unique_ptr<PrfSet>> prf_or =
-      HkdfPrfKeyManager().GetPrimitive<PrfSet>(key_or.ValueOrDie());
+  StatusOr<std::unique_ptr<Prf>> prf_or =
+      HkdfPrfKeyManager().GetPrimitive<Prf>(key_or.ValueOrDie());
 
   ASSERT_THAT(prf_or.status(), IsOk());
 
@@ -305,7 +305,7 @@ TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
       std::move(direct_streaming_prf.ValueOrDie()));
 
   util::StatusOr<std::string> output_or =
-      prf_or.ValueOrDie()->ComputePrimary("input string", 100);
+      prf_or.ValueOrDie()->Compute("input string", 100);
   util::StatusOr<std::string> direct_output_or =
       direct_prf->Compute("input string", 100);
 

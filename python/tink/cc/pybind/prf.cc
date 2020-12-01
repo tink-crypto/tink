@@ -14,28 +14,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/prf/prf_set.h"
+#include "tink/cc/pybind/prf.h"
 
 #include "pybind11/pybind11.h"
+#include "tink/prf/prf_set.h"
 #include "tink/util/statusor.h"
 #include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {
 
-void PybindRegisterPrfSet(pybind11::module* module) {
+void PybindRegisterPrf(pybind11::module* module) {
   namespace py = pybind11;
   py::module& m = *module;
 
-  py::class_<PrfSet>(m, "PrfSet", "The interface for PRF Set.")
+  py::class_<Prf>(m, "Prf", "The interface for PRF.")
       // We only wrap PrfSet objects that contain a single PRF. Therefore, we
       // only need the function "compute_primary".
       .def(
-          "compute_primary",
-          [](const PrfSet& self, const py::bytes& input_data,
+          "compute",
+          [](const Prf& self, const py::bytes& input_data,
              size_t output_length) -> util::StatusOr<py::bytes> {
             // TODO(b/145925674)
-            return self.ComputePrimary(std::string(input_data), output_length);
+            return self.Compute(std::string(input_data), output_length);
           },
           py::arg("input_data"), py::arg("output_length"),
           "Computes the value of the primary (and only) PRF.");

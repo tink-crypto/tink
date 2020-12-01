@@ -26,12 +26,10 @@ namespace {
 
 class PrfSetPrimitiveWrapper : public PrfSet {
  public:
-  explicit PrfSetPrimitiveWrapper(std::unique_ptr<PrimitiveSet<PrfSet>> prf_set)
+  explicit PrfSetPrimitiveWrapper(std::unique_ptr<PrimitiveSet<Prf>> prf_set)
       : prf_set_(std::move(prf_set)) {
-    auto prf_sets = prf_set_->get_raw_primitives().ValueOrDie();
-    for (const auto& prf : *prf_sets) {
-      prfs_.insert(
-          {prf->get_key_id(), prf->get_primitive().GetPrfs().begin()->second});
+    for (const auto& prf : *prf_set_->get_raw_primitives().ValueOrDie()) {
+      prfs_.insert({prf->get_key_id(), &prf->get_primitive()});
     }
   }
 
@@ -43,11 +41,11 @@ class PrfSetPrimitiveWrapper : public PrfSet {
   ~PrfSetPrimitiveWrapper() override {}
 
  private:
-  std::unique_ptr<PrimitiveSet<PrfSet>> prf_set_;
+  std::unique_ptr<PrimitiveSet<Prf>> prf_set_;
   std::map<uint32_t, Prf*> prfs_;
 };
 
-util::Status Validate(PrimitiveSet<PrfSet>* prf_set) {
+util::Status Validate(PrimitiveSet<Prf>* prf_set) {
   if (prf_set == nullptr) {
     return util::Status(util::error::INTERNAL, "prf_set must be non-NULL");
   }
@@ -56,10 +54,6 @@ util::Status Validate(PrimitiveSet<PrfSet>* prf_set) {
                         "prf_set has no primary");
   }
   for (auto prf : prf_set->get_all()) {
-    if (prf->get_primitive().GetPrfs().size() != 1) {
-      return util::Status(util::error::INTERNAL,
-                          "prf_set contains prfs with more than one function");
-    }
     if (prf->get_output_prefix_type() != OutputPrefixType::RAW) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "PrfSet should only be used with prefix type RAW");
@@ -71,7 +65,7 @@ util::Status Validate(PrimitiveSet<PrfSet>* prf_set) {
 }  // namespace
 
 util::StatusOr<std::unique_ptr<PrfSet>> PrfSetWrapper::Wrap(
-    std::unique_ptr<PrimitiveSet<PrfSet>> prf_set) const {
+    std::unique_ptr<PrimitiveSet<Prf>> prf_set) const {
   util::Status status = Validate(prf_set.get());
   if (!status.ok()) return status;
   return {absl::make_unique<PrfSetPrimitiveWrapper>(std::move(prf_set))};

@@ -43,7 +43,7 @@ namespace tink {
 class HkdfPrfKeyManager
     : public KeyTypeManager<google::crypto::tink::HkdfPrfKey,
                             google::crypto::tink::HkdfPrfKeyFormat,
-                            List<StreamingPrf, PrfSet>> {
+                            List<StreamingPrf, Prf>> {
  public:
   class StreamingPrfFactory : public PrimitiveFactory<StreamingPrf> {
     crypto::tink::util::StatusOr<std::unique_ptr<StreamingPrf>> Create(
@@ -54,8 +54,8 @@ class HkdfPrfKeyManager
     }
   };
 
-  class PrfSetFactory : public PrimitiveFactory<PrfSet> {
-    crypto::tink::util::StatusOr<std::unique_ptr<PrfSet>> Create(
+  class PrfSetFactory : public PrimitiveFactory<Prf> {
+    crypto::tink::util::StatusOr<std::unique_ptr<Prf>> Create(
         const google::crypto::tink::HkdfPrfKey& key) const override {
       auto hkdf_result = subtle::HkdfStreamingPrf::New(
           crypto::tink::util::Enums::ProtoToSubtle(key.params().hash()),
@@ -63,8 +63,8 @@ class HkdfPrfKeyManager
       if (!hkdf_result.ok()) {
         return hkdf_result.status();
       }
-      return subtle::CreatePrfSetFromPrf(subtle::CreatePrfFromStreamingPrf(
-          std::move(hkdf_result.ValueOrDie())));
+      return subtle::CreatePrfFromStreamingPrf(
+          std::move(hkdf_result.ValueOrDie()));
     }
   };
 

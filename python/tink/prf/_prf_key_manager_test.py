@@ -31,7 +31,7 @@ def setUpModule():
   prf.register()
 
 
-class PrfSetKeyManagerTest(parameterized.TestCase):
+class PrfKeyManagerTest(parameterized.TestCase):
 
   @parameterized.parameters([
       ('AES_CMAC_PRF', prf.prf_key_templates.AES_CMAC),
