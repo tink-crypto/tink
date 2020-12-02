@@ -106,7 +106,6 @@ static EciesAeadHkdfPrivateKey getNewEciesPrivateKey() {
       [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(keysetHandle);
 
-  error = nil;
   id<TINKHybridDecrypt> primitive =
       [TINKHybridDecryptFactory primitiveWithKeysetHandle:keysetHandle error:&error];
 

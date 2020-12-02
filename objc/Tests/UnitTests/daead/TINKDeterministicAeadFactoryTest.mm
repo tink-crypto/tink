@@ -66,7 +66,6 @@ using google::crypto::tink::KeyStatusType;
       [[TINKKeysetHandle alloc] initWithCCKeysetHandle:TestKeysetHandle::GetKeysetHandle(keyset)];
   XCTAssertNotNil(handle);
 
-  error = nil;
   id<TINKDeterministicAead> aead = [TINKDeterministicAeadFactory primitiveWithKeysetHandle:handle
                                                                                      error:&error];
   XCTAssertNil(aead);
