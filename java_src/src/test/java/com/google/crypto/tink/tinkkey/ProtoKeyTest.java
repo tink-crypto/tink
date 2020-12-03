@@ -42,9 +42,10 @@ public final class ProtoKeyTest {
     KeyTemplate kt = AesEaxKeyManager.aes128EaxTemplate();
     KeyData kd = Registry.newKeyData(kt);
 
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThat(pk.getProtoKey()).isEqualTo(kd);
+    assertThat(pk.getOutputPrefixType()).isEqualTo(kt.getOutputPrefixType());
     assertThat(pk.hasSecret()).isTrue();
   }
 
@@ -54,9 +55,10 @@ public final class ProtoKeyTest {
     KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
     KeyData kd = Registry.newKeyData(kt);
 
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThat(pk.getProtoKey()).isEqualTo(kd);
+    assertThat(pk.getOutputPrefixType()).isEqualTo(kt.getOutputPrefixType());
     assertThat(pk.hasSecret()).isTrue();
   }
 
@@ -69,9 +71,10 @@ public final class ProtoKeyTest {
             .setKeyMaterialType(KeyData.KeyMaterialType.UNKNOWN_KEYMATERIAL)
             .build();
 
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThat(pk.getProtoKey()).isEqualTo(kd);
+    assertThat(pk.getOutputPrefixType()).isEqualTo(kt.getOutputPrefixType());
     assertThat(pk.hasSecret()).isTrue();
   }
 
@@ -81,9 +84,10 @@ public final class ProtoKeyTest {
     KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
     KeyData kd = Registry.getPublicKeyData(kt.getTypeUrl(), Registry.newKeyData(kt).getValue());
 
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThat(pk.getProtoKey()).isEqualTo(kd);
+    assertThat(pk.getOutputPrefixType()).isEqualTo(kt.getOutputPrefixType());
     assertThat(pk.hasSecret()).isFalse();
   }
 
@@ -96,9 +100,10 @@ public final class ProtoKeyTest {
             .setKeyMaterialType(KeyData.KeyMaterialType.REMOTE)
             .build();
 
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThat(pk.getProtoKey()).isEqualTo(kd);
+    assertThat(pk.getOutputPrefixType()).isEqualTo(kt.getOutputPrefixType());
     assertThat(pk.hasSecret()).isFalse();
   }
 
@@ -106,7 +111,7 @@ public final class ProtoKeyTest {
   public void testGetKeyTemplate_shouldThrow() throws GeneralSecurityException {
     KeyTemplate kt = AesEaxKeyManager.aes128EaxTemplate();
     KeyData kd = Registry.newKeyData(kt);
-    ProtoKey pk = new ProtoKey(kd);
+    ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
 
     assertThrows(UnsupportedOperationException.class, pk::getKeyTemplate);
   }
