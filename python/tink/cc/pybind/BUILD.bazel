@@ -176,6 +176,7 @@ py_test(
     name = "status_test",
     srcs = ["status_test.py"],
     deps = [
+        ":tink_bindings",
         ":tink_testonly_bindings",
         requirement("absl-py"),
         requirement("six"),
