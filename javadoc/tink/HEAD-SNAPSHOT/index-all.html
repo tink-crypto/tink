@@ -84,6 +84,10 @@
 <dd>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">add(KeyHandle, KeyAccess)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
+<dd>
+<div class="block">Adds the input <code>KeyHandle</code> to the existing keyset with <code>OutputPrefixType.TINK</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-">add(KmsClient)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
 <dd>
 <div class="block">Adds a client to the list of known <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects.</div>
@@ -543,6 +547,10 @@
 </a>
 <h2 class="title">C</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyAccess.html#canAccessSecret--">canAccessSecret()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a></dt>
+<dd>
+<div class="block">Returns true if the <code>KeyAccess</code> instance grants access to a key's secret</div>
+</dd>
 <dt><a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Catalogue</span></a>&lt;<a href="com/google/crypto/tink/Catalogue.html" title="type parameter in Catalogue">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -607,6 +615,8 @@
 <dt><a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a> - package com.google.crypto.tink.subtle</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/prf/package-summary.html">com.google.crypto.tink.subtle.prf</a> - package com.google.crypto.tink.subtle.prf</dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a> - package com.google.crypto.tink.tinkkey</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/util/package-summary.html">com.google.crypto.tink.util</a> - package com.google.crypto.tink.util</dt>
 <dd>&nbsp;</dd>
@@ -711,6 +721,16 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey(TinkKey, KeyAccess)</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Returns a <code>KeyHandle</code> instance with <code>key</code> as the underlying <code>TinkKey</code> if the
+ caller provides the correct <code>KeyAccess</code> instance.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createFromKey(KeyData, KeyTemplate.OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Returns a <code>KeyHandle</code> instance where the underlying <code>TinkKey</code> wraps the input
+ <code>keyData</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#createHmacKeyTemplate-int-int-com.google.crypto.tink.proto.HashType-">createHmacKeyTemplate(int, int, HashType)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -1495,6 +1515,11 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.KemKey.html#getKemBytes--">getKemBytes()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.KemKey.html" title="class in com.google.crypto.tink.subtle">EciesHkdfSenderKem.KemKey</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#getKey-com.google.crypto.tink.tinkkey.KeyAccess-">getKey(KeyAccess)</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Returns the underlying <code>TinkKey</code> key if <code>access</code> is a <code>SecretKeyAccess</code> and
+ the key has a secret, or if the key does not have a secret, otherwise throws a <code>GeneralSecurityException</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.html#getKeyClass--">getKeyClass()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a></dt>
 <dd>
 <div class="block">Returns the class corresponding to the key protobuffer.</div>
@@ -1530,6 +1555,14 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html#getKeySizeInBytes--">getKeySizeInBytes()</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmFactory.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/ProtoKey.html#getKeyTemplate--">getKeyTemplate()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey">ProtoKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/TinkKey.html#getKeyTemplate--">getKeyTemplate()</a></span> - Method in interface com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a></dt>
+<dd>
+<div class="block">A <code>TinkKey</code> should know the <code>KeyTemplate</code> from which it was generated,
+ which in turn specifies the cryptographic algorithm in which the <code>TinkKey</code> should
+ be used.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrHmacAeadKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrKeyManager.html#getKeyType--">getKeyType()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrKeyManager</a></dt>
@@ -1606,6 +1639,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTemplate.html#getOutputPrefixType--">getOutputPrefixType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getOutputPrefixType--">getOutputPrefixType()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/ProtoKey.html#getOutputPrefixType--">getOutputPrefixType()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey">ProtoKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html#getPlaintextSegmentSize--">getPlaintextSegmentSize()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html" title="class in com.google.crypto.tink.subtle">AesCtrHmacStreaming</a></dt>
 <dd>&nbsp;</dd>
@@ -1771,6 +1806,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html#getPrivateKey--">getPrivateKey()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.KeyPair.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign.KeyPair</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/ProtoKey.html#getProtoKey--">getProtoKey()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey">ProtoKey</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.html#getPublicKey-com.google.crypto.tink.proto.EciesAeadHkdfPrivateKey-">getPublicKey(EciesAeadHkdfPrivateKey)</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/EciesAeadHkdfPrivateKeyManager.html" title="class in com.google.crypto.tink.hybrid">EciesAeadHkdfPrivateKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyTypeManager.html#getPublicKey-KeyProtoT-">getPublicKey(KeyProtoT)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a></dt>
@@ -1889,6 +1926,16 @@
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PemKeyType.html#hash">hash</a></span> - Variable in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#hasSecret--">hasSecret()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Returns <code>true</code> if the underlying <code>TinkKey</code> has a secret.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/ProtoKey.html#hasSecret--">hasSecret()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey">ProtoKey</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/TinkKey.html#hasSecret--">hasSecret()</a></span> - Method in interface com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a></dt>
+<dd>
+<div class="block">Returns true if the key contains secret key material, and false otherwise.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/subtle/Hex.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">Hex</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">Helper methods for encode/decode hex strings.</div>
@@ -2190,6 +2237,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#KEY_PAIR_GENERATOR">KEY_PAIR_GENERATOR</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyAccess</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block">An access token for <code>TinkKey</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrHmacAeadKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrKeyManager</a></dt>
@@ -2240,6 +2291,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block">Wraps a <code>TinkKey</code> and enforces access to the underlying <code>TinkKey</code> with <code>KeyAccess</code>.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyManager</span></a>&lt;<a href="com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A KeyManager "understands" keys of a specific key type: it can generate keys of the supported
@@ -2795,8 +2850,16 @@
 <div class="block"><span class="deprecationComment">use <code>setPrimary</code></span></div>
 </div>
 </dd>
+<dt><a href="com/google/crypto/tink/tinkkey/ProtoKey.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">ProtoKey</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block">Wraps the proto <code>KeyData</code> as an implementation of a <code>TinkKey</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Verify.html#PUBLIC_KEY_LEN">PUBLIC_KEY_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Verify.html" title="class in com.google.crypto.tink.subtle">Ed25519Verify</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyAccess.html#publicAccess--">publicAccess()</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a></dt>
+<dd>
+<div class="block">Returns a <code>KeyAccess</code> instance where <code>canAccessSecret()</code> returns false.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/X25519.html#publicFromPrivate-byte:A-">publicFromPrivate(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/X25519.html" title="class in com.google.crypto.tink.subtle">X25519</a></dt>
 <dd>
 <div class="block">Returns the 32-byte Diffie-Hellman public value based on the given <code>privateKey</code> (i.e.,
@@ -3475,6 +3538,10 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><span class="typeNameLink">TinkKey</span></a> - Interface in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block"><code>TinkKey</code> represents how Tink views individual keys.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TKeyAgreement.html#TKeyAgreement--">TKeyAgreement()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TKeyAgreement.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyAgreement</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TKeyFactory.html#TKeyFactory--">TKeyFactory()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TKeyFactory.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyFactory</a></dt>
