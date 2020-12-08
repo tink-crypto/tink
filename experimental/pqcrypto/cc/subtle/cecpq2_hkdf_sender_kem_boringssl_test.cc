@@ -260,7 +260,8 @@ void createFailureSharedSecret(uint8_t out_shared_key[HRSS_KEY_BYTES],
 // is essentially the same as TestSenderRecipientFullFlowSuccess with the
 // difference that we alter bytes of the kem_bytes thus preventing the two
 // shared secrets to match.
-TEST_F(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
+TEST_F(Cecpq2HkdfSenderKemBoringSslTest,
+       DISABLED_TestSenderRecipientFullFlowFailure) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
