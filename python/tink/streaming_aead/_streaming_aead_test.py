@@ -105,17 +105,17 @@ class StreamingAeadTest(absltest.TestCase):
       filename = os.path.join(tmpdirname, 'file')
       with open(filename, 'wb') as f:
         f.write(b'data')
-      dest = open(filename, 'rb')  # dest is not writable
-      with self.assertRaises(ValueError):
-        primitive.new_encrypting_stream(dest, b'aad')
+      with open(filename, 'rb') as dest:  # dest is not writable
+        with self.assertRaises(ValueError):
+          primitive.new_encrypting_stream(dest, b'aad')
 
   def test_decrypt_fails_on_nonreadable_stream(self):
     primitive = get_primitive()
     with tempfile.TemporaryDirectory() as tmpdirname:
       # src not readable
-      src = open(os.path.join(tmpdirname, 'file2'), 'wb')
-      with self.assertRaises(ValueError):
-        primitive.new_decrypting_stream(src, b'aad')
+      with open(os.path.join(tmpdirname, 'file2'), 'wb') as src:
+        with self.assertRaises(ValueError):
+          primitive.new_decrypting_stream(src, b'aad')
 
 if __name__ == '__main__':
   absltest.main()
