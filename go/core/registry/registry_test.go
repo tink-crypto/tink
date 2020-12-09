@@ -170,12 +170,36 @@ func TestPrimitive(t *testing.T) {
 }
 
 func TestRegisterKmsClient(t *testing.T) {
-	kms := &testutil.DummyKMSClient{}
-	registry.RegisterKMSClient(kms)
-
-	_, err := registry.GetKMSClient("dummy")
+	c1, err := testutil.NewFakeKMSClient("fake-kms://prefix1")
 	if err != nil {
-		t.Errorf("error fetching dummy kms client: %s", err)
+		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://prefix1') failed: %v", err)
 	}
-
+	c2, err := testutil.NewFakeKMSClient("fake-kms://prefix2")
+	if err != nil {
+		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://prefix2') failed: %v", err)
+	}
+	registry.RegisterKMSClient(c1)
+	registry.RegisterKMSClient(c2)
+	output1, err := registry.GetKMSClient("fake-kms://prefix1-postfix")
+	if err != nil {
+		t.Errorf("registry.GetKMSClient('fake-kms://prefix1-postfix') failed: %v", err)
+	}
+	if output1 != c1 {
+		t.Errorf("registry.GetKMSClient('fake-kms://prefix1-postfix') did not return c1")
+	}
+	output2, err := registry.GetKMSClient("fake-kms://prefix2-postfix")
+	if err != nil {
+		t.Errorf("registry.GetKMSClient('fake-kms://prefix2-postfix') failed: %v", err)
+	}
+	if output2 != c2 {
+		t.Errorf("registry.GetKMSClient('fake-kms://prefix2-postfix') did not return c2")
+	}
+	_, err = registry.GetKMSClient("fake-kms://unknown-prefix")
+	if err == nil {
+		t.Errorf("registry.GetKMSClient('fake-kms://unknown-prefix') succeeded, want fail")
+	}
+	_, err = registry.GetKMSClient("bad-kms://unknown-prefix")
+	if err == nil {
+		t.Errorf("registry.GetKMSClient('bad-kms://unknown-prefix') succeeded, want fail")
+	}
 }

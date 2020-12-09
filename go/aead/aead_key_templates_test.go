@@ -21,6 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
@@ -89,6 +90,39 @@ func TestNoPrefixKeyTemplates(t *testing.T) {
 			if !proto.Equal(want, tc.template) {
 				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
 			}
+			if err := testEncryptDecrypt(tc.template); err != nil {
+				t.Errorf("%v", err)
+			}
+		})
+	}
+}
+
+func TestKMSEnvelopeAEADKeyTemplates(t *testing.T) {
+	fakeKmsClient, err := testutil.NewFakeKMSClient("fake-kms://")
+	if err != nil {
+		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://') failed: %v", err)
+	}
+	registry.RegisterKMSClient(fakeKmsClient)
+
+	fixedKeyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	newKeyURI, err := testutil.NewFakeKMSKeyURI()
+	if err != nil {
+		t.Fatalf("testutil.NewFakeKMSKeyURI() failed: %v", err)
+	}
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "Fixed Fake KMS Envelope AEAD Key with AES128_GCM",
+			template: aead.KMSEnvelopeAEADKeyTemplate(fixedKeyURI, aead.AES128GCMKeyTemplate()),
+		}, {
+			name:     "New Fake KMS Envelope AEAD Key with AES128_GCM",
+			template: aead.KMSEnvelopeAEADKeyTemplate(newKeyURI, aead.AES128GCMKeyTemplate()),
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
 			if err := testEncryptDecrypt(tc.template); err != nil {
 				t.Errorf("%v", err)
 			}
