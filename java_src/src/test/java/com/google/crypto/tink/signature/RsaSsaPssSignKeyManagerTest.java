@@ -18,6 +18,7 @@ package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTemplate;
@@ -292,6 +293,38 @@ public class RsaSsaPssSignKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void createCorruptedModulusPrimitive_throws() throws Exception {
+
+    RsaSsaPssKeyFormat format =
+        createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
+    RsaSsaPssPrivateKey originalKey = factory.createKey(format);
+    byte[] originalN = originalKey.getPublicKey().getN().toByteArray();
+    originalN[0] = (byte) (originalN[0] ^ 0x01);
+    ByteString corruptedN = ByteString.copyFrom(originalN);
+    RsaSsaPssPublicKey corruptedPub =
+        RsaSsaPssPublicKey.newBuilder()
+            .setVersion(originalKey.getPublicKey().getVersion())
+            .setN(corruptedN)
+            .setE(originalKey.getPublicKey().getE())
+            .build();
+
+    RsaSsaPssPrivateKey corruptedKey =
+        RsaSsaPssPrivateKey.newBuilder()
+            .setVersion(originalKey.getVersion())
+            .setPublicKey(corruptedPub)
+            .setD(originalKey.getD())
+            .setP(originalKey.getP())
+            .setQ(originalKey.getQ())
+            .setDp(originalKey.getDp())
+            .setDq(originalKey.getDq())
+            .setCrt(originalKey.getCrt())
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
 
   @Test
