@@ -1,5 +1,3 @@
-// Copyright 2017 Google Inc.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -43,6 +41,22 @@ public final class SelfKeyTestValidators {
     } catch (GeneralSecurityException e) {
       throw new GeneralSecurityException(
           "RSA PSS signing with private key followed by verifying with public key failed."
+              + " The key may be corrupted.",
+          e);
+    }
+  }
+
+  public static final void validateRsaSsaPkcs1(
+      RSAPrivateCrtKey privateKey, RSAPublicKey publicKey, Enums.HashType sigHash)
+      throws GeneralSecurityException {
+
+    RsaSsaPkcs1SignJce rsaSigner = new RsaSsaPkcs1SignJce(privateKey, sigHash);
+    RsaSsaPkcs1VerifyJce rsaVerifier = new RsaSsaPkcs1VerifyJce(publicKey, sigHash);
+    try {
+      rsaVerifier.verify(rsaSigner.sign(TEST_MESSAGE.toByteArray()), TEST_MESSAGE.toByteArray());
+    } catch (GeneralSecurityException e) {
+      throw new GeneralSecurityException(
+          "RSA PKCS1 signing with private key followed by verifying with public key failed."
               + " The key may be corrupted.",
           e);
     }

@@ -88,7 +88,7 @@ public class SelfKeyTestValidatorsTest {
     "00b3de05bd6644917afad4817f0609933c8b5cd46f04cfbc21fa0220296d474759b8da325da8061eb4a53f8bc3e1537b2a18c1414ae71f02f527f2d8e4e4b0b5d6feeb1191cb00db5d88a6573b4afdb4fc162eff4d062905e0f7ae50d7277a67c90762422e1604ab371a3319f01d19e7c6574a18163518ade29b4850d9fbc64e49b8586258060593f464b1dc5793412f6faec86a326424ddfae21567249f7e7d3cf4d394d972d9d448773aa7d7856e7bfb7cff16e942b5010ce94932682a78ebb0a58bd067cfe95ef0926a120ecd289758025ddda6a42e1622d7bdf6679756da06687add83423def17a3b0a9815a472354a9b9c82b71223465c04c311d10bbb400",
   };
 
-  private static Object[] parametersValid() {
+  private static Object[] parametersPssValid() {
     return new Object[] {
       new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 2048, 32},
       new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 3072, 32},
@@ -102,11 +102,33 @@ public class SelfKeyTestValidatorsTest {
     };
   }
 
-  private static Object[] parametersInvalid() {
+  private static Object[] parametersPssInvalid() {
     return new Object[] {
       new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 2047, 32},
       new Object[] {Enums.HashType.SHA384, Enums.HashType.SHA384, 2047, 48},
       new Object[] {Enums.HashType.SHA512, Enums.HashType.SHA512, 2047, 64},
+    };
+  }
+
+  private static Object[] parametersPkcs1Valid() {
+    return new Object[] {
+      new Object[] {Enums.HashType.SHA256, 2048},
+      new Object[] {Enums.HashType.SHA256, 3072},
+      new Object[] {Enums.HashType.SHA256, 4096},
+      new Object[] {Enums.HashType.SHA384, 2048},
+      new Object[] {Enums.HashType.SHA384, 3072},
+      new Object[] {Enums.HashType.SHA384, 4096},
+      new Object[] {Enums.HashType.SHA512, 2048},
+      new Object[] {Enums.HashType.SHA512, 3072},
+      new Object[] {Enums.HashType.SHA512, 4096},
+    };
+  }
+
+  private static Object[] parametersPkcs1Invalid() {
+    return new Object[] {
+      new Object[] {Enums.HashType.SHA256, 2047},
+      new Object[] {Enums.HashType.SHA384, 2047},
+      new Object[] {Enums.HashType.SHA512, 2047},
     };
   }
 
@@ -147,7 +169,7 @@ public class SelfKeyTestValidatorsTest {
   }
 
   @Test
-  @Parameters(method = "parametersValid")
+  @Parameters(method = "parametersPssValid")
   public void testValidateRsaSsaPssValid(
       Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
       throws Exception {
@@ -156,7 +178,7 @@ public class SelfKeyTestValidatorsTest {
   }
 
   @Test
-  @Parameters(method = "parametersInvalid")
+  @Parameters(method = "parametersPssInvalid")
   public void testValidateRsaSsaPssInvalid(
       Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
       throws Exception {
@@ -166,5 +188,22 @@ public class SelfKeyTestValidatorsTest {
         () ->
             SelfKeyTestValidators.validateRsaSsaPss(
                 privateKey, publicKey, sigHash, mgf1Hash, saltLength));
+  }
+
+  @Test
+  @Parameters(method = "parametersPkcs1Valid")
+  public void testValidateRsaSsaPkcs1Valid(Enums.HashType sigHash, int bitLength) throws Exception {
+    createKey(bitLength);
+    SelfKeyTestValidators.validateRsaSsaPkcs1(privateKey, publicKey, sigHash);
+  }
+
+  @Test
+  @Parameters(method = "parametersPkcs1Invalid")
+  public void testValidateRsaSsaPkcs1Invalid(Enums.HashType sigHash, int bitLength)
+      throws Exception {
+    createKey(bitLength);
+    assertThrows(
+        Exception.class,
+        () -> SelfKeyTestValidators.validateRsaSsaPkcs1(privateKey, publicKey, sigHash));
   }
 }
