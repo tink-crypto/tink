@@ -88,10 +88,16 @@ class HybridEncryptionTest(parameterized.TestCase):
         output = dec.decrypt(ciphertext, context_info)
         self.assertEqual(output, plaintext)
       for dec in unsupported_decs:
-        with self.assertRaises(tink.TinkError):
+        with self.assertRaises(
+            tink.TinkError,
+            msg='Language %s supports hybrid decrypt with %s unexpectedly' %
+            (dec.lang, key_template_name)):
           dec.decrypt(ciphertext, context_info)
     for enc in unsupported_encs:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports hybrid encrypt with %s unexpectedly' % (
+              enc.lang, key_template_name)):
         enc.encrypt(b'plaintext', b'context_info')
 
 

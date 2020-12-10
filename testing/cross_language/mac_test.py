@@ -72,10 +72,16 @@ class MacTest(parameterized.TestCase):
       for p2 in supported_macs:
         self.assertIsNone(p2.verify_mac(mac_value, data))
       for p2 in unsupported_macs:
-        with self.assertRaises(tink.TinkError):
+        with self.assertRaises(
+            tink.TinkError,
+            msg='Language %s supports verify_mac with %s unexpectedly' %
+            (p2.lang, key_template_name)):
           p2.verify_mac(mac_value, data)
     for p in unsupported_macs:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports compute_mac with %s unexpectedly' %
+          (p.lang, key_template_name)):
         p.compute_mac(data)
 
 

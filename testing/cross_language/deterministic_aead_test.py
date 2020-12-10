@@ -79,10 +79,16 @@ class DeterministicAeadTest(parameterized.TestCase):
       output = p2.decrypt_deterministically(ciphertext, associated_data)
       self.assertEqual(output, plaintext)
     for p2 in unsupported_daeads:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports decrypt_deterministically with %s '
+          'unexpectedly' % (p2.lang, key_template_name)):
         p2.decrypt_deterministically(ciphertext, associated_data)
     for p in unsupported_daeads:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports encrypt_deterministically with %s '
+          'unexpectedly' % (p.lang, key_template_name)):
         p.encrypt_deterministically(b'plaintext', b'associated_data')
 
 

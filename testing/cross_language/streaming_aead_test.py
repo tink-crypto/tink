@@ -91,12 +91,18 @@ class StreamingAeadPythonTest(parameterized.TestCase):
             ciphertext_stream, associated_data)
         self.assertEqual(decrypted_stream.read(), plaintext)
       for p2 in unsupported_streaming_aeads:
-        with self.assertRaises(tink.TinkError):
+        with self.assertRaises(
+            tink.TinkError,
+            msg='Language %s supports streaming AEAD decryption with %s '
+            'unexpectedly' % (p2.lang, key_template_name)):
           ciphertext_stream = io.BytesIO(ciphertext)
           decrypted_stream = p2.new_decrypting_stream(
               ciphertext_stream, associated_data)
     for p in unsupported_streaming_aeads:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports streaming AEAD encryption with %s '
+          'unexpectedly' % (p.lang, key_template_name)):
         plaintext_stream = io.BytesIO(b'plaintext')
         ciphertext_result_stream = p.new_encrypting_stream(
             plaintext_stream, b'associated_data')

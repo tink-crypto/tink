@@ -86,10 +86,16 @@ class AeadPythonTest(parameterized.TestCase):
         output = p2.decrypt(ciphertext, associated_data)
         self.assertEqual(output, plaintext)
       for p2 in unsupported_aeads:
-        with self.assertRaises(tink.TinkError):
+        with self.assertRaises(
+            tink.TinkError,
+            msg='Language %s supports AEAD decrypt with %s unexpectedly' %
+            (p2.lang, key_template_name)):
           p2.decrypt(ciphertext, associated_data)
     for p in unsupported_aeads:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports AEAD encrypt with %s unexpectedly' % (
+              p.lang, key_template_name)):
         p.encrypt(b'plaintext', b'associated_data')
 
   @parameterized.parameters(all_aead_key_template_names())
