@@ -53,7 +53,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setExpiration(expiration).build();
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
@@ -67,7 +67,7 @@ public final class JwtValidatorTest {
         new ToBeSignedJwt.Builder().setExpiration(expiration).build();
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
@@ -94,7 +94,7 @@ public final class JwtValidatorTest {
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
@@ -108,7 +108,7 @@ public final class JwtValidatorTest {
         new ToBeSignedJwt.Builder().setNotBefore(notBefore).build();
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
@@ -135,7 +135,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setIssuer("123").build();
     JwtValidator validator = new JwtValidator.Builder().setIssuer("123").build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getIssuer()).isEqualTo("123");
   }
@@ -162,7 +162,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setSubject("123").build();
     JwtValidator validator = new JwtValidator.Builder().setSubject("123").build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getSubject()).isEqualTo("123");
   }
@@ -189,7 +189,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().setJwtId("123").build();
     JwtValidator validator = new JwtValidator.Builder().setJwtId("123").build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getJwtId()).isEqualTo("123");
   }
@@ -225,7 +225,7 @@ public final class JwtValidatorTest {
     ToBeSignedJwt unverified =
         new ToBeSignedJwt.Builder().addAudience("foo").build();
     JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getAudiences()).containsExactly("foo");
   }
@@ -238,7 +238,7 @@ public final class JwtValidatorTest {
             .addAudience("bar")
             .build();
     JwtValidator validator = new JwtValidator.Builder().setAudience("bar").build();
-    Jwt token = validator.validate(unverified);
+    VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }

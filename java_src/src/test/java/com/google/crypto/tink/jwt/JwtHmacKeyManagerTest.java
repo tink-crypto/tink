@@ -97,7 +97,7 @@ public class JwtHmacKeyManagerTest {
   public void createKey_multipleTimes() throws Exception {
     JwtHmacKeyFormat keyFormat = makeJwtHmacKeyFormat(32, HashType.SHA256);
     int numKeys = 100;
-    Set<String> keys = new TreeSet<String>();
+    Set<String> keys = new TreeSet<>();
     for (int i = 0; i < numKeys; ++i) {
       keys.add(TestUtil.hexEncode(factory.createKey(keyFormat).getKeyValue().toByteArray()));
     }

@@ -33,13 +33,13 @@ import org.json.JSONObject;
  * It contains the payload of the token, but no header information (typ, cty, alg and kid).
  */
 @Immutable
-public final class Jwt {
+public final class VerifiedJwt {
 
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JSONObject payload;
 
 
-  Jwt(JSONObject payload) {
+  VerifiedJwt(JSONObject payload) {
     this.payload = payload;
   }
 

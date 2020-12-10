@@ -45,5 +45,5 @@ public interface JwtMac {
    * @throws GeneralSecurityException when the signature of the token could not be verified, the
    *   token contains an invalid claim or header, the token has been expired or can't be used yet
    */
-  Jwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException;
+  VerifiedJwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException;
 }

@@ -120,7 +120,7 @@ public class JwtMacWrapperTest {
     ToBeSignedJwt tbs = new ToBeSignedJwt.Builder().setJwtId("blah").build();
     String compact = wrapped.createCompact(tbs);
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = wrapped.verifyCompact(compact, validator);
+    VerifiedJwt token = wrapped.verifyCompact(compact, validator);
 
     assertThat(token.getJwtId()).isEqualTo("blah");
   }
@@ -153,8 +153,8 @@ public class JwtMacWrapperTest {
     ToBeSignedJwt tbs = new ToBeSignedJwt.Builder().setJwtId("blah").build();
     String compact = wrapped.createCompact(tbs);
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = wrapped.verifyCompact(compact, validator);
-    Jwt token2 = mac2.verifyCompact(compact, validator);
+    VerifiedJwt token = wrapped.verifyCompact(compact, validator);
+    VerifiedJwt token2 = mac2.verifyCompact(compact, validator);
 
     assertThrows(GeneralSecurityException.class, () -> mac1.verifyCompact(compact, validator));
     assertThat(token.getJwtId()).isEqualTo("blah");

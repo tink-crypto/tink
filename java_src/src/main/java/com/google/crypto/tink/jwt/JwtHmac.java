@@ -53,7 +53,8 @@ public final class JwtHmac implements JwtMac {
   }
 
   @Override
-  public Jwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException {
+  public VerifiedJwt verifyCompact(String compact, JwtValidator validator)
+      throws GeneralSecurityException {
     String[] parts = compact.split("\\.", -1);
     if (parts.length != 3) {
       throw new JwtInvalidException(

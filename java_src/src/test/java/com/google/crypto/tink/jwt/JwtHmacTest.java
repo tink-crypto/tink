@@ -75,7 +75,7 @@ public final class JwtHmacTest {
             .build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience(audience).build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
     double value = (double) token.getClaim("amount");
 
     assertThat(value).isEqualTo(amount);
@@ -203,7 +203,7 @@ public final class JwtHmacTest {
         new ToBeSignedJwt.Builder().setExpiration(expiration).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
@@ -223,7 +223,7 @@ public final class JwtHmacTest {
 
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
   }
@@ -262,7 +262,7 @@ public final class JwtHmacTest {
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
@@ -282,7 +282,7 @@ public final class JwtHmacTest {
 
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
   }
@@ -338,7 +338,7 @@ public final class JwtHmacTest {
         new ToBeSignedJwt.Builder().addAudience("foo").build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo");
   }
@@ -356,7 +356,7 @@ public final class JwtHmacTest {
             .build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience("bar").build();
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
@@ -400,7 +400,7 @@ public final class JwtHmacTest {
     Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
     JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
 
-    Jwt token = mac.verifyCompact(compact, validator);
+    VerifiedJwt token = mac.verifyCompact(compact, validator);
 
     assertThat(token.getIssuer()).isEqualTo("joe");
     boolean value = (boolean) token.getClaim("http://example.com/is_root");
