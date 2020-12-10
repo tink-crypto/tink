@@ -200,7 +200,8 @@ implements <a href="../../../../com/google/crypto/tink/KeysetReader.html" title=
 <pre>public static&nbsp;<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;withInputStream(<a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io">InputStream</a>&nbsp;stream)</pre>
 <div class="block">Static method to create a BinaryKeysetReader from an <a href="https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html?is-external=true" title="class or interface in java.io"><code>InputStream</code></a>.
 
- <p>Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called.</div>
+ <p>Note: the input stream won't be read until <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#read--"><code>read()</code></a> or <a href="../../../../com/google/crypto/tink/BinaryKeysetReader.html#readEncrypted--"><code>readEncrypted()</code></a> is called, and will be closed immediately after the keyset is
+ read.</div>
 </li>
 </ul>
 <a name="withBytes-byte:A-">
