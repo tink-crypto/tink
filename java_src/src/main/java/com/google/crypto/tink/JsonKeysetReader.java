@@ -48,19 +48,16 @@ public final class JsonKeysetReader implements KeysetReader {
 
   private final InputStream inputStream;
   private final JSONObject json;
-  private final boolean closeStreamAfterReading;
   private boolean urlSafeBase64 = false;
 
-  private JsonKeysetReader(InputStream inputStream, boolean closeStreamAfterReading) {
+  private JsonKeysetReader(InputStream inputStream) {
     this.inputStream = inputStream;
-    this.closeStreamAfterReading = closeStreamAfterReading;
     json = null;
   }
 
   private JsonKeysetReader(JSONObject json) {
     this.json = json;
     this.inputStream = null;
-    this.closeStreamAfterReading = false;
   }
 
   /**
@@ -70,7 +67,7 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withInputStream(InputStream input) throws IOException {
-    return new JsonKeysetReader(input, /*closeStreamAfterReading=*/ false);
+    return new JsonKeysetReader(input);
   }
 
   /** Static method to create a JsonKeysetReader from an {@link JSONObject}. */
@@ -80,13 +77,12 @@ public final class JsonKeysetReader implements KeysetReader {
 
   /** Static method to create a JsonKeysetReader from a string. */
   public static JsonKeysetReader withString(String input) {
-    return new JsonKeysetReader(
-        new ByteArrayInputStream(input.getBytes(UTF_8)), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new ByteArrayInputStream(input.getBytes(UTF_8)));
   }
 
   /** Static method to create a JsonKeysetReader from a byte array. */
   public static JsonKeysetReader withBytes(final byte[] bytes) {
-    return new JsonKeysetReader(new ByteArrayInputStream(bytes), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   /**
@@ -96,7 +92,7 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    */
   public static JsonKeysetReader withFile(File file) throws IOException {
-    return new JsonKeysetReader(new FileInputStream(file), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new FileInputStream(file));
   }
 
   /**
@@ -140,7 +136,7 @@ public final class JsonKeysetReader implements KeysetReader {
     } catch (JSONException e) {
       throw new IOException(e);
     } finally {
-      if (inputStream != null && closeStreamAfterReading) {
+      if (inputStream != null) {
         inputStream.close();
       }
     }
@@ -158,7 +154,7 @@ public final class JsonKeysetReader implements KeysetReader {
     } catch (JSONException e) {
       throw new IOException(e);
     } finally {
-      if (inputStream != null && closeStreamAfterReading) {
+      if (inputStream != null) {
         inputStream.close();
       }
     }
