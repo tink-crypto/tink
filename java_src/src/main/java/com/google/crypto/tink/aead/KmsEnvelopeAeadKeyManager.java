@@ -16,14 +16,10 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.KmsClient;
-import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.*;
+import com.google.crypto.tink.proto.*;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
-import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
+import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -99,5 +95,14 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
 
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), newKeyAllowed);
+  }
+  
+  public static final com.google.crypto.tink.KeyTemplate kmsEnvelopeAeadKeyTemplate(final String keyUri){
+    final var aesKeyFormat = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
+    final var keyFormat = KmsEnvelopeAeadKeyFormat.newBuilder()
+            .setDekTemplate(com.google.crypto.tink.KeyTemplate.create(new AesGcmKeyManager().getKeyType(),aesKeyFormat.toByteArray(), com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK))
+            .setKekUri(keyUri)
+            .build().toByteArray();
+    return com.google.crypto.tink.KeyTemplate.create(keyManager.getKeyType(), keyFormat, com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK)
   }
 }
