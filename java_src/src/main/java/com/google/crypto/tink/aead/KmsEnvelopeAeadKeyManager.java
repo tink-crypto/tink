@@ -98,11 +98,11 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
   }
   
   public static final com.google.crypto.tink.KeyTemplate kmsEnvelopeAeadKeyTemplate(final String keyUri){
-    final var aesKeyFormat = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
-    final var keyFormat = KmsEnvelopeAeadKeyFormat.newBuilder()
+    final AesGcmKeyFormat  aesKeyFormat = AesGcmKeyFormat.newBuilder().setKeySize(32).build();
+    final byte[] keyFormat = KmsEnvelopeAeadKeyFormat.newBuilder()
             .setDekTemplate(com.google.crypto.tink.KeyTemplate.create(new AesGcmKeyManager().getKeyType(),aesKeyFormat.toByteArray(), com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK))
             .setKekUri(keyUri)
             .build().toByteArray();
-    return com.google.crypto.tink.KeyTemplate.create(keyManager.getKeyType(), keyFormat, com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK)
+    return com.google.crypto.tink.KeyTemplate.create(new KmsEnvelopeAeadKeyManager().getKeyType(), keyFormat, com.google.crypto.tink.KeyTemplate.OutputPrefixType.TINK);
   }
 }
