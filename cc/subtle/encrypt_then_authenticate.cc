@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+#include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/mac.h"
 #include "tink/subtle/ind_cpa_cipher.h"
@@ -60,20 +62,21 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
   additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
 
-  auto ct = ind_cpa_cipher_->Encrypt(plaintext);
-  if (!ct.ok()) {
-    return ct.status();
-  }
-  std::string ciphertext(ct.ValueOrDie());
-  std::string toAuthData(additional_data);
-  toAuthData.append(ciphertext);
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "additional data too long");
   }
-  toAuthData.append(longToBigEndianStr(aad_size_in_bits));
+
+  auto ct = ind_cpa_cipher_->Encrypt(plaintext);
+  if (!ct.ok()) {
+    return ct.status();
+  }
+  std::string ciphertext(ct.ValueOrDie());
+  std::string toAuthData = absl::StrCat(additional_data, ciphertext,
+                                        longToBigEndianStr(aad_size_in_bits));
+
   auto tag = mac_->ComputeMac(toAuthData);
   if (!tag.ok()) {
     return tag.status();
@@ -94,19 +97,19 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }
 
-  std::string payload = std::string(ciphertext.data(), ciphertext.size())
-                            .substr(0, ciphertext.size() - tag_size_);
-  std::string toAuthData(additional_data);
-  toAuthData.append(payload);
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "additional data too long");
   }
-  toAuthData.append(longToBigEndianStr(aad_size_in_bits));
-  auto verified = mac_->VerifyMac(
-      ciphertext.substr(ciphertext.size() - tag_size_, tag_size_), toAuthData);
+
+  auto payload = ciphertext.substr(0, ciphertext.size() - tag_size_);
+  auto tag = ciphertext.substr(ciphertext.size() - tag_size_, tag_size_);
+  std::string toAuthData = absl::StrCat(additional_data, payload,
+                                        longToBigEndianStr(aad_size_in_bits));
+
+  auto verified = mac_->VerifyMac(tag, toAuthData);
   if (!verified.ok()) {
     return verified;
   }
