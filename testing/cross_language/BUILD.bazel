@@ -50,6 +50,8 @@ py_test(
         "@tink_py//tink/proto:hkdf_prf_py_pb2",
         "@tink_py//tink/proto:hmac_prf_py_pb2",
         "@tink_py//tink/proto:hmac_py_pb2",
+        "@tink_py//tink/proto:kms_aead_py_pb2",
+        "@tink_py//tink/proto:kms_envelope_py_pb2",
         "@tink_py//tink/proto:tink_py_pb2",
         "@tink_py//tink/proto:xchacha20_poly1305_py_pb2",
     ],

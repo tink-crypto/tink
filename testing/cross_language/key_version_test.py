@@ -35,6 +35,8 @@ from tink.proto import chacha20_poly1305_pb2
 from tink.proto import hkdf_prf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import kms_aead_pb2
+from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 from tink.proto import xchacha20_poly1305_pb2
 
@@ -49,6 +51,8 @@ KEY_TYPE_TO_PROTO_CLASS = {
     'AesCtrHmacAeadKey': aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKey,
     'ChaCha20Poly1305Key': chacha20_poly1305_pb2.ChaCha20Poly1305Key,
     'XChaCha20Poly1305Key': xchacha20_poly1305_pb2.XChaCha20Poly1305Key,
+    'KmsAeadKey': kms_aead_pb2.KmsAeadKey,
+    'KmsEnvelopeAeadKey': kms_envelope_pb2.KmsEnvelopeAeadKey,
     'AesCmacKey': aes_cmac_pb2.AesCmacKey,
     'HmacKey': hmac_pb2.HmacKey,
     'AesCmacPrfKey': aes_cmac_prf_pb2.AesCmacPrfKey,

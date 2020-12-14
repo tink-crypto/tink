@@ -24,6 +24,8 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.proto import common_pb2
+from tink.proto import kms_aead_pb2
+from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 
 # All languages supported by cross-language tests.
@@ -37,6 +39,8 @@ AEAD_KEY_TYPES = [
     'AesCtrHmacAeadKey',
     'ChaCha20Poly1305Key',
     'XChaCha20Poly1305Key',
+    'KmsAeadKey',
+    'KmsEnvelopeAeadKey',
 ]
 DAEAD_KEY_TYPES = ['AesSivKey']
 STREAMING_AEAD_KEY_TYPES = [
@@ -64,6 +68,40 @@ ALL_KEY_TYPES = (
     HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES +
     PRF_KEY_TYPES)
 
+
+# Fake KMS keys are base64-encoded keysets. Each server must register a
+# fake KmsClient that can handle these keys.
+_FAKE_KMS_KEY_URI = (
+    'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRv'
+    'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
+
+
+# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
+def _create_kms_aead_key_template(key_uri: Text) -> tink_pb2.KeyTemplate:
+  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
+  key_format = kms_aead_pb2.KmsAeadKeyFormat()
+  key_format.key_uri = key_uri
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = 'type.googleapis.com/google.crypto.tink.KmsAeadKey'
+  key_template.output_prefix_type = tink_pb2.RAW
+  return key_template
+
+
+# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
+def _create_kms_envelope_aead_key_template(
+    kek_uri: Text, dek_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
+  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
+  key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
+  key_format.kek_uri = kek_uri
+  key_format.dek_template.MergeFrom(dek_template)
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = (
+      'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
+  key_template.output_prefix_type = tink_pb2.RAW
+  return key_template
+
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
     'AesEaxKey': ['cc', 'java', 'python'],
@@ -72,6 +110,8 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
+    'KmsAeadKey': ['cc'],
+    'KmsEnvelopeAeadKey': ['cc', 'go'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
@@ -99,6 +139,8 @@ KEY_TEMPLATE_NAMES = {
     'AesCtrHmacAeadKey': ['AES128_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256'],
     'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
     'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
+    'KmsAeadKey': ['FAKE_KMS_AEAD'],
+    'KmsEnvelopeAeadKey': ['FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM'],
     'AesSivKey': ['AES256_SIV'],
     'AesCtrHmacStreamingKey': [
         'AES128_CTR_HMAC_SHA256_4KB',
@@ -163,6 +205,11 @@ KEY_TEMPLATE = {
             output_prefix_type=tink_pb2.TINK),
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
+    'FAKE_KMS_AEAD':
+        _create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
+    'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
+        _create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM),
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
     'AES128_CTR_HMAC_SHA256_4KB':

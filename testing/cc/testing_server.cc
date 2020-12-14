@@ -17,6 +17,7 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "tink/config/tink_config.h"
+#include "tink/util/fake_kms_client.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
 #include "deterministic_aead_impl.h"
@@ -37,6 +38,15 @@ void RunServer() {
               << std::endl;
     return;
   }
+  auto register_fake_kms_client_status =
+      crypto::tink::test::FakeKmsClient::RegisterNewClient("", "");
+  if (!register_fake_kms_client_status.ok()) {
+    std::cout << "FakeKmsClient::RegisterNewClient("", "") failed: "
+        << register_fake_kms_client_status.error_message()
+              << std::endl;
+    return;
+  }
+
   const int port = absl::GetFlag(FLAGS_port);
   std::string server_address = absl::StrCat("[::]:", port);
 
