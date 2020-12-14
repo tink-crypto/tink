@@ -16,15 +16,17 @@ package testutil_test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/testutil"
 )
 
-func TestWycheproofParsing(t *testing.T) {
+func TestPopulateSuite(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 
+	// TODO(175520475): Test the HexBytes type.
 	type AeadTest struct {
 		testutil.WycheproofCase
 		Key        string `json:"key"`
@@ -45,18 +47,9 @@ func TestWycheproofParsing(t *testing.T) {
 		TestGroups []*AeadGroup `json:"testGroups"`
 	}
 
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_gcm_test.json"))
-	if err != nil {
-		t.Fatalf("cannot open file: %s", err)
-	}
-	parser := json.NewDecoder(f)
 	suite := new(AeadSuite)
-	if err := parser.Decode(suite); err != nil {
-		t.Fatalf("cannot decode test data: %s", err)
+	if err := testutil.PopulateSuite(suite, "aes_gcm_test.json"); err != nil {
+		t.Fatalf("error populating suite: %s", err)
 	}
 
 	if suite.Algorithm != "AES-GCM" {
@@ -65,5 +58,33 @@ func TestWycheproofParsing(t *testing.T) {
 
 	if suite.TestGroups[0].Tests[0].Key == "" {
 		t.Error("suite.TestGroups[0].Tests[0].Key is empty")
+	}
+}
+
+func TestPopulateSuite_FileOpenError(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+
+	suite := new(testutil.WycheproofSuite)
+	err := testutil.PopulateSuite(suite, "NON_EXISTENT_FILE")
+	if err == nil {
+		t.Error("succeeded with non-existent file")
+	}
+	var e *os.PathError
+	if !errors.As(err, &e) {
+		t.Errorf("unexpected error for non-existent file: %s", err)
+	}
+}
+
+func TestPopulateSuite_DecodeError(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+
+	var suite *testutil.WycheproofSuite
+	err := testutil.PopulateSuite(suite, "aes_gcm_test.json")
+	if err == nil {
+		t.Error("succeeded with nil suite")
+	}
+	var e *json.InvalidUnmarshalError
+	if !errors.As(err, &e) {
+		t.Errorf("unexpected error for decode error: %s", err)
 	}
 }

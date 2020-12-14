@@ -19,14 +19,39 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/aead/subtle"
+	"github.com/google/tink/go/testutil"
 )
+
+type AEADSuite struct {
+	testutil.WycheproofSuite
+	TestGroups []*AEADGroup `json:"testGroups"`
+}
+
+type AEADGroup struct {
+	testutil.WycheproofGroup
+	IvSize  uint32      `json:"ivSize"`
+	KeySize uint32      `json:"keySize"`
+	TagSize uint32      `json:"tagSize"`
+	Type    string      `json:"type"`
+	Tests   []*AEADCase `json:"tests"`
+}
+
+type AEADCase struct {
+	testutil.WycheproofCase
+	Aad testutil.HexBytes `json:"aad"`
+	Ct  testutil.HexBytes `json:"ct"`
+	Iv  testutil.HexBytes `json:"iv"`
+	Key testutil.HexBytes `json:"key"`
+	Msg testutil.HexBytes `json:"msg"`
+	Tag testutil.HexBytes `json:"tag"`
+}
 
 func TestValidateAESKeySize(t *testing.T) {
 	var i uint32
 	for i = 0; i < 65; i++ {
 		err := subtle.ValidateAESKeySize(i)
 		switch i {
-    case 16, 32: // Valid key sizes.
+		case 16, 32: // Valid key sizes.
 			if err != nil {
 				t.Errorf("want no error, got %v", err)
 			}
