@@ -26,18 +26,19 @@ import org.json.JSONObject;
 /**
  * A <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT) that can be signed or
  * MAC'ed to obtain a compact JWT.
+ * It can also be a token that has been parsed from a compact JWT, but not yet verified.
  */
 @Immutable
-public final class ToBeSignedJwt {
+public final class RawJwt {
 
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JSONObject payload;
 
-  private ToBeSignedJwt(Builder builder) {
+  private RawJwt(Builder builder) {
     this.payload = builder.payload;
   }
 
-  /** Builder for ToBeSignedJwt */
+  /** Builder for RawJwt */
   public static final class Builder {
     private final JSONObject payload;
 
@@ -149,8 +150,8 @@ public final class ToBeSignedJwt {
       return setPayload(JwtNames.validate(name), value);
     }
 
-    public ToBeSignedJwt build() {
-      return new ToBeSignedJwt(this);
+    public RawJwt build() {
+      return new RawJwt(this);
     }
   }
 

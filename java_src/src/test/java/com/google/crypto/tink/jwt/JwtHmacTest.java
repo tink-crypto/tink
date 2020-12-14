@@ -66,8 +66,8 @@ public final class JwtHmacTest {
     String audience = "mybank";
     String jwtId = "user123";
     double amount = 0.1;
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder()
+    RawJwt unverified =
+        new RawJwt.Builder()
             .setIssuer(issuer)
             .addAudience(audience)
             .setJwtId(jwtId)
@@ -107,7 +107,7 @@ public final class JwtHmacTest {
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -130,7 +130,7 @@ public final class JwtHmacTest {
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -153,7 +153,7 @@ public final class JwtHmacTest {
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
     String jwtId = "user123";
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().setJwtId(jwtId).build();
+    RawJwt unverified = new RawJwt.Builder().setJwtId(jwtId).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -177,8 +177,8 @@ public final class JwtHmacTest {
 
     Clock clock1 = Clock.systemUTC();
     // This token expires in 1 minute in the future.
-    ToBeSignedJwt token =
-        new ToBeSignedJwt.Builder()
+    RawJwt token =
+        new RawJwt.Builder()
             .setExpiration(clock1.instant().plus(Duration.ofMinutes(1)))
             .build();
     String compact = mac.createCompact(token);
@@ -199,8 +199,8 @@ public final class JwtHmacTest {
     Clock clock = Clock.systemUTC();
     // This token expires in 1 minute in the future.
     Instant expiration = clock.instant().plus(Duration.ofMinutes(1));
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().setExpiration(expiration).build();
+    RawJwt unverified =
+        new RawJwt.Builder().setExpiration(expiration).build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
     VerifiedJwt token = mac.verifyCompact(compact, validator);
@@ -217,8 +217,8 @@ public final class JwtHmacTest {
     Clock clock1 = Clock.systemUTC();
     // This token expires in 1 minutes in the future.
     Instant expiration = clock1.instant().plus(Duration.ofMinutes(1));
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().setExpiration(expiration).build();
+    RawJwt unverified =
+        new RawJwt.Builder().setExpiration(expiration).build();
     String compact = mac.createCompact(unverified);
 
     // A clock skew of 1 minute is allowed.
@@ -237,8 +237,8 @@ public final class JwtHmacTest {
     Clock clock = Clock.systemUTC();
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock.instant().plus(Duration.ofMinutes(1));
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().setNotBefore(notBefore).build();
+    RawJwt unverified =
+        new RawJwt.Builder().setNotBefore(notBefore).build();
     String compact = mac.createCompact(unverified);
 
     JwtValidator validator = new JwtValidator.Builder().build();
@@ -255,8 +255,8 @@ public final class JwtHmacTest {
     Clock clock1 = Clock.systemUTC();
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().setNotBefore(notBefore).build();
+    RawJwt unverified =
+        new RawJwt.Builder().setNotBefore(notBefore).build();
     String compact = mac.createCompact(unverified);
 
     // Move the clock to 2 minutes in the future.
@@ -276,8 +276,8 @@ public final class JwtHmacTest {
     Clock clock1 = Clock.systemUTC();
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().setNotBefore(notBefore).build();
+    RawJwt unverified =
+        new RawJwt.Builder().setNotBefore(notBefore).build();
     String compact = mac.createCompact(unverified);
 
     // A clock skew of 1 minute is allowed.
@@ -293,7 +293,7 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    ToBeSignedJwt unverified = new ToBeSignedJwt.Builder().build();
+    RawJwt unverified = new RawJwt.Builder().build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
 
@@ -306,8 +306,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().addAudience("foo").build();
+    RawJwt unverified =
+        new RawJwt.Builder().addAudience("foo").build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().build();
 
@@ -320,8 +320,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().addAudience("foo").build();
+    RawJwt unverified =
+        new RawJwt.Builder().addAudience("foo").build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience("bar").build();
 
@@ -334,8 +334,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder().addAudience("foo").build();
+    RawJwt unverified =
+        new RawJwt.Builder().addAudience("foo").build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience("foo").build();
     VerifiedJwt token = mac.verifyCompact(compact, validator);
@@ -349,8 +349,8 @@ public final class JwtHmacTest {
     SecretKey secretKey = new SecretKeySpec(Random.randBytes(32), "HMAC");
     JwtHmac mac = new JwtHmac(algo, secretKey);
 
-    ToBeSignedJwt unverified =
-        new ToBeSignedJwt.Builder()
+    RawJwt unverified =
+        new RawJwt.Builder()
             .addAudience("foo")
             .addAudience("bar")
             .build();
@@ -417,12 +417,12 @@ public final class JwtHmacTest {
     // Construct atoken with a valid MAC, but with an invalid header.
     PrfHmacJce prf = new PrfHmacJce("HMACSHA256", secretKey);
     PrfMac mac = new PrfMac(prf, prf.getMaxOutputLength());
-    ToBeSignedJwt emptyToBeSignedJwt = new ToBeSignedJwt.Builder().build();
+    RawJwt emptyRawJwt = new RawJwt.Builder().build();
     JSONObject wrongTypeHeader = new JSONObject();
     wrongTypeHeader.put("alg", "HS256");
     wrongTypeHeader.put("typ", "IWT");  // bad type
     String headerStr = Base64.urlSafeEncode(wrongTypeHeader.toString().getBytes(UTF_8));
-    String payloadStr = JwtFormat.encodePayload(emptyToBeSignedJwt.getPayload());
+    String payloadStr = JwtFormat.encodePayload(emptyRawJwt.getPayload());
     String unsignedCompact = headerStr + "." + payloadStr;
     String tag = JwtFormat.encodeSignature(mac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     String signedCompact = unsignedCompact + "." + tag;

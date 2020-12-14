@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 @Immutable
 public interface JwtMac {
   /** Computes a MAC, and encodes the JWT and the tag in the JWS compact serialization format. */
-  String createCompact(ToBeSignedJwt token) throws GeneralSecurityException;
+  String createCompact(RawJwt token) throws GeneralSecurityException;
 
   /**
    * Verifies and decodes a JWT in the JWS compact serialization format.

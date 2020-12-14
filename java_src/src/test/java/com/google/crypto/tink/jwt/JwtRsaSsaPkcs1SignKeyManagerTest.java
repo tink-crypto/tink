@@ -223,7 +223,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
     JwtPublicKeyVerify verifier = new JwtRsaSsaPkcs1Verify(publicKey, algorithmToString(algorithm));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     verifier.verify(signer.sign(token), validator);
   }

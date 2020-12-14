@@ -135,7 +135,7 @@ public class JwtHmacKeyManagerTest {
     JwtMac managerMac = manager.getPrimitive(validKey, JwtMac.class);
     JwtMac directMac =
         new JwtHmac("HS256", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     managerMac.verifyCompact(directMac.createCompact(token), validator);
   }
@@ -146,7 +146,7 @@ public class JwtHmacKeyManagerTest {
     JwtMac managerMac = manager.getPrimitive(validKey, JwtMac.class);
     JwtMac directMac =
         new JwtHmac("HS384", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     managerMac.verifyCompact(directMac.createCompact(token), validator);
   }
@@ -157,7 +157,7 @@ public class JwtHmacKeyManagerTest {
     JwtMac managerMac = manager.getPrimitive(validKey, JwtMac.class);
     JwtMac directMac =
         new JwtHmac("HS512", new SecretKeySpec(validKey.getKeyValue().toByteArray(), "HMAC"));
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     managerMac.verifyCompact(directMac.createCompact(token), validator);
   }

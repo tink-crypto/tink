@@ -140,7 +140,7 @@ public final class JwtValidator {
    * Validates that all claims in this validator are also present in {@code target}.
    * @throws JwtInvalidException when {@code target} contains an invalid claim or header
    */
-  VerifiedJwt validate(ToBeSignedJwt target) throws JwtInvalidException {
+  VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
 
 
@@ -174,7 +174,7 @@ public final class JwtValidator {
     return new VerifiedJwt(target.getPayload());
   }
 
-  private void validateTimestampClaims(ToBeSignedJwt target) throws JwtInvalidException {
+  private void validateTimestampClaims(RawJwt target) throws JwtInvalidException {
     Instant now = this.clock.instant();
 
     Instant exp = target.getExpiration();

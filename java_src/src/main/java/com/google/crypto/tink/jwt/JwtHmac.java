@@ -46,7 +46,7 @@ public final class JwtHmac implements JwtMac {
   }
 
   @Override
-  public String createCompact(ToBeSignedJwt token) throws GeneralSecurityException {
+  public String createCompact(RawJwt token) throws GeneralSecurityException {
     String unsignedCompact = JwtFormat.createUnsignedCompact(this.algo, token.getPayload());
     return JwtFormat.createSignedCompact(
         unsignedCompact, mac.computeMac(unsignedCompact.getBytes(US_ASCII)));
@@ -66,7 +66,7 @@ public final class JwtHmac implements JwtMac {
     mac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
     JwtFormat.validateHeader(this.algo, JwtFormat.decodeHeader(parts[0]));
     JSONObject payload = JwtFormat.decodePayload(parts[1]);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(payload).build();
+    RawJwt token = new RawJwt.Builder(payload).build();
     return validator.validate(token);
   }
 

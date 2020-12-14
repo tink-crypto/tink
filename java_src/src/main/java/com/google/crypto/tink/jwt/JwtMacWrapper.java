@@ -44,7 +44,7 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
     }
 
     @Override
-    public String createCompact(ToBeSignedJwt token) throws GeneralSecurityException {
+    public String createCompact(RawJwt token) throws GeneralSecurityException {
       return primitives.getPrimary().getPrimitive().createCompact(token);
     }
 

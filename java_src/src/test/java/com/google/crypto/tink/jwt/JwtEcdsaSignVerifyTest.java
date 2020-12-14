@@ -68,7 +68,7 @@ public class JwtEcdsaSignVerifyTest {
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
     JwtEcdsaSign signer = new JwtEcdsaSign(priv, algorithm);
     JwtEcdsaVerify verifier = new JwtEcdsaVerify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     verifier.verify(signer.sign(token), validator);
   }
@@ -139,7 +139,7 @@ public class JwtEcdsaSignVerifyTest {
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
     JwtEcdsaSign signer = new JwtEcdsaSign(priv, algorithm);
     JwtEcdsaVerify verifier = new JwtEcdsaVerify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     String compactJwt = signer.sign(token);
     String[] parts = compactJwt.split("\\.", -1);
@@ -160,7 +160,7 @@ public class JwtEcdsaSignVerifyTest {
     KeyPair otherKeyPair = generateKeyPair(algorithm);
     ECPublicKey pub = (ECPublicKey) otherKeyPair.getPublic();
     JwtEcdsaVerify verifier = new JwtEcdsaVerify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(signer.sign(token), validator));
@@ -174,7 +174,7 @@ public class JwtEcdsaSignVerifyTest {
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
     JwtEcdsaSign signer = new JwtEcdsaSign(priv, algorithm);
     JwtEcdsaVerify verifier = new JwtEcdsaVerify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     String result = signer.sign(token);
     char[] validJwt = new char[result.length()];
@@ -200,7 +200,7 @@ public class JwtEcdsaSignVerifyTest {
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
     JwtEcdsaSign signer = new JwtEcdsaSign(priv, algorithm);
     JwtEcdsaVerify verifier = new JwtEcdsaVerify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     String result = signer.sign(token);
     char[] validJwt = new char[result.length()];

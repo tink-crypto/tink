@@ -103,7 +103,7 @@ public final class JwtRsaSsaPkcs1VerifyKeyManagerTest {
     JwtRsaSsaPkcs1PublicKey publicKey = signManager.getPublicKey(privateKey);
     JwtPublicKeySign signer = signManager.getPrimitive(privateKey, JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     verifier.verify(signer.sign(token), validator);
   }
@@ -127,7 +127,7 @@ public final class JwtRsaSsaPkcs1VerifyKeyManagerTest {
     JwtRsaSsaPkcs1PublicKey publicKey = signManager.getPublicKey(factory.createKey(keyFormat));
     JwtPublicKeySign signer = signManager.getPrimitive(privateKey, JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(signer.sign(token), validator));
