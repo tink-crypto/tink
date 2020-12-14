@@ -1,3 +1,5 @@
+// Copyright 2019 Google LLC.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,17 +13,19 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
-#define TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
 
-#include "pybind11/pybind11.h"
+#ifndef TINK_PYTHON_CC_CC_JWT_CONFIG_H_
+#define TINK_PYTHON_CC_CC_JWT_CONFIG_H_
+
+#include "tink/util/status.h"
+#include "tink/registry.h"
 
 namespace crypto {
 namespace tink {
 
-void PybindRegisterHybridDecrypt(pybind11::module* m);
+crypto::tink::util::Status CcJwtConfigRegister();
 
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
+#endif  // TINK_PYTHON_CC_CC_JWT_CONFIG_H_

@@ -18,6 +18,7 @@
 #include "tink/cc/pybind/aead.h"
 #include "tink/cc/pybind/cc_aws_kms_client.h"
 #include "tink/cc/pybind/cc_gcp_kms_client.h"
+#include "tink/cc/pybind/cc_jwt_config.h"
 #include "tink/cc/pybind/cc_key_manager.h"
 #include "tink/cc/pybind/cc_streaming_aead_wrappers.h"
 #include "tink/cc/pybind/cc_tink_config.h"
@@ -45,6 +46,7 @@ PYBIND11_MODULE(tink_bindings, m) {
   PybindRegisterAead(&m);
   PybindRegisterHybridEncrypt(&m);
   PybindRegisterCcTinkConfig(&m);
+  PybindRegisterCcJwtConfig(&m);
   PybindRegisterStreamingAead(&m);
   PybindRegisterDeterministicAead(&m);
   PybindRegisterPublicKeySign(&m);

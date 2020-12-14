@@ -11,17 +11,16 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
-#define TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_CC_JWT_CONFIG_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_CC_JWT_CONFIG_H_
 
 #include "pybind11/pybind11.h"
 
 namespace crypto {
 namespace tink {
 
-void PybindRegisterHybridDecrypt(pybind11::module* m);
+void PybindRegisterCcJwtConfig(pybind11::module* m);
 
 }  // namespace tink
 }  // namespace crypto
-
-#endif  // TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_CC_JWT_CONFIG_H_

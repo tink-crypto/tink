@@ -54,6 +54,7 @@ py_test(
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:hmac_prf_py_pb2",
         "//tink/proto:hmac_py_pb2",
+        "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -65,6 +66,17 @@ tink_pybind_library(
     deps = [
         ":status_casters",
         "//tink/cc:cc_tink_config",
+        "@pybind11",
+    ],
+)
+
+tink_pybind_library(
+    name = "cc_jwt_config",
+    srcs = ["cc_jwt_config.cc"],
+    hdrs = ["cc_jwt_config.h"],
+    deps = [
+        ":status_casters",
+        "//tink/cc:cc_jwt_config",
         "@pybind11",
     ],
 )
@@ -321,6 +333,7 @@ tink_pybind_extension(
         ":aead",
         ":cc_aws_kms_client",
         ":cc_gcp_kms_client",
+        ":cc_jwt_config",
         ":cc_key_manager",
         ":cc_streaming_aead_wrappers",
         ":cc_tink_config",
