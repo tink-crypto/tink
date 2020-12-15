@@ -18,7 +18,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -84,11 +83,11 @@ func PopulateSuite(suite interface{}, filename string) error {
 	}
 	f, err := os.Open(filepath.Join(srcDir, wycheproofDir, filename))
 	if err != nil {
-		return fmt.Errorf("unable to open file: %w", err)
+		return err
 	}
 	parser := json.NewDecoder(f)
 	if err := parser.Decode(suite); err != nil {
-		return fmt.Errorf("cannot decode test data: %w", err)
+		return err
 	}
 	return nil
 }

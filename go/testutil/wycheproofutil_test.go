@@ -16,7 +16,6 @@ package testutil_test
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 	"testing"
 
@@ -69,8 +68,7 @@ func TestPopulateSuite_FileOpenError(t *testing.T) {
 	if err == nil {
 		t.Error("succeeded with non-existent file")
 	}
-	var e *os.PathError
-	if !errors.As(err, &e) {
+	if _, ok := err.(*os.PathError); !ok {
 		t.Errorf("unexpected error for non-existent file: %s", err)
 	}
 }
@@ -83,8 +81,7 @@ func TestPopulateSuite_DecodeError(t *testing.T) {
 	if err == nil {
 		t.Error("succeeded with nil suite")
 	}
-	var e *json.InvalidUnmarshalError
-	if !errors.As(err, &e) {
+	if _, ok := err.(*json.InvalidUnmarshalError); !ok {
 		t.Errorf("unexpected error for decode error: %s", err)
 	}
 }
