@@ -45,6 +45,9 @@ func GetHashDigestSize(hash string) (uint32, error) {
 	return digestSize, nil
 }
 
+// TODO(ckl): Perhaps return an explicit error instead of ""/nil for the
+// following functions.
+
 // ConvertHashName converts different forms of a hash name to the
 // hash name that tink recognizes.
 func ConvertHashName(name string) string {
