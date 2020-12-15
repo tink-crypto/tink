@@ -721,6 +721,10 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#createFromKey-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey(KeyHandle, KeyAccess)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Creates a <code>KeysetHandle</code> that contains the single <code>KeyHandle</code> passed as input.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey(TinkKey, KeyAccess)</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
 <dd>
 <div class="block">Returns a <code>KeyHandle</code> instance with <code>key</code> as the underlying <code>TinkKey</code> if the
@@ -1332,6 +1336,11 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#fieldSizeInBytes-java.security.spec.EllipticCurve-">fieldSizeInBytes(EllipticCurve)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>
 <div class="block">Returns the size of an element of the field over which the curve is defined.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#findPrimaryKey--">findPrimaryKey()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Searches the keyset to find the primary key of this <code>KeysetHandle</code>, and returns the key
+ wrapped in a <code>KeyHandle</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/CleartextKeysetHandle.html#fromKeyset-com.google.crypto.tink.proto.Keyset-">fromKeyset(Keyset)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></dt>
 <dd>
