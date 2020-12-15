@@ -38,6 +38,7 @@ cc_library(
     name = "secret_data",
     hdrs = ["secret_data.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":secret_data_internal",
         "@com_google_absl//absl/strings",
@@ -187,6 +188,7 @@ cc_library(
     srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":buffer",
         ":constants",
@@ -240,6 +242,7 @@ cc_library(
     srcs = [],
     hdrs = ["test_matchers.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":status",
         ":statusor",

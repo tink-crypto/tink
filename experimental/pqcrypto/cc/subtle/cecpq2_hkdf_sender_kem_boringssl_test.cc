@@ -16,13 +16,13 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "openssl/sha.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -44,9 +44,15 @@ struct HrssKeyPair {
   std::string hrss_public_key_marshaled;
 };
 
+struct EccKeyPair {
+  std::string pub_x;
+  std::string pub_y;
+  util::SecretData priv;
+};
+
 struct Cecpq2KeyPair {
   struct HrssKeyPair hrss_key_pair;
-  SubtleUtilBoringSSL::EcKey x25519_key_pair;
+  struct EccKeyPair x25519_key_pair;
 };
 
 // This method performs some basic common setup (HRSS and X25519 key generation,
@@ -56,9 +62,13 @@ crypto::tink::util::StatusOr<struct Cecpq2KeyPair> HrssTestCommon(
   Cecpq2KeyPair cecpq2_key_pair;
 
   // Generating a X25519 key pair
-  auto status_or_ec_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve_type);
-  if (!status_or_ec_test_key.ok()) return status_or_ec_test_key.status();
-  cecpq2_key_pair.x25519_key_pair = status_or_ec_test_key.ValueOrDie();
+  cecpq2_key_pair.x25519_key_pair.priv.resize(X25519_PRIVATE_KEY_LEN);
+  subtle::ResizeStringUninitialized(&(cecpq2_key_pair.x25519_key_pair.pub_x),
+                                    X25519_PUBLIC_VALUE_LEN);
+  X25519_keypair(const_cast<uint8_t*>(
+                 reinterpret_cast<const uint8_t*>(
+                 cecpq2_key_pair.x25519_key_pair.pub_x.data())),
+                 cecpq2_key_pair.x25519_key_pair.priv.data());
 
   // Generating a HRSS key pair
   util::SecretData generate_hrss_key_entropy =
@@ -74,8 +84,9 @@ crypto::tink::util::StatusOr<struct Cecpq2KeyPair> HrssTestCommon(
       &(cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled),
       HRSS_PUBLIC_KEY_BYTES);
   HRSS_marshal_public_key(
-      reinterpret_cast<uint8_t*>(
-          cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled.data()),
+      const_cast<uint8_t*>(
+      reinterpret_cast<const uint8_t*>(
+      cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled.data())),
       &(cecpq2_key_pair.hrss_key_pair.hrss_public_key));
 
   return cecpq2_key_pair;

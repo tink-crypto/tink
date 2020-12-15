@@ -15,13 +15,13 @@
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/hrss.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 
