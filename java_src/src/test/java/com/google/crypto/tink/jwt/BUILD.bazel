@@ -249,6 +249,50 @@ java_test(
 )
 
 java_test(
+    name = "JwtEcdsaVerifyKeyManagerTest",
+    srcs = ["JwtEcdsaVerifyKeyManagerTest.java"],
+    deps = [
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:pl_pragmatists_JUnitParams",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_verify_key_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//proto:jwt_ecdsa_java_proto",
+        "//proto:tink_java_proto",
+    ],
+)
+
+java_test(
+    name = "JwtEcdsaSignKeyManagerTest",
+    size = "large",
+    srcs = ["JwtEcdsaSignKeyManagerTest.java"],
+    deps = [
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+        "@maven//:pl_pragmatists_JUnitParams",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign_key_manager",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_verify",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "//proto:jwt_ecdsa_java_proto",
+        "//proto:tink_java_proto",
+    ],
+)
+java_test(
     name = "JwtFormatTest",
     size = "small",
     srcs = ["JwtFormatTest.java"],

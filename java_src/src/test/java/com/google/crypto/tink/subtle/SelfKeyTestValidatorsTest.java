@@ -18,6 +18,8 @@ import static org.junit.Assert.assertThrows;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateCrtKeySpec;
@@ -31,13 +33,15 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitParamsRunner.class)
 public class SelfKeyTestValidatorsTest {
 
-  private RSAPublicKey publicKey;
-  private RSAPrivateCrtKey privateKey;
+  private RSAPublicKey publicRsaKey;
+  private RSAPrivateCrtKey privateRsaKey;
+  private ECPrivateKey privateEcdsaKey;
+  private ECPublicKey publicEcdsaKey;
 
   // These are keys only used for testing, generated with openssl CLI.
   // openssl genrsa -out private-key4096.pem 4096
   // openssl rsa -in private-key4096.pem -text -noout
-  private static final String[] KEY_2048 = {
+  private static final String[] RSAKEY_2048 = {
     // N
     "00a5af78921b98763aa4578fd75b7aeb13f7bd7694e5fcf0e25d0c01424374d5cf1c2429c2d94ec1aea4782c0b34dfc63165daabd2573aa90ef6ef5176c985af467d06e68bfb24632f353e650895205777c368fe01593a705d0d300c90b7b7fe09c5012eb07cec76726567f5dfa3c0e73e7d50524e15cc7fac9c47c5d94729b56f0a604485a426716d9e29f43d1c08e4967878ae230f074a97a4e8d17d37dfc6ced5c59485a0640b3b1b6c77816c9123490e49813f43847588689d4c4989d653a92069a8bac5c4fa13abc95b3a27bb0a1a5097e97fd4dd3575656a057715c2a7f3a70058f8f6e7f1ca957cf45f1b748a0f8c2ccd2a51cda862ee25e9346daedd67",
     // D
@@ -54,7 +58,7 @@ public class SelfKeyTestValidatorsTest {
     "008ca975a95b86bb7e98e58dccb8b7f26d80cd47e389e898f0dc7281f97283981ad748be97ba335ea867ea126197f9f4df1ea33bc383375ce13b08d346ba54f11ccaa71f3314451db255275f090a88a266007b1ea27b762d2ba37e454e7c4f13d798af6f537348b583b13ddfbfd90997d118df8d5d9c369ec28230c415a71c1bf3",
   };
 
-  private static final String[] KEY_3072 = {
+  private static final String[] RSAKEY_3072 = {
     // N
     "00d3764ebdb48112dfefee52feaad8c89f6b8be358780f77808838ed8565099c0c3c0217543ca8cacd4d9de52c6c1264f3ca3c648671e8b336e9560ea28f7830b775402d8224f3c8b5645958d389dcef47f35c20a65c0a2ece6b68bdcbfabb30a92ba2b59b5022ba50accc16113d6d30053bb079685169c454a93f492d6f17d4c7e770b20e7175577284f3505789d127013ada0c44aac2167c47d8a4de377ab9408cf7d5319218ed666b317d459c829133e70906d05bb3138bc593ce7b025705aae3244bb634eaa70047204ed8b13c9ce9fbc4fa0277afe5831897cc838c7fe92a8eaadc1961a70c95254b363efea78dfcdba9683b4105c2e19384fdec569d6c04c89e7f3eac198c05c906e523e5a63e047f45295f3fa7ec3801b7f1d52064218551052753973f184ff85a5e8938ac621adfcbcffe8f3cb936263b026a2e09fcd88510dc37f31d3acf49046d3ea44c453414c70c0cae341411825fc38edfe4d6743dfaafa0b1b4a2f37775c7c75c40f76f1bf01e9be123820da1e34c59e4700fdf",
     // D
@@ -71,7 +75,7 @@ public class SelfKeyTestValidatorsTest {
     "00abe67e2e70a261aa1f489bcb6237f06f7d9c650f40bdc60570ec624d1914300339c2fe4dbc14b03e839007e09fc52c060bf94179e87e505b993ceff03e67c542769e035a8f7607ad88b65214fd4c702c7a4e469be64b5562e5ce8ffda2ce2b720ade8b9ea6c750678239f3c136fee1970d3c88db26cdec535b6376237f09ce1ab655822f6f78ce98b869116711a002fbb6046c2ec192224600d06b6eb46a5912353f61860d1ed5cd2d01b4fc7d17a4a7771137b427868100ef2b417fc003341b",
   };
 
-  private static final String[] KEY_4096 = {
+  private static final String[] RSAKEY_4096 = {
     // N
     "00b81c5e5753c233a3cdf8a1d928122b2f2c489af9e05167f481b1dd420ddf4eb57dc2da0541ff2403ec5302c4c44edaac046de4b94658146f4705ca60ce8de9f58eb4b0c660062c16c0600a3e5988c09d0aaf4607a62cae34ffd88db9bb1d1110c01a0117db0b233eeaa66621638fcfff548a778fec609b5adfa336f51eb1c63128affee1cfd4657bb6aac4fe3b08f642e2dc49cf4138f6335a230994ab12522c6d4e909f0f44cd430f0cc95b8d05dc89ded0a0dd1ba83206ed37d1223efaddc4b7ae373f05af1e00d2edde29e30f5152e270d2f50eb305b90d4c8825d6901fdbaf7df561a017a9a49221cba49a51efb88ebfe2639183eeae81f40a008cb9eb9045fb402863a82f7d41a691098d4d9cb8dcd44001b1956727f5f515cd1fb718d3c70fa70ebd5a92a6e2f1fd53d0abfa2c840fdf2f34a43ba6f7ab58d8e055e5684a631c08773d5b85469ca3d7d3137f358ff483e1d99c97d62d7a620488cd2bd963a3e97c5385123ed41f781c57a8456f32c80f096dcf8b823a18a289853d2b19411dded7d91c59380b883907c63e8f3fc75c2836ed6c4dfe04a8f919342b63278c8b5285e4706fda095f5a3286aa70e5cdd074f99358c98f53a9921270b44114824b9d89de39a0cffb6d496589798b55a629350422a84f2acf59a94e02d280beb75d439da4264791c7ef5efcd7bb5c4a8f129fce3c61a47e8601af9799490dc5",
     // D
@@ -86,6 +90,410 @@ public class SelfKeyTestValidatorsTest {
     "0186374ec17cfb83fd9c8ecc55af87bdce57f6e6319771c016604e042efc0fa34873d219511a029a548617f96feeaf2a9b5e72527c79adfb96aa3a17c8747637d3452d0438a7dfdb940eb35813fa2230674b3e4ea1d936b02057ecf5c8839ae429196c8eb72f586bae7e32605a3e9063769a6ec35e011d2bd582fa98cf78bb293594015e18e252bdb167b2daef8ca55a8a84c096837877fc4e49e9d567415a0a5441ea7f278bb0eed3cf7b0c782476b34e541743c0a40fb9ffbd8e54a56f87750177853609997e0f0d0cdcd7c15134a3724b94ba1438cecd5313450efdee7aaa72318ff46f01b6e093a4a5f0b58c3eee36e8e1417cb334e7d47a2a80d9a76c97",
     // crt
     "00b3de05bd6644917afad4817f0609933c8b5cd46f04cfbc21fa0220296d474759b8da325da8061eb4a53f8bc3e1537b2a18c1414ae71f02f527f2d8e4e4b0b5d6feeb1191cb00db5d88a6573b4afdb4fc162eff4d062905e0f7ae50d7277a67c90762422e1604ab371a3319f01d19e7c6574a18163518ade29b4850d9fbc64e49b8586258060593f464b1dc5793412f6faec86a326424ddfae21567249f7e7d3cf4d394d972d9d448773aa7d7856e7bfb7cff16e942b5010ce94932682a78ebb0a58bd067cfe95ef0926a120ecd289758025ddda6a42e1622d7bdf6679756da06687add83423def17a3b0a9815a472354a9b9c82b71223465c04c311d10bbb400",
+  };
+
+  // generated with openssl ecparam -genkey -name prime256v1 -out ec256.pem
+  // openssl ec -in ec256.pem -text -noout
+  // http://tools.ietf.org/html/rfc5480#section-2.2:
+  //  04 means there is no compression
+  //  03 means there is a compression and select y as positive
+  //  02 means there is a compression and select y as negative
+
+  private static final byte[][] ECDSAKEY_256 = {
+    // pubX
+    {
+      (byte) 0x52, (byte) 0x46, (byte) 0x92, (byte) 0x45, (byte) 0x30, (byte) 0x2b, (byte) 0x25,
+          (byte) 0x47, (byte) 0x07, (byte) 0xd7, (byte) 0xcd, (byte) 0xe7, (byte) 0x09, (byte) 0x0e,
+          (byte) 0x27,
+      (byte) 0x9f, (byte) 0x37, (byte) 0x44, (byte) 0x58, (byte) 0x8e, (byte) 0x0d, (byte) 0xd6,
+          (byte) 0x8b, (byte) 0xfa, (byte) 0xe0, (byte) 0x46, (byte) 0x81, (byte) 0x8a, (byte) 0x99,
+          (byte) 0x3f,
+      (byte) 0xee, (byte) 0x02
+    },
+    // pubY
+    {
+      (byte) 0xdc, (byte) 0x63, (byte) 0xb3, (byte) 0xfe, (byte) 0x58, (byte) 0xd0, (byte) 0x4b,
+          (byte) 0x35, (byte) 0x6c, (byte) 0xa9, (byte) 0x81, (byte) 0x22, (byte) 0x5a, (byte) 0x97,
+          (byte) 0xe7,
+      (byte) 0xbe, (byte) 0x70, (byte) 0x78, (byte) 0x22, (byte) 0xc5, (byte) 0x2b, (byte) 0x22,
+          (byte) 0x13, (byte) 0x3a, (byte) 0x52, (byte) 0x4d, (byte) 0x0a, (byte) 0x7c, (byte) 0xcc,
+          (byte) 0xdd,
+      (byte) 0x0a, (byte) 0x5d
+    },
+    // Priv
+    {
+      (byte) 0x07, (byte) 0x6e, (byte) 0x85, (byte) 0x27, (byte) 0xa1, (byte) 0xb4, (byte) 0x53,
+          (byte) 0x03, (byte) 0xdc, (byte) 0x6f, (byte) 0x7f, (byte) 0xb8, (byte) 0xd8, (byte) 0xdc,
+          (byte) 0x44,
+      (byte) 0x4d, (byte) 0x75, (byte) 0x19, (byte) 0x85, (byte) 0xc7, (byte) 0xe6, (byte) 0x12,
+          (byte) 0xbb, (byte) 0x69, (byte) 0x75, (byte) 0x5f, (byte) 0xac, (byte) 0x3e, (byte) 0xe4,
+          (byte) 0xa6,
+      (byte) 0x24, (byte) 0x71
+    }
+  };
+  private static final byte[][] ECDSAKEY_384 = {
+    // pubX
+    {
+      (byte) 0x70,
+      (byte) 0xf0,
+      (byte) 0x26,
+      (byte) 0xee,
+      (byte) 0x16,
+      (byte) 0x6b,
+      (byte) 0x7f,
+      (byte) 0x12,
+      (byte) 0xbb,
+      (byte) 0x24,
+      (byte) 0x04,
+      (byte) 0x62,
+      (byte) 0x57,
+      (byte) 0x2f,
+      (byte) 0x39,
+      (byte) 0x08,
+      (byte) 0xc1,
+      (byte) 0x21,
+      (byte) 0x36,
+      (byte) 0xfa,
+      (byte) 0x47,
+      (byte) 0x6d,
+      (byte) 0x46,
+      (byte) 0x87,
+      (byte) 0x80,
+      (byte) 0x43,
+      (byte) 0x9e,
+      (byte) 0x16,
+      (byte) 0x92,
+      (byte) 0x93,
+      (byte) 0x6e,
+      (byte) 0x5a,
+      (byte) 0x39,
+      (byte) 0xe0,
+      (byte) 0x2d,
+      (byte) 0xaa,
+      (byte) 0x25,
+      (byte) 0x46,
+      (byte) 0x1f,
+      (byte) 0x04,
+      (byte) 0x7d,
+      (byte) 0xfc,
+      (byte) 0x5b,
+      (byte) 0xb2,
+      (byte) 0x28,
+      (byte) 0xab,
+      (byte) 0x72,
+      (byte) 0xb8
+    },
+    // pubY
+    {
+      (byte) 0x23,
+      (byte) 0x44,
+      (byte) 0x5f,
+      (byte) 0xa0,
+      (byte) 0x2d,
+      (byte) 0x6a,
+      (byte) 0x36,
+      (byte) 0xf4,
+      (byte) 0x48,
+      (byte) 0x4b,
+      (byte) 0x9e,
+      (byte) 0x72,
+      (byte) 0x15,
+      (byte) 0x30,
+      (byte) 0x30,
+      (byte) 0xbe,
+      (byte) 0xa5,
+      (byte) 0x4e,
+      (byte) 0xd1,
+      (byte) 0xaa,
+      (byte) 0x10,
+      (byte) 0x75,
+      (byte) 0x09,
+      (byte) 0xb0,
+      (byte) 0xb0,
+      (byte) 0xe7,
+      (byte) 0x26,
+      (byte) 0x52,
+      (byte) 0xf3,
+      (byte) 0x6d,
+      (byte) 0xec,
+      (byte) 0xc2,
+      (byte) 0xa6,
+      (byte) 0x48,
+      (byte) 0xd5,
+      (byte) 0x72,
+      (byte) 0x6b,
+      (byte) 0x51,
+      (byte) 0x1e,
+      (byte) 0x63,
+      (byte) 0x25,
+      (byte) 0xd0,
+      (byte) 0x16,
+      (byte) 0x13,
+      (byte) 0xa7,
+      (byte) 0xd0,
+      (byte) 0x5d,
+      (byte) 0x7f
+    },
+    // Priv
+    {
+      (byte) 0x7e,
+      (byte) 0x1f,
+      (byte) 0xd1,
+      (byte) 0x8c,
+      (byte) 0x54,
+      (byte) 0x52,
+      (byte) 0x83,
+      (byte) 0x04,
+      (byte) 0xa7,
+      (byte) 0xcb,
+      (byte) 0x10,
+      (byte) 0x18,
+      (byte) 0x20,
+      (byte) 0xcb,
+      (byte) 0x1a,
+      (byte) 0x61,
+      (byte) 0xe3,
+      (byte) 0x1f,
+      (byte) 0x40,
+      (byte) 0xfd,
+      (byte) 0x77,
+      (byte) 0xd4,
+      (byte) 0xfe,
+      (byte) 0x1b,
+      (byte) 0x4f,
+      (byte) 0x74,
+      (byte) 0xa0,
+      (byte) 0x5d,
+      (byte) 0x1d,
+      (byte) 0x2b,
+      (byte) 0x6b,
+      (byte) 0x85,
+      (byte) 0x58,
+      (byte) 0x67,
+      (byte) 0x22,
+      (byte) 0xa7,
+      (byte) 0x10,
+      (byte) 0xb4,
+      (byte) 0x99,
+      (byte) 0x87,
+      (byte) 0x8d,
+      (byte) 0x3f,
+      (byte) 0xd9,
+      (byte) 0xfb,
+      (byte) 0xba,
+      (byte) 0xe3,
+      (byte) 0x45,
+      (byte) 0x58
+    }
+  };
+  private static final byte[][] ECDSAKEY_521 = {
+    // pubX
+    {
+      (byte) 0x01,
+      (byte) 0xf0,
+      (byte) 0xb3,
+      (byte) 0x4f,
+      (byte) 0x92,
+      (byte) 0x73,
+      (byte) 0x0e,
+      (byte) 0x18,
+      (byte) 0x80,
+      (byte) 0x56,
+      (byte) 0x70,
+      (byte) 0xa5,
+      (byte) 0x4f,
+      (byte) 0x74,
+      (byte) 0x2e,
+      (byte) 0xa0,
+      (byte) 0x56,
+      (byte) 0xf2,
+      (byte) 0x67,
+      (byte) 0x25,
+      (byte) 0x93,
+      (byte) 0x08,
+      (byte) 0x19,
+      (byte) 0x37,
+      (byte) 0xed,
+      (byte) 0x45,
+      (byte) 0xa2,
+      (byte) 0x53,
+      (byte) 0x6e,
+      (byte) 0x74,
+      (byte) 0x50,
+      (byte) 0x95,
+      (byte) 0x46,
+      (byte) 0x2a,
+      (byte) 0x46,
+      (byte) 0x75,
+      (byte) 0x96,
+      (byte) 0x76,
+      (byte) 0x92,
+      (byte) 0xc2,
+      (byte) 0xe2,
+      (byte) 0xfa,
+      (byte) 0xce,
+      (byte) 0xa4,
+      (byte) 0x19,
+      (byte) 0x81,
+      (byte) 0x62,
+      (byte) 0xee,
+      (byte) 0x69,
+      (byte) 0xb6,
+      (byte) 0xa5,
+      (byte) 0xf2,
+      (byte) 0x81,
+      (byte) 0x22,
+      (byte) 0x6e,
+      (byte) 0x8f,
+      (byte) 0x12,
+      (byte) 0x3d,
+      (byte) 0x6b,
+      (byte) 0x82,
+      (byte) 0x17,
+      (byte) 0xb3,
+      (byte) 0x3f,
+      (byte) 0xa5,
+      (byte) 0xf0,
+      (byte) 0xdc
+    },
+    // pubY
+    {
+      (byte) 0x01,
+      (byte) 0xdd,
+      (byte) 0x63,
+      (byte) 0x19,
+      (byte) 0x2c,
+      (byte) 0x1d,
+      (byte) 0xe4,
+      (byte) 0xaa,
+      (byte) 0xc3,
+      (byte) 0x39,
+      (byte) 0x74,
+      (byte) 0xd9,
+      (byte) 0xf3,
+      (byte) 0x69,
+      (byte) 0x29,
+      (byte) 0x20,
+      (byte) 0x07,
+      (byte) 0x0f,
+      (byte) 0x1e,
+      (byte) 0x82,
+      (byte) 0xbc,
+      (byte) 0xc5,
+      (byte) 0x46,
+      (byte) 0xa9,
+      (byte) 0x5b,
+      (byte) 0x83,
+      (byte) 0x8e,
+      (byte) 0xd3,
+      (byte) 0x5b,
+      (byte) 0x3e,
+      (byte) 0xa2,
+      (byte) 0x3b,
+      (byte) 0x63,
+      (byte) 0x86,
+      (byte) 0xf9,
+      (byte) 0xe4,
+      (byte) 0x4a,
+      (byte) 0x47,
+      (byte) 0xb7,
+      (byte) 0xf8,
+      (byte) 0x30,
+      (byte) 0x70,
+      (byte) 0xb0,
+      (byte) 0xee,
+      (byte) 0xda,
+      (byte) 0xd0,
+      (byte) 0x43,
+      (byte) 0x22,
+      (byte) 0xb3,
+      (byte) 0xec,
+      (byte) 0xa8,
+      (byte) 0xf9,
+      (byte) 0xe9,
+      (byte) 0x1b,
+      (byte) 0x52,
+      (byte) 0xa2,
+      (byte) 0xcb,
+      (byte) 0xe0,
+      (byte) 0x05,
+      (byte) 0x08,
+      (byte) 0x3b,
+      (byte) 0x20,
+      (byte) 0x27,
+      (byte) 0x80,
+      (byte) 0xe9,
+      (byte) 0x6d
+    },
+    // Priv
+    {
+      (byte) 0x00,
+      (byte) 0xe9,
+      (byte) 0x3a,
+      (byte) 0xba,
+      (byte) 0xf5,
+      (byte) 0x66,
+      (byte) 0x69,
+      (byte) 0x34,
+      (byte) 0x6d,
+      (byte) 0x37,
+      (byte) 0x9a,
+      (byte) 0xdd,
+      (byte) 0xf1,
+      (byte) 0x91,
+      (byte) 0xf0,
+      (byte) 0x40,
+      (byte) 0x9e,
+      (byte) 0x89,
+      (byte) 0x08,
+      (byte) 0x5e,
+      (byte) 0xc9,
+      (byte) 0x16,
+      (byte) 0xb6,
+      (byte) 0x03,
+      (byte) 0x08,
+      (byte) 0xb9,
+      (byte) 0x00,
+      (byte) 0x48,
+      (byte) 0x62,
+      (byte) 0xa8,
+      (byte) 0xe4,
+      (byte) 0xe8,
+      (byte) 0x97,
+      (byte) 0x28,
+      (byte) 0x17,
+      (byte) 0x31,
+      (byte) 0x9d,
+      (byte) 0xa2,
+      (byte) 0xcb,
+      (byte) 0xc1,
+      (byte) 0x7f,
+      (byte) 0xfb,
+      (byte) 0x19,
+      (byte) 0x24,
+      (byte) 0xfd,
+      (byte) 0x75,
+      (byte) 0x7b,
+      (byte) 0x91,
+      (byte) 0xbd,
+      (byte) 0xa1,
+      (byte) 0x5b,
+      (byte) 0x9a,
+      (byte) 0x2a,
+      (byte) 0x93,
+      (byte) 0xeb,
+      (byte) 0x82,
+      (byte) 0x4d,
+      (byte) 0x0f,
+      (byte) 0xe6,
+      (byte) 0x2f,
+      (byte) 0x4b,
+      (byte) 0xeb,
+      (byte) 0xfc,
+      (byte) 0x4a,
+      (byte) 0xa9,
+      (byte) 0x6c
+    }
   };
 
   private static Object[] parametersPssValid() {
@@ -132,29 +540,29 @@ public class SelfKeyTestValidatorsTest {
     };
   }
 
-  public static final String[] getKeyInfo(int keySize) throws Exception {
+  public static final String[] getRsaKeyInfo(int keySize) throws Exception {
     switch (keySize) {
       case 2048:
-        return KEY_2048;
+        return RSAKEY_2048;
       case 3072:
-        return KEY_3072;
+        return RSAKEY_3072;
       case 4096:
       default:
-        return KEY_4096;
+        return RSAKEY_4096;
     }
   }
 
-  private final void createKey(int bitLength) throws Exception {
-    String[] keyInfo = getKeyInfo(bitLength);
+  private final void createRsaKey(int bitLength) throws Exception {
+    String[] keyInfo = getRsaKeyInfo(bitLength);
     KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
-    publicKey =
+    publicRsaKey =
         (RSAPublicKey)
             kf.generatePublic(
                 new RSAPublicKeySpec(
                     new BigInteger(keyInfo[0].substring(keyInfo[0].length() - (bitLength / 4)), 16),
                     BigInteger.valueOf(65537)));
 
-    privateKey =
+    privateRsaKey =
         (RSAPrivateCrtKey)
             kf.generatePrivate(
                 new RSAPrivateCrtKeySpec(
@@ -173,8 +581,9 @@ public class SelfKeyTestValidatorsTest {
   public void testValidateRsaSsaPssValid(
       Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
       throws Exception {
-    createKey(bitLength);
-    SelfKeyTestValidators.validateRsaSsaPss(privateKey, publicKey, sigHash, mgf1Hash, saltLength);
+    createRsaKey(bitLength);
+    SelfKeyTestValidators.validateRsaSsaPss(
+        privateRsaKey, publicRsaKey, sigHash, mgf1Hash, saltLength);
   }
 
   @Test
@@ -182,28 +591,66 @@ public class SelfKeyTestValidatorsTest {
   public void testValidateRsaSsaPssInvalid(
       Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
       throws Exception {
-    createKey(bitLength);
+    createRsaKey(bitLength);
     assertThrows(
         Exception.class,
         () ->
             SelfKeyTestValidators.validateRsaSsaPss(
-                privateKey, publicKey, sigHash, mgf1Hash, saltLength));
+                privateRsaKey, publicRsaKey, sigHash, mgf1Hash, saltLength));
   }
 
   @Test
   @Parameters(method = "parametersPkcs1Valid")
   public void testValidateRsaSsaPkcs1Valid(Enums.HashType sigHash, int bitLength) throws Exception {
-    createKey(bitLength);
-    SelfKeyTestValidators.validateRsaSsaPkcs1(privateKey, publicKey, sigHash);
+    createRsaKey(bitLength);
+    SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, sigHash);
   }
 
   @Test
   @Parameters(method = "parametersPkcs1Invalid")
   public void testValidateRsaSsaPkcs1Invalid(Enums.HashType sigHash, int bitLength)
       throws Exception {
-    createKey(bitLength);
+    createRsaKey(bitLength);
     assertThrows(
         Exception.class,
-        () -> SelfKeyTestValidators.validateRsaSsaPkcs1(privateKey, publicKey, sigHash));
+        () -> SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, sigHash));
+  }
+
+  private static Object[] parametersEcdsaValid() {
+    return new Object[] {
+      new Object[] {Enums.HashType.SHA256, EllipticCurves.CurveType.NIST_P256},
+      new Object[] {Enums.HashType.SHA384, EllipticCurves.CurveType.NIST_P384},
+      new Object[] {Enums.HashType.SHA512, EllipticCurves.CurveType.NIST_P521},
+    };
+  }
+
+  public static final byte[][] getEcdsaKeyInfo(EllipticCurves.CurveType curveType)
+      throws Exception {
+    switch (curveType) {
+      case NIST_P256:
+        return ECDSAKEY_256;
+      case NIST_P384:
+        return ECDSAKEY_384;
+      case NIST_P521:
+        return ECDSAKEY_521;
+    }
+
+    throw new Exception("invalid curve. Should never happen.");
+  }
+
+  private final void createEcdsaKey(EllipticCurves.CurveType curveType) throws Exception {
+    byte[][] key = getEcdsaKeyInfo(curveType);
+    publicEcdsaKey = EllipticCurves.getEcPublicKey(curveType, key[0], key[1]);
+
+    privateEcdsaKey = EllipticCurves.getEcPrivateKey(curveType, key[2]);
+  }
+
+  @Test
+  @Parameters(method = "parametersEcdsaValid")
+  public void testValidateEcdsaValid(Enums.HashType hash, EllipticCurves.CurveType curveType)
+      throws Exception {
+    createEcdsaKey(curveType);
+    SelfKeyTestValidators.validateEcdsa(
+        privateEcdsaKey, publicEcdsaKey, hash, EllipticCurves.EcdsaEncoding.IEEE_P1363);
   }
 }

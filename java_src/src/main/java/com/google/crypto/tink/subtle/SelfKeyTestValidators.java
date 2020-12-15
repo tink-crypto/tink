@@ -16,6 +16,8 @@ package com.google.crypto.tink.subtle;
 
 import com.google.protobuf.ByteString;
 import java.security.GeneralSecurityException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -57,6 +59,26 @@ public final class SelfKeyTestValidators {
     } catch (GeneralSecurityException e) {
       throw new GeneralSecurityException(
           "RSA PKCS1 signing with private key followed by verifying with public key failed."
+              + " The key may be corrupted.",
+          e);
+    }
+  }
+
+  public static final void validateEcdsa(
+      ECPrivateKey privateKey,
+      ECPublicKey publicKey,
+      Enums.HashType hash,
+      EllipticCurves.EcdsaEncoding encoding)
+      throws GeneralSecurityException {
+
+    EcdsaSignJce ecdsaSigner = new EcdsaSignJce(privateKey, hash, encoding);
+    EcdsaVerifyJce ecdsaverifier = new EcdsaVerifyJce(publicKey, hash, encoding);
+    try {
+      ecdsaverifier.verify(
+          ecdsaSigner.sign(TEST_MESSAGE.toByteArray()), TEST_MESSAGE.toByteArray());
+    } catch (GeneralSecurityException e) {
+      throw new GeneralSecurityException(
+          "ECDSA signing with private key followed by verifying with public key failed."
               + " The key may be corrupted.",
           e);
     }
