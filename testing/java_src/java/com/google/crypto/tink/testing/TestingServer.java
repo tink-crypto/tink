@@ -16,6 +16,7 @@ package com.google.crypto.tink.testing;
 
 
 
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.config.TinkConfig;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public final class TestingServer {
     TinkConfig.register();
 
     System.out.println("Start server on port " + port);
+    KmsClients.add(new FakeKmsClient());
     ServerBuilder.forPort(port)
         .addService(new MetadataServiceImpl())
         .addService(new KeysetServiceImpl())
