@@ -35,6 +35,7 @@
 #include "tink/cc/pybind/status.h"
 #include "tink/cc/pybind/status_casters.h"
 #include "tink/cc/pybind/streaming_aead.h"
+#include "tink/cc/pybind/status_injector.h"
 
 namespace crypto {
 namespace tink {
@@ -59,6 +60,7 @@ PYBIND11_MODULE(tink_bindings, m) {
   PybindRegisterPythonFileObjectAdapter(&m);
   PybindRegisterInputStreamAdapter(&m);
   PybindRegisterPublicKeyVerify(&m);
+  pybind11::test::PybindRegisterStatusInjector(&m);
 }
 
 }  // namespace tink
