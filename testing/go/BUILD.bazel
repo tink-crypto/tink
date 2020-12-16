@@ -72,7 +72,7 @@ go_binary(
         ":services",
         ":testing_api_go_grpc",
         "@tink_go//core/registry:go_default_library",
-        "@tink_go//testutil:go_default_library",
+        "@tink_go//testing/fakekms:go_default_library",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )

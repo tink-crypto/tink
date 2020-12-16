@@ -14,7 +14,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package testutil
+// Package fakekms provides a fake implementation of registry.KMSClient.
+//
+// Normally, a 'keyURI' identifies a key that is stored remotely by the KMS,
+// and every operation is executed remotely using a RPC call to the KMS, since
+// the key should not be sent to the client.
+// In this fake implementation we want to avoid these RPC calls. We achieve this
+// by encoding the key in the 'keyURI'. So the client simply needs to decode
+// the key and generate an AEAD out of it. This is of course insecure and should
+// only be used in testing.
+package fakekms
 
 import (
 	"bytes"
@@ -33,22 +42,13 @@ const fakePrefix = "fake-kms://"
 
 var _ registry.KMSClient = (*fakeClient)(nil)
 
-// fakeClient is a fake implementation of registry.KMSClient.
-//
-// Normally, a 'keyURI' identifies a key that is stored remotely by the KMS,
-// and every operation is executed remotely using a RPC call to the KMS, since
-// the key should not be sent to the client.
-// In this fake implementation we want to avoid these RPC calls. We achieve this
-// by encoding the key in the 'keyURI'. So the client simply needs to decode
-// the key and generate an AEAD out of it. This is of course insecure and should
-// only be used in testing.
 type fakeClient struct {
 	uriPrefix string
 }
 
-// NewFakeKMSClient returns a fake KMS client which will handle keys with uriPrefix prefix.
+// NewClient returns a fake KMS client which will handle keys with uriPrefix prefix.
 // keyURI must have the following format: 'fake-kms://<base64 encoded aead keyset>'.
-func NewFakeKMSClient(uriPrefix string) (registry.KMSClient, error) {
+func NewClient(uriPrefix string) (registry.KMSClient, error) {
 	if !strings.HasPrefix(strings.ToLower(uriPrefix), fakePrefix) {
 		return nil, fmt.Errorf("uriPrefix must start with %s, but got %s", fakePrefix, uriPrefix)
 	}
@@ -80,8 +80,8 @@ func (c *fakeClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	return aead.New(handle)
 }
 
-// NewFakeKMSKeyURI returns a new, random fake KMS key URI.
-func NewFakeKMSKeyURI() (string, error) {
+// NewKeyURI returns a new, random fake KMS key URI.
+func NewKeyURI() (string, error) {
 	handle, err := keyset.NewHandle(aead.AES128GCMKeyTemplate())
 	if err != nil {
 		return "", err

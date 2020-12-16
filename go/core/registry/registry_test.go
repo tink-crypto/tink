@@ -22,6 +22,7 @@ import (
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/mac/subtle"
+	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/go/testutil"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
@@ -170,13 +171,13 @@ func TestPrimitive(t *testing.T) {
 }
 
 func TestRegisterKmsClient(t *testing.T) {
-	c1, err := testutil.NewFakeKMSClient("fake-kms://prefix1")
+	c1, err := fakekms.NewClient("fake-kms://prefix1")
 	if err != nil {
-		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://prefix1') failed: %v", err)
+		t.Fatalf("fakekms.NewClient('fake-kms://prefix1') failed: %v", err)
 	}
-	c2, err := testutil.NewFakeKMSClient("fake-kms://prefix2")
+	c2, err := fakekms.NewClient("fake-kms://prefix2")
 	if err != nil {
-		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://prefix2') failed: %v", err)
+		t.Fatalf("fakekms.NewClient('fake-kms://prefix2') failed: %v", err)
 	}
 	registry.RegisterKMSClient(c1)
 	registry.RegisterKMSClient(c2)

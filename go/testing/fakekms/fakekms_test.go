@@ -12,20 +12,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package testutil_test
+package fakekms_test
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/google/tink/go/testutil"
+	"github.com/google/tink/go/testing/fakekms"
 )
 
 const keyURI = "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
 const anotherKeyURI = "fake-kms://CLHW_5cHElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIZ-2h9InfZTbbkJjaJBsVgYARABGLHW_5cHIAE"
 
 func TestValidKeyURIs(t *testing.T) {
-	newKeyURI, err := testutil.NewFakeKMSKeyURI()
+	newKeyURI, err := fakekms.NewKeyURI()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestValidKeyURIs(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc, func(t *testing.T) {
-			client, err := testutil.NewFakeKMSClient(keyURI)
+			client, err := fakekms.NewClient(keyURI)
 			if err != nil {
 				t.Fatalf("testutil.NewFakeKMSClient(keyURI) failed: %v", err)
 			}
@@ -66,17 +66,17 @@ func TestValidKeyURIs(t *testing.T) {
 }
 
 func TestBadUriPrefix(t *testing.T) {
-	_, err := testutil.NewFakeKMSClient("bad-prefix://encodedkeyset")
+	_, err := fakekms.NewClient("bad-prefix://encodedkeyset")
 	if err == nil {
-		t.Fatalf("testutil.NewFakeKMSClient('bad-prefix://encodedkeyset') succeeded, want fail")
+		t.Fatalf("fakekms.NewClient('bad-prefix://encodedkeyset') succeeded, want fail")
 	}
 }
 
 func TestValidPrefix(t *testing.T) {
 	uriPrefix := "fake-kms://CM2b" // is a prefix of keyURI
-	client, err := testutil.NewFakeKMSClient(uriPrefix)
+	client, err := fakekms.NewClient(uriPrefix)
 	if err != nil {
-		t.Fatalf("testutil.NewFakeKMSClient(uriPrefix) failed: %v", err)
+		t.Fatalf("fakekms.NewClient(uriPrefix) failed: %v", err)
 	}
 	if !client.Supported(keyURI) {
 		t.Fatalf("client with URI prefix %s should support key URI %s", uriPrefix, keyURI)
@@ -89,9 +89,9 @@ func TestValidPrefix(t *testing.T) {
 
 func TestInvalidPrefix(t *testing.T) {
 	uriPrefix := "fake-kms://CM2x" // is not a prefix of keyURI
-	client, err := testutil.NewFakeKMSClient(uriPrefix)
+	client, err := fakekms.NewClient(uriPrefix)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("fakekms.NewClient(uriPrefix) failed: %v", err)
 	}
 	if client.Supported(keyURI) {
 		t.Fatalf("client with URI prefix %s should not support key URI %s", uriPrefix, keyURI)
@@ -103,9 +103,9 @@ func TestInvalidPrefix(t *testing.T) {
 }
 
 func TestGetAeadFailsWithBadKeysetEncoding(t *testing.T) {
-	client, err := testutil.NewFakeKMSClient("fake-kms://bad")
+	client, err := fakekms.NewClient("fake-kms://bad")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("fakekms.NewClient('fake-kms://bad') failed: %v", err)
 	}
 	_, err = client.GetAEAD("fake-kms://badencoding")
 	if err == nil {

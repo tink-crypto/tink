@@ -23,6 +23,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -98,16 +99,16 @@ func TestNoPrefixKeyTemplates(t *testing.T) {
 }
 
 func TestKMSEnvelopeAEADKeyTemplates(t *testing.T) {
-	fakeKmsClient, err := testutil.NewFakeKMSClient("fake-kms://")
+	fakeKmsClient, err := fakekms.NewClient("fake-kms://")
 	if err != nil {
-		t.Fatalf("testutil.NewFakeKMSClient('fake-kms://') failed: %v", err)
+		t.Fatalf("fakekms.NewClient('fake-kms://') failed: %v", err)
 	}
 	registry.RegisterKMSClient(fakeKmsClient)
 
 	fixedKeyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
-	newKeyURI, err := testutil.NewFakeKMSKeyURI()
+	newKeyURI, err := fakekms.NewKeyURI()
 	if err != nil {
-		t.Fatalf("testutil.NewFakeKMSKeyURI() failed: %v", err)
+		t.Fatalf("fakekms.NewKeyURI() failed: %v", err)
 	}
 	var testCases = []struct {
 		name     string

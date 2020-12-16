@@ -24,10 +24,9 @@ import (
 	// context is used to cancel outstanding requests
 	"google.golang.org/grpc"
 	"github.com/google/tink/go/core/registry"
+	"github.com/google/tink/go/testing/fakekms"
 	pbgrpc "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	"github.com/google/tink/testing/go/services"
-
-	"github.com/google/tink/go/testutil"
 )
 
 var (
@@ -36,7 +35,7 @@ var (
 
 func main() {
 	flag.Parse()
-	client, err := testutil.NewFakeKMSClient("fake-kms://")
+	client, err := fakekms.NewClient("fake-kms://")
 	if err != nil {
 		log.Fatalf("Failed to generate new FakeKMSClient: %v", err)
 	}

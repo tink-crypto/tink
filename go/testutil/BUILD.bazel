@@ -7,7 +7,6 @@ go_library(
     testonly = 1,
     srcs = [
         "constant.go",
-        "fake_kms_client.go",
         "testdata.go",
         "testutil.go",
         "wycheproofutil.go",
@@ -16,7 +15,6 @@ go_library(
         "@tink_base//testdata/templates",
     ],
     importpath = "github.com/google/tink/go/testutil",
-    visibility = ["//visibility:public"],
     deps = [
         "//aead:go_default_library",
         "//core/registry:go_default_library",
@@ -52,7 +50,6 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "fake_kms_client_test.go",
         "testdata_test.go",
         "testutil_test.go",
         "wycheproofutil_test.go",
