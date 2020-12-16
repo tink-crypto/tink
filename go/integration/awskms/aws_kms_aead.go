@@ -82,8 +82,20 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
+	// In AwsKmsAead.decrypt() it is important to check the returned KeyId against the one
+	// previously configured. If we don't do this, the possibility exists for the ciphertext to
+	// be replaced by one under a key we don't control/expect, but do have decrypt permissions
+	// on.
+	// The check is disabled if keyARN is not in key ARN format.
+	// See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
+	if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
 		return nil, errors.New("decryption failed: wrong key id")
 	}
 	return resp.Plaintext, nil
+}
+
+/** Returns {@code true} if {@code keyArn} is in key ARN format. */
+func isKeyArnFormat(keyArn string) bool {
+	tokens := strings.Split(keyArn, ":")
+	return len(tokens) == 6 && strings.HasPrefix(tokens[5], "key/")
 }
