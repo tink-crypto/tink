@@ -9,19 +9,22 @@
     usually installed at `/Users/username/Library/Android/sdk/`. You also need
     Android SDK Build Tools 24.0.3 or newer.
 
-*   Check out source code and build
+*   The javadoc targets require using JDK 8.
+
+*   Check out the source code, navigate to the Java Bazel workspace and execute
+    all test targets in the project:
 
 ```shell
 git clone https://github.com/google/tink
-cd tink
-bazel test java/...
+cd tink/java_src
+bazel test ...
 ```
 
 ## Code structure
 
 ### Java packages
 
-*   **com.google.crypto.tink** This package consists only the core of Tink,
+*   **com.google.crypto.tink** This package consists of only the core of Tink,
     including the primitive interfaces and key management APIs. Users that
     [develop their own primitives or key
     types](JAVA-HOWTO.md#custom-implementation-of-a-primitive)
