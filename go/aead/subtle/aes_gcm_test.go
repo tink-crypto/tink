@@ -17,13 +17,12 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
+	"fmt"
 	"testing"
 
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 )
 
 var keySizes = []int{16, 32}
@@ -157,103 +156,48 @@ func TestAESGCMRandomNonce(t *testing.T) {
 	}
 }
 
-type testdata struct {
-	Algorithm        string
-	GeneratorVersion string
-	NumberOfTests    uint32
-	TestGroups       []*testgroup
-}
-
-type testgroup struct {
-	IvSize  uint32
-	KeySize uint32
-	TagSize uint32
-	Type    string
-	Tests   []*testcase
-}
-
-type testcase struct {
-	Aad     string
-	Comment string
-	Ct      string
-	Iv      string
-	Key     string
-	Msg     string
-	Result  string
-	Tag     string
-	TcID    uint32
-}
-
-func TestVectors(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
+func TestAESGCMWycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	suite := new(AEADSuite)
+	if err := testutil.PopulateSuite(suite, "aes_gcm_test.json"); err != nil {
+		t.Fatalf("failed populating suite: %s", err)
 	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_gcm_test.json"))
+	for _, group := range suite.TestGroups {
+		if err := subtle.ValidateAESKeySize(group.KeySize / 8); err != nil {
+			continue
+		}
+		if group.IvSize != subtle.AESGCMIVSize*8 {
+			continue
+		}
+		for _, test := range group.Tests {
+			caseName := fmt.Sprintf("%s-%s(%d,%d):Case-%d",
+				suite.Algorithm, group.Type, group.KeySize, group.TagSize, test.CaseID)
+			t.Run(caseName, func(t *testing.T) { runAESGCMWycheproofCase(t, test) })
+		}
+	}
+}
+
+func runAESGCMWycheproofCase(t *testing.T, tc *AEADCase) {
+	var combinedCt []byte
+	combinedCt = append(combinedCt, tc.Iv...)
+	combinedCt = append(combinedCt, tc.Ct...)
+	combinedCt = append(combinedCt, tc.Tag...)
+	// create cipher and do encryption
+	cipher, err := subtle.NewAESGCM(tc.Key)
 	if err != nil {
-		t.Fatalf("cannot open file: %s", err)
+		t.Fatalf("cannot create new instance of AESGCM in test case: %s", err)
 	}
-	parser := json.NewDecoder(f)
-	data := new(testdata)
-	if err := parser.Decode(data); err != nil {
-		t.Fatalf("cannot decode test data: %s", err)
-	}
-
-	for _, g := range data.TestGroups {
-		if err := subtle.ValidateAESKeySize(g.KeySize / 8); err != nil {
-			continue
+	decrypted, err := cipher.Decrypt(combinedCt, tc.Aad)
+	if err != nil {
+		if tc.Result == "valid" {
+			t.Errorf("unexpected error in test case: %s", err)
 		}
-		if g.IvSize != subtle.AESGCMIVSize*8 {
-			continue
+	} else {
+		if tc.Result == "invalid" {
+			t.Error("decrypted invalid test case")
 		}
-		for _, tc := range g.Tests {
-			key, err := hex.DecodeString(tc.Key)
-			if err != nil {
-				t.Errorf("cannot decode key in test case %d: %s", tc.TcID, err)
-			}
-			aad, err := hex.DecodeString(tc.Aad)
-			if err != nil {
-				t.Errorf("cannot decode aad in test case %d: %s", tc.TcID, err)
-			}
-			msg, err := hex.DecodeString(tc.Msg)
-			if err != nil {
-				t.Errorf("cannot decode msg in test case %d: %s", tc.TcID, err)
-			}
-			ct, err := hex.DecodeString(tc.Ct)
-			if err != nil {
-				t.Errorf("cannot decode ct in test case %d: %s", tc.TcID, err)
-			}
-			iv, err := hex.DecodeString(tc.Iv)
-			if err != nil {
-				t.Errorf("cannot decode iv in test case %d: %s", tc.TcID, err)
-			}
-			tag, err := hex.DecodeString(tc.Tag)
-			if err != nil {
-				t.Errorf("cannot decode tag in test case %d: %s", tc.TcID, err)
-			}
-			var combinedCt []byte
-			combinedCt = append(combinedCt, iv...)
-			combinedCt = append(combinedCt, ct...)
-			combinedCt = append(combinedCt, tag...)
-			// create cipher and do encryption
-			cipher, err := subtle.NewAESGCM(key)
-			if err != nil {
-				t.Errorf("cannot create new instance of AESGCM in test case %d: %s", tc.TcID, err)
-				continue
-			}
-			decrypted, err := cipher.Decrypt(combinedCt, aad)
-			if err != nil {
-				if tc.Result == "valid" {
-					t.Errorf("unexpected error in test case %d: %s", tc.TcID, err)
-				}
-			} else {
-				if tc.Result == "invalid" {
-					t.Errorf("decrypted invalid test case %d", tc.TcID)
-				}
-				if !bytes.Equal(decrypted, msg) {
-					t.Errorf("incorrect decryption in test case %d", tc.TcID)
-				}
-			}
+		if !bytes.Equal(decrypted, tc.Msg) {
+			t.Error("incorrect decryption in test case")
 		}
 	}
 }

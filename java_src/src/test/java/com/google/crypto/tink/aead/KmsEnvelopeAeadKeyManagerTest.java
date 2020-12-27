@@ -16,22 +16,20 @@
 
 package com.google.crypto.tink.aead;
 
-import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,30 +41,27 @@ import org.junit.runners.JUnit4;
 public class KmsEnvelopeAeadKeyManagerTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    KmsClients.add(new GcpKmsClient()
-        .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE));
+    KmsClients.add(new FakeKmsClient());
     AeadConfig.register();
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
-  public void testGcpKmsKeyRestricted() throws Exception {
+  public void testKmsAeadWithBoundedClient_success() throws Exception {
+    String keyUri = FakeKmsClient.createFakeKeyUri();
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
-            TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(keyUri, dekTemplate));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
   public void testParsingInvalidCiphertexts() throws Exception {
+    String keyUri = FakeKmsClient.createFakeKeyUri();
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(
-            TestUtil.RESTRICTED_CRYPTO_KEY_URI, dekTemplate));
+    KeysetHandle keysetHandle =
+        KeysetHandle.generateNew(
+            AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(keyUri, dekTemplate));
 
     Aead aead = keysetHandle.getPrimitive(Aead.class);
     byte[] plaintext = Random.randBytes(20);
@@ -92,45 +87,34 @@ public class KmsEnvelopeAeadKeyManagerTest {
     assertArrayEquals(plaintext, aead.decrypt(ciphertext2, aad));
 
     // negative length
-    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
-        .put(header)
-        .putInt(-1)
-        .put(encryptedDek)
-        .put(payload)
-        .array();
-    try {
-      aead.decrypt(ciphertext2, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
+    byte[] ciphertext3 =
+        ByteBuffer.allocate(ciphertext.length)
+            .put(header)
+            .putInt(-1)
+            .put(encryptedDek)
+            .put(payload)
+            .array();
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext3, aad));
 
     // length larger than actual value
-    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
-        .put(header)
-        .putInt(encryptedDek.length + 1)
-        .put(encryptedDek)
-        .put(payload)
-        .array();
-    try {
-      aead.decrypt(ciphertext2, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
+    byte[] ciphertext4 =
+        ByteBuffer.allocate(ciphertext.length)
+            .put(header)
+            .putInt(encryptedDek.length + 1)
+            .put(encryptedDek)
+            .put(payload)
+            .array();
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext4, aad));
 
     // length larger than total ciphertext length
-    ciphertext2 = ByteBuffer.allocate(ciphertext.length)
-        .put(header)
-        .putInt(encryptedDek.length + payload.length + 1)
-        .put(encryptedDek)
-        .put(payload)
-        .array();
-    try {
-      aead.decrypt(ciphertext2, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
+    byte[] ciphertext5 =
+        ByteBuffer.allocate(ciphertext.length)
+            .put(header)
+            .putInt(encryptedDek.length + payload.length + 1)
+            .put(encryptedDek)
+            .put(payload)
+            .array();
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext5, aad));
   }
+
 }

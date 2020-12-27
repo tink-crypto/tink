@@ -38,7 +38,7 @@ public final class JwtRsaSsaPkcs1Sign implements JwtPublicKeySign {
   }
 
   @Override
-  public String sign(ToBeSignedJwt token) throws GeneralSecurityException {
+  public String sign(RawJwt token) throws GeneralSecurityException {
     String unsignedCompact =
         JwtFormat.createUnsignedCompact(this.algorithmName, token.getPayload());
     return JwtFormat.createSignedCompact(

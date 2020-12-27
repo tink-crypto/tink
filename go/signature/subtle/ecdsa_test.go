@@ -17,7 +17,6 @@ package subtle_test
 import (
 	"encoding/asn1"
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -25,13 +24,11 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-type paramsTest struct {
+type paramsTestECDSA struct {
 	hash     string
 	curve    string
 	encoding string
 }
-
-var _ = fmt.Println
 
 func TestECDSAEncodeDecodeDER(t *testing.T) {
 	nTest := 1000
@@ -171,35 +168,37 @@ func TestECDSAValidateParams(t *testing.T) {
 	}
 }
 
-func genECDSAInvalidParams() []paramsTest {
+func genECDSAInvalidParams() []paramsTestECDSA {
 	encodings := []string{"DER", "IEEE_P1363"}
-	testCases := []paramsTest{
+	testCases := []paramsTestECDSA{
 		// invalid encoding
-		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
+		{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
 	}
 	for _, encoding := range encodings {
-		// invalid curve
-		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "UNKNOWN_CURVE", encoding: encoding})
-		// invalid hash: P256 and SHA-512
-		testCases = append(testCases, paramsTest{hash: "SHA512", curve: "NIST_P256", encoding: encoding})
-		// invalid hash: P521 and SHA-256
-		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "NIST_P521", encoding: encoding})
-		// invalid hash: P384 and SHA-256
-		testCases = append(testCases, paramsTest{hash: "SHA256", curve: "NIST_P384", encoding: encoding})
+		testCases = append(testCases,
+			// invalid curve
+			paramsTestECDSA{hash: "SHA256", curve: "UNKNOWN_CURVE", encoding: encoding},
+			// invalid hash: P256 and SHA-512
+			paramsTestECDSA{hash: "SHA512", curve: "NIST_P256", encoding: encoding},
+			// invalid hash: P521 and SHA-256
+			paramsTestECDSA{hash: "SHA256", curve: "NIST_P521", encoding: encoding},
+			// invalid hash: P384 and SHA-256
+			paramsTestECDSA{hash: "SHA256", curve: "NIST_P384", encoding: encoding},
+		)
 	}
 	return testCases
 }
 
-func genECDSAValidParams() []paramsTest {
-	return []paramsTest{
-		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "DER"},
-		paramsTest{hash: "SHA256", curve: "NIST_P256", encoding: "IEEE_P1363"},
-		paramsTest{hash: "SHA384", curve: "NIST_P384", encoding: "DER"},
-		paramsTest{hash: "SHA384", curve: "NIST_P384", encoding: "IEEE_P1363"},
-		paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "DER"},
-		paramsTest{hash: "SHA512", curve: "NIST_P384", encoding: "IEEE_P1363"},
-		paramsTest{hash: "SHA512", curve: "NIST_P521", encoding: "DER"},
-		paramsTest{hash: "SHA512", curve: "NIST_P521", encoding: "IEEE_P1363"},
+func genECDSAValidParams() []paramsTestECDSA {
+	return []paramsTestECDSA{
+		{hash: "SHA256", curve: "NIST_P256", encoding: "DER"},
+		{hash: "SHA256", curve: "NIST_P256", encoding: "IEEE_P1363"},
+		{hash: "SHA384", curve: "NIST_P384", encoding: "DER"},
+		{hash: "SHA384", curve: "NIST_P384", encoding: "IEEE_P1363"},
+		{hash: "SHA512", curve: "NIST_P384", encoding: "DER"},
+		{hash: "SHA512", curve: "NIST_P384", encoding: "IEEE_P1363"},
+		{hash: "SHA512", curve: "NIST_P521", encoding: "DER"},
+		{hash: "SHA512", curve: "NIST_P521", encoding: "IEEE_P1363"},
 	}
 }
 

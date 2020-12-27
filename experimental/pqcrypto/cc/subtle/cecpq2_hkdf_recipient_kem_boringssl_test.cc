@@ -25,7 +25,7 @@ namespace tink {
 namespace subtle {
 namespace {
 
-class Cecpq2HkdfRecipientKemBoringSslTest : public ::testing::Test {};
+class DISABLED_Cecpq2HkdfRecipientKemBoringSslTest : public ::testing::Test {};
 
 // These are the values used by the sender. A recipient using this information
 // should successfully produce the shared key listed below.
@@ -155,7 +155,7 @@ static const char k_symmetric_key[] =
 // This test evaluates the creation of a Cecpq2HkdfRecipientKemBoringSslTest
 // instance with an unknown curve type. It should fail with an util::error::
 // UNIMPLEMENTED error.
-TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
+TEST_F(DISABLED_Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
   // Using all correct values (thus, this test should SUCCEED)
   std::string pub_encoded_hex = k_cecpq2_public_value_correct;
   std::string x25519_priv_hex = k_cecpq2_x25519_private_key_hex;
@@ -189,7 +189,7 @@ TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
 
 // This test evaluates the case where a unsupported curve (NIST_P256) is
 // specified. This test should fail with an util::error::UNIMPLEMENTED error.
-TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
+TEST_F(DISABLED_Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -221,7 +221,7 @@ TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
             status_or_recipient_kem.status().error_code());
 }
 
-TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
+TEST_F(DISABLED_Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
   HashType hash_type = HashType::SHA256;
   EcPointFormat point_format = EcPointFormat::COMPRESSED;
@@ -267,7 +267,7 @@ TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
       test::HexEncode(util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
 }
 
-TEST_F(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
+TEST_F(DISABLED_Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
   HashType hash_type = HashType::SHA256;
   EcPointFormat point_format = EcPointFormat::COMPRESSED;

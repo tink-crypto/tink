@@ -124,17 +124,6 @@ func (d *DummyKMSClient) Supported(keyURI string) bool {
 	return keyURI == "dummy"
 }
 
-// LoadCredentials loads the credentials in credentialPath. If credentialPath is null, loads the
-// default credentials.
-func (d *DummyKMSClient) LoadCredentials(credentialPath string) (interface{}, error) {
-	return d, nil
-}
-
-// LoadDefaultCredentials loads with the default credentials.
-func (d *DummyKMSClient) LoadDefaultCredentials() (interface{}, error) {
-	return d, nil
-}
-
 // GetAEAD gets an Aead backend by keyURI.
 func (d *DummyKMSClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 	return &DummyAEAD{}, nil

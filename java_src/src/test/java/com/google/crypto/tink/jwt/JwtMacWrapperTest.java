@@ -117,10 +117,10 @@ public class JwtMacWrapperTest {
     primitiveSet.setPrimary(entry);
     JwtMac wrapped = wrapper.wrap(primitiveSet);
 
-    ToBeSignedJwt tbs = new ToBeSignedJwt.Builder().setJwtId("blah").build();
-    String compact = wrapped.createCompact(tbs);
+    RawJwt rawJwt = new RawJwt.Builder().setJwtId("blah").build();
+    String compact = wrapped.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = wrapped.verifyCompact(compact, validator);
+    VerifiedJwt token = wrapped.verifyCompact(compact, validator);
 
     assertThat(token.getJwtId()).isEqualTo("blah");
   }
@@ -150,11 +150,11 @@ public class JwtMacWrapperTest {
     primitiveSet.setPrimary(entry);
     JwtMac wrapped = wrapper.wrap(primitiveSet);
 
-    ToBeSignedJwt tbs = new ToBeSignedJwt.Builder().setJwtId("blah").build();
-    String compact = wrapped.createCompact(tbs);
+    RawJwt rawJwt = new RawJwt.Builder().setJwtId("blah").build();
+    String compact = wrapped.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
-    Jwt token = wrapped.verifyCompact(compact, validator);
-    Jwt token2 = mac2.verifyCompact(compact, validator);
+    VerifiedJwt token = wrapped.verifyCompact(compact, validator);
+    VerifiedJwt token2 = mac2.verifyCompact(compact, validator);
 
     assertThrows(GeneralSecurityException.class, () -> mac1.verifyCompact(compact, validator));
     assertThat(token.getJwtId()).isEqualTo("blah");
@@ -165,8 +165,8 @@ public class JwtMacWrapperTest {
   public void wrongKey_throwsInvalidSignatureException() throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
     JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt.Builder().build();
-    String compact = jwtMac.createCompact(toBeSignedJwt);
+    RawJwt rawJwt = new RawJwt.Builder().build();
+    String compact = jwtMac.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
 
     KeysetHandle wrongKeysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
@@ -179,8 +179,8 @@ public class JwtMacWrapperTest {
   public void wrongIssuer_throwsInvalidException() throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
     JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-    ToBeSignedJwt toBeSignedJwt = new ToBeSignedJwt.Builder().setIssuer("Justus").build();
-    String compact = jwtMac.createCompact(toBeSignedJwt);
+    RawJwt rawJwt = new RawJwt.Builder().setIssuer("Justus").build();
+    String compact = jwtMac.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().setIssuer("Peter").build();
     assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
   }
@@ -190,12 +190,12 @@ public class JwtMacWrapperTest {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(JwtHmacKeyManager.hs256Template());
     JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
     Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
-    ToBeSignedJwt toBeSignedJwt =
-        new ToBeSignedJwt.Builder()
+    RawJwt rawJwt =
+        new RawJwt.Builder()
             .setExpiration(now.minusSeconds(100)) // exipired 100 seconds ago
             .setIssuedAt(now.minusSeconds(200))
             .build();
-    String compact = jwtMac.createCompact(toBeSignedJwt);
+    String compact = jwtMac.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
   }
@@ -206,12 +206,12 @@ public class JwtMacWrapperTest {
     JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
 
     Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
-    ToBeSignedJwt toBeSignedJwt =
-        new ToBeSignedJwt.Builder()
+    RawJwt rawJwt =
+        new RawJwt.Builder()
             .setNotBefore(now.plusSeconds(3600)) // is valid in 1 hour, but not before
             .setIssuedAt(now)
             .build();
-    String compact = jwtMac.createCompact(toBeSignedJwt);
+    String compact = jwtMac.createCompact(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(JwtInvalidException.class, () -> jwtMac.verifyCompact(compact, validator));
   }

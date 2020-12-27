@@ -21,12 +21,14 @@ import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
@@ -42,6 +44,10 @@ import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.tinkkey.KeyAccess;
+import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.ProtoKey;
+import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -200,6 +206,29 @@ public class KeysetHandleTest {
       keys.add(aesGcmKey.getKeyValue().toStringUtf8());
     }
     assertThat(keys).hasSize(8);
+  }
+
+  @Test
+  public void createFromKey() throws Exception {
+    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
+    KeyHandle kh = KeyHandle.createFromKey(Registry.newKeyData(kt), kt.getOutputPrefixType());
+    KeyAccess ka = SecretKeyAccess.insecureSecretAccess();
+
+    KeysetHandle handle = KeysetHandle.createFromKey(kh, ka);
+
+    Keyset keyset = handle.getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    Keyset.Key key = keyset.getKey(0);
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(key.getKeyId());
+    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key.hasKeyData()).isTrue();
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(kt.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat =
+        AesGcmKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey =
+        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
   }
 
   /** Tests that toString doesn't contain key material. */
@@ -476,5 +505,27 @@ public class KeysetHandleTest {
     } catch (GeneralSecurityException e) {
       assertExceptionContains(e, "keyset contains key material");
     }
+  }
+
+  @Test
+  public void findPrimaryKey_shouldWork() throws Exception {
+    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
+    KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
+    KeysetHandle ksh =
+        KeysetManager.withKeysetHandle(KeysetHandle.generateNew(kt1)).add(kt2).getKeysetHandle();
+
+    KeyHandle kh = ksh.findPrimaryKey();
+
+    ProtoKey pk = (ProtoKey) kh.getKey(SecretKeyAccess.insecureSecretAccess());
+    assertThat(pk.getProtoKey().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+  }
+
+  @Test
+  public void findPrimaryKey_noPrimary_shouldThrow() throws Exception {
+    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
+    KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
+    KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
+
+    assertThrows(GeneralSecurityException.class, ksh::findPrimaryKey);
   }
 }

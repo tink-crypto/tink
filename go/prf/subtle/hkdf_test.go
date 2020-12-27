@@ -12,16 +12,17 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package subtle
+package subtle_test
 
 import (
+	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/google/tink/go/prf/subtle"
+	"github.com/google/tink/go/testutil"
 )
 
 type rfc5869test struct {
@@ -36,7 +37,7 @@ type rfc5869test struct {
 func TestVectorsRFC5869(t *testing.T) {
 	// Test vectors from RFC 5869.
 	testvectors := []*rfc5869test{
-		&rfc5869test{
+		{
 			hash:         "SHA256",
 			key:          "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 			salt:         "000102030405060708090a0b0c",
@@ -44,7 +45,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 42,
 			okm:          "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA256",
 			key:          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f",
 			salt:         "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
@@ -52,7 +53,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 82,
 			okm:          "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA256",
 			key:          "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 			salt:         "",
@@ -60,7 +61,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 42,
 			okm:          "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA1",
 			key:          "0b0b0b0b0b0b0b0b0b0b0b",
 			salt:         "000102030405060708090a0b0c",
@@ -68,7 +69,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 42,
 			okm:          "085a01ea1b10f36933068b56efa5ad81a4f14b822f5b091568a9cdd4f155fda2c22e422478d305f3f896",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA1",
 			key:          "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f",
 			salt:         "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
@@ -76,7 +77,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 82,
 			okm:          "0bd770a74d1160f7c9f12cd5912a06ebff6adcae899d92191fe4305673ba2ffe8fa3f1a4e5ad79f3f334b3b202b2173c486ea37ce3d397ed034c7f9dfeb15c5e927336d0441f4c4300e2cff0d0900b52d3b4",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA1",
 			key:          "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 			salt:         "",
@@ -84,7 +85,7 @@ func TestVectorsRFC5869(t *testing.T) {
 			outputLength: 42,
 			okm:          "0ac1af7002b3d761d1e55298da9d0506b9ae52057220a306e07b6b87e8df21d0ea00033de03984d34918",
 		},
-		&rfc5869test{
+		{
 			hash:         "SHA1",
 			key:          "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c",
 			salt:         "",
@@ -106,7 +107,7 @@ func TestVectorsRFC5869(t *testing.T) {
 		if err != nil {
 			t.Errorf("Could not decode info: %v", err)
 		}
-		p, err := NewHKDFPRF(v.hash, key, salt)
+		p, err := subtle.NewHKDFPRF(v.hash, key, salt)
 		if err != nil {
 			t.Errorf("Could not create HKDF object: %v", err)
 		}
@@ -120,108 +121,74 @@ func TestVectorsRFC5869(t *testing.T) {
 	}
 }
 
-type hkdftestdata struct {
-	Algorithm        string
-	GeneratorVersion string
-	NumberOfTests    uint32
-	TestGroups       []*hkdftestgroup
-}
-
-type hkdftestgroup struct {
-	KeySize uint32
-	Type    string
-	Tests   []*hkdftestcase
-}
-
-type hkdftestcase struct {
-	TcID    uint32
-	Comment string
-	IKM     string
-	Salt    string
-	Info    string
-	Size    uint32
-	OKM     string
-	Result  string
-}
-
-func TestVectorsHKDFWycheproof(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
+func TestHKDFPRFWycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	for _, hash := range []string{"SHA1", "SHA256", "SHA512"} {
-		f, err := os.Open(filepath.Join(srcDir, fmt.Sprintf("wycheproof/testvectors/hkdf_%s_test.json", strings.ToLower(hash))))
-		if err != nil {
-			t.Fatalf("cannot open file: %s", err)
+		filename := fmt.Sprintf("hkdf_%s_test.json", strings.ToLower(hash))
+		suite := new(hkdfSuite)
+		if err := testutil.PopulateSuite(suite, filename); err != nil {
+			t.Fatalf("Failed populating suite: %s", err)
 		}
-		parser := json.NewDecoder(f)
-		data := new(hkdftestdata)
-		if err := parser.Decode(data); err != nil {
-			t.Fatalf("cannot decode test data: %s", err)
-		}
+		for _, group := range suite.TestGroups {
+			for _, test := range group.Tests {
+				caseName := fmt.Sprintf("%s-%s-%s(%d):Case-%d", suite.Algorithm, group.Type, hash, group.KeySize, test.CaseID)
+				t.Run(caseName, func(t *testing.T) {
+					if uint32(len(test.IKM))*8 != group.KeySize {
+						t.Fatal("Invalid key length")
+					}
 
-		for _, g := range data.TestGroups {
-			for _, tc := range g.Tests {
-				ikm, err := hex.DecodeString(tc.IKM)
-				if err != nil || uint32(len(ikm))*8 != g.KeySize {
-					t.Errorf("Could not decode key for test case %d (%s): %v", tc.TcID, tc.Comment, err)
-					continue
-				}
-				salt, err := hex.DecodeString(tc.Salt)
-				if err != nil {
-					t.Errorf("Could not decode salt for test case %d (%s): %v", tc.TcID, tc.Comment, err)
-					continue
-				}
-				info, err := hex.DecodeString(tc.Info)
-				if err != nil {
-					t.Errorf("Could not decode salt for test case %d (%s): %v", tc.TcID, tc.Comment, err)
-					continue
-				}
-				hkdfPRF, err := NewHKDFPRF(hash, ikm, salt)
-				valid := tc.Result == "valid"
-				if valid && err != nil {
-					t.Errorf("Could not create HKDF %s PRF for test case %d (%s): %v", hash, tc.TcID, tc.Comment, err)
-					continue
-				}
-				if !valid && err != nil {
-					continue
-				}
-				res, err := hkdfPRF.ComputePRF(info, tc.Size)
-				if valid && err != nil {
-					t.Errorf("Could not compute HKDF %s PRF for test case %d (%s): %v", hash, tc.TcID, tc.Comment, err)
-					continue
-				}
-				if !valid && err != nil {
-					continue
-				}
-				if valid && hex.EncodeToString(res) != tc.OKM {
-					t.Errorf("Compute HKDF %s PRF and expected for test case %d (%s) do not match:\nComputed: %q\nExpected: %q", hash, tc.TcID, tc.Comment, hex.EncodeToString(res), tc.OKM)
-				}
-				if !valid && hex.EncodeToString(res) == tc.OKM {
-					t.Errorf("Compute HKDF %s PRF and invalid expected for test case %d (%s) match:\nComputed: %q\nExpected: %q", hash, tc.TcID, tc.Comment, hex.EncodeToString(res), tc.OKM)
-				}
+					hkdfPRF, err := subtle.NewHKDFPRF(hash, test.IKM, test.Salt)
+					switch test.Result {
+					case "valid":
+						if err != nil {
+							t.Fatalf("NewHKDFPRF failed: %v", err)
+						}
+						res, err := hkdfPRF.ComputePRF(test.Info, test.Size)
+						if err != nil {
+							t.Fatalf("ComputePRF() failed: %v", err)
+						}
+						if !bytes.Equal(res, test.OKM) {
+							t.Errorf("ComputePRF() result and expected result do not match:\nComputed: %q\nExpected: %q", hex.EncodeToString(res), test.OKM)
+						}
+
+					case "invalid":
+						if err != nil {
+							return
+						}
+						res, err := hkdfPRF.ComputePRF(test.Info, test.Size)
+						if err != nil {
+							return
+						}
+						if bytes.Equal(res, test.OKM) {
+							t.Errorf("ComputePRF() result and invalid expected result match:\nComputed: %q\nExpected: %q", hex.EncodeToString(res), test.OKM)
+						}
+
+					default:
+						t.Fatalf("Unsupported test result: %q", test.Result)
+					}
+				})
 			}
 		}
 	}
 }
 
 func TestHKDFPRFHash(t *testing.T) {
-	if _, err := NewHKDFPRF("SHA256", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA256", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{}); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work with SHA256: %v", err)
 	}
-	if _, err := NewHKDFPRF("SHA512", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA512", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{}); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work with SHA512: %v", err)
 	}
-	if _, err := NewHKDFPRF("SHA1", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA1", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{}); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work with SHA1: %v", err)
 	}
-	if _, err := NewHKDFPRF("md5", []byte{
+	if _, err := subtle.NewHKDFPRF("md5", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{}); err == nil {
 		t.Errorf("Expected NewHKDFPRF to fail with md5")
@@ -229,17 +196,17 @@ func TestHKDFPRFHash(t *testing.T) {
 }
 
 func TestHKDFPRFSalt(t *testing.T) {
-	if _, err := NewHKDFPRF("SHA256", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA256", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, nil); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work nil salt: %v", err)
 	}
-	if _, err := NewHKDFPRF("SHA256", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA256", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{}); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work empty salt: %v", err)
 	}
-	if _, err := NewHKDFPRF("SHA256", []byte{
+	if _, err := subtle.NewHKDFPRF("SHA256", []byte{
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10}, []byte{0xaf, 0xfe, 0xc0, 0xff, 0xee}); err != nil {
 		t.Errorf("Expected NewHKDFPRF to work with salt: %v", err)
@@ -248,7 +215,7 @@ func TestHKDFPRFSalt(t *testing.T) {
 
 func TestHKDFPRFOutputLength(t *testing.T) {
 	for hash, length := range map[string]int{"SHA1": 20, "SHA256": 32, "SHA512": 64} {
-		prf, err := NewHKDFPRF(hash, []byte{
+		prf, err := subtle.NewHKDFPRF(hash, []byte{
 			0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 			0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
 			0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -275,22 +242,22 @@ func TestHKDFPRFOutputLength(t *testing.T) {
 }
 
 func TestValidateHKDFPRFParams(t *testing.T) {
-	if err := ValidateHKDFPRFParams("SHA256", 32, []byte{}); err != nil {
+	if err := subtle.ValidateHKDFPRFParams("SHA256", 32, []byte{}); err != nil {
 		t.Errorf("Unexpected error for valid HKDF PRF params: %v", err)
 	}
-	if err := ValidateHKDFPRFParams("SHA256", 32, nil); err != nil {
+	if err := subtle.ValidateHKDFPRFParams("SHA256", 32, nil); err != nil {
 		t.Errorf("Unexpected error for valid HKDF PRF params: %v", err)
 	}
-	if err := ValidateHKDFPRFParams("SHA256", 32, []byte{0xaf, 0xfe, 0xc0, 0xff, 0xee}); err != nil {
+	if err := subtle.ValidateHKDFPRFParams("SHA256", 32, []byte{0xaf, 0xfe, 0xc0, 0xff, 0xee}); err != nil {
 		t.Errorf("Unexpected error for salted valid HKDF PRF params: %v", err)
 	}
-	if err := ValidateHKDFPRFParams("SHA256", 4, []byte{}); err == nil {
+	if err := subtle.ValidateHKDFPRFParams("SHA256", 4, []byte{}); err == nil {
 		t.Errorf("Short key size not detected for HKDF PRF params")
 	}
-	if err := ValidateHKDFPRFParams("md5", 32, []byte{}); err == nil {
+	if err := subtle.ValidateHKDFPRFParams("md5", 32, []byte{}); err == nil {
 		t.Errorf("Weak hash function not detected for HKDF PRF params")
 	}
-	if err := ValidateHKDFPRFParams("SHA1", 32, []byte{}); err == nil {
+	if err := subtle.ValidateHKDFPRFParams("SHA1", 32, []byte{}); err == nil {
 		t.Errorf("Weak hash function not detected for HKDF PRF params")
 	}
 }

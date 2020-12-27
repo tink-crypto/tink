@@ -17,15 +17,14 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
+	"fmt"
 	"math/rand"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"golang.org/x/crypto/chacha20poly1305"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestChaCha20Poly1305EncryptDecrypt(t *testing.T) {
@@ -197,85 +196,54 @@ func TestChaCha20Poly1305RandomNonce(t *testing.T) {
 	}
 }
 
-func TestChaCha20Poly1305WycheproofVectors(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
+func TestChaCha20Poly1305WycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	suite := new(AEADSuite)
+	if err := testutil.PopulateSuite(suite, "chacha20_poly1305_test.json"); err != nil {
+		t.Fatalf("failed populating suite: %s", err)
 	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/chacha20_poly1305_test.json"))
+	for _, group := range suite.TestGroups {
+		if group.KeySize/8 != chacha20poly1305.KeySize {
+			continue
+		}
+		if group.IvSize/8 != chacha20poly1305.NonceSize {
+			continue
+		}
+
+		for _, test := range group.Tests {
+			caseName := fmt.Sprintf("%s-%s:Case-%d", suite.Algorithm, group.Type, test.CaseID)
+			t.Run(caseName, func(t *testing.T) { runChaCha20Poly1305WycheproofCase(t, test) })
+		}
+	}
+}
+
+func runChaCha20Poly1305WycheproofCase(t *testing.T, tc *AEADCase) {
+	var combinedCt []byte
+	combinedCt = append(combinedCt, tc.Iv...)
+	combinedCt = append(combinedCt, tc.Ct...)
+	combinedCt = append(combinedCt, tc.Tag...)
+
+	ca, err := subtle.NewChaCha20Poly1305(tc.Key)
 	if err != nil {
-		t.Fatalf("cannot open file: %s", err)
-	}
-	parser := json.NewDecoder(f)
-	data := new(testdata)
-	if err := parser.Decode(data); err != nil {
-		t.Fatalf("cannot decode test data: %s", err)
+		t.Fatalf("cannot create new instance of ChaCha20Poly1305: %s", err)
 	}
 
-	for _, g := range data.TestGroups {
-		if g.KeySize/8 != chacha20poly1305.KeySize {
-			continue
+	_, err = ca.Encrypt(tc.Msg, tc.Aad)
+	if err != nil {
+		t.Fatalf("unexpected encryption error: %s", err)
+	}
+
+	decrypted, err := ca.Decrypt(combinedCt, tc.Aad)
+	if err != nil {
+		if tc.Result == "valid" {
+			t.Errorf("unexpected error: %s", err)
 		}
-		if g.IvSize/8 != chacha20poly1305.NonceSize {
-			continue
+	} else {
+		if tc.Result == "invalid" {
+			t.Error("decrypted invalid")
 		}
-
-		for _, tc := range g.Tests {
-			key, err := hex.DecodeString(tc.Key)
-			if err != nil {
-				t.Errorf("#%d, cannot decode key: %s", tc.TcID, err)
-			}
-			aad, err := hex.DecodeString(tc.Aad)
-			if err != nil {
-				t.Errorf("#%d, cannot decode aad: %s", tc.TcID, err)
-			}
-			msg, err := hex.DecodeString(tc.Msg)
-			if err != nil {
-				t.Errorf("#%d, cannot decode msg: %s", tc.TcID, err)
-			}
-			ct, err := hex.DecodeString(tc.Ct)
-			if err != nil {
-				t.Errorf("#%d, cannot decode ct: %s", tc.TcID, err)
-			}
-			nonce, err := hex.DecodeString(tc.Iv)
-			if err != nil {
-				t.Errorf("#%d, cannot decode nonce: %s", tc.TcID, err)
-			}
-			tag, err := hex.DecodeString(tc.Tag)
-			if err != nil {
-				t.Errorf("#%d, cannot decode tag: %s", tc.TcID, err)
-			}
-
-			var combinedCt []byte
-			combinedCt = append(combinedCt, nonce...)
-			combinedCt = append(combinedCt, ct...)
-			combinedCt = append(combinedCt, tag...)
-
-			ca, err := subtle.NewChaCha20Poly1305(key)
-			if err != nil {
-				t.Errorf("#%d, cannot create new instance of ChaCha20Poly1305: %s", tc.TcID, err)
-				continue
-			}
-
-			_, err = ca.Encrypt(msg, aad)
-			if err != nil {
-				t.Errorf("#%d, unexpected encryption error: %s", tc.TcID, err)
-				continue
-			}
-
-			decrypted, err := ca.Decrypt(combinedCt, aad)
-			if err != nil {
-				if tc.Result == "valid" {
-					t.Errorf("#%d, unexpected error: %s", tc.TcID, err)
-				}
-			} else {
-				if tc.Result == "invalid" {
-					t.Errorf("#%d, decrypted invalid", tc.TcID)
-				}
-				if !bytes.Equal(decrypted, msg) {
-					t.Errorf("#%d, incorrect decryption", tc.TcID)
-				}
-			}
+		if !bytes.Equal(decrypted, tc.Msg) {
+			t.Error("incorrect decryption")
 		}
 	}
 }

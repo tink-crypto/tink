@@ -14,6 +14,7 @@
 package com.google.crypto.tink.tinkkey;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.errorprone.annotations.Immutable;
 
@@ -21,20 +22,22 @@ import com.google.errorprone.annotations.Immutable;
  * Wraps the proto {@code KeyData} as an implementation of a {@code TinkKey}. The underlying {@code
  * KeyData} determines whether this ProtoKey has a secret.
  *
- * <p>ProtoKey is not part of Tink's public API.
+ * <p>ProtoKey is visibility-restricted.
  */
 @Immutable
-final class ProtoKey implements TinkKey {
+public final class ProtoKey implements TinkKey {
   private final KeyData keyData;
   private final boolean hasSecret;
+  private final OutputPrefixType outputPrefixType;
 
   /**
    * Constructs a ProtoKey with {@code hasSecret()} returning true if the input {@code KeyData} has
    * key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
    */
-  ProtoKey(KeyData keyData) {
+  ProtoKey(KeyData keyData, OutputPrefixType opt) {
     this.hasSecret = isSecret(keyData);
     this.keyData = keyData;
+    this.outputPrefixType = opt;
   }
 
   private static boolean isSecret(KeyData keyData) {
@@ -45,6 +48,10 @@ final class ProtoKey implements TinkKey {
 
   public KeyData getProtoKey() {
     return keyData;
+  }
+
+  public OutputPrefixType getOutputPrefixType() {
+    return outputPrefixType;
   }
 
   @Override

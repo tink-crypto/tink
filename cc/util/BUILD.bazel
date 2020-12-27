@@ -38,6 +38,7 @@ cc_library(
     name = "secret_data",
     hdrs = ["secret_data.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":secret_data_internal",
         "@com_google_absl//absl/strings",
@@ -187,6 +188,7 @@ cc_library(
     srcs = ["test_util.cc"],
     hdrs = ["test_util.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":buffer",
         ":constants",
@@ -240,6 +242,7 @@ cc_library(
     srcs = [],
     hdrs = ["test_matchers.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":status",
         ":statusor",
@@ -291,6 +294,28 @@ cc_library(
     include_prefix = "tink/util",
     deps = [
         "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "fake_kms_client",
+    srcs = ["fake_kms_client.cc"],
+    hdrs = ["fake_kms_client.h"],
+    include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//:aead",
+        "//:binary_keyset_reader",
+        "//:binary_keyset_writer",
+        "//:cleartext_keyset_handle",
+        "//:keyset_handle",
+        "//:kms_client",
+        "//:kms_clients",
+        "//aead:aead_key_templates",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -462,6 +487,21 @@ cc_test(
         ":status",
         ":test_matchers",
         "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fake_kms_client_test",
+    srcs = ["fake_kms_client_test.cc"],
+    deps = [
+        ":errors",
+        ":fake_kms_client",
+        ":status",
+        ":statusor",
+        ":test_matchers",
+        ":test_util",
+        "//aead:aead_config",
         "@com_google_googletest//:gtest_main",
     ],
 )

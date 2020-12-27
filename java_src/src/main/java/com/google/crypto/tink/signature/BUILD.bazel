@@ -81,6 +81,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -102,6 +103,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -164,6 +166,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -219,6 +222,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -381,6 +385,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -443,6 +448,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -497,6 +503,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
     ],

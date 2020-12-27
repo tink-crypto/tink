@@ -31,21 +31,23 @@ import java.io.OutputStream;
  */
 public final class BinaryKeysetWriter implements KeysetWriter {
   private final OutputStream outputStream;
-  private final boolean closeStreamAfterReading;
 
-  private BinaryKeysetWriter(OutputStream stream, boolean closeStreamAfterReading) {
+  private BinaryKeysetWriter(OutputStream stream) {
     this.outputStream = stream;
-    this.closeStreamAfterReading = closeStreamAfterReading;
   }
 
-  /** Static method to create a BinaryKeysetWriter that writes to an {@link OutputStream}. */
+  /**
+   * Static method to create a BinaryKeysetWriter that writes to an {@link OutputStream}.
+   *
+   * <p>{@code stream} will be immmediately closed after the keyset is written.
+   */
   public static KeysetWriter withOutputStream(OutputStream stream) {
-    return new BinaryKeysetWriter(stream, /*closeStreamAfterReading=*/ false);
+    return new BinaryKeysetWriter(stream);
   }
 
   /** Static method to create a BinaryKeysetWriter that writes to a file. */
   public static KeysetWriter withFile(File file) throws IOException {
-    return new BinaryKeysetWriter(new FileOutputStream(file), /*closeStreamAfterReading=*/ true);
+    return new BinaryKeysetWriter(new FileOutputStream(file));
   }
 
   @Override
@@ -53,9 +55,7 @@ public final class BinaryKeysetWriter implements KeysetWriter {
     try {
       keyset.writeTo(outputStream);
     } finally {
-      if (closeStreamAfterReading) {
-        outputStream.close();
-      }
+      outputStream.close();
     }
   }
 
@@ -64,9 +64,7 @@ public final class BinaryKeysetWriter implements KeysetWriter {
     try {
       keyset.writeTo(outputStream);
     } finally {
-      if (closeStreamAfterReading) {
-        outputStream.close();
-      }
+      outputStream.close();
     }
   }
 }

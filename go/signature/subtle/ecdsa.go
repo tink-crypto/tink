@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package subtle provides subtle implementations of digital signature primitives.
 package subtle
 
 import (

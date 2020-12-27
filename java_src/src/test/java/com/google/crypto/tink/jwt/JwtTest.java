@@ -29,7 +29,7 @@ import org.junit.runners.JUnit4;
 public final class JwtTest {
   @Test
   public void emptyJwt_success() throws Exception {
-    Jwt emptyToken = new Jwt(new JSONObject());
+    VerifiedJwt emptyToken = new VerifiedJwt(new JSONObject());
 
     assertThat(emptyToken.getIssuer()).isNull();
     assertThat(emptyToken.getSubject()).isNull();
@@ -45,7 +45,7 @@ public final class JwtTest {
   public void getIssuer_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_ISSUER, "foo");
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getIssuer()).isEqualTo("foo");
   }
@@ -54,7 +54,7 @@ public final class JwtTest {
   public void getSubject_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_SUBJECT, "foo");
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getSubject()).isEqualTo("foo");
   }
@@ -65,7 +65,7 @@ public final class JwtTest {
     JSONArray audiences = new JSONArray();
     audiences.put("foo");
     payload.put(JwtNames.CLAIM_AUDIENCE, audiences);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getAudiences()).containsExactly("foo");
   }
@@ -77,7 +77,7 @@ public final class JwtTest {
     audiences.put("foo");
     audiences.put("bar");
     payload.put(JwtNames.CLAIM_AUDIENCE, audiences);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
@@ -86,7 +86,7 @@ public final class JwtTest {
   public void getJwtId_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_JWT_ID, "foo");
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getJwtId()).isEqualTo("foo");
   }
@@ -95,7 +95,7 @@ public final class JwtTest {
   public void getExpiration_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_EXPIRATION, 1234567);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getExpiration()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
@@ -104,7 +104,7 @@ public final class JwtTest {
   public void getNotBefore_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_NOT_BEFORE, 1234567);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getNotBefore()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
@@ -113,7 +113,7 @@ public final class JwtTest {
   public void getIssuedAt_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_ISSUED_AT, 1234567);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
@@ -128,7 +128,7 @@ public final class JwtTest {
     payload.put(JwtNames.CLAIM_ISSUED_AT, Instant.now().getEpochSecond());
     payload.put(JwtNames.CLAIM_NOT_BEFORE, Instant.now().getEpochSecond());
     payload.put(JwtNames.CLAIM_JWT_ID, "id");
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_EXPIRATION));
     assertThrows(IllegalArgumentException.class, () -> token.getClaim(JwtNames.CLAIM_ISSUER));
@@ -149,7 +149,7 @@ public final class JwtTest {
     payload.put("int", 123);
     payload.put("bool", true);
 
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
     assertThat(token.getClaim("bool")).isEqualTo(true);
     assertThat(token.getClaim("string")).isEqualTo("issuer");
     assertThat(token.getClaim("int")).isEqualTo(123);
@@ -159,7 +159,7 @@ public final class JwtTest {
   public void nonExpiredToken_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_EXPIRATION, 1234567);
-    Jwt token = new Jwt(payload);
+    VerifiedJwt token = new VerifiedJwt(payload);
 
     assertThat(token.getExpiration()).isEqualTo(Instant.ofEpochSecond(1234567));
 
@@ -176,7 +176,7 @@ public final class JwtTest {
   public void notBeforeToken_success() throws Exception {
     JSONObject payload = new JSONObject();
     payload.put(JwtNames.CLAIM_NOT_BEFORE, 1234567);
-    Jwt notBeforeToken = new Jwt(payload);
+    VerifiedJwt notBeforeToken = new VerifiedJwt(payload);
 
     assertThat(notBeforeToken.getNotBefore()).isEqualTo(Instant.ofEpochSecond(1234567));
 

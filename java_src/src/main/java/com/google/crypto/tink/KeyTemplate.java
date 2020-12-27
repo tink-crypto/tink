@@ -46,7 +46,7 @@ public final class KeyTemplate {
     CRUNCHY
   }
 
-  private static OutputPrefixType fromProto(
+  static OutputPrefixType fromProto(
       com.google.crypto.tink.proto.OutputPrefixType outputPrefixType) {
     switch (outputPrefixType) {
       case TINK:
@@ -62,8 +62,7 @@ public final class KeyTemplate {
     }
   }
 
-  private static com.google.crypto.tink.proto.OutputPrefixType toProto(
-      OutputPrefixType outputPrefixType) {
+  static com.google.crypto.tink.proto.OutputPrefixType toProto(OutputPrefixType outputPrefixType) {
     switch (outputPrefixType) {
       case TINK:
         return com.google.crypto.tink.proto.OutputPrefixType.TINK;

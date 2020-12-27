@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 @Immutable
 public interface JwtMac {
   /** Computes a MAC, and encodes the JWT and the tag in the JWS compact serialization format. */
-  String createCompact(ToBeSignedJwt token) throws GeneralSecurityException;
+  String createCompact(RawJwt token) throws GeneralSecurityException;
 
   /**
    * Verifies and decodes a JWT in the JWS compact serialization format.
@@ -45,5 +45,5 @@ public interface JwtMac {
    * @throws GeneralSecurityException when the signature of the token could not be verified, the
    *   token contains an invalid claim or header, the token has been expired or can't be used yet
    */
-  Jwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException;
+  VerifiedJwt verifyCompact(String compact, JwtValidator validator) throws GeneralSecurityException;
 }

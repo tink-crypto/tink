@@ -19,6 +19,7 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"fmt"
+	"math"
 
 	// Placeholder for internal crypto/subtle allowlist, please ignore. // to allow import of "crypto/subte"
 	"github.com/google/tink/go/subtle/random"
@@ -69,10 +70,10 @@ func NewAESGCMSIV(key []byte) (*AESGCMSIV, error) {
 // (2) the actual ciphertext
 // (3) the authentication tag.
 func (a *AESGCMSIV) Encrypt(pt, aad []byte) ([]byte, error) {
-	if uint64(len(pt)) > 1<<36 {
+	if len(pt) > math.MaxInt32-AESGCMSIVNonceSize-aesgcmsivTagSize {
 		return nil, fmt.Errorf("aes_gcm_siv: plaintext too long")
 	}
-	if uint64(len(aad)) > 1<<36 {
+	if len(aad) > math.MaxInt32 {
 		return nil, fmt.Errorf("aes_gcm_siv: additional-data too long")
 	}
 
@@ -109,10 +110,10 @@ func (a *AESGCMSIV) Decrypt(ct, aad []byte) ([]byte, error) {
 	if len(ct) < AESGCMSIVNonceSize+aesgcmsivTagSize {
 		return nil, fmt.Errorf("aes_gcm_siv: ciphertext too short")
 	}
-	if len(ct) > (1<<36)+AESGCMSIVNonceSize+aesgcmsivTagSize {
+	if len(ct) > math.MaxInt32 {
 		return nil, fmt.Errorf("aes_gcm_siv: ciphertext too long")
 	}
-	if uint64(len(aad)) > 1<<36 {
+	if len(aad) > math.MaxInt32 {
 		return nil, fmt.Errorf("aes_gcm_siv: additional-data too long")
 	}
 

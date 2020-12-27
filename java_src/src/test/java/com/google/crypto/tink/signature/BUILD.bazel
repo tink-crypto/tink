@@ -134,6 +134,7 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "//src/main/java/com/google/crypto/tink/testing:test_util",

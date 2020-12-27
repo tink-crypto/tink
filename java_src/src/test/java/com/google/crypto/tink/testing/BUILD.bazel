@@ -43,3 +43,16 @@ java_test(
     ],
 )
 
+java_test(
+    name = "FakeKmsClientTest",
+    size = "small",
+    srcs = ["FakeKmsClientTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "//src/main/java/com/google/crypto/tink/testing:fake_kms_client",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

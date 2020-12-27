@@ -84,7 +84,10 @@ class PrfSetPythonTest(parameterized.TestCase):
     ]
     for lang in unsupported_languages:
       p = testing_servers.prf_set(lang, keyset)
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports PRF compute with %s unexpectedly' %
+          (p.lang, key_template_name)):
         p.primary().compute(b'input_data', output_length=16)
 
   @parameterized.parameters(all_prf_key_template_names())

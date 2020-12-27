@@ -32,6 +32,10 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.Keyset.Key;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.crypto.tink.tinkkey.KeyAccess;
+import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.SecretKeyAccess;
+import com.google.crypto.tink.tinkkey.TinkKey;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import org.junit.BeforeClass;
@@ -640,6 +644,88 @@ public class KeysetManagerTest {
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(existingPrimaryKeyId);
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
     TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
+  }
+
+  @Test
+  public void add_newKeyset_shouldAddKey_keyHandle() throws Exception {
+    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
+    KeyHandle kh = KeyHandle.createFromKey(Registry.newKeyData(kt), kt.getOutputPrefixType());
+    KeyAccess ka = SecretKeyAccess.insecureSecretAccess();
+    KeysetManager km = KeysetManager.withEmptyKeyset();
+
+    km = km.add(kh, ka);
+
+    Keyset keyset = km.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(1);
+    // No primary key because add doesn't automatically promote the new key to primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+    Keyset.Key key = keyset.getKey(0);
+    assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key.hasKeyData()).isTrue();
+    assertThat(key.getKeyData().getTypeUrl()).isEqualTo(kt.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat =
+        AesGcmKeyFormat.parseFrom(kt.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey =
+        AesGcmKey.parseFrom(key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey.getKeyValue().size()).isEqualTo(aesGcmKeyFormat.getKeySize());
+  }
+
+  @Test
+  public void add_existingKeyset_shouldAddKey_keyHandle() throws Exception {
+    KeyTemplate kt1 = AesGcmKeyManager.aes128GcmTemplate();
+    KeysetManager km = KeysetManager.withEmptyKeyset().add(kt1);
+    KeyTemplate kt2 = AesGcmKeyManager.aes256GcmTemplate();
+    KeyHandle kh = KeyHandle.createFromKey(Registry.newKeyData(kt2), kt2.getOutputPrefixType());
+    KeyAccess ka = SecretKeyAccess.insecureSecretAccess();
+
+    km = km.add(kh, ka);
+
+    Keyset keyset = km.getKeysetHandle().getKeyset();
+    assertThat(keyset.getKeyCount()).isEqualTo(2);
+    // None of the keys are primary.
+    assertThat(keyset.getPrimaryKeyId()).isEqualTo(0);
+    Keyset.Key key1 = keyset.getKey(0);
+    assertThat(key1.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key1.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key1.hasKeyData()).isTrue();
+    assertThat(key1.getKeyData().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat1 =
+        AesGcmKeyFormat.parseFrom(kt1.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey1 =
+        AesGcmKey.parseFrom(key1.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey1.getKeyValue().size()).isEqualTo(aesGcmKeyFormat1.getKeySize());
+    Keyset.Key key2 = keyset.getKey(1);
+    assertThat(key2.getStatus()).isEqualTo(KeyStatusType.ENABLED);
+    assertThat(key2.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
+    assertThat(key2.hasKeyData()).isTrue();
+    assertThat(key2.getKeyData().getTypeUrl()).isEqualTo(kt2.getTypeUrl());
+    AesGcmKeyFormat aesGcmKeyFormat2 =
+        AesGcmKeyFormat.parseFrom(kt2.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesGcmKey aesGcmKey2 =
+        AesGcmKey.parseFrom(key2.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(aesGcmKey2.getKeyValue().size()).isEqualTo(aesGcmKeyFormat2.getKeySize());
+  }
+
+  @Test
+  public void add_unsupportedTinkKey_shouldThrow_keyHandle() throws Exception {
+    TinkKey tk =
+        new TinkKey() {
+          @Override
+          public boolean hasSecret() {
+            return false;
+          }
+
+          @Override
+          public KeyTemplate getKeyTemplate() {
+            throw new UnsupportedOperationException();
+          }
+        };
+    KeyAccess ka = KeyAccess.publicAccess();
+    KeyHandle kh = KeyHandle.createFromKey(tk, ka);
+    KeysetManager km = KeysetManager.withEmptyKeyset();
+
+    assertThrows(UnsupportedOperationException.class, () -> km.add(kh, ka));
   }
 
   @Test

@@ -14,6 +14,8 @@
 #ifndef TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
 #define TINK_PYTHON_TINK_CC_PYBIND_HYBRID_DECRYPT_H_
 
+#include "pybind11/pybind11.h"
+
 namespace crypto {
 namespace tink {
 

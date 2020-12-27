@@ -40,7 +40,7 @@ public final class JwtEcdsaSign implements JwtPublicKeySign {
   }
 
   @Override
-  public String sign(ToBeSignedJwt token) throws GeneralSecurityException {
+  public String sign(RawJwt token) throws GeneralSecurityException {
     String unsignedCompact =
         JwtFormat.createUnsignedCompact(this.algorithmName, token.getPayload());
     return JwtFormat.createSignedCompact(

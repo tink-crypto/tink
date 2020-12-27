@@ -190,6 +190,22 @@ java_library(
 )
 
 java_library(
+    name = "selfkeytests_validators",
+    srcs = ["SelfKeyTestValidators.java"],
+    deps = [
+        ":enums",
+        "@com_google_protobuf//:protobuf_javalite",
+        ":ecdsa_sign_jce",
+        ":ecdsa_verify_jce",
+        ":elliptic_curves",
+        ":rsa_ssa_pkcs1_sign_jce",
+        ":rsa_ssa_pkcs1_verify_jce",
+        ":rsa_ssa_pss_sign_jce",
+        ":rsa_ssa_pss_verify_jce",
+    ],
+)
+
+java_library(
     name = "stream_segment_encrypter",
     srcs = ["StreamSegmentEncrypter.java"],
 )

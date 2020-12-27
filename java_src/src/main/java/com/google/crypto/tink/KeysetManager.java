@@ -20,6 +20,9 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.tinkkey.KeyAccess;
+import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.ProtoKey;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
@@ -93,6 +96,28 @@ public final class KeysetManager {
    */
   public synchronized KeysetManager add(KeyTemplate keyTemplate) throws GeneralSecurityException {
     addNewKey(keyTemplate.getProto(), false);
+    return this;
+  }
+
+  /**
+   * Adds the input {@code KeyHandle} to the existing keyset with {@code OutputPrefixType.TINK}.
+   *
+   * @throws GeneralSecurityException if the given {@code KeyAccess} does not grant access to the
+   *     key contained in the {@code KeyHandle}.
+   * @throws UnsupportedOperationException if the {@code KeyHandle} contains a {@code TinkKey} which
+   *     is not a {@code ProtoKey}.
+   */
+  public synchronized KeysetManager add(KeyHandle keyHandle, KeyAccess access)
+      throws GeneralSecurityException {
+    ProtoKey pkey;
+    try {
+      pkey = (ProtoKey) keyHandle.getKey(access);
+    } catch (ClassCastException e) {
+      throw new UnsupportedOperationException(
+          "KeyHandles which contain TinkKeys that are not ProtoKeys are not yet supported.", e);
+    }
+    keysetBuilder.addKey(
+        createKeysetKey(pkey.getProtoKey(), KeyTemplate.toProto(pkey.getOutputPrefixType())));
     return this;
   }
 
@@ -239,9 +264,12 @@ public final class KeysetManager {
 
   private synchronized Keyset.Key newKey(com.google.crypto.tink.proto.KeyTemplate keyTemplate)
       throws GeneralSecurityException {
-    KeyData keyData = Registry.newKeyData(keyTemplate);
+    return createKeysetKey(Registry.newKeyData(keyTemplate), keyTemplate.getOutputPrefixType());
+  }
+
+  private synchronized Keyset.Key createKeysetKey(
+      KeyData keyData, OutputPrefixType outputPrefixType) throws GeneralSecurityException {
     int keyId = newKeyId();
-    OutputPrefixType outputPrefixType = keyTemplate.getOutputPrefixType();
     if (outputPrefixType == OutputPrefixType.UNKNOWN_PREFIX) {
       throw new GeneralSecurityException("unknown output prefix type");
     }

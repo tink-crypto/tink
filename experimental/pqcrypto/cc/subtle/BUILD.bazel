@@ -12,8 +12,8 @@ cc_library(
     deps = [
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
+        "@tink_cc//subtle",
         "@tink_cc//subtle:subtle_util",
-        "@tink_cc//subtle:subtle_util_boringssl",
         "@tink_cc//util:secret_data",
         "@tink_cc//util:statusor",
     ],
@@ -25,10 +25,11 @@ cc_library(
     hdrs = ["cecpq2_hkdf_recipient_kem_boringssl.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":cecpq2_hkdf_sender_kem_boringssl",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
+        "@tink_cc//subtle",
         "@tink_cc//subtle:subtle_util",
-        "@tink_cc//subtle:subtle_util_boringssl",
         "@tink_cc//util:secret_data",
         "@tink_cc//util:statusor",
     ],
@@ -46,8 +47,8 @@ cc_test(
         "@boringssl//:crypto",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
-        "@tink_cc//subtle:sublte_util_boringssl",
         "@tink_cc//util:test_matchers",
+        "@tink_cc//util:test_util",
     ],
 )
 
@@ -60,7 +61,7 @@ cc_test(
         ":cecpq2_hkdf_recipient_kem_boringssl",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
-        "@tink_cc//subtle:sublte_util_boringssl",
         "@tink_cc//util:test_matchers",
+        "@tink_cc//util:test_util",
     ],
 )

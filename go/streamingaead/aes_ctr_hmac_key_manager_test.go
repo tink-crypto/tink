@@ -238,19 +238,19 @@ func genInvalidAESCTRHMACKeys() []proto.Message {
 		testutil.NewAESCTRHMACKeyFormat(32, commonpb.HashType_SHA256, 32, commonpb.HashType_SHA256, 16, 4096),
 
 		// bad key size
-		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 17, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
-		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 16, commonpb.HashType_SHA256, 17, commonpb.HashType_SHA256, 16, 4096),
-		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 33, commonpb.HashType_SHA256, 33, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, 17, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, 16, commonpb.HashType_SHA256, 17, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, 33, commonpb.HashType_SHA256, 33, commonpb.HashType_SHA256, 16, 4096),
 
 		// bad version
-		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion+1, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+		testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion+1, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
 	}
 }
 
 func genInvalidAESCTRHMACKeyFormats() []proto.Message {
 	return []proto.Message{
-		// not AESGCMKeyFormat
-		testutil.NewAESCTRHMACKey(testutil.AESGCMKeyVersion, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
+		// not AESCTRHMACKeyFormat
+		testutil.NewAESCTRHMACKey(testutil.AESCTRHMACKeyVersion, 16, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
 
 		// invalid key size
 		testutil.NewAESCTRHMACKeyFormat(17, commonpb.HashType_SHA256, 16, commonpb.HashType_SHA256, 16, 4096),
@@ -263,7 +263,7 @@ func validateAESCTRHMACKey(key *ctrhmacpb.AesCtrHmacStreamingKey, format *ctrhma
 	if uint32(len(key.KeyValue)) != format.KeySize {
 		return fmt.Errorf("incorrect key size")
 	}
-	if key.Version != testutil.AESGCMKeyVersion {
+	if key.Version != testutil.AESCTRHMACKeyVersion {
 		return fmt.Errorf("incorrect key version")
 	}
 	if key.Params.CiphertextSegmentSize != format.Params.CiphertextSegmentSize {

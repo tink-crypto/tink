@@ -74,7 +74,7 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     setup(keySize);
     JwtRsaSsaPkcs1Sign signer = new JwtRsaSsaPkcs1Sign(priv, algorithm);
     JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(pub, algorithm);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     verifier.verify(signer.sign(token), validator);
   }
@@ -128,7 +128,7 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     setup(keySize);
     JwtRsaSsaPkcs1Sign signer = new JwtRsaSsaPkcs1Sign(priv, signerAlgo);
     JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(pub, verifierAlgo);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(signer.sign(token), validator));
@@ -144,7 +144,7 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     RSAPublicKey otherPub = (RSAPublicKey) otherKeyPair.getPublic();
     JwtRsaSsaPkcs1Sign signer = new JwtRsaSsaPkcs1Sign(priv, algo);
     JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(otherPub, algo);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(signer.sign(token), validator));
@@ -157,7 +157,7 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     setup(keySize);
     JwtRsaSsaPkcs1Sign signer = new JwtRsaSsaPkcs1Sign(priv, algo);
     JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(pub, algo);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     String result = signer.sign(token);
     char[] validJwt = new char[result.length()];
@@ -182,7 +182,7 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     setup(keySize);
     JwtRsaSsaPkcs1Sign signer = new JwtRsaSsaPkcs1Sign(priv, algo);
     JwtRsaSsaPkcs1Verify verifier = new JwtRsaSsaPkcs1Verify(pub, algo);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder().build();
+    RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     String result = signer.sign(token);
     char[] validJwt = new char[result.length()];
@@ -232,12 +232,12 @@ public class JwtRsaSsaPkcs1SignVerifyTest {
     // Construct a token with a valid Signature, but with an invalid header.
     RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(
         (RSAPrivateCrtKey) keyPair.getPrivate(), JwtSigUtil.hashForPkcs1Algorithm("RS256"));
-    ToBeSignedJwt emptyToBeSignedJwt = new ToBeSignedJwt.Builder().build();
+    RawJwt emptyRawJwt = new RawJwt.Builder().build();
     JSONObject wrongTypeHeader = new JSONObject();
     wrongTypeHeader.put("alg", "RS256");
     wrongTypeHeader.put("typ", "IWT");  // bad type
     String headerStr = Base64.urlSafeEncode(wrongTypeHeader.toString().getBytes(UTF_8));
-    String payloadStr = JwtFormat.encodePayload(emptyToBeSignedJwt.getPayload());
+    String payloadStr = JwtFormat.encodePayload(emptyRawJwt.getPayload());
     String unsignedCompact = headerStr + "." + payloadStr;
     String tag = JwtFormat.encodeSignature(signer.sign(unsignedCompact.getBytes(US_ASCII)));
     String signedCompact = unsignedCompact + "." + tag;

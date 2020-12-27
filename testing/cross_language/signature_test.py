@@ -83,10 +83,16 @@ class SignatureTest(parameterized.TestCase):
       for verifier in supported_verifiers:
         self.assertIsNone(verifier.verify(sign, message))
       for verifier in unsupported_verifiers:
-        with self.assertRaises(tink.TinkError):
+        with self.assertRaises(
+            tink.TinkError,
+            msg='Language %s supports signature verify with %s unexpectedly' %
+            (verifier.lang, key_template_name)):
           verifier.verify(sign, message)
     for signer in unsupported_signers:
-      with self.assertRaises(tink.TinkError):
+      with self.assertRaises(
+          tink.TinkError,
+          msg='Language %s supports signature sign with %s unexpectedly' %
+          (signer.lang, key_template_name)):
         _ = signer.sign(message)
 
 

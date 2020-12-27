@@ -40,7 +40,8 @@ public final class JwtEcdsaVerify implements JwtPublicKeyVerify {
   }
 
   @Override
-  public Jwt verify(String compact, JwtValidator validator) throws GeneralSecurityException {
+  public VerifiedJwt verify(String compact, JwtValidator validator)
+      throws GeneralSecurityException {
     JwtSigUtil.validateASCII(compact);
 
     String[] parts = compact.split("\\.", -1);
@@ -54,7 +55,7 @@ public final class JwtEcdsaVerify implements JwtPublicKeyVerify {
     this.verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
     JwtFormat.validateHeader(this.algorithmName, JwtFormat.decodeHeader(parts[0]));
     JSONObject payload = JwtFormat.decodePayload(parts[1]);
-    ToBeSignedJwt token = new ToBeSignedJwt.Builder(payload).build();
+    RawJwt token = new RawJwt.Builder(payload).build();
     return validator.validate(token);
   }
 }

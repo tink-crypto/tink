@@ -33,22 +33,21 @@ import java.io.InputStream;
  */
 public final class BinaryKeysetReader implements KeysetReader {
   private final InputStream inputStream;
-  private final boolean closeStreamAfterReading;
 
   /**
    * Static method to create a BinaryKeysetReader from an {@link InputStream}.
    *
    * <p>Note: the input stream won't be read until {@link BinaryKeysetReader#read} or {@link
-   * BinaryKeysetReader#readEncrypted} is called.
+   * BinaryKeysetReader#readEncrypted} is called, and will be closed immediately after the keyset is
+   * read.
    */
   public static KeysetReader withInputStream(InputStream stream) {
-    return new BinaryKeysetReader(stream, /*closeStreamAfterReading=*/ false);
+    return new BinaryKeysetReader(stream);
   }
 
   /** Static method to create a BinaryKeysetReader from a byte arrary. */
   public static KeysetReader withBytes(final byte[] bytes) {
-    return new BinaryKeysetReader(
-        new ByteArrayInputStream(bytes), /*closeStreamAfterReading=*/ true);
+    return new BinaryKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   /**
@@ -58,36 +57,28 @@ public final class BinaryKeysetReader implements KeysetReader {
    * BinaryKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withFile(File file) throws IOException {
-    return new BinaryKeysetReader(new FileInputStream(file), /*closeStreamAfterReading=*/ true);
+    return new BinaryKeysetReader(new FileInputStream(file));
   }
 
-  private BinaryKeysetReader(InputStream stream, boolean closeStreamAfterReading) {
+  private BinaryKeysetReader(InputStream stream) {
     this.inputStream = stream;
-    this.closeStreamAfterReading = closeStreamAfterReading;
   }
 
   @Override
   public Keyset read() throws IOException {
     try {
-      Keyset keyset = Keyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
-      return keyset;
+      return Keyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
     } finally {
-      if (closeStreamAfterReading) {
-        inputStream.close();
-      }
+      inputStream.close();
     }
   }
 
   @Override
   public EncryptedKeyset readEncrypted() throws IOException {
     try {
-      EncryptedKeyset keyset =
-          EncryptedKeyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
-      return keyset;
+      return EncryptedKeyset.parseFrom(inputStream, ExtensionRegistryLite.getEmptyRegistry());
     } finally {
-      if (closeStreamAfterReading) {
-        inputStream.close();
-      }
+      inputStream.close();
     }
   }
 }

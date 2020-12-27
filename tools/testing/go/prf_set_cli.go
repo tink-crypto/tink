@@ -46,9 +46,9 @@ func main() {
 	keysetFilename := os.Args[1]
 	dataFilename := os.Args[2]
 	prfFilename := os.Args[3]
-	outputLength, err := strconv.Atoi(os.Args[4])
-	if err != nil || outputLength < 0 || outputLength >= 1<<32 {
-		log.Fatalf("Output length is not a uint32, but %q", os.Args[4])
+	outputLength, err := strconv.ParseInt(os.Args[4], 10, 32)
+	if err != nil {
+		log.Fatalf("Failed parsing output-length (%q): %v\n", os.Args[4], err)
 	}
 
 	log.Printf("Using keyset from file %q to compute PRFs of data from file %q. The resulting PRFs will be written to file %q.\n",

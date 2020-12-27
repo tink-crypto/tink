@@ -44,12 +44,12 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
     }
 
     @Override
-    public String createCompact(ToBeSignedJwt token) throws GeneralSecurityException {
+    public String createCompact(RawJwt token) throws GeneralSecurityException {
       return primitives.getPrimary().getPrimitive().createCompact(token);
     }
 
     @Override
-    public Jwt verifyCompact(String compact, JwtValidator validator)
+    public VerifiedJwt verifyCompact(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       // All JWT keys are raw.
       List<PrimitiveSet.Entry<JwtMac>> entries = primitives.getRawPrimitives();

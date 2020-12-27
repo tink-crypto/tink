@@ -31,6 +31,7 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.SelfKeyTestValidators;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -58,6 +59,19 @@ public final class EcdsaSignKeyManager
                 EllipticCurves.getEcPrivateKey(
                     SigUtil.toCurveType(key.getPublicKey().getParams().getCurve()),
                     key.getKeyValue().toByteArray());
+
+            ECPublicKey publicKey =
+                EllipticCurves.getEcPublicKey(
+                    SigUtil.toCurveType(key.getPublicKey().getParams().getCurve()),
+                    key.getPublicKey().getX().toByteArray(),
+                    key.getPublicKey().getY().toByteArray());
+
+            SelfKeyTestValidators.validateEcdsa(
+                privateKey,
+                publicKey,
+                SigUtil.toHashType(key.getPublicKey().getParams().getHashType()),
+                SigUtil.toEcdsaEncoding(key.getPublicKey().getParams().getEncoding()));
+
             return new EcdsaSignJce(
                 privateKey,
                 SigUtil.toHashType(key.getPublicKey().getParams().getHashType()),

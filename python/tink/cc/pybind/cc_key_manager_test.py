@@ -27,6 +27,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import hybrid
@@ -35,6 +36,7 @@ from tink.cc.pybind import tink_bindings
 
 def setUpModule():
   tink_bindings.register()
+  tink_bindings.register_jwt()
 
 
 class AeadKeyManagerTest(absltest.TestCase):
@@ -70,7 +72,7 @@ class AeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.iv_size, 12)
     self.assertLen(key.key_value, 16)
 
-  def test_invalid_params_throw_exception(self):
+  def test_invalid_params_raise_exception(self):
     key_template = self.new_aes_eax_key_template(9, 16)
     with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
@@ -117,7 +119,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 64)
 
-  def test_invalid_params_throw_exception(self):
+  def test_invalid_params_raise_exception(self):
     key_template = self.new_aes_siv_key_template(65)
     with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
@@ -161,7 +163,7 @@ class HybridKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.public_key.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
 
-  def test_new_key_data_invalid_params_throw_exception(self):
+  def test_new_key_data_invalid_params_raise_exception(self):
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'Unsupported elliptic curve'):
       self.hybrid_decrypt_key_manager().new_key_data(
@@ -229,7 +231,7 @@ class MacKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.tag_size, 24)
     self.assertLen(key.key_value, 16)
 
-  def test_invalid_params_throw_exception(self):
+  def test_invalid_params_raise_exception(self):
     key_template = self.new_hmac_key_template(common_pb2.SHA256, 9, 16)
     with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
@@ -251,6 +253,61 @@ class MacKeyManagerTest(absltest.TestCase):
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF', b'data')
+
+
+class JwtMacKeyManagerTest(absltest.TestCase):
+
+  def setUp(self):
+    super(JwtMacKeyManagerTest, self).setUp()
+    self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.JwtHmacKey')
+
+  def new_jwt_hmac_key_template(self, hash_type, key_size):
+    key_format = jwt_hmac_pb2.JwtHmacKeyFormat()
+    key_format.hash_type = hash_type
+    key_format.key_size = key_size
+    key_template = tink_pb2.KeyTemplate()
+    key_template.type_url = 'type.googleapis.com/google.crypto.tink.JwtHmacKey'
+    key_template.value = key_format.SerializeToString()
+    return key_template.SerializeToString()
+
+  def test_key_type(self):
+    self.assertEqual(self.key_manager.key_type(),
+                     'type.googleapis.com/google.crypto.tink.JwtHmacKey')
+
+  def test_new_key_data(self):
+    key_template = self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)
+    key_data = tink_pb2.KeyData()
+    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    self.assertEqual(key_data.type_url, self.key_manager.key_type())
+    key = jwt_hmac_pb2.JwtHmacKey()
+    key.ParseFromString(key_data.value)
+    self.assertEqual(key.version, 0)
+    self.assertEqual(key.hash_type, common_pb2.SHA256)
+    self.assertLen(key.key_value, 32)
+
+  def test_too_short_key_size_raises_exception(self):
+    key_template = self.new_jwt_hmac_key_template(common_pb2.SHA256, 31)
+    with self.assertRaises(tink_bindings.StatusNotOk):
+      self.key_manager.new_key_data(key_template)
+
+  def test_mac_success(self):
+    mac = self.key_manager.primitive(
+        self.key_manager.new_key_data(
+            self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)))
+    data = b'data'
+    tag = mac.compute_mac(data)
+    self.assertLen(tag, 32)
+    # No exception raised.
+    mac.verify_mac(tag, data)
+
+  def test_mac_wrong(self):
+    mac = self.key_manager.primitive(
+        self.key_manager.new_key_data(
+            self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)))
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'verification failed'):
+      mac.verify_mac(b'0123456789ABCDEF0123456789ABCDEF', b'data')
 
 
 class PrfKeyManagerTest(absltest.TestCase):
@@ -286,7 +343,7 @@ class PrfKeyManagerTest(absltest.TestCase):
     self.assertEqual(key.params.hash, common_pb2.SHA256)
     self.assertLen(key.key_value, 16)
 
-  def test_invalid_params_throw_exception(self):
+  def test_invalid_params_raise_exception(self):
     key_template = self.new_hmac_prf_key_template(
         hash_type=common_pb2.SHA256, key_size=7)
     with self.assertRaises(tink_bindings.StatusNotOk):

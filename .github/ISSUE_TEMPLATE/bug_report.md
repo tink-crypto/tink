@@ -1,16 +1,9 @@
---------------------------------------------------------------------------------
-
+---
 name: Bug report
-
 about: Create a report to help us improve Tink
+assignees: 'thaidn, chuckx'
 
-title: ''
-
-labels: ''
-
-assignees: 'thaidn, ckl'
-
---------------------------------------------------------------------------------
+---
 
 **Help us help you**
 
@@ -19,27 +12,27 @@ Please tell us more about
 
 **Describe the bug**
 
-A clear and concise description of what the bug is.
+Provide clear and concise description of the bug.
 
 **To Reproduce**
 
-Please include buildable code snippets or gists which triggered the bug.
+Include buildable code snippets or gists which triggered the bug.
 
 **Expected behavior**
 
-A clear and concise description of what you expected to happen.
+Describe of what you expected to happen.
 
 **Error messages, stack traces, etc.**
 
 If applicable, please include error messages, stack traces or any debugging
-information that you'd seen.
+information.
 
 **Version information**
 
--   Language: (e.g., Java, Python, etc.)
--   Version: (e.g., 1.2.0)
--   Environment: (e.g., JDK 8, Python3.7, iPhone 11, Android M, etc.)
+ - Language: (e.g., Java, Python, etc.)
+ - Version: (e.g., 1.2.0)
+ - Environment: (e.g., JDK 8, Python3.7, iPhone 11, Android M, etc.)
 
 **Additional context**
 
-Add any other context about the problem here.
+Add any other context about the problem.

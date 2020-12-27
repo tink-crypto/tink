@@ -11,6 +11,7 @@ go_library(
         "ecies_hkdf_recipient_kem.go",
         "ecies_hkdf_sender_kem.go",
         "elliptic_curves.go",
+        "subtle.go",
     ],
     importpath = "github.com/google/tink/go/hybrid/subtle",
     deps = [
@@ -21,7 +22,13 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = ["elliptic_curves_test.go"],
+    srcs = [
+        "elliptic_curves_test.go",
+        "subtle_test.go",
+    ],
     data = ["@wycheproof//testvectors:all"],
-    embed = [":go_default_library"],
+    deps = [
+        ":go_default_library",
+        "//testutil:go_default_library",
+    ],
 )

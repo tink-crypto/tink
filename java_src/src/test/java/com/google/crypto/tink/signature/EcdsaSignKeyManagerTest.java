@@ -18,10 +18,12 @@ package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -31,6 +33,7 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -203,6 +206,34 @@ public class EcdsaSignKeyManagerTest {
     } catch (GeneralSecurityException e) {
       // expected
     }
+  }
+
+  @Test
+  public void createCorruptedPublicKeyPrimitive_throws() throws Exception {
+
+    EcdsaKeyFormat format =
+        createKeyFormat(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
+    EcdsaPrivateKey originalKey = factory.createKey(format);
+    byte[] originalPubX = originalKey.getPublicKey().getX().toByteArray();
+    byte[] originalPubY = originalKey.getPublicKey().getY().toByteArray();
+    originalPubX[0] = (byte) (originalPubX[0] ^ 0x01);
+    ByteString corruptedPubX = ByteString.copyFrom(originalPubX);
+    EcdsaPublicKey corruptedPub =
+        EcdsaPublicKey.newBuilder()
+            .setVersion(originalKey.getPublicKey().getVersion())
+            .setParams(originalKey.getPublicKey().getParams())
+            .setX(corruptedPubX)
+            .setY(ByteString.copyFrom(originalPubY))
+            .build();
+    EcdsaPrivateKey corruptedKey =
+        EcdsaPrivateKey.newBuilder()
+            .setVersion(originalKey.getVersion())
+            .setPublicKey(corruptedPub)
+            .setKeyValue(originalKey.getKeyValue())
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
 
   /** Tests that a public key is extracted properly from a private key. */

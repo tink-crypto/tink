@@ -54,6 +54,7 @@ py_test(
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:hmac_prf_py_pb2",
         "//tink/proto:hmac_py_pb2",
+        "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -65,6 +66,17 @@ tink_pybind_library(
     deps = [
         ":status_casters",
         "//tink/cc:cc_tink_config",
+        "@pybind11",
+    ],
+)
+
+tink_pybind_library(
+    name = "cc_jwt_config",
+    srcs = ["cc_jwt_config.cc"],
+    hdrs = ["cc_jwt_config.h"],
+    deps = [
+        ":status_casters",
+        "//tink/cc:cc_jwt_config",
         "@pybind11",
     ],
 )
@@ -176,7 +188,7 @@ py_test(
     name = "status_test",
     srcs = ["status_test.py"],
     deps = [
-        ":tink_testonly_bindings",
+        ":tink_bindings",
         requirement("absl-py"),
         requirement("six"),
     ],
@@ -320,45 +332,7 @@ tink_pybind_extension(
         ":aead",
         ":cc_aws_kms_client",
         ":cc_gcp_kms_client",
-        ":cc_key_manager",
-        ":cc_streaming_aead_wrappers",
-        ":cc_tink_config",
-        ":deterministic_aead",
-        ":hybrid_decrypt",
-        ":hybrid_encrypt",
-        ":input_stream_adapter",
-        ":mac",
-        ":output_stream_adapter",
-        ":prf",
-        ":public_key_sign",
-        ":public_key_verify",
-        ":python_file_object_adapter",
-        ":status",
-        ":status_casters",
-        ":streaming_aead",
-        "@tink_cc//:aead",
-        "@tink_cc//:deterministic_aead",
-        "@tink_cc//:hybrid_decrypt",
-        "@tink_cc//:hybrid_encrypt",
-        "@tink_cc//:mac",
-        "@tink_cc//:public_key_sign",
-        "@tink_cc//:public_key_verify",
-        "@tink_cc//:streaming_aead",
-        "@tink_cc//integration/awskms:aws_kms_client",
-        "@tink_cc//integration/gcpkms:gcp_kms_client",
-        "@tink_cc//prf:prf_set",
-        "@tink_cc//util:status",
-        "@tink_cc//util:statusor",
-    ],
-)
-
-tink_pybind_extension(
-    name = "tink_testonly_bindings",
-    srcs = ["tink_testonly_bindings.cc"],
-    deps = [
-        ":aead",
-        ":cc_aws_kms_client",
-        ":cc_gcp_kms_client",
+        ":cc_jwt_config",
         ":cc_key_manager",
         ":cc_streaming_aead_wrappers",
         ":cc_tink_config",
