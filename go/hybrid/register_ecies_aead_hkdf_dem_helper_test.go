@@ -20,9 +20,11 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/signature"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -32,6 +34,7 @@ var (
 		aead.AES128CTRHMACSHA256KeyTemplate(): 48,
 		aead.AES256GCMKeyTemplate():           32,
 		aead.AES128GCMKeyTemplate():           16,
+		daead.AESSIVKeyTemplate():             64,
 	}
 	uTemplates = []*tinkpb.KeyTemplate{
 		signature.ECDSAP256KeyTemplate(),
@@ -39,6 +42,7 @@ var (
 		&tinkpb.KeyTemplate{TypeUrl: "some url", Value: []byte{0}},
 		&tinkpb.KeyTemplate{TypeUrl: aesCTRHMACAEADTypeURL},
 		&tinkpb.KeyTemplate{TypeUrl: aesGCMTypeURL},
+		&tinkpb.KeyTemplate{TypeUrl: aesSIVTypeURL},
 	}
 )
 
@@ -72,15 +76,28 @@ func TestAead(t *testing.T) {
 			t.Fatalf("error generating a DEM helper :%s", err)
 		}
 		sk := random.GetRandomBytes(rDem.GetSymmetricKeySize())
-		a, err := rDem.GetAEAD(sk)
+		prim, err := rDem.GetAEADOrDAEAD(sk)
 		if err != nil {
 			t.Errorf("error getting AEAD primitive :%s", err)
 		}
-		ct, err := a.Encrypt(pt, ad)
+		var ct []byte
+		switch a := prim.(type) {
+		case tink.AEAD:
+			ct, err = a.Encrypt(pt, ad)
+		case tink.DeterministicAEAD:
+			ct, err = a.EncryptDeterministically(pt, ad)
+		}
 		if err != nil {
 			t.Errorf("error encrypting :%s", err)
 		}
-		dt, err := a.Decrypt(ct, ad)
+
+		var dt []byte
+		switch a := prim.(type) {
+		case tink.AEAD:
+			dt, err = a.Decrypt(ct, ad)
+		case tink.DeterministicAEAD:
+			dt, err = a.DecryptDeterministically(ct, ad)
+		}
 		if err != nil {
 			t.Errorf("error decrypting :%s", err)
 		}
@@ -90,13 +107,13 @@ func TestAead(t *testing.T) {
 
 		// shorter symmetric key
 		sk = random.GetRandomBytes(rDem.GetSymmetricKeySize() - 1)
-		if _, err = rDem.GetAEAD(sk); err == nil {
+		if _, err = rDem.GetAEADOrDAEAD(sk); err == nil {
 			t.Errorf("retrieving AEAD primitive should have failed")
 		}
 
 		// longer symmetric key
 		sk = random.GetRandomBytes(rDem.GetSymmetricKeySize() + 1)
-		if _, err = rDem.GetAEAD(sk); err == nil {
+		if _, err = rDem.GetAEADOrDAEAD(sk); err == nil {
 			t.Errorf("retrieving AEAD primitive should have failed")
 		}
 

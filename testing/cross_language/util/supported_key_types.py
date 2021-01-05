@@ -290,7 +290,6 @@ KEY_TEMPLATE = {
 # the list of supported languages of the whole key type.
 _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
     'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python'],
-    'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV': ['cc', 'java', 'python'],
 }
 
 

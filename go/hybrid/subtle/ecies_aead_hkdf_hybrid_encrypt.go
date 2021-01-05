@@ -16,6 +16,9 @@ package subtle
 
 import (
 	"bytes"
+	"errors"
+
+	"github.com/google/tink/go/tink"
 )
 
 // ECIESAEADHKDFHybridEncrypt is an instance of ECIES encryption with HKDF-KEM (key encapsulation mechanism)
@@ -57,11 +60,19 @@ func (e *ECIESAEADHKDFHybridEncrypt) Encrypt(plaintext, contextInfo []byte) ([]b
 	if err != nil {
 		return nil, err
 	}
-	aead, err := e.demHelper.GetAEAD(kemKey.SymmetricKey)
+	prim, err := e.demHelper.GetAEADOrDAEAD(kemKey.SymmetricKey)
 	if err != nil {
 		return nil, err
 	}
-	ct, err := aead.Encrypt(plaintext, []byte{})
+	var ct []byte
+	switch a := prim.(type) {
+	case tink.AEAD:
+		ct, err = a.Encrypt(plaintext, []byte{})
+	case tink.DeterministicAEAD:
+		ct, err = a.EncryptDeterministically(plaintext, []byte{})
+	default:
+		err = errors.New("Internal error: unexpected primitive type")
+	}
 	if err != nil {
 		return nil, err
 	}
