@@ -94,12 +94,6 @@ func testSignVerify(template *tinkpb.KeyTemplate) error {
 	if err != nil {
 		return fmt.Errorf("signature.NewSigner(privateHandle) failed: %s", err)
 	}
-	msg := []byte("this data needs to be signed")
-	sig, err := signer.Sign(msg)
-	if err != nil {
-		return fmt.Errorf("signer.Sign(msg) failed: %s", err)
-	}
-
 	publicHandle, err := privateHandle.Public()
 	if err != nil {
 		return fmt.Errorf("privateHandle.Public() failed: %s", err)
@@ -109,8 +103,35 @@ func testSignVerify(template *tinkpb.KeyTemplate) error {
 		return fmt.Errorf("signature.NewVerifier(publicHandle) failed: %s", err)
 	}
 
-	if err := verifier.Verify(sig, msg); err != nil {
-		return fmt.Errorf("verifier.Verify(sig, msg) failed: %s", err)
+	var testInputs = []struct {
+		message1 []byte
+		message2 []byte
+	}{
+		{
+			message1: []byte("this data needs to be signed"),
+			message2: []byte("this data needs to be signed"),
+		}, {
+			message1: []byte(""),
+			message2: []byte(""),
+		}, {
+			message1: []byte(""),
+			message2: nil,
+		}, {
+			message1: nil,
+			message2: []byte(""),
+		}, {
+			message1: nil,
+			message2: nil,
+		},
+	}
+	for _, ti := range testInputs {
+		sig, err := signer.Sign(ti.message1)
+		if err != nil {
+			return fmt.Errorf("signer.Sign(ti.message1) failed: %s", err)
+		}
+		if err := verifier.Verify(sig, ti.message2); err != nil {
+			return fmt.Errorf("verifier.Verify(sig, ti.message2) failed: %s", err)
+		}
 	}
 	return nil
 }

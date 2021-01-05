@@ -63,20 +63,62 @@ func testEncryptDecrypt(template *tinkpb.KeyTemplate) error {
 		return fmt.Errorf("daead.New(handle) failed: %v", err)
 	}
 
-	plaintext := []byte("some data to encrypt")
-	aad := []byte("extra data to authenticate")
-	ciphertext, err := primitive.EncryptDeterministically(plaintext, aad)
-	if err != nil {
-		return fmt.Errorf("encryption failed, error: %v", err)
+	var testInputs = []struct {
+		plaintext []byte
+		aad1      []byte
+		aad2      []byte
+	}{
+		{
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte("extra data to authenticate"),
+			aad2:      []byte("extra data to authenticate"),
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte(""),
+			aad2:      []byte(""),
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: []byte(""),
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: nil,
+			aad1:      []byte("extra data to authenticate"),
+			aad2:      []byte("extra data to authenticate"),
+		}, {
+			plaintext: nil,
+			aad1:      []byte(""),
+			aad2:      []byte(""),
+		}, {
+			plaintext: nil,
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte(""),
+			aad2:      nil,
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      nil,
+			aad2:      []byte(""),
+		},
 	}
-	decrypted, err := primitive.DecryptDeterministically(ciphertext, aad)
-	if err != nil {
-		return fmt.Errorf("decryption failed, error: %v", err)
-	}
+	for _, ti := range testInputs {
+		ciphertext, err := primitive.EncryptDeterministically(ti.plaintext, ti.aad1)
+		if err != nil {
+			return fmt.Errorf("encryption failed, error: %v", err)
+		}
+		decrypted, err := primitive.DecryptDeterministically(ciphertext, ti.aad2)
+		if err != nil {
+			return fmt.Errorf("decryption failed, error: %v", err)
+		}
 
-	if !bytes.Equal(plaintext, decrypted) {
-		return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
+		if !bytes.Equal(ti.plaintext, decrypted) {
+			return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, ti.plaintext)
+		}
 	}
-
 	return nil
 }
