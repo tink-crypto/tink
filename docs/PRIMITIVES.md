@@ -30,7 +30,7 @@ describe the main properties of Tink primitives.
 **Primitive**      | **Java** | **C++** | **ObjC** | **Go** | **Python**
 ------------------ | -------- | ------- | -------- | ------ | ----------
 AEAD               | yes      | yes     | yes      | yes    | yes
-Streaming AEAD     | yes      | yes     | no       | yes    | no
+Streaming AEAD     | yes      | yes     | no       | yes    | yes
 Deterministic AEAD | yes      | yes     | yes      | yes    | yes
 MAC                | yes      | yes     | yes      | yes    | yes
 PRF                | yes      | yes     | no       | yes    | yes
@@ -45,7 +45,7 @@ JavaScript is currently under development.
 
 | Primitive          | Java Implementations                                                              |
 | ------------------ | --------------------------------------------------------------------------------- |
-| AEAD               | AES-EAX, AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305 |
+| AEAD               | AES-GCM, AES-GCM-SIV, AES-CTR-HMAC, AES-EAX, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305 |
 | Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                                    |
 | Deterministic AEAD | AES-SIV                                                                           |
 | MAC                | HMAC-SHA2, AES-CMAC                                                               |
@@ -80,7 +80,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 | Primitive          | Go Implementations                                                       |
 | ------------------ | ------------------------------------------------------------------------ |
 | AEAD               | AES-GCM, AES-CTR-HMAC, KMS Envelope, CHACHA20-POLY1305, XCHACHA-POLY1305 |
-| Streaming AEAD     | AES-GCM-HKDF-STREAMING                                                   |
+| Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING                           |
 | Deterministic AEAD | AES-SIV                                                                  |
 | MAC                | HMAC-SHA2, AES-CMAC                                                      |
 | PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                           |
@@ -92,6 +92,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 Primitive          | Python Implementations
 ------------------ | -----------------------------------------------------------------------------
 AEAD               | AES-GCM, AES-CTR-HMAC, AES-EAX, KMS Envelope, XCHACHA20-POLY1305
+Streaming AEAD     | AES-GCM-HKDF-STREAMING, AES-CTR-HMAC-STREAMING
 Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2, AES-CMAC
 PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC
