@@ -15,6 +15,7 @@
 package prf_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
@@ -58,13 +59,42 @@ func TestKeyTemplates(t *testing.T) {
 				t.Errorf("prf.NewPRFSet(handle) failed: %s", err)
 			}
 
-			msg := []byte("This is an ID needs to be redacted")
-			output, err := prfset.ComputePrimaryPRF(msg, 16)
-			if err != nil {
-				t.Errorf("prfset.ComputePrimaryPRF(msg, 16) failed: %s", err)
+			var testInputs = []struct {
+				message1 []byte
+				message2 []byte
+			}{
+				{
+					message1: []byte("this data needs to be authenticated"),
+					message2: []byte("this data needs to be authenticated"),
+				}, {
+					message1: []byte(""),
+					message2: []byte(""),
+				}, {
+					message1: []byte(""),
+					message2: nil,
+				}, {
+					message1: nil,
+					message2: []byte(""),
+				}, {
+					message1: nil,
+					message2: nil,
+				},
 			}
-			if len(output) != 16 {
-				t.Errorf("len(output) = %d, want 16", len(output))
+			for _, ti := range testInputs {
+				output, err := prfset.ComputePrimaryPRF(ti.message1, 16)
+				if err != nil {
+					t.Errorf("prfset.ComputePrimaryPRF(ti.message1, 16) failed: %s", err)
+				}
+				if len(output) != 16 {
+					t.Errorf("len(output) = %d, want 16", len(output))
+				}
+				output2, err := prfset.ComputePrimaryPRF(ti.message2, 16)
+				if err != nil {
+					t.Errorf("prfset.ComputePrimaryPRF(ti.message2, 16) failed: %s", err)
+				}
+				if !bytes.Equal(output2, output) {
+					t.Errorf("equivalent inputs did not produce equivalent outputs, got: %q, want: %q", output2, output)
+				}
 			}
 		})
 	}
