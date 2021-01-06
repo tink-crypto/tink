@@ -226,53 +226,11 @@ TEST_F(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
                 status_or_shared_secret.ValueOrDie())));
 }
 
-// Method that generates the shared secret returned by HRSS in case of
-// decapsulation failure. This shared secret consists of the HMAC of the
-// ciphertext using portion of the HRSS private key as the HMAC key.
-void createFailureSharedSecret(uint8_t out_shared_key[HRSS_KEY_BYTES],
-                               struct HRSS_private_key* in_priv,
-                               const uint8_t* ciphertext,
-                               size_t ciphertext_len) {
-  // Shifting the private key by 15 positions (as in its marshaled version) then
-  // by 1760 positions to reach the expected HMAC key used in BoringSSL:
-  uint8_t* priv_hmac_ptr =
-      reinterpret_cast<uint8_t*>(in_priv->opaque) + 15 + 1760;
-
-  // This is HMAC, expanded inline rather than using the |HMAC| function so that
-  // we can avoid dealing with possible allocation failures and so keep this
-  // function infallible.
-  uint8_t masked_key[SHA256_CBLOCK];
-  for (size_t i = 0; i < 32; i++) {
-    masked_key[i] = priv_hmac_ptr[i] ^ 0x36;
-  }
-  std::memset(masked_key + 32, 0x36, 32);
-
-  SHA256_CTX hash_ctx;
-  SHA256_Init(&hash_ctx);
-  SHA256_Update(&hash_ctx, masked_key, SHA256_CBLOCK);
-  SHA256_Update(&hash_ctx, ciphertext, ciphertext_len);
-  uint8_t inner_digest[SHA256_DIGEST_LENGTH];
-  SHA256_Final(inner_digest, &hash_ctx);
-
-  for (size_t i = 0; i < 32; i++) {
-    masked_key[i] ^= (0x5c ^ 0x36);
-  }
-  memset(masked_key + 32, 0x5c, 32);
-
-  SHA256_Init(&hash_ctx);
-  SHA256_Update(&hash_ctx, masked_key, sizeof(masked_key));
-  SHA256_Update(&hash_ctx, inner_digest, sizeof(inner_digest));
-  OPENSSL_STATIC_ASSERT(HRSS_KEY_BYTES == SHA256_DIGEST_LENGTH,
-                        "HRSS shared key length incorrect");
-  SHA256_Final(out_shared_key, &hash_ctx);
-}
-
 // This test evaluates the whole KEM flow: from Sender to Recipient. This test
 // is essentially the same as TestSenderRecipientFullFlowSuccess with the
 // difference that we alter bytes of the kem_bytes thus preventing the two
 // shared secrets to match.
-TEST_F(Cecpq2HkdfSenderKemBoringSslTest,
-       DISABLED_TestSenderRecipientFullFlowFailure) {
+TEST_F(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -328,41 +286,9 @@ TEST_F(Cecpq2HkdfSenderKemBoringSslTest,
       kem_bytes, hash_type, test::HexDecodeOrDie(salt_hex),
       test::HexDecodeOrDie(info_hex), out_len, point_format);
 
-  // Recover the X25519 shared secret (needed for the defective shared secret
-  // computation)
-  util::SecretData x25519_shared_secret(X25519_SHARED_KEY_LEN);
-  X25519(x25519_shared_secret.data(),
-         cecpq2_key_pair.x25519_key_pair.priv.data(),
-         reinterpret_cast<const uint8_t*>(kem_bytes.data()));
-
-  // Computing the shared secret returned by BoringSSL's HRSS assuming that HRSS
-  // decapsulation fails
-  util::SecretData hrss_out_shared_key_defective(HRSS_KEY_BYTES);
-  createFailureSharedSecret(hrss_out_shared_key_defective.data(),
-                            &recipient_hrss_priv_copy,
-                            reinterpret_cast<const uint8_t*>(
-                                kem_bytes.data() + X25519_PUBLIC_VALUE_LEN),
-                            HRSS_CIPHERTEXT_BYTES);
-
-  // Concatenate both shared secrets (correct X25519 and wrong HRSS) and
-  // kem_bytes
-  std::string kem_bytes_and_shared_secrets = absl::StrCat(
-      kem_bytes, util::SecretDataAsStringView(x25519_shared_secret),
-      util::SecretDataAsStringView(hrss_out_shared_key_defective));
-  util::SecretData ikm =
-      util::SecretDataFromStringView(kem_bytes_and_shared_secrets);
-
-  // Compute symmetric key from both shared secrets, kem_bytes, hkdf_salt and
-  // hkdf_info using HKDF
-  auto symmetric_key_or =
-      Hkdf::ComputeHkdf(hash_type, ikm, test::HexDecodeOrDie(salt_hex),
-                        test::HexDecodeOrDie(info_hex), out_len);
-  ASSERT_TRUE(symmetric_key_or.ok());
-  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
-
-  // Asserting that the generated shared secret matches with the one that should
-  // be produced by HRSS in case of HRSS decapsulation failure:
-  EXPECT_EQ(test::HexEncode(util::SecretDataAsStringView(symmetric_key)),
+  // Asserting that the shared secrets do not match
+  EXPECT_NE(test::HexEncode(
+                util::SecretDataAsStringView(kem_key->get_symmetric_key())),
             test::HexEncode(util::SecretDataAsStringView(
                 status_or_shared_secret.ValueOrDie())));
 }
