@@ -1,4 +1,5 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 licenses(["notice"])
 
@@ -27,5 +28,33 @@ android_library(
         "//src/main/java/com/google/crypto/tink/prf:prf_config-android",
         "//src/main/java/com/google/crypto/tink/signature:signature_config-android",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config-android",
+    ],
+)
+
+bool_flag(
+    name = "use_only_fips",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "fips_enabled",
+    flag_values = {":use_only_fips": "True"},
+    visibility = ["//visibility:public"],
+)
+
+java_library(
+    name = "tink_fips_status",
+    srcs = select({
+        ":fips_enabled": ["TinkFipsEnabled.java"],
+        "//conditions:default": ["TinkFipsDisabled.java"],
+    }),
+)
+
+java_library(
+    name = "tink_fips",
+    srcs = ["TinkFips.java"],
+    deps = [
+        ":tink_fips_status",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
