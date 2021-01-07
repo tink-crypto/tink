@@ -51,7 +51,7 @@ JavaScript is currently under development.
 | MAC                | HMAC-SHA2, AES-CMAC                                                               |
 | PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                                    |
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS                       |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                                                          |
+| Hybrid Encryption  | ECIES with AEAD/DeterministicAEAD and HKDF                                        |
 
 #### C++
 
@@ -63,7 +63,7 @@ JavaScript is currently under development.
 | MAC                | HMAC-SHA2, AES-CMAC                                                                              |
 | PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                                                   |
 | Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS                                      |
-| Hybrid Encryption  | ECIES with AEAD and HKDF, ECIES with HKDF and Deterministic AEAD                                 |
+| Hybrid Encryption  | ECIES with AEAD/DeterministicAEAD and HKDF                                                       |
 
 #### Objective-C
 
@@ -85,7 +85,7 @@ Hybrid Encryption  | ECIES with AEAD and HKDF
 | MAC                | HMAC-SHA2, AES-CMAC                                                      |
 | PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC                                           |
 | Digital Signatures | ECDSA over NIST curves, Ed25519                                          |
-| Hybrid Encryption  | ECIES with AEAD and HKDF                                                 |
+| Hybrid Encryption  | ECIES with AEAD/DeterministicAEAD and HKDF                               |
 
 #### Python
 
@@ -97,7 +97,7 @@ Deterministic AEAD | AES-SIV
 MAC                | HMAC-SHA2, AES-CMAC
 PRF                | HKDF-SHA2, HMAC-SHA2, AES-CMAC
 Digital Signatures | ECDSA over NIST curves, Ed25519, RSA-SSA-PKCS1, RSA-SSA-PSS
-Hybrid Encryption  | ECIES with AEAD and HKDF
+Hybrid Encryption  | ECIES with AEAD/DeterministicAEAD and HKDF
 
 ---
 
