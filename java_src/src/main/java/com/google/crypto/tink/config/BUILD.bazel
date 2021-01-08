@@ -48,6 +48,13 @@ java_library(
         ":fips_enabled": ["TinkFipsEnabled.java"],
         "//conditions:default": ["TinkFipsDisabled.java"],
     }),
+    deps = select({
+        ":fips_enabled": [
+          "@maven//:org_conscrypt_conscrypt_openjdk_uber",
+        ],
+        "//conditions:default": [
+        ],
+    }),
 )
 
 java_library(
@@ -55,6 +62,5 @@ java_library(
     srcs = ["TinkFips.java"],
     deps = [
         ":tink_fips_status",
-        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )

@@ -13,11 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.config;
 
-import java.lang.reflect.Method;
-import org.conscrypt.Conscrypt;
-
 final class TinkFips {
-
   /** The status of FIPS compatibility of an algorithm. */
   public enum AlgorithmFipsCompatibility {
     /** The algorithm is not FIPS compatible */
@@ -34,27 +30,11 @@ final class TinkFips {
       public boolean isCompatible() {
         // If Tink is not in FIPS-only mode, then no restrictions are necessary. In FIPS-only mode
         // this returns True if BoringCrypto is available.
-        return !TinkFipsStatus.useOnlyFips() || checkBoringSslStatus();
+        return !TinkFipsStatus.useOnlyFips() || TinkFipsStatus.fipsModuleAvailable();
       }
     };
 
     public abstract boolean isCompatible();
-  }
-
-  public static boolean checkBoringSslStatus() {
-    return Conscrypt.isAvailable() && checkConscryptUsesFipsBoringSsl();
-  }
-
-  static Boolean checkConscryptUsesFipsBoringSsl() {
-    try {
-      Class<?> cls = Class.forName("Conscrypt");
-      Method isBoringSslFIPSBuild = cls.getMethod("isBoringSslFIPSBuild");
-      return (Boolean) isBoringSslFIPSBuild.invoke(null);
-    } catch (ReflectiveOperationException e) {
-      // This happens if the Conscrypt version does not support checking for FIPS
-      // mode in BoringSSL.
-      return false;
-    }
   }
 
   private TinkFips() {}
