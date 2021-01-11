@@ -35,19 +35,19 @@ const (
 	aesSIVTypeURL         = "type.googleapis.com/google.crypto.tink.AesSivKey"
 )
 
-// registerECIESAEADHKDFDemHelper generates AEAD or DeterministicAEAD primitives for the specified KeyTemplate and key material.
+// eciesAEADHKDFDEMHelper generates AEAD or DeterministicAEAD primitives for the specified KeyTemplate and key material.
 // in order to implement the EciesAEADHKDFDEMHelper interface.
-type registerECIESAEADHKDFDemHelper struct {
+type eciesAEADHKDFDEMHelper struct {
 	demKeyURL        string
 	keyData          []byte
 	symmetricKeySize uint32
 	aesCTRSize       uint32
 }
 
-var _ subtle.EciesAEADHKDFDEMHelper = (*registerECIESAEADHKDFDemHelper)(nil)
+var _ subtle.EciesAEADHKDFDEMHelper = (*eciesAEADHKDFDEMHelper)(nil)
 
 // newRegisterECIESAEADHKDFDemHelper initializes and returns a RegisterECIESAEADHKDFDemHelper
-func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEADHKDFDemHelper, error) {
+func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*eciesAEADHKDFDEMHelper, error) {
 	var len uint32
 	var aesCTRSize uint32
 	var keyFormat []byte
@@ -106,7 +106,7 @@ func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEA
 		return nil, fmt.Errorf("failed to serialize key, error: %v", err)
 	}
 
-	return &registerECIESAEADHKDFDemHelper{
+	return &eciesAEADHKDFDEMHelper{
 		demKeyURL:        k.TypeUrl,
 		keyData:          sk,
 		symmetricKeySize: len,
@@ -115,13 +115,13 @@ func newRegisterECIESAEADHKDFDemHelper(k *tinkpb.KeyTemplate) (*registerECIESAEA
 }
 
 // GetSymmetricKeySize returns the symmetric key size
-func (r *registerECIESAEADHKDFDemHelper) GetSymmetricKeySize() uint32 {
+func (r *eciesAEADHKDFDEMHelper) GetSymmetricKeySize() uint32 {
 	return r.symmetricKeySize
 
 }
 
 // GetAEADOrDAEAD returns the AEAD or deterministic AEAD primitive from the DEM
-func (r *registerECIESAEADHKDFDemHelper) GetAEADOrDAEAD(symmetricKeyValue []byte) (interface{}, error) {
+func (r *eciesAEADHKDFDEMHelper) GetAEADOrDAEAD(symmetricKeyValue []byte) (interface{}, error) {
 	var sk []byte
 	if uint32(len(symmetricKeyValue)) != r.GetSymmetricKeySize() {
 		return nil, errors.New("symmetric key has incorrect length")

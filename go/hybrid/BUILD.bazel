@@ -9,7 +9,7 @@ go_library(
         "hybrid_decrypt_factory.go",
         "hybrid_encrypt_factory.go",
         "hybrid_key_templates.go",
-        "register_ecies_aead_hkdf_dem_helper.go",
+        "ecies_aead_hkdf_dem_helper.go",
     ],
     importpath = "github.com/google/tink/go/hybrid",
     visibility = ["//visibility:public"],
@@ -39,7 +39,7 @@ go_test(
         "hybrid_factory_test.go",
         "hybrid_key_templates_test.go",
         "hybrid_test.go",
-        "register_ecies_aead_hkdf_dem_helper_test.go",
+        "ecies_aead_hkdf_dem_helper_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
