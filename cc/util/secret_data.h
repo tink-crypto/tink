@@ -118,21 +118,10 @@ class SecretValue {
   }
 
   SecretValue& operator=(const SecretValue& other) {
-    ptr_ = MakeSecretUniquePtr<T>(*other.ptr_);
+    *ptr_ = *other.ptr_;
     return *this;
   }
 
-  SecretValue(SecretValue&& other) {
-    ptr_ = MakeSecretUniquePtr<T>();
-    ptr_.swap(other.ptr_);
-  }
-
-  SecretValue& operator=(SecretValue&& other) {
-    ptr_.swap(other.ptr_);
-    return *this;
-  }
-
-  ~SecretValue() = default;
   T& value() { return *ptr_; }
   const T& value() const { return *ptr_; }
 
