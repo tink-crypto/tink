@@ -50,17 +50,36 @@ java_library(
     }),
     deps = select({
         ":fips_enabled": [
-          "@maven//:org_conscrypt_conscrypt_openjdk_uber",
+            "@maven//:org_conscrypt_conscrypt_openjdk_uber",
         ],
         "//conditions:default": [
         ],
     }),
 )
 
+android_library(
+    name = "tink_fips_status-android",
+    srcs = select({
+        ":fips_enabled": ["TinkFipsEnabled.java"],
+        "//conditions:default": ["TinkFipsDisabled.java"],
+    }),
+)
+
 java_library(
     name = "tink_fips",
     srcs = ["TinkFips.java"],
+    visibility = ["//visibility:public"],
     deps = [
         ":tink_fips_status",
+    ],
+)
+
+android_library(
+    name = "tink_fips-android",
+    srcs = ["TinkFips.java"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":tink_fips_status-android",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
