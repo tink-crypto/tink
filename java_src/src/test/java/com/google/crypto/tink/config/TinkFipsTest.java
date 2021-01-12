@@ -32,7 +32,7 @@ public final class TinkFipsTest {
   @Test
   public void testFipsOnlyModeDisabledAlgorithmCompatibility() {
     // Test behavior when FIPS-only mode is not used.
-    Assume.assumeTrue(!TinkFipsStatus.useOnlyFips());
+    Assume.assumeFalse(TinkFipsStatus.useOnlyFips());
     assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isTrue();
     assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isTrue();
