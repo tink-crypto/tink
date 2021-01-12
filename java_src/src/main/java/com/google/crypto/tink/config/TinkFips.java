@@ -13,11 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.config;
 
-/**
- * Static methods for checking if Tink was built in FIPS mode and to check for algorithm
- * compatibility.
- */
-public final class TinkFips {
+final class TinkFips {
   /** The status of FIPS compatibility of an algorithm. */
   public enum AlgorithmFipsCompatibility {
     /** The algorithm is not FIPS compatible */
@@ -39,10 +35,6 @@ public final class TinkFips {
     };
 
     public abstract boolean isCompatible();
-  }
-
-  public static boolean useOnlyFips() {
-    return TinkFipsStatus.useOnlyFips();
   }
 
   private TinkFips() {}
