@@ -514,7 +514,7 @@ public class KeysetHandleTest {
     KeysetHandle ksh =
         KeysetManager.withKeysetHandle(KeysetHandle.generateNew(kt1)).add(kt2).getKeysetHandle();
 
-    KeyHandle kh = ksh.findPrimaryKey();
+    KeyHandle kh = ksh.primaryKey();
 
     ProtoKey pk = (ProtoKey) kh.getKey(SecretKeyAccess.insecureSecretAccess());
     assertThat(pk.getProtoKey().getTypeUrl()).isEqualTo(kt1.getTypeUrl());
@@ -526,6 +526,6 @@ public class KeysetHandleTest {
     KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
     KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
 
-    assertThrows(GeneralSecurityException.class, ksh::findPrimaryKey);
+    assertThrows(GeneralSecurityException.class, ksh::primaryKey);
   }
 }
