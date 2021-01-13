@@ -1,4 +1,4 @@
 absl-py
-attr
+attrs
 hypothesis
 protobuf
