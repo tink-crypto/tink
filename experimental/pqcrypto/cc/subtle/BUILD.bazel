@@ -59,6 +59,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":cecpq2_hkdf_recipient_kem_boringssl",
+        "@boringssl//:crypto",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
         "@tink_cc//util:test_matchers",
