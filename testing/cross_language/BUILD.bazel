@@ -69,19 +69,6 @@ py_test(
 )
 
 py_test(
-    name = "non_malleability_test",
-    srcs = ["non_malleability_test.py"],
-    deps = [
-        "//util:supported_key_types",
-        "//util:testing_servers",
-        requirement("absl-py"),
-        requirement("hypothesis"),
-        requirement("protobuf"),
-        "@tink_py//tink:tink_python",
-    ],
-)
-
-py_test(
     name = "aead_test",
     srcs = ["aead_test.py"],
     deps = [

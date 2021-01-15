@@ -1,4 +1,2 @@
 absl-py
-attrs
-hypothesis
 protobuf
