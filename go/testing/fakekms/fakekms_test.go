@@ -36,14 +36,14 @@ func TestValidKeyURIs(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc, func(t *testing.T) {
-			client, err := fakekms.NewClient(keyURI)
+			client, err := fakekms.NewClient(tc)
 			if err != nil {
 				t.Fatalf("testutil.NewFakeKMSClient(keyURI) failed: %v", err)
 			}
-			if !client.Supported(keyURI) {
+			if !client.Supported(tc) {
 				t.Fatalf("client.Supported(keyURI) is false, want true")
 			}
-			primitive, err := client.GetAEAD(keyURI)
+			primitive, err := client.GetAEAD(tc)
 			if err != nil {
 				t.Fatalf("client.GetAEAD(keyURI) failed: %v", err)
 			}
