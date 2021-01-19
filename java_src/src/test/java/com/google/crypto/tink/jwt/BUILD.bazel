@@ -30,9 +30,9 @@ java_test(
 )
 
 java_test(
-    name = "JwtTest",
+    name = "VerifiedJwtTest",
     size = "small",
-    srcs = ["JwtTest.java"],
+    srcs = ["VerifiedJwtTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_names",

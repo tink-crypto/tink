@@ -26,7 +26,7 @@ import org.junit.runners.JUnit4;
 
 /** Unit tests for Jwt */
 @RunWith(JUnit4.class)
-public final class JwtTest {
+public final class VerifiedJwtTest {
   @Test
   public void emptyJwt_success() throws Exception {
     VerifiedJwt emptyToken = new VerifiedJwt(new JSONObject());
