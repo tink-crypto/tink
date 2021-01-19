@@ -239,6 +239,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_verify",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",

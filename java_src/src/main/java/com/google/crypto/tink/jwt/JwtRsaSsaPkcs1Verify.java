@@ -41,8 +41,7 @@ public final class JwtRsaSsaPkcs1Verify implements JwtPublicKeyVerify {
   @Override
   public VerifiedJwt verify(String compact, JwtValidator validator)
       throws GeneralSecurityException {
-    JwtSigUtil.validateASCII(compact);
-
+    JwtFormat.validateASCII(compact);
     String[] parts = compact.split("\\.", -1);
     if (parts.length != 3) {
       throw new JwtInvalidException(

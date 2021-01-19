@@ -100,12 +100,4 @@ final class JwtSigUtil {
     }
     throw new GeneralSecurityException("unknown algorithm " + algorithm);
   }
-
-  public static void validateASCII(String data) throws GeneralSecurityException {
-    for (char c : data.toCharArray()) {
-      if ((c & 0x80) > 0) {
-        throw new GeneralSecurityException("Non ascii character");
-      }
-    }
-  }
 }

@@ -28,13 +28,11 @@ import java.security.GeneralSecurityException;
  * version one can do:
  *
  * <pre>{@code
- * SignatureConfig.init();
+ * JwtSignatureConfig.init();
  * }</pre>
  *
  * <p>For more information on how to obtain and use instances of JwtPublicKeySign or
  * PublicKeyVerify, see {@link JwtPublicKeySignFactory} or {@link PublicKeyVerifyFactory}.
- *
- * @since 1.0.0
  */
 public final class JwtSignatureConfig {
   public static final String JWT_ECDSA_PUBLIC_KEY_TYPE_URL =
@@ -58,8 +56,6 @@ public final class JwtSignatureConfig {
    * Tries to register with the {@link com.google.crypto.tink.Registry} all instances of {@link
    * com.google.crypto.tink.Catalogue} needed to handle JwtPublicKeySign and PublicKeyVerify key
    * types supported in Tink.
-   *
-   * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
     JwtEcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);

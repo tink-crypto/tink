@@ -139,4 +139,11 @@ final class JwtFormat {
     return unsignedCompact + "." + encodeSignature(signature);
   }
 
+  static void validateASCII(String data) throws JwtInvalidException {
+    for (char c : data.toCharArray()) {
+      if ((c & 0x80) > 0) {
+        throw new JwtInvalidException("Non ascii character");
+      }
+    }
+  }
 }

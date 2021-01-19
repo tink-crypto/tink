@@ -187,7 +187,7 @@ public class JwtEcdsaSignVerifyTest {
       assertThat(validJwt[i] & 0x80).isSameInstanceAs(0);
       nonASciiJwt[i] = (char) (validJwt[i] | 0x80);
       assertThrows(
-          GeneralSecurityException.class,
+          JwtInvalidException.class,
           () -> verifier.verify(new String(nonASciiJwt), validator));
     }
   }
