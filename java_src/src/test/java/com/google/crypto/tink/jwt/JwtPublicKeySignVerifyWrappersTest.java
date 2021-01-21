@@ -60,8 +60,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  @Parameters(method = "parametersTemplates")
-  public void test_wrapNoPrimary_throws(KeyTemplate template) throws Exception {
+  public void test_wrapNoPrimary_throws() throws Exception {
+    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
     KeysetManager manager = KeysetManager.withEmptyKeyset().add(template);
     KeysetHandle handle = manager.getKeysetHandle();
     assertThrows(
@@ -73,8 +73,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  @Parameters(method = "parametersTemplates")
-  public void test_wrapNoRaw_throws(KeyTemplate rawTemplate) throws Exception {
+  public void test_wrapNoRaw_throws() throws Exception {
+    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
     // Convert the normal, raw template into a template with output prefix type TINK
     KeyTemplate tinkTemplate =
         KeyTemplate.create(
@@ -89,8 +89,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  @Parameters(method = "parametersTemplates")
-  public void test_wrapSingleKey_works(KeyTemplate template) throws Exception {
+  public void test_wrapSingleKey_works() throws Exception {
+    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
@@ -104,8 +104,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  @Parameters(method = "parametersTemplates")
-  public void test_wrapMultipleKeys(KeyTemplate template) throws Exception {
+  public void test_wrapMultipleKeys() throws Exception {
+    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
 
     KeysetManager manager = KeysetManager.withEmptyKeyset();
     manager.addNewKey(KeyTemplateProtoConverter.toProto(template), /*asPrimary=*/ true);
