@@ -301,7 +301,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_ecdsa_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_public_key_sign",
