@@ -15,17 +15,23 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.EcdsaVerifyJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
+import org.json.JSONObject;
 
 /**
  * This key manager produces new instances of {@code JwtEcdsaVerify}. It doesn't support key
@@ -63,14 +69,35 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
     @Override
     public JwtPublicKeyVerify getPrimitive(JwtEcdsaPublicKey keyProto)
         throws GeneralSecurityException {
-
       // This will throw an exception is protocol is invalid
       EllipticCurves.CurveType curve = getCurve(keyProto.getAlgorithm());
-
       ECPublicKey publicKey =
           EllipticCurves.getEcPublicKey(
               curve, keyProto.getX().toByteArray(), keyProto.getY().toByteArray());
-      return new JwtEcdsaVerify(publicKey, keyProto.getAlgorithm().name());
+      final String algorithm = keyProto.getAlgorithm().name();
+      Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+      final EcdsaVerifyJce verifier = new EcdsaVerifyJce(publicKey, hash, EcdsaEncoding.IEEE_P1363);
+
+      return new JwtPublicKeyVerify() {
+        @Override
+        public VerifiedJwt verify(String compact, JwtValidator validator)
+            throws GeneralSecurityException {
+          JwtFormat.validateASCII(compact);
+          String[] parts = compact.split("\\.", -1);
+          if (parts.length != 3) {
+            throw new JwtInvalidException(
+                "only tokens in JWS compact serialization format are supported");
+          }
+          String unsignedCompact = parts[0] + "." + parts[1];
+          byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
+
+          verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
+          JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+          JSONObject payload = JwtFormat.decodePayload(parts[1]);
+          RawJwt token = new RawJwt.Builder(payload).build();
+          return validator.validate(token);
+        }
+      };
     }
   }
 

@@ -33,7 +33,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
-import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
@@ -159,23 +158,6 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtEcdsaPublicKey publicKey = manager.getPublicKey(privateKey);
 
     assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
-  }
-
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void createPrimitive_ok(JwtEcdsaAlgorithm algorithm) throws Exception {
-
-    JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
-    JwtEcdsaPrivateKey key = factory.createKey(format);
-    JwtEcdsaPublicKey pubKey = key.getPublicKey();
-    JwtPublicKeySign signer = manager.getPrimitive(key, JwtPublicKeySign.class);
-    ECPublicKey publicKey =
-        EllipticCurves.getEcPublicKey(
-            algorithmToCurve(algorithm), pubKey.getX().toByteArray(), pubKey.getY().toByteArray());
-    JwtPublicKeyVerify verifier = new JwtEcdsaVerify(publicKey, algorithmToString(algorithm));
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
-    verifier.verify(signer.sign(token), validator);
   }
 
   @Test
