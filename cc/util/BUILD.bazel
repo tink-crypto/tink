@@ -91,6 +91,22 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":status",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+
+cc_test(
+    name = "statusor_test",
+    size = "small",
+    srcs = ["statusor_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkopts = ["-lpthread"],
+    deps = [
+        ":status",
+        ":statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

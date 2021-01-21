@@ -21,6 +21,7 @@
 #include <iostream>
 #include <utility>
 
+#include "absl/status/statusor.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -108,6 +109,11 @@ class StatusOr {
     return std::move(value_);
   }
 
+  // Implicitly convertible to absl::StatusOr. Implicit conversions explicitly
+  // allowed by style arbiter waiver in cl/351594378.
+  operator ::absl::StatusOr<T>() const&;  // NOLINT
+  operator ::absl::StatusOr<T>() &&;      // NOLINT
+
   template <typename U>
   friend class StatusOr;
 
@@ -174,6 +180,18 @@ inline const StatusOr<T>& StatusOr<T>::operator=(const StatusOr<U>& other) {
     value_ = other.value_;
   }
   return *this;
+}
+
+template <typename T>
+StatusOr<T>::operator ::absl::StatusOr<T>() const& {
+  if (!ok()) return ::absl::Status(status_);
+  return value_;
+}
+
+template <typename T>
+StatusOr<T>::operator ::absl::StatusOr<T>() && {
+  if (!ok()) return ::absl::Status(std::move(status_));
+  return std::move(value_);
 }
 
 }  // namespace util

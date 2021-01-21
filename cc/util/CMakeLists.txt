@@ -60,6 +60,7 @@ tink_cc_library(
   SRCS
     statusor.h
   DEPS
+    absl::status
     tink::util::status
   PUBLIC
 )
@@ -432,4 +433,16 @@ tink_cc_test(
     tink::aead::aead_key_templates
     tink::proto::kms_aead_cc_proto
     tink::proto::kms_envelope_cc_proto
+)
+
+tink_cc_test(
+  NAME statusor_test
+  SRCS
+    statusor_test.cc
+  DEPS
+    tink::util::status
+    tink::util::statusor
+    gmock
+    absl::status
+    absl::statusor
 )
