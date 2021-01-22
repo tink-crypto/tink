@@ -39,7 +39,7 @@ _SERVER_PATHS = {
         'testing/cc/testing_server'
     ],
     'go': [
-        'testing/go/bazel-bin/linux_amd64_stripped/testing_server',
+        'testing/go/bazel-bin/testing_server_/testing_server',
         'testing/go/testing_server'
     ],
     'java': [
