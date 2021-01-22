@@ -36,41 +36,6 @@ namespace tink {
 namespace subtle {
 namespace {
 
-// This method performs some basic common setup (HRSS and X25519 key generation,
-// and marshaling HRSS public key) needed by the tests.
-crypto::tink::util::StatusOr<crypto::tink::pqc::Cecpq2KeyPair>
-GenerateCecpq2Keypair(EllipticCurveType curve_type) {
-  crypto::tink::pqc::Cecpq2KeyPair cecpq2_key_pair;
-
-  // Generating a X25519 key pair
-  cecpq2_key_pair.x25519_key_pair.priv.resize(X25519_PRIVATE_KEY_LEN);
-  subtle::ResizeStringUninitialized(&(cecpq2_key_pair.x25519_key_pair.pub_x),
-                                    X25519_PUBLIC_VALUE_LEN);
-  X25519_keypair(const_cast<uint8_t*>(
-                 reinterpret_cast<const uint8_t*>(
-                 cecpq2_key_pair.x25519_key_pair.pub_x.data())),
-                 cecpq2_key_pair.x25519_key_pair.priv.data());
-
-  // Generating a HRSS key pair
-  util::SecretData generate_hrss_key_entropy =
-      crypto::tink::subtle::Random::GetRandomKeyBytes(HRSS_GENERATE_KEY_BYTES);
-  HRSS_generate_key(&cecpq2_key_pair.hrss_key_pair.hrss_public_key,
-                    cecpq2_key_pair.hrss_key_pair.hrss_private_key.get(),
-                    generate_hrss_key_entropy.data());
-
-  // Marshalling the HRSS public key
-  subtle::ResizeStringUninitialized(
-      &(cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled),
-      HRSS_PUBLIC_KEY_BYTES);
-  HRSS_marshal_public_key(
-      const_cast<uint8_t*>(
-      reinterpret_cast<const uint8_t*>(
-      cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled.data())),
-      &(cecpq2_key_pair.hrss_key_pair.hrss_public_key));
-
-  return cecpq2_key_pair;
-}
-
 // This test evaluates the creation of a Cecpq2HkdfSenderKemBoringSsl instance
 // with an unknown curve type parameter. It should fail with an
 // util::error::UNIMPLEMENTED error.
@@ -80,7 +45,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
   }
 
   auto statur_or_cecpq2_key =
-      GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
   ASSERT_TRUE(statur_or_cecpq2_key.ok());
   auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
 
@@ -105,7 +70,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
   }
 
   auto statur_or_cecpq2_key =
-      GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
   ASSERT_TRUE(statur_or_cecpq2_key.ok());
   auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
 
@@ -133,7 +98,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
   int out_len = 32;
 
   auto statur_or_cecpq2_key =
-      GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
   ASSERT_TRUE(statur_or_cecpq2_key.ok());
   auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
 
@@ -171,7 +136,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
   int out_len = 32;
 
   auto statur_or_cecpq2_key =
-      GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
   ASSERT_TRUE(statur_or_cecpq2_key.ok());
   auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
 
@@ -226,7 +191,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
   int out_len = 32;
 
   auto statur_or_cecpq2_key =
-      GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
   ASSERT_TRUE(statur_or_cecpq2_key.ok());
   auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
 

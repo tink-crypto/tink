@@ -106,10 +106,10 @@ TEST(CreatesNewCecpq2KeyPairTest, GeneratesDifferentKeysEveryTime) {
   // Generating two HRSS key pairs
   crypto::tink::util::SecretData hrss_key_entropy1 =
       crypto::tink::subtle::Random::GetRandomKeyBytes(HRSS_GENERATE_KEY_BYTES);
-  auto keypair1 = crypto::tink::pqc::GetNewHrssKey(hrss_key_entropy1);
+  auto keypair1 = crypto::tink::pqc::GenerateHrssKeyPair(hrss_key_entropy1);
   crypto::tink::util::SecretData hrss_key_entropy2 =
       crypto::tink::subtle::Random::GetRandomKeyBytes(HRSS_GENERATE_KEY_BYTES);
-  auto keypair2 = crypto::tink::pqc::GetNewHrssKey(hrss_key_entropy2);
+  auto keypair2 = crypto::tink::pqc::GenerateHrssKeyPair(hrss_key_entropy2);
 
   size_t priv_key_size = sizeof(keypair1.ValueOrDie().hrss_private_key->opaque);
   size_t pub_key_size = sizeof(keypair1.ValueOrDie().hrss_public_key.opaque);
@@ -144,7 +144,7 @@ TEST(CreatesNewCecpq2KeyPairTest, SuccessfullHrssKeyGen) {
       HRSS_GENERATE_KEY_BYTES);
   util::SecretData hrss_key_gen_entropy =
       util::SecretDataFromStringView(hrss_key_gen_entropy_str);
-  auto keypair = crypto::tink::pqc::GetNewHrssKey(hrss_key_gen_entropy);
+  auto keypair = crypto::tink::pqc::GenerateHrssKeyPair(hrss_key_gen_entropy);
 
   // Checking that the generated HRSS public key matched the test vector one
   EXPECT_EQ(test::HexEncode(keypair.ValueOrDie().hrss_public_key_marshaled),

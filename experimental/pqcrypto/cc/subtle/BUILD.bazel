@@ -39,6 +39,7 @@ cc_library(
     name = "cecpq2_subtle_boringssl_util",
     srcs = ["cecpq2_subtle_boringssl_util.cc"],
     hdrs = ["cecpq2_subtle_boringssl_util.h"],
+    visibility = ["//visibility:public"],
     deps = [
         "@boringssl//:crypto",
         "@tink_cc//subtle",

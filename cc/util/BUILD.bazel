@@ -60,6 +60,7 @@ cc_library(
     srcs = ["enums.cc"],
     hdrs = ["enums.h"],
     include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
     deps = [
         ":statusor",
         "//proto:common_cc_proto",
