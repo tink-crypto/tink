@@ -14,9 +14,12 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeFalse;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
@@ -25,19 +28,25 @@ import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
+import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
+import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -256,6 +265,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @Test
   @Parameters(method = "templates")
   public void createSignVerify_success(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -270,6 +280,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @Test
   @Parameters(method = "templates")
   public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
@@ -283,31 +294,10 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class, () -> otherVerifier.verify(signedCompact, validator));
   }
 
-  // TODO(juerg): This test needs to be changed: The modified token currently does not have a valid
-  // signature, so we never get to the algorithm check.
-  @Test
-  public void createSignVerify_algoMismatch_throw() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
-    JwtPublicKeyVerify verifier =
-        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
-    String signedCompact = signer.sign(rawToken);
-
-    String[] parts = signedCompact.split("\\.", -1);
-    String header = new String(Base64.urlSafeDecode(parts[0]), UTF_8);
-    // Patch the JWT with a different algorithm.
-    String headerBase64 = Base64.urlSafeEncode(header.replace("ES256", "ES384").getBytes(UTF_8));
-    String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
-
-    JwtValidator validator = new JwtValidator.Builder().build();
-    assertThrows(GeneralSecurityException.class, () -> verifier.verify(modifiedCompact, validator));
-  }
-
   @Test
   @Parameters(method = "templates")
   public void createSignVerify_header_modification_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -328,6 +318,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @Test
   @Parameters(method = "templates")
   public void createSignVerify_payload_modification_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -348,6 +339,7 @@ public class JwtEcdsaSignKeyManagerTest {
   @Test
   @Parameters(method = "templates")
   public void createSignVerify_bitFlipped_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -371,5 +363,74 @@ public class JwtEcdsaSignKeyManagerTest {
             () -> verifier.verify(new String(invalidJwt), validator));
       }
     }
+  }
+
+  private static String generateSignedCompact(
+      EcdsaSignJce rawSigner, JSONObject header, JSONObject payload)
+      throws GeneralSecurityException {
+    String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
+    String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
+    String unsignedCompact = headerBase64 + "." + payloadBase64;
+    String signature = Base64.urlSafeEncode(rawSigner.sign(unsignedCompact.getBytes(UTF_8)));
+    return unsignedCompact + "." + signature;
+  }
+
+  @Test
+  public void createSignVerify_withDifferentHeaders() throws Exception {
+    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtEcdsaPrivateKey keyProto =
+        JwtEcdsaPrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    ECPrivateKey privateKey =
+        EllipticCurves.getEcPrivateKey(
+            JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
+            keyProto.getKeyValue().toByteArray());
+    String algorithm = keyProto.getPublicKey().getAlgorithm().name();
+    Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+    EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
+
+    JSONObject payload = new JSONObject();
+    payload.put(JwtNames.CLAIM_ISSUER, "issuer");
+    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    // Normal, valid signed compact.
+    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload);
+    String normalSignedCompact =
+        JwtFormat.createSignedCompact(
+            unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));
+    verifier.verify(normalSignedCompact, validator);
+
+    // valid token, with "typ" set in the header
+    JSONObject goodHeader = new JSONObject();
+    goodHeader.put(JwtNames.HEADER_ALGORITHM, "ES256");
+    goodHeader.put("typ", "JWT");
+    String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
+    verifier.verify(goodSignedCompact, validator);
+
+    // invalid token with an empty header
+    JSONObject emptyHeader = new JSONObject();
+    String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(emptyHeaderSignedCompact, validator));
+
+    // invalid token with a valid but incorrect algorithm in the header
+    JSONObject badAlgoHeader = new JSONObject();
+    badAlgoHeader.put(JwtNames.HEADER_ALGORITHM, "RS256");
+    String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(badAlgoSignedCompact, validator));
+
+    // invalid token with an unknown "typ" in the header
+    JSONObject badTypeHheader = new JSONObject();
+    badTypeHheader.put(JwtNames.HEADER_ALGORITHM, "ES256");
+    badTypeHheader.put("typ", "IWT");
+    String badTypeSignedCompact = generateSignedCompact(rawSigner, badTypeHheader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(badTypeSignedCompact, validator));
   }
 }
