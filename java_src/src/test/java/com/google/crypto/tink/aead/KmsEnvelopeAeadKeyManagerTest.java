@@ -39,6 +39,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class KmsEnvelopeAeadKeyManagerTest {
+  private final KmsEnvelopeAeadKeyManager manager = new KmsEnvelopeAeadKeyManager();
+
   @BeforeClass
   public static void setUp() throws Exception {
     KmsClients.add(new FakeKmsClient());
@@ -48,10 +50,11 @@ public class KmsEnvelopeAeadKeyManagerTest {
   @Test
   public void testKmsAeadWithBoundedClient_success() throws Exception {
     String keyUri = FakeKmsClient.createFakeKeyUri();
-    KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
+    com.google.crypto.tink.KeyTemplate dekTemplate =
+        AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template();
     KeysetHandle keysetHandle =
         KeysetHandle.generateNew(
-            AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(keyUri, dekTemplate));
+            manager.envelopeTemplate(keyUri, dekTemplate));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 

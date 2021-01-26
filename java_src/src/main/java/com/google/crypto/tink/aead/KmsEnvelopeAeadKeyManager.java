@@ -16,7 +16,13 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.*;
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
+import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKey;
 import com.google.crypto.tink.proto.KmsEnvelopeAeadKeyFormat;
@@ -24,7 +30,6 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import java.security.GeneralSecurityException;
 
 /**
@@ -98,24 +103,21 @@ public class KmsEnvelopeAeadKeyManager extends KeyTypeManager<KmsEnvelopeAeadKey
     Registry.registerKeyManager(new KmsEnvelopeAeadKeyManager(), newKeyAllowed);
   }
 
-
   /**
-   * Creates a new instance of a AES-Envelope {@link KeyTemplate}
-   * @param keyUri  URI of the KMS to use for the KEK. See {@link KmsClient#doesSupport(String)} for supported formats.
-   * @param dekTemplate The {@link KeyTemplate} to use for the DEK. For example {@link AesGcmKeyManager#aes256GcmTemplate()}
-   * @return  a {@link KeyTemplate} that generates new instances of AES-Envelope.
-   * @throws InvalidProtocolBufferException If the {@link KeyTemplate} for the DEK is invalid.
+   * @return a new {@link KeyTemplate} that can generate ai
+   *     {@link com.google.crypto.tink.proto.KmsEnvelopeAeadKey} whose KEK is pointing to
+   *     {@code kekUri} and DEK template is {@code dekTemplate}.
+   * @throws GeneralSecurityException if the {@link KeyTemplate} for the DEK is invalid.
    */
-  public static KeyTemplate envelopeTemplate(String keyUri,KeyTemplate dekTemplate) throws InvalidProtocolBufferException {
+  public static KeyTemplate envelopeTemplate(String kekUri, KeyTemplate dekTemplate)
+      throws GeneralSecurityException {
     KmsEnvelopeAeadKeyFormat format = KmsEnvelopeAeadKeyFormat.newBuilder()
-            .setDekTemplate(com.google.crypto.tink.proto.KeyTemplate.parseFrom(dekTemplate.getValue()))
-            .setKekUri(keyUri)
-            .build();
-    return KeyTemplate
-            .create(new KmsEnvelopeAeadKeyManager().getKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.TINK);
+        .setDekTemplate(KeyTemplateProtoConverter.toProto(dekTemplate))
+        .setKekUri(kekUri)
+        .build();
+    return KeyTemplate.create(
+        new KmsEnvelopeAeadKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
   }
-
-
-
-
 }
