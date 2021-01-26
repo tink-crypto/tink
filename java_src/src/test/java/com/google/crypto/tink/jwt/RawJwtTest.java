@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+// TODO(juerg): Add validation and tests for StringOrURI.
+
 /** Unit tests for RawJwt */
 @RunWith(JUnit4.class)
 public final class RawJwtTest {
@@ -48,6 +50,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_AUDIENCE)).isNull();
+    assertThat(token.getAudiences()).isNull();
   }
 
   @Test
@@ -56,6 +59,7 @@ public final class RawJwtTest {
     JSONArray audiences = (JSONArray) token.getClaim(JwtNames.CLAIM_AUDIENCE);
 
     assertThat(audiences.getString(0)).isEqualTo("foo");
+    assertThat(token.getAudiences()).containsExactly("foo");
   }
 
   @Test
@@ -65,11 +69,19 @@ public final class RawJwtTest {
 
     assertThat(audiences.getString(0)).isEqualTo("foo");
     assertThat(audiences.getString(1)).isEqualTo("bar");
+    assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
 
   @Test
   public void noSubject_success() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
+
+    assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
+  }
+
+  @Test
+  public void setUnsetSubject_returnsNull() throws Exception {
+    RawJwt token = new RawJwt.Builder().setSubject("foo").setSubject(null).build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
   }
@@ -128,6 +140,9 @@ public final class RawJwtTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_EXPIRATION, Instant.now()));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_EXPIRATION, 1234567));
   }
 
   @Test
@@ -180,10 +195,58 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void addClaim_none_success() throws Exception {
+  public void getUnknownClaim_returnsNull() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
     assertThat(token.getClaim("claim")).isNull();
+  }
+
+  @Test
+  public void addJsonArrayClaim_success() throws Exception {
+    JSONArray collection = new JSONArray()
+        .put(true)
+        .put(123)
+        .put(456L)
+        .put(123.456)
+        .put("value")
+        .put(new JSONArray().put(1).put(2));
+
+    RawJwt token = new RawJwt.Builder().addClaim("collection", collection).build();
+
+    JSONArray output = (JSONArray) token.getClaim("collection");
+    assertThat(output.length()).isEqualTo(6);
+    assertThat(output.getBoolean(0)).isTrue();
+    assertThat(output.getInt(1)).isEqualTo(123);
+    assertThat(output.getLong(2)).isEqualTo(456L);
+    assertThat(output.getDouble(3)).isEqualTo(123.456);
+    assertThat(output.getString(4)).isEqualTo("value");
+    JSONArray nestedOutput = output.getJSONArray(5);
+    assertThat(nestedOutput.length()).isEqualTo(2);
+    assertThat(nestedOutput.getInt(0)).isEqualTo(1);
+    assertThat(nestedOutput.getInt(1)).isEqualTo(2);
+  }
+
+  @Test
+  public void addJsonObjectClaim_success() throws Exception {
+    JSONObject obj = new JSONObject()
+        .put("boolean", false)
+        .put("obj1", new JSONObject().put("obj2", new JSONObject().put("42", 42)));
+
+    RawJwt token = new RawJwt.Builder().addClaim("obj", obj).build();
+
+    JSONObject output = (JSONObject) token.getClaim("obj");
+    assertThat(output.getBoolean("boolean")).isFalse();
+    assertThat(output.getJSONObject("obj1").getJSONObject("obj2").getInt("42")).isEqualTo(42);
+
+    // The behaviour of output.getString("boolean") is inconsistent.
+
+    // In google3 and on android, this returns a string "false".
+    // see: https://developer.android.com/reference/org/json/JSONObject#getString(java.lang.String)
+    // and: https://source.corp.google.com/piper///depot/google3/third_party/java_src/j2objc/jre_emul/android/platform/libcore/json/src/main/java/org/json/JSONObject.java;l=559
+
+    // But with the maven implementation, this throws an error.
+    // see: https://javadoc.io/doc/org.json/json/latest/index.html
+    // and: https://github.com/stleary/JSON-java/blob/e33f463179ddb6b5d68eabf24528d94af2d0886b/src/main/java/org/json/JSONObject.java#L858
   }
 
   @Test
@@ -236,5 +299,19 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().setJwtId("blah").build();
     JSONObject playload = token.getPayload();
     assertThat(playload.get(JwtNames.CLAIM_JWT_ID)).isEqualTo("blah");
+  }
+
+  @Test
+  public void fromJsonString_success() throws Exception {
+    String input = "{\"jid\": \"abc123\", \"aud\": [\"me\", \"you\"], \"custom\": "
+        + " {\"int\": 123, \"string\": \"value\"}}";
+
+    RawJwt token = new RawJwt.Builder(new JSONObject(input)).build();
+    assertThat(token.getClaim("jid")).isEqualTo("abc123");
+    assertThat(token.getAudiences()).containsExactly("me", "you");
+
+    JSONObject custom = (JSONObject) token.getClaim("custom");
+    assertThat(custom.getInt("int")).isEqualTo(123);
+    assertThat(custom.getString("string")).isEqualTo("value");
   }
 }
