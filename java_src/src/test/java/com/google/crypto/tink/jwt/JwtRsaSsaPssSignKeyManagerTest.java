@@ -14,18 +14,26 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeFalse;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.Keyset;
+import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Random;
+import com.google.crypto.tink.subtle.RsaSsaPssSignJce;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -33,13 +41,15 @@ import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.Set;
 import java.util.TreeSet;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.json.JSONObject;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,6 +59,11 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   private final JwtRsaSsaPssSignKeyManager manager = new JwtRsaSsaPssSignKeyManager();
   private final KeyTypeManager.KeyFactory<JwtRsaSsaPssKeyFormat, JwtRsaSsaPssPrivateKey> factory =
       manager.keyFactory();
+
+  @BeforeClass
+  public static void setUp() throws Exception {
+    JwtSignatureConfig.register();
+  }
 
   private static JwtRsaSsaPssKeyFormat createKeyFormat(
       JwtRsaSsaPssAlgorithm algorithm, int modulusSizeInBits, BigInteger publicExponent) {
@@ -85,6 +100,15 @@ public class JwtRsaSsaPssSignKeyManagerTest {
       default: // fall out
     }
     throw new GeneralSecurityException("unknown algorithm " + algo.name());
+  }
+
+  private static Object[] templates() {
+    return new Object[] {
+      JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template(),
+      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template(),
+      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template(),
+      JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template()
+    };
   }
 
   @Test
@@ -176,10 +200,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   @Test
   @Parameters(method = "parametersAlgoAndSize")
   public void createKeys_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize) throws Exception {
-    if (TestUtil.isTsan()) {
-      // factory.createKey is too slow in Tsan.
-      return;
-    }
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     JwtRsaSsaPssPrivateKey key = factory.createKey(format);
     checkConsistency(key, format);
@@ -190,10 +211,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   @Parameters(method = "parametersAlgoAndSize")
   public void createKey_alwaysNewElement_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize)
       throws Exception {
-    if (TestUtil.isTsan()) {
-      // factory.createKey is too slow in Tsan.
-      return;
-    }
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
@@ -209,33 +227,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   @Parameters(method = "parametersAlgoAndSize")
-  public void createPrimitive_ok(JwtRsaSsaPssAlgorithm algorithm, int keySize) throws Exception {
-    if (TestUtil.isTsan()) {
-      // factory.createKey is too slow in Tsan.
-      return;
-    }
-    JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
-    JwtRsaSsaPssPrivateKey key = factory.createKey(format);
-    JwtPublicKeySign signer = manager.getPrimitive(key, JwtPublicKeySign.class);
-    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
-    BigInteger modulus = new BigInteger(1, key.getPublicKey().getN().toByteArray());
-    BigInteger exponent = new BigInteger(1, key.getPublicKey().getE().toByteArray());
-    RSAPublicKey publicKey =
-        (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
-    JwtPublicKeyVerify verifier = new JwtRsaSsaPssVerify(publicKey, algorithmToString(algorithm));
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
-    verifier.verify(signer.sign(token), validator);
-  }
-
-  @Test
-  @Parameters(method = "parametersAlgoAndSize")
   public void createCorruptedModulusPrimitive_throws(JwtRsaSsaPssAlgorithm algorithm, int keySize)
       throws Exception {
-    if (TestUtil.isTsan()) {
-      // factory.createKey is too slow in Tsan.
-      return;
-    }
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
     JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
     JwtRsaSsaPssPrivateKey originalKey = factory.createKey(format);
     byte[] originalN = originalKey.getPublicKey().getN().toByteArray();
@@ -337,5 +331,158 @@ public class JwtRsaSsaPssSignKeyManagerTest {
             JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+  }
+
+  @Test
+  @Parameters(method = "templates")
+  public void createSignVerify_success(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    String signedCompact = signer.sign(rawToken);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    VerifiedJwt verifiedToken = verifier.verify(signedCompact, validator);
+    assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+  }
+
+  @Test
+  @Parameters(method = "templates")
+  public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    String signedCompact = signer.sign(rawToken);
+
+    KeysetHandle otherHandle = KeysetHandle.generateNew(template);
+    JwtPublicKeyVerify otherVerifier =
+        otherHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(
+        GeneralSecurityException.class, () -> otherVerifier.verify(signedCompact, validator));
+  }
+
+  @Test
+  @Parameters(method = "templates")
+  public void createSignVerify_header_modification_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    String signedCompact = signer.sign(rawToken);
+
+    // Modify the header by adding a space at the end.
+    String[] parts = signedCompact.split("\\.", -1);
+    String header = new String(Base64.urlSafeDecode(parts[0]), UTF_8);
+    String headerBase64 = Base64.urlSafeEncode((header + " ").getBytes(UTF_8));
+    String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
+
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(GeneralSecurityException.class, () -> verifier.verify(modifiedCompact, validator));
+  }
+
+  @Test
+  @Parameters(method = "templates")
+  public void createSignVerify_payload_modification_throw(KeyTemplate template) throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+    String signedCompact = signer.sign(rawToken);
+
+    // Modify the payload by adding a space at the end.
+    String[] parts = signedCompact.split("\\.", -1);
+    String payload = new String(Base64.urlSafeDecode(parts[1]), UTF_8);
+    String payloadBase64 = Base64.urlSafeEncode((payload + " ").getBytes(UTF_8));
+    String modifiedCompact = parts[0] + "." + payloadBase64 + "." + parts[2];
+
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThrows(GeneralSecurityException.class, () -> verifier.verify(modifiedCompact, validator));
+  }
+
+  private static final RSAPrivateCrtKey createPrivateKey(JwtRsaSsaPssPrivateKey keyProto)
+      throws GeneralSecurityException {
+    KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    return (RSAPrivateCrtKey)
+        kf.generatePrivate(
+            new RSAPrivateCrtKeySpec(
+                new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
+                new BigInteger(1, keyProto.getPublicKey().getE().toByteArray()),
+                new BigInteger(1, keyProto.getD().toByteArray()),
+                new BigInteger(1, keyProto.getP().toByteArray()),
+                new BigInteger(1, keyProto.getQ().toByteArray()),
+                new BigInteger(1, keyProto.getDp().toByteArray()),
+                new BigInteger(1, keyProto.getDq().toByteArray()),
+                new BigInteger(1, keyProto.getCrt().toByteArray())));
+  }
+
+  private static String generateSignedCompact(
+      RsaSsaPssSignJce rawSigner, JSONObject header, JSONObject payload)
+      throws GeneralSecurityException {
+    String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
+    String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
+    String unsignedCompact = headerBase64 + "." + payloadBase64;
+    String signature = Base64.urlSafeEncode(rawSigner.sign(unsignedCompact.getBytes(UTF_8)));
+    return unsignedCompact + "." + signature;
+  }
+
+  @Test
+  public void createSignVerify_withDifferentHeaders() throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template();
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtRsaSsaPssPrivateKey keyProto =
+        JwtRsaSsaPssPrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
+
+    String algorithm = JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(
+          keyProto.getPublicKey().getAlgorithm());
+
+    Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
+    int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
+    RsaSsaPssSignJce rawSigner = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = new JwtValidator.Builder().build();
+
+    JSONObject payload = new JSONObject();
+    payload.put(JwtNames.CLAIM_ISSUER, "issuer");
+
+    // valid token, with "typ" set in the header
+    JSONObject goodHeader = new JSONObject();
+    goodHeader.put(JwtNames.HEADER_ALGORITHM, "PS256");
+    goodHeader.put("typ", "JWT");
+    String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
+    verifier.verify(goodSignedCompact, validator);
+
+    // invalid token with an empty header
+    JSONObject emptyHeader = new JSONObject();
+    String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(emptyHeaderSignedCompact, validator));
+
+    // invalid token with a valid but incorrect algorithm in the header
+    JSONObject badAlgoHeader = new JSONObject();
+    badAlgoHeader.put(JwtNames.HEADER_ALGORITHM, "RS256");
+    String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(badAlgoSignedCompact, validator));
+
+    // invalid token with an unknown "typ" in the header
+    JSONObject badTypeHheader = new JSONObject();
+    badTypeHheader.put(JwtNames.HEADER_ALGORITHM, "PS256");
+    badTypeHheader.put("typ", "IWT");
+    String badTypeSignedCompact = generateSignedCompact(rawSigner, badTypeHheader, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verify(badTypeSignedCompact, validator));
   }
 }
