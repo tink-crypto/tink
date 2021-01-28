@@ -44,13 +44,24 @@ java_test(
 )
 
 java_test(
-    name = "JwtHmacTest",
+    name = "JwtHmacKeyManagerTest",
     size = "small",
-    srcs = ["JwtHmacTest.java"],
+    srcs = ["JwtHmacKeyManagerTest.java"],
     deps = [
+        "//proto:tink_java_proto",
+        "//proto:common_java_proto",
+        "//proto:jwt_hmac_java_proto",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
@@ -58,33 +69,13 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "//src/main/java/com/google/crypto/tink/testing:test_util",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-        "@maven//:org_json_json",
-    ],
-)
-
-java_test(
-    name = "JwtHmacKeyManagerTest",
-    size = "small",
-    srcs = ["JwtHmacKeyManagerTest.java"],
-    deps = [
-        "//proto:common_java_proto",
-        "//proto:jwt_hmac_java_proto",
-        "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac_key_manager",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_mac",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_validator",
-        "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
-        "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@maven//:org_json_json",
+        "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
 
