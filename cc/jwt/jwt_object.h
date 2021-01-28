@@ -39,16 +39,8 @@ namespace tink {
 // the requested header or claim does not match.
 class JwtObject {
  public:
-  JwtObject(const JsonObject& header, const JsonObject& payload);
+  explicit JwtObject(const JsonObject& payload);
   JwtObject();
-
-  // Header Getters.
-  util::StatusOr<std::string> GetType() const;
-  util::StatusOr<std::string> GetContentType() const;
-  util::StatusOr<enum JwtAlgorithm> GetAlgorithm() const;
-  // Its value MUST be a case-sensitive string.
-  // https://tools.ietf.org/html/rfc7515#section-4.1.4
-  util::StatusOr<std::string> GetKeyId() const;
 
   // Payload Getters.
   // The "iss" value is a case-sensitive string.
@@ -82,14 +74,6 @@ class JwtObject {
   util::StatusOr<std::vector<int>> GetClaimAsNumberList(
       absl::string_view name) const;
 
-  // Header setters
-  util::Status SetType(absl::string_view type);
-  util::Status SetContentType(absl::string_view contentType);
-  util::Status SetAlgorithm(enum JwtAlgorithm algorithm);
-  // Its value MUST be a case-sensitive string.
-  // https://tools.ietf.org/html/rfc7515#section-4.1.4
-  util::Status SetKeyId(absl::string_view keyid);
-
   // Payload setters
   util::Status SetIssuer(absl::string_view issuer);
   // The "sub" value is a case-sensitive string.
@@ -119,8 +103,6 @@ class JwtObject {
   // List of field names and their type.
   util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
   getClaimNamesAndTypes();
-  util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
-  getHeaderNamesAndTypes();
 
  private:
   util::StatusOr<absl::string_view> AlgorithmTypeToString(
@@ -133,7 +115,6 @@ class JwtObject {
   bool IsRegisteredPayloadName(absl::string_view name);
 
  private:
-  JsonObject header_;
   JsonObject payload_;
 };
 

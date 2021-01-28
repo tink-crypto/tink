@@ -30,76 +30,9 @@ using ::testing::Pair;
 namespace crypto {
 namespace tink {
 
-TEST(JwtObject, TypeOK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetType("xxx"), IsOk());
-  ASSERT_THAT(jwt.SetType("the type"), IsOk());
-
-  ASSERT_THAT(jwt.GetType(), IsOkAndHolds("the type"));
-}
-
-TEST(JwtObject, ContentTypeOK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetContentType("xxx"), IsOk());
-  ASSERT_THAT(jwt.SetContentType("the type"), IsOk());
-
-  ASSERT_THAT(jwt.GetContentType(), IsOkAndHolds("the type"));
-}
-
-TEST(JwtObject, AlgorithmHS256OK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kHs256), IsOk());
-
-  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kHs256));
-}
-
-TEST(JwtObject, AlgorithmES256OK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kRs256), IsOk());
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
-
-  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kEs256));
-}
-
-TEST(JwtObject, AlgorithmRS256OK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kRs256), IsOk());
-
-  ASSERT_THAT(jwt.GetAlgorithm(), IsOkAndHolds(JwtAlgorithm::kRs256));
-}
-
-TEST(JwtObject, KeyidOK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  ASSERT_THAT(jwt.SetKeyId("key-xxx"), IsOk());
-  ASSERT_THAT(jwt.SetKeyId("key-id1234"), IsOk());
-
-  ASSERT_THAT(jwt.GetKeyId(), IsOkAndHolds("key-id1234"));
-}
-
 TEST(JwtObject, IssuerOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
   ASSERT_THAT(jwt.SetIssuer("xxx"), IsOk());
   ASSERT_THAT(jwt.SetIssuer("google"), IsOk());
 
@@ -107,9 +40,8 @@ TEST(JwtObject, IssuerOK) {
 }
 
 TEST(JwtObject, SubjectOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   ASSERT_THAT(jwt.SetSubject("xxx"), IsOk());
   ASSERT_THAT(jwt.SetSubject("google"), IsOk());
@@ -118,9 +50,8 @@ TEST(JwtObject, SubjectOK) {
 }
 
 TEST(JwtObject, JwtIdOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   ASSERT_THAT(jwt.SetJwtId("xxx"), IsOk());
   ASSERT_THAT(jwt.SetJwtId("google"), IsOk());
@@ -129,9 +60,8 @@ TEST(JwtObject, JwtIdOK) {
 }
 
 TEST(JwtObject, ExpirationOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   absl::Time now = absl::Now();
   ASSERT_THAT(jwt.SetExpiration(now + absl::Seconds(300)), IsOk());
@@ -145,9 +75,8 @@ TEST(JwtObject, ExpirationOK) {
 }
 
 TEST(JwtObject, NotBeforeOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   absl::Time now = absl::Now();
   ASSERT_THAT(jwt.SetNotBefore(now + absl::Seconds(300)), IsOk());
@@ -161,9 +90,8 @@ TEST(JwtObject, NotBeforeOK) {
 }
 
 TEST(JwtObject, IssuedAtOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   absl::Time now = absl::Now();
   ASSERT_THAT(jwt.SetIssuedAt(now + absl::Seconds(300)), IsOk());
@@ -177,9 +105,8 @@ TEST(JwtObject, IssuedAtOK) {
 }
 
 TEST(JwtObject, AudiencesOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
   ASSERT_THAT(jwt.AddAudience("aud1"), IsOk());
   ASSERT_THAT(jwt.AddAudience("aud2"), IsOk());
   ASSERT_THAT(jwt.AddAudience("aud3"), IsOk());
@@ -189,34 +116,9 @@ TEST(JwtObject, AudiencesOK) {
   ASSERT_THAT(jwt.GetAudiences(), IsOkAndHolds(list));
 }
 
-TEST(JwtObject, ListHeaderNameAndTypesOK) {
-  JsonObject header;
-  JsonObject payload;
-  auto jwt = JwtObject(header, payload);
-
-  // Header fields.
-  ASSERT_THAT(jwt.SetAlgorithm(JwtAlgorithm::kEs256), IsOk());
-  ASSERT_THAT(jwt.SetKeyId("key-xxx"), IsOk());
-  ASSERT_THAT(jwt.SetContentType("xxx"), IsOk());
-  ASSERT_THAT(jwt.SetType("xxx"), IsOk());
-
-  auto headers_or = jwt.getHeaderNamesAndTypes();
-  ASSERT_THAT(headers_or.status(), IsOk());
-  absl::flat_hash_map<std::string, enum JsonFieldType> headers =
-      headers_or.ValueOrDie();
-
-  EXPECT_THAT(headers,
-              testing::UnorderedElementsAre(
-                  Pair(kJwtHeaderAlgorithm, JsonFieldType::kString),
-                  Pair(kJwtHeaderType, JsonFieldType::kString),
-                  Pair(kJwtHeaderContentType, JsonFieldType::kString),
-                  Pair(kJwtHeaderKeyId, JsonFieldType::kString)));
-}
-
 TEST(JwtObject, ListClaimNameAndTypesOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   // Payload claims.
   ASSERT_THAT(jwt.AddAudience("aud1"), IsOk());
@@ -250,9 +152,8 @@ TEST(JwtObject, ListClaimNameAndTypesOK) {
 }
 
 TEST(JwtObject, ClaimStringOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   ASSERT_THAT(jwt.SetClaimAsString("claim1", "xxx"), IsOk());
   ASSERT_THAT(jwt.SetClaimAsString("claim1", "bla"), IsOk());
@@ -261,9 +162,8 @@ TEST(JwtObject, ClaimStringOK) {
 }
 
 TEST(JwtObject, ClaimNumberOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
   ASSERT_THAT(jwt.SetClaimAsNumber("claim1", 567), IsOk());
   ASSERT_THAT(jwt.SetClaimAsNumber("claim1", 123), IsOk());
 
@@ -271,9 +171,8 @@ TEST(JwtObject, ClaimNumberOK) {
 }
 
 TEST(JwtObject, ClaimListNumberOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
   std::vector<int> nvalues = {1, 2};
 
   for (auto &v : nvalues) {
@@ -285,9 +184,8 @@ TEST(JwtObject, ClaimListNumberOK) {
 }
 
 TEST(JwtObject, ClaimListStringOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   std::vector<absl::string_view> nvalues = {"he", "ho"};
   for (auto &v : nvalues) {
@@ -299,9 +197,8 @@ TEST(JwtObject, ClaimListStringOK) {
 }
 
 TEST(JwtObject, ClaimBoolOK) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   ASSERT_THAT(jwt.SetClaimAsBool("claim1", true), IsOk());
   ASSERT_THAT(jwt.GetClaimAsBool("claim1"), IsOkAndHolds(true));
@@ -311,9 +208,8 @@ TEST(JwtObject, ClaimBoolOK) {
 }
 
 TEST(JwtObject, AddRegisteredClaimInvalidArgument) {
-  JsonObject header;
   JsonObject payload;
-  auto jwt = JwtObject(header, payload);
+  auto jwt = JwtObject(payload);
 
   std::string value = "bla";
   ASSERT_THAT(jwt.SetClaimAsString("iss", value),

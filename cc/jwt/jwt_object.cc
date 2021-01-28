@@ -23,8 +23,7 @@
 namespace crypto {
 namespace tink {
 
-JwtObject::JwtObject(const JsonObject& header, const JsonObject& payload) {
-  header_ = header;
+JwtObject::JwtObject(const JsonObject& payload) {
   payload_ = payload;
 }
 
@@ -84,59 +83,9 @@ util::StatusOr<std::string> JwtObject::GetJwtId() const {
   return payload_.GetValueAsString(kJwtClaimJwtId);
 }
 
-util::StatusOr<std::string> JwtObject::GetContentType() const {
-  return header_.GetValueAsString(kJwtHeaderContentType);
-}
-
-util::StatusOr<enum JwtAlgorithm> JwtObject::GetAlgorithm() const {
-  auto algo_or = header_.GetValueAsString(kJwtHeaderAlgorithm);
-  if (algo_or.status() != util::OkStatus()) {
-    return algo_or.status();
-  }
-
-  auto algo = algo_or.ValueOrDie();
-  auto algo_type_or = AlgorithmStringToType(algo);
-  if (algo_type_or.status() != util::OkStatus()) {
-    return algo_type_or.status();
-  }
-
-  return algo_type_or.ValueOrDie();
-}
-
-util::StatusOr<std::string> JwtObject::GetKeyId() const {
-  return header_.GetValueAsString(kJwtHeaderKeyId);
-}
-
 util::StatusOr<std::string> JwtObject::GetClaimAsString(
     absl::string_view name) const {
   return payload_.GetValueAsString(name);
-}
-
-util::StatusOr<std::string> JwtObject::GetType() const {
-  return header_.GetValueAsString(kJwtHeaderType);
-}
-
-util::Status JwtObject::SetType(absl::string_view type) {
-  return header_.SetValueAsString(kJwtHeaderType, type);
-}
-
-util::Status JwtObject::SetContentType(absl::string_view contentType) {
-  return header_.SetValueAsString(kJwtHeaderContentType, contentType);
-}
-
-util::Status JwtObject::SetAlgorithm(enum JwtAlgorithm algorithm) {
-  auto algo_or = AlgorithmTypeToString(algorithm);
-  if (!algo_or.status().ok()) {
-    return algo_or.status();
-  }
-
-  auto algo = algo_or.ValueOrDie();
-
-  return header_.SetValueAsString(kJwtHeaderAlgorithm, algo);
-}
-
-util::Status JwtObject::SetKeyId(absl::string_view keyid) {
-  return header_.SetValueAsString(kJwtHeaderKeyId, keyid);
 }
 
 util::Status JwtObject::SetIssuer(absl::string_view issuer) {
@@ -239,11 +188,6 @@ JwtObject::getClaimNamesAndTypes() {
   return payload_.getFieldNamesAndTypes();
 }
 
-util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>
-JwtObject::getHeaderNamesAndTypes() {
-  return header_.getFieldNamesAndTypes();
-}
-
 util::StatusOr<enum JwtAlgorithm> JwtObject::AlgorithmStringToType(
     absl::string_view algo_name) const {
   if (algo_name == kJwtAlgorithmHs256) {
@@ -261,16 +205,6 @@ util::StatusOr<enum JwtAlgorithm> JwtObject::AlgorithmStringToType(
       absl::Substitute("algorithm '$0' does not exist", algo_name));
 }
 
-util::Status JwtObject::ValidateHeaderName(absl::string_view name) {
-  if (IsRegisteredHeaderName(name)) {
-    return absl::InvalidArgumentError(absl::Substitute(
-        "header '$0' is invalid because it's a registered name; "
-        "use the corresponding setter method.",
-        name));
-  }
-
-  return util::OkStatus();
-}
 
 util::Status JwtObject::ValidatePayloadName(absl::string_view name) {
   if (IsRegisteredPayloadName(name)) {
@@ -281,11 +215,6 @@ util::Status JwtObject::ValidatePayloadName(absl::string_view name) {
   }
 
   return util::OkStatus();
-}
-
-bool JwtObject::IsRegisteredHeaderName(absl::string_view name) {
-  return name == kJwtHeaderAlgorithm || name == kJwtHeaderKeyId ||
-         name == kJwtHeaderType || name == kJwtHeaderContentType;
 }
 
 bool JwtObject::IsRegisteredPayloadName(absl::string_view name) {
