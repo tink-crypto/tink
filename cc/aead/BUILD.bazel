@@ -138,6 +138,7 @@ cc_library(
     name = "aes_gcm_key_manager",
     hdrs = ["aes_gcm_key_manager.h"],
     include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
     deps = [
         "//:aead",
         "//:core/key_type_manager",
@@ -190,6 +191,7 @@ cc_library(
     srcs = ["aes_ctr_hmac_aead_key_manager.cc"],
     hdrs = ["aes_ctr_hmac_aead_key_manager.h"],
     include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
     deps = [
         "//:aead",
         "//:core/key_type_manager",
@@ -221,6 +223,7 @@ cc_library(
     name = "xchacha20_poly1305_key_manager",
     hdrs = ["xchacha20_poly1305_key_manager.h"],
     include_prefix = "tink/aead",
+    visibility = ["//visibility:public"],
     deps = [
         "//:aead",
         "//:core/key_type_manager",

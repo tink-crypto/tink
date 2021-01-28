@@ -15,201 +15,97 @@
 package streamingaead_test
 
 import (
-	"fmt"
+	"bytes"
+	"io/ioutil"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/streamingaead"
 	"github.com/google/tink/go/testutil"
-	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto"
-	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
-	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
-func TestAESGCMHKDFKeyTemplates(t *testing.T) {
-	tcs := []struct {
-		name                  string
-		tmpl                  *tinkpb.KeyTemplate
-		keySize               uint32
-		ciphertextSegmentSize uint32
+func TestKeyTemplates(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
 	}{
 		{
-			name:                  "AES128GCMHKDF4KBKeyTemplate",
-			tmpl:                  streamingaead.AES128GCMHKDF4KBKeyTemplate(),
-			keySize:               16,
-			ciphertextSegmentSize: 4096,
+			name:     "AES128_GCM_HKDF_4KB",
+			template: streamingaead.AES128GCMHKDF4KBKeyTemplate(),
 		},
 		{
-			name:                  "AES128GCMHKDF1MBKeyTemplate",
-			tmpl:                  streamingaead.AES128GCMHKDF1MBKeyTemplate(),
-			keySize:               16,
-			ciphertextSegmentSize: 1048576,
+			name:     "AES128_GCM_HKDF_1MB",
+			template: streamingaead.AES128GCMHKDF1MBKeyTemplate(),
 		},
 		{
-			name:                  "AES256GCMHKDF4KBKeyTemplate",
-			tmpl:                  streamingaead.AES256GCMHKDF4KBKeyTemplate(),
-			keySize:               32,
-			ciphertextSegmentSize: 4096,
+			name:     "AES256_GCM_HKDF_4KB",
+			template: streamingaead.AES256GCMHKDF4KBKeyTemplate(),
+		}, {
+			name:     "AES256_GCM_HKDF_1MB",
+			template: streamingaead.AES256GCMHKDF1MBKeyTemplate(),
+		}, {
+			name:     "AES128_CTR_HMAC_SHA256_4KB",
+			template: streamingaead.AES128CTRHMACSHA256Segment4KBKeyTemplate(),
 		},
 		{
-			name:                  "AES256GCMHKDF1MBKeyTemplate",
-			tmpl:                  streamingaead.AES256GCMHKDF1MBKeyTemplate(),
-			keySize:               32,
-			ciphertextSegmentSize: 1048576,
+			name:     "AES128_CTR_HMAC_SHA256_1MB",
+			template: streamingaead.AES128CTRHMACSHA256Segment1MBKeyTemplate(),
+		},
+		{
+			name:     "AES256_CTR_HMAC_SHA256_4KB",
+			template: streamingaead.AES256CTRHMACSHA256Segment4KBKeyTemplate(),
+		},
+		{
+			name:     "AES256_CTR_HMAC_SHA256_1MB",
+			template: streamingaead.AES256CTRHMACSHA256Segment1MBKeyTemplate(),
 		},
 	}
-	for _, tc := range tcs {
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := checkAESGCMHKDFKeyTemplate(
-				tc.tmpl,
-				tc.keySize,
-				commonpb.HashType_SHA256,
-				tc.ciphertextSegmentSize,
-				tinkpb.OutputPrefixType_RAW,
-			)
+			want, err := testutil.KeyTemplateProto("streamingaead", tc.name)
 			if err != nil {
-				t.Error(err)
+				t.Fatalf(err.Error())
+			}
+			if !proto.Equal(want, tc.template) {
+				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
+			}
+			handle, err := keyset.NewHandle(tc.template)
+			if err != nil {
+				t.Fatalf("keyset.NewHandle(template) failed: %v", err)
+			}
+			primitive, err := streamingaead.New(handle)
+			if err != nil {
+				t.Fatalf("aead.New(handle) failed: %v", err)
+			}
+
+			plaintext := []byte("some data to encrypt")
+			aad := []byte("extra data to authenticate")
+			buf := &bytes.Buffer{}
+			w, err := primitive.NewEncryptingWriter(buf, aad)
+			if err != nil {
+				t.Fatalf("primitive.NewEncryptingWriter(buf, aad) failed: %v", err)
+			}
+			if _, err := w.Write(plaintext); err != nil {
+				t.Fatalf("w.Write(plaintext) failed: %v", err)
+			}
+			if err := w.Close(); err != nil {
+				t.Fatalf("w.Close() failed: %v", err)
+			}
+
+			r, err := primitive.NewDecryptingReader(buf, aad)
+			if err != nil {
+				t.Fatalf("primitive.NewDecryptingReader(buf, aad) failed: %v", err)
+			}
+			decrypted, err := ioutil.ReadAll(r)
+			if err != nil {
+				t.Fatalf("ioutil.ReadAll(r) failed: %v", err)
+			}
+			if !bytes.Equal(decrypted, plaintext) {
+				t.Errorf("decrypted data doesn't match plaintext, got: %q, want: ''", decrypted)
 			}
 		})
 	}
-}
-
-func checkAESGCMHKDFKeyTemplate(
-	template *tinkpb.KeyTemplate,
-	keySize uint32,
-	hkdfHashType commonpb.HashType,
-	ciphertextSegmentSize uint32,
-	outputPrefixType tinkpb.OutputPrefixType,
-) error {
-	if template.TypeUrl != testutil.AESGCMHKDFTypeURL {
-		return fmt.Errorf("incorrect type url")
-	}
-	if template.OutputPrefixType != outputPrefixType {
-		return fmt.Errorf("incorrect output prefix type")
-	}
-	keyFormat := new(gcmhkdfpb.AesGcmHkdfStreamingKeyFormat)
-	err := proto.Unmarshal(template.Value, keyFormat)
-	if err != nil {
-		return fmt.Errorf("cannot deserialize key format: %s", err)
-	}
-	if keyFormat.KeySize != keySize {
-		return fmt.Errorf("incorrect main key size, expect %d, got %d", keySize, keyFormat.KeySize)
-	}
-	if keyFormat.Params.DerivedKeySize != keySize {
-		return fmt.Errorf("incorrect derived key size, expect %d, got %d", keySize, keyFormat.Params.DerivedKeySize)
-	}
-	if keyFormat.Params.CiphertextSegmentSize != ciphertextSegmentSize {
-		return fmt.Errorf("incorrect ciphertext segment size, expect %d, got %d", ciphertextSegmentSize, keyFormat.Params.CiphertextSegmentSize)
-	}
-	if keyFormat.Params.HkdfHashType != hkdfHashType {
-		return fmt.Errorf("incorrect HKDF hash type, expect %s, got %s", keyFormat.Params.HkdfHashType.String(), hkdfHashType.String())
-	}
-	return nil
-}
-
-func TestAESCTRHMACKeyTemplates(t *testing.T) {
-	testcases := []struct {
-		name                  string
-		template              *tinkpb.KeyTemplate
-		keySize               uint32
-		hkdfHashType          commonpb.HashType
-		tagAlg                commonpb.HashType
-		tagSize               uint32
-		ciphertextSegmentSize uint32
-	}{
-		{
-			name:                  "AES128CTRHMACSHA256Segment4KBKeyTemplate",
-			template:              streamingaead.AES128CTRHMACSHA256Segment4KBKeyTemplate(),
-			keySize:               16,
-			hkdfHashType:          commonpb.HashType_SHA256,
-			tagAlg:                commonpb.HashType_SHA256,
-			tagSize:               32,
-			ciphertextSegmentSize: 4096,
-		},
-		{
-			name:                  "AES128CTRHMACSHA256Segment1MBKeyTemplate",
-			template:              streamingaead.AES128CTRHMACSHA256Segment1MBKeyTemplate(),
-			keySize:               16,
-			hkdfHashType:          commonpb.HashType_SHA256,
-			tagAlg:                commonpb.HashType_SHA256,
-			tagSize:               32,
-			ciphertextSegmentSize: 1048576,
-		},
-		{
-			name:                  "AES256CTRHMACSHA256Segment4KBKeyTemplate",
-			template:              streamingaead.AES256CTRHMACSHA256Segment4KBKeyTemplate(),
-			keySize:               32,
-			hkdfHashType:          commonpb.HashType_SHA256,
-			tagAlg:                commonpb.HashType_SHA256,
-			tagSize:               32,
-			ciphertextSegmentSize: 4096,
-		},
-		{
-			name:                  "AES256CTRHMACSHA256Segment1MBKeyTemplate",
-			template:              streamingaead.AES256CTRHMACSHA256Segment1MBKeyTemplate(),
-			keySize:               32,
-			hkdfHashType:          commonpb.HashType_SHA256,
-			tagAlg:                commonpb.HashType_SHA256,
-			tagSize:               32,
-			ciphertextSegmentSize: 1048576,
-		},
-	}
-	for _, tc := range testcases {
-		t.Run(tc.name, func(t *testing.T) {
-			err := checkAESCTRHMACKeyTemplate(
-				tc.template,
-				tc.keySize,
-				tc.hkdfHashType,
-				tc.tagAlg,
-				tc.tagSize,
-				tc.ciphertextSegmentSize,
-				tinkpb.OutputPrefixType_RAW,
-			)
-			if err != nil {
-				t.Error(err)
-			}
-		})
-	}
-}
-
-func checkAESCTRHMACKeyTemplate(
-	template *tinkpb.KeyTemplate,
-	keySize uint32,
-	hkdfHashType commonpb.HashType,
-	tagAlg commonpb.HashType,
-	tagSize uint32,
-	ciphertextSegmentSize uint32,
-	outputPrefixType tinkpb.OutputPrefixType,
-) error {
-	if template.TypeUrl != testutil.AESCTRHMACTypeURL {
-		return fmt.Errorf("incorrect type url")
-	}
-	if template.OutputPrefixType != outputPrefixType {
-		return fmt.Errorf("incorrect output prefix type")
-	}
-	keyFormat := new(ctrhmacpb.AesCtrHmacStreamingKeyFormat)
-	err := proto.Unmarshal(template.Value, keyFormat)
-	if err != nil {
-		return fmt.Errorf("cannot deserialize key format: %s", err)
-	}
-	if keyFormat.KeySize != keySize {
-		return fmt.Errorf("incorrect main key size, expect %d, got %d", keySize, keyFormat.KeySize)
-	}
-	if keyFormat.Params.DerivedKeySize != keySize {
-		return fmt.Errorf("incorrect derived key size, expect %d, got %d", keySize, keyFormat.Params.DerivedKeySize)
-	}
-	if keyFormat.Params.HkdfHashType != hkdfHashType {
-		return fmt.Errorf("incorrect HKDF hash type, expect %s, got %s", hkdfHashType.String(), keyFormat.Params.HkdfHashType.String())
-	}
-	if keyFormat.Params.HmacParams.Hash != tagAlg {
-		return fmt.Errorf("incorrect tag algorithm, expect %s, got %s", tagAlg.String(), keyFormat.Params.HmacParams.Hash.String())
-	}
-	if keyFormat.Params.HmacParams.TagSize != tagSize {
-		return fmt.Errorf("incorrect tag size, expect %d, got %d", tagSize, keyFormat.Params.HmacParams.TagSize)
-	}
-	if keyFormat.Params.CiphertextSegmentSize != ciphertextSegmentSize {
-		return fmt.Errorf("incorrect ciphertext segment size, expect %d, got %d", ciphertextSegmentSize, keyFormat.Params.CiphertextSegmentSize)
-	}
-	return nil
 }

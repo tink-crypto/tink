@@ -349,7 +349,7 @@ public final class KeysetHandle {
    * Searches the keyset to find the primary key of this {@code KeysetHandle}, and returns the key
    * wrapped in a {@code KeyHandle}.
    */
-  public KeyHandle findPrimaryKey() throws GeneralSecurityException {
+  public KeyHandle primaryKey() throws GeneralSecurityException {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getKeyId() == primaryKeyId) {

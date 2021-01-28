@@ -14,6 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
@@ -23,7 +25,9 @@ import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.SelfKeyTestValidators;
 import com.google.crypto.tink.subtle.Validators;
@@ -75,7 +79,18 @@ public final class JwtEcdsaSignKeyManager
 
       // Note: this will throw an exception is algorithm is invalid
       selfTestKey(privateKey, keyProto);
-      return new JwtEcdsaSign(privateKey, keyProto.getPublicKey().getAlgorithm().name());
+      final String algorithm = keyProto.getPublicKey().getAlgorithm().name();
+      Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+      final EcdsaSignJce signer = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
+
+      return new JwtPublicKeySign() {
+        @Override
+        public String sign(RawJwt token) throws GeneralSecurityException {
+          String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, token.getPayload());
+          return JwtFormat.createSignedCompact(
+              unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
+        }
+      };
     }
   }
 

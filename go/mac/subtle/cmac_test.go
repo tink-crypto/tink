@@ -169,13 +169,17 @@ func TestNewCMACWithInvalidInput(t *testing.T) {
 	}
 }
 
-func TestCMACComputeMACWithInvalidInput(t *testing.T) {
+func TestCMACComputeVerifyWithNilInput(t *testing.T) {
 	cipher, err := subtle.NewAESCMAC(random.GetRandomBytes(16), 16)
 	if err != nil {
 		t.Errorf("unexpected error when creating new CMAC")
 	}
-	if _, err := cipher.ComputeMAC(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
+	tag, err := cipher.ComputeMAC(nil)
+	if err != nil {
+		t.Errorf("cipher.ComputeMAC(nil) failed: %v", err)
+	}
+	if err := cipher.VerifyMAC(tag, nil); err != nil {
+		t.Errorf("cipher.VerifyMAC(tag, nil) failed: %v", err)
 	}
 }
 
@@ -189,6 +193,9 @@ func TestCMACVerifyMACWithInvalidInput(t *testing.T) {
 	}
 	if err := cipher.VerifyMAC([]byte{1}, nil); err == nil {
 		t.Errorf("expect an error when data is nil")
+	}
+	if err := cipher.VerifyMAC(nil, nil); err == nil {
+		t.Errorf("cipher.VerifyMAC(nil, nil) succeeded unexpectedly")
 	}
 }
 

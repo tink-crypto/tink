@@ -32,7 +32,20 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     }
     const keyFormatProto = EcdsaPrivateKeyFactory.getKeyFormatProto(keyFormat);
     EcdsaUtil.validateKeyFormat(keyFormatProto);
-    return EcdsaPrivateKeyFactory.newKeyImpl(keyFormatProto);
+    const params = keyFormatProto.getParams();
+    if (!params) {
+      throw new SecurityException('Params not set');
+    }
+    const curveTypeProto = params.getCurve();
+    const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
+    const curveName = EllipticCurves.curveToString(curveTypeSubtle);
+    const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
+    const jsonPublicKey =
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const jsonPrivateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    return EcdsaPrivateKeyFactory.jsonToProtoKey(
+        jsonPrivateKey, jsonPublicKey, params);
   }
 
   /**
@@ -61,29 +74,6 @@ class EcdsaPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
             .setTypeUrl(EcdsaPublicKeyManager.KEY_TYPE)
             .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
     return publicKeyData;
-  }
-
-  /**
-   * Generates key corresponding to the given key format.
-   * WARNING: This function assumes that the keyFormat has been validated.
-   *
-   */
-  private static async newKeyImpl(keyFormat: PbEcdsaKeyFormat):
-      Promise<PbEcdsaPrivateKey> {
-    const params = (keyFormat.getParams());
-    if (!params) {
-      throw new SecurityException('Params not set');
-    }
-    const curveTypeProto = params.getCurve();
-    const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
-    const curveName = EllipticCurves.curveToString(curveTypeSubtle);
-    const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
-    const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    return EcdsaPrivateKeyFactory.jsonToProtoKey(
-        jsonPrivateKey, jsonPublicKey, params);
   }
 
   /**

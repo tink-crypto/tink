@@ -13,6 +13,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
@@ -24,6 +26,7 @@ import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
 import com.google.crypto.tink.subtle.SelfKeyTestValidators;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
@@ -90,9 +93,21 @@ public final class JwtRsaSsaPkcs1SignKeyManager
         throws GeneralSecurityException {
       RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
       selfTestKey(privateKey, keyProto);
-      return new JwtRsaSsaPkcs1Sign(
-          privateKey,
-          JwtRsaSsaPkcs1VerifyKeyManager.getKeyAlgorithm(keyProto.getPublicKey().getAlgorithm()));
+      final String algorithm = JwtRsaSsaPkcs1VerifyKeyManager.getKeyAlgorithm(
+          keyProto.getPublicKey().getAlgorithm());
+      // This function also validates the algorithm.
+      Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+      final RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(privateKey, hash);
+
+      return new JwtPublicKeySign() {
+        @Override
+        public String sign(RawJwt token) throws GeneralSecurityException {
+          String unsignedCompact =
+              JwtFormat.createUnsignedCompact(algorithm, token.getPayload());
+          return JwtFormat.createSignedCompact(
+              unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
+        }
+      };
     }
   }
 

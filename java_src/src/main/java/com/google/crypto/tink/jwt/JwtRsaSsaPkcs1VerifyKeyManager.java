@@ -13,11 +13,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.EngineFactory;
+import com.google.crypto.tink.subtle.Enums;
+import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
@@ -26,6 +30,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
+import org.json.JSONObject;
 
 /**
  * This key manager produces new instances of {@code JwtRsaSsaPkcs11Verify}. It doesn't support key
@@ -65,9 +70,31 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
           @Override
           public JwtPublicKeyVerify getPrimitive(JwtRsaSsaPkcs1PublicKey keyProto)
               throws GeneralSecurityException {
-            String algorithm = getKeyAlgorithm(keyProto.getAlgorithm());
-            RSAPublicKey pubKey = createPublicKey(keyProto);
-            return new JwtRsaSsaPkcs1Verify(pubKey, algorithm);
+            final String algorithm = getKeyAlgorithm(keyProto.getAlgorithm());
+            RSAPublicKey publickey = createPublicKey(keyProto);
+            Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+            final RsaSsaPkcs1VerifyJce verifier = new RsaSsaPkcs1VerifyJce(publickey, hash);
+
+            return new JwtPublicKeyVerify() {
+              @Override
+              public VerifiedJwt verify(String compact, JwtValidator validator)
+                  throws GeneralSecurityException {
+                JwtFormat.validateASCII(compact);
+                String[] parts = compact.split("\\.", -1);
+                if (parts.length != 3) {
+                  throw new JwtInvalidException(
+                      "only tokens in JWS compact serialization format are supported");
+                }
+                String unsignedCompact = parts[0] + "." + parts[1];
+                byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
+
+                verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
+                JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+                JSONObject payload = JwtFormat.decodePayload(parts[1]);
+                RawJwt token = new RawJwt.Builder(payload).build();
+                return validator.validate(token);
+              }
+            };
           }
         });
   }

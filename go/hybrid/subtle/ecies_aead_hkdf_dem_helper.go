@@ -14,14 +14,12 @@
 
 package subtle
 
-import "github.com/google/tink/go/tink"
-
 // EciesAEADHKDFDEMHelper a helper for DEM (data encapsulation mechanism) of ECIES-AEAD-HKDF.
 type EciesAEADHKDFDEMHelper interface {
 
 	// GetSymmetricKeySize gives the size of the DEM-key in bytes
 	GetSymmetricKeySize() uint32
 
-	// GetAEAD returns the newly created AEAD primitive.
-	GetAEAD(symmetricKeyValue []byte) (tink.AEAD, error)
+	// GetAEADOrDAEAD returns the newly created AEAD or Deterministic Aead primitive.
+	GetAEADOrDAEAD(symmetricKeyValue []byte) (interface{}, error)
 }

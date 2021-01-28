@@ -138,7 +138,10 @@ Tink is maintained by (A-Z):
 -   Thomas Holenstein
 -   Stefan Kölbl
 -   Charles Lee
+-   Atul Luykx
+-   Rafael Misoczki
 -   Sophie Schmieg
+-   Laurent Simon
 -   Jürg Wullschleger
 
 Alumni

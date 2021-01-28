@@ -98,56 +98,6 @@ class AeadPythonTest(parameterized.TestCase):
               p.lang, key_template_name)):
         p.encrypt(b'plaintext', b'associated_data')
 
-  @parameterized.parameters(all_aead_key_template_names())
-  def test_decrypt_bit_modified_ciphertext_fails(self, template_name):
-    """A basic test if the ciphertext is malleable with single bit-flips."""
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        template_name]
-    self.assertNotEmpty(supported_langs)
-    template = supported_key_types.KEY_TEMPLATE[template_name]
-    # Take the first supported language to generate the keyset.
-    keyset = testing_servers.new_keyset(supported_langs[0], template)
-    ciphertext = testing_servers.aead(supported_langs[0], keyset).encrypt(
-        b'plaintext', b'aad')
-    for lang in supported_langs:
-      primitive = testing_servers.aead(lang, keyset)
-      for i in range(len(ciphertext) * 8):
-        # flip the ith bit in the ciphertext.
-        modified_ciphertext = bytearray(ciphertext)
-        modified_ciphertext[i // 8] ^= 1 << (i % 8)
-        with self.assertRaises(
-            tink.TinkError,
-            msg='ciphertext with the %dth bit flipped did not cause a '
-            'decryption error in %s. keyset="%s", modified_ciphertext="%s"' %
-            (i, lang, keyset.hex(), bytes(modified_ciphertext).hex())):
-          primitive.decrypt(bytes(modified_ciphertext), b'aad')
-
-  @parameterized.parameters(all_aead_key_template_names())
-  def test_convert_to_raw_fails(self, template_name):
-    """Make sure that "wrapped" AEADs don't accept the raw AEAD ciphertext."""
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        template_name]
-    self.assertNotEmpty(supported_langs)
-    template = supported_key_types.KEY_TEMPLATE[template_name]
-    if template.output_prefix_type == tink_pb2.RAW:
-      # ciphertext is already raw, so there is nothing to test.
-      return
-    keyset = testing_servers.new_keyset(supported_langs[0], template)
-    ciphertext = testing_servers.aead(supported_langs[0], keyset).encrypt(
-        b'plaintext', b'aad')
-    for lang in supported_langs:
-      primitive = testing_servers.aead(lang, keyset)
-      # all non-raw keys add a 5 byte prefix to the raw ciphertext. Remove it
-      # and try to decrypt.
-      raw_ciphertext = ciphertext[:5]
-      with self.assertRaises(
-          tink.TinkError,
-          msg='non-raw ciphertext with 5 byte tink header removed did not '
-          'cause a decryption error in %s. keyset="%s", '
-          'modified_ciphertext="%s"' %
-          (lang, keyset.hex(), raw_ciphertext.hex())):
-        primitive.decrypt(raw_ciphertext, b'aad')
-
 
 # If the implementations work fine for keysets with single keys, then key
 # rotation should work if the primitive wrapper is implemented correctly.

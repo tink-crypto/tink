@@ -64,6 +64,9 @@ def _java_single_jar(ctx):
     for p in ctx.attr.root_packages:
         args.add("--include_prefixes", p.replace(".", "/"))
 
+    if ctx.attr.exclude_build_data:
+        args.add("--exclude_build_data")
+
     ctx.actions.run(
         inputs = inputs.to_list() + resource_files,
         outputs = [ctx.outputs.jar],
@@ -89,6 +92,7 @@ java_single_jar = rule(
         "source_jar": attr.bool(default = False),
         "compress": attr.string(default = "preserve"),
         "root_packages": attr.string_list(),
+        "exclude_build_data": attr.bool(default = True),
     },
     outputs = {
         "jar": "%{name}.jar",
@@ -112,6 +116,8 @@ Args:
   source_jar: Whether to combine only the source jars of input to create a single
       output source jar. The compiled code jars of input will be ignored.
   root_packages: Java packages to include in generated jar.
+  exclude_build_data: Whether to omit the build-data.properties file generated
+      by default.
 
 Outputs:
   {name}.jar: A single jar containing all of the input.
