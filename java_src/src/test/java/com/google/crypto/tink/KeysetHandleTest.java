@@ -397,7 +397,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void findPrimaryKey_shouldWork() throws Exception {
+  public void primaryKey_shouldWork() throws Exception {
     KeyTemplate kt1 = AesEaxKeyManager.aes128EaxTemplate();
     KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
     KeysetHandle ksh =
@@ -410,7 +410,7 @@ public class KeysetHandleTest {
   }
 
   @Test
-  public void findPrimaryKey_noPrimary_shouldThrow() throws Exception {
+  public void primaryKey_noPrimaryPresent_shouldThrow() throws Exception {
     KeyTemplate kt1 = AesEaxKeyManager.aes128EaxTemplate();
     KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
     KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
