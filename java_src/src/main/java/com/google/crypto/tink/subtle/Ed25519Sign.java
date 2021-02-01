@@ -84,7 +84,16 @@ public final class Ed25519Sign implements PublicKeySign {
 
     /** Returns a new <publicKey, privateKey> KeyPair. */
     public static KeyPair newKeyPair() throws GeneralSecurityException {
-      byte[] privateKey = Random.randBytes(Field25519.FIELD_LEN);
+      return newKeyPairFromSeed(Random.randBytes(Field25519.FIELD_LEN));
+    }
+
+    /** Returns a new <publicKey, privateKey> KeyPair generated from a seed. */
+    public static KeyPair newKeyPairFromSeed(byte[] secretSeed) throws GeneralSecurityException {
+      if (secretSeed.length != Field25519.FIELD_LEN) {
+        throw new IllegalArgumentException(
+            String.format("Given secret seed length is not %s", Field25519.FIELD_LEN));
+      }
+      byte[] privateKey = secretSeed;
       byte[] publicKey = Ed25519.scalarMultWithBaseToBytes(Ed25519.getHashedScalar(privateKey));
       return new KeyPair(publicKey, privateKey);
     }

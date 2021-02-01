@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
@@ -157,5 +158,12 @@ public final class Ed25519SignTest {
       }
     }
     assertEquals(0, errors);
+  }
+
+  @Test
+  public void testKeyPairFromSeedTooShort() throws Exception {
+    byte[] keyMaterial = Random.randBytes(10);
+    assertThrows(
+        IllegalArgumentException.class, () -> Ed25519Sign.KeyPair.newKeyPairFromSeed(keyMaterial));
   }
 }

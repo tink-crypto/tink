@@ -30,6 +30,8 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -110,6 +112,33 @@ public final class Ed25519PrivateKeyManager
             .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
             .setPublicKey(publicKey)
             .build();
+      }
+
+      @Override
+      public Ed25519PrivateKey deriveKey(Ed25519KeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        Validators.validateVersion(format.getVersion(), getVersion());
+
+        byte[] pseudorandomness = new byte[Ed25519Sign.SECRET_KEY_LEN];
+        try {
+          int read = inputStream.read(pseudorandomness);
+          if (read != Ed25519Sign.SECRET_KEY_LEN) {
+            throw new GeneralSecurityException("Not enough pseudorandomness given");
+          }
+          Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(pseudorandomness);
+          Ed25519PublicKey publicKey =
+              Ed25519PublicKey.newBuilder()
+                  .setVersion(getVersion())
+                  .setKeyValue(ByteString.copyFrom(keyPair.getPublicKey()))
+                  .build();
+          return Ed25519PrivateKey.newBuilder()
+              .setVersion(getVersion())
+              .setKeyValue(ByteString.copyFrom(keyPair.getPrivateKey()))
+              .setPublicKey(publicKey)
+              .build();
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
       }
     };
   }
