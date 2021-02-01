@@ -77,6 +77,37 @@ Status Ed25519SignKeyManager::ValidateKey(const Ed25519PrivateKey& key) const {
   return Ed25519VerifyKeyManager().ValidateKey(key.public_key());
 }
 
+StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::DeriveKey(
+    const Ed25519KeyFormat& key_format, InputStream* input_stream) const {
+  crypto::tink::util::Status status =
+      ValidateVersion(key_format.version(), get_version());
+  if (!status.ok()) return status;
+
+  crypto::tink::util::StatusOr<std::string> randomness =
+      ReadBytesFromStream(kEd25519SecretSeedSize, input_stream);
+  if (!randomness.ok()) {
+    if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          "Could not get enough pseudorandomness from input stream");
+    }
+    return randomness.status();
+  }
+  auto key = subtle::SubtleUtilBoringSSL::GetNewEd25519KeyFromSeed(
+      util::SecretDataFromStringView(randomness.ValueOrDie()));
+
+  Ed25519PrivateKey ed25519_private_key;
+  ed25519_private_key.set_version(get_version());
+  ed25519_private_key.set_key_value(key->private_key);
+
+  // Build Ed25519PublicKey.
+  auto ed25519_public_key = ed25519_private_key.mutable_public_key();
+  ed25519_public_key->set_version(get_version());
+  ed25519_public_key->set_key_value(key->public_key);
+
+  return ed25519_private_key;
+}
+
 Status Ed25519SignKeyManager::ValidateKeyFormat(
     const Ed25519KeyFormat& key_format) const {
   return util::OkStatus();

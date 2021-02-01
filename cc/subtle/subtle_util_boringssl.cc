@@ -33,6 +33,7 @@
 #include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/random.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -226,13 +227,24 @@ SubtleUtilBoringSSL::X25519KeyFromEcKey(
 // static
 std::unique_ptr<SubtleUtilBoringSSL::Ed25519Key>
 SubtleUtilBoringSSL::GetNewEd25519Key() {
+  // Generate a new secret seed.
+  util::SecretData secret_seed = util::SecretDataFromStringView(
+      crypto::tink::subtle::Random::GetRandomBytes(32));
+  return GetNewEd25519KeyFromSeed(secret_seed);
+}
+
+// static
+std::unique_ptr<SubtleUtilBoringSSL::Ed25519Key>
+SubtleUtilBoringSSL::GetNewEd25519KeyFromSeed(
+    const util::SecretData &secret_seed) {
   // Generate a new key pair.
   uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
   uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
 
-  ED25519_keypair(out_public_key, out_private_key);
+  ED25519_keypair_from_seed(out_public_key, out_private_key,
+                            secret_seed.data());
 
-  std::unique_ptr<Ed25519Key> key(new Ed25519Key);
+  auto key = absl::make_unique<Ed25519Key>();
   key->public_key = std::string(reinterpret_cast<const char *>(out_public_key),
                                 ED25519_PUBLIC_KEY_LEN);
   std::string tmp = std::string(reinterpret_cast<const char *>(out_private_key),

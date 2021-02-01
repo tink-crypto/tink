@@ -587,6 +587,7 @@ cc_library(
     hdrs = ["subtle_util_boringssl.h"],
     include_prefix = "tink/subtle",
     deps = [
+        ":random",
         ":common_enums",
         "//config:tink_fips",
         "//util:errors",

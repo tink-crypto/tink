@@ -145,6 +145,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::enums
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -513,6 +514,7 @@ tink_cc_test(
     tink::core::registry
     tink::subtle::ed25519_verify_boringssl
     tink::util::enums
+    tink::util::istream_input_stream
     tink::util::protobuf_helper
     tink::util::status
     tink::util::statusor
