@@ -56,7 +56,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_hmac_key_manager",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_mac",

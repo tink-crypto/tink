@@ -14,6 +14,8 @@
 
 package com.google.crypto.tink.jwt;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
@@ -21,20 +23,87 @@ import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.JwtHmacKey;
 import com.google.crypto.tink.proto.JwtHmacKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.subtle.PrfHmacJce;
+import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code JwtHmacKey} keys and produces new instances of {@link
  * JwtHmac}.
  */
 public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
+  private static final String getAlgorithm(HashType hash) throws GeneralSecurityException {
+    switch (hash) {
+      case SHA256:
+        return "HS256";
+      case SHA384:
+        return "HS384";
+      case SHA512:
+        return "HS512";
+      default:
+        throw new GeneralSecurityException("unknown hash");
+    }
+  }
+
+  private static final String getHmacAlgorithm(HashType hash) throws GeneralSecurityException {
+    switch (hash) {
+      case SHA256:
+        return "HMACSHA256";
+      case SHA384:
+        return "HMACSHA384";
+      case SHA512:
+        return "HMACSHA512";
+      default:
+        throw new GeneralSecurityException("unknown hash");
+    }
+  }
+
+  @Immutable
+  private static final class JwtHmac implements JwtMac {
+    private final PrfMac prfMac;
+    private final String algorithm;
+
+    public JwtHmac(String algorithm, PrfMac prfMac) {
+      this.algorithm = algorithm;
+      this.prfMac = prfMac;
+    }
+
+    @Override
+    public String createCompact(RawJwt token) throws GeneralSecurityException {
+      String unsignedCompact =
+          JwtFormat.createUnsignedCompact(algorithm, token.getPayload());
+      return JwtFormat.createSignedCompact(
+          unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
+    }
+
+    @Override
+    public VerifiedJwt verifyCompact(String compact, JwtValidator validator)
+        throws GeneralSecurityException {
+      JwtFormat.validateASCII(compact);
+      String[] parts = compact.split("\\.", -1);
+      if (parts.length != 3) {
+        throw new JwtInvalidException(
+            "only tokens in JWS compact serialization format are supported");
+      }
+      String unsignedCompact = parts[0] + "." + parts[1];
+      byte[] expectedTag = JwtFormat.decodeSignature(parts[2]);
+      prfMac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
+      JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+      JSONObject payload = JwtFormat.decodePayload(parts[1]);
+      RawJwt token = new RawJwt.Builder(payload).build();
+      return validator.validate(token);
+    }
+  };
+
   public JwtHmacKeyManager() {
     super(
         JwtHmacKey.class,
@@ -44,16 +113,9 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
             HashType hash = key.getHashType();
             byte[] keyValue = key.getKeyValue().toByteArray();
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-            switch (hash) {
-              case SHA256:
-                return new JwtHmac("HS256", keySpec);
-              case SHA384:
-                return new JwtHmac("HS384", keySpec);
-              case SHA512:
-                return new JwtHmac("HS512", keySpec);
-              default:
-                throw new GeneralSecurityException("unknown hash");
-            }
+            PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(hash), keySpec);
+            final PrfMac prfMac = new PrfMac(prf, prf.getMaxOutputLength());
+            return new JwtHmac(getAlgorithm(hash), prfMac);
           }
         });
   }

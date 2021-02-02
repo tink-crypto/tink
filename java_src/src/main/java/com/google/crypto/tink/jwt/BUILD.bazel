@@ -83,8 +83,8 @@ java_library(
 )
 
 java_library(
-    name = "jwt_hmac",
-    srcs = ["JwtHmac.java"],
+    name = "jwt_hmac_key_manager",
+    srcs = ["JwtHmacKeyManager.java"],
     deps = [
         ":jwt_format",
         ":jwt_invalid_exception",
@@ -92,29 +92,20 @@ java_library(
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
-        "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:org_json_json",
-    ],
-)
-
-java_library(
-    name = "jwt_hmac_key_manager",
-    srcs = ["JwtHmacKeyManager.java"],
-    deps = [
-        ":jwt_hmac",
-        ":jwt_mac",
         "//proto:common_java_proto",
         "//proto:jwt_hmac_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+        "@maven//:org_json_json",
     ],
 )
 
@@ -495,8 +486,8 @@ android_library(
 )
 
 android_library(
-    name = "jwt_hmac-android",
-    srcs = ["JwtHmac.java"],
+    name = "jwt_hmac_key_manager-android",
+    srcs = ["JwtHmacKeyManager.java"],
     deps = [
         ":jwt_format-android",
         ":jwt_invalid_exception",
@@ -504,28 +495,19 @@ android_library(
         ":jwt_validator-android",
         ":raw_jwt-android",
         ":verified_jwt-android",
-        "//src/main/java/com/google/crypto/tink:mac",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
-        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
-        "@maven//:com_google_errorprone_error_prone_annotations",
-    ],
-)
-
-android_library(
-    name = "jwt_hmac_key_manager-android",
-    srcs = ["JwtHmacKeyManager.java"],
-    deps = [
-        ":jwt_hmac-android",
-        ":jwt_mac-android",
         "//proto:common_java_proto_lite",
         "//proto:jwt_hmac_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
+        "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
