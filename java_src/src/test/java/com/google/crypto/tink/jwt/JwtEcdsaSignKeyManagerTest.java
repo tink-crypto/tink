@@ -399,7 +399,7 @@ public class JwtEcdsaSignKeyManagerTest {
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Normal, valid signed compact.
-    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));

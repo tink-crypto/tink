@@ -130,37 +130,28 @@ public final class JwtFormatTest {
     payload.put("iss", "joe");
     payload.put("exp", 1300819380);
     payload.put("http://example.com/is_root", true);
-    String encodedPayload = JwtFormat.encodePayload(payload);
-    JSONObject decodedPayload = JwtFormat.decodePayload(encodedPayload);
-    assertThat(decodedPayload.getString("iss")).isEqualTo("joe");
-    assertThat(decodedPayload.getInt("exp")).isEqualTo(1300819380);
-    assertThat(decodedPayload.getBoolean("http://example.com/is_root")).isTrue();
+    String jsonPayload = payload.toString();
+    String encodedPayload = JwtFormat.encodePayload(jsonPayload);
+    String decodedPayload = JwtFormat.decodePayload(encodedPayload);
+    assertThat(decodedPayload).isEqualTo(jsonPayload);
   }
 
   @Test
   public void decodePayload_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
     JSONObject payload =
-        JwtFormat.decodePayload(
-            "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt"
-                + "cGxlLmNvbS9pc19yb290Ijp0cnVlfQ");
+        new JSONObject(
+            JwtFormat.decodePayload(
+                "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt"
+                    + "cGxlLmNvbS9pc19yb290Ijp0cnVlfQ"));
     assertThat(payload.getString("iss")).isEqualTo("joe");
     assertThat(payload.getInt("exp")).isEqualTo(1300819380);
     assertThat(payload.getBoolean("http://example.com/is_root")).isTrue();
   }
 
   @Test
-  public void decodeInvalidPayload_fails() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.decodePayload("INVALID!!!"));
-  }
-
-  @Test
   public void createUnsignedCompact_success() throws Exception {
-    JSONObject payload = new JSONObject();
-    payload.put("iss", "joe");
-    assertThat(JwtFormat.createUnsignedCompact("RS256", payload)).isEqualTo(
+    assertThat(JwtFormat.createUnsignedCompact("RS256", "{\"iss\":\"joe\"}")).isEqualTo(
             "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
   }
 

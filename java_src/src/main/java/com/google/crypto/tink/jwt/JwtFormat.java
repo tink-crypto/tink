@@ -104,18 +104,12 @@ final class JwtFormat {
     return json;
   }
 
-  static String encodePayload(JSONObject json) {
-    return Base64.urlSafeEncode(json.toString().getBytes(UTF_8));
+  static String encodePayload(String jsonPayload) {
+    return Base64.urlSafeEncode(jsonPayload.getBytes(UTF_8));
   }
 
-  static JSONObject decodePayload(String payloadStr) throws JwtInvalidException{
-    JSONObject json;
-    try {
-      json = new JSONObject(new String(Base64.urlSafeDecode(payloadStr), UTF_8));
-    } catch (JSONException | IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT payload: " + ex);
-    }
-    return json;
+  static String decodePayload(String payloadStr){
+    return new String(Base64.urlSafeDecode(payloadStr), UTF_8);
   }
 
   static String encodeSignature(byte[] signature) {
@@ -130,9 +124,9 @@ final class JwtFormat {
     }
   }
 
-  static String createUnsignedCompact(String algorithm, JSONObject payload)
+  static String createUnsignedCompact(String algorithm, String jsonPayload)
       throws InvalidAlgorithmParameterException {
-    return createHeader(algorithm) + "." + encodePayload(payload);
+    return createHeader(algorithm) + "." + encodePayload(jsonPayload);
   }
 
   static String createSignedCompact(String unsignedCompact, byte[] signature) {

@@ -7,6 +7,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@maven//:org_json_json",

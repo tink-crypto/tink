@@ -104,7 +104,8 @@ public final class JwtRsaSsaPssSignKeyManager
       return new JwtPublicKeySign() {
         @Override
         public String sign(RawJwt token) throws GeneralSecurityException {
-          String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, token.getPayload());
+          String unsignedCompact =
+              JwtFormat.createUnsignedCompact(algorithm, token.getPayload().toString());
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

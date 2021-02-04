@@ -31,7 +31,6 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
-import org.json.JSONObject;
 
 /**
  * This key manager produces new instances of {@code JwtEcdsaVerify}. It doesn't support key
@@ -93,7 +92,7 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
 
           verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
           JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
-          JSONObject payload = JwtFormat.decodePayload(parts[1]);
+          String payload = JwtFormat.decodePayload(parts[1]);
           RawJwt token = new RawJwt.Builder(payload).build();
           return validator.validate(token);
         }

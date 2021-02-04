@@ -34,7 +34,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import javax.crypto.spec.SecretKeySpec;
-import org.json.JSONObject;
 
 /**
  * This key manager generates new {@code JwtHmacKey} keys and produces new instances of {@link
@@ -80,7 +79,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     @Override
     public String createCompact(RawJwt token) throws GeneralSecurityException {
       String unsignedCompact =
-          JwtFormat.createUnsignedCompact(algorithm, token.getPayload());
+          JwtFormat.createUnsignedCompact(algorithm, token.getPayload().toString());
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
@@ -98,7 +97,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
       byte[] expectedTag = JwtFormat.decodeSignature(parts[2]);
       prfMac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
       JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
-      JSONObject payload = JwtFormat.decodePayload(parts[1]);
+      String payload = JwtFormat.decodePayload(parts[1]);
       RawJwt token = new RawJwt.Builder(payload).build();
       return validator.validate(token);
     }

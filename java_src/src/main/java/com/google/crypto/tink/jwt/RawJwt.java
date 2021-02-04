@@ -46,8 +46,12 @@ public final class RawJwt {
       payload = new JSONObject();
     }
 
-    Builder(JSONObject payload) {
-      this.payload = payload;
+    Builder(String jsonPayload) throws JwtInvalidException {
+      try {
+        this.payload = new JSONObject(jsonPayload);
+      } catch (JSONException ex) {
+        throw new JwtInvalidException("invalid JWT payload: " + ex);
+      }
     }
 
     private Builder setPayload(String name, Object value) {

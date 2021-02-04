@@ -306,12 +306,17 @@ public final class RawJwtTest {
     String input = "{\"jid\": \"abc123\", \"aud\": [\"me\", \"you\"], \"custom\": "
         + " {\"int\": 123, \"string\": \"value\"}}";
 
-    RawJwt token = new RawJwt.Builder(new JSONObject(input)).build();
+    RawJwt token = new RawJwt.Builder(input).build();
     assertThat(token.getClaim("jid")).isEqualTo("abc123");
     assertThat(token.getAudiences()).containsExactly("me", "you");
 
     JSONObject custom = (JSONObject) token.getClaim("custom");
     assertThat(custom.getInt("int")).isEqualTo(123);
     assertThat(custom.getString("string")).isEqualTo("value");
+  }
+
+  @Test
+  public void fromInvalidJsonString_shouldThrow() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> new RawJwt.Builder("invalid!!!"));
   }
 }

@@ -30,7 +30,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
-import org.json.JSONObject;
 
 /**
  * This key manager produces new instances of {@code JwtRsaSsaPkcs11Verify}. It doesn't support key
@@ -90,7 +89,7 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
 
                 verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
                 JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
-                JSONObject payload = JwtFormat.decodePayload(parts[1]);
+                String payload = JwtFormat.decodePayload(parts[1]);
                 RawJwt token = new RawJwt.Builder(payload).build();
                 return validator.validate(token);
               }

@@ -58,6 +58,7 @@ java_library(
     srcs = ["RawJwt.java"],
     deps = [
         ":jwt_names",
+        ":jwt_invalid_exception",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:org_json_json",
     ],
@@ -301,7 +302,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -468,6 +468,7 @@ android_library(
     srcs = ["RawJwt.java"],
     deps = [
         ":jwt_names",
+        ":jwt_invalid_exception",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

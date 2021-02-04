@@ -561,7 +561,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().build();
 
     // Normal, valid signed compact.
-    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawPrimitive.computeMac(unsignedCompact.getBytes(US_ASCII)));
