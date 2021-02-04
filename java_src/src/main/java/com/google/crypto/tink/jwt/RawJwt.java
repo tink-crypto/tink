@@ -18,7 +18,10 @@ import com.google.errorprone.annotations.Immutable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,9 +152,52 @@ public final class RawJwt {
       return setPayload(JwtNames.CLAIM_ISSUED_AT, value.getEpochSecond());
     }
 
-    /** Adds an arbitrary claim to the JWT. */
-    public Builder addClaim(String name, Object value) {
-      return setPayload(JwtNames.validate(name), value);
+    /** Adds a custom claim of type {@code boolean} to the JWT. */
+    public Builder addBooleanClaim(String name, boolean value) {
+      JwtNames.validate(name);
+      return setPayload(name, value);
+    }
+
+    /** Adds a custom claim of type {@code double} to the JWT. */
+    public Builder addNumberClaim(String name, double value) {
+      JwtNames.validate(name);
+      return setPayload(name, value);
+    }
+
+    /** Adds a custom claim of type {@code String} to the JWT. */
+    public Builder addStringClaim(String name, String value) {
+      JwtNames.validate(name);
+      return setPayload(name, value);
+    }
+
+    /** Adds a custom claim with value null. */
+    public Builder addNullClaim(String name) {
+      JwtNames.validate(name);
+      return setPayload(name, JSONObject.NULL);
+    }
+
+    /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
+    public Builder addJsonObjectClaim(String name, String encodedJsonObject)
+        throws JwtInvalidException {
+      JwtNames.validate(name);
+      try {
+        JSONObject jsonObject = new JSONObject(encodedJsonObject);
+        return setPayload(name, jsonObject);
+      } catch (JSONException ex) {
+        throw new JwtInvalidException("Invalid JSON Object: " + ex.getMessage());
+      }
+    }
+
+    /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
+    public Builder addJsonArrayClaim(String name, String encodedJsonArray)
+        throws JwtInvalidException {
+      JwtNames.validate(name);
+      try {
+        JSONArray jsonArray = new JSONArray(encodedJsonArray);
+        return setPayload(name, jsonArray);
+      } catch (JSONException ex) {
+        throw new JwtInvalidException("Invalid JSON Array: " + ex.getMessage());
+      }
     }
 
     public RawJwt build() {
@@ -159,11 +205,12 @@ public final class RawJwt {
     }
   }
 
-
+  // TODO(juerg): Replace by a method that returns the encoded payload instead.
   JSONObject getPayload() {
     return payload;
   }
 
+  // TODO(juerg): This should be removed, as we don't want to return Json objects directly.
   Object getClaim(String name) {
     try {
       return payload.get(name);
@@ -172,19 +219,125 @@ public final class RawJwt {
     }
   }
 
+  Boolean getBooleanClaim(String name) throws JwtInvalidException {
+    JwtNames.validate(name);
+    try {
+      return (Boolean) payload.get(name);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
 
-  List<String> getAudiences() {
-    JSONArray audiences = (JSONArray) getClaim(JwtNames.CLAIM_AUDIENCE);
-    if (audiences == null) {
+  Double getNumberClaim(String name) throws JwtInvalidException {
+    JwtNames.validate(name);
+    try {
+      return (Double) payload.get(name);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+     // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  String getStringClaim(String name) throws JwtInvalidException {
+    JwtNames.validate(name);
+    try {
+      return (String) payload.get(name);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+     // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  boolean isNullClaim(String name) {
+    try {
+      return (JSONObject.NULL.equals(payload.get(name)));
+    } catch (JSONException ex) {
+      return false;
+    }
+  }
+
+  String getJsonObjectClaim(String name) throws JwtInvalidException {
+    try {
+      JSONObject claim = (JSONObject) payload.get(name);
+      return claim.toString();
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+     // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  String getJsonArrayClaim(String name) throws JwtInvalidException {
+    try {
+      JSONArray claim = (JSONArray) payload.get(name);
+      return claim.toString();
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+     // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  String getIssuer() throws JwtInvalidException {
+    try {
+      return (String) payload.get(JwtNames.CLAIM_ISSUER);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + JwtNames.CLAIM_ISSUER + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  String getSubject() throws JwtInvalidException {
+    try {
+      return (String) payload.get(JwtNames.CLAIM_SUBJECT);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + JwtNames.CLAIM_SUBJECT + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  String getJwtId() throws JwtInvalidException {
+    try {
+      return (String) payload.get(JwtNames.CLAIM_JWT_ID);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + JwtNames.CLAIM_JWT_ID + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
+      return null;
+    }
+  }
+
+  List<String> getAudiences() throws JwtInvalidException {
+    JSONArray audiences;
+    try {
+      audiences = (JSONArray) payload.get(JwtNames.CLAIM_AUDIENCE);
+    } catch (ClassCastException ex) {
+      throw new JwtInvalidException("claim " + JwtNames.CLAIM_AUDIENCE + ": " + ex.getMessage());
+    } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
       return null;
     }
 
     List<String> result = new ArrayList<>(audiences.length());
     for (int i = 0; i < audiences.length(); i++) {
       try {
-        result.add(audiences.getString(i));
-      } catch (JSONException ex) {
-        throw new IllegalStateException("invalid audience", ex);
+        String audience = (String) audiences.get(i);
+        result.add(audience);
+      } catch (ClassCastException | JSONException ex) {
+        throw new JwtInvalidException("invalid audience: " + ex.getMessage());
       }
     }
 
@@ -195,6 +348,7 @@ public final class RawJwt {
     try {
       return Instant.ofEpochSecond(payload.getLong(name));
     } catch (JSONException ex) {
+      // TODO(juerg): throw an exception instead.
       return null;
     }
   }
@@ -211,4 +365,19 @@ public final class RawJwt {
     return getInstant(JwtNames.CLAIM_ISSUED_AT);
   }
 
+  /** Returns all custom claim names. */
+  Set<String> customClaimNames() {
+    HashSet<String> names = new HashSet<>();
+
+    // The following is an unchecked conversion in server Java, but not in android Java.
+    // We cannot suppress both warnings.
+    Iterator<String> payloadIterator = this.payload.keys();
+    while (payloadIterator.hasNext()) {
+      String name = payloadIterator.next();
+      if (!JwtNames.isRegisteredName(name)) {
+        names.add(name);
+      }
+    }
+    return Collections.unmodifiableSet(names);
+  }
 }

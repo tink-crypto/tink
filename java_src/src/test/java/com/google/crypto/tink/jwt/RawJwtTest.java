@@ -19,6 +19,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -36,6 +37,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_ISSUER)).isNull();
+    assertThat(token.getIssuer()).isNull();
   }
 
   @Test
@@ -43,6 +45,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().setIssuer("foo").build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_ISSUER)).isEqualTo("foo");
+    assertThat(token.getIssuer()).isEqualTo("foo");
   }
 
   @Test
@@ -57,7 +60,6 @@ public final class RawJwtTest {
   public void addAudience_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addAudience("foo").build();
     JSONArray audiences = (JSONArray) token.getClaim(JwtNames.CLAIM_AUDIENCE);
-
     assertThat(audiences.getString(0)).isEqualTo("foo");
     assertThat(token.getAudiences()).containsExactly("foo");
   }
@@ -77,6 +79,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
+    assertThat(token.getSubject()).isNull();
   }
 
   @Test
@@ -84,6 +87,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().setSubject("foo").setSubject(null).build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
+    assertThat(token.getSubject()).isNull();
   }
 
   @Test
@@ -91,6 +95,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().setSubject("foo").build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isEqualTo("foo");
+    assertThat(token.getSubject()).isEqualTo("foo");
   }
 
   @Test
@@ -98,6 +103,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_JWT_ID)).isNull();
+    assertThat(token.getJwtId()).isNull();
   }
 
   @Test
@@ -105,148 +111,159 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().setJwtId("foo").build();
 
     assertThat(token.getClaim(JwtNames.CLAIM_JWT_ID)).isEqualTo("foo");
+    assertThat(token.getJwtId()).isEqualTo("foo");
   }
 
   @Test
-  public void addClaim_issuer_shouldThrow() throws Exception {
+  public void addStringClaim_issuer_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_ISSUER, "blah"));
+        () -> new RawJwt.Builder().addStringClaim(JwtNames.CLAIM_ISSUER, "blah"));
   }
 
   @Test
-  public void addClaim_subject_shouldThrow() throws Exception {
+  public void addStringClaim_subject_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_SUBJECT, "blah"));
+        () -> new RawJwt.Builder().addStringClaim(JwtNames.CLAIM_SUBJECT, "blah"));
   }
 
   @Test
-  public void addClaim_audience_shouldThrow() throws Exception {
+  public void addEncodedJsonArrayClaim_audience_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_AUDIENCE, "blah"));
+        () -> new RawJwt.Builder().addJsonArrayClaim(JwtNames.CLAIM_AUDIENCE, "[\"a\", \"b\"]"));
   }
 
   @Test
-  public void addClaim_jwtId_shouldThrow() throws Exception {
+  public void addStringClaim_jwtId_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_JWT_ID, "blah"));
+        () -> new RawJwt.Builder().addStringClaim(JwtNames.CLAIM_JWT_ID, "blah"));
   }
 
   @Test
-  public void addClaim_expiration_shouldThrow() throws Exception {
+  public void addNumberClaim_expiration_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_EXPIRATION, Instant.now()));
+        () -> new RawJwt.Builder().addNumberClaim(JwtNames.CLAIM_EXPIRATION, 1234567));
+  }
+
+  @Test
+  public void addNumberClaim_issuedAt_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_EXPIRATION, 1234567));
+        () -> new RawJwt.Builder().addNumberClaim(JwtNames.CLAIM_ISSUED_AT, 1234567));
   }
 
   @Test
-  public void addClaim_issuedAt_shouldThrow() throws Exception {
+  public void addNumberClaim_notBefore_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_ISSUED_AT, Instant.now()));
+        () -> new RawJwt.Builder().addNumberClaim(JwtNames.CLAIM_NOT_BEFORE, 1234567));
   }
 
   @Test
-  public void addClaim_notBefore_shouldThrow() throws Exception {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new RawJwt.Builder().addClaim(JwtNames.CLAIM_NOT_BEFORE, Instant.now()));
+  public void addAndGetStringClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addStringClaim("claim", "value").build();
+
+    assertThat(token.getStringClaim("claim")).isEqualTo("value");
   }
 
   @Test
-  public void addClaim_string_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().addClaim("claim", "value").build();
+  public void addAndGetIntegerAsNumberClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addNumberClaim("claim", 1).build();
 
-    assertThat(token.getClaim("claim")).isEqualTo("value");
+    // A Json Number is always a floating point.
+    assertThat(token.getNumberClaim("claim")).isEqualTo(1.0);
   }
 
   @Test
-  public void addClaim_integer_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().addClaim("claim", 1).build();
+  public void addAndGetDoubleAsNumberClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addNumberClaim("claim", 123.4).build();
 
-    assertThat(token.getClaim("claim")).isEqualTo(1);
+    assertThat(token.getNumberClaim("claim")).isEqualTo(123.4);
   }
 
   @Test
-  public void addClaim_long_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().addClaim("claim", 1L).build();
+  public void addAndGetBooleanClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addBooleanClaim("claim", true).build();
 
-    assertThat(token.getClaim("claim")).isEqualTo(1L);
+    assertThat(token.getBooleanClaim("claim")).isTrue();
   }
 
   @Test
-  public void addClaim_double_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().addClaim("claim", 123.4).build();
+  public void addAndCheckNullClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addNullClaim("claim").build();
 
-    assertThat(token.getClaim("claim")).isEqualTo(123.4);
-  }
-
-  @Test
-  public void addClaim_boolean_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().addClaim("claim", true).build();
-
-    assertThat(token.getClaim("claim")).isEqualTo(true);
+    assertThat(token.isNullClaim("claim")).isTrue();
   }
 
   @Test
   public void getUnknownClaim_returnsNull() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getClaim("claim")).isNull();
+    assertThat(token.getBooleanClaim("claim")).isNull();
+    assertThat(token.getNumberClaim("claim")).isNull();
+    assertThat(token.getStringClaim("claim")).isNull();
+    assertThat(token.getJsonArrayClaim("claim")).isNull();
+    assertThat(token.getJsonObjectClaim("claim")).isNull();
+    assertThat(token.isNullClaim("claim")).isFalse();
   }
 
   @Test
-  public void addJsonArrayClaim_success() throws Exception {
-    JSONArray collection = new JSONArray()
-        .put(true)
-        .put(123)
-        .put(456L)
-        .put(123.456)
-        .put("value")
-        .put(new JSONArray().put(1).put(2));
+  public void addAndGetEncodedJsonArrayClaim_success() throws Exception {
+    String encodedJsonArray = "[true, 123, 123.456, \"value\", [1, 2]]";
 
-    RawJwt token = new RawJwt.Builder().addClaim("collection", collection).build();
-
-    JSONArray output = (JSONArray) token.getClaim("collection");
-    assertThat(output.length()).isEqualTo(6);
-    assertThat(output.getBoolean(0)).isTrue();
-    assertThat(output.getInt(1)).isEqualTo(123);
-    assertThat(output.getLong(2)).isEqualTo(456L);
-    assertThat(output.getDouble(3)).isEqualTo(123.456);
-    assertThat(output.getString(4)).isEqualTo("value");
-    JSONArray nestedOutput = output.getJSONArray(5);
-    assertThat(nestedOutput.length()).isEqualTo(2);
-    assertThat(nestedOutput.getInt(0)).isEqualTo(1);
-    assertThat(nestedOutput.getInt(1)).isEqualTo(2);
+    RawJwt token =
+        new RawJwt.Builder().addJsonArrayClaim("collection", encodedJsonArray).build();
+    String output = token.getJsonArrayClaim("collection");
+    assertThat(output).isEqualTo("[true,123,123.456,\"value\",[1,2]]");
   }
 
   @Test
-  public void addJsonObjectClaim_success() throws Exception {
-    JSONObject obj = new JSONObject()
-        .put("boolean", false)
-        .put("obj1", new JSONObject().put("obj2", new JSONObject().put("42", 42)));
+  public void addInvalidEncodedJsonArrayClaim_shouldThrow() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonArrayClaim("array", "\"foo\""));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonArrayClaim("array", "123"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonArrayClaim("array", "\"[123]\""));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonArrayClaim("array", "null"));
+  }
 
-    RawJwt token = new RawJwt.Builder().addClaim("obj", obj).build();
+  @Test
+  public void addAndGetEncodedJsonObjectClaim_success() throws Exception {
+    String encodedJsonObject = "{\"boolean\":false,\"obj1\":{\"obj2\":{\"42\":42}}}";
 
-    JSONObject output = (JSONObject) token.getClaim("obj");
-    assertThat(output.getBoolean("boolean")).isFalse();
-    assertThat(output.getJSONObject("obj1").getJSONObject("obj2").getInt("42")).isEqualTo(42);
+    RawJwt token =
+        new RawJwt.Builder().addJsonObjectClaim("obj", encodedJsonObject).build();
+    String output = token.getJsonObjectClaim("obj");
 
-    // The behaviour of output.getString("boolean") is inconsistent.
+    JSONObject obj = new JSONObject(output);
+    assertThat(obj.getBoolean("boolean")).isFalse();
+    assertThat(obj.getJSONObject("obj1").getJSONObject("obj2").getInt("42")).isEqualTo(42);
+  }
 
-    // In google3 and on android, this returns a string "false".
-    // see: https://developer.android.com/reference/org/json/JSONObject#getString(java.lang.String)
-    // and: https://source.corp.google.com/piper///depot/google3/third_party/java_src/j2objc/jre_emul/android/platform/libcore/json/src/main/java/org/json/JSONObject.java;l=559
-
-    // But with the maven implementation, this throws an error.
-    // see: https://javadoc.io/doc/org.json/json/latest/index.html
-    // and: https://github.com/stleary/JSON-java/blob/e33f463179ddb6b5d68eabf24528d94af2d0886b/src/main/java/org/json/JSONObject.java#L858
+  @Test
+  public void addInvalidEncodedJsonObjectClaim_shouldThrow() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonObjectClaim("obj", "\"foo\""));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonObjectClaim("obj", "123"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonObjectClaim("obj", "\"{\"a\":1}\""));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> new RawJwt.Builder().addJsonObjectClaim("obj", "null"));
   }
 
   @Test
@@ -302,15 +319,17 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromJsonString_success() throws Exception {
-    String input = "{\"jid\": \"abc123\", \"aud\": [\"me\", \"you\"], \"custom\": "
-        + " {\"int\": 123, \"string\": \"value\"}}";
+  public void fromJson_success() throws Exception {
+    String input =
+        "{\"jti\": \"abc123\", \"aud\": [\"me\", \"you\"], \"custom\": "
+            + " {\"int\": 123, \"string\": \"value\"}}";
 
     RawJwt token = new RawJwt.Builder(input).build();
-    assertThat(token.getClaim("jid")).isEqualTo("abc123");
+    assertThat(token.getJwtId()).isEqualTo("abc123");
     assertThat(token.getAudiences()).containsExactly("me", "you");
 
-    JSONObject custom = (JSONObject) token.getClaim("custom");
+    String encodedObject = token.getJsonObjectClaim("custom");
+    JSONObject custom = new JSONObject(encodedObject);
     assertThat(custom.getInt("int")).isEqualTo(123);
     assertThat(custom.getString("string")).isEqualTo("value");
   }
@@ -318,5 +337,63 @@ public final class RawJwtTest {
   @Test
   public void fromInvalidJsonString_shouldThrow() throws Exception {
     assertThrows(JwtInvalidException.class, () -> new RawJwt.Builder("invalid!!!"));
+  }
+
+  @Test
+  public void fromJson_invalidItemInAudience() throws Exception {
+    String input = "{\"aud\": [\"me\", 123]}";
+    RawJwt token = new RawJwt.Builder(input).build();
+    assertThrows(JwtInvalidException.class, token::getAudiences);
+  }
+
+  @Test
+  public void fromJson_audienceIsNotAnArray() throws Exception {
+    String input = "{\"aud\": \"me\"}";
+    RawJwt token = new RawJwt.Builder(input).build();
+    assertThrows(JwtInvalidException.class, token::getAudiences);
+  }
+
+  @Test
+  public void getClaimsOfDifferentType_shouldThrow() throws Exception {
+    RawJwt token =
+        new RawJwt.Builder()
+            .addNumberClaim("number", 1)
+            .addStringClaim("string", "value")
+            .addBooleanClaim("boolean", true)
+            .addStringClaim("booleanString", "true")
+            .addStringClaim("numberString", "1")
+            .addNullClaim("nullClaim")
+            .build();
+    assertThrows(JwtInvalidException.class, () -> token.getBooleanClaim("number"));
+    assertThrows(JwtInvalidException.class, () -> token.getBooleanClaim("booleanString"));
+    assertThrows(JwtInvalidException.class, () -> token.getNumberClaim("string"));
+    assertThrows(JwtInvalidException.class, () -> token.getNumberClaim("numberString"));
+    assertThrows(JwtInvalidException.class, () -> token.getStringClaim("number"));
+    assertThrows(JwtInvalidException.class, () -> token.getStringClaim("boolean"));
+    assertThrows(JwtInvalidException.class, () -> token.getBooleanClaim("nullClaim"));
+    assertThrows(JwtInvalidException.class, () -> token.getNumberClaim("nullClaim"));
+    assertThrows(JwtInvalidException.class, () -> token.getStringClaim("nullClaim"));
+  }
+
+  @Test
+  public void hasNullClaimOfDifferentType_returnsFalse() throws Exception {
+    RawJwt token = new RawJwt.Builder().addBooleanClaim("boolean", true).build();
+    assertThat(token.isNullClaim("boolean")).isFalse();
+  }
+
+  @Test
+  public void customClaimNames_success() throws Exception {
+    RawJwt token =
+        new RawJwt.Builder()
+            .setIssuer("issuer")
+            .setExpiration(Instant.ofEpochSecond(1234567))
+            .addStringClaim("string", "value")
+            .addBooleanClaim("boolean", true)
+            .addNumberClaim("number", 123.456)
+            .addNullClaim("nothing")
+            .build();
+
+    Set<String> claimSet = token.customClaimNames();
+    assertThat(claimSet).containsExactly("string", "boolean", "number", "nothing");
   }
 }

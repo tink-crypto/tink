@@ -326,7 +326,7 @@ public class JwtHmacKeyManagerTest {
             .setIssuer(issuer)
             .addAudience(audience)
             .setJwtId(jwtId)
-            .addClaim("amount", amount)
+            .addNumberClaim("amount", amount)
             .build();
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience(audience).build();
