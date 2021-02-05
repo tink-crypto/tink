@@ -171,7 +171,7 @@ public final class JwtValidator {
               audience, audiences));
     }
 
-    return new VerifiedJwt(target.getPayload());
+    return new VerifiedJwt(target);
   }
 
   private void validateTimestampClaims(RawJwt target) throws JwtInvalidException {

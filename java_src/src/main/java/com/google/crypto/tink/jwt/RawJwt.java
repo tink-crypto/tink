@@ -256,6 +256,7 @@ public final class RawJwt {
   }
 
   boolean isNullClaim(String name) {
+    JwtNames.validate(name);
     try {
       return (JSONObject.NULL.equals(payload.get(name)));
     } catch (JSONException ex) {
@@ -264,6 +265,7 @@ public final class RawJwt {
   }
 
   String getJsonObjectClaim(String name) throws JwtInvalidException {
+    JwtNames.validate(name);
     try {
       JSONObject claim = (JSONObject) payload.get(name);
       return claim.toString();
@@ -276,6 +278,7 @@ public final class RawJwt {
   }
 
   String getJsonArrayClaim(String name) throws JwtInvalidException {
+    JwtNames.validate(name);
     try {
       JSONArray claim = (JSONArray) payload.get(name);
       return claim.toString();

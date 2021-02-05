@@ -16,12 +16,7 @@ package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * A read-only implementation of <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a>
@@ -35,58 +30,42 @@ import org.json.JSONObject;
 @Immutable
 public final class VerifiedJwt {
 
-  @SuppressWarnings("Immutable") // We do not mutate the payload.
-  private final JSONObject payload;
+  private final RawJwt rawJwt;
 
-
-  VerifiedJwt(JSONObject payload) {
-    this.payload = payload;
+  VerifiedJwt(RawJwt rawJwt) {
+    this.rawJwt = rawJwt;
   }
 
   /**
    * Returns the {@code iss} claim that identifies the principal that issued the JWT or {@code null}
    * for none.
    */
-  public String getIssuer() {
-    return (String) getClaimWithoutValidation(JwtNames.CLAIM_ISSUER);
+  public String getIssuer() throws JwtInvalidException {
+    return this.rawJwt.getIssuer();
   }
 
   /**
    * Returns the {@code sub} claim identifying the principal that is the subject of the JWT or
    * {@code null} for none.
    */
-  public String getSubject() {
-    return (String) getClaimWithoutValidation(JwtNames.CLAIM_SUBJECT);
+  public String getSubject() throws JwtInvalidException {
+    return this.rawJwt.getSubject();
   }
 
   /**
    * Returns the {@code aud} claim identifying the principals that are the audience of the JWT or
    * {@code null} for none.
    */
-  public List<String> getAudiences() {
-    JSONArray audiences = (JSONArray) getClaimWithoutValidation(JwtNames.CLAIM_AUDIENCE);
-    if (audiences == null) {
-      return null;
-    }
-
-    List<String> result = new ArrayList<>(audiences.length());
-    for (int i = 0; i < audiences.length(); i++) {
-      try {
-        result.add(audiences.getString(i));
-      } catch (JSONException ex) {
-        throw new IllegalStateException("invalid audience", ex);
-      }
-    }
-
-    return Collections.unmodifiableList(result);
+  public List<String> getAudiences() throws JwtInvalidException {
+    return this.rawJwt.getAudiences();
   }
 
   /**
    * Returns the {@code jti} claim that provides a unique identifier for the JWT or {@code null} for
    * none.
    */
-  public String getJwtId() {
-    return (String) getClaimWithoutValidation(JwtNames.CLAIM_JWT_ID);
+  public String getJwtId() throws JwtInvalidException {
+    return this.rawJwt.getJwtId();
   }
 
   /**
@@ -98,7 +77,7 @@ public final class VerifiedJwt {
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
   public Instant getExpiration() {
-    return getInstant(JwtNames.CLAIM_EXPIRATION);
+    return this.rawJwt.getExpiration();
   }
 
   /**
@@ -110,7 +89,7 @@ public final class VerifiedJwt {
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
   public Instant getNotBefore() {
-    return getInstant(JwtNames.CLAIM_NOT_BEFORE);
+    return this.rawJwt.getNotBefore();
   }
 
   /**
@@ -122,34 +101,54 @@ public final class VerifiedJwt {
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
   public Instant getIssuedAt() {
-    return getInstant(JwtNames.CLAIM_ISSUED_AT);
+    return this.rawJwt.getIssuedAt();
   }
 
   /**
-   * Returns the claim of name {@code name} or {@code null} for none.
+   * Returns the claim of name {@code name} and type Boolean or {@code null} for none. If the claim
+   * with this name has another type, this method will throw an JwtInvalidException exception.
    */
-  public Object getClaimWithoutValidation(String name) {
-    try {
-      return payload.get(name);
-    } catch (JSONException ex) {
-      return null;
-    }
+  Boolean getBooleanClaim(String name) throws JwtInvalidException {
+    return this.rawJwt.getBooleanClaim(name);
   }
 
   /**
-   * Returns the claim of name {@code name} or {@code null} for none.
+   * Returns the claim of name {@code name} and type Number or {@code null} for none. If the claim
+   * with this name has another type, this method will throw an JwtInvalidException exception.
    */
-  public Object getClaim(String name) {
-    JwtNames.validate(name);
-    return getClaimWithoutValidation(name);
+  Double getNumberClaim(String name) throws JwtInvalidException {
+    return this.rawJwt.getNumberClaim(name);
   }
 
-
-  private Instant getInstant(String name) {
-    try {
-      return Instant.ofEpochSecond(payload.getLong(name));
-    } catch (JSONException ex) {
-      return null;
-    }
+  /**
+   * Returns the claim of name {@code name} and type String or {@code null} for none. If the claim
+   * with this name has another type, this method will throw an JwtInvalidException exception.
+   */
+  String getStringClaim(String name) throws JwtInvalidException {
+    return this.rawJwt.getStringClaim(name);
   }
+
+  /** Returns true iff there is a claim of name {@code name} and type NULL. */
+  boolean isNullClaim(String name) {
+    return this.rawJwt.isNullClaim(name);
+  }
+
+  /**
+   * Returns the claim of name {@code name} and type JSON Object encoded in a string, or {@code
+   * null} for none. If the claims with this name has another type, this method will throw an
+   * JwtInvalidException exception.
+   */
+  String getJsonObjectClaim(String name) throws JwtInvalidException {
+    return this.rawJwt.getJsonObjectClaim(name);
+  }
+
+  /**
+   * Returns the claim of name {@code name} and type JSON Array encoded in a string, or {@code null}
+   * for none. If the claims with this name has another type, this method will throw an
+   * JwtInvalidException exception.
+   */
+  String getJsonArrayClaim(String name) throws JwtInvalidException {
+    return this.rawJwt.getJsonArrayClaim(name);
+  }
+
 }

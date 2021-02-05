@@ -42,9 +42,8 @@ java_library(
     srcs = ["VerifiedJwt.java"],
     deps = [
         ":jwt_invalid_exception",
-        ":jwt_names",
+        ":raw_jwt",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -57,8 +56,8 @@ java_library(
     name = "raw_jwt",
     srcs = ["RawJwt.java"],
     deps = [
-        ":jwt_names",
         ":jwt_invalid_exception",
+        ":jwt_names",
         "@maven//:com_google_errorprone_error_prone_annotations",
         "@maven//:org_json_json",
     ],
@@ -98,7 +97,6 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
-        "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
@@ -106,7 +104,6 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -458,7 +455,7 @@ android_library(
     srcs = ["VerifiedJwt.java"],
     deps = [
         ":jwt_invalid_exception",
-        ":jwt_names",
+        ":raw_jwt-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -467,8 +464,8 @@ android_library(
     name = "raw_jwt-android",
     srcs = ["RawJwt.java"],
     deps = [
-        ":jwt_names",
         ":jwt_invalid_exception",
+        ":jwt_names",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -501,7 +498,6 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
-        "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",

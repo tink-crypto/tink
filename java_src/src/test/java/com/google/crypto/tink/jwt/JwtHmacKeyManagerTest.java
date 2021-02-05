@@ -331,9 +331,8 @@ public class JwtHmacKeyManagerTest {
     String compact = mac.createCompact(unverified);
     JwtValidator validator = new JwtValidator.Builder().setAudience(audience).build();
     VerifiedJwt token = mac.verifyCompact(compact, validator);
-    double value = (double) token.getClaim("amount");
 
-    assertThat(value).isEqualTo(amount);
+    assertThat(token.getNumberClaim("amount")).isEqualTo(amount);
     assertThat(token.getIssuer()).isEqualTo(issuer);
     assertThat(token.getAudiences()).containsExactly(audience);
     assertThat(token.getJwtId()).isEqualTo(jwtId);
@@ -660,8 +659,6 @@ public class JwtHmacKeyManagerTest {
     VerifiedJwt token = primitive.verifyCompact(compact, validator);
 
     assertThat(token.getIssuer()).isEqualTo("joe");
-    boolean value = (boolean) token.getClaim("http://example.com/is_root");
-
-    assertThat(value).isTrue();
+    assertThat(token.getBooleanClaim("http://example.com/is_root")).isTrue();
   }
 }
