@@ -312,10 +312,9 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void getPayload_success() throws Exception {
+  public void getJsonPayload_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setJwtId("blah").build();
-    JSONObject playload = token.getPayload();
-    assertThat(playload.get(JwtNames.CLAIM_JWT_ID)).isEqualTo("blah");
+    assertThat(token.getJsonPayload()).isEqualTo("{\"jti\":\"blah\"}");
   }
 
   @Test
@@ -395,5 +394,19 @@ public final class RawJwtTest {
 
     Set<String> claimSet = token.customClaimNames();
     assertThat(claimSet).containsExactly("string", "boolean", "number", "nothing");
+  }
+
+  @Test
+  public void changingValuesInBuilderChangesAlreadBuiltToken() throws Exception {
+    RawJwt.Builder builder = new RawJwt.Builder();
+
+    builder.setSubject("foo");
+    RawJwt fooToken = builder.build();
+
+    builder.setSubject("bar");
+    RawJwt barToken = builder.build();
+
+    assertThat(fooToken.getSubject()).isEqualTo("bar");  // This is wrong, we should change that.
+    assertThat(barToken.getSubject()).isEqualTo("bar");
   }
 }

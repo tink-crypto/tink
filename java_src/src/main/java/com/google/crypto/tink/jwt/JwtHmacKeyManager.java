@@ -79,7 +79,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     @Override
     public String createCompact(RawJwt token) throws GeneralSecurityException {
       String unsignedCompact =
-          JwtFormat.createUnsignedCompact(algorithm, token.getPayload().toString());
+          JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }

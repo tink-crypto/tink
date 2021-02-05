@@ -87,7 +87,7 @@ public final class JwtEcdsaSignKeyManager
         @Override
         public String sign(RawJwt token) throws GeneralSecurityException {
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithm, token.getPayload().toString());
+              JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

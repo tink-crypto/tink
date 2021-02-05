@@ -205,9 +205,8 @@ public final class RawJwt {
     }
   }
 
-  // TODO(juerg): Replace by a method that returns the encoded payload instead.
-  JSONObject getPayload() {
-    return payload;
+  String getJsonPayload() {
+    return payload.toString();
   }
 
   // TODO(juerg): This should be removed, as we don't want to return Json objects directly.
