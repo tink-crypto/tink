@@ -18,18 +18,17 @@ import com.google.errorprone.annotations.Immutable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /** A set of expected claims and headers to validate against another JWT. */
 @Immutable
 public final class JwtValidator {
   private static final Duration MAX_CLOCK_SKEW = Duration.ofMinutes(10);
 
-  @SuppressWarnings("Immutable") // We do not mutate the payload.
-  private final JSONObject payload;
+  private final String issuer;
+  private final String subject;
+  private final String audience;
+  private final String jwtId;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -37,28 +36,24 @@ public final class JwtValidator {
   private final Duration clockSkew;
 
   private JwtValidator(Builder builder) {
-    this.payload = builder.payload;
+    this.issuer = builder.issuer;
+    this.subject = builder.subject;
+    this.audience = builder.audience;
+    this.jwtId = builder.jwtId;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
 
   /** Builder for JwtValidator */
   public static final class Builder {
-    private final JSONObject payload;
+    private String issuer;
+    private String subject;
+    private String audience;
+    private String jwtId;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
     public Builder() {
-      payload = new JSONObject();
-    }
-
-    private Builder setPayload(String name, Object value) {
-      try {
-        payload.put(name, value);
-        return this;
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException(ex);
-      }
     }
 
     /**
@@ -67,7 +62,8 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
-      return setPayload(JwtNames.CLAIM_ISSUER, value);
+      this.issuer = value;
+      return this;
     }
 
     /**
@@ -76,7 +72,8 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
-      return setPayload(JwtNames.CLAIM_SUBJECT, value);
+      this.subject = value;
+      return this;
     }
 
     /**
@@ -85,7 +82,8 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder setAudience(String value) {
-      return setPayload(JwtNames.CLAIM_AUDIENCE, value);
+      this.audience = value;
+      return this;
     }
 
     /**
@@ -94,7 +92,8 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
     public Builder setJwtId(String value) {
-      return setPayload(JwtNames.CLAIM_JWT_ID, value);
+      this.jwtId = value;
+      return this;
     }
 
     /** Sets the clock used to verify timestamp claims. */
@@ -118,21 +117,8 @@ public final class JwtValidator {
       return this;
     }
 
-    /** Adds an arbitrary claim. */
-    public Builder addClaim(String name, Object value) {
-      return setPayload(JwtNames.validate(name), value);
-    }
-
     public JwtValidator build() {
       return new JwtValidator(this);
-    }
-  }
-
-  private Object getClaim(String name) {
-    try {
-      return payload.get(name);
-    } catch (JSONException ex) {
-      return null;
     }
   }
 
@@ -143,34 +129,47 @@ public final class JwtValidator {
   VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
 
-
-    Iterator<String> payloadIterator = this.payload.keys();
-    while (payloadIterator.hasNext()) {
-      String name = payloadIterator.next();
-      if (name.equals(JwtNames.CLAIM_AUDIENCE)) {
-        // This is checked below.
-        continue;
-      }
-      Object value = target.getClaim(name);
-      if (value == null || !value.equals(this.getClaim(name))) {
+    if (this.issuer != null) {
+      String issuer = target.getIssuer();
+      if (issuer == null) {
         throw new JwtInvalidException(
-            String.format(
-                "invalid JWT; expected claim '%s' with value %s, but got %s",
-                name, value, this.getClaim(name)));
+            String.format("invalid JWT; missing expected issuer %s.", this.issuer));
+      }
+      if (!issuer.equals(this.issuer)) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; expected issuer  %s, but got %s", this.issuer, issuer));
       }
     }
-
-    // Check that the validator's audience is in the list of claimed audiences.
+    if (this.subject != null) {
+      String subject = target.getSubject();
+      if (subject == null) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; missing expected subject %s.", this.subject));
+      }
+      if (!subject.equals(this.subject)) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; expected subject  %s, but got %s", this.subject, subject));
+      }
+    }
     List<String> audiences = target.getAudiences();
-    String audience = (String) this.getClaim(JwtNames.CLAIM_AUDIENCE);
-    if ((audiences == null && audience != null)
-        || (audiences != null && !audiences.contains(audience))) {
+    if ((audiences == null && this.audience != null)
+        || (audiences != null && !audiences.contains(this.audience))) {
       throw new JwtInvalidException(
           String.format(
               "invalid JWT; cannot find the expected audience %s in claimed audiences %s",
               audience, audiences));
     }
-
+    if (this.jwtId != null) {
+      String jwtId = target.getJwtId();
+      if (jwtId == null) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; missing expected JWT ID %s.", this.subject));
+      }
+      if (!jwtId.equals(this.jwtId)) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; expected JWT ID  %s, but got %s", this.jwtId, jwtId));
+      }
+    }
     return new VerifiedJwt(target);
   }
 

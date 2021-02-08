@@ -74,11 +74,9 @@ java_library(
     deps = [
         ":jwt_format",
         ":jwt_invalid_exception",
-        ":jwt_names",
         ":raw_jwt",
         ":verified_jwt",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -476,7 +474,6 @@ android_library(
     deps = [
         ":jwt_format-android",
         ":jwt_invalid_exception",
-        ":jwt_names",
         ":raw_jwt-android",
         ":verified_jwt-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
