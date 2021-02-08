@@ -20,7 +20,6 @@ import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
 import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,6 @@ public final class RawJwtTest {
   public void noIssuer_success() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_ISSUER)).isNull();
     assertThat(token.getIssuer()).isNull();
   }
 
@@ -44,7 +42,6 @@ public final class RawJwtTest {
   public void setIssuer_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setIssuer("foo").build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_ISSUER)).isEqualTo("foo");
     assertThat(token.getIssuer()).isEqualTo("foo");
   }
 
@@ -52,25 +49,18 @@ public final class RawJwtTest {
   public void noAudience_success() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_AUDIENCE)).isNull();
     assertThat(token.getAudiences()).isNull();
   }
 
   @Test
   public void addAudience_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addAudience("foo").build();
-    JSONArray audiences = (JSONArray) token.getClaim(JwtNames.CLAIM_AUDIENCE);
-    assertThat(audiences.getString(0)).isEqualTo("foo");
     assertThat(token.getAudiences()).containsExactly("foo");
   }
 
   @Test
   public void addMulitpleAudiences_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addAudience("foo").addAudience("bar").build();
-    JSONArray audiences = (JSONArray) token.getClaim(JwtNames.CLAIM_AUDIENCE);
-
-    assertThat(audiences.getString(0)).isEqualTo("foo");
-    assertThat(audiences.getString(1)).isEqualTo("bar");
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
 
@@ -78,7 +68,6 @@ public final class RawJwtTest {
   public void noSubject_success() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
     assertThat(token.getSubject()).isNull();
   }
 
@@ -86,7 +75,6 @@ public final class RawJwtTest {
   public void setUnsetSubject_returnsNull() throws Exception {
     RawJwt token = new RawJwt.Builder().setSubject("foo").setSubject(null).build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isNull();
     assertThat(token.getSubject()).isNull();
   }
 
@@ -94,7 +82,6 @@ public final class RawJwtTest {
   public void setSubject_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setSubject("foo").build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_SUBJECT)).isEqualTo("foo");
     assertThat(token.getSubject()).isEqualTo("foo");
   }
 
@@ -102,7 +89,6 @@ public final class RawJwtTest {
   public void noJwtId_success() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_JWT_ID)).isNull();
     assertThat(token.getJwtId()).isNull();
   }
 
@@ -110,7 +96,6 @@ public final class RawJwtTest {
   public void setJwtId_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setJwtId("foo").build();
 
-    assertThat(token.getClaim(JwtNames.CLAIM_JWT_ID)).isEqualTo("foo");
     assertThat(token.getJwtId()).isEqualTo("foo");
   }
 

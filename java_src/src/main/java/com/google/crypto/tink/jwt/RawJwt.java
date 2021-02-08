@@ -209,15 +209,6 @@ public final class RawJwt {
     return payload.toString();
   }
 
-  // TODO(juerg): This should be removed, as we don't want to return Json objects directly.
-  Object getClaim(String name) {
-    try {
-      return payload.get(name);
-    } catch (JSONException ex) {
-      return null;
-    }
-  }
-
   Boolean getBooleanClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
     try {
