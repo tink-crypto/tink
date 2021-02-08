@@ -13,6 +13,10 @@ syntax = "proto3";
 
 package tink_testing_api;
 
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
 option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
 
@@ -127,8 +131,7 @@ service DeterministicAead {
       returns (DeterministicAeadEncryptResponse) {}
   // Decrypts a ciphertext with the provided keyset
   rpc DecryptDeterministically(DeterministicAeadDecryptRequest)
-    returns (DeterministicAeadDecryptResponse) {
-  }
+      returns (DeterministicAeadDecryptResponse) {}
 }
 
 message DeterministicAeadEncryptRequest {
@@ -320,6 +323,76 @@ message PrfSetComputeRequest {
 message PrfSetComputeResponse {
   oneof result {
     bytes output = 1;
+    string err = 2;
+  }
+}
+
+// Service for JSON Web Tokens (JWT)
+service Jwt {
+  // Computes a signed compact JWT token.
+  rpc Sign(JwtSignRequest) returns (JwtSignResponse) {}
+  // Verifies the validity of the signed compact JWT token
+  rpc Verify(JwtVerifyRequest) returns (JwtVerifyResponse) {}
+}
+
+//  Used to represent the JSON null value.
+enum NullValue {
+  NULL_VALUE = 0;
+}
+
+message JwtCustomClaim {
+  string name = 1;
+  oneof value {
+    NullValue null_value = 2;
+    double number_value = 3;
+    string string_value = 4;
+    bool bool_value = 5;
+    string json_object_value = 6;
+    string json_array_value = 7;
+  }
+}
+
+message JwtToken {
+  google.protobuf.StringValue issuer = 1;
+  google.protobuf.StringValue subject = 2;
+  repeated string audience = 3;
+  google.protobuf.StringValue jwt_id = 4;
+  google.protobuf.Timestamp expiration = 5;
+  google.protobuf.Timestamp not_before = 6;
+  google.protobuf.Timestamp issued_at = 7;
+  repeated JwtCustomClaim custom_claim = 8;
+}
+
+message JwtValidator {
+  google.protobuf.StringValue issuer = 1;
+  google.protobuf.StringValue subject = 2;
+  google.protobuf.StringValue audience = 3;
+  google.protobuf.StringValue jwt_id = 4;
+  google.protobuf.Timestamp now = 5;
+  google.protobuf.Duration clock_skew = 6;
+}
+
+message JwtSignRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset
+  JwtToken raw_jwt = 2;
+}
+
+message JwtSignResponse {
+  oneof result {
+    string signed_compact_jwt = 1;
+    string err = 2;
+  }
+}
+
+message JwtVerifyRequest {
+  bytes keyset = 1;    // serialized google.crypto.tink.Keyset
+  string signed_compact_jwt = 2;
+  JwtValidator validator = 3;
+}
+
+message JwtVerifyResponse {
+  oneof result {
+    JwtToken verified_jwt = 1;
     string err = 2;
   }
 }
