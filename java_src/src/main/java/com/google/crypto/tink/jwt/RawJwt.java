@@ -38,7 +38,21 @@ public final class RawJwt {
   private final JSONObject payload;
 
   private RawJwt(Builder builder) {
-    this.payload = builder.payload;
+    // shallow-copy builder.payload. A shallow copy is enough, as payload entries never get
+    // passed out of the builder, and never get modified.
+    JSONObject copy = new JSONObject();
+    // The following is an unchecked conversion in server Java, but not in android Java.
+    // We cannot suppress both warnings.
+    Iterator<String> iterator = builder.payload.keys();
+    while (iterator.hasNext()) {
+      String name = iterator.next();
+      try {
+        copy.put(name, builder.payload.get(name));
+      } catch (JSONException e) { // Should never happen.
+        throw new IllegalStateException("unexpected error: ", e);
+      }
+    }
+    this.payload = copy;
   }
 
   /** Builder for RawJwt */

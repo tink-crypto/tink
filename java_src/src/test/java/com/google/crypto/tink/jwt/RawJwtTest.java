@@ -382,7 +382,7 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void changingValuesInBuilderChangesAlreadBuiltToken() throws Exception {
+  public void changingValueInBuilderDoesntChangeAlreadyBuiltToken() throws Exception {
     RawJwt.Builder builder = new RawJwt.Builder();
 
     builder.setSubject("foo");
@@ -391,7 +391,7 @@ public final class RawJwtTest {
     builder.setSubject("bar");
     RawJwt barToken = builder.build();
 
-    assertThat(fooToken.getSubject()).isEqualTo("bar");  // This is wrong, we should change that.
+    assertThat(fooToken.getSubject()).isEqualTo("foo");
     assertThat(barToken.getSubject()).isEqualTo("bar");
   }
 }
