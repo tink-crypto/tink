@@ -31,13 +31,13 @@ public final class VerifiedJwtTest {
   public void emptyJwt_success() throws Exception {
     VerifiedJwt emptyToken = new VerifiedJwt(new RawJwt.Builder().build());
 
-    assertThat(emptyToken.getIssuer()).isNull();
-    assertThat(emptyToken.getSubject()).isNull();
-    assertThat(emptyToken.getAudiences()).isNull();
-    assertThat(emptyToken.getJwtId()).isNull();
-    assertThat(emptyToken.getExpiration()).isNull();
-    assertThat(emptyToken.getNotBefore()).isNull();
-    assertThat(emptyToken.getIssuedAt()).isNull();
+    assertThrows(JwtInvalidException.class, emptyToken::getIssuer);
+    assertThrows(JwtInvalidException.class, emptyToken::getSubject);
+    assertThrows(JwtInvalidException.class, emptyToken::getAudiences);
+    assertThrows(JwtInvalidException.class, emptyToken::getJwtId);
+    assertThrows(JwtInvalidException.class, emptyToken::getExpiration);
+    assertThrows(JwtInvalidException.class, emptyToken::getNotBefore);
+    assertThrows(JwtInvalidException.class, emptyToken::getIssuedAt);
   }
 
   @Test

@@ -76,7 +76,7 @@ public final class VerifiedJwt {
    * 26. To use it on older Android devices, enable API desugaring as shown in
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
-  public Instant getExpiration() {
+  public Instant getExpiration() throws JwtInvalidException  {
     return this.rawJwt.getExpiration();
   }
 
@@ -88,7 +88,7 @@ public final class VerifiedJwt {
    * 26. To use it on older Android devices, enable API desugaring as shown in
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
-  public Instant getNotBefore() {
+  public Instant getNotBefore() throws JwtInvalidException {
     return this.rawJwt.getNotBefore();
   }
 
@@ -100,7 +100,7 @@ public final class VerifiedJwt {
    * 26. To use it on older Android devices, enable API desugaring as shown in
    * https://developer.android.com/studio/write/java8-support#library-desugaring.
    */
-  public Instant getIssuedAt() {
+  public Instant getIssuedAt() throws JwtInvalidException {
     return this.rawJwt.getIssuedAt();
   }
 

@@ -18,7 +18,6 @@ import com.google.errorprone.annotations.Immutable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 
 /** A set of expected claims and headers to validate against another JWT. */
 @Immutable
@@ -130,44 +129,41 @@ public final class JwtValidator {
     validateTimestampClaims(target);
 
     if (this.issuer != null) {
-      String issuer = target.getIssuer();
-      if (issuer == null) {
+      if (!target.hasIssuer()) {
         throw new JwtInvalidException(
             String.format("invalid JWT; missing expected issuer %s.", this.issuer));
       }
-      if (!issuer.equals(this.issuer)) {
+      if (!target.getIssuer().equals(this.issuer)) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; expected issuer  %s, but got %s", this.issuer, issuer));
+            String.format("invalid JWT; expected issuer %s, but got %s", this.issuer, issuer));
       }
     }
     if (this.subject != null) {
-      String subject = target.getSubject();
-      if (subject == null) {
+      if (!target.hasSubject()) {
         throw new JwtInvalidException(
             String.format("invalid JWT; missing expected subject %s.", this.subject));
       }
-      if (!subject.equals(this.subject)) {
+      if (!target.getSubject().equals(this.subject)) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; expected subject  %s, but got %s", this.subject, subject));
+            String.format("invalid JWT; expected subject %s, but got %s", this.subject, subject));
       }
     }
-    List<String> audiences = target.getAudiences();
-    if ((audiences == null && this.audience != null)
-        || (audiences != null && !audiences.contains(this.audience))) {
+    boolean hasAudiences = target.hasAudiences();
+    if ((!hasAudiences && this.audience != null)
+        || (hasAudiences && !target.getAudiences().contains(this.audience))) {
       throw new JwtInvalidException(
           String.format(
               "invalid JWT; cannot find the expected audience %s in claimed audiences %s",
-              audience, audiences));
+              audience, target.getAudiences()));
     }
     if (this.jwtId != null) {
-      String jwtId = target.getJwtId();
-      if (jwtId == null) {
+      if (!target.hasJwtId()) {
         throw new JwtInvalidException(
             String.format("invalid JWT; missing expected JWT ID %s.", this.subject));
       }
-      if (!jwtId.equals(this.jwtId)) {
+      if (!target.getJwtId().equals(this.jwtId)) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; expected JWT ID  %s, but got %s", this.jwtId, jwtId));
+            String.format("invalid JWT; expected JWT ID %s, but got %s", this.jwtId, jwtId));
       }
     }
     return new VerifiedJwt(target);
@@ -176,14 +172,12 @@ public final class JwtValidator {
   private void validateTimestampClaims(RawJwt target) throws JwtInvalidException {
     Instant now = this.clock.instant();
 
-    Instant exp = target.getExpiration();
-    if (exp != null && exp.isBefore(now.minus(this.clockSkew))) {
-      throw new JwtInvalidException("token has expired since " + exp);
+    if (target.hasExpiration() && target.getExpiration().isBefore(now.minus(this.clockSkew))) {
+      throw new JwtInvalidException("token has expired since " + target.getExpiration());
     }
 
-    Instant nbf = target.getNotBefore();
-    if (nbf != null && nbf.isAfter(now.plus(this.clockSkew))) {
-      throw new JwtInvalidException("token cannot be used before " + nbf);
+    if (target.hasNotBefore() && target.getNotBefore().isAfter(now.plus(this.clockSkew))) {
+      throw new JwtInvalidException("token cannot be used before " + target.getNotBefore());
     }
   }
 }

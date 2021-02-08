@@ -32,70 +32,69 @@ import org.junit.runners.JUnit4;
 public final class RawJwtTest {
 
   @Test
-  public void noIssuer_success() throws Exception {
+  public void emptyToken_getRegisteredClaimShouldThrow() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
+    assertThrows(JwtInvalidException.class, token::getIssuer);
+    assertThrows(JwtInvalidException.class, token::getAudiences);
+    assertThrows(JwtInvalidException.class, token::getSubject);
+    assertThrows(JwtInvalidException.class, token::getJwtId);
+    assertThrows(JwtInvalidException.class, token::getExpiration);
+    assertThrows(JwtInvalidException.class, token::getNotBefore);
+    assertThrows(JwtInvalidException.class, token::getIssuedAt);
+  }
 
-    assertThat(token.getIssuer()).isNull();
+  @Test
+  public void emptyToken_hasShouldReturnFalse() throws Exception {
+    RawJwt token = new RawJwt.Builder().build();
+    assertThat(token.hasIssuer()).isFalse();
+    assertThat(token.hasSubject()).isFalse();
+    assertThat(token.hasAudiences()).isFalse();
+    assertThat(token.hasJwtId()).isFalse();
+    assertThat(token.hasExpiration()).isFalse();
+    assertThat(token.hasNotBefore()).isFalse();
+    assertThat(token.hasIssuedAt()).isFalse();
   }
 
   @Test
   public void setIssuer_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setIssuer("foo").build();
-
+    assertThat(token.hasIssuer()).isTrue();
     assertThat(token.getIssuer()).isEqualTo("foo");
-  }
-
-  @Test
-  public void noAudience_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getAudiences()).isNull();
   }
 
   @Test
   public void addAudience_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addAudience("foo").build();
+    assertThat(token.hasAudiences()).isTrue();
     assertThat(token.getAudiences()).containsExactly("foo");
   }
 
   @Test
   public void addMulitpleAudiences_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addAudience("foo").addAudience("bar").build();
+    assertThat(token.hasAudiences()).isTrue();
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
 
   @Test
-  public void noSubject_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getSubject()).isNull();
-  }
-
-  @Test
-  public void setUnsetSubject_returnsNull() throws Exception {
+  public void setUnsetSubject_shouldThrow() throws Exception {
+    // TODO(juerg): Don't allow null values to be set.
     RawJwt token = new RawJwt.Builder().setSubject("foo").setSubject(null).build();
-
-    assertThat(token.getSubject()).isNull();
+    assertThat(token.hasSubject()).isFalse();
+    assertThrows(JwtInvalidException.class, token::getSubject);
   }
 
   @Test
   public void setSubject_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setSubject("foo").build();
-
+    assertThat(token.hasSubject()).isTrue();
     assertThat(token.getSubject()).isEqualTo("foo");
-  }
-
-  @Test
-  public void noJwtId_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getJwtId()).isNull();
   }
 
   @Test
   public void setJwtId_success() throws Exception {
     RawJwt token = new RawJwt.Builder().setJwtId("foo").build();
-
+    assertThat(token.hasJwtId()).isTrue();
     assertThat(token.getJwtId()).isEqualTo("foo");
   }
 
@@ -185,23 +184,35 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void getUnknownClaim_returnsNull() throws Exception {
+  public void hasUnknownClaim_false() throws Exception {
+    RawJwt token = new RawJwt.Builder().build();
+    assertThat(token.hasClaim("claim")).isFalse();
+  }
+
+  @Test
+  public void getUnknownClaim_shouldThrow() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
 
-    assertThat(token.getBooleanClaim("claim")).isNull();
-    assertThat(token.getNumberClaim("claim")).isNull();
-    assertThat(token.getStringClaim("claim")).isNull();
-    assertThat(token.getJsonArrayClaim("claim")).isNull();
-    assertThat(token.getJsonObjectClaim("claim")).isNull();
+    assertThrows(JwtInvalidException.class, () -> token.getBooleanClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> token.getNumberClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> token.getStringClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> token.getJsonArrayClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> token.getJsonObjectClaim("claim"));
+  }
+
+  @Test
+  public void unknownClaimIsNotNull() throws Exception {
+    RawJwt token = new RawJwt.Builder().build();
     assertThat(token.isNullClaim("claim")).isFalse();
   }
 
   @Test
   public void addAndGetEncodedJsonArrayClaim_success() throws Exception {
     String encodedJsonArray = "[true, 123, 123.456, \"value\", [1, 2]]";
-
     RawJwt token =
         new RawJwt.Builder().addJsonArrayClaim("collection", encodedJsonArray).build();
+
+    assertThat(token.hasClaim("collection")).isTrue();
     String output = token.getJsonArrayClaim("collection");
     assertThat(output).isEqualTo("[true,123,123.456,\"value\",[1,2]]");
   }
@@ -225,9 +236,10 @@ public final class RawJwtTest {
   @Test
   public void addAndGetEncodedJsonObjectClaim_success() throws Exception {
     String encodedJsonObject = "{\"boolean\":false,\"obj1\":{\"obj2\":{\"42\":42}}}";
-
     RawJwt token =
         new RawJwt.Builder().addJsonObjectClaim("obj", encodedJsonObject).build();
+
+    assertThat(token.hasClaim("obj")).isTrue();
     String output = token.getJsonObjectClaim("obj");
 
     JSONObject obj = new JSONObject(output);
@@ -252,25 +264,12 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void noExpiration_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getExpiration()).isNull();
-  }
-
-  @Test
   public void setExpiration_success() throws Exception {
     Instant instant = Instant.now();
     RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
 
+    assertThat(token.hasExpiration()).isTrue();
     assertThat(token.getExpiration()).isEqualTo(instant.truncatedTo(SECONDS));
-  }
-
-  @Test
-  public void noNotBefore_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getNotBefore()).isNull();
   }
 
   @Test
@@ -278,21 +277,17 @@ public final class RawJwtTest {
     Instant instant = Instant.now();
     RawJwt token = new RawJwt.Builder().setNotBefore(instant).build();
 
+    assertThat(token.hasNotBefore()).isTrue();
     assertThat(token.getNotBefore()).isEqualTo(instant.truncatedTo(SECONDS));
   }
 
-  @Test
-  public void noIssuedAt_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
-
-    assertThat(token.getIssuedAt()).isNull();
-  }
 
   @Test
   public void setIssuedAt_success() throws Exception {
     Instant instant = Instant.now();
     RawJwt token = new RawJwt.Builder().setIssuedAt(instant).build();
 
+    assertThat(token.hasIssuedAt()).isTrue();
     assertThat(token.getIssuedAt()).isEqualTo(instant.truncatedTo(SECONDS));
   }
 

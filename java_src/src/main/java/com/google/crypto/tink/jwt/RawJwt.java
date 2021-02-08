@@ -223,15 +223,17 @@ public final class RawJwt {
     return payload.toString();
   }
 
+  boolean hasClaim(String name) {
+    JwtNames.validate(name);
+    return payload.has(name);
+  }
+
   Boolean getBooleanClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
     try {
       return (Boolean) payload.get(name);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
     }
   }
 
@@ -239,11 +241,8 @@ public final class RawJwt {
     JwtNames.validate(name);
     try {
       return (Double) payload.get(name);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-     // TODO(juerg): throw an exception instead.
-      return null;
     }
   }
 
@@ -251,11 +250,8 @@ public final class RawJwt {
     JwtNames.validate(name);
     try {
       return (String) payload.get(name);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-     // TODO(juerg): throw an exception instead.
-      return null;
     }
   }
 
@@ -273,11 +269,8 @@ public final class RawJwt {
     try {
       JSONObject claim = (JSONObject) payload.get(name);
       return claim.toString();
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-     // TODO(juerg): throw an exception instead.
-      return null;
     }
   }
 
@@ -286,44 +279,53 @@ public final class RawJwt {
     try {
       JSONArray claim = (JSONArray) payload.get(name);
       return claim.toString();
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-     // TODO(juerg): throw an exception instead.
-      return null;
     }
+  }
+
+  boolean hasIssuer() {
+    return payload.has(JwtNames.CLAIM_ISSUER);
   }
 
   String getIssuer() throws JwtInvalidException {
     try {
       return (String) payload.get(JwtNames.CLAIM_ISSUER);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + JwtNames.CLAIM_ISSUER + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
     }
+  }
+
+  boolean hasSubject() {
+    return payload.has(JwtNames.CLAIM_SUBJECT);
   }
 
   String getSubject() throws JwtInvalidException {
     try {
       return (String) payload.get(JwtNames.CLAIM_SUBJECT);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + JwtNames.CLAIM_SUBJECT + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
     }
+  }
+
+  boolean hasJwtId() {
+    return payload.has(JwtNames.CLAIM_JWT_ID);
   }
 
   String getJwtId() throws JwtInvalidException {
     try {
       return (String) payload.get(JwtNames.CLAIM_JWT_ID);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + JwtNames.CLAIM_JWT_ID + ": " + ex.getMessage());
+    }
+  }
+
+  boolean hasAudiences() {
+    try {
+      JSONArray audiences = (JSONArray) payload.get(JwtNames.CLAIM_AUDIENCE);
+      return audiences.length() > 0;
     } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
+      return false;
     }
   }
 
@@ -331,11 +333,8 @@ public final class RawJwt {
     JSONArray audiences;
     try {
       audiences = (JSONArray) payload.get(JwtNames.CLAIM_AUDIENCE);
-    } catch (ClassCastException ex) {
+    } catch (ClassCastException | JSONException ex) {
       throw new JwtInvalidException("claim " + JwtNames.CLAIM_AUDIENCE + ": " + ex.getMessage());
-    } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
     }
 
     List<String> result = new ArrayList<>(audiences.length());
@@ -351,24 +350,35 @@ public final class RawJwt {
     return Collections.unmodifiableList(result);
   }
 
-  private Instant getInstant(String name) {
+  private Instant getInstant(String name) throws JwtInvalidException {
     try {
       return Instant.ofEpochSecond(payload.getLong(name));
     } catch (JSONException ex) {
-      // TODO(juerg): throw an exception instead.
-      return null;
+      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
     }
   }
 
-  Instant getExpiration() {
+  boolean hasExpiration() {
+    return payload.has(JwtNames.CLAIM_EXPIRATION);
+  }
+
+  Instant getExpiration() throws JwtInvalidException {
     return getInstant(JwtNames.CLAIM_EXPIRATION);
   }
 
-  Instant getNotBefore() {
+  boolean hasNotBefore() {
+    return payload.has(JwtNames.CLAIM_NOT_BEFORE);
+  }
+
+  Instant getNotBefore() throws JwtInvalidException {
     return getInstant(JwtNames.CLAIM_NOT_BEFORE);
   }
 
-  Instant getIssuedAt() {
+  boolean hasIssuedAt() {
+    return payload.has(JwtNames.CLAIM_ISSUED_AT);
+  }
+
+  Instant getIssuedAt() throws JwtInvalidException {
     return getInstant(JwtNames.CLAIM_ISSUED_AT);
   }
 
