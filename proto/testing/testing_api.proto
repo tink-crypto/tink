@@ -367,7 +367,6 @@ message JwtValidator {
   google.protobuf.StringValue issuer = 1;
   google.protobuf.StringValue subject = 2;
   google.protobuf.StringValue audience = 3;
-  google.protobuf.StringValue jwt_id = 4;
   google.protobuf.Timestamp now = 5;
   google.protobuf.Duration clock_skew = 6;
 }

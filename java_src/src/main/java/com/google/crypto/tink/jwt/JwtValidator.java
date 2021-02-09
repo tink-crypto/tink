@@ -27,7 +27,6 @@ public final class JwtValidator {
   private final String issuer;
   private final String subject;
   private final String audience;
-  private final String jwtId;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -38,7 +37,6 @@ public final class JwtValidator {
     this.issuer = builder.issuer;
     this.subject = builder.subject;
     this.audience = builder.audience;
-    this.jwtId = builder.jwtId;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
@@ -48,7 +46,6 @@ public final class JwtValidator {
     private String issuer;
     private String subject;
     private String audience;
-    private String jwtId;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
@@ -56,7 +53,8 @@ public final class JwtValidator {
     }
 
     /**
-     * Sets the expected issuer claim.
+     * Sets the expected issuer of the token. When this is set, all tokens with missing or different
+     * {@code iss} claims are rejected.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
@@ -66,8 +64,8 @@ public final class JwtValidator {
     }
 
     /**
-     * Sets the expected subject claim.
-     *
+     * Sets the expected subject of the token. When this is set, all tokens with missing or
+     * different {@code sub} claims are rejected.
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
@@ -76,22 +74,14 @@ public final class JwtValidator {
     }
 
     /**
-     * Sets the expected audience claim.
+     * Sets the expected audience. When this is set, all tokens that do not contain this audience
+     * in their {@code aud} claims are rejected. If is not set, all token that have {@code aud}
+     * claims are rejected. So this must be set for token that have {@code aud} claims.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder setAudience(String value) {
       this.audience = value;
-      return this;
-    }
-
-    /**
-     * Sets the expected JWT ID claim.
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
-     */
-    public Builder setJwtId(String value) {
-      this.jwtId = value;
       return this;
     }
 
@@ -148,22 +138,14 @@ public final class JwtValidator {
             String.format("invalid JWT; expected subject %s, but got %s", this.subject, subject));
       }
     }
-    boolean hasAudiences = target.hasAudiences();
-    if ((!hasAudiences && this.audience != null)
-        || (hasAudiences && !target.getAudiences().contains(this.audience))) {
-      throw new JwtInvalidException(
-          String.format(
-              "invalid JWT; cannot find the expected audience %s in claimed audiences %s",
-              audience, target.getAudiences()));
-    }
-    if (this.jwtId != null) {
-      if (!target.hasJwtId()) {
+    if (this.audience != null) {
+      if (!target.hasAudiences() || !target.getAudiences().contains(this.audience)) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected JWT ID %s.", this.subject));
+            String.format("invalid JWT; missing expected audience %s.", this.audience));
       }
-      if (!target.getJwtId().equals(this.jwtId)) {
-        throw new JwtInvalidException(
-            String.format("invalid JWT; expected JWT ID %s, but got %s", this.jwtId, jwtId));
+    } else {
+      if (target.hasAudiences()) {
+        throw new JwtInvalidException("invalid JWT; token has audience set, but validator not.");
       }
     }
     return new VerifiedJwt(target);
