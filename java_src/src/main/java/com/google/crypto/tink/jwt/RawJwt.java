@@ -55,20 +55,70 @@ public final class RawJwt {
     this.payload = copy;
   }
 
+  private RawJwt(String jsonPayload) throws JwtInvalidException {
+    try {
+      this.payload = new JSONObject(jsonPayload);
+      validateStringClaim(JwtNames.CLAIM_ISSUER);
+      validateStringClaim(JwtNames.CLAIM_SUBJECT);
+      validateStringClaim(JwtNames.CLAIM_JWT_ID);
+      validateNumberClaim(JwtNames.CLAIM_EXPIRATION);
+      validateNumberClaim(JwtNames.CLAIM_NOT_BEFORE);
+      validateNumberClaim(JwtNames.CLAIM_ISSUED_AT);
+      validateAudienceClaim();
+    } catch (JSONException ex) {
+      throw new JwtInvalidException("invalid JWT payload: " + ex);
+    }
+  }
+
+  private void validateStringClaim(String name) throws JSONException, JwtInvalidException {
+    if (!this.payload.has(name)) {
+      return;
+    }
+    if (!(this.payload.get(name) instanceof String)) {
+      throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a string.");
+    }
+  }
+
+  private void validateNumberClaim(String name) throws JSONException, JwtInvalidException {
+    if (!this.payload.has(name)) {
+      return;
+    }
+    if (!(this.payload.get(name) instanceof Double)
+        && !(this.payload.get(name) instanceof Integer)
+        && !(this.payload.get(name) instanceof Long)) {
+      throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a number.");
+    }
+  }
+
+  private void validateAudienceClaim() throws JSONException, JwtInvalidException {
+    if (!this.payload.has(JwtNames.CLAIM_AUDIENCE)) {
+      return;
+    }
+    Object audienceObj = this.payload.get(JwtNames.CLAIM_AUDIENCE);
+    if (audienceObj instanceof String) {
+      JSONArray audiences = new JSONArray();
+      audiences.put(audienceObj);
+      this.payload.put(JwtNames.CLAIM_AUDIENCE, audiences);
+      return;
+    }
+    // getAudiences makes sure that all entries are strings.
+    List<String> audiences = this.getAudiences();
+    if (audiences.size() < 1) {
+      throw new JwtInvalidException(
+          "invalid JWT payload: claim " + JwtNames.CLAIM_AUDIENCE + " is present but empty.");
+    }
+  }
+
+  static RawJwt fromJsonPayload(String jsonPayload) throws JwtInvalidException {
+    return new RawJwt(jsonPayload);
+  }
+
   /** Builder for RawJwt */
   public static final class Builder {
     private final JSONObject payload;
 
     public Builder() {
       payload = new JSONObject();
-    }
-
-    Builder(String jsonPayload) throws JwtInvalidException {
-      try {
-        this.payload = new JSONObject(jsonPayload);
-      } catch (JSONException ex) {
-        throw new JwtInvalidException("invalid JWT payload: " + ex);
-      }
     }
 
     private Builder setPayload(String name, Object value) {
@@ -321,12 +371,8 @@ public final class RawJwt {
   }
 
   boolean hasAudiences() {
-    try {
-      JSONArray audiences = (JSONArray) payload.get(JwtNames.CLAIM_AUDIENCE);
-      return audiences.length() > 0;
-    } catch (JSONException ex) {
-      return false;
-    }
+    // If an audience claim is present, it is always a JSONArray with length > 0.
+    return payload.has(JwtNames.CLAIM_AUDIENCE);
   }
 
   List<String> getAudiences() throws JwtInvalidException {

@@ -167,7 +167,7 @@ public class JwtHmacKeyManagerTest {
         UnsupportedOperationException.class,
         () ->
             factory.deriveKey(
-                JwtHmacKeyFormat.newBuilder().build(),
+                JwtHmacKeyFormat.getDefaultInstance(),
                 new ByteArrayInputStream(Random.randBytes(100))));
   }
 

@@ -110,21 +110,6 @@ public final class VerifiedJwtTest {
   }
 
   @Test
-  public void getJwtIdFromInt_throwsException() throws Exception {
-    RawJwt rawToken = new RawJwt.Builder("{\"jti\":1234}").build();
-    VerifiedJwt token = new VerifiedJwt(rawToken);
-    // TODO(juerg): Throw a JwtInvalidException on construction of RawJwt.
-    assertThrows(JwtInvalidException.class, token::getJwtId);
-  }
-
-  @Test
-  public void getJwtIdFromNull_success() throws Exception {
-    RawJwt rawToken = new RawJwt.Builder("{\"jti\":null}").build();
-    VerifiedJwt token = new VerifiedJwt(rawToken);
-    assertThrows(JwtInvalidException.class, token::getJwtId);
-  }
-
-  @Test
   public void getExpiration_success() throws Exception {
     RawJwt rawToken = new RawJwt.Builder().setExpiration(Instant.ofEpochSecond(1234567)).build();
     VerifiedJwt token = new VerifiedJwt(rawToken);

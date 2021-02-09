@@ -298,14 +298,15 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromJson_success() throws Exception {
+  public void fromJsonPayload_success() throws Exception {
     String input =
-        "{\"jti\": \"abc123\", \"aud\": [\"me\", \"you\"], \"custom\": "
-            + " {\"int\": 123, \"string\": \"value\"}}";
+        "{\"jti\": \"abc123\", \"aud\": [\"me\", \"you\"], \"iat\": 123, "
+            + "\"custom\": {\"int\": 123, \"string\": \"value\"}}";
 
-    RawJwt token = new RawJwt.Builder(input).build();
+    RawJwt token = RawJwt.fromJsonPayload(input);
     assertThat(token.getJwtId()).isEqualTo("abc123");
     assertThat(token.getAudiences()).containsExactly("me", "you");
+    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
 
     String encodedObject = token.getJsonObjectClaim("custom");
     JSONObject custom = new JSONObject(encodedObject);
@@ -314,22 +315,46 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromInvalidJsonString_shouldThrow() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> new RawJwt.Builder("invalid!!!"));
+  public void fromJsonPayloadWithFloatIssuedAt_success() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload("{\"iat\": 123.456}");
+    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
   }
 
   @Test
-  public void fromJson_invalidItemInAudience() throws Exception {
-    String input = "{\"aud\": [\"me\", 123]}";
-    RawJwt token = new RawJwt.Builder(input).build();
-    assertThrows(JwtInvalidException.class, token::getAudiences);
+  public void fromEmptyJsonPayload_success() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload("{}");
+    assertThat(token.hasIssuer()).isFalse();
   }
 
   @Test
-  public void fromJson_audienceIsNotAnArray() throws Exception {
+  public void fromInvalidJsonPayload_shouldThrow() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("invalid!!!"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iss\": true}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iss\": null}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"sub\": 123}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": 123}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": [\"a\", 1]}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": [null]}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"jti\": []}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"exp\": \"123\"}"));
+  }
+
+  @Test
+  public void fromJsonPayloadWithAudienceAsString_convertedToArray() throws Exception {
+    // According to https://tools.ietf.org/html/rfc7519#section-4.1.3, this should be accepted.
     String input = "{\"aud\": \"me\"}";
-    RawJwt token = new RawJwt.Builder(input).build();
-    assertThrows(JwtInvalidException.class, token::getAudiences);
+    RawJwt token = RawJwt.fromJsonPayload(input);
+    assertThat(token.getAudiences()).containsExactly("me");
+    assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":[\"me\"]}");
+  }
+
+  @Test
+  public void fromJsonPayloadWithEmptyAudience_shouldThrow() throws Exception {
+    String input = "{\"jti\": \"id\", \"aud\": []}";
+    // An audience claim that is present but empty results in a token that must always be rejected
+    // by the receiver, because the receiver is required to test that it is among the audiences.
+    // See https://tools.ietf.org/html/rfc7519#section-4.1.3. It is better to consider it invalid.
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
   }
 
   @Test

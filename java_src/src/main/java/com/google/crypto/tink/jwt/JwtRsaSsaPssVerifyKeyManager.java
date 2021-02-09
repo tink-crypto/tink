@@ -92,7 +92,7 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
                 verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
                 JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
                 String payload = JwtFormat.decodePayload(parts[1]);
-                RawJwt token = new RawJwt.Builder(payload).build();
+                RawJwt token = RawJwt.fromJsonPayload(payload);
                 return validator.validate(token);
               }
             };
