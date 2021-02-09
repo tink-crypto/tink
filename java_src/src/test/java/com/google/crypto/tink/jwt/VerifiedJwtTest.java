@@ -28,7 +28,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class VerifiedJwtTest {
   @Test
-  public void emptyJwt_success() throws Exception {
+  public void emptyToken_getMethodsShouldThrow() throws Exception {
     VerifiedJwt emptyToken = new VerifiedJwt(new RawJwt.Builder().build());
 
     assertThrows(JwtInvalidException.class, emptyToken::getIssuer);
@@ -38,6 +38,30 @@ public final class VerifiedJwtTest {
     assertThrows(JwtInvalidException.class, emptyToken::getExpiration);
     assertThrows(JwtInvalidException.class, emptyToken::getNotBefore);
     assertThrows(JwtInvalidException.class, emptyToken::getIssuedAt);
+    assertThrows(JwtInvalidException.class, () -> emptyToken.getBooleanClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> emptyToken.getStringClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> emptyToken.getNumberClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> emptyToken.getJsonArrayClaim("claim"));
+    assertThrows(JwtInvalidException.class, () -> emptyToken.getJsonObjectClaim("claim"));
+  }
+
+  @Test
+  public void emptyToken_hasMethodsShouldReturnFalse() throws Exception {
+    RawJwt emptyToken = new RawJwt.Builder().build();
+    assertThat(emptyToken.hasIssuer()).isFalse();
+    assertThat(emptyToken.hasSubject()).isFalse();
+    assertThat(emptyToken.hasAudiences()).isFalse();
+    assertThat(emptyToken.hasJwtId()).isFalse();
+    assertThat(emptyToken.hasExpiration()).isFalse();
+    assertThat(emptyToken.hasNotBefore()).isFalse();
+    assertThat(emptyToken.hasIssuedAt()).isFalse();
+    assertThat(emptyToken.hasClaim("claim")).isFalse();
+  }
+
+  @Test
+  public void emptyToken_isNullClaimReturnFalse() throws Exception {
+    RawJwt emptyToken = new RawJwt.Builder().build();
+    assertThat(emptyToken.isNullClaim("claim")).isFalse();
   }
 
   @Test
@@ -45,6 +69,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setIssuer("foo").build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasIssuer()).isTrue();
     assertThat(token.getIssuer()).isEqualTo("foo");
   }
 
@@ -53,6 +78,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setSubject("foo").build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasSubject()).isTrue();
     assertThat(token.getSubject()).isEqualTo("foo");
   }
 
@@ -61,6 +87,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().addAudience("foo").build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasAudiences()).isTrue();
     assertThat(token.getAudiences()).containsExactly("foo");
   }
 
@@ -69,6 +96,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().addAudience("foo").addAudience("bar").build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasAudiences()).isTrue();
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
   }
 
@@ -77,6 +105,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setJwtId("foo").build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasJwtId()).isTrue();
     assertThat(token.getJwtId()).isEqualTo("foo");
   }
 
@@ -100,6 +129,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setExpiration(Instant.ofEpochSecond(1234567)).build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasExpiration()).isTrue();
     assertThat(token.getExpiration()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
 
@@ -108,6 +138,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setNotBefore(Instant.ofEpochSecond(1234567)).build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasNotBefore()).isTrue();
     assertThat(token.getNotBefore()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
 
@@ -116,6 +147,7 @@ public final class VerifiedJwtTest {
     RawJwt rawToken = new RawJwt.Builder().setIssuedAt(Instant.ofEpochSecond(1234567)).build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasIssuedAt()).isTrue();
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(1234567));
   }
 
@@ -158,9 +190,13 @@ public final class VerifiedJwtTest {
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
+    assertThat(token.hasClaim("bool")).isTrue();
     assertThat(token.getBooleanClaim("bool")).isTrue();
+    assertThat(token.hasClaim("string")).isTrue();
     assertThat(token.getStringClaim("string")).isEqualTo("issuer");
+    assertThat(token.hasClaim("int")).isTrue();
     assertThat(token.getNumberClaim("int")).isEqualTo(123.0);
+    assertThat(token.hasClaim("double")).isTrue();
     assertThat(token.getNumberClaim("double")).isEqualTo(123.456);
   }
 
@@ -171,8 +207,11 @@ public final class VerifiedJwtTest {
         .addStringClaim("null_string", "null")
         .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
+    assertThat(token.hasClaim("null_object")).isTrue();
     assertThat(token.isNullClaim("null_object")).isTrue();
+    assertThat(token.hasClaim("null_string")).isTrue();
     assertThat(token.isNullClaim("null_string")).isFalse();
+    assertThat(token.hasClaim("unknown_claim")).isFalse();
     assertThat(token.isNullClaim("unknown_claim")).isFalse();
   }
 
@@ -184,6 +223,7 @@ public final class VerifiedJwtTest {
             .addJsonArrayClaim("collection", "[true, 123, 123.456, \"value\", [1,2]]")
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
+    assertThat(token.hasClaim("collection")).isTrue();
     assertThat(token.getJsonArrayClaim("collection"))
         .isEqualTo("[true,123,123.456,\"value\",[1,2]]");
   }
@@ -197,7 +237,28 @@ public final class VerifiedJwtTest {
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.getJwtId()).isEqualTo("id");
+    assertThat(token.hasClaim("obj")).isTrue();
     assertThat(token.getJsonObjectClaim("obj"))
         .isEqualTo("{\"obj1\":{\"obj2\":{\"42\":[42]}}}");
+  }
+
+  @Test
+  public void customClaimNames_success() throws Exception {
+    RawJwt token =
+        new RawJwt.Builder()
+            .setIssuer("issuer")
+            .setExpiration(Instant.ofEpochSecond(1234567))
+            .addStringClaim("string", "value")
+            .addBooleanClaim("boolean", true)
+            .addNumberClaim("number", 123.456)
+            .addNullClaim("nothing")
+            .build();
+    assertThat(token.customClaimNames()).containsExactly("string", "boolean", "number", "nothing");
+  }
+
+  @Test
+  public void customClaimNames_empty() throws Exception {
+    RawJwt token = new RawJwt.Builder().build();
+    assertThat(token.customClaimNames()).isEmpty();
   }
 }
