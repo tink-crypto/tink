@@ -48,7 +48,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code iss} claim is present.
    */
-  boolean hasIssuer() {
+  public boolean hasIssuer() {
     return this.rawJwt.hasIssuer();
   }
 
@@ -63,7 +63,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code sub} claim is present.
    */
-  boolean hasSubject() {
+  public boolean hasSubject() {
     return this.rawJwt.hasSubject();
   }
 
@@ -78,7 +78,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code aud} claim is present.
    */
-  boolean hasAudiences() {
+  public boolean hasAudiences() {
     return this.rawJwt.hasAudiences();
   }
 
@@ -93,7 +93,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code jti} claim is present.
    */
-  boolean hasJwtId() {
+  public boolean hasJwtId() {
     return this.rawJwt.hasJwtId();
   }
 
@@ -113,7 +113,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code exp} claim is present.
    */
-  boolean hasExpiration() {
+  public boolean hasExpiration() {
     return this.rawJwt.hasExpiration();
   }
 
@@ -133,7 +133,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code nbf} claim is present.
    */
-  boolean hasNotBefore() {
+  public boolean hasNotBefore() {
     return this.rawJwt.hasNotBefore();
   }
 
@@ -152,7 +152,7 @@ public final class VerifiedJwt {
   /**
    * Returns true iff the {@code iat} claim is present.
    */
-  boolean hasIssuedAt() {
+  public boolean hasIssuedAt() {
     return this.rawJwt.hasIssuedAt();
   }
 
@@ -160,7 +160,7 @@ public final class VerifiedJwt {
    * Returns the non-registered claim of name {@code name} and type Boolean. Throws a
    * JwtInvalidException if no such claim is present or the claim has another type.
    */
-  Boolean getBooleanClaim(String name) throws JwtInvalidException {
+  public Boolean getBooleanClaim(String name) throws JwtInvalidException {
     return this.rawJwt.getBooleanClaim(name);
   }
 
@@ -168,7 +168,7 @@ public final class VerifiedJwt {
    * Returns the non-registered claim of name {@code name} and type Number. Throws a
    * JwtInvalidException if no such claim is present or the claim has another type.
    */
-  Double getNumberClaim(String name) throws JwtInvalidException {
+  public Double getNumberClaim(String name) throws JwtInvalidException {
     return this.rawJwt.getNumberClaim(name);
   }
 
@@ -176,12 +176,12 @@ public final class VerifiedJwt {
    * Returns the non-registered claim of name {@code name} and type String. Throws a
    * JwtInvalidException if no such claim is present or the claim has another type.
    */
-  String getStringClaim(String name) throws JwtInvalidException {
+  public String getStringClaim(String name) throws JwtInvalidException {
     return this.rawJwt.getStringClaim(name);
   }
 
   /** Returns true iff there is a non-registered claim of name {@code name} and type NULL. */
-  boolean isNullClaim(String name) {
+  public boolean isNullClaim(String name) {
     return this.rawJwt.isNullClaim(name);
   }
 
@@ -189,7 +189,7 @@ public final class VerifiedJwt {
    * Returns the non-registered claim of name {@code name} and type JSON Object encoded in a string.
    * Throws a JwtInvalidException if no such claim is present or the claim has another type.
    */
-  String getJsonObjectClaim(String name) throws JwtInvalidException {
+  public String getJsonObjectClaim(String name) throws JwtInvalidException {
     return this.rawJwt.getJsonObjectClaim(name);
   }
 
@@ -197,14 +197,14 @@ public final class VerifiedJwt {
    * Returns the non-registered claim of name {@code name} and type JSON Array encoded in a string.
    * Throws a JwtInvalidException if no such claim is present or the claim has another type.
    */
-  String getJsonArrayClaim(String name) throws JwtInvalidException {
+  public String getJsonArrayClaim(String name) throws JwtInvalidException {
     return this.rawJwt.getJsonArrayClaim(name);
   }
 
   /**
    * Returns true iff the non-registered claim of name {@code name} is present.
    */
-  boolean hasClaim(String name) {
+  public boolean hasClaim(String name) {
     return this.rawJwt.hasClaim(name);
   }
 
