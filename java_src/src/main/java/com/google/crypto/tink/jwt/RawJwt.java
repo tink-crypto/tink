@@ -122,6 +122,11 @@ public final class RawJwt {
     }
 
     private Builder setPayload(String name, Object value) {
+      if (value == null) {
+        throw new NullPointerException(
+            "Null pointers as claim values are not allowed. Use addNullClaim() to add a JSON null "
+                + "object.");
+      }
       try {
         payload.put(name, value);
         return this;
@@ -155,6 +160,9 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder addAudience(String value) {
+      if (value == null) {
+        throw new NullPointerException("claims with null value are not allowed.");
+      }
       JSONArray audiences;
       try {
         audiences = payload.getJSONArray(JwtNames.CLAIM_AUDIENCE);

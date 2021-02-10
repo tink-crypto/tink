@@ -77,11 +77,28 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void setUnsetSubject_shouldThrow() throws Exception {
-    // TODO(juerg): Don't allow null values to be set.
-    RawJwt token = new RawJwt.Builder().setSubject("foo").setSubject(null).build();
-    assertThat(token.hasSubject()).isFalse();
-    assertThrows(JwtInvalidException.class, token::getSubject);
+  public void setNullNameOrValue_shouldThrow() throws Exception {
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setIssuer(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setSubject(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().addAudience(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setJwtId(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setExpiration(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setNotBefore(null));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().setIssuedAt(null));
+    assertThrows(
+        NullPointerException.class, () -> new RawJwt.Builder().addBooleanClaim(null, true));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().addNumberClaim(null, 1.0));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().addStringClaim(null, "a"));
+    assertThrows(NullPointerException.class, () -> new RawJwt.Builder().addStringClaim("a", null));
+    assertThrows(
+        NullPointerException.class,
+        () -> new RawJwt.Builder().addJsonObjectClaim(null, "{\"a\":\"b\"}"));
+    assertThrows(
+        NullPointerException.class, () -> new RawJwt.Builder().addJsonObjectClaim("a", null));
+    assertThrows(
+        NullPointerException.class, () -> new RawJwt.Builder().addJsonArrayClaim(null, "[1, 2]"));
+    assertThrows(
+        NullPointerException.class, () -> new RawJwt.Builder().addJsonArrayClaim("a", null));
   }
 
   @Test
@@ -298,6 +315,12 @@ public final class RawJwtTest {
   }
 
   @Test
+  public void getJsonPayloadWithNullClaim_success() throws Exception {
+    RawJwt token = new RawJwt.Builder().addNullClaim("null_claim").build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"null_claim\":null}");
+  }
+
+  @Test
   public void fromJsonPayload_success() throws Exception {
     String input =
         "{\"jti\": \"abc123\", \"aud\": [\"me\", \"you\"], \"iat\": 123, "
@@ -324,6 +347,17 @@ public final class RawJwtTest {
   public void fromEmptyJsonPayload_success() throws Exception {
     RawJwt token = RawJwt.fromJsonPayload("{}");
     assertThat(token.hasIssuer()).isFalse();
+  }
+
+  @Test
+  public void fromJsonPayloadWithNullClaim_success() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload("{\"null_claim\":null}");
+    assertThat(token.isNullClaim("null_claim")).isTrue();
+  }
+
+  @Test
+  public void fromNullJsonPayload_shouldThrow() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("null"));
   }
 
   @Test
