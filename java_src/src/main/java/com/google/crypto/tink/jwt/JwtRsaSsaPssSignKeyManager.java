@@ -53,26 +53,25 @@ public final class JwtRsaSsaPssSignKeyManager
   private static final void selfTestKey(
       RSAPrivateCrtKey privateKey, JwtRsaSsaPssPrivateKey keyProto)
       throws GeneralSecurityException {
-    java.security.KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    java.security.KeyFactory factory = EngineFactory.KEY_FACTORY.getInstance("RSA");
     RSAPublicKey publicKey =
         (RSAPublicKey)
-            kf.generatePublic(
+            factory.generatePublic(
                 new RSAPublicKeySpec(
                     new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
                     new BigInteger(1, keyProto.getPublicKey().getE().toByteArray())));
     // Sign and verify a test message to make sure that the key is correct.
-    String algorithm =
-        JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(keyProto.getPublicKey().getAlgorithm());
-    Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
-    int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
+    JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
+    int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
     SelfKeyTestValidators.validateRsaSsaPss(privateKey, publicKey, hash, hash, saltLength);
   }
 
   private static final RSAPrivateCrtKey createPrivateKey(JwtRsaSsaPssPrivateKey keyProto)
       throws GeneralSecurityException {
-    java.security.KeyFactory kf = EngineFactory.KEY_FACTORY.getInstance("RSA");
+    java.security.KeyFactory factory = EngineFactory.KEY_FACTORY.getInstance("RSA");
     return (RSAPrivateCrtKey)
-        kf.generatePrivate(
+        factory.generatePrivate(
             new RSAPrivateCrtKeySpec(
                 new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
                 new BigInteger(1, keyProto.getPublicKey().getE().toByteArray()),
@@ -95,17 +94,17 @@ public final class JwtRsaSsaPssSignKeyManager
         throws GeneralSecurityException {
       RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
       selfTestKey(privateKey, keyProto);
-      final String algorithm =
-          JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(keyProto.getPublicKey().getAlgorithm());
-      Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
-      int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
+      JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+      Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
+      int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
       final RsaSsaPssSignJce signer = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
+      final String algorithmName = JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(algorithm);
 
       return new JwtPublicKeySign() {
         @Override
         public String sign(RawJwt token) throws GeneralSecurityException {
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
+              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

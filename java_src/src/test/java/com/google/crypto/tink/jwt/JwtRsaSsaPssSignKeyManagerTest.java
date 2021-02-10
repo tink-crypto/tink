@@ -444,11 +444,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
 
-    String algorithm = JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(
-          keyProto.getPublicKey().getAlgorithm());
-
-    Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
-    int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
+    JwtRsaSsaPssAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
+    int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
     RsaSsaPssSignJce rawSigner = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);

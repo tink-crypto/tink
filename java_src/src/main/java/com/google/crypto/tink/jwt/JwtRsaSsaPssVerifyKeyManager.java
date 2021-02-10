@@ -36,13 +36,14 @@ import java.security.spec.RSAPublicKeySpec;
  * generation.
  */
 class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey> {
-  static final String getKeyAlgorithm(JwtRsaSsaPssAlgorithm algorithmProto)
+
+  static final String getKeyAlgorithm(JwtRsaSsaPssAlgorithm algorithm)
       throws GeneralSecurityException {
 
     // Note: each algorithm defines not just the modulo size, but also the
     // hash length and salt length to use.
     // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5
-    switch (algorithmProto) {
+    switch (algorithm) {
       case PS256:
         return "PS256";
       case PS384:
@@ -50,7 +51,35 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
       case PS512:
         return "PS512";
       default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithmProto.name());
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
+    }
+  }
+
+  static final Enums.HashType hashForPssAlgorithm(JwtRsaSsaPssAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case PS256:
+        return Enums.HashType.SHA256;
+      case PS384:
+        return Enums.HashType.SHA384;
+      case PS512:
+        return Enums.HashType.SHA512;
+      default:
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
+    }
+  }
+
+  static final int saltLengthForPssAlgorithm(JwtRsaSsaPssAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case PS256:
+        return 32;
+      case PS384:
+        return 48;
+      case PS512:
+        return 64;
+      default:
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
     }
   }
 
@@ -70,12 +99,12 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
           @Override
           public JwtPublicKeyVerify getPrimitive(JwtRsaSsaPssPublicKey keyProto)
               throws GeneralSecurityException {
-            final String algorithm = getKeyAlgorithm(keyProto.getAlgorithm());
             RSAPublicKey publickey = createPublicKey(keyProto);
-            Enums.HashType hash = JwtSigUtil.hashForPssAlgorithm(algorithm);
-            int saltLength = JwtSigUtil.saltLengthForPssAlgorithm(algorithm);
+            Enums.HashType hash = hashForPssAlgorithm(keyProto.getAlgorithm());
+            int saltLength = saltLengthForPssAlgorithm(keyProto.getAlgorithm());
             final RsaSsaPssVerifyJce verifier =
                 new RsaSsaPssVerifyJce(publickey, hash, hash, saltLength);
+            final String algorithmName = getKeyAlgorithm(keyProto.getAlgorithm());
             return new JwtPublicKeyVerify() {
               @Override
               public VerifiedJwt verify(String compact, JwtValidator validator)
@@ -90,7 +119,7 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
                 byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
                 verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
-                JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+                JwtFormat.validateHeader(algorithmName, JwtFormat.decodeHeader(parts[0]));
                 String payload = JwtFormat.decodePayload(parts[1]);
                 RawJwt token = RawJwt.fromJsonPayload(payload);
                 return validator.validate(token);
