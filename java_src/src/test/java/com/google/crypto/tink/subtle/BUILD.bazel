@@ -8,7 +8,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
@@ -18,7 +18,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -30,7 +30,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
@@ -42,7 +42,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -67,7 +67,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -76,7 +76,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -108,14 +108,14 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -200,7 +200,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
@@ -210,7 +210,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -302,7 +302,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
@@ -312,7 +312,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -340,7 +340,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink:key_wrap",
@@ -350,7 +350,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -373,7 +373,7 @@ java_test(
     ],
     tags = ["notsan"],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
@@ -385,7 +385,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -398,7 +398,7 @@ java_test(
     ],
     tags = ["notsan"],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
@@ -410,7 +410,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -450,7 +450,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -459,7 +459,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -565,7 +565,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
@@ -574,7 +574,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -642,7 +642,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     runtime_deps = [
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -650,6 +650,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )

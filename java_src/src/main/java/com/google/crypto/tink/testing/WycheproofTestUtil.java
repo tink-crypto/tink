@@ -18,6 +18,10 @@ package com.google.crypto.tink.testing;
 
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums.HashType;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /** Wycheproof Test helpers. */
 public class WycheproofTestUtil {
@@ -88,20 +90,20 @@ public class WycheproofTestUtil {
     return result.toByteArray();
   }
 
-  /** Gets JSONObject from file. */
-  public static JSONObject readJson(String path) throws Exception {
+  /** Gets JsonObject from file. */
+  public static JsonObject readJson(String path) throws Exception {
     String filePath = path;
     if (TestUtil.isAndroid()) {
       // TODO(b/67385998): make this work outside google3.
       filePath = "/sdcard/googletest/test_runfiles/google3/" + path;
     }
-    JSONObject result;
+    JsonObject result;
     try (FileInputStream fileInputStream = new FileInputStream(new File(filePath))) {
-      result = new JSONObject(new String(readAll(fileInputStream), UTF_8));
+      result = JsonParser.parseString(new String(readAll(fileInputStream), UTF_8)).getAsJsonObject();
     }
-    String algorithm = result.getString("algorithm");
-    String generatorVersion = result.getString("generatorVersion");
-    int numTests = result.getInt("numberOfTests");
+    String algorithm = result.get("algorithm").getAsString();
+    String generatorVersion = result.get("generatorVersion").getAsString();
+    int numTests = result.get("numberOfTests").getAsInt();
     System.out.println(
         String.format(
             "Read from %s total %d test cases for algorithm %s with generator version %s",
@@ -128,11 +130,11 @@ public class WycheproofTestUtil {
   }
 
   /** @return true if the test case has one of the flags. */
-  public static boolean checkFlags(JSONObject testcase, String... flags) throws Exception {
-    JSONArray entries = testcase.getJSONArray("flags");
-    for (int i = 0; i < entries.length(); i++) {
+  public static boolean checkFlags(JsonObject testcase, String... flags) throws Exception {
+    JsonArray entries = testcase.get("flags").getAsJsonArray();
+    for (int i = 0; i < entries.size(); i++) {
       for (String flag : flags) {
-        if (flag.equals(entries.get(i))) {
+        if (flag.equals(entries.get(i).getAsString())) {
           return true;
         }
       }

@@ -23,10 +23,10 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -122,33 +122,33 @@ public final class Ed25519SignTest {
     }
   }
 
-  private byte[] getMessage(JSONObject testcase) throws Exception {
+  private byte[] getMessage(JsonObject testcase) throws Exception {
     if (testcase.has("msg")) {
-      return Hex.decode(testcase.getString("msg"));
+      return Hex.decode(testcase.get("msg").getAsString());
     } else {
-      return Hex.decode(testcase.getString("message"));
+      return Hex.decode(testcase.get("message").getAsString());
     }
   }
 
   @Test
   public void testSigningWithWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/eddsa_test.json");
     int errors = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONObject key = group.getJSONObject("key");
-      byte[] privateKey = Hex.decode(key.getString("sk"));
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+    JsonArray testGroups = json.get("testGroups").getAsJsonArray();
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonObject key = group.get("key").getAsJsonObject();
+      byte[] privateKey = Hex.decode(key.get("sk").getAsString());
+      JsonArray tests = group.get("tests").getAsJsonArray();
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
             String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+                "testcase %d (%s)", testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         byte[] msg = getMessage(testcase);
-        byte[] sig = Hex.decode(testcase.getString("sig"));
-        String result = testcase.getString("result");
+        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
+        String result = testcase.get("result").getAsString();
         if (result.equals("invalid")) {
           continue;
         }
