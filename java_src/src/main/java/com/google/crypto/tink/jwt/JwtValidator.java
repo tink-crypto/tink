@@ -59,6 +59,9 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
+      if (value == null) {
+        throw new NullPointerException("issuer cannot be null");
+      }
       this.issuer = value;
       return this;
     }
@@ -69,6 +72,9 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
+      if (value == null) {
+        throw new NullPointerException("subject cannot be null");
+      }
       this.subject = value;
       return this;
     }
@@ -81,12 +87,18 @@ public final class JwtValidator {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder setAudience(String value) {
+      if (value == null) {
+        throw new NullPointerException("audience cannot be null");
+      }
       this.audience = value;
       return this;
     }
 
     /** Sets the clock used to verify timestamp claims. */
     public Builder setClock(java.time.Clock clock) {
+      if (clock == null) {
+        throw new NullPointerException("clock cannot be null");
+      }
       this.clock = clock;
       return this;
     }

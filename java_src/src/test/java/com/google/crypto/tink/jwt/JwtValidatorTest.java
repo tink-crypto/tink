@@ -30,6 +30,15 @@ import org.junit.runners.JUnit4;
 public final class JwtValidatorTest {
 
   @Test
+  public void setNullValue_shouldThrow() throws Exception {
+    assertThrows(NullPointerException.class, () -> new JwtValidator.Builder().setIssuer(null));
+    assertThrows(NullPointerException.class, () -> new JwtValidator.Builder().setSubject(null));
+    assertThrows(NullPointerException.class, () -> new JwtValidator.Builder().setAudience(null));
+    assertThrows(NullPointerException.class, () -> new JwtValidator.Builder().setClock(null));
+    assertThrows(NullPointerException.class, () -> new JwtValidator.Builder().setClockSkew(null));
+  }
+
+  @Test
   public void validate_expired_shouldThrow() throws Exception {
     Clock clock1 = Clock.systemUTC();
     // This token expires in 1 minute in the future.
