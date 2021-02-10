@@ -388,8 +388,8 @@ public class JwtEcdsaSignKeyManagerTest {
         EllipticCurves.getEcPrivateKey(
             JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
             keyProto.getKeyValue().toByteArray());
-    String algorithm = keyProto.getPublicKey().getAlgorithm().name();
-    Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+    JwtEcdsaAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
     EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
 
     JSONObject payload = new JSONObject();
@@ -399,7 +399,7 @@ public class JwtEcdsaSignKeyManagerTest {
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Normal, valid signed compact.
-    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload.toString());
+    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm.name(), payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));

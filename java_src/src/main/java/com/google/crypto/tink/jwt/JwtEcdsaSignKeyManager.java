@@ -58,7 +58,7 @@ public final class JwtEcdsaSignKeyManager
         throws GeneralSecurityException {
 
       Enums.HashType hash =
-          JwtSigUtil.hashForEcdsaAlgorithm(keyProto.getPublicKey().getAlgorithm().name());
+          JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(keyProto.getPublicKey().getAlgorithm());
       ECPublicKey publicKey =
           EllipticCurves.getEcPublicKey(
               JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
@@ -77,17 +77,18 @@ public final class JwtEcdsaSignKeyManager
               JwtEcdsaVerifyKeyManager.getCurve(keyProto.getPublicKey().getAlgorithm()),
               keyProto.getKeyValue().toByteArray());
 
-      // Note: this will throw an exception is algorithm is invalid
+      // Note: this will throw an exception if algorithm is invalid
       selfTestKey(privateKey, keyProto);
-      final String algorithm = keyProto.getPublicKey().getAlgorithm().name();
-      Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+      JwtEcdsaAlgorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+      Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
       final EcdsaSignJce signer = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
+      final String algorithmName = algorithm.name();
 
       return new JwtPublicKeySign() {
         @Override
         public String sign(RawJwt token) throws GeneralSecurityException {
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
+              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

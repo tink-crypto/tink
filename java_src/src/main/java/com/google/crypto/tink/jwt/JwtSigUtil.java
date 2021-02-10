@@ -14,11 +14,8 @@
 
 package com.google.crypto.tink.jwt;
 
-import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
 import java.security.GeneralSecurityException;
-import java.security.spec.EllipticCurve;
-import java.util.Objects;
 
 final class JwtSigUtil {
 
@@ -38,39 +35,4 @@ final class JwtSigUtil {
     throw new GeneralSecurityException("unknown algorithm " + algorithm);
   }
 
-  public static Enums.HashType hashForEcdsaAlgorithm(String algorithm)
-      throws GeneralSecurityException {
-    switch (algorithm) {
-      case "ES256":
-        return Enums.HashType.SHA256;
-      case "ES384":
-        return Enums.HashType.SHA384;
-      case "ES512":
-        return Enums.HashType.SHA512;
-      default: // fall out
-    }
-    throw new GeneralSecurityException("unknown algorithm " + algorithm);
-  }
-
-  public static void validateCurve(EllipticCurve curve, String algorithm)
-      throws GeneralSecurityException {
-    EllipticCurve expectedCurve;
-    switch (algorithm) {
-      case "ES256":
-        expectedCurve = EllipticCurves.getNistP256Params().getCurve();
-        break;
-      case "ES384":
-        expectedCurve = EllipticCurves.getNistP384Params().getCurve();
-        break;
-      case "ES512":
-        expectedCurve = EllipticCurves.getNistP521Params().getCurve();
-        break;
-      default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithm);
-    }
-    if (!Objects.equals(curve, expectedCurve)) {
-      throw new GeneralSecurityException(
-          "curve mistmatch. Expected '" + expectedCurve + "', got '" + curve + "'");
-    }
-  }
 }

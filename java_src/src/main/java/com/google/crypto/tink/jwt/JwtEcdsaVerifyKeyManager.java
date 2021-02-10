@@ -38,10 +38,9 @@ import java.security.interfaces.ECPublicKey;
  */
 class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
 
-  static final EllipticCurves.CurveType getCurve(JwtEcdsaAlgorithm algorithmProto)
+  static final EllipticCurves.CurveType getCurve(JwtEcdsaAlgorithm algorithm)
       throws GeneralSecurityException {
-
-    switch (algorithmProto) {
+    switch (algorithm) {
       case ES256:
         return EllipticCurves.CurveType.NIST_P256;
       case ES384:
@@ -49,14 +48,28 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
       case ES512:
         return EllipticCurves.CurveType.NIST_P521;
       default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithmProto.name());
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
     }
   }
 
-  static final void validateEcdsaAlgorithm(JwtEcdsaAlgorithm algorithmProto)
+  public static Enums.HashType hashForEcdsaAlgorithm(JwtEcdsaAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case ES256:
+        return Enums.HashType.SHA256;
+      case ES384:
+        return Enums.HashType.SHA384;
+      case ES512:
+        return Enums.HashType.SHA512;
+      default:
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
+    }
+  }
+
+  static final void validateEcdsaAlgorithm(JwtEcdsaAlgorithm algorithm)
       throws GeneralSecurityException {
     // Purposely ignore the result. This function will throw if the algorithm is invalid.
-    JwtSigUtil.hashForEcdsaAlgorithm(algorithmProto.name());
+    hashForEcdsaAlgorithm(algorithm);
   }
 
   private static class JwtPublicKeyVerifyFactory
@@ -73,9 +86,9 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
       ECPublicKey publicKey =
           EllipticCurves.getEcPublicKey(
               curve, keyProto.getX().toByteArray(), keyProto.getY().toByteArray());
-      final String algorithm = keyProto.getAlgorithm().name();
-      Enums.HashType hash = JwtSigUtil.hashForEcdsaAlgorithm(algorithm);
+      Enums.HashType hash = hashForEcdsaAlgorithm(keyProto.getAlgorithm());
       final EcdsaVerifyJce verifier = new EcdsaVerifyJce(publicKey, hash, EcdsaEncoding.IEEE_P1363);
+      final String algorithmName = keyProto.getAlgorithm().name();
 
       return new JwtPublicKeyVerify() {
         @Override
@@ -91,7 +104,7 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
           byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
           verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
-          JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+          JwtFormat.validateHeader(algorithmName, JwtFormat.decodeHeader(parts[0]));
           String payload = JwtFormat.decodePayload(parts[1]);
           RawJwt token = RawJwt.fromJsonPayload(payload);
           return validator.validate(token);
