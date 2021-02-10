@@ -340,9 +340,8 @@ enum NullValue {
   NULL_VALUE = 0;
 }
 
-message JwtCustomClaim {
-  string name = 1;
-  oneof value {
+message JwtClaimValue {
+  oneof kind {
     NullValue null_value = 2;
     double number_value = 3;
     string string_value = 4;
@@ -355,12 +354,12 @@ message JwtCustomClaim {
 message JwtToken {
   google.protobuf.StringValue issuer = 1;
   google.protobuf.StringValue subject = 2;
-  repeated string audience = 3;
+  repeated string audiences = 3;
   google.protobuf.StringValue jwt_id = 4;
   google.protobuf.Timestamp expiration = 5;
   google.protobuf.Timestamp not_before = 6;
   google.protobuf.Timestamp issued_at = 7;
-  repeated JwtCustomClaim custom_claim = 8;
+  map<string, JwtClaimValue> custom_claims = 8;
 }
 
 message JwtValidator {
