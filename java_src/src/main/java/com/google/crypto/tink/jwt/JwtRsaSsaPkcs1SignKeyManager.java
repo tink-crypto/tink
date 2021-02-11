@@ -60,9 +60,8 @@ public final class JwtRsaSsaPkcs1SignKeyManager
                     new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
                     new BigInteger(1, keyProto.getPublicKey().getE().toByteArray())));
     // Sign and verify a test message to make sure that the key is correct.
-    String algorithm =
-        JwtRsaSsaPkcs1VerifyKeyManager.getKeyAlgorithm(keyProto.getPublicKey().getAlgorithm());
-    Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+    JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
     SelfKeyTestValidators.validateRsaSsaPkcs1(privateKey, publicKey, hash);
   }
 
@@ -93,17 +92,17 @@ public final class JwtRsaSsaPkcs1SignKeyManager
         throws GeneralSecurityException {
       RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
       selfTestKey(privateKey, keyProto);
-      final String algorithm = JwtRsaSsaPkcs1VerifyKeyManager.getKeyAlgorithm(
-          keyProto.getPublicKey().getAlgorithm());
-      // This function also validates the algorithm.
-      Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
-      final RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(privateKey, hash);
 
+      JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+      // This function also validates the algorithm.
+      Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
+      final RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(privateKey, hash);
+      final String algorithmName = algorithm.name();
       return new JwtPublicKeySign() {
         @Override
         public String sign(RawJwt token) throws GeneralSecurityException {
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
+              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

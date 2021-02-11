@@ -98,7 +98,7 @@ public final class JwtRsaSsaPssSignKeyManager
       Enums.HashType hash = JwtRsaSsaPssVerifyKeyManager.hashForPssAlgorithm(algorithm);
       int saltLength = JwtRsaSsaPssVerifyKeyManager.saltLengthForPssAlgorithm(algorithm);
       final RsaSsaPssSignJce signer = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
-      final String algorithmName = JwtRsaSsaPssVerifyKeyManager.getKeyAlgorithm(algorithm);
+      final String algorithmName = algorithm.name();
 
       return new JwtPublicKeySign() {
         @Override

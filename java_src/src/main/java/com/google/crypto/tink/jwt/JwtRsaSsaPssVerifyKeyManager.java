@@ -37,24 +37,9 @@ import java.security.spec.RSAPublicKeySpec;
  */
 class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey> {
 
-  static final String getKeyAlgorithm(JwtRsaSsaPssAlgorithm algorithm)
-      throws GeneralSecurityException {
-
-    // Note: each algorithm defines not just the modulo size, but also the
-    // hash length and salt length to use.
-    // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5
-    switch (algorithm) {
-      case PS256:
-        return "PS256";
-      case PS384:
-        return "PS384";
-      case PS512:
-        return "PS512";
-      default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
-    }
-  }
-
+  // Note: each algorithm defines not just the modulo size, but also the
+  // hash length and salt length to use.
+  // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5
   static final Enums.HashType hashForPssAlgorithm(JwtRsaSsaPssAlgorithm algorithm)
       throws GeneralSecurityException {
     switch (algorithm) {
@@ -104,7 +89,7 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
             int saltLength = saltLengthForPssAlgorithm(keyProto.getAlgorithm());
             final RsaSsaPssVerifyJce verifier =
                 new RsaSsaPssVerifyJce(publickey, hash, hash, saltLength);
-            final String algorithmName = getKeyAlgorithm(keyProto.getAlgorithm());
+            final String algorithmName = keyProto.getAlgorithm().name();
             return new JwtPublicKeyVerify() {
               @Override
               public VerifiedJwt verify(String compact, JwtValidator validator)

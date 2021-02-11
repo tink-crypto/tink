@@ -465,9 +465,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         JwtRsaSsaPkcs1PrivateKey.parseFrom(
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
-    String algorithm = JwtRsaSsaPkcs1VerifyKeyManager.getKeyAlgorithm(
-        keyProto.getPublicKey().getAlgorithm());
-    Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+    JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
     RsaSsaPkcs1SignJce rawSigner = new RsaSsaPkcs1SignJce(privateKey, hash);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);

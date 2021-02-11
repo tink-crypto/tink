@@ -36,20 +36,21 @@ import java.security.spec.RSAPublicKeySpec;
  * generation.
  */
 class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1PublicKey> {
-  static final String getKeyAlgorithm(JwtRsaSsaPkcs1Algorithm algorithmProto)
+
+  // Note: each algorithm defines not just the modulo size, but also the
+  // hash length and salt length to use.
+  // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5
+  public static Enums.HashType hashForPkcs1Algorithm(JwtRsaSsaPkcs1Algorithm algorithm)
       throws GeneralSecurityException {
-    // Note: each algorithm defines not just the modulo size, but also the
-    // hash length and salt length to use.
-    // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.5
-    switch (algorithmProto) {
+    switch (algorithm) {
       case RS256:
-        return "RS256";
+        return Enums.HashType.SHA256;
       case RS384:
-        return "RS384";
+        return Enums.HashType.SHA384;
       case RS512:
-        return "RS512";
+        return Enums.HashType.SHA512;
       default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithmProto.name());
+        throw new GeneralSecurityException("unknown algorithm " + algorithm.name());
     }
   }
 
@@ -69,10 +70,10 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
           @Override
           public JwtPublicKeyVerify getPrimitive(JwtRsaSsaPkcs1PublicKey keyProto)
               throws GeneralSecurityException {
-            final String algorithm = getKeyAlgorithm(keyProto.getAlgorithm());
             RSAPublicKey publickey = createPublicKey(keyProto);
-            Enums.HashType hash = JwtSigUtil.hashForPkcs1Algorithm(algorithm);
+            Enums.HashType hash = hashForPkcs1Algorithm(keyProto.getAlgorithm());
             final RsaSsaPkcs1VerifyJce verifier = new RsaSsaPkcs1VerifyJce(publickey, hash);
+            final String algorithmName = keyProto.getAlgorithm().name();
 
             return new JwtPublicKeyVerify() {
               @Override
@@ -88,7 +89,7 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
                 byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
 
                 verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
-                JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
+                JwtFormat.validateHeader(algorithmName, JwtFormat.decodeHeader(parts[0]));
                 String payload = JwtFormat.decodePayload(parts[1]);
                 RawJwt token = RawJwt.fromJsonPayload(payload);
                 return validator.validate(token);
