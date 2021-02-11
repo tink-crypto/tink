@@ -45,8 +45,7 @@ at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 latest version is [1.5.0](https://github.com/google/tink/releases/tag/v1.5.0),
 released on 2020-10-13.
 
-[Javascript/Typescript](docs/JAVASCRIPT-HOWTO.md) is in an alpha state, should
-only be used for testing. Check it out and let us know what you think!
+Javascript/Typescript is in an alpha state and should only be used for testing.
 
 ## Getting started
 
@@ -96,7 +95,6 @@ pod install
 ## Learn more
 
 *   [Java HOW-TO](docs/JAVA-HOWTO.md)
-*   [Javascript/Typescript HOW-TO](docs/JAVASCRIPT-HOWTO.md)
 *   [C++ HOW-TO](docs/CPP-HOWTO.md)
 *   [Obj-C HOW-TO](docs/OBJC-HOWTO.md)
 *   [Go HOW-TO](docs/GOLANG-HOWTO.md)
