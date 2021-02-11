@@ -237,7 +237,7 @@ public final class JwtEcdsaSignKeyManager
    * Returns a {@link KeyTemplate} containing a {@link JwtEcdsaKeyFormat} with some specified
    * parameters.
    */
-  public static KeyTemplate createKeyTemplate(JwtEcdsaAlgorithm algorithm) {
+  private static KeyTemplate createKeyTemplate(JwtEcdsaAlgorithm algorithm) {
     JwtEcdsaKeyFormat format = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
     return KeyTemplate.create(
         new JwtEcdsaSignKeyManager().getKeyType(),
