@@ -44,8 +44,8 @@ crypto::tink::util::Status ChecksFipsCompatibility(
         return util::OkStatus();
       }
     default:
-      util::Status(util::error::INTERNAL,
-                   "Could not determine FIPS status.");
+      return util::Status(util::error::INTERNAL,
+                          "Could not determine FIPS status.");
   }
 }
 
