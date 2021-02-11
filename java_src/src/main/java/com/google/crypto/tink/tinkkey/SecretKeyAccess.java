@@ -16,8 +16,10 @@ package com.google.crypto.tink.tinkkey;
 import com.google.errorprone.annotations.Immutable;
 
 /**
- * A visibility-restricted class used to generate {@code KeyAccess} instances granting secret
- * access.
+ * A class used to generate {@code KeyAccess} instances granting secret access.
+ *
+ * <p>This class can be used to keep track of places where secret keys are accessed directly in
+ * code, as opposed to indirectly via a primitive.
  **/
 @Immutable
 public final class SecretKeyAccess {

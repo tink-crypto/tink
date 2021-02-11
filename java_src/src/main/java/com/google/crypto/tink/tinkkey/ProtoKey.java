@@ -22,7 +22,7 @@ import com.google.errorprone.annotations.Immutable;
  * Wraps the proto {@code KeyData} as an implementation of a {@code TinkKey}. The underlying {@code
  * KeyData} determines whether this ProtoKey has a secret.
  *
- * <p>ProtoKey is visibility-restricted.
+ * <p>ProtoKey is not intended for use outside of the Tink project.
  */
 @Immutable
 public final class ProtoKey implements TinkKey {
