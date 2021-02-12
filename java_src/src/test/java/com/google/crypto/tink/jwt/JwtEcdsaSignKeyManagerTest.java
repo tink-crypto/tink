@@ -36,6 +36,7 @@ import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
@@ -46,7 +47,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -366,7 +366,7 @@ public class JwtEcdsaSignKeyManagerTest {
   }
 
   private static String generateSignedCompact(
-      EcdsaSignJce rawSigner, JSONObject header, JSONObject payload)
+      EcdsaSignJce rawSigner, JsonObject header, JsonObject payload)
       throws GeneralSecurityException {
     String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
     String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
@@ -392,8 +392,8 @@ public class JwtEcdsaSignKeyManagerTest {
     Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
     EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
 
-    JSONObject payload = new JSONObject();
-    payload.put(JwtNames.CLAIM_ISSUER, "issuer");
+    JsonObject payload = new JsonObject();
+    payload.addProperty(JwtNames.CLAIM_ISSUER, "issuer");
     JwtValidator validator = new JwtValidator.Builder().build();
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
@@ -406,29 +406,29 @@ public class JwtEcdsaSignKeyManagerTest {
     verifier.verify(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
-    JSONObject goodHeader = new JSONObject();
-    goodHeader.put(JwtNames.HEADER_ALGORITHM, "ES256");
-    goodHeader.put("typ", "JWT");
+    JsonObject goodHeader = new JsonObject();
+    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verify(goodSignedCompact, validator);
 
     // invalid token with an empty header
-    JSONObject emptyHeader = new JSONObject();
+    JsonObject emptyHeader = new JsonObject();
     String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(emptyHeaderSignedCompact, validator));
 
     // invalid token with a valid but incorrect algorithm in the header
-    JSONObject badAlgoHeader = new JSONObject();
-    badAlgoHeader.put(JwtNames.HEADER_ALGORITHM, "RS256");
+    JsonObject badAlgoHeader = new JsonObject();
+    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(badAlgoSignedCompact, validator));
 
     // invalid token with an unknown "typ" in the header
-    JSONObject badTypeHheader = new JSONObject();
-    badTypeHheader.put(JwtNames.HEADER_ALGORITHM, "ES256");
-    badTypeHheader.put("typ", "IWT");
+    JsonObject badTypeHheader = new JsonObject();
+    badTypeHheader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    badTypeHheader.addProperty("typ", "IWT");
     String badTypeSignedCompact = generateSignedCompact(rawSigner, badTypeHheader, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verify(badTypeSignedCompact, validator));

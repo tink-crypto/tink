@@ -58,8 +58,8 @@ java_library(
     deps = [
         ":jwt_invalid_exception",
         ":jwt_names",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -321,7 +321,7 @@ java_library(
         ":jwt_invalid_exception",
         ":jwt_names",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -440,6 +440,7 @@ android_library(
     deps = [
         ":jwt_invalid_exception",
         ":jwt_names",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -623,6 +624,7 @@ android_library(
         ":jwt_invalid_exception",
         ":jwt_names",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

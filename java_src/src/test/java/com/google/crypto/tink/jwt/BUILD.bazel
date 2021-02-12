@@ -5,12 +5,12 @@ java_test(
     size = "small",
     srcs = ["RawJwtTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
-        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -26,7 +26,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
     ],
 )
 
@@ -37,8 +36,8 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_names",
-        "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
+        "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
@@ -72,9 +71,9 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:key_type_manager_test_util",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
         "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
@@ -129,9 +128,9 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
         "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
@@ -208,9 +207,9 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
         "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
@@ -264,9 +263,9 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
         "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
@@ -278,9 +277,9 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:org_json_json",
     ],
 )
 

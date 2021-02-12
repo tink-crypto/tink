@@ -15,16 +15,19 @@
 package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * A <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT) that can be signed or
@@ -35,29 +38,15 @@ import org.json.JSONObject;
 public final class RawJwt {
 
   @SuppressWarnings("Immutable") // We do not mutate the payload.
-  private final JSONObject payload;
+  private final JsonObject payload;
 
   private RawJwt(Builder builder) {
-    // shallow-copy builder.payload. A shallow copy is enough, as payload entries never get
-    // passed out of the builder, and never get modified.
-    JSONObject copy = new JSONObject();
-    // The following is an unchecked conversion in server Java, but not in android Java.
-    // We cannot suppress both warnings.
-    Iterator<String> iterator = builder.payload.keys();
-    while (iterator.hasNext()) {
-      String name = iterator.next();
-      try {
-        copy.put(name, builder.payload.get(name));
-      } catch (JSONException e) { // Should never happen.
-        throw new IllegalStateException("unexpected error: ", e);
-      }
-    }
-    this.payload = copy;
+    this.payload = builder.payload.deepCopy();
   }
 
   private RawJwt(String jsonPayload) throws JwtInvalidException {
     try {
-      this.payload = new JSONObject(jsonPayload);
+      this.payload = JsonParser.parseString(jsonPayload).getAsJsonObject();
       validateStringClaim(JwtNames.CLAIM_ISSUER);
       validateStringClaim(JwtNames.CLAIM_SUBJECT);
       validateStringClaim(JwtNames.CLAIM_JWT_ID);
@@ -65,42 +54,45 @@ public final class RawJwt {
       validateNumberClaim(JwtNames.CLAIM_NOT_BEFORE);
       validateNumberClaim(JwtNames.CLAIM_ISSUED_AT);
       validateAudienceClaim();
-    } catch (JSONException ex) {
+    } catch (IllegalStateException | JsonParseException ex) {
       throw new JwtInvalidException("invalid JWT payload: " + ex);
     }
   }
 
-  private void validateStringClaim(String name) throws JSONException, JwtInvalidException {
+  private void validateStringClaim(String name) throws JwtInvalidException {
     if (!this.payload.has(name)) {
       return;
     }
-    if (!(this.payload.get(name) instanceof String)) {
+    if (!this.payload.get(name).isJsonPrimitive()
+        || !this.payload.get(name).getAsJsonPrimitive().isString()) {
       throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a string.");
     }
   }
 
-  private void validateNumberClaim(String name) throws JSONException, JwtInvalidException {
+  private void validateNumberClaim(String name) throws JwtInvalidException {
     if (!this.payload.has(name)) {
       return;
     }
-    if (!(this.payload.get(name) instanceof Double)
-        && !(this.payload.get(name) instanceof Integer)
-        && !(this.payload.get(name) instanceof Long)) {
+    if (!this.payload.get(name).isJsonPrimitive()
+        || !this.payload.get(name).getAsJsonPrimitive().isNumber()) {
       throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a number.");
     }
   }
 
-  private void validateAudienceClaim() throws JSONException, JwtInvalidException {
+  private void validateAudienceClaim() throws JwtInvalidException {
     if (!this.payload.has(JwtNames.CLAIM_AUDIENCE)) {
       return;
     }
-    Object audienceObj = this.payload.get(JwtNames.CLAIM_AUDIENCE);
-    if (audienceObj instanceof String) {
-      JSONArray audiences = new JSONArray();
-      audiences.put(audienceObj);
-      this.payload.put(JwtNames.CLAIM_AUDIENCE, audiences);
+    // if aud is a string, convert it to a JsonArray.
+    if (this.payload.get(JwtNames.CLAIM_AUDIENCE).isJsonPrimitive()
+        && this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonPrimitive().isString()) {
+      JsonArray audiences = new JsonArray();
+      audiences.add(this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsString());
+      this.payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
       return;
     }
+
+    // aud is not a string, it must be an JsonArray of strings.
     // getAudiences makes sure that all entries are strings.
     List<String> audiences = this.getAudiences();
     if (audiences.size() < 1) {
@@ -115,24 +107,15 @@ public final class RawJwt {
 
   /** Builder for RawJwt */
   public static final class Builder {
-    private final JSONObject payload;
+    private final JsonObject payload;
 
     public Builder() {
-      payload = new JSONObject();
+      payload = new JsonObject();
     }
 
-    private Builder setPayload(String name, Object value) {
-      if (value == null) {
-        throw new NullPointerException(
-            "Null pointers as claim values are not allowed. Use addNullClaim() to add a JSON null "
-                + "object.");
-      }
-      try {
-        payload.put(name, value);
-        return this;
-      } catch (JSONException ex) {
-        throw new IllegalArgumentException(ex);
-      }
+    private Builder setPayload(String name, JsonElement value) {
+      payload.add(name, value);
+      return this;
     }
 
 
@@ -142,7 +125,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
-      return setPayload(JwtNames.CLAIM_ISSUER, value);
+      return setPayload(JwtNames.CLAIM_ISSUER, new JsonPrimitive(value));
     }
 
     /**
@@ -151,7 +134,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
-      return setPayload(JwtNames.CLAIM_SUBJECT, value);
+      return setPayload(JwtNames.CLAIM_SUBJECT, new JsonPrimitive(value));
     }
 
     /**
@@ -163,14 +146,11 @@ public final class RawJwt {
       if (value == null) {
         throw new NullPointerException("claims with null value are not allowed.");
       }
-      JSONArray audiences;
-      try {
-        audiences = payload.getJSONArray(JwtNames.CLAIM_AUDIENCE);
-      } catch (JSONException ex) {
-        audiences = new JSONArray();
+      JsonArray audiences = new JsonArray();
+      if (payload.has(JwtNames.CLAIM_AUDIENCE)) {
+        audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
       }
-
-      audiences.put(value);
+      audiences.add(value);
       return setPayload(JwtNames.CLAIM_AUDIENCE, audiences);
     }
 
@@ -180,7 +160,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
     public Builder setJwtId(String value) {
-      return setPayload(JwtNames.CLAIM_JWT_ID, value);
+      return setPayload(JwtNames.CLAIM_JWT_ID, new JsonPrimitive(value));
     }
 
     /**
@@ -194,7 +174,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.4
      */
     public Builder setExpiration(Instant value) {
-      return setPayload(JwtNames.CLAIM_EXPIRATION, value.getEpochSecond());
+      return setPayload(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(value.getEpochSecond()));
     }
 
     /**
@@ -208,7 +188,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.5
      */
     public Builder setNotBefore(Instant value) {
-      return setPayload(JwtNames.CLAIM_NOT_BEFORE, value.getEpochSecond());
+      return setPayload(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(value.getEpochSecond()));
     }
 
     /**
@@ -221,31 +201,32 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.6
      */
     public Builder setIssuedAt(Instant value) {
-      return setPayload(JwtNames.CLAIM_ISSUED_AT, value.getEpochSecond());
+      return setPayload(JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(value.getEpochSecond()));
     }
 
     /** Adds a custom claim of type {@code boolean} to the JWT. */
     public Builder addBooleanClaim(String name, boolean value) {
       JwtNames.validate(name);
-      return setPayload(name, value);
+      return setPayload(name, new JsonPrimitive(value));
     }
 
     /** Adds a custom claim of type {@code double} to the JWT. */
     public Builder addNumberClaim(String name, double value) {
       JwtNames.validate(name);
-      return setPayload(name, value);
+      return setPayload(name, new JsonPrimitive(value));
     }
 
     /** Adds a custom claim of type {@code String} to the JWT. */
     public Builder addStringClaim(String name, String value) {
       JwtNames.validate(name);
-      return setPayload(name, value);
+      return setPayload(name, new JsonPrimitive(value));
     }
 
     /** Adds a custom claim with value null. */
     public Builder addNullClaim(String name) {
       JwtNames.validate(name);
-      return setPayload(name, JSONObject.NULL);
+      payload.add(name, JsonNull.INSTANCE);
+      return this;
     }
 
     /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
@@ -253,9 +234,9 @@ public final class RawJwt {
         throws JwtInvalidException {
       JwtNames.validate(name);
       try {
-        JSONObject jsonObject = new JSONObject(encodedJsonObject);
+        JsonObject jsonObject = JsonParser.parseString(encodedJsonObject).getAsJsonObject();
         return setPayload(name, jsonObject);
-      } catch (JSONException ex) {
+      } catch (JsonParseException | IllegalStateException ex) {
         throw new JwtInvalidException("Invalid JSON Object: " + ex.getMessage());
       }
     }
@@ -265,9 +246,9 @@ public final class RawJwt {
         throws JwtInvalidException {
       JwtNames.validate(name);
       try {
-        JSONArray jsonArray = new JSONArray(encodedJsonArray);
+        JsonArray jsonArray = JsonParser.parseString(encodedJsonArray).getAsJsonArray();
         return setPayload(name, jsonArray);
-      } catch (JSONException ex) {
+      } catch (JsonParseException | IllegalStateException ex) {
         throw new JwtInvalidException("Invalid JSON Array: " + ex.getMessage());
       }
     }
@@ -288,58 +269,73 @@ public final class RawJwt {
 
   Boolean getBooleanClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
-    try {
-      return (Boolean) payload.get(name);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
     }
+    if (!payload.get(name).isJsonPrimitive()
+        || !payload.get(name).getAsJsonPrimitive().isBoolean()) {
+      throw new JwtInvalidException("claim " + name + " is not a boolean");
+    }
+    return payload.get(name).getAsBoolean();
   }
 
   Double getNumberClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
-    try {
-      return (Double) payload.get(name);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
     }
+    if (!payload.get(name).isJsonPrimitive()
+        || !payload.get(name).getAsJsonPrimitive().isNumber()) {
+      throw new JwtInvalidException("claim " + name + " is not a number");
+    }
+    return payload.get(name).getAsDouble();
   }
 
   String getStringClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
-    try {
-      return (String) payload.get(name);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    return getStringClaimInternal(name);
+  }
+
+  private String getStringClaimInternal(String name) throws JwtInvalidException {
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
     }
+    if (!payload.get(name).isJsonPrimitive()
+        || !payload.get(name).getAsJsonPrimitive().isString()) {
+      throw new JwtInvalidException("claim " + name + " is not a string");
+    }
+    return payload.get(name).getAsString();
   }
 
   boolean isNullClaim(String name) {
     JwtNames.validate(name);
     try {
-      return (JSONObject.NULL.equals(payload.get(name)));
-    } catch (JSONException ex) {
+      return (JsonNull.INSTANCE.equals(payload.get(name)));
+    } catch (JsonParseException ex) {
       return false;
     }
   }
 
   String getJsonObjectClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
-    try {
-      JSONObject claim = (JSONObject) payload.get(name);
-      return claim.toString();
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
     }
+    if (!payload.get(name).isJsonObject()) {
+      throw new JwtInvalidException("claim " + name + " is not a JSON object");
+    }
+    return payload.get(name).getAsJsonObject().toString();
   }
 
   String getJsonArrayClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
-    try {
-      JSONArray claim = (JSONArray) payload.get(name);
-      return claim.toString();
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
     }
+    if (!payload.get(name).isJsonArray()) {
+      throw new JwtInvalidException("claim " + name + " is not a JSON array");
+    }
+    return payload.get(name).getAsJsonArray().toString();
   }
 
   boolean hasIssuer() {
@@ -347,11 +343,7 @@ public final class RawJwt {
   }
 
   String getIssuer() throws JwtInvalidException {
-    try {
-      return (String) payload.get(JwtNames.CLAIM_ISSUER);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + JwtNames.CLAIM_ISSUER + ": " + ex.getMessage());
-    }
+    return getStringClaimInternal(JwtNames.CLAIM_ISSUER);
   }
 
   boolean hasSubject() {
@@ -359,11 +351,7 @@ public final class RawJwt {
   }
 
   String getSubject() throws JwtInvalidException {
-    try {
-      return (String) payload.get(JwtNames.CLAIM_SUBJECT);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + JwtNames.CLAIM_SUBJECT + ": " + ex.getMessage());
-    }
+    return getStringClaimInternal(JwtNames.CLAIM_SUBJECT);
   }
 
   boolean hasJwtId() {
@@ -371,44 +359,49 @@ public final class RawJwt {
   }
 
   String getJwtId() throws JwtInvalidException {
-    try {
-      return (String) payload.get(JwtNames.CLAIM_JWT_ID);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + JwtNames.CLAIM_JWT_ID + ": " + ex.getMessage());
-    }
+    return getStringClaimInternal(JwtNames.CLAIM_JWT_ID);
   }
 
   boolean hasAudiences() {
-    // If an audience claim is present, it is always a JSONArray with length > 0.
+    // If an audience claim is present, it is always a JsonArray with length > 0.
     return payload.has(JwtNames.CLAIM_AUDIENCE);
   }
 
   List<String> getAudiences() throws JwtInvalidException {
-    JSONArray audiences;
-    try {
-      audiences = (JSONArray) payload.get(JwtNames.CLAIM_AUDIENCE);
-    } catch (ClassCastException | JSONException ex) {
-      throw new JwtInvalidException("claim " + JwtNames.CLAIM_AUDIENCE + ": " + ex.getMessage());
+    if (!hasAudiences()) {
+      throw new JwtInvalidException("claim aud does not exist");
+    }
+    if (!payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
+      throw new JwtInvalidException("claim aud is not a JSON array");
     }
 
-    List<String> result = new ArrayList<>(audiences.length());
-    for (int i = 0; i < audiences.length(); i++) {
-      try {
-        String audience = (String) audiences.get(i);
-        result.add(audience);
-      } catch (ClassCastException | JSONException ex) {
-        throw new JwtInvalidException("invalid audience: " + ex.getMessage());
+    JsonArray audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
+    List<String> result = new ArrayList<>(audiences.size());
+    for (int i = 0; i < audiences.size(); i++) {
+      if (!audiences.get(i).isJsonPrimitive()
+          || !audiences.get(i).getAsJsonPrimitive().isString()) {
+        throw new JwtInvalidException(
+            String.format("invalid audience: got %s; want a string", audiences.get(i)));
       }
+      String audience = audiences.get(i).getAsString();
+      result.add(audience);
     }
 
     return Collections.unmodifiableList(result);
   }
 
   private Instant getInstant(String name) throws JwtInvalidException {
+    if (!payload.has(name)) {
+      throw new JwtInvalidException("claim " + name + " does not exist");
+    }
+    if (!payload.get(name).isJsonPrimitive()
+        || !payload.get(name).getAsJsonPrimitive().isNumber()) {
+      throw new JwtInvalidException("claim " + name + " is not a timestamp");
+    }
     try {
-      return Instant.ofEpochSecond(payload.getLong(name));
-    } catch (JSONException ex) {
-      throw new JwtInvalidException("claim " + name + ": " + ex.getMessage());
+      return Instant.ofEpochSecond(payload.get(name).getAsJsonPrimitive().getAsLong());
+    } catch (NumberFormatException ex) {
+      throw new JwtInvalidException("claim " + name + " is not a timestamp: " + ex);
     }
   }
 
@@ -439,12 +432,7 @@ public final class RawJwt {
   /** Returns all custom claim names. */
   Set<String> customClaimNames() {
     HashSet<String> names = new HashSet<>();
-
-    // The following is an unchecked conversion in server Java, but not in android Java.
-    // We cannot suppress both warnings.
-    Iterator<String> payloadIterator = this.payload.keys();
-    while (payloadIterator.hasNext()) {
-      String name = payloadIterator.next();
+    for (String name : this.payload.keySet()) {
       if (!JwtNames.isRegisteredName(name)) {
         names.add(name);
       }

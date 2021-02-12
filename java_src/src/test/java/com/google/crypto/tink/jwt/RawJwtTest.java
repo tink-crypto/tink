@@ -18,9 +18,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.time.Instant;
 import java.util.Set;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -259,9 +260,10 @@ public final class RawJwtTest {
     assertThat(token.hasClaim("obj")).isTrue();
     String output = token.getJsonObjectClaim("obj");
 
-    JSONObject obj = new JSONObject(output);
-    assertThat(obj.getBoolean("boolean")).isFalse();
-    assertThat(obj.getJSONObject("obj1").getJSONObject("obj2").getInt("42")).isEqualTo(42);
+    JsonObject obj = JsonParser.parseString(output).getAsJsonObject();
+    assertThat(obj.get("boolean").getAsBoolean()).isFalse();
+    assertThat(obj.getAsJsonObject("obj1").getAsJsonObject("obj2").get("42").getAsInt())
+        .isEqualTo(42);
   }
 
   @Test
@@ -332,9 +334,9 @@ public final class RawJwtTest {
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
 
     String encodedObject = token.getJsonObjectClaim("custom");
-    JSONObject custom = new JSONObject(encodedObject);
-    assertThat(custom.getInt("int")).isEqualTo(123);
-    assertThat(custom.getString("string")).isEqualTo("value");
+    JsonObject custom = JsonParser.parseString(encodedObject).getAsJsonObject();
+    assertThat(custom.get("int").getAsInt()).isEqualTo(123);
+    assertThat(custom.get("string").getAsString()).isEqualTo("value");
   }
 
   @Test
