@@ -23,6 +23,8 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -32,8 +34,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 import java.security.spec.X509EncodedKeySpec;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -556,14 +556,14 @@ public class EllipticCurvesTest {
     // NOTE(bleichen): Instead of ecdh_test.json it might be easier to use the
     //   files ecdh_<curve>_ecpoint.json, which encode the public key point just as DER
     //   encoded bitsequence.
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/ecdh_test.json");
     int errors = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONArray tests = group.getJSONArray("tests");
-      String curve = group.getString("curve");
+    JsonArray testGroups = json.get("testGroups").getAsJsonArray();
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonArray tests = group.get("tests").getAsJsonArray();
+      String curve = group.get("curve").getAsString();
       EllipticCurves.CurveType curveType;
       try {
         curveType = WycheproofTestUtil.getCurveType(curve);
@@ -571,8 +571,8 @@ public class EllipticCurvesTest {
         System.out.println("Unsupported curve:" + curve);
         continue;
       }
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         if (WycheproofTestUtil.checkFlags(testcase, "CVE_2017_10176")) {
           System.out.println("Skipping CVE-2017-10176 test, see b/73760761");
           continue;
@@ -580,11 +580,12 @@ public class EllipticCurvesTest {
 
         String tcId =
             String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        String result = testcase.getString("result");
-        String hexPubKey = testcase.getString("public");
-        String expectedSharedSecret = testcase.getString("shared");
-        String hexPrivKey = testcase.getString("private");
+                "testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        String result = testcase.get("result").getAsString();
+        String hexPubKey = testcase.get("public").getAsString();
+        String expectedSharedSecret = testcase.get("shared").getAsString();
+        String hexPrivKey = testcase.get("private").getAsString();
         if (hexPrivKey.length() % 2 == 1) {
           hexPrivKey = "0" + hexPrivKey;
         }

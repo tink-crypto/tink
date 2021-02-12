@@ -159,7 +159,7 @@ public final class TestingServicesTest {
             + "      \"status\": \"ENABLED\""
             + "    }"
             + "  ]"
-            + "})";
+            + "}";
     KeysetFromJsonResponse fromResponse = keysetFromJson(keysetStub, jsonKeyset);
     assertThat(fromResponse.getErr()).isEmpty();
     byte[] output = fromResponse.getKeyset().toByteArray();

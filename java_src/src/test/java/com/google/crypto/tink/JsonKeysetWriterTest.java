@@ -131,8 +131,8 @@ public class JsonKeysetWriterTest {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     CleartextKeysetHandle.write(modifiedHandle, JsonKeysetWriter.withOutputStream(outputStream));
-    assertThat(outputStream.toString()).contains("\"primaryKeyId\": 4275736384");
-    assertThat(outputStream.toString()).contains("\"keyId\": 4275736384");
+    assertThat(outputStream.toString()).contains("\"primaryKeyId\":4275736384");
+    assertThat(outputStream.toString()).contains("\"keyId\":4275736384");
   }
 
 }
