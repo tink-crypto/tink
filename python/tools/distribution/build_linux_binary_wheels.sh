@@ -13,8 +13,9 @@ chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
 ./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
 
 # Install Protoc which is needed for compiling the protos
-PROTOC_ZIP='protoc-3.11.4-linux-x86_64.zip'
-curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/${PROTOC_ZIP}
+PROTOC_VERSION='3.14.0'
+PROTOC_ZIP="protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}"
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink
