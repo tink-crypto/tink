@@ -76,4 +76,6 @@ public final class PaymentMethodTokenRecipientKeyGen {
     generateKey();
     System.out.println("done.");
   }
+
+  private PaymentMethodTokenRecipientKeyGen() {}
 }

@@ -88,4 +88,6 @@ public class AeadCli {
 
     System.out.println("All done.");
   }
+
+  private AeadCli() {}
 }

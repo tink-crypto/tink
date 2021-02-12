@@ -67,4 +67,6 @@ public class HybridEncryptCli {
 
     System.out.println("All done.");
   }
+
+  private HybridEncryptCli() {}
 }

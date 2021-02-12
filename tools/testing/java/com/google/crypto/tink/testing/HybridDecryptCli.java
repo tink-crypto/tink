@@ -67,4 +67,6 @@ public class HybridDecryptCli {
 
     System.out.println("All done.");
   }
+
+  private HybridDecryptCli() {}
 }

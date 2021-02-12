@@ -76,4 +76,6 @@ public class PublicKeyVerifyCli {
 
     System.out.println("All done.");
   }
+
+  private PublicKeyVerifyCli() {}
 }

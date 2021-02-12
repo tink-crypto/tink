@@ -95,4 +95,6 @@ public class MacCli {
 
     System.out.println("All done.");
   }
+
+  private MacCli() {}
 }

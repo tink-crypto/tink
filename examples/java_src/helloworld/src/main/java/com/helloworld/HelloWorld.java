@@ -45,4 +45,6 @@ public final class HelloWorld {
       System.exit(1);
     }
   }
+
+  private HelloWorld() {}
 }
