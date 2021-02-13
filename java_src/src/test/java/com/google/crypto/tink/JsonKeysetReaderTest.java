@@ -25,14 +25,13 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.subtle.Random;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,7 +130,7 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testRead_missingKey_shouldThrowException() throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
+    JSONObject json = new JSONObject(JSON_KEYSET);
     json.remove("key"); // remove key
 
     try {
@@ -143,12 +142,12 @@ public class JsonKeysetReaderTest {
   }
 
   private void testRead_invalidKey_shouldThrowException(String name) throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
-    JsonArray keys = json.get("key").getAsJsonArray();
-    JsonObject key = keys.get(0).getAsJsonObject();
+    JSONObject json = new JSONObject(JSON_KEYSET);
+    JSONArray keys = json.getJSONArray("key");
+    JSONObject key = keys.getJSONObject(0);
     key.remove(name);
-    keys.set(0, key);
-    json.add("key", keys);
+    keys.put(0, key);
+    json.put("key", keys);
 
     try {
       JsonKeysetReader.withJsonObject(json).read();
@@ -167,14 +166,14 @@ public class JsonKeysetReaderTest {
   }
 
   private void testRead_invalidKeyData_shouldThrowException(String name) throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
-    JsonArray keys = json.get("key").getAsJsonArray();
-    JsonObject key = keys.get(0).getAsJsonObject();
-    JsonObject keyData = key.get("keyData").getAsJsonObject();
+    JSONObject json = new JSONObject(JSON_KEYSET);
+    JSONArray keys = json.getJSONArray("key");
+    JSONObject key = keys.getJSONObject(0);
+    JSONObject keyData = key.getJSONObject("keyData");
     keyData.remove(name);
-    key.add("keyData", keyData);
-    keys.set(0, key);
-    json.add("key", keys);
+    key.put("keyData", keyData);
+    keys.put(0, key);
+    json.put("key", keys);
 
     try {
       JsonKeysetReader.withJsonObject(json).read();
@@ -193,14 +192,14 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testRead_invalidKeyMaterialType_shouldThrowException() throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
-    JsonArray keys = json.get("key").getAsJsonArray();
-    JsonObject key = keys.get(0).getAsJsonObject();
-    JsonObject keyData = key.get("keyData").getAsJsonObject();
-    keyData.addProperty("keyMaterialType", "invalid");
-    key.add("keyData", keyData);
-    keys.set(0, key);
-    json.add("key", keys);
+    JSONObject json = new JSONObject(JSON_KEYSET);
+    JSONArray keys = json.getJSONArray("key");
+    JSONObject key = keys.getJSONObject(0);
+    JSONObject keyData = key.getJSONObject("keyData");
+    keyData.put("keyMaterialType", "invalid");
+    key.put("keyData", keyData);
+    keys.put(0, key);
+    json.put("key", keys);
 
     try {
       JsonKeysetReader.withJsonObject(json).read();
@@ -212,12 +211,12 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testRead_invalidStatus_shouldThrowException() throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
-    JsonArray keys = json.get("key").getAsJsonArray();
-    JsonObject key = keys.get(0).getAsJsonObject();
-    key.addProperty("status", "invalid");
-    keys.set(0, key);
-    json.add("key", keys);
+    JSONObject json = new JSONObject(JSON_KEYSET);
+    JSONArray keys = json.getJSONArray("key");
+    JSONObject key = keys.getJSONObject(0);
+    key.put("status", "invalid");
+    keys.put(0, key);
+    json.put("key", keys);
 
     try {
       JsonKeysetReader.withJsonObject(json).read();
@@ -229,12 +228,12 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testRead_invalidOutputPrefixType_shouldThrowException() throws Exception {
-    JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
-    JsonArray keys = json.get("key").getAsJsonArray();
-    JsonObject key = keys.get(0).getAsJsonObject();
-    key.addProperty("outputPrefixType", "invalid");
-    keys.set(0, key);
-    json.add("key", keys);
+    JSONObject json = new JSONObject(JSON_KEYSET);
+    JSONArray keys = json.getJSONArray("key");
+    JSONObject key = keys.getJSONObject(0);
+    key.put("outputPrefixType", "invalid");
+    keys.put(0, key);
+    json.put("key", keys);
 
     try {
       JsonKeysetReader.withJsonObject(json).read();
@@ -266,8 +265,7 @@ public class JsonKeysetReaderTest {
     KeysetHandle handle3 =
         CleartextKeysetHandle.read(JsonKeysetReader.withBytes(JSON_KEYSET.getBytes(UTF_8)));
     KeysetHandle handle4 =
-        CleartextKeysetHandle.read(
-            JsonKeysetReader.withJsonObject(JsonParser.parseString(JSON_KEYSET).getAsJsonObject()));
+        CleartextKeysetHandle.read(JsonKeysetReader.withJsonObject(new JSONObject(JSON_KEYSET)));
 
     assertKeysetHandle(handle1, handle2);
     assertKeysetHandle(handle1, handle3);
@@ -317,8 +315,7 @@ public class JsonKeysetReaderTest {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetHandle handle = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);
     handle.write(JsonKeysetWriter.withOutputStream(outputStream), masterKey);
-    JsonObject json =
-        JsonParser.parseString(new String(outputStream.toByteArray(), UTF_8)).getAsJsonObject();
+    JSONObject json = new JSONObject(new String(outputStream.toByteArray(), UTF_8));
     json.remove("encryptedKeyset"); // remove key
 
     try {
@@ -344,15 +341,14 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testReadKeyset_negativeKeyId_works() throws Exception {
-    JsonObject json = JsonParser.parseString(createJsonKeysetWithId("-21")).getAsJsonObject();
+    JSONObject json = new JSONObject(createJsonKeysetWithId("-21"));
     Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
   }
 
   @Test
   public void testReadKeyset_hugeKeyId_throws() throws Exception {
-    JsonObject json =
-        JsonParser.parseString(createJsonKeysetWithId("4294967275")).getAsJsonObject(); // 2^32 - 21
+    JSONObject json = new JSONObject(createJsonKeysetWithId("4294967275")); // 2^32 - 21
     Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
   }

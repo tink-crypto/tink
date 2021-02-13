@@ -27,14 +27,14 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -151,37 +151,36 @@ public class AesGcmSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JsonObject json =
+    JSONObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_siv_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
-    JsonArray testGroups = json.getAsJsonArray("testGroups");
-    for (int i = 0; i < testGroups.size(); i++) {
-      JsonObject group = testGroups.get(i).getAsJsonObject();
-      int keySize = group.get("keySize").getAsInt();
-      JsonArray tests = group.getAsJsonArray("tests");
+    JSONArray testGroups = json.getJSONArray("testGroups");
+    for (int i = 0; i < testGroups.length(); i++) {
+      JSONObject group = testGroups.getJSONObject(i);
+      int keySize = group.getInt("keySize");
+      JSONArray tests = group.getJSONArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
-        cntSkippedTests += tests.size();
+        cntSkippedTests += tests.length();
         continue;
       }
-      for (int j = 0; j < tests.size(); j++) {
-        JsonObject testcase = tests.get(j).getAsJsonObject();
+      for (int j = 0; j < tests.length(); j++) {
+        JSONObject testcase = tests.getJSONObject(j);
         String tcId =
             String.format(
-                "testcase %d (%s)",
-                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
-        byte[] iv = Hex.decode(testcase.get("iv").getAsString());
-        byte[] key = Hex.decode(testcase.get("key").getAsString());
-        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
-        byte[] aad = Hex.decode(testcase.get("aad").getAsString());
-        byte[] ct = Hex.decode(testcase.get("ct").getAsString());
-        byte[] tag = Hex.decode(testcase.get("tag").getAsString());
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+        byte[] iv = Hex.decode(testcase.getString("iv"));
+        byte[] key = Hex.decode(testcase.getString("key"));
+        byte[] msg = Hex.decode(testcase.getString("msg"));
+        byte[] aad = Hex.decode(testcase.getString("aad"));
+        byte[] ct = Hex.decode(testcase.getString("ct"));
+        byte[] tag = Hex.decode(testcase.getString("tag"));
         byte[] ciphertext = Bytes.concat(iv, ct, tag);
         // Result is one of "valid", "invalid", "acceptable".
         // "valid" are test vectors with matching plaintext, ciphertext and tag.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext and tag.
         // "acceptable" are test vectors with weak parameters or legacy formats.
-        String result = testcase.get("result").getAsString();
+        String result = testcase.getString("result");
         // Tink only supports 12-byte iv.
         if (iv.length != 12) {
           result = "invalid";

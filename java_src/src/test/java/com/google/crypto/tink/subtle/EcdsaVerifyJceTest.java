@@ -24,8 +24,6 @@ import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -36,6 +34,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -65,26 +65,26 @@ public class EcdsaVerifyJceTest {
 
   private static void testWycheproofVectors(String fileName, EcdsaEncoding encoding)
       throws Exception {
-    JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
+    JSONObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
     int errors = 0;
     int cntSkippedTests = 0;
-    JsonArray testGroups = jsonObj.getAsJsonArray("testGroups");
-    for (int i = 0; i < testGroups.size(); i++) {
-      JsonObject group = testGroups.get(i).getAsJsonObject();
+    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
+    for (int i = 0; i < testGroups.length(); i++) {
+      JSONObject group = testGroups.getJSONObject(i);
 
       KeyFactory kf = KeyFactory.getInstance("EC");
-      byte[] encodedPubKey = Hex.decode(group.get("keyDer").getAsString());
+      byte[] encodedPubKey = Hex.decode(group.getString("keyDer"));
       X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(encodedPubKey);
-      String sha = group.get("sha").getAsString();
+      String sha = group.getString("sha");
       String signatureAlgorithm = WycheproofTestUtil.getSignatureAlgorithmName(sha, "ECDSA");
 
-      JsonArray tests = group.getAsJsonArray("tests");
-      for (int j = 0; j < tests.size(); j++) {
-        JsonObject testcase = tests.get(j).getAsJsonObject();
+      JSONArray tests = group.getJSONArray("tests");
+      for (int j = 0; j < tests.length(); j++) {
+        JSONObject testcase = tests.getJSONObject(j);
         String tcId =
-            String.format("testcase %d (%s)",
-                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
 
         if (signatureAlgorithm.isEmpty()) {
           System.out.printf("Skipping %s because signature algorithm is empty\n", tcId);
@@ -103,8 +103,8 @@ public class EcdsaVerifyJceTest {
           continue;
         }
         byte[] msg = getMessage(testcase);
-        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
-        String result = testcase.get("result").getAsString();
+        byte[] sig = Hex.decode(testcase.getString("sig"));
+        String result = testcase.getString("result");
         try {
           verifier.verify(sig, msg);
           if (result.equals("invalid")) {
@@ -123,12 +123,12 @@ public class EcdsaVerifyJceTest {
     assertEquals(0, errors);
   }
 
-  private static byte[] getMessage(JsonObject testcase) throws Exception {
+  private static byte[] getMessage(JSONObject testcase) throws Exception {
     // Previous version of Wycheproof test vectors uses "message" while the new one uses "msg".
     if (testcase.has("msg")) {
-      return Hex.decode(testcase.get("msg").getAsString());
+      return Hex.decode(testcase.getString("msg"));
     } else {
-      return Hex.decode(testcase.get("message").getAsString());
+      return Hex.decode(testcase.getString("message"));
     }
   }
 

@@ -21,15 +21,15 @@ import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.subtle.Base64;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@link KeysetWriter} that can write to some source cleartext or encrypted keysets in <a
@@ -78,9 +78,9 @@ public final class JsonKeysetWriter implements KeysetWriter {
   @Override
   public void write(Keyset keyset) throws IOException {
     try {
-      outputStream.write(toJson(keyset).toString().getBytes(UTF_8));
+      outputStream.write(toJson(keyset).toString(4).getBytes(UTF_8));
       outputStream.write(System.lineSeparator().getBytes(UTF_8));
-    } catch (JsonParseException e) {
+    } catch (JSONException e) {
       throw new IOException(e);
     } finally {
       outputStream.close();
@@ -89,67 +89,68 @@ public final class JsonKeysetWriter implements KeysetWriter {
 
   @Override
   public void write(EncryptedKeyset keyset) throws IOException {
-    outputStream.write(toJson(keyset).toString().getBytes(UTF_8));
-    outputStream.write(System.lineSeparator().getBytes(UTF_8));
-    outputStream.close();
+    try {
+      outputStream.write(toJson(keyset).toString(4).getBytes(UTF_8));
+      outputStream.write(System.lineSeparator().getBytes(UTF_8));
+    } catch (JSONException e) {
+      throw new IOException(e);
+    } finally {
+      outputStream.close();
+    }
   }
 
   private long toUnsignedLong(int x) {
     return ((long) x) & 0xffffffffL;
   }
 
-  private JsonObject toJson(Keyset keyset) {
-    JsonObject json = new JsonObject();
-    json.addProperty("primaryKeyId", toUnsignedLong(keyset.getPrimaryKeyId()));
-    JsonArray keys = new JsonArray();
+  private JSONObject toJson(Keyset keyset) throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("primaryKeyId", toUnsignedLong(keyset.getPrimaryKeyId()));
+    JSONArray keys = new JSONArray();
     for (Keyset.Key key : keyset.getKeyList()) {
-      keys.add(toJson(key));
+      keys.put(toJson(key));
     }
-    json.add("key", keys);
+    json.put("key", keys);
     return json;
   }
 
-  private JsonObject toJson(Keyset.Key key) {
-    JsonObject json = new JsonObject();
-    json.add("keyData", toJson(key.getKeyData()));
-    json.addProperty("status", key.getStatus().name());
-    json.addProperty("keyId", toUnsignedLong(key.getKeyId()));
-    json.addProperty("outputPrefixType", key.getOutputPrefixType().name());
-    return json;
+  private JSONObject toJson(Keyset.Key key) throws JSONException {
+    return new JSONObject()
+        .put("keyData", toJson(key.getKeyData()))
+        .put("status", key.getStatus().name())
+        .put("keyId", toUnsignedLong(key.getKeyId()))
+        .put("outputPrefixType", key.getOutputPrefixType().name());
   }
 
-  private JsonObject toJson(KeyData keyData) {
-    JsonObject json = new JsonObject();
-    json.addProperty("typeUrl", keyData.getTypeUrl());
-    json.addProperty("value", Base64.encode(keyData.getValue().toByteArray()));
-    json.addProperty("keyMaterialType", keyData.getKeyMaterialType().name());
-    return json;
+  private JSONObject toJson(KeyData keyData) throws JSONException {
+    return new JSONObject()
+        .put("typeUrl", keyData.getTypeUrl())
+        .put("value", Base64.encode(keyData.getValue().toByteArray()))
+        .put("keyMaterialType", keyData.getKeyMaterialType().name());
   }
 
-  private JsonObject toJson(EncryptedKeyset keyset) {
-    JsonObject json = new JsonObject();
-    json.addProperty("encryptedKeyset", Base64.encode(keyset.getEncryptedKeyset().toByteArray()));
-    json.add("keysetInfo", toJson(keyset.getKeysetInfo()));
-    return json;
+  private JSONObject toJson(EncryptedKeyset keyset) throws JSONException {
+    return new JSONObject()
+        .put("encryptedKeyset", Base64.encode(keyset.getEncryptedKeyset().toByteArray()))
+        .put("keysetInfo", toJson(keyset.getKeysetInfo()));
   }
 
-  private JsonObject toJson(KeysetInfo keysetInfo) {
-    JsonObject json = new JsonObject();
-    json.addProperty("primaryKeyId", toUnsignedLong(keysetInfo.getPrimaryKeyId()));
-    JsonArray keyInfos = new JsonArray();
+  private JSONObject toJson(KeysetInfo keysetInfo) throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("primaryKeyId", toUnsignedLong(keysetInfo.getPrimaryKeyId()));
+    JSONArray keyInfos = new JSONArray();
     for (KeysetInfo.KeyInfo keyInfo : keysetInfo.getKeyInfoList()) {
-      keyInfos.add(toJson(keyInfo));
+      keyInfos.put(toJson(keyInfo));
     }
-    json.add("keyInfo", keyInfos);
+    json.put("keyInfo", keyInfos);
     return json;
   }
 
-  private JsonObject toJson(KeysetInfo.KeyInfo keyInfo) {
-    JsonObject json = new JsonObject();
-    json.addProperty("typeUrl", keyInfo.getTypeUrl());
-    json.addProperty("status", keyInfo.getStatus().name());
-    json.addProperty("keyId", keyInfo.getKeyId());
-    json.addProperty("outputPrefixType", keyInfo.getOutputPrefixType().name());
-    return json;
+  private JSONObject toJson(KeysetInfo.KeyInfo keyInfo) throws JSONException {
+    return new JSONObject()
+        .put("typeUrl", keyInfo.getTypeUrl())
+        .put("status", keyInfo.getStatus().name())
+        .put("keyId", keyInfo.getKeyId())
+        .put("outputPrefixType", keyInfo.getOutputPrefixType().name());
   }
 }

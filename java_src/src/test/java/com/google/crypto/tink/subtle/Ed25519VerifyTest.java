@@ -20,9 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.WycheproofTestUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -47,33 +47,33 @@ public final class Ed25519VerifyTest {
     }
   }
 
-  private byte[] getMessage(JsonObject testcase) throws Exception {
+  private byte[] getMessage(JSONObject testcase) throws Exception {
     if (testcase.has("msg")) {
-      return Hex.decode(testcase.get("msg").getAsString());
+      return Hex.decode(testcase.getString("msg"));
     } else {
-      return Hex.decode(testcase.get("message").getAsString());
+      return Hex.decode(testcase.getString("message"));
     }
   }
 
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
-    JsonObject json =
+    JSONObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/eddsa_test.json");
     int errors = 0;
-    JsonArray testGroups = json.get("testGroups").getAsJsonArray();
-    for (int i = 0; i < testGroups.size(); i++) {
-      JsonObject group = testGroups.get(i).getAsJsonObject();
-      JsonObject key = group.get("key").getAsJsonObject();
-      byte[] publicKey = Hex.decode(key.get("pk").getAsString());
-      JsonArray tests = group.get("tests").getAsJsonArray();
-      for (int j = 0; j < tests.size(); j++) {
-        JsonObject testcase = tests.get(j).getAsJsonObject();
+    JSONArray testGroups = json.getJSONArray("testGroups");
+    for (int i = 0; i < testGroups.length(); i++) {
+      JSONObject group = testGroups.getJSONObject(i);
+      JSONObject key = group.getJSONObject("key");
+      byte[] publicKey = Hex.decode(key.getString("pk"));
+      JSONArray tests = group.getJSONArray("tests");
+      for (int j = 0; j < tests.length(); j++) {
+        JSONObject testcase = tests.getJSONObject(j);
         String tcId =
-            String.format("testcase %d (%s)",
-                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+            String.format(
+                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
         byte[] msg = getMessage(testcase);
-        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
-        String result = testcase.get("result").getAsString();
+        byte[] sig = Hex.decode(testcase.getString("sig"));
+        String result = testcase.getString("result");
         Ed25519Verify verifier = new Ed25519Verify(publicKey);
         try {
           verifier.verify(sig, msg);
