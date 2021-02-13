@@ -140,10 +140,6 @@ install_temp_protoc() {
 main() {
   # Initialization for Kokoro environments.
   if [[ -n "${KOKORO_ROOT}" ]]; then
-    # TODO(b/73748835): Workaround on Kokoro.
-    rm -f ~/.bazelrc
-
-    # TODO(b/131821833) Use the latest version of Bazel.
     use_bazel.sh $(cat .bazelversion)
 
     # Install protoc into a temporary directory.
@@ -209,7 +205,7 @@ main() {
   run_all_linux_tests
 
   if [[ "${PLATFORM}" == 'darwin' ]]; then
-    # TODO(przydatek): re-enable after ObjC WORKSPACE is added.
+    # TODO(b/155060426): re-enable after ObjC WORKSPACE is added.
     # run_macos_tests
     echo "*** ObjC tests not enabled yet."
   fi
