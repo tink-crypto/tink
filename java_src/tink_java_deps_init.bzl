@@ -28,7 +28,6 @@ def tink_java_deps_init():
             "com.google.http-client:google-http-client-jackson2:1.31.0",
             "com.google.oauth-client:google-oauth-client:1.30.1",
             "com.google.truth:truth:0.44",
-            "org.json:json:20170516",
             "joda-time:joda-time:2.10.3",
             "junit:junit:4.13",
             "org.conscrypt:conscrypt-openjdk-uber:2.4.0",

@@ -16,18 +16,19 @@
 
 package com.google.crypto.tink.subtle;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,31 +54,32 @@ public class AesSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_siv_cmac_test.json");
-    JSONArray testGroups = json.getJSONArray("testGroups");
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
     int cntSkippedTests = 0;
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      int keySize = group.getInt("keySize");
-      JSONArray tests = group.getJSONArray("tests");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      int keySize = group.get("keySize").getAsInt();
+      JsonArray tests = group.getAsJsonArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
-        cntSkippedTests += tests.length();
+        cntSkippedTests += tests.size();
         continue;
       }
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
             String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        byte[] key = Hex.decode(testcase.getString("key"));
-        byte[] msg = Hex.decode(testcase.getString("msg"));
-        byte[] aad = Hex.decode(testcase.getString("aad"));
-        byte[] ct = Hex.decode(testcase.getString("ct"));
+                "testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
+        byte[] aad = Hex.decode(testcase.get("aad").getAsString());
+        byte[] ct = Hex.decode(testcase.get("ct").getAsString());
         // Result is one of "valid" and "invalid".
         // "valid" are test vectors with matching plaintext and ciphertext.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext.
-        String result = testcase.getString("result");
+        String result = testcase.get("result").getAsString();
         DeterministicAead daead = new AesSiv(key);
         if (result.equals("valid")) {
           byte[] ciphertext = daead.encryptDeterministically(msg, aad);
@@ -108,7 +110,7 @@ public class AesSivTest {
         byte[] aad = Random.randBytes(Random.randInt(128) + 1);
         byte[] ciphertext = dead.encryptDeterministically(plaintext, aad);
         byte[] rebuiltPlaintext = dead.decryptDeterministically(ciphertext, aad);
-        assertEquals(AesUtil.BLOCK_SIZE, ciphertext.length);
+        assertThat(ciphertext).hasLength(AesUtil.BLOCK_SIZE);
         assertEquals(Hex.encode(plaintext), Hex.encode(rebuiltPlaintext));
       }
     }

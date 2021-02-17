@@ -23,11 +23,11 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.KeyWrap;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -81,31 +81,31 @@ public class KwpTest {
   @Test
   public void testWycheproof() throws Exception {
     final String expectedVersion = "0.6";
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/kwp_test.json");
     Set<String> exceptions = new TreeSet<String>();
-    String generatorVersion = json.getString("generatorVersion");
+    String generatorVersion = json.get("generatorVersion").getAsString();
     if (!generatorVersion.equals(expectedVersion)) {
       System.out.printf("Expecting test vectors with version %s found version %s.\n",
                         expectedVersion, generatorVersion);
     }
     int errors = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        String tc = "tcId: " + tcid + " " + testcase.getString("comment");
-        byte[] key = Hex.decode(testcase.getString("key"));
-        byte[] data = Hex.decode(testcase.getString("msg"));
-        byte[] expected = Hex.decode(testcase.getString("ct"));
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonArray tests = group.getAsJsonArray("tests");
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
+        int tcid = testcase.get("tcId").getAsInt();
+        String tc = "tcId: " + tcid + " " + testcase.get("comment").getAsString();
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] data = Hex.decode(testcase.get("msg").getAsString());
+        byte[] expected = Hex.decode(testcase.get("ct").getAsString());
         // Result is one of "valid", "invalid", "acceptable".
         // "valid" are test vectors with matching plaintext, ciphertext and tag.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext and tag.
         // "acceptable" are test vectors with weak parameters or legacy formats.
-        String result = testcase.getString("result");
+        String result = testcase.get("result").getAsString();
 
         // Test wrapping
         KeyWrap wrapper;

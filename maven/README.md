@@ -5,7 +5,8 @@ Tink Java has 4 Maven artifacts, all are in the `com.google.crypto.tink` group.
 ### `tink`
 
 The core of Tink built for server-side applications. It only depends on
-[`org.json:json`](https://search.maven.org/artifact/org.json/json) and
+[`com.google.code.gson:gson`](https://search.maven.org/artifact/com.google.code.gson/gson)
+and
 [`com.google.protobuf:protobuf-java`](https://search.maven.org/artifact/com.google.protobuf/protobuf-java).
 
 ### `tink-android`

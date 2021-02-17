@@ -22,13 +22,13 @@ import static org.junit.Assert.fail;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,35 +60,35 @@ public class RsaSsaPkcs1VerifyJceTest {
   }
 
   private static void testWycheproofVectors(String fileName) throws Exception {
-    JSONObject jsonObj = WycheproofTestUtil.readJson(fileName);
+    JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
     int errors = 0;
-    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
+    JsonArray testGroups = jsonObj.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
 
       KeyFactory kf = KeyFactory.getInstance("RSA");
-      byte[] encodedPubKey = Hex.decode(group.getString("keyDer"));
+      byte[] encodedPubKey = Hex.decode(group.get("keyDer").getAsString());
       X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(encodedPubKey);
-      String sha = group.getString("sha");
+      String sha = group.get("sha").getAsString();
       HashType hash = WycheproofTestUtil.getHashType(sha);
 
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      JsonArray tests = group.getAsJsonArray("tests");
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         // Do not perform the Wycheproof test if the RSA public exponent is small.
         if (WycheproofTestUtil.checkFlags(testcase, "SmallPublicKey")) {
           continue;
         }
         String tcId =
-            String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+            String.format("testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
 
         RsaSsaPkcs1VerifyJce verifier = new RsaSsaPkcs1VerifyJce(pubKey, hash);
         byte[] msg = getMessage(testcase);
-        byte[] sig = Hex.decode(testcase.getString("sig"));
-        String result = testcase.getString("result");
+        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
+        String result = testcase.get("result").getAsString();
         try {
           verifier.verify(sig, msg);
           if (result.equals("invalid")) {
@@ -106,12 +106,12 @@ public class RsaSsaPkcs1VerifyJceTest {
     assertEquals(0, errors);
   }
 
-  private static byte[] getMessage(JSONObject testcase) throws Exception {
+  private static byte[] getMessage(JsonObject testcase) throws Exception {
     // Previous version of Wycheproof test vectors uses "message" while the new one uses "msg".
     if (testcase.has("msg")) {
-      return Hex.decode(testcase.getString("msg"));
+      return Hex.decode(testcase.get("msg").getAsString());
     } else {
-      return Hex.decode(testcase.getString("message"));
+      return Hex.decode(testcase.get("message").getAsString());
     }
   }
 }
