@@ -2,7 +2,7 @@
 
 <!--*
 # Document freshness: For more information, see go/fresh-source.
-freshness: { owner: 'sschmieg' reviewed: '2020-08-20' }
+freshness: { owner: 'sschmieg' reviewed: '2021-02-18' }
 *-->
 
 This is a description of Tink's wire format for keys and primitive output. The
