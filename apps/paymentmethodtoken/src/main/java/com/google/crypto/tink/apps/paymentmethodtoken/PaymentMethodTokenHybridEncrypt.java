@@ -16,16 +16,16 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
-import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@link HybridEncrypt} implementation for the hybrid encryption used in <a
@@ -54,19 +54,25 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
             contextInfo,
             symmetricKeySize,
             PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-    byte[] aesCtrKey = Arrays.copyOf(kemKey.getSymmetricKey(), protocolVersionConfig.aesCtrKeySize);
+    byte[] aesCtrKey =
+        Arrays.copyOfRange(kemKey.getSymmetricKey(), 0, protocolVersionConfig.aesCtrKeySize);
     byte[] ciphertext = PaymentMethodTokenUtil.aesCtr(aesCtrKey, plaintext);
     byte[] hmacSha256Key =
         Arrays.copyOfRange(
             kemKey.getSymmetricKey(), protocolVersionConfig.aesCtrKeySize, symmetricKeySize);
     byte[] tag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, ciphertext);
     byte[] ephemeralPublicKey = kemKey.getKemBytes();
-    JsonObject result = new JsonObject();
-    result.addProperty(
-        PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext));
-    result.addProperty(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag));
-    result.addProperty(
-        PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY, Base64.encode(ephemeralPublicKey));
-    return result.toString().getBytes(UTF_8);
+    try {
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext))
+          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
+          .put(
+              PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
+              Base64.encode(ephemeralPublicKey))
+          .toString()
+          .getBytes(StandardCharsets.UTF_8);
+    } catch (JSONException e) {
+      throw new GeneralSecurityException("cannot encrypt; JSON error");
+    }
   }
 }

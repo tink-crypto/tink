@@ -16,21 +16,19 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Hkdf;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@link HybridDecrypt} implementation for the hybrid encryption used in <a
@@ -71,20 +69,20 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
   public byte[] decrypt(final byte[] ciphertext, final byte[] contextInfo)
       throws GeneralSecurityException {
     try {
-      JsonObject json = JsonParser.parseString(new String(ciphertext, UTF_8)).getAsJsonObject();
+      JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
       validate(json);
       byte[] demKey = kem(json, contextInfo);
       return dem(json, demKey);
-    } catch (JsonParseException | IllegalStateException e) {
+    } catch (JSONException e) {
       throw new GeneralSecurityException("cannot decrypt; failed to parse JSON");
     }
   }
 
-  private byte[] kem(JsonObject json, final byte[] contextInfo) throws GeneralSecurityException {
+  private byte[] kem(JSONObject json, final byte[] contextInfo)
+      throws GeneralSecurityException, JSONException {
     int demKeySize = protocolVersionConfig.aesCtrKeySize + protocolVersionConfig.hmacSha256KeySize;
     byte[] ephemeralPublicKey =
-        Base64.decode(
-            json.get(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY).getAsString());
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
     byte[] sharedSecret = recipientKem.computeSharedSecret(ephemeralPublicKey);
     return Hkdf.computeEciesHkdfSymmetricKey(
         ephemeralPublicKey,
@@ -95,15 +93,14 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
         demKeySize);
   }
 
-  private byte[] dem(JsonObject json, final byte[] demKey) throws GeneralSecurityException {
+  private byte[] dem(JSONObject json, final byte[] demKey)
+      throws GeneralSecurityException, JSONException {
     byte[] hmacSha256Key =
         Arrays.copyOfRange(demKey, protocolVersionConfig.aesCtrKeySize, demKey.length);
     byte[] encryptedMessage =
-        Base64.decode(
-            json.get(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY).getAsString());
+        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
     byte[] computedTag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, encryptedMessage);
-    byte[] expectedTag =
-        Base64.decode(json.get(PaymentMethodTokenConstants.JSON_TAG_KEY).getAsString());
+    byte[] expectedTag = Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_TAG_KEY));
     if (!Bytes.equal(expectedTag, computedTag)) {
       throw new GeneralSecurityException("cannot decrypt; invalid MAC");
     }
@@ -111,11 +108,11 @@ class PaymentMethodTokenHybridDecrypt implements HybridDecrypt {
     return PaymentMethodTokenUtil.aesCtr(aesCtrKey, encryptedMessage);
   }
 
-  private void validate(JsonObject payload) throws GeneralSecurityException {
+  private void validate(JSONObject payload) throws GeneralSecurityException {
     if (!payload.has(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY)
         || !payload.has(PaymentMethodTokenConstants.JSON_TAG_KEY)
         || !payload.has(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY)
-        || payload.size() != 3) {
+        || payload.length() != 3) {
       throw new GeneralSecurityException(
           "The payload must contain exactly encryptedMessage, tag and ephemeralPublicKey");
     }

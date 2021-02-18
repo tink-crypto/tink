@@ -21,12 +21,13 @@ import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstant
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Creates a signed certificate with the intermediate signing keys used by the sender in certain
@@ -147,7 +148,7 @@ public class SenderIntermediateCertFactory {
   /**
    * Creates the certificate.
    *
-   * <p>This will return a serialized JsonObject in the following format:
+   * <p>This will return a serialized JSONObject in the following format:
    *
    * <pre>
    *   {
@@ -163,23 +164,27 @@ public class SenderIntermediateCertFactory {
    * </pre>
    */
   public String create() throws GeneralSecurityException {
-    JsonObject jsonObj = new JsonObject();
-    jsonObj.addProperty(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY, intermediateSigningKey);
-    jsonObj.addProperty(
-        PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY, Long.toString(expiration));
-    String signedKey = jsonObj.toString();
+    try {
+      String signedKey =
+          new JSONObject()
+              .put(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY, intermediateSigningKey)
+              .put(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY, Long.toString(expiration))
+              .toString();
       byte[] toSignBytes =
           PaymentMethodTokenUtil.toLengthValue(
               // The order of the parameters matters.
               senderId, protocolVersion, signedKey);
-    JsonArray signatures = new JsonArray();
+      JSONArray signatures = new JSONArray();
       for (PublicKeySign signer : signers) {
         byte[] signature = signer.sign(toSignBytes);
-      signatures.add(Base64.encode(signature));
+        signatures.put(Base64.encode(signature));
+      }
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY, signedKey)
+          .put(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY, signatures)
+          .toString();
+    } catch (JSONException e) {
+      throw new RuntimeException("Failed to perform JSON encoding", e);
     }
-    JsonObject result = new JsonObject();
-    result.addProperty(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY, signedKey);
-    result.add(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY, signatures);
-    return result.toString();
   }
 }
