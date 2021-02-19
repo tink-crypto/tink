@@ -270,7 +270,7 @@ CreateDeriverFunctionFor(
     result.set_type_url(key_type_manager->get_key_type());
     result.set_value(key_proto_or.ValueOrDie().SerializeAsString());
     result.set_key_material_type(key_type_manager->key_material_type());
-    return result;
+    return std::move(result);
   };
 }
 
