@@ -30,6 +30,8 @@ import (
 	"github.com/google/tink/go/testutil"
 )
 
+// The tests are from
+// http://google.github.io/end-to-end/api/source/src/javascript/crypto/e2e/ecc/ecdh_testdata.js.src.html.
 type testEC1 struct {
 	elliptic.Curve
 	pubX, pubY string
@@ -42,8 +44,6 @@ type testEC2 struct {
 	X, Y        string
 }
 
-// Test cases same as the java tests from
-// //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/EllipticCurvesTest.java
 var (
 	tEC1 = []testEC1{
 		{

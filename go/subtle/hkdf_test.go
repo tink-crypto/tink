@@ -23,9 +23,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-// Tests sourced from
-// //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/HkdfTest.java
-
+// Tests the implementation against the test vectors from RFC 5869.
 var hkdfTests = []struct {
 	hashAlg     string
 	key         string
