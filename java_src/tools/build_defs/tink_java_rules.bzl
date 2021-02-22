@@ -18,14 +18,14 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
     """
 
     TARGET_DEVICES = {
-        19: "//tools/android/emulated_devices/nexus_5:google_19_x86_gms_stable",
-        21: "//tools/android/emulated_devices/nexus_6:google_21_x86",
-        22: "//tools/android/emulated_devices/nexus_6:google_22_x86",
-        23: "//tools/android/emulated_devices/nexus_6:google_23_x86",
-        24: "//tools/android/emulated_devices/nexus_6:google_24_x86",
-        25: "//tools/android/emulated_devices/nexus_6p:google_25_x86",
-        26: "//tools/android/emulated_devices/pixel_c:google_26_x86",
-        27: "//tools/android/emulated_devices/pixel_xl:google_27_x86",
+        19: "//tools/mobile/devices/android/nexus_5:google_19_x86_gms_stable",
+        21: "//tools/mobile/devices/android/nexus_6:google_21_x86",
+        22: "//tools/mobile/devices/android/nexus_6:google_22_x86",
+        23: "//tools/mobile/devices/android/nexus_6:google_23_x86",
+        24: "//tools/mobile/devices/android/nexus_6:google_24_x86",
+        25: "//tools/mobile/devices/android/nexus_6p:google_25_x86",
+        26: "//tools/mobile/devices/android/pixel_c:google_26_x86",
+        27: "//tools/mobile/devices/android/pixel_xl:google_27_x86",
     }
 
     for version_num, device in TARGET_DEVICES.items():
