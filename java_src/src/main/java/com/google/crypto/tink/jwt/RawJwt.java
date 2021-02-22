@@ -16,7 +16,6 @@ package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -113,19 +112,14 @@ public final class RawJwt {
       payload = new JsonObject();
     }
 
-    private Builder setPayload(String name, JsonElement value) {
-      payload.add(name, value);
-      return this;
-    }
-
-
     /**
      * Sets the issuer claim that identifies the principal that issued the JWT.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
-      return setPayload(JwtNames.CLAIM_ISSUER, new JsonPrimitive(value));
+      payload.add(JwtNames.CLAIM_ISSUER, new JsonPrimitive(value));
+      return this;
     }
 
     /**
@@ -134,7 +128,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
-      return setPayload(JwtNames.CLAIM_SUBJECT, new JsonPrimitive(value));
+      payload.add(JwtNames.CLAIM_SUBJECT, new JsonPrimitive(value));
+      return this;
     }
 
     /**
@@ -151,7 +146,8 @@ public final class RawJwt {
         audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
       }
       audiences.add(value);
-      return setPayload(JwtNames.CLAIM_AUDIENCE, audiences);
+      payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
+      return this;
     }
 
     /**
@@ -160,7 +156,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
     public Builder setJwtId(String value) {
-      return setPayload(JwtNames.CLAIM_JWT_ID, new JsonPrimitive(value));
+      payload.add(JwtNames.CLAIM_JWT_ID, new JsonPrimitive(value));
+      return this;
     }
 
     /**
@@ -174,7 +171,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.4
      */
     public Builder setExpiration(Instant value) {
-      return setPayload(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(value.getEpochSecond()));
+      payload.add(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(value.getEpochSecond()));
+      return this;
     }
 
     /**
@@ -188,7 +186,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.5
      */
     public Builder setNotBefore(Instant value) {
-      return setPayload(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(value.getEpochSecond()));
+      payload.add(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(value.getEpochSecond()));
+      return this;
     }
 
     /**
@@ -201,25 +200,29 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.6
      */
     public Builder setIssuedAt(Instant value) {
-      return setPayload(JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(value.getEpochSecond()));
+      payload.add(JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(value.getEpochSecond()));
+      return this;
     }
 
     /** Adds a custom claim of type {@code boolean} to the JWT. */
     public Builder addBooleanClaim(String name, boolean value) {
       JwtNames.validate(name);
-      return setPayload(name, new JsonPrimitive(value));
+      payload.add(name, new JsonPrimitive(value));
+      return this;
     }
 
     /** Adds a custom claim of type {@code double} to the JWT. */
     public Builder addNumberClaim(String name, double value) {
       JwtNames.validate(name);
-      return setPayload(name, new JsonPrimitive(value));
+      payload.add(name, new JsonPrimitive(value));
+      return this;
     }
 
     /** Adds a custom claim of type {@code String} to the JWT. */
     public Builder addStringClaim(String name, String value) {
       JwtNames.validate(name);
-      return setPayload(name, new JsonPrimitive(value));
+      payload.add(name, new JsonPrimitive(value));
+      return this;
     }
 
     /** Adds a custom claim with value null. */
@@ -234,11 +237,11 @@ public final class RawJwt {
         throws JwtInvalidException {
       JwtNames.validate(name);
       try {
-        JsonObject jsonObject = JsonParser.parseString(encodedJsonObject).getAsJsonObject();
-        return setPayload(name, jsonObject);
+        payload.add(name, JsonParser.parseString(encodedJsonObject).getAsJsonObject());
       } catch (JsonParseException | IllegalStateException ex) {
         throw new JwtInvalidException("Invalid JSON Object: " + ex.getMessage());
       }
+      return this;
     }
 
     /** Adds a custom claim encoded in a JSON {@code String} to the JWT. */
@@ -246,11 +249,11 @@ public final class RawJwt {
         throws JwtInvalidException {
       JwtNames.validate(name);
       try {
-        JsonArray jsonArray = JsonParser.parseString(encodedJsonArray).getAsJsonArray();
-        return setPayload(name, jsonArray);
+        payload.add(name, JsonParser.parseString(encodedJsonArray).getAsJsonArray());
       } catch (JsonParseException | IllegalStateException ex) {
         throw new JwtInvalidException("Invalid JSON Array: " + ex.getMessage());
       }
+      return this;
     }
 
     public RawJwt build() {
