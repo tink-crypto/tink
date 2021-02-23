@@ -14,8 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.subtle;
+package com.google.crypto.tink;
 
+import com.google.crypto.tink.subtle.Base64;
+import com.google.crypto.tink.subtle.EllipticCurves;
+import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,12 +31,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-/**
- * PEM key types that Tink supports
- *
- * @deprecated Use com.google.crypto.tink.PemKeyType instead.
- */
-@Deprecated
+/** PEM key types that Tink supports */
 public enum PemKeyType {
   // RSASSA-PSS 2048 bit key with a SHA256 digest.
   RSA_PSS_2048_SHA256("RSA", "RSASSA-PSS", 2048, HashType.SHA256),

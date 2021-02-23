@@ -553,6 +553,17 @@ android_library(
     ],
 )
 
+android_library(
+    name = "pem_key_type",
+    srcs = ["PemKeyType.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+    ],
+)
+
 template_rule(
     name = "version_java",
     src = "Version.java.templ",

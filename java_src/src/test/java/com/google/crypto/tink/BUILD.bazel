@@ -83,9 +83,9 @@ java_test(
         "//src/main/java/com/google/crypto/tink/config:tink_config",
         "//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
         "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
-        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -334,6 +334,17 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "PemKeyTypeTest",
+    size = "small",
+    srcs = ["PemKeyTypeTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:pem_key_type",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
