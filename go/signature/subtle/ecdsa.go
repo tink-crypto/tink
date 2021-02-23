@@ -22,12 +22,12 @@ import (
 
 var errUnsupportedEncoding = errors.New("ecdsa: unsupported encoding")
 
-// ECDSASignature is a struct holding r and s values of an ECDSA signature.
+// ECDSASignature is a struct holding the r and s values of an ECDSA signature.
 type ECDSASignature struct {
 	R, S *big.Int
 }
 
-// NewECDSASignature creates a new ecdsaSignature object.
+// NewECDSASignature creates a new ECDSASignature instance.
 func NewECDSASignature(r, s *big.Int) *ECDSASignature {
 	return &ECDSASignature{R: r, S: s}
 }
@@ -72,7 +72,7 @@ func DecodeECDSASignature(encodedBytes []byte, encoding string) (*ECDSASignature
 
 // ValidateECDSAParams validates ECDSA parameters.
 // The hash's strength must not be weaker than the curve's strength.
-// Only DER encoding is supported now.
+// DER and IEEE_P1363 encodings are supported.
 func ValidateECDSAParams(hashAlg string, curve string, encoding string) error {
 	switch encoding {
 	case "DER":
