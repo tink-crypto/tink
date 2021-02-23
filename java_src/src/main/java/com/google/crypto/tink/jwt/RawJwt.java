@@ -265,9 +265,11 @@ public final class RawJwt {
     return payload.toString();
   }
 
-  boolean hasClaim(String name) {
+  boolean hasBooleanClaim(String name) {
     JwtNames.validate(name);
-    return payload.has(name);
+    return (payload.has(name)
+        && payload.get(name).isJsonPrimitive()
+        && payload.get(name).getAsJsonPrimitive().isBoolean());
   }
 
   Boolean getBooleanClaim(String name) throws JwtInvalidException {
@@ -282,6 +284,13 @@ public final class RawJwt {
     return payload.get(name).getAsBoolean();
   }
 
+  boolean hasNumberClaim(String name) {
+    JwtNames.validate(name);
+    return (payload.has(name)
+        && payload.get(name).isJsonPrimitive()
+        && payload.get(name).getAsJsonPrimitive().isNumber());
+  }
+
   Double getNumberClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
     if (!payload.has(name)) {
@@ -292,6 +301,13 @@ public final class RawJwt {
       throw new JwtInvalidException("claim " + name + " is not a number");
     }
     return payload.get(name).getAsDouble();
+  }
+
+  boolean hasStringClaim(String name) {
+    JwtNames.validate(name);
+    return (payload.has(name)
+        && payload.get(name).isJsonPrimitive()
+        && payload.get(name).getAsJsonPrimitive().isString());
   }
 
   String getStringClaim(String name) throws JwtInvalidException {
@@ -319,6 +335,11 @@ public final class RawJwt {
     }
   }
 
+  boolean hasJsonObjectClaim(String name) {
+    JwtNames.validate(name);
+    return (payload.has(name) && payload.get(name).isJsonObject());
+  }
+
   String getJsonObjectClaim(String name) throws JwtInvalidException {
     JwtNames.validate(name);
     if (!payload.has(name)) {
@@ -328,6 +349,11 @@ public final class RawJwt {
       throw new JwtInvalidException("claim " + name + " is not a JSON object");
     }
     return payload.get(name).getAsJsonObject().toString();
+  }
+
+  boolean hasJsonArrayClaim(String name) {
+    JwtNames.validate(name);
+    return (payload.has(name) && payload.get(name).isJsonArray());
   }
 
   String getJsonArrayClaim(String name) throws JwtInvalidException {

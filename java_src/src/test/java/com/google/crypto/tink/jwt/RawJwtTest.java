@@ -169,6 +169,7 @@ public final class RawJwtTest {
   public void addAndGetStringClaim_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addStringClaim("claim", "value").build();
 
+    assertThat(token.hasStringClaim("claim")).isTrue();
     assertThat(token.getStringClaim("claim")).isEqualTo("value");
   }
 
@@ -177,6 +178,7 @@ public final class RawJwtTest {
     RawJwt token = new RawJwt.Builder().addNumberClaim("claim", 1).build();
 
     // A Json Number is always a floating point.
+    assertThat(token.hasNumberClaim("claim")).isTrue();
     assertThat(token.getNumberClaim("claim")).isEqualTo(1.0);
   }
 
@@ -184,6 +186,7 @@ public final class RawJwtTest {
   public void addAndGetDoubleAsNumberClaim_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addNumberClaim("claim", 123.4).build();
 
+    assertThat(token.hasNumberClaim("claim")).isTrue();
     assertThat(token.getNumberClaim("claim")).isEqualTo(123.4);
   }
 
@@ -191,6 +194,7 @@ public final class RawJwtTest {
   public void addAndGetBooleanClaim_success() throws Exception {
     RawJwt token = new RawJwt.Builder().addBooleanClaim("claim", true).build();
 
+    assertThat(token.hasBooleanClaim("claim")).isTrue();
     assertThat(token.getBooleanClaim("claim")).isTrue();
   }
 
@@ -204,7 +208,11 @@ public final class RawJwtTest {
   @Test
   public void hasUnknownClaim_false() throws Exception {
     RawJwt token = new RawJwt.Builder().build();
-    assertThat(token.hasClaim("claim")).isFalse();
+    assertThat(token.hasBooleanClaim("claim")).isFalse();
+    assertThat(token.hasNumberClaim("claim")).isFalse();
+    assertThat(token.hasStringClaim("claim")).isFalse();
+    assertThat(token.hasJsonArrayClaim("claim")).isFalse();
+    assertThat(token.hasJsonObjectClaim("claim")).isFalse();
   }
 
   @Test
@@ -230,7 +238,7 @@ public final class RawJwtTest {
     RawJwt token =
         new RawJwt.Builder().addJsonArrayClaim("collection", encodedJsonArray).build();
 
-    assertThat(token.hasClaim("collection")).isTrue();
+    assertThat(token.hasJsonArrayClaim("collection")).isTrue();
     String output = token.getJsonArrayClaim("collection");
     assertThat(output).isEqualTo("[true,123,123.456,\"value\",[1,2]]");
   }
@@ -257,7 +265,7 @@ public final class RawJwtTest {
     RawJwt token =
         new RawJwt.Builder().addJsonObjectClaim("obj", encodedJsonObject).build();
 
-    assertThat(token.hasClaim("obj")).isTrue();
+    assertThat(token.hasJsonObjectClaim("obj")).isTrue();
     String output = token.getJsonObjectClaim("obj");
 
     JsonObject obj = JsonParser.parseString(output).getAsJsonObject();

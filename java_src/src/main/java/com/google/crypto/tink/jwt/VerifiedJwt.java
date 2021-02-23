@@ -202,10 +202,38 @@ public final class VerifiedJwt {
   }
 
   /**
-   * Returns true iff the non-registered claim of name {@code name} is present.
+   * Returns true iff a non-registered claim of name {@code name} and type boolean is present.
    */
-  public boolean hasClaim(String name) {
-    return this.rawJwt.hasClaim(name);
+  public boolean hasBooleanClaim(String name) {
+    return this.rawJwt.hasBooleanClaim(name);
+  }
+
+  /**
+   * Returns true iff a non-registered claim of name {@code name} and type number is present.
+   */
+  public boolean hasNumberClaim(String name) {
+    return this.rawJwt.hasNumberClaim(name);
+  }
+
+  /**
+   * Returns true iff a non-registered claim of name {@code name} and type string is present.
+   */
+  public boolean hasStringClaim(String name) {
+    return this.rawJwt.hasStringClaim(name);
+  }
+
+  /**
+   * Returns true iff a non-registered claim of name {@code name} and type JsonObject is present.
+   */
+  public boolean hasJsonObjectClaim(String name) {
+    return this.rawJwt.hasJsonObjectClaim(name);
+  }
+
+  /**
+   * Returns true iff a non-registered claim of name {@code name} and type JsonArray is present.
+   */
+  public boolean hasJsonArrayClaim(String name) {
+    return this.rawJwt.hasJsonArrayClaim(name);
   }
 
   /**

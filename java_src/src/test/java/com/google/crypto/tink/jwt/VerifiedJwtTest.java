@@ -55,7 +55,11 @@ public final class VerifiedJwtTest {
     assertThat(emptyToken.hasExpiration()).isFalse();
     assertThat(emptyToken.hasNotBefore()).isFalse();
     assertThat(emptyToken.hasIssuedAt()).isFalse();
-    assertThat(emptyToken.hasClaim("claim")).isFalse();
+    assertThat(emptyToken.hasBooleanClaim("claim")).isFalse();
+    assertThat(emptyToken.hasNumberClaim("claim")).isFalse();
+    assertThat(emptyToken.hasStringClaim("claim")).isFalse();
+    assertThat(emptyToken.hasJsonArrayClaim("claim")).isFalse();
+    assertThat(emptyToken.hasJsonObjectClaim("claim")).isFalse();
   }
 
   @Test
@@ -175,13 +179,13 @@ public final class VerifiedJwtTest {
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
-    assertThat(token.hasClaim("bool")).isTrue();
+    assertThat(token.hasBooleanClaim("bool")).isTrue();
     assertThat(token.getBooleanClaim("bool")).isTrue();
-    assertThat(token.hasClaim("string")).isTrue();
+    assertThat(token.hasStringClaim("string")).isTrue();
     assertThat(token.getStringClaim("string")).isEqualTo("issuer");
-    assertThat(token.hasClaim("int")).isTrue();
+    assertThat(token.hasNumberClaim("int")).isTrue();
     assertThat(token.getNumberClaim("int")).isEqualTo(123.0);
-    assertThat(token.hasClaim("double")).isTrue();
+    assertThat(token.hasNumberClaim("double")).isTrue();
     assertThat(token.getNumberClaim("double")).isEqualTo(123.456);
   }
 
@@ -192,11 +196,11 @@ public final class VerifiedJwtTest {
         .addStringClaim("null_string", "null")
         .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
-    assertThat(token.hasClaim("null_object")).isTrue();
+    assertThat(token.hasStringClaim("null_object")).isFalse();
     assertThat(token.isNullClaim("null_object")).isTrue();
-    assertThat(token.hasClaim("null_string")).isTrue();
+    assertThat(token.hasStringClaim("null_string")).isTrue();
     assertThat(token.isNullClaim("null_string")).isFalse();
-    assertThat(token.hasClaim("unknown_claim")).isFalse();
+    assertThat(token.hasStringClaim("unknown_claim")).isFalse();
     assertThat(token.isNullClaim("unknown_claim")).isFalse();
   }
 
@@ -208,7 +212,7 @@ public final class VerifiedJwtTest {
             .addJsonArrayClaim("collection", "[true, 123, 123.456, \"value\", [1,2]]")
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
-    assertThat(token.hasClaim("collection")).isTrue();
+    assertThat(token.hasJsonArrayClaim("collection")).isTrue();
     assertThat(token.getJsonArrayClaim("collection"))
         .isEqualTo("[true,123,123.456,\"value\",[1,2]]");
   }
@@ -222,7 +226,7 @@ public final class VerifiedJwtTest {
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.getJwtId()).isEqualTo("id");
-    assertThat(token.hasClaim("obj")).isTrue();
+    assertThat(token.hasJsonObjectClaim("obj")).isTrue();
     assertThat(token.getJsonObjectClaim("obj"))
         .isEqualTo("{\"obj1\":{\"obj2\":{\"42\":[42]}}}");
   }
