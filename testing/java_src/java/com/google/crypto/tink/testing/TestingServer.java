@@ -17,7 +17,15 @@ package com.google.crypto.tink.testing;
 
 
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.daead.DeterministicAeadConfig;
+import com.google.crypto.tink.hybrid.HybridConfig;
+import com.google.crypto.tink.jwt.JwtMacConfig;
+import com.google.crypto.tink.jwt.JwtSignatureConfig;
+import com.google.crypto.tink.mac.MacConfig;
+import com.google.crypto.tink.prf.PrfConfig;
+import com.google.crypto.tink.signature.SignatureConfig;
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -43,7 +51,15 @@ public final class TestingServer {
     int port = Integer.parseInt(args[1]);
 
     installConscrypt();
-    TinkConfig.register();
+    AeadConfig.register();
+    DeterministicAeadConfig.register();
+    HybridConfig.register();
+    JwtMacConfig.register();
+    JwtSignatureConfig.register();
+    MacConfig.register();
+    PrfConfig.register();
+    SignatureConfig.register();
+    StreamingAeadConfig.register();
 
     System.out.println("Start server on port " + port);
     KmsClients.add(new FakeKmsClient());
@@ -57,6 +73,7 @@ public final class TestingServer {
         .addService(new MacServiceImpl())
         .addService(new PrfSetServiceImpl())
         .addService(new SignatureServiceImpl())
+        .addService(new JwtServiceImpl())
         .build()
         .start()
         .awaitTermination();
