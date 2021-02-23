@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":41,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":41,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":9,"i11":9,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":9,"i25":9,"i26":9,"i27":9,"i28":9,"i29":9,"i30":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -227,50 +227,56 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#fieldSizeInBytes-java.security.spec.EllipticCurve-">fieldSizeInBytes</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#fieldSizeInBits-java.security.spec.EllipticCurve-">fieldSizeInBits</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve)</code>
 <div class="block">Returns the size of an element of the field over which the curve is defined.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#fieldSizeInBytes-java.security.spec.EllipticCurve-">fieldSizeInBytes</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve)</code>
+<div class="block">Returns the size of an element of the field over which the curve is defined.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyPair.html?is-external=true" title="class or interface in java.security">KeyPair</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#generateKeyPair-java.security.spec.ECParameterSpec-">generateKeyPair</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;spec)</code>
 <div class="block">Generates a new key pair for <code>spec</code>.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyPair.html?is-external=true" title="class or interface in java.security">KeyPair</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#generateKeyPair-com.google.crypto.tink.subtle.EllipticCurves.CurveType-">generateKeyPair</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curve)</code>
 <div class="block">Generates a new key pair for <code>curve</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getCurveSpec-com.google.crypto.tink.subtle.EllipticCurves.CurveType-">getCurveSpec</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curve)</code>
 <div class="block">Returns the ECParameterSpec for a named curve.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPrivateKey-byte:A-">getEcPrivateKey</a></span>(byte[]&nbsp;pkcs8PrivateKey)</code>
 <div class="block">Returns an <code>ECPrivateKey</code> from <code>pkcs8PrivateKey</code> which is an encoding of a private
  key, encoded according to the ASN.1 type SubjectPublicKeyInfo.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPrivateKey-com.google.crypto.tink.subtle.EllipticCurves.CurveType-byte:A-">getEcPrivateKey</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curve,
                byte[]&nbsp;keyValue)</code>
 <div class="block">Returns an <code>ECPrivateKey</code> from <code>curve</code> type and <code>keyValue</code>.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPublicKey-byte:A-">getEcPublicKey</a></span>(byte[]&nbsp;x509PublicKey)</code>
 <div class="block">Returns an <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces"><code>ECPublicKey</code></a> from <code>x509PublicKey</code> which is an encoding of a public
  key, encoded according to the ASN.1 type SubjectPublicKeyInfo.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPublicKey-java.security.spec.ECParameterSpec-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">getEcPublicKey</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;spec,
               <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;pointFormat,
@@ -279,7 +285,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  <code>pointFormat</code> on <code>curve</code>.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPublicKey-com.google.crypto.tink.subtle.EllipticCurves.CurveType-byte:A-byte:A-">getEcPublicKey</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curve,
               byte[]&nbsp;x,
@@ -287,7 +293,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Returns an <code>ECPublicKey</code> from <code>curve</code> type and <code>x</code> and <code>y</code> coordinates.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getEcPublicKey-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">getEcPublicKey</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curve,
               <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;pointFormat,
@@ -296,25 +302,25 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  <code>pointFormat</code> on <code>curve</code>.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getModulus-java.security.spec.EllipticCurve-">getModulus</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve)</code>
 <div class="block">Returns the modulus of the field used by the curve specified in ecParams.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getNistP256Params--">getNistP256Params</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getNistP384Params--">getNistP384Params</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getNistP521Params--">getNistP521Params</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#getY-java.math.BigInteger-boolean-java.security.spec.EllipticCurve-">getY</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;x,
     boolean&nbsp;lsb,
@@ -322,31 +328,31 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Computes the y coordinate of a point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isNistEcParameterSpec-java.security.spec.ECParameterSpec-">isNistEcParameterSpec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;spec)</code>
 <div class="block">Returns whether <code>spec</code> is a <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> of one of the NIST curves.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isSameEcParameterSpec-java.security.spec.ECParameterSpec-java.security.spec.ECParameterSpec-">isSameEcParameterSpec</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;one,
                      <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec">ECParameterSpec</a>&nbsp;two)</code>
 <div class="block">Returns whether <code>one</code> is the same <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECParameterSpec.html?is-external=true" title="class or interface in java.security.spec"><code>ECParameterSpec</code></a> as <code>two</code>.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#isValidDerEncoding-byte:A-">isValidDerEncoding</a></span>(byte[]&nbsp;sig)</code>&nbsp;</td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>protected static <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#modSqrt-java.math.BigInteger-java.math.BigInteger-">modSqrt</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;x,
        <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;p)</code>
 <div class="block">Computes a square root modulo an odd prime.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointDecode-java.security.spec.EllipticCurve-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">pointDecode</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -354,7 +360,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Decodes an encoded point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/ECPoint.html?is-external=true" title="class or interface in java.security.spec">ECPoint</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointDecode-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-byte:A-">pointDecode</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curveType,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -362,7 +368,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Decodes an encoded point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointEncode-java.security.spec.EllipticCurve-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-java.security.spec.ECPoint-">pointEncode</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -370,7 +376,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Encodes a point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>static byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#pointEncode-com.google.crypto.tink.subtle.EllipticCurves.CurveType-com.google.crypto.tink.subtle.EllipticCurves.PointFormatType-java.security.spec.ECPoint-">pointEncode</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.CurveType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.CurveType</a>&nbsp;curveType,
            <a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.PointFormatType.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.PointFormatType</a>&nbsp;format,
@@ -378,7 +384,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Encodes a point on an elliptic curve.</div>
 </td>
 </tr>
-<tr id="i29" class="rowColor">
+<tr id="i30" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EllipticCurves.html#validatePublicKey-java.security.interfaces.ECPublicKey-java.security.interfaces.ECPrivateKey-">validatePublicKey</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPublicKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPublicKey</a>&nbsp;publicKey,
                  <a href="https://docs.oracle.com/javase/8/docs/api/java/security/interfaces/ECPrivateKey.html?is-external=true" title="class or interface in java.security.interfaces">ECPrivateKey</a>&nbsp;privateKey)</code>
@@ -506,6 +512,25 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dd><code>curve</code> - must be a prime order elliptic curve</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the order of the finite field over which curve is defined.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="fieldSizeInBits-java.security.spec.EllipticCurve-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>fieldSizeInBits</h4>
+<pre>public static&nbsp;int&nbsp;fieldSizeInBits(<a href="https://docs.oracle.com/javase/8/docs/api/java/security/spec/EllipticCurve.html?is-external=true" title="class or interface in java.security.spec">EllipticCurve</a>&nbsp;curve)
+                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Returns the size of an element of the field over which the curve is defined.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>curve</code> - must be a prime order elliptic curve</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the size of an element in bits</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
