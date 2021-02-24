@@ -21,7 +21,9 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,5 +73,70 @@ public class AeadConfigTest {
 
     // Running init() manually again should succeed.
     AeadConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmKey",
+      "type.googleapis.com/google.crypto.tink.AesEaxKey",
+      // AES-GCM-SIV is not included here, as it's not available with the default JCE provider.
+      // "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Aead.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Aead.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesEaxKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      try {
+        Registry.getUntypedKeyManager(typeUrl);
+        fail("Expected GeneralSecurityException");
+      } catch (GeneralSecurityException e) {
+        assertThat(e.toString()).contains("No key manager found");
+      }
+    }
   }
 }
