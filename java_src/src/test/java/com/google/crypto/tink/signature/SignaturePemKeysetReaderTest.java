@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.KeysetReader;
-import com.google.crypto.tink.PemKeyType;
 import com.google.crypto.tink.proto.EcdsaPublicKey;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
@@ -30,6 +29,7 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.subtle.PemKeyType;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.BufferedReader;
 import java.io.StringReader;
