@@ -25,7 +25,7 @@ option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_ecdsa_go_proto";
 
 enum JwtEcdsaAlgorithm {
-  UNKNOWN = 0;
+  ES_UNKNOWN = 0;
   ES256 = 1;
   ES384 = 2;
   ES512 = 3;

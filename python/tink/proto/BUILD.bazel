@@ -264,3 +264,36 @@ py_proto_library(
         ":common_py_pb2",
     ],
 )
+
+py_proto_library(
+    name = "jwt_rsa_ssa_pss_py_pb2",
+    srcs = [
+        "jwt_rsa_ssa_pss.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_py_pb2",
+    ],
+)
+
+py_proto_library(
+    name = "jwt_rsa_ssa_pkcs1_py_pb2",
+    srcs = [
+        "jwt_rsa_ssa_pkcs1.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_py_pb2",
+    ],
+)
+
+py_proto_library(
+    name = "jwt_ecdsa_py_pb2",
+    srcs = [
+        "jwt_ecdsa.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":common_py_pb2",
+    ],
+)
