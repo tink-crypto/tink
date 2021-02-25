@@ -1,0 +1,38 @@
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("@tink_py_pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+py_library(
+    name = "jwt",
+    srcs = ["__init__.py"],
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":_raw_jwt",
+    ],
+)
+
+py_library(
+    name = "_raw_jwt",
+    srcs = ["_raw_jwt.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+        requirement("six"),
+    ],
+)
+
+py_test(
+    name = "_raw_jwt_test",
+    srcs = ["_raw_jwt_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/core",
+    ],
+)
