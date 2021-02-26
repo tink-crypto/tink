@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":10,"i8":9};
+var methods = {"i0":10,"i1":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -183,15 +183,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#EngineFactory-T_WRAPPER-">EngineFactory</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#EngineFactory-T_WRAPPER-java.util.List-">EngineFactory</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder,
-             <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html?is-external=true" title="class or interface in java.security">Provider</a>&gt;&nbsp;policy)</code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#EngineFactory-T_WRAPPER-java.util.List-boolean-">EngineFactory</a></span>(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder,
-             <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html?is-external=true" title="class or interface in java.security">Provider</a>&gt;&nbsp;policy,
-             boolean&nbsp;letFallback)</code>&nbsp;</td>
-</tr>
 </table>
 </li>
 </ul>
@@ -208,45 +199,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TCipher.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TCipher</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/Cipher.html?is-external=true" title="class or interface in javax.crypto">Cipher</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomCipherProvider-boolean-java.lang.String...-">getCustomCipherProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                       <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyAgreement.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyAgreement</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/KeyAgreement.html?is-external=true" title="class or interface in javax.crypto">KeyAgreement</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomKeyAgreementProvider-boolean-java.lang.String...-">getCustomKeyAgreementProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyFactory.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyFactory</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyFactory.html?is-external=true" title="class or interface in java.security">KeyFactory</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomKeyFactoryProvider-boolean-java.lang.String...-">getCustomKeyFactoryProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                           <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyPairGenerator.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyPairGenerator</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyPairGenerator.html?is-external=true" title="class or interface in java.security">KeyPairGenerator</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomKeyPairGeneratorProvider-boolean-java.lang.String...-">getCustomKeyPairGeneratorProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                                 <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TMac.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TMac</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/Mac.html?is-external=true" title="class or interface in javax.crypto">Mac</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomMacProvider-boolean-java.lang.String...-">getCustomMacProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                    <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TMessageDigest.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TMessageDigest</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html?is-external=true" title="class or interface in java.security">MessageDigest</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomMessageDigestProvider-boolean-java.lang.String...-">getCustomMessageDigestProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                              <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TSignature.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TSignature</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Signature.html?is-external=true" title="class or interface in java.security">Signature</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getCustomSignatureProvider-boolean-java.lang.String...-">getCustomSignatureProvider</a></span>(boolean&nbsp;letFallbackToDefault,
-                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>&nbsp;</td>
-</tr>
-<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_ENGINE</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#getInstance-java.lang.String-">getInstance</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;algorithm)</code>&nbsp;</td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html?is-external=true" title="class or interface in java.security">Provider</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html#toProviderList-java.lang.String...-">toProviderList</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</code>
 <div class="block">Helper function to get a list of Providers from names.</div>
@@ -350,35 +306,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </a><a name="EngineFactory-T_WRAPPER-">
 <!--   -->
 </a>
-<ul class="blockList">
-<li class="blockList">
-<h4>EngineFactory</h4>
-<pre>public&nbsp;EngineFactory(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder)</pre>
-</li>
-</ul>
-<a name="EngineFactory-com.google.crypto.tink.subtle.EngineWrapper-java.util.List-">
-<!--   -->
-</a><a name="EngineFactory-T_WRAPPER-java.util.List-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>EngineFactory</h4>
-<pre>public&nbsp;EngineFactory(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder,
-                     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html?is-external=true" title="class or interface in java.security">Provider</a>&gt;&nbsp;policy)</pre>
-</li>
-</ul>
-<a name="EngineFactory-com.google.crypto.tink.subtle.EngineWrapper-java.util.List-boolean-">
-<!--   -->
-</a><a name="EngineFactory-T_WRAPPER-java.util.List-boolean-">
-<!--   -->
-</a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>EngineFactory</h4>
-<pre>public&nbsp;EngineFactory(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder,
-                     <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Provider.html?is-external=true" title="class or interface in java.security">Provider</a>&gt;&nbsp;policy,
-                     boolean&nbsp;letFallback)</pre>
+<pre>public&nbsp;EngineFactory(<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="type parameter in EngineFactory">T_WRAPPER</a>&nbsp;instanceBuilder)</pre>
 </li>
 </ul>
 </li>
@@ -389,76 +320,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="getCustomCipherProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomCipherProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TCipher.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TCipher</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/Cipher.html?is-external=true" title="class or interface in javax.crypto">Cipher</a>&gt;&nbsp;getCustomCipherProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomMacProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomMacProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TMac.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TMac</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/Mac.html?is-external=true" title="class or interface in javax.crypto">Mac</a>&gt;&nbsp;getCustomMacProvider(boolean&nbsp;letFallbackToDefault,
-                                                                               <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomSignatureProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomSignatureProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TSignature.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TSignature</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/Signature.html?is-external=true" title="class or interface in java.security">Signature</a>&gt;&nbsp;getCustomSignatureProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                                 <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomMessageDigestProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomMessageDigestProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TMessageDigest.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TMessageDigest</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html?is-external=true" title="class or interface in java.security">MessageDigest</a>&gt;&nbsp;getCustomMessageDigestProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                                             <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomKeyAgreementProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomKeyAgreementProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyAgreement.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyAgreement</a>,<a href="https://docs.oracle.com/javase/8/docs/api/javax/crypto/KeyAgreement.html?is-external=true" title="class or interface in javax.crypto">KeyAgreement</a>&gt;&nbsp;getCustomKeyAgreementProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                                          <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomKeyPairGeneratorProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomKeyPairGeneratorProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyPairGenerator.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyPairGenerator</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyPairGenerator.html?is-external=true" title="class or interface in java.security">KeyPairGenerator</a>&gt;&nbsp;getCustomKeyPairGeneratorProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                                                      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
-<a name="getCustomKeyFactoryProvider-boolean-java.lang.String...-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getCustomKeyFactoryProvider</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/subtle/EngineWrapper.TKeyFactory.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TKeyFactory</a>,<a href="https://docs.oracle.com/javase/8/docs/api/java/security/KeyFactory.html?is-external=true" title="class or interface in java.security">KeyFactory</a>&gt;&nbsp;getCustomKeyFactoryProvider(boolean&nbsp;letFallbackToDefault,
-                                                                                                    <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;providerNames)</pre>
-</li>
-</ul>
 <a name="toProviderList-java.lang.String...-">
 <!--   -->
 </a>
