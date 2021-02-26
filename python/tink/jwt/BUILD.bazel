@@ -12,6 +12,7 @@ py_library(
     visibility = ["//visibility:public"],
     deps = [
         ":_raw_jwt",
+        ":_verified_jwt",
     ],
 )
 
@@ -21,7 +22,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/core",
-        requirement("six"),
     ],
 )
 
@@ -32,7 +32,25 @@ py_test(
     deps = [
         ":jwt",
         requirement("absl-py"),
-        "//tink:tink_python",
+    ],
+)
+
+py_library(
+    name = "_verified_jwt",
+    srcs = ["_verified_jwt.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_raw_jwt",
         "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_verified_jwt_test",
+    srcs = ["_verified_jwt_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
     ],
 )

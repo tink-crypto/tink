@@ -19,9 +19,11 @@ import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
 from tink.jwt import _raw_jwt
+from tink.jwt import _verified_jwt
 
 JwtInvalidError = _raw_jwt.JwtInvalidError
 RawJwt = _raw_jwt.RawJwt
+VerifiedJwt = _verified_jwt.VerifiedJwt
 Claim = _raw_jwt.Claim
 
 
