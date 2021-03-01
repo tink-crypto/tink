@@ -506,6 +506,7 @@ java_library(
         ":engine_wrapper",
         ":enums",
         ":validators",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
