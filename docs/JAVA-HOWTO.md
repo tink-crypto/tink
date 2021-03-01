@@ -574,7 +574,7 @@ message.
 ```
 
 Some common specifications are available as pre-generated templates in
-[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates),
+[testdata/templates](https://github.com/google/tink/tree/master/testdata/templates),
 and can be accessed via the `...KeyTemplates.java` classes of the respective
 primitives.
 
