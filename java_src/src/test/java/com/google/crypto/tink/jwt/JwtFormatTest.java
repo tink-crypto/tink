@@ -15,8 +15,10 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.subtle.Base64;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.security.InvalidAlgorithmParameterException;
@@ -57,10 +59,16 @@ public final class JwtFormatTest {
   }
 
   @Test
-  public void decodeInvalidHeader_fail() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.decodeHeader("INVALID!!!"));
+  public void decodeHeader_success() throws Exception {
+    String headerStr = Base64.urlSafeEncode("{\"alg\":\"RS256\"}".getBytes(UTF_8));
+    JsonObject header = JwtFormat.decodeHeader(headerStr);
+    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
+  }
+
+  @Test
+  public void decodeHeaderWithoutQuotes_fail() throws Exception {
+    String headerStr = Base64.urlSafeEncode("{alg:RS256}".getBytes(UTF_8));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader(headerStr));
   }
 
   @Test

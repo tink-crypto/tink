@@ -277,6 +277,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

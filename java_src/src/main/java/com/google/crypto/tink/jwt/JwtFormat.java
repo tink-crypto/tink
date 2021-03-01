@@ -19,7 +19,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Locale;
 
@@ -96,8 +98,10 @@ final class JwtFormat {
 
   static JsonObject decodeHeader(String headerStr) throws JwtInvalidException {
     try {
-      return JsonParser.parseString(new String(Base64.urlSafeDecode(headerStr), UTF_8))
-          .getAsJsonObject();
+      String jsonHeader = new String(Base64.urlSafeDecode(headerStr), UTF_8);
+      JsonReader jsonReader = new JsonReader(new StringReader(jsonHeader));
+      jsonReader.setLenient(false);
+      return Streams.parse(jsonReader).getAsJsonObject();
     } catch (JsonParseException | IllegalArgumentException ex) {
       throw new JwtInvalidException("invalid JWT header: " + ex);
     }

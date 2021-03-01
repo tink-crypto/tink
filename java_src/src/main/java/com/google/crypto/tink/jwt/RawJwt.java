@@ -21,6 +21,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +48,10 @@ public final class RawJwt {
 
   private RawJwt(String jsonPayload) throws JwtInvalidException {
     try {
-      this.payload = JsonParser.parseString(jsonPayload).getAsJsonObject();
+      JsonReader jsonReader = new JsonReader(new StringReader(jsonPayload));
+      jsonReader.setLenient(false);
+      this.payload = Streams.parse(jsonReader).getAsJsonObject();
+
       validateStringClaim(JwtNames.CLAIM_ISSUER);
       validateStringClaim(JwtNames.CLAIM_SUBJECT);
       validateStringClaim(JwtNames.CLAIM_JWT_ID);

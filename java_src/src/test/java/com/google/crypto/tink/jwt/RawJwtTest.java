@@ -402,6 +402,26 @@ public final class RawJwtTest {
   }
 
   @Test
+  public void fromJsonPayloadWithComments_shouldThrow () throws Exception {
+    String input = "{\"sub\": \"subject\" /*, \"iss\": \"issuer\" */}";
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
+  }
+
+  @Test
+  public void fromJsonPayloadWithEscapedChars_success() throws Exception {
+    String input = "{\"i\\u0073\\u0073\": \"\\u0061lice\"}";
+    RawJwt token = RawJwt.fromJsonPayload(input);
+    assertThat(token.getIssuer()).isEqualTo("alice");
+  }
+
+  @Test
+  public void fromJsonPayloadWithoutQuotes_shoudThrow() throws Exception {
+    String input = "{iss: issuer}";
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
+  }
+
+
+  @Test
   public void getClaimsOfDifferentType_shouldThrow() throws Exception {
     RawJwt token =
         new RawJwt.Builder()
