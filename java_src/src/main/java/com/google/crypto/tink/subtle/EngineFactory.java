@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
@@ -43,27 +42,20 @@ import javax.crypto.Mac;
  */
 public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_ENGINE> {
   private static final Logger logger = Logger.getLogger(EngineFactory.class.getName());
-  private static final List<Provider> policy;
-  private static final boolean LET_FALLBACK;
+  private static final List<Provider> defaultPolicy;
+  private static final boolean DEFAULT_LET_FALLBACK = true;
 
   // Warning: keep this above the initialization of static providers below. or you'll get null
   // pointer errors (due to this policy not being initialized).
   static {
-    if (TinkFips.useOnlyFips()) {
-      // The only accepted provider is Conscrypt in FIPS-mode and no fallback is allowed.
-      policy = toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
-      LET_FALLBACK = false;
-    } else if (SubtleUtil.isAndroid()) {
+    if (SubtleUtil.isAndroid()) {
       // TODO(thaidn): test this when Android building and testing are supported.
-      // On Android prefer Conscrypt, but allow fallback to other providers.
-      policy =
+      defaultPolicy =
           toProviderList(
               "GmsCore_OpenSSL" /* Conscrypt in GmsCore, updatable thus preferrable */,
               "AndroidOpenSSL" /* Conscrypt in AOSP, not updatable but still better than BC */);
-      LET_FALLBACK = true;
     } else {
-      policy = new ArrayList<>();
-      LET_FALLBACK = true;
+      defaultPolicy = new ArrayList<>();
     }
   }
 
@@ -104,11 +96,13 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
 
   public EngineFactory(T_WRAPPER instanceBuilder) {
     this.instanceBuilder = instanceBuilder;
+    this.policy = defaultPolicy;
+    this.letFallback = DEFAULT_LET_FALLBACK;
   }
 
   public T_ENGINE getInstance(String algorithm) throws GeneralSecurityException {
     Exception cause = null;
-    for (Provider provider : policy) {
+    for (Provider provider : this.policy) {
       try {
         return this.instanceBuilder.getInstance(algorithm, provider);
       } catch (Exception e) {
@@ -117,11 +111,13 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
         }
       }
     }
-    if (LET_FALLBACK) {
+    if (letFallback) {
       return this.instanceBuilder.getInstance(algorithm, null);
     }
     throw new GeneralSecurityException("No good Provider found.", cause);
   }
 
   private final T_WRAPPER instanceBuilder;
+  private final List<Provider> policy;
+  private final boolean letFallback;
 }
