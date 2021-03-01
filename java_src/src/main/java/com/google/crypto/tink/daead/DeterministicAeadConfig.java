@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.daead;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -78,8 +79,15 @@ public final class DeterministicAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    AesSivKeyManager.register(/* newKeyAllowed = */ true);
     DeterministicAeadWrapper.register();
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      // Currently there are no determinstic AEADs which are compatible and therefore none will
+      // be registered.
+      return;
+    }
+    AesSivKeyManager.register(/* newKeyAllowed = */ true);
   }
 
   private DeterministicAeadConfig() {}
