@@ -28,12 +28,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 
@@ -136,8 +139,10 @@ public final class JsonKeysetReader implements KeysetReader {
       if (json != null) {
         return keysetFromJson(json);
       } else {
-        return keysetFromJson(
-            JsonParser.parseString(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
+        JsonReader jsonReader = new JsonReader(
+            new StringReader(new String(Util.readAll(inputStream), UTF_8)));
+        jsonReader.setLenient(false);
+        return keysetFromJson(Streams.parse(jsonReader).getAsJsonObject());
       }
     } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);

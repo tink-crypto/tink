@@ -17,6 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadKeyTemplates;
@@ -344,16 +345,38 @@ public class JsonKeysetReaderTest {
 
   @Test
   public void testReadKeyset_negativeKeyId_works() throws Exception {
-    JsonObject json = JsonParser.parseString(createJsonKeysetWithId("-21")).getAsJsonObject();
-    Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
+    String jsonKeysetString = createJsonKeysetWithId("-21");
+    Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
   }
 
   @Test
-  public void testReadKeyset_hugeKeyId_throws() throws Exception {
-    JsonObject json =
-        JsonParser.parseString(createJsonKeysetWithId("4294967275")).getAsJsonObject(); // 2^32 - 21
-    Keyset keyset = JsonKeysetReader.withJsonObject(json).read();
+  public void testReadKeyset_hugeKeyId_convertsIntoSignedInt32() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("4294967275"); // 2^32 - 21
+    Keyset keyset = JsonKeysetReader.withString(jsonKeysetString).read();
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(-21);
+  }
+
+  @Test
+  public void testReadKeyset_keyIdWithComment_throws() throws Exception {
+    String jsonKeysetString = createJsonKeysetWithId("123 /* comment on key ID */");
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
+  }
+
+  @Test
+  public void testReadKeyset_withoutQuotes_throws() throws Exception {
+    String jsonKeysetString = "{"
+        + "primaryKeyId: 123,"
+        + "key:[{"
+        + "keyData:{"
+        + "typeUrl:\"type.googleapis.com/google.crypto.tink.HmacKey\","
+        + "keyMaterialType: SYMMETRIC,"
+        + "value: \"EgQIAxAQGiBYhMkitTWFVefTIBg6kpvac+bwFOGSkENGmU+1EYgocg==\""
+        + "},"
+        + "outputPrefixType:TINK,"
+        + "keyId:123,"
+        + "status:ENABLED"
+        + "}]}";
+    assertThrows(IOException.class, () -> JsonKeysetReader.withString(jsonKeysetString).read());
   }
 }
