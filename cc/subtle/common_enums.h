@@ -47,6 +47,7 @@ enum HashType {
   SHA384 = 2,
   SHA256 = 3,
   SHA512 = 4,
+  SHA224 = 5,
 };
 
 enum EcdsaSignatureEncoding {

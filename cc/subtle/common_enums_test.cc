@@ -34,6 +34,7 @@ TEST_F(CommonEnumsTest, testEllipticCurveTypeToString) {
 
 TEST_F(CommonEnumsTest, testHashTypeToString) {
   EXPECT_EQ("SHA1", EnumToString(HashType::SHA1));
+  EXPECT_EQ("SHA224", EnumToString(HashType::SHA224));
   EXPECT_EQ("SHA256", EnumToString(HashType::SHA256));
   EXPECT_EQ("SHA384", EnumToString(HashType::SHA384));
   EXPECT_EQ("SHA512", EnumToString(HashType::SHA512));

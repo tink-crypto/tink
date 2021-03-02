@@ -261,6 +261,8 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
   switch (hash_type) {
     case HashType::SHA1:
       return EVP_sha1();
+    case HashType::SHA224:
+      return EVP_sha224();
     case HashType::SHA256:
       return EVP_sha256();
     case HashType::SHA384:
@@ -507,7 +509,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
 // static
 util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
   switch (sig_hash) {
-    case HashType::SHA256: /* fall through */
+    case HashType::SHA224: /* fall through */
+    case HashType::SHA256:
     case HashType::SHA384:
     case HashType::SHA512:
       return util::Status::OK;

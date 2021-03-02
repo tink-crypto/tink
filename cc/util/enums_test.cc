@@ -73,6 +73,8 @@ TEST_F(EnumsTest, testEllipticCurveType) {
 
 TEST_F(EnumsTest, testHashType) {
   EXPECT_EQ(pb::HashType::SHA1, Enums::SubtleToProto(subtle::HashType::SHA1));
+  EXPECT_EQ(pb::HashType::SHA224,
+            Enums::SubtleToProto(subtle::HashType::SHA224));
   EXPECT_EQ(pb::HashType::SHA256,
             Enums::SubtleToProto(subtle::HashType::SHA256));
   EXPECT_EQ(pb::HashType::SHA384,
@@ -85,6 +87,8 @@ TEST_F(EnumsTest, testHashType) {
             Enums::SubtleToProto((subtle::HashType)42));
 
   EXPECT_EQ(subtle::HashType::SHA1, Enums::ProtoToSubtle(pb::HashType::SHA1));
+  EXPECT_EQ(subtle::HashType::SHA224,
+            Enums::ProtoToSubtle(pb::HashType::SHA224));
   EXPECT_EQ(subtle::HashType::SHA256,
             Enums::ProtoToSubtle(pb::HashType::SHA256));
   EXPECT_EQ(subtle::HashType::SHA384,
@@ -106,7 +110,7 @@ TEST_F(EnumsTest, testHashType) {
       count++;
     }
   }
-  EXPECT_EQ(5, count);
+  EXPECT_EQ(6, count);
 }
 
 TEST_F(EnumsTest, testHashSize) {
@@ -227,6 +231,7 @@ TEST_F(EnumsTest, testHashName) {
   EXPECT_EQ("UNKNOWN_HASH", std::string(Enums::HashName((pb::HashType)42)));
 
   EXPECT_EQ(pb::HashType::SHA1, Enums::Hash("SHA1"));
+  EXPECT_EQ(pb::HashType::SHA224, Enums::Hash("SHA224"));
   EXPECT_EQ(pb::HashType::SHA256, Enums::Hash("SHA256"));
   EXPECT_EQ(pb::HashType::SHA384, Enums::Hash("SHA384"));
   EXPECT_EQ(pb::HashType::SHA512, Enums::Hash("SHA512"));
@@ -243,7 +248,7 @@ TEST_F(EnumsTest, testHashName) {
       count++;
     }
   }
-  EXPECT_EQ(5, count);
+  EXPECT_EQ(6, count);
 }
 
 TEST_F(EnumsTest, testKeyMaterialName) {
