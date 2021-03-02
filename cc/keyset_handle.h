@@ -54,7 +54,7 @@ class KeysetHandle {
   // and writes the resulting EncryptedKeyset to the given |writer|,
   // which must be non-null.
   crypto::tink::util::Status Write(KeysetWriter* writer,
-                                   const Aead& master_key_aead);
+                                   const Aead& master_key_aead) const;
 
   // Returns KeysetInfo, a "safe" Keyset that doesn't contain any actual
   // key material, thus can be used for logging or monitoring.
@@ -65,7 +65,7 @@ class KeysetHandle {
   // This can be used to persist public keysets or envelope encryption keysets.
   // Users that need to persist cleartext keysets can use
   // |CleartextKeysetHandle|.
-  crypto::tink::util::Status WriteNoSecret(KeysetWriter* writer);
+  crypto::tink::util::Status WriteNoSecret(KeysetWriter* writer) const;
 
   // Returns a new KeysetHandle that contains public keys corresponding
   // to the private keys from this handle.
