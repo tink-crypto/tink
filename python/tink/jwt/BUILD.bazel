@@ -11,6 +11,7 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_jwt_validator",
         ":_raw_jwt",
         ":_verified_jwt",
     ],
@@ -50,6 +51,27 @@ py_test(
     srcs = ["_verified_jwt_test.py"],
     srcs_version = "PY3",
     deps = [
+        ":jwt",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "_jwt_validator",
+    srcs = ["_jwt_validator.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_raw_jwt",
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "_jwt_validator_test",
+    srcs = ["_jwt_validator_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_validator",
         ":jwt",
         requirement("absl-py"),
     ],

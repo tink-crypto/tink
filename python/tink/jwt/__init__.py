@@ -18,12 +18,14 @@ from __future__ import print_function
 import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
+from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
 
 JwtInvalidError = _raw_jwt.JwtInvalidError
 RawJwt = _raw_jwt.RawJwt
 VerifiedJwt = _verified_jwt.VerifiedJwt
+JwtValidator = _jwt_validator.JwtValidator
 Claim = _raw_jwt.Claim
 
 
@@ -41,3 +43,12 @@ def new_raw_jwt(issuer: Optional[Text] = None,
                 custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
   return _raw_jwt.RawJwt.create(issuer, subject, audiences, jwt_id, expiration,
                                 not_before, issued_at, custom_claims)
+
+
+def new_validator(issuer: Optional[Text] = None,
+                  subject: Optional[Text] = None,
+                  audience: Optional[Text] = None,
+                  clock_skew: Optional[datetime.timedelta] = None,
+                  fixed_now: Optional[datetime.datetime] = None
+                  ) -> JwtValidator:
+  return JwtValidator(issuer, subject, audience, clock_skew, fixed_now)
