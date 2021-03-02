@@ -17,7 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
@@ -39,27 +39,20 @@ public class StreamingAeadConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkstreamingaead");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("StreamingAeadConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("TinkStreamingAead");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("StreamingAeadConfig.register()");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkstreamingaead"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("StreamingAeadConfig.register()");
+    GeneralSecurityException e2 =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("TinkStreamingAead"));
+    assertThat(e2.toString()).contains("no catalogue found");
+    assertThat(e2.toString()).contains("StreamingAeadConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    GeneralSecurityException e3 =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e3.toString()).contains("No key manager found");
 
     // Initialize the config.
     StreamingAeadConfig.register();

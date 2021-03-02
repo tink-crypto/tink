@@ -17,7 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -121,12 +121,7 @@ public class EcdsaVerifyKeyManagerTest {
   public void validateKey_wrongVersion_throws() throws Exception {
     EcdsaPublicKey wrongVersionKey =
         EcdsaPublicKey.newBuilder(validPublicKey()).setVersion(1).build();
-    try {
-      verifyManager.validateKey(wrongVersionKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(wrongVersionKey));
   }
 
   @Test
@@ -140,12 +135,7 @@ public class EcdsaVerifyKeyManagerTest {
                     .setCurve(EllipticCurveType.NIST_P521)
                     .build())
             .build();
-    try {
-      verifyManager.validateKey(wrongHashKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(wrongHashKey));
   }
 
   class RfcTestVector {
@@ -224,16 +214,13 @@ public class EcdsaVerifyKeyManagerTest {
       PublicKeyVerify verifier = createVerifier(t);
       verifier.verify(t.sig, t.msg);
       for (BytesMutation mutation : TestUtil.generateMutations(t.sig)) {
-        try {
-          verifier.verify(mutation.value, t.msg);
-          fail(
-              String.format(
-                  "Invalid signature, should have thrown exception : sig = %s, msg = %s,"
-                      + " description = %s",
-                  Hex.encode(mutation.value), Hex.encode(t.msg), mutation.description));
-        } catch (GeneralSecurityException expected) {
-          // Expected.
-        }
+        assertThrows(
+            String.format(
+                "Invalid signature, should have thrown exception : sig = %s, msg = %s,"
+                    + " description = %s",
+                Hex.encode(mutation.value), Hex.encode(t.msg), mutation.description),
+            GeneralSecurityException.class,
+            () -> verifier.verify(mutation.value, t.msg));
       }
     }
   }
@@ -308,18 +295,18 @@ public class EcdsaVerifyKeyManagerTest {
 
       // Create PublicKeyVerify.
       ECPoint w = pubKey.getW();
-      try {
-        PublicKeyVerify unusedVerifier =
-            createVerifier(
-                hashType,
-                curveType,
-                EcdsaSignatureEncoding.DER,
-                w.getAffineX().toByteArray(),
-                w.getAffineY().toByteArray());
-        fail("Unsupported key, should have thrown exception: " + hashType + " " + curveType);
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      assertThrows(
+          "Unsupported key, should have thrown exception: " + hashType + " " + curveType,
+          GeneralSecurityException.class,
+          () -> {
+            PublicKeyVerify unusedVerifier =
+                createVerifier(
+                    hashType,
+                    curveType,
+                    EcdsaSignatureEncoding.DER,
+                    w.getAffineX().toByteArray(),
+                    w.getAffineY().toByteArray());
+          });
     }
   }
 

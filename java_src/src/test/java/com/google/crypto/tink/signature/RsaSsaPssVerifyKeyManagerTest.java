@@ -16,6 +16,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTypeManager;
@@ -109,12 +110,9 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
   @Test
   public void validateKey_empty_throws() throws Exception {
-    try {
-      verifyManager.validateKey(RsaSsaPssPublicKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifyManager.validateKey(RsaSsaPssPublicKey.getDefaultInstance()));
   }
 
   @Test
@@ -155,12 +153,7 @@ public class RsaSsaPssVerifyKeyManagerTest {
     RsaSsaPssPublicKey publicKey = nistTestVectors[0].publicKeyProto;
 
     RsaSsaPssPublicKey invalidKey = RsaSsaPssPublicKey.newBuilder(publicKey).setVersion(1).build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -172,12 +165,7 @@ public class RsaSsaPssVerifyKeyManagerTest {
             .setN(ByteString.copyFrom(TestUtil.hexDecode("23")))
             .setE(ByteString.copyFrom(TestUtil.hexDecode("03")))
             .build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -233,12 +221,7 @@ public class RsaSsaPssVerifyKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     byte[] signature = signer.sign(message);
-    try {
-      verifier.verify(signature, message);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifier.verify(signature, message));
   }
 
   @Test

@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -73,12 +72,9 @@ public class Ed25519PrivateKeyManagerTest {
 
   @Test
   public void validateKey_empty_throws() throws Exception {
-    try {
-      manager.validateKey(Ed25519PrivateKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(Ed25519PrivateKey.getDefaultInstance()));
   }
 
   // Tests that generated keys are different.
@@ -102,12 +98,7 @@ public class Ed25519PrivateKeyManagerTest {
   public void validateKey_wrongVersion() throws Exception {
     Ed25519PrivateKey validKey = factory.createKey(Ed25519KeyFormat.getDefaultInstance());
     Ed25519PrivateKey invalidKey = Ed25519PrivateKey.newBuilder(validKey).setVersion(1).build();
-    try {
-      manager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(invalidKey));
   }
 
   @Test
@@ -117,12 +108,7 @@ public class Ed25519PrivateKeyManagerTest {
         Ed25519PrivateKey.newBuilder(validKey)
             .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
             .build();
-    try {
-      manager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(invalidKey));
   }
 
   @Test
@@ -134,12 +120,7 @@ public class Ed25519PrivateKeyManagerTest {
                 Ed25519PublicKey.newBuilder(validKey.getPublicKey())
                     .setKeyValue(ByteString.copyFrom(Random.randBytes(64))))
             .build();
-    try {
-      manager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(invalidKey));
   }
 
   /** Tests that a public key is extracted properly from a private key. */

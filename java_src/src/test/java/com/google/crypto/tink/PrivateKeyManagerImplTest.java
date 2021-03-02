@@ -16,7 +16,7 @@ package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.Ed25519PrivateKey;
 import com.google.crypto.tink.proto.Ed25519PublicKey;
@@ -146,13 +146,11 @@ public final class PrivateKeyManagerImplTest {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(33)))
             .build();
     ByteString privateKeyByteString = privateKey.toByteString();
-    
-    try {
-      manager.getPublicKeyData(privateKeyByteString);
-      fail();
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "validateKey(Ed25519PrivateKey)");
-    }
+
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> manager.getPublicKeyData(privateKeyByteString));
+    assertExceptionContains(e, "validateKey(Ed25519PrivateKey)");
   }
 
   @Test
@@ -170,11 +168,9 @@ public final class PrivateKeyManagerImplTest {
             .build();
     ByteString privateKeyByteString = privateKey.toByteString();
 
-    try {
-      manager.getPublicKeyData(privateKeyByteString);
-      fail();
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "validateKey(Ed25519PublicKey)");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> manager.getPublicKeyData(privateKeyByteString));
+    assertExceptionContains(e, "validateKey(Ed25519PublicKey)");
   }
 }

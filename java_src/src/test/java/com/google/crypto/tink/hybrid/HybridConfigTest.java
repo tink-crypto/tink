@@ -17,7 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.Registry;
@@ -39,35 +39,23 @@ public class HybridConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybridencrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybriddecrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybridencrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     HybridConfig.register();

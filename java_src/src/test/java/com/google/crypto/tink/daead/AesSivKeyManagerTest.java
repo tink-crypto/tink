@@ -17,7 +17,7 @@
 package com.google.crypto.tink.daead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.DeterministicAead;
 import com.google.crypto.tink.KeyTemplate;
@@ -49,54 +49,45 @@ public class AesSivKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      new AesSivKeyManager().keyFactory().validateKeyFormat(AesSivKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new AesSivKeyManager()
+                .keyFactory()
+                .validateKeyFormat(AesSivKeyFormat.getDefaultInstance()));
   }
 
   @Test
   public void validateKeyFormat_checkAllLengths() throws Exception {
     AesSivKeyManager manager = new AesSivKeyManager();
-    for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
+      final int i = j;
       if (i == 64) {
         manager.keyFactory().validateKeyFormat(createAesSivKeyFormat(i));
       } else {
-        try {
-          manager.keyFactory().validateKeyFormat(createAesSivKeyFormat(i));
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> manager.keyFactory().validateKeyFormat(createAesSivKeyFormat(i)));
       }
     }
   }
 
   @Test
   public void validateKey_empty() throws Exception {
-    try {
-      new AesSivKeyManager().validateKey(AesSivKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> new AesSivKeyManager().validateKey(AesSivKey.getDefaultInstance()));
   }
 
   @Test
   public void validateKey_checkAllLengths() throws Exception {
     AesSivKeyManager manager = new AesSivKeyManager();
-    for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
+      final int i = j;
       if (i == 64) {
         manager.validateKey(createAesSivKey(i));
       } else {
-        try {
-          manager.validateKey(createAesSivKey(i));
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> manager.validateKey(createAesSivKey(i)));
       }
     }
   }
@@ -104,12 +95,9 @@ public class AesSivKeyManagerTest {
   @Test
   public void validateKey_version() throws Exception {
     AesSivKeyManager manager = new AesSivKeyManager();
-    try {
-      manager.validateKey(AesSivKey.newBuilder(createAesSivKey(64)).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(AesSivKey.newBuilder(createAesSivKey(64)).setVersion(1).build()));
   }
 
   @Test

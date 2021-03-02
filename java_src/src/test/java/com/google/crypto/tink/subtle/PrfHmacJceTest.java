@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
@@ -132,12 +133,7 @@ public class PrfHmacJceTest {
           new PrfMac(new PrfHmacJce(t.algName, new SecretKeySpec(t.key, "HMAC")), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
-        try {
-          mac.verifyMac(modifiedTag, t.message);
-          fail("Invalid MAC, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
       }
     }
     // Test with random keys.
@@ -148,12 +144,7 @@ public class PrfHmacJceTest {
               t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
-        try {
-          mac.verifyMac(modifiedTag, t.message);
-          fail("Invalid MAC, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
       }
     }
   }
@@ -167,12 +158,7 @@ public class PrfHmacJceTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedMessage = Arrays.copyOf(t.message, t.message.length);
           modifiedMessage[b] = (byte) (modifiedMessage[b] ^ (1 << bit));
-          try {
-            mac.verifyMac(t.tag, modifiedMessage);
-            fail("Invalid MAC, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(t.tag, modifiedMessage));
         }
       }
     }
@@ -184,12 +170,7 @@ public class PrfHmacJceTest {
               t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
         byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length - j);
-        try {
-          mac.verifyMac(modifiedTag, t.message);
-          fail("Invalid MAC, should have thrown exception");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
       }
     }
   }
@@ -203,12 +184,7 @@ public class PrfHmacJceTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
           modifiedTag[b] = (byte) (modifiedTag[b] ^ (1 << bit));
-          try {
-            mac.verifyMac(modifiedTag, t.message);
-            fail("Invalid MAC, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
         }
       }
     }
@@ -222,12 +198,7 @@ public class PrfHmacJceTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modifiedTag = Arrays.copyOf(t.tag, t.tag.length);
           modifiedTag[b] = (byte) (modifiedTag[b] ^ (1 << bit));
-          try {
-            mac.verifyMac(modifiedTag, t.message);
-            fail("Invalid MAC, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(modifiedTag, t.message));
         }
       }
     }
@@ -235,12 +206,11 @@ public class PrfHmacJceTest {
 
   @Test
   public void testThrowExceptionIfKeySizeIsTooSmall() throws Exception {
-    try {
-      new PrfMac(new PrfHmacJce("HMACSHA1", new SecretKeySpec(Random.randBytes(15), "HMAC")), 16);
-      fail("Expected InvalidAlgorithmParameterException");
-    } catch (InvalidAlgorithmParameterException ex) {
-      // expected.
-    }
+    assertThrows(
+        InvalidAlgorithmParameterException.class,
+        () ->
+            new PrfMac(
+                new PrfHmacJce("HMACSHA1", new SecretKeySpec(Random.randBytes(15), "HMAC")), 16));
   }
 
   @Test

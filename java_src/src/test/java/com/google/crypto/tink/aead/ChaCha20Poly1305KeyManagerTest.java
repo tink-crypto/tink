@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -59,27 +59,23 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void validateKey_empty() throws Exception {
-    try {
-      new ChaCha20Poly1305KeyManager().validateKey(ChaCha20Poly1305Key.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new ChaCha20Poly1305KeyManager().validateKey(ChaCha20Poly1305Key.getDefaultInstance()));
   }
 
   @Test
   public void validateKey_checkAllLengths() throws Exception {
     ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
-    for (int i = 0; i < 100; i++) {
+    for (int j = 0; j < 100; j++) {
+      final int i = j;
       if (i == 32) {
         manager.validateKey(createChaCha20Poly1305Key(i));
       } else {
-        try {
-          manager.validateKey(createChaCha20Poly1305Key(i));
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> manager.validateKey(createChaCha20Poly1305Key(i)));
       }
     }
   }
@@ -88,13 +84,13 @@ public class ChaCha20Poly1305KeyManagerTest {
   public void validateKey_version() throws Exception {
     ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
 
-    try {
-      manager.validateKey(
-          ChaCha20Poly1305Key.newBuilder(createChaCha20Poly1305Key(32)).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                ChaCha20Poly1305Key.newBuilder(createChaCha20Poly1305Key(32))
+                    .setVersion(1)
+                    .build()));
   }
 
   @Test

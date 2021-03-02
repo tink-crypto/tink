@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -79,12 +78,9 @@ public class RsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(RsaSsaPkcs1KeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(RsaSsaPkcs1KeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -109,35 +105,20 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   @Test
   public void validateKeyFormat_Sha1Disallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA1, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_UnknownHashDisallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format =
         createKeyFormat(HashType.UNKNOWN_HASH, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_smallModulusDisallowed_throws() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA512, 1024, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   private static void checkConsistency(

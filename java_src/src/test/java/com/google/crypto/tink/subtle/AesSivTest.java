@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
@@ -87,14 +88,10 @@ public class AesSivTest {
           byte[] plaintext = daead.decryptDeterministically(ct, aad);
           assertEquals(tcId, Hex.encode(msg), Hex.encode(plaintext));
         } else {
-          try {
-            byte[] plaintext = daead.decryptDeterministically(ct, aad);
-            fail(
-                String.format(
-                    "FAIL %s: decrypted invalid ciphertext as %s", tcId, Hex.encode(plaintext)));
-          } catch (GeneralSecurityException ex) {
-            // This is expected
-          }
+          assertThrows(
+              String.format("FAIL %s: decrypted invalid ciphertext", tcId),
+              GeneralSecurityException.class,
+              () -> daead.decryptDeterministically(ct, aad));
         }
       }
     }
@@ -282,25 +279,18 @@ public class AesSivTest {
 
   @Test
   public void testInvalidKeySizes() throws GeneralSecurityException {
-    try {
-      // AesSiv doesn't accept 32-byte keys.
-      new AesSiv(Random.randBytes(32));
-      fail("32-byte keys should not be accepted");
-    } catch (InvalidKeyException ex) {
-      // expected.
-    }
+    assertThrows(InvalidKeyException.class, () -> new AesSiv(Random.randBytes(32)));
 
-    for (int j = 0; j < 100; j++) {
+    for (int i = 0; i < 100; i++) {
+      final int j = i;
       if (j == 48 || j == 64) {
         continue;
       }
 
-      try {
-        new AesSiv(Random.randBytes(j));
-        fail("Keys with invalid size should not be accepted: " + j);
-      } catch (InvalidKeyException ex) {
-        // expected.
-      }
+      assertThrows(
+          "Keys with invalid size should not be accepted: " + j,
+          InvalidKeyException.class,
+          () -> new AesSiv(Random.randBytes(j)));
     }
   }
 }

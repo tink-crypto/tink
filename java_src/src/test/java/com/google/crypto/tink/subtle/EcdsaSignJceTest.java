@@ -17,8 +17,8 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
@@ -70,13 +70,11 @@ public class EcdsaSignJceTest {
     KeyPair keyPair = keyGen.generateKeyPair();
     ECPrivateKey priv = (ECPrivateKey) keyPair.getPrivate();
 
-    try {
-      new EcdsaSignJce(priv, HashType.SHA1, EcdsaEncoding.DER);
-      fail("Unsafe hash, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> new EcdsaSignJce(priv, HashType.SHA1, EcdsaEncoding.DER));
+    TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
   }
 
   @Test

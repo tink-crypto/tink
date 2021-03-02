@@ -19,7 +19,6 @@ package com.google.crypto.tink.signature;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -71,12 +70,9 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(EcdsaKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(EcdsaKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -113,99 +109,83 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_noSha1() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_p384NotWithSha256() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_p521OnlyWithSha512() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA384, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA384, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_unkownsProhibited() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.UNKNOWN_HASH, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.UNKNOWN_CURVE, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256,
-              EllipticCurveType.NIST_P256,
-              EcdsaSignatureEncoding.UNKNOWN_ENCODING));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.UNKNOWN_HASH,
+                    EllipticCurveType.NIST_P256,
+                    EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.UNKNOWN_CURVE, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256,
+                    EllipticCurveType.NIST_P256,
+                    EcdsaSignatureEncoding.UNKNOWN_ENCODING)));
   }
 
   @Test
   public void validateKey_empty() throws Exception {
-    try {
-      manager.validateKey(EcdsaPrivateKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(EcdsaPrivateKey.getDefaultInstance()));
   }
 
   @Test

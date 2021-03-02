@@ -18,7 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyWrap;
 import com.google.crypto.tink.testing.TestUtil;
@@ -51,16 +51,16 @@ public class KwpTest {
   @Test
   public void testInvalidKeySizes() throws Exception {
     // Tests the wrapping key. Its key size is either 16 or 32.
-    for (int i = 0; i < 255; i++) {
+    for (int j = 0; j < 255; j++) {
+      final int i = j;
       if (i == 16 || i == 32) {
         continue;
       }
-      try {
-        KeyWrap unused = new Kwp(new byte[i]);
-        fail("Constructed wrapper with invalid key size");
-      } catch (GeneralSecurityException ex) {
-        // expected
-      }
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> {
+            KeyWrap unused = new Kwp(new byte[i]);
+          });
     }
   }
 
@@ -68,13 +68,9 @@ public class KwpTest {
   public void testInvalidWrappingSizes() throws Exception {
     byte[] wrapKey = Random.randBytes(16);
     KeyWrap wrapper = new Kwp(wrapKey);
-    for (int wrappedSize = 0; wrappedSize < 16; wrappedSize++) {
-      try {
-        wrapper.wrap(new byte[wrappedSize]);
-        fail("Should not wrap short keys");
-      } catch (GeneralSecurityException ex) {
-        // expected
-      }
+    for (int i = 0; i < 16; i++) {
+      final int wrappedSize = i;
+      assertThrows(GeneralSecurityException.class, () -> wrapper.wrap(new byte[wrappedSize]));
     }
   }
 

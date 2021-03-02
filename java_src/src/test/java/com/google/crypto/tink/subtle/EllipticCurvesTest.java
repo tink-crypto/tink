@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
@@ -147,17 +148,15 @@ public class EllipticCurvesTest {
 
   @Test
   public void testPointNotOnCurve() throws Exception {
-    for (int i = 0; i < testVectors1.length; i++) {
+    for (int j = 0; j < testVectors1.length; j++) {
+      final int i = j;
       ECPoint pubPoint =
           new ECPoint(
               new BigInteger(testVectors1[i].pubX, 16),
               new BigInteger(testVectors1[i].pubY, 16).subtract(BigInteger.ONE));
-      try {
-        EllipticCurves.checkPointOnCurve(pubPoint, testVectors1[i].getCurve());
-        fail("The point is not on the curve");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> EllipticCurves.checkPointOnCurve(pubPoint, testVectors1[i].getCurve()));
     }
   }
 

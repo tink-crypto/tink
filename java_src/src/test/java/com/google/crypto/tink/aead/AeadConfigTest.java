@@ -17,7 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
@@ -41,29 +41,17 @@ public class AeadConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkaead");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("AeadConfig.register()");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkaead"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("AeadConfig.register()");
     // Before registration, key manager should be absent.
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     AeadConfig.register();
@@ -131,12 +119,10 @@ public class AeadConfigTest {
     };
 
     for (String typeUrl : keyTypeUrls) {
-      try {
-        Registry.getUntypedKeyManager(typeUrl);
-        fail("Expected GeneralSecurityException");
-      } catch (GeneralSecurityException e) {
-        assertThat(e.toString()).contains("No key manager found");
-      }
+      GeneralSecurityException e =
+          assertThrows(
+              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+      assertThat(e.toString()).contains("No key manager found");
     }
   }
 }

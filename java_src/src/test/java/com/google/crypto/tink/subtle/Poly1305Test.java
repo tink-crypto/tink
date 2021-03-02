@@ -18,6 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
 import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
@@ -37,44 +38,42 @@ public class Poly1305Test {
 
   @Test
   public void testPoly1305ComputeMacThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() {
-    try {
-      Poly1305.computeMac(new byte[MAC_KEY_SIZE_IN_BYTES + 1], new byte[0]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> Poly1305.computeMac(new byte[MAC_KEY_SIZE_IN_BYTES + 1], new byte[0]));
+    Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testPoly1305ComputeMacThrowsIllegalArgExpWhenKeyLenIsLessThan32() {
-    try {
-      Poly1305.computeMac(new byte[MAC_KEY_SIZE_IN_BYTES - 1], new byte[0]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> Poly1305.computeMac(new byte[MAC_KEY_SIZE_IN_BYTES - 1], new byte[0]));
+    Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testPoly1305VerifyMacThrowsIllegalArgExpWhenKeyLenIsGreaterThan32()
       throws GeneralSecurityException {
-    try {
-      Poly1305.verifyMac(new byte[MAC_KEY_SIZE_IN_BYTES + 1], new byte[0], new byte[0]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Poly1305.verifyMac(new byte[MAC_KEY_SIZE_IN_BYTES + 1], new byte[0], new byte[0]));
+    Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testPoly1305VerifyMacThrowsIllegalArgExpWhenKeyLenIsLessThan32()
       throws GeneralSecurityException {
-    try {
-      Poly1305.verifyMac(new byte[MAC_KEY_SIZE_IN_BYTES - 1], new byte[0], new byte[0]);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Poly1305.verifyMac(new byte[MAC_KEY_SIZE_IN_BYTES - 1], new byte[0], new byte[0]));
+    Truth.assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
@@ -99,14 +98,13 @@ public class Poly1305Test {
 
   @Test
   public void testFailedVerification() throws GeneralSecurityException {
-    try {
-      byte[] key = new byte[MAC_KEY_SIZE_IN_BYTES];
-      key[0] = 1;
-      Poly1305.verifyMac(key, new byte[]{1}, new byte[MAC_TAG_SIZE_IN_BYTES]);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      Truth.assertThat(e).hasMessageThat().containsMatch("invalid MAC");
-    }
+    byte[] key = new byte[MAC_KEY_SIZE_IN_BYTES];
+    key[0] = 1;
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Poly1305.verifyMac(key, new byte[] {1}, new byte[MAC_TAG_SIZE_IN_BYTES]));
+    Truth.assertThat(e).hasMessageThat().containsMatch("invalid MAC");
   }
 
   /**

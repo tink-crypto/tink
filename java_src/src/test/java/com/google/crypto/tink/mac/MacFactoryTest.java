@@ -19,6 +19,7 @@ package com.google.crypto.tink.mac;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
@@ -102,13 +103,12 @@ public class MacFactoryTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modified = Arrays.copyOf(plaintextAndTag, plaintextAndTag.length);
           modified[b] ^= (byte) (1 << bit);
-          try {
-            mac.verifyMac(Arrays.copyOfRange(modified, plaintext.length, modified.length),
-                Arrays.copyOfRange(modified, 0, plaintext.length));
-            fail("Invalid tag or plaintext, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(
+              GeneralSecurityException.class,
+              () ->
+                  mac.verifyMac(
+                      Arrays.copyOfRange(modified, plaintext.length, modified.length),
+                      Arrays.copyOfRange(modified, 0, plaintext.length)));
         }
       }
 
@@ -133,13 +133,8 @@ public class MacFactoryTest {
       keysetHandle2 = TestUtil.createKeysetHandle(
           TestUtil.createKeyset(random));
       mac2 = MacFactory.getPrimitive(keysetHandle2);
-      tag = mac2.computeMac(plaintext);
-      try {
-        mac.verifyMac(tag, plaintext);
-        fail("Invalid MAC MAC, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      final byte[] tag2 = mac2.computeMac(plaintext);
+      assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(tag2, plaintext));
     }
   }
 
@@ -177,21 +172,16 @@ public class MacFactoryTest {
         TestUtil.createKey(
             TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
 
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    try {
-      MacFactory.getPrimitive(keysetHandle);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
-    }
+    final KeysetHandle keysetHandle =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> MacFactory.getPrimitive(keysetHandle));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
 
     // invalid as the primary key.
-    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    try {
-      MacFactory.getPrimitive(keysetHandle);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
-    }
+    final KeysetHandle keysetHandle2 =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    e = assertThrows(GeneralSecurityException.class, () -> MacFactory.getPrimitive(keysetHandle2));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac not supported");
   }
 }

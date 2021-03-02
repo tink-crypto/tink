@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
@@ -131,13 +131,11 @@ public class AeadFactoryTest {
             OutputPrefixType.TINK);
     keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(random));
     aead2 = keysetHandle2.getPrimitive(Aead.class);
-    ciphertext = aead2.encrypt(plaintext, associatedData);
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
+    final byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
+    assertExceptionContains(e, "decryption failed");
   }
 
   @Test
@@ -216,21 +214,16 @@ public class AeadFactoryTest {
         TestUtil.createKey(
             TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
 
-    KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    try {
-      keysetHandle.getPrimitive(Aead.class);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
-    }
+    final KeysetHandle keysetHandle =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> keysetHandle.getPrimitive(Aead.class));
+    assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
 
     // invalid as the primary key.
-    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    try {
-      keysetHandle.getPrimitive(Aead.class);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
-    }
+    final KeysetHandle keysetHandle2 =
+        TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    e = assertThrows(GeneralSecurityException.class, () -> keysetHandle2.getPrimitive(Aead.class));
+    assertExceptionContains(e, "com.google.crypto.tink.DeterministicAead");
   }
 }

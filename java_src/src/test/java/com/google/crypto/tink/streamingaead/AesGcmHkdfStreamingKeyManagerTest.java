@@ -17,7 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -68,12 +68,9 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(AesGcmHkdfStreamingKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmHkdfStreamingKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -83,33 +80,23 @@ public class AesGcmHkdfStreamingKeyManagerTest {
 
   @Test
   public void validateKeyFormat_unkownHash_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createKeyFormat(32, 32, HashType.UNKNOWN_HASH, 1024));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(createKeyFormat(32, 32, HashType.UNKNOWN_HASH, 1024)));
   }
 
   @Test
   public void validateKeyFormat_smallKey_throws() throws Exception {
-    try {
-      // TODO(b/140161847): Also check (16,32,SHA256,1024)
-      factory.validateKeyFormat(createKeyFormat(15, 32, HashType.SHA256, 1024));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(createKeyFormat(15, 32, HashType.SHA256, 1024)));
   }
 
   @Test
   public void validateKeyFormat_smallSegment_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createKeyFormat(16, 32, HashType.SHA256, 45));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(createKeyFormat(16, 32, HashType.SHA256, 45)));
   }
 
   @Test
@@ -147,12 +134,9 @@ public class AesGcmHkdfStreamingKeyManagerTest {
         createKeyFormat(keySize, derivedKeySize, HashType.SHA256, 1024);
 
     byte[] keyMaterial = Random.randBytes(31);
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -182,12 +166,9 @@ public class AesGcmHkdfStreamingKeyManagerTest {
             .build();
 
     byte[] keyMaterial = Random.randBytes(32);
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

@@ -100,12 +100,11 @@ public class KeysetManagerTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createUnknownStatusKey(keyId)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).enable(keyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot enable");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).enable(keyId));
+    assertThat(e.toString()).contains("cannot enable");
   }
 
   @Test
@@ -114,12 +113,11 @@ public class KeysetManagerTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createDestroyedKey(keyId)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).enable(keyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot enable");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).enable(keyId));
+    assertThat(e.toString()).contains("cannot enable");
   }
 
   @Test
@@ -128,12 +126,11 @@ public class KeysetManagerTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).enable(keyId + 1);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).enable(keyId + 1));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -162,12 +159,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).setPrimary(44);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).setPrimary(44));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -178,12 +174,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createDisabledKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   @Test
@@ -194,12 +189,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createDestroyedKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   @Test
@@ -210,12 +204,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).setPrimary(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   // Same tests as for setPrimary() for the deprecated promote(), which should be equivalent.
@@ -245,12 +238,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).promote(44);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).promote(44));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -261,12 +253,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createDisabledKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   @Test
@@ -277,12 +268,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createDestroyedKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   @Test
@@ -293,12 +283,11 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(newPrimaryKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).promote(newPrimaryKeyId));
+    assertThat(e.toString()).contains("cannot set key as primary because it's not enabled");
   }
 
   @Test
@@ -327,12 +316,15 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).disable(primaryKeyId).getKeysetHandle().getKeyset();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot disable the primary key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                KeysetManager.withKeysetHandle(handle)
+                    .disable(primaryKeyId)
+                    .getKeysetHandle()
+                    .getKeyset());
+    assertThat(e.toString()).contains("cannot disable the primary key");
   }
 
   @Test
@@ -343,12 +335,15 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createDestroyedKey(otherKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).disable(otherKeyId).getKeysetHandle().getKeyset();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot disable key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                KeysetManager.withKeysetHandle(handle)
+                    .disable(otherKeyId)
+                    .getKeysetHandle()
+                    .getKeyset());
+    assertThat(e.toString()).contains("cannot disable key");
   }
 
   @Test
@@ -357,12 +352,11 @@ public class KeysetManagerTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).disable(keyId + 1);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).disable(keyId + 1));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -392,12 +386,15 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).destroy(primaryKeyId).getKeysetHandle().getKeyset();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot destroy the primary key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                KeysetManager.withKeysetHandle(handle)
+                    .destroy(primaryKeyId)
+                    .getKeysetHandle()
+                    .getKeyset());
+    assertThat(e.toString()).contains("cannot destroy the primary key");
   }
 
   @Test
@@ -408,12 +405,15 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createUnknownStatusKey(otherKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).destroy(otherKeyId).getKeysetHandle().getKeyset();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot destroy key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                KeysetManager.withKeysetHandle(handle)
+                    .destroy(otherKeyId)
+                    .getKeysetHandle()
+                    .getKeyset());
+    assertThat(e.toString()).contains("cannot destroy key");
   }
 
   @Test
@@ -422,12 +422,11 @@ public class KeysetManagerTest {
     KeysetHandle handle = KeysetHandle.fromKeyset(
         TestUtil.createKeyset(createDisabledKey(keyId)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).destroy(keyId + 1);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).destroy(keyId + 1));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -454,12 +453,15 @@ public class KeysetManagerTest {
         TestUtil.createKeyset(
             createEnabledKey(primaryKeyId),
             createEnabledKey(otherKeyId)));
-    try {
-      KeysetManager.withKeysetHandle(handle).delete(primaryKeyId).getKeysetHandle().getKeyset();
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("cannot delete the primary key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                KeysetManager.withKeysetHandle(handle)
+                    .delete(primaryKeyId)
+                    .getKeysetHandle()
+                    .getKeyset());
+    assertThat(e.toString()).contains("cannot delete the primary key");
   }
 
   @Test
@@ -471,12 +473,11 @@ public class KeysetManagerTest {
             createEnabledKey(keyId1),
             createEnabledKey(keyId2)));
 
-    try {
-      KeysetManager.withKeysetHandle(handle).delete(44);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("key not found");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> KeysetManager.withKeysetHandle(handle).delete(44));
+    assertThat(e.toString()).contains("key not found");
   }
 
   @Test
@@ -495,12 +496,10 @@ public class KeysetManagerTest {
     com.google.crypto.tink.proto.KeyTemplate bogus =
         TestUtil.createKeyTemplateWithNonExistingTypeUrl();
 
-    try {
-      KeysetManager.withEmptyKeyset().rotate(bogus);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "No key manager found for key type");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> KeysetManager.withEmptyKeyset().rotate(bogus));
+    TestUtil.assertExceptionContains(e, "No key manager found for key type");
   }
 
   @Test
@@ -559,12 +558,10 @@ public class KeysetManagerTest {
     KeyTemplate bogus =
         KeyTemplate.create("does not exist", new byte[0], KeyTemplate.OutputPrefixType.TINK);
 
-    try {
-      KeysetManager.withEmptyKeyset().add(bogus);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "No key manager found for key type");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> KeysetManager.withEmptyKeyset().add(bogus));
+    TestUtil.assertExceptionContains(e, "No key manager found for key type");
   }
 
   @Test
@@ -572,12 +569,10 @@ public class KeysetManagerTest {
     com.google.crypto.tink.proto.KeyTemplate bogus =
         TestUtil.createKeyTemplateWithNonExistingTypeUrl();
 
-    try {
-      KeysetManager.withEmptyKeyset().add(bogus);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "No key manager found for key type");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> KeysetManager.withEmptyKeyset().add(bogus));
+    TestUtil.assertExceptionContains(e, "No key manager found for key type");
   }
 
   @Test

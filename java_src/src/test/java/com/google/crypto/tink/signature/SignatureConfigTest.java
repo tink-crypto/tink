@@ -17,7 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.Registry;
@@ -39,27 +39,19 @@ public class SignatureConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkpublickeysign");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("SignatureConfig.registe");
-    }
-    try {
-      Registry.getCatalogue("tinkpublickeyverify");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("SignatureConfig.registe");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeysign"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("SignatureConfig.registe");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeyverify"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("SignatureConfig.registe");
     String typeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     SignatureConfig.register();

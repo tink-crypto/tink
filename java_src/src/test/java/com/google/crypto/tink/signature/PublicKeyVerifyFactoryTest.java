@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeysetHandle;
@@ -153,12 +154,7 @@ public class PublicKeyVerifyFactoryTest {
                           keys[0].getOutputPrefixType()))));
       byte[] plaintext = Random.randBytes(1211);
       byte[] sig = signer.sign(plaintext);
-      try {
-        verifier.verify(sig, plaintext);
-        fail("Invalid signature, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      assertThrows(GeneralSecurityException.class, () -> verifier.verify(sig, plaintext));
     }
   }
 }

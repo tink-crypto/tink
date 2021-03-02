@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
@@ -134,12 +135,7 @@ public class EncryptThenAuthenticateTest {
       for (int j = 0; j < 8; j++) {
         byte[] c1 = Arrays.copyOf(ciphertext, ciphertext.length);
         c1[i] = (byte) (c1[i] ^ (1 << j));
-        try {
-          aead.decrypt(c1, aad);
-          fail("Invalid ciphertext, should have failed");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> aead.decrypt(c1, aad));
       }
     }
   }
@@ -154,12 +150,7 @@ public class EncryptThenAuthenticateTest {
       for (int j = 0; j < 8; j++) {
         byte[] aad1 = Arrays.copyOf(aad, aad.length);
         aad1[i] = (byte) (aad1[i] ^ (1 << j));
-        try {
-          aead.decrypt(ciphertext, aad1);
-          fail("Invalid aad, should have failed");
-        } catch (GeneralSecurityException expected) {
-          // Expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, aad1));
       }
     }
   }
@@ -181,32 +172,27 @@ public class EncryptThenAuthenticateTest {
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
     Aead aead = getAead(Random.randBytes(16), Random.randBytes(16), 16, 16, "HMACSHA256");
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = aead.encrypt(null, aad);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = aead.encrypt(null, null);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = aead.decrypt(null, aad);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = aead.decrypt(null, null);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
+    byte[] aad = new byte[] {1, 2, 3};
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, null);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, null);
+        });
   }
 
   @Test
@@ -220,13 +206,12 @@ public class EncryptThenAuthenticateTest {
       assertArrayEquals(plaintext, decrypted);
       byte[] decrypted2 = aead.decrypt(ciphertext, null);
       assertArrayEquals(plaintext, decrypted2);
-      try {
-        byte[] badAad = new byte[] {1, 2, 3};
-        byte[] unused = aead.decrypt(ciphertext, badAad);
-        fail("Decrypting with modified aad should fail");
-      } catch (GeneralSecurityException expected) {
-        // This is expected.
-      }
+      byte[] badAad = new byte[] {1, 2, 3};
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = aead.decrypt(ciphertext, badAad);
+          });
     }
     {  // encrypting with aad equal to null
       byte[] ciphertext = aead.encrypt(plaintext, null);
@@ -234,13 +219,12 @@ public class EncryptThenAuthenticateTest {
       assertArrayEquals(plaintext, decrypted);
       byte[] decrypted2 = aead.decrypt(ciphertext, null);
       assertArrayEquals(plaintext, decrypted2);
-      try {
-        byte[] badAad = new byte[] {1, 2, 3};
-        byte[] unused = aead.decrypt(ciphertext, badAad);
-        fail("Decrypting with modified aad should fail");
-      } catch (GeneralSecurityException expected) {
-        // This is expected.
-      }
+      byte[] badAad = new byte[] {1, 2, 3};
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = aead.decrypt(ciphertext, badAad);
+          });
     }
   }
 
@@ -252,12 +236,7 @@ public class EncryptThenAuthenticateTest {
     byte[] ciphertext = aead.encrypt(plaintext, aad);
     for (int i = 1; i < ciphertext.length; i++) {
       byte[] c1 = Arrays.copyOf(ciphertext, ciphertext.length - i);
-      try {
-        aead.decrypt(c1, aad);
-        fail("Invalid ciphertext, should have failed");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      assertThrows(GeneralSecurityException.class, () -> aead.decrypt(c1, aad));
     }
   }
 

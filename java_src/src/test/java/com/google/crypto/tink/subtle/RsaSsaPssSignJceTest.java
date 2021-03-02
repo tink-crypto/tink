@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
@@ -46,13 +46,11 @@ public class RsaSsaPssSignJceTest {
     keyGen.initialize(keySize);
 
     RSAPrivateCrtKey priv = (RSAPrivateCrtKey) keyGen.generateKeyPair().getPrivate();
-    try {
-      new RsaSsaPssSignJce(priv, HashType.SHA1, HashType.SHA1, 20);
-      fail("Unsafe hash, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> new RsaSsaPssSignJce(priv, HashType.SHA1, HashType.SHA1, 20));
+    TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
   }
 
   @Test

@@ -18,7 +18,7 @@ package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.proto.AesCmacPrfKey;
@@ -37,14 +37,12 @@ import org.junit.runners.JUnit4;
 public class AesCmacPrfKeyManagerTest {
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      new AesCmacPrfKeyManager()
-          .keyFactory()
-          .validateKeyFormat(AesCmacPrfKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new AesCmacPrfKeyManager()
+                .keyFactory()
+                .validateKeyFormat(AesCmacPrfKeyFormat.getDefaultInstance()));
   }
 
   private static AesCmacPrfKeyFormat makeAesCmacPrfKeyFormat(int keySize) {
@@ -60,18 +58,12 @@ public class AesCmacPrfKeyManagerTest {
   @Test
   public void validateKeyFormat_notValid_throws() throws Exception {
     AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacPrfKeyFormat(31));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacPrfKeyFormat(16));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacPrfKeyFormat(31)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacPrfKeyFormat(16)));
   }
 
   @Test
@@ -104,37 +96,30 @@ public class AesCmacPrfKeyManagerTest {
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
-    try {
-      AesCmacPrfKey validKey = manager.keyFactory().createKey(makeAesCmacPrfKeyFormat(32));
-      manager.validateKey(AesCmacPrfKey.newBuilder(validKey).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    AesCmacPrfKey validKey = manager.keyFactory().createKey(makeAesCmacPrfKeyFormat(32));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(AesCmacPrfKey.newBuilder(validKey).setVersion(1).build()));
   }
 
   @Test
   public void validateKey_notValid_throws() throws Exception {
     AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
     AesCmacPrfKey validKey = manager.keyFactory().createKey(makeAesCmacPrfKeyFormat(32));
-    try {
-      manager.validateKey(
-          AesCmacPrfKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(16)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.validateKey(
-          AesCmacPrfKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacPrfKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(16)))
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacPrfKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
+                    .build()));
   }
 
   @Test

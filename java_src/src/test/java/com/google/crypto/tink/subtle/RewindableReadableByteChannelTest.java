@@ -21,8 +21,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.StreamingTestUtil.ByteBufferChannel;
 import java.io.IOException;
@@ -177,12 +177,8 @@ public class RewindableReadableByteChannelTest {
     RewindableReadableByteChannel rewindableChannel =
         new RewindableReadableByteChannel(baseChannel);
     rewindableChannel.close();
-    try {
-      rewindableChannel.rewind();
-      fail("Should have thrown exception, as cannot rewind after closing.");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "Cannot rewind");
-    }
+    IOException expected = assertThrows(IOException.class, rewindableChannel::rewind);
+    assertExceptionContains(expected, "Cannot rewind");
   }
 
   @Test
@@ -193,11 +189,11 @@ public class RewindableReadableByteChannelTest {
         new RewindableReadableByteChannel(baseChannel);
     rewindableChannel.close();
     ByteBuffer buffer = ByteBuffer.allocate(42);
-    try {
-      int unused = rewindableChannel.read(buffer);
-      fail("Should have thrown exception, as cannot read after closing.");
-    } catch (ClosedChannelException expected) {
-    }
+    assertThrows(
+        ClosedChannelException.class,
+        () -> {
+          int unused = rewindableChannel.read(buffer);
+        });
   }
 
   @Test
@@ -399,12 +395,8 @@ public class RewindableReadableByteChannelTest {
     RewindableReadableByteChannel rewindableChannel =
         new RewindableReadableByteChannel(baseChannel);
     rewindableChannel.disableRewinding();
-    try {
-      rewindableChannel.rewind();
-      fail("Should have thrown exception, as cannot rewind after closing.");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "Cannot rewind");
-    }
+    IOException expected = assertThrows(IOException.class, rewindableChannel::rewind);
+    assertExceptionContains(expected, "Cannot rewind");
   }
 
   @Test
@@ -487,10 +479,10 @@ public class RewindableReadableByteChannelTest {
     assertFalse(rewindableChannel.isOpen());
 
     ByteBuffer buffer = ByteBuffer.allocate(42);
-    try {
-      int unused = rewindableChannel.read(buffer);
-      fail("Should have thrown exception, as cannot read after closing.");
-    } catch (ClosedChannelException expected) {
-    }
+    assertThrows(
+        ClosedChannelException.class,
+        () -> {
+          int unused = rewindableChannel.read(buffer);
+        });
   }
 }

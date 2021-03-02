@@ -17,7 +17,7 @@ package com.google.crypto.tink.prf;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -55,12 +55,7 @@ public class HkdfPrfKeyManagerTest {
   @Test
   public void validateKey_empty_throws() throws Exception {
     HkdfPrfKey key = HkdfPrfKey.getDefaultInstance();
-    try {
-      manager.validateKey(key);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test
@@ -81,12 +76,7 @@ public class HkdfPrfKeyManagerTest {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
             .build();
-    try {
-      manager.validateKey(key);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test
@@ -130,12 +120,7 @@ public class HkdfPrfKeyManagerTest {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA1))
             .build();
-    try {
-      manager.validateKey(key);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test
@@ -146,23 +131,13 @@ public class HkdfPrfKeyManagerTest {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(32)))
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
             .build();
-    try {
-      manager.validateKey(key);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test
   public void validateKeyFormat_empty_throws() throws Exception {
     HkdfPrfKeyFormat keyFormat = HkdfPrfKeyFormat.getDefaultInstance();
-    try {
-      factory.validateKeyFormat(keyFormat);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(keyFormat));
   }
 
   @Test
@@ -181,12 +156,7 @@ public class HkdfPrfKeyManagerTest {
             .setKeySize(31)
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
             .build();
-    try {
-      factory.validateKeyFormat(keyFormat);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(keyFormat));
   }
 
   @Test
@@ -226,12 +196,7 @@ public class HkdfPrfKeyManagerTest {
             .setKeySize(32)
             .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA1))
             .build();
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test

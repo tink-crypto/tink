@@ -17,7 +17,7 @@
 package com.google.crypto.tink.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Config;
 import com.google.crypto.tink.Registry;
@@ -37,91 +37,64 @@ import org.junit.runners.MethodSorters;
 public class TinkConfigTest {
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkaead");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("AeadConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybriddecrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybridencrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkpublickeysign");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("SignatureConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkpublickeyverify");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("SignatureConfig.register()");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkaead"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("AeadConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybridencrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeysign"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("SignatureConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeyverify"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("SignatureConfig.register()");
     String macTypeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
     String aeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
     String daeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesSivKey";
     String hybridTypeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
     String signTypeUrl = "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
     String streamingAeadTypeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey";
-    try {
-      Registry.getUntypedKeyManager(macTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    try {
-      Registry.getUntypedKeyManager(aeadTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    try {
-      Registry.getUntypedKeyManager(daeadTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    try {
-      Registry.getUntypedKeyManager(hybridTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    try {
-      Registry.getUntypedKeyManager(signTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
-    try {
-      Registry.getUntypedKeyManager(streamingAeadTypeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(macTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(aeadTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(daeadTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(hybridTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(signTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getUntypedKeyManager(streamingAeadTypeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     TinkConfig.register();

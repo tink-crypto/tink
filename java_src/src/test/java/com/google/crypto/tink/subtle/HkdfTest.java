@@ -18,7 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
@@ -48,12 +48,9 @@ public class HkdfTest {
 
   @Test
   public void testInvalidCodeSize() throws Exception {
-    try {
-      Hkdf.computeHkdf("HmacSha256", new byte[0], new byte[0], new byte[0], 32 * 256);
-      fail("Invalid size, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Hkdf.computeHkdf("HmacSha256", new byte[0], new byte[0], new byte[0], 32 * 256));
   }
 
   /**

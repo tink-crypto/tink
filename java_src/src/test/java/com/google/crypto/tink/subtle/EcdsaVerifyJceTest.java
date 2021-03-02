@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
@@ -140,13 +140,11 @@ public class EcdsaVerifyJceTest {
     KeyPair keyPair = keyGen.generateKeyPair();
     ECPublicKey pub = (ECPublicKey) keyPair.getPublic();
     // Verify with EcdsaVerifyJce.
-    try {
-      new EcdsaVerifyJce(pub, HashType.SHA1, EcdsaEncoding.DER);
-      fail("Unsafe hash, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> new EcdsaVerifyJce(pub, HashType.SHA1, EcdsaEncoding.DER));
+    TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
   }
 
   @Test
@@ -251,31 +249,23 @@ public class EcdsaVerifyJceTest {
       // Verify with EcdsaVerifyJce.
       EcdsaVerifyJce verifier = new EcdsaVerifyJce(pub, HashType.SHA256, encoding);
 
-      for (BytesMutation mutation : TestUtil.generateMutations(signature)) {
-        try {
-          verifier.verify(mutation.value, message);
-          fail(
-              String.format(
-                  "Invalid signature, should have thrown exception : signature = %s, message = %s, "
-                      + " description = %s",
-                  Hex.encode(mutation.value), Arrays.toString(message), mutation.description));
-        } catch (GeneralSecurityException expected) {
-          // Expected.
-        }
+      for (final BytesMutation mutation : TestUtil.generateMutations(signature)) {
+        assertThrows(
+            String.format(
+                "Invalid signature, should have thrown exception : signature = %s, message = %s, "
+                    + " description = %s",
+                Hex.encode(mutation.value), Arrays.toString(message), mutation.description),
+            GeneralSecurityException.class,
+            () -> verifier.verify(mutation.value, message));
       }
 
       // Encodings mismatch.
-      verifier =
+      EcdsaVerifyJce verifier2 =
           new EcdsaVerifyJce(
               pub,
               HashType.SHA256,
               encoding == EcdsaEncoding.IEEE_P1363 ? EcdsaEncoding.DER : EcdsaEncoding.IEEE_P1363);
-      try {
-        verifier.verify(signature, message);
-        fail("Invalid signature, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected.
-      }
+      assertThrows(GeneralSecurityException.class, () -> verifier2.verify(signature, message));
     }
   }
 }

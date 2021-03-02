@@ -17,7 +17,7 @@
 package com.google.crypto.tink;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
@@ -43,30 +43,27 @@ public class NoSecretKeysetHandleTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetManager manager = KeysetManager.withEmptyKeyset().rotate(template);
     Keyset keyset = manager.getKeysetHandle().getKeyset();
-    try {
-      KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains secret key material");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> {
+              KeysetHandle unused = NoSecretKeysetHandle.parseFrom(keyset.toByteArray());
+            });
+    assertExceptionContains(e, "keyset contains secret key material");
   }
 
   @Test
   public void testVoidInputs() throws Exception {
-    KeysetHandle unused;
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> NoSecretKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0])));
+    assertExceptionContains(e, "empty keyset");
 
-    try {
-      unused = NoSecretKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
-
-    try {
-      unused = NoSecretKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> NoSecretKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0])));
+    assertExceptionContains(e, "empty keyset");
   }
 }

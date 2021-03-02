@@ -135,12 +135,9 @@ public class JsonKeysetReaderTest {
     JsonObject json = JsonParser.parseString(JSON_KEYSET).getAsJsonObject();
     json.remove("key"); // remove key
 
-    try {
-      JsonKeysetReader.withJsonObject(json).read();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("invalid keyset");
-    }
+    IOException e =
+        assertThrows(IOException.class, () -> JsonKeysetReader.withJsonObject(json).read());
+    assertThat(e.toString()).contains("invalid keyset");
   }
 
   private void testRead_invalidKey_shouldThrowException(String name) throws Exception {
@@ -203,12 +200,9 @@ public class JsonKeysetReaderTest {
     keys.set(0, key);
     json.add("key", keys);
 
-    try {
-      JsonKeysetReader.withJsonObject(json).read();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("unknown key material type");
-    }
+    IOException e =
+        assertThrows(IOException.class, () -> JsonKeysetReader.withJsonObject(json).read());
+    assertThat(e.toString()).contains("unknown key material type");
   }
 
   @Test
@@ -220,12 +214,9 @@ public class JsonKeysetReaderTest {
     keys.set(0, key);
     json.add("key", keys);
 
-    try {
-      JsonKeysetReader.withJsonObject(json).read();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("unknown status");
-    }
+    IOException e =
+        assertThrows(IOException.class, () -> JsonKeysetReader.withJsonObject(json).read());
+    assertThat(e.toString()).contains("unknown status");
   }
 
   @Test
@@ -237,12 +228,9 @@ public class JsonKeysetReaderTest {
     keys.set(0, key);
     json.add("key", keys);
 
-    try {
-      JsonKeysetReader.withJsonObject(json).read();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("unknown output prefix type");
-    }
+    IOException e =
+        assertThrows(IOException.class, () -> JsonKeysetReader.withJsonObject(json).read());
+    assertThat(e.toString()).contains("unknown output prefix type");
   }
 
   @Test
@@ -322,12 +310,10 @@ public class JsonKeysetReaderTest {
         JsonParser.parseString(new String(outputStream.toByteArray(), UTF_8)).getAsJsonObject();
     json.remove("encryptedKeyset"); // remove key
 
-    try {
-      JsonKeysetReader.withJsonObject(json).readEncrypted();
-      fail("Expected IOException");
-    } catch (IOException e) {
-      assertThat(e.toString()).contains("invalid encrypted keyset");
-    }
+    IOException e =
+        assertThrows(
+            IOException.class, () -> JsonKeysetReader.withJsonObject(json).readEncrypted());
+    assertThat(e.toString()).contains("invalid encrypted keyset");
   }
 
   @Test

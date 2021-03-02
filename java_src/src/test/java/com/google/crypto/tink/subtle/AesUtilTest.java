@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +47,9 @@ public class AesUtilTest {
     assertEquals(16, r.length);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void padTooLongTest() {
-    AesUtil.cmacPad(new byte[16]);
+    assertThrows(IllegalArgumentException.class, () -> AesUtil.cmacPad(new byte[16]));
   }
 
   @Test

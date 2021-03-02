@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -71,12 +71,9 @@ public class AesGcmSivKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -87,42 +84,24 @@ public class AesGcmSivKeyManagerTest {
 
   @Test
   public void validateKeyFormat_invalid() throws Exception {
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(15).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(17).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(31).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(33).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
-    try {
-      factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(64).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(1).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(15).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(17).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(31).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(33).build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesGcmSivKeyFormat.newBuilder().setKeySize(64).build()));
   }
 
   @Test
@@ -207,12 +186,9 @@ public class AesGcmSivKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(31);
     AesGcmSivKeyFormat format =
         AesGcmSivKeyFormat.newBuilder().setVersion(0).setKeySize(32).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -222,12 +198,9 @@ public class AesGcmSivKeyManagerTest {
     byte[] keyMaterial = Random.randBytes(100);
     AesGcmSivKeyFormat format =
         AesGcmSivKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

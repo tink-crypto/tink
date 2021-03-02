@@ -17,8 +17,8 @@
 package com.google.crypto.tink.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
@@ -81,12 +81,9 @@ public class KeysDownloaderTest {
 
   @Test
   public void builderShouldThrowIllegalArgumentExceptionWhenUrlIsNotHttps() {
-    try {
-      new KeysDownloader.Builder().setUrl("http://abc").build();
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException ex) {
-      // expected.
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new KeysDownloader.Builder().setUrl("http://abc").build());
   }
 
   @Test
@@ -102,14 +99,10 @@ public class KeysDownloaderTest {
         new HttpResponseBuilder().setStatusCode(HttpStatusCodes.STATUS_CODE_NO_CONTENT);
     KeysDownloader instance = newInstanceForTests();
 
-    try {
-      instance.download();
-      fail();
-    } catch (IOException expected) {
-      assertEquals(
-          "Unexpected status code = " + HttpStatusCodes.STATUS_CODE_NO_CONTENT,
-          expected.getMessage());
-    }
+    IOException expected = assertThrows(IOException.class, instance::download);
+    assertEquals(
+        "Unexpected status code = " + HttpStatusCodes.STATUS_CODE_NO_CONTENT,
+        expected.getMessage());
   }
 
   @Test
@@ -118,17 +111,13 @@ public class KeysDownloaderTest {
         new HttpResponseBuilder().setStatusCode(HttpStatusCodes.STATUS_CODE_NO_CONTENT);
     KeysDownloader instance = newInstanceForTests();
 
-    try {
-      instance.download();
-      fail();
-    } catch (IOException expected) {
-      assertTrue(
-          "Message "
-              + expected.getMessage()
-              + " should contain "
-              + HttpStatusCodes.STATUS_CODE_NO_CONTENT,
-          expected.getMessage().contains(Integer.toString(HttpStatusCodes.STATUS_CODE_NO_CONTENT)));
-    }
+    IOException expected = assertThrows(IOException.class, instance::download);
+    assertTrue(
+        "Message "
+            + expected.getMessage()
+            + " should contain "
+            + HttpStatusCodes.STATUS_CODE_NO_CONTENT,
+        expected.getMessage().contains(Integer.toString(HttpStatusCodes.STATUS_CODE_NO_CONTENT)));
   }
 
   @Test
@@ -318,11 +307,7 @@ public class KeysDownloaderTest {
     httpResponseBuilder = new HttpResponseBuilder().setContent("keys2");
     // Executor temporarily full, rejecting new Runnable instances
     executorIsAcceptingRunnables = false;
-    try {
-      instance.refreshInBackground();
-      fail();
-    } catch (RejectedExecutionException expected) {
-    }
+    assertThrows(RejectedExecutionException.class, instance::refreshInBackground);
     httpResponseBuilder = new HttpResponseBuilder().setContent("keys3");
     // Executor available again, accepting new Runnable instances
     executorIsAcceptingRunnables = true;

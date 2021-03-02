@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.testing.TestUtil;
@@ -49,35 +49,27 @@ public class ChaCha20Poly1305Test {
   @Test
   public void testSnufflePoly1305ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32()
       throws InvalidKeyException {
-    try {
-      createInstance(new byte[KEY_SIZE + 1]);
-      fail("Expected InvalidKeyException.");
-    } catch (InvalidKeyException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    InvalidKeyException e =
+        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[KEY_SIZE + 1]));
+    assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testSnufflePoly1305ThrowsIllegalArgExpWhenKeyLenIsLessThan32()
       throws InvalidKeyException {
-    try {
-      createInstance(new byte[KEY_SIZE - 1]);
-      fail("Expected InvalidKeyException.");
-    } catch (InvalidKeyException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    InvalidKeyException e =
+        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[KEY_SIZE - 1]));
+    assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testDecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort()
       throws InvalidKeyException {
     Aead cipher = createInstance(new byte[KEY_SIZE]);
-    try {
-      cipher.decrypt(new byte[27], new byte[1]);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> cipher.decrypt(new byte[27], new byte[1]));
+    assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
   }
 
   @Test
@@ -121,19 +113,15 @@ public class ChaCha20Poly1305Test {
     byte[] ciphertext = aead.encrypt(message, aad);
 
     for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
-      try {
-        byte[] unused = aead.decrypt(mutation.value, aad);
-        fail(
-            String.format(
-                "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Arrays.toString(aad), mutation.description));
-      } catch (GeneralSecurityException ex) {
-        // This is expected.
-        // This could be a AeadBadTagException when the tag verification
-        // fails or some not yet specified Exception when the ciphertext is too short.
-        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-      }
+      assertThrows(
+          String.format(
+              "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
+                  + " description = %s",
+              Hex.encode(mutation.value), Arrays.toString(aad), mutation.description),
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = aead.decrypt(mutation.value, aad);
+          });
     }
 
     // Modify AAD
@@ -141,12 +129,11 @@ public class ChaCha20Poly1305Test {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modified = Arrays.copyOf(aad, aad.length);
         modified[b] ^= (byte) (1 << bit);
-        try {
-          byte[] unused = aead.decrypt(ciphertext, modified);
-          fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
-          // This is expected.
-        }
+        assertThrows(
+            AEADBadTagException.class,
+            () -> {
+              byte[] unused = aead.decrypt(ciphertext, modified);
+            });
       }
     }
   }
@@ -154,32 +141,27 @@ public class ChaCha20Poly1305Test {
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
     Aead aead = createInstance(Random.randBytes(KEY_SIZE));
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = aead.encrypt(null, aad);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = aead.encrypt(null, null);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = aead.decrypt(null, aad);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = aead.decrypt(null, null);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
+    byte[] aad = new byte[] {1, 2, 3};
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.encrypt(null, null);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = aead.decrypt(null, null);
+        });
   }
 
   @Test
@@ -194,13 +176,12 @@ public class ChaCha20Poly1305Test {
         assertArrayEquals(message, decrypted);
         byte[] decrypted2 = aead.decrypt(ciphertext, null);
         assertArrayEquals(message, decrypted2);
-        try {
-          byte[] badAad = new byte[] {1, 2, 3};
-          byte[] unused = aead.decrypt(ciphertext, badAad);
-          fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
-          // This is expected.
-        }
+        byte[] badAad = new byte[] {1, 2, 3};
+        assertThrows(
+            AEADBadTagException.class,
+            () -> {
+              byte[] unused = aead.decrypt(ciphertext, badAad);
+            });
       }
       {  // encrypting with aad equal to null
         byte[] ciphertext = aead.encrypt(message, null);
@@ -208,13 +189,12 @@ public class ChaCha20Poly1305Test {
         assertArrayEquals(message, decrypted);
         byte[] decrypted2 = aead.decrypt(ciphertext, null);
         assertArrayEquals(message, decrypted2);
-        try {
-          byte[] badAad = new byte[] {1, 2, 3};
-          byte[] unused = aead.decrypt(ciphertext, badAad);
-          fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
-          // This is expected.
-        }
+        byte[] badAad = new byte[] {1, 2, 3};
+        assertThrows(
+            AEADBadTagException.class,
+            () -> {
+              byte[] unused = aead.decrypt(ciphertext, badAad);
+            });
       }
     }
   }

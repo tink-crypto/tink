@@ -88,16 +88,16 @@ public final class Ed25519SignTest {
 
   @Test
   public void testSignWithPrivateKeyLengthDifferentFrom32Byte() throws Exception {
-    try {
-      Ed25519Sign unused = new Ed25519Sign(new byte[31]);
-      fail("Private key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      Ed25519Sign unused = new Ed25519Sign(new byte[33]);
-      fail("Private key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Sign unused = new Ed25519Sign(new byte[31]);
+        });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Sign unused = new Ed25519Sign(new byte[33]);
+        });
   }
 
   @Test

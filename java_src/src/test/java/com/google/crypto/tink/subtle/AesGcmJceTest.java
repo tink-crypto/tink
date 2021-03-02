@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
@@ -77,12 +78,7 @@ public class AesGcmJceTest {
     byte[] message = Random.randBytes(20);
     byte[] aad = Random.randBytes(20);
 
-    try {
-      gcm.encrypt(message, aad);
-      fail("Expected UnsupportedOperationException");
-    } catch (UnsupportedOperationException ex) {
-      // expected.
-    }
+    assertThrows(UnsupportedOperationException.class, () -> gcm.encrypt(message, aad));
   }
 
   @Test
@@ -116,39 +112,29 @@ public class AesGcmJceTest {
     byte[] ciphertext = gcm.encrypt(message, aad);
 
     for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
-      try {
-        byte[] unused = gcm.decrypt(mutation.value, aad);
-        fail(
-            String.format(
-                "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Hex.encode(aad), mutation.description));
-      } catch (GeneralSecurityException ex) {
-        // This is expected.
-        // This could be a AeadBadTagException when the tag verification
-        // fails or some not yet specified Exception when the ciphertext is too short.
-        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-      }
+      assertThrows(
+          String.format(
+              "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
+                  + " description = %s",
+              Hex.encode(mutation.value), Hex.encode(aad), mutation.description),
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(mutation.value, aad);
+          });
     }
 
     // Modify AAD
     if (aad != null && aad.length != 0) {
       for (BytesMutation mutation : TestUtil.generateMutations(aad)) {
-        try {
-          byte[] unused = gcm.decrypt(ciphertext, mutation.value);
-          fail(
-              String.format(
-                  "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
-                      + " description = %s",
-                  Arrays.toString(ciphertext),
-                  Arrays.toString(mutation.value),
-                  mutation.description));
-        } catch (GeneralSecurityException ex) {
-          // This is expected.
-          // This could be a AeadBadTagException when the tag verification
-          // fails or some not yet specified Exception when the ciphertext is too short.
-          // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-        }
+        assertThrows(
+            String.format(
+                "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
+                    + " description = %s",
+                Arrays.toString(ciphertext), Arrays.toString(mutation.value), mutation.description),
+            GeneralSecurityException.class,
+            () -> {
+              byte[] unused = gcm.decrypt(ciphertext, mutation.value);
+            });
       }
     }
   }
@@ -227,32 +213,27 @@ public class AesGcmJceTest {
   public void testNullPlaintextOrCiphertext() throws Exception {
     for (int keySize : keySizeInBytes) {
       AesGcmJce gcm = new AesGcmJce(Random.randBytes(keySize));
-      try {
-        byte[] aad = generateAad();
-        byte[] unused = gcm.encrypt(null, aad);
-        fail("Encrypting a null plaintext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] unused = gcm.encrypt(null, null);
-        fail("Encrypting a null plaintext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] aad = generateAad();
-        byte[] unused = gcm.decrypt(null, aad);
-        fail("Decrypting a null ciphertext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] unused = gcm.decrypt(null, null);
-        fail("Decrypting a null ciphertext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
+      byte[] aad = generateAad();
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.encrypt(null, aad);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.encrypt(null, null);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(null, aad);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(null, null);
+          });
     }
   }
 

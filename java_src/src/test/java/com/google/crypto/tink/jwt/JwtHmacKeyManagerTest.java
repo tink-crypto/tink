@@ -20,7 +20,6 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
@@ -78,12 +77,9 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(JwtHmacKeyFormat.getDefaultInstance());
-      fail("At least the hash type needs to be set");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(JwtHmacKeyFormat.getDefaultInstance()));
   }
 
   private static JwtHmacKeyFormat makeJwtHmacKeyFormat(int keySize, HashType hashType) {
@@ -102,12 +98,9 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void validateKeyFormat_keySizeTooSmall_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(makeJwtHmacKeyFormat(31, HashType.SHA256));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeJwtHmacKeyFormat(31, HashType.SHA256)));
   }
 
   @Test
@@ -139,26 +132,21 @@ public class JwtHmacKeyManagerTest {
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     JwtHmacKey validKey = factory.createKey(makeJwtHmacKeyFormat(32, HashType.SHA256));
-    try {
-      manager.validateKey(JwtHmacKey.newBuilder(validKey).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(JwtHmacKey.newBuilder(validKey).setVersion(1).build()));
   }
 
   @Test
   public void validateKey_notValid_throws() throws Exception {
     JwtHmacKey validKey = factory.createKey(makeJwtHmacKeyFormat(32, HashType.SHA256));
-    try {
-      manager.validateKey(
-          JwtHmacKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                JwtHmacKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
+                    .build()));
   }
 
   @Test

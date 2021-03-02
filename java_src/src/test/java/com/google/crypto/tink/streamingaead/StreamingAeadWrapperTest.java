@@ -17,7 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.StreamingAead;
@@ -140,17 +140,15 @@ public class StreamingAeadWrapperTest {
     StreamingTestUtil.testEncryptionAndDecryption(primaryAead, primaryAead);
     StreamingTestUtil.testEncryptionAndDecryption(otherAead, otherAead);
     StreamingTestUtil.testEncryptionAndDecryption(anotherAead, anotherAead);
-    try {
-      StreamingTestUtil.testEncryptionAndDecryption(otherAead, primaryAead);
-      fail("No matching key, should have thrown an exception");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "No matching key");
-    }
-    try {
-      StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead);
-      fail("No matching key, should have thrown an exception");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "No matching key");
-    }
+    IOException expected =
+        assertThrows(
+            IOException.class,
+            () -> StreamingTestUtil.testEncryptionAndDecryption(otherAead, primaryAead));
+    assertExceptionContains(expected, "No matching key");
+    IOException expected2 =
+        assertThrows(
+            IOException.class,
+            () -> StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead));
+    assertExceptionContains(expected2, "No matching key");
   }
 }

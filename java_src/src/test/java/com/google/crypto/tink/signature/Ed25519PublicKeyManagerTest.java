@@ -17,7 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeySign;
@@ -52,12 +52,9 @@ public class Ed25519PublicKeyManagerTest {
 
   @Test
   public void validateKey_empty_throws() throws Exception {
-    try {
-      verifyManager.validateKey(Ed25519PublicKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifyManager.validateKey(Ed25519PublicKey.getDefaultInstance()));
   }
 
   private Ed25519PrivateKey createPrivateKey() throws GeneralSecurityException {
@@ -74,12 +71,7 @@ public class Ed25519PublicKeyManagerTest {
   public void validateKey_wrongVersion() throws Exception {
     Ed25519PublicKey publicKey = signManager.getPublicKey(createPrivateKey());
     Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey).setVersion(1).build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -88,12 +80,7 @@ public class Ed25519PublicKeyManagerTest {
     Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey)
               .setKeyValue(ByteString.copyFrom(Random.randBytes(31)))
               .build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -102,12 +89,7 @@ public class Ed25519PublicKeyManagerTest {
     Ed25519PublicKey invalidKey = Ed25519PublicKey.newBuilder(publicKey)
               .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
               .build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -133,11 +115,6 @@ public class Ed25519PublicKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     byte[] signature = signer.sign(message);
-    try {
-      verifier.verify(signature, message);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifier.verify(signature, message));
   }
 }

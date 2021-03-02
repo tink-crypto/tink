@@ -17,7 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.subtle.Enums;
@@ -34,10 +34,6 @@ public final class SigUtilTest {
     assertEquals(Enums.HashType.SHA256, SigUtil.toHashType(HashType.SHA256));
     assertEquals(Enums.HashType.SHA384, SigUtil.toHashType(HashType.SHA384));
     assertEquals(Enums.HashType.SHA512, SigUtil.toHashType(HashType.SHA512));
-    try {
-      SigUtil.toHashType(HashType.UNKNOWN_HASH);
-      fail("Invalid hash, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-    }
+    assertThrows(GeneralSecurityException.class, () -> SigUtil.toHashType(HashType.UNKNOWN_HASH));
   }
 }

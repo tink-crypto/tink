@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
@@ -35,16 +35,16 @@ import org.junit.runners.JUnit4;
 public final class Ed25519VerifyTest {
   @Test
   public void testVerificationWithPublicKeyLengthDifferentFrom32Byte() throws Exception {
-    try {
-      Ed25519Verify unused = new Ed25519Verify(new byte[31]);
-      fail("Public key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      Ed25519Verify unused = new Ed25519Verify(new byte[33]);
-      fail("Public key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Verify unused = new Ed25519Verify(new byte[31]);
+        });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Verify unused = new Ed25519Verify(new byte[33]);
+        });
   }
 
   private byte[] getMessage(JsonObject testcase) throws Exception {
