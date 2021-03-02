@@ -200,8 +200,10 @@ public final class JwtServiceImpl extends JwtImplBase {
     if (verifiedJwt.hasSubject()) {
         builder.setSubject(StringValue.newBuilder().setValue(verifiedJwt.getSubject()));
     }
-    for (String audience : verifiedJwt.getAudiences()) {
-      builder.addAudiences(audience);
+    if (verifiedJwt.hasAudiences()) {
+      for (String audience : verifiedJwt.getAudiences()) {
+        builder.addAudiences(audience);
+      }
     }
     if (verifiedJwt.hasJwtId()) {
         builder.setJwtId(StringValue.newBuilder().setValue(verifiedJwt.getJwtId()));

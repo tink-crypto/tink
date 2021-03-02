@@ -156,6 +156,33 @@ public final class JwtServiceImplTest {
   }
 
   @Test
+  public void jwtMacEmptySignVerify_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    JwtToken token = JwtToken.getDefaultInstance();
+
+    JwtSignRequest signRequest =
+        JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
+    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    assertThat(signResponse.getErr()).isEmpty();
+
+    JwtValidator validator = JwtValidator.getDefaultInstance();
+    JwtVerifyRequest verifyRequest =
+        JwtVerifyRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setSignedCompactJwt(signResponse.getSignedCompactJwt())
+            .setValidator(validator)
+            .build();
+
+    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    assertThat(verifyResponse.getErr()).isEmpty();
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+  }
+
+  @Test
   public void publicKeySignVerify_success() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(
         JwtEcdsaSignKeyManager.jwtES256Template());
