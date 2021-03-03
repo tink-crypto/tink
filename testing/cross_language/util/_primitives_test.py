@@ -15,7 +15,7 @@ import datetime
 from absl.testing import absltest
 
 from proto.testing import testing_api_pb2
-from google3.third_party.tink.python.tink import jwt
+from tink import jwt
 from util import _primitives
 
 
