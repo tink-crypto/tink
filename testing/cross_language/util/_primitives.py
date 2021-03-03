@@ -16,7 +16,9 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
+import datetime
 import io
+import json
 from typing import BinaryIO, Mapping, Text
 
 import tink
@@ -31,6 +33,8 @@ from tink import streaming_aead
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
+
+from google3.third_party.tink.python.tink import jwt
 
 
 def new_keyset(stub: testing_api_pb2_grpc.KeysetStub,
@@ -325,3 +329,168 @@ class PrfSet(prf.PrfSet):
   def primary(self) -> prf.Prf:
     self._initialize_key_ids()
     return self._prfs[self._primary_key_id]
+
+
+def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
+  """Converts a jwt.RawJwt into a proto."""
+  raw_token = testing_api_pb2.JwtToken()
+  if raw_jwt.has_issuer():
+    raw_token.issuer.value = raw_jwt.issuer()
+  if raw_jwt.has_subject():
+    raw_token.subject.value = raw_jwt.subject()
+  if raw_jwt.has_audiences():
+    raw_token.audiences.extend(raw_jwt.audiences())
+  if raw_jwt.has_jwt_id():
+    raw_token.jwt_id.value = raw_jwt.jwt_id()
+  if raw_jwt.has_expiration():
+    raw_token.expiration.seconds = int(raw_jwt.expiration().timestamp())
+  if raw_jwt.has_not_before():
+    raw_token.not_before.seconds = int(raw_jwt.not_before().timestamp())
+  if raw_jwt.has_issued_at():
+    raw_token.issued_at.seconds = int(raw_jwt.issued_at().timestamp())
+  for name in raw_jwt.custom_claim_names():
+    value = raw_jwt.custom_claim(name)
+    if value is None:
+      raw_token.custom_claims[name].null_value = testing_api_pb2.NULL_VALUE
+    if isinstance(value, (int, float)):
+      raw_token.custom_claims[name].number_value = value
+    if isinstance(value, Text):
+      raw_token.custom_claims[name].string_value = value
+    if isinstance(value, bool):
+      raw_token.custom_claims[name].bool_value = value
+    if isinstance(value, dict):
+      raw_token.custom_claims[name].json_object_value = json.dumps(value)
+    if isinstance(value, list):
+      raw_token.custom_claims[name].json_array_value = json.dumps(value)
+  return raw_token
+
+
+def proto_to_verified_jwt(
+    token: testing_api_pb2.JwtToken) -> jwt.VerifiedJwt:
+  """Converts a proto JwtToken into a jwt.VerifiedJwt."""
+  issuer = None
+  if token.HasField('issuer'):
+    issuer = token.issuer.value
+  subject = None
+  if token.HasField('subject'):
+    subject = token.subject.value
+  jwt_id = None
+  if token.HasField('jwt_id'):
+    jwt_id = token.jwt_id.value
+  audiences = None
+  if token.audiences:
+    audiences = list(token.audiences)
+  expiration = None
+  if token.HasField('expiration'):
+    expiration = datetime.datetime.fromtimestamp(token.expiration.seconds,
+                                                 datetime.timezone.utc)
+  not_before = None
+  if token.HasField('not_before'):
+    not_before = datetime.datetime.fromtimestamp(token.not_before.seconds,
+                                                 datetime.timezone.utc)
+  issued_at = None
+  if token.HasField('issued_at'):
+    issued_at = datetime.datetime.fromtimestamp(token.issued_at.seconds,
+                                                datetime.timezone.utc)
+  custom_claims = {}
+  for name in token.custom_claims:
+    value = token.custom_claims[name]
+    if value.HasField('null_value'):
+      custom_claims[name] = None
+    if value.HasField('number_value'):
+      custom_claims[name] = value.number_value
+    if value.HasField('string_value'):
+      custom_claims[name] = value.string_value
+    if value.HasField('bool_value'):
+      custom_claims[name] = value.bool_value
+    if value.HasField('json_object_value'):
+      custom_claims[name] = json.loads(value.json_object_value)
+    if value.HasField('json_array_value'):
+      custom_claims[name] = json.loads(value.json_array_value)
+  raw_jwt = jwt.new_raw_jwt(issuer, subject, audiences, jwt_id, expiration,
+                            not_before, issued_at, custom_claims)
+  return jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
+
+
+def jwt_validator_to_proto(
+    validator: jwt.JwtValidator) -> testing_api_pb2.JwtValidator:
+  """Converts a jwt.JwtValidator into a proto JwtValidator."""
+  proto_validator = testing_api_pb2.JwtValidator()
+  if validator.has_issuer():
+    proto_validator.issuer.value = validator.issuer()
+  if validator.has_subject():
+    proto_validator.subject.value = validator.subject()
+  if validator.has_audience():
+    proto_validator.audience.value = validator.audience()
+  proto_validator.clock_skew.seconds = validator.clock_skew().seconds
+  if validator.has_fixed_now():
+    proto_validator.now.seconds = int(validator.fixed_now().timestamp())
+  return proto_validator
+
+
+class JwtMac():
+  """Implements a JwtMac from a Jwt service stub."""
+
+  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+               keyset: bytes) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset = keyset
+
+  def sign(self, raw_jwt: jwt.RawJwt) -> Text:
+    request = testing_api_pb2.JwtSignRequest(
+        keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
+    response = self._stub.MacSign(request)
+    if response.err:
+      raise tink.TinkError(response.err)
+    return response.signed_compact_jwt
+
+  def verify(self, signed_compact_jwt: Text,
+             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+    request = testing_api_pb2.JwtVerifyRequest(
+        keyset=self._keyset,
+        validator=jwt_validator_to_proto(validator),
+        signed_compact_jwt=signed_compact_jwt)
+    response = self._stub.MacVerify(request)
+    if response.err:
+      raise tink.TinkError(response.err)
+    return proto_to_verified_jwt(response.verified_jwt)
+
+
+class JwtPublicKeySign():
+  """Implements a JwtPublicKeySign from a Jwt service stub."""
+
+  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+               keyset: bytes) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset = keyset
+
+  def sign(self, raw_jwt: jwt.RawJwt) -> Text:
+    request = testing_api_pb2.JwtSignRequest(
+        keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
+    response = self._stub.PublicKeySign(request)
+    if response.err:
+      raise tink.TinkError(response.err)
+    return response.signed_compact_jwt
+
+
+class JwtPublicKeyVerify():
+  """Implements a JwtPublicKeyVerify from a Jwt service stub."""
+
+  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+               keyset: bytes) -> None:
+    self.lang = lang
+    self._stub = stub
+    self._keyset = keyset
+
+  def verify(self, signed_compact_jwt: Text,
+             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+    request = testing_api_pb2.JwtVerifyRequest(
+        keyset=self._keyset,
+        validator=jwt_validator_to_proto(validator),
+        signed_compact_jwt=signed_compact_jwt)
+    response = self._stub.PublicKeyVerify(request)
+    if response.err:
+      raise tink.TinkError(response.err)
+    return proto_to_verified_jwt(response.verified_jwt)
