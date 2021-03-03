@@ -77,7 +77,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
 
     @Override
-    public String sign(RawJwt token) throws GeneralSecurityException {
+    public String computeMacAndEncode(RawJwt token) throws GeneralSecurityException {
       String unsignedCompact =
           JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
       return JwtFormat.createSignedCompact(
@@ -85,7 +85,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
 
     @Override
-    public VerifiedJwt verify(String compact, JwtValidator validator)
+    public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       JwtFormat.validateASCII(compact);
       String[] parts = compact.split("\\.", -1);

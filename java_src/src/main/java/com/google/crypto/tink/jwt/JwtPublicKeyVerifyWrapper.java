@@ -46,7 +46,7 @@ class JwtPublicKeyVerifyWrapper
     }
 
     @Override
-    public VerifiedJwt verify(String compact, JwtValidator validator)
+    public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
 
       // All JWT keys are raw.
@@ -54,7 +54,7 @@ class JwtPublicKeyVerifyWrapper
       GeneralSecurityException interestingException = null;
       for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
         try {
-          return entry.getPrimitive().verify(compact, validator);
+          return entry.getPrimitive().verifyAndDecode(compact, validator);
         } catch (GeneralSecurityException e) {
           if (e instanceof JwtInvalidException) {
             // Keep this exception so that we are able to throw a meaningful message in the end

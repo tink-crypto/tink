@@ -120,7 +120,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      String signedCompactJwt = jwtMac.sign(rawJwt);
+      String signedCompactJwt = jwtMac.computeMacAndEncode(rawJwt);
       response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
       response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
@@ -143,7 +143,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
-      String signedCompactJwt = signer.sign(rawJwt);
+      String signedCompactJwt = signer.signAndEncode(rawJwt);
       response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
       response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
@@ -258,7 +258,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      VerifiedJwt verifiedJwt = jwtMac.verify(request.getSignedCompactJwt(), validator);
+      VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
       response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
@@ -283,7 +283,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       JwtPublicKeyVerify verifier = keysetHandle.getPrimitive(JwtPublicKeyVerify.class);
-      VerifiedJwt verifiedJwt = verifier.verify(request.getSignedCompactJwt(), validator);
+      VerifiedJwt verifiedJwt = verifier.verifyAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
       response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
