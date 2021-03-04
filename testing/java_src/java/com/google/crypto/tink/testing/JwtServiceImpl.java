@@ -112,7 +112,8 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Creates a signed compact JWT. */
   @Override
-  public void macSign(JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
+  public void computeMacAndEncode(
+      JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
     JwtSignResponse response;
     try {
       KeysetHandle keysetHandle =
@@ -134,7 +135,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Creates a signed compact JWT. */
   @Override
-  public void publicKeySign(
+  public void publicKeySignAndEncode(
       JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
     JwtSignResponse response;
     try {
@@ -209,13 +210,16 @@ public final class JwtServiceImpl extends JwtImplBase {
         builder.setJwtId(StringValue.newBuilder().setValue(verifiedJwt.getJwtId()));
     }
     if (verifiedJwt.hasExpiration()) {
-        builder.setExpiration(Timestamp.newBuilder().setSeconds(verifiedJwt.getExpiration().getEpochSecond()));
+      builder.setExpiration(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getExpiration().getEpochSecond()));
     }
     if (verifiedJwt.hasNotBefore()) {
-        builder.setNotBefore(Timestamp.newBuilder().setSeconds(verifiedJwt.getNotBefore().getEpochSecond()));
+      builder.setNotBefore(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getNotBefore().getEpochSecond()));
     }
     if (verifiedJwt.hasIssuedAt()) {
-        builder.setIssuedAt(Timestamp.newBuilder().setSeconds(verifiedJwt.getIssuedAt().getEpochSecond()));
+      builder.setIssuedAt(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getIssuedAt().getEpochSecond()));
     }
     for (String claimName : verifiedJwt.customClaimNames()) {
       addCustomClaimToBuilder(verifiedJwt, claimName, builder);
@@ -248,7 +252,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Decodes and verifies a signed, compact JWT. */
   @Override
-  public void macVerify(
+  public void verifyMacAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
     JwtVerifyResponse response;
@@ -273,7 +277,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Decodes and verifies a signed, compact JWT. */
   @Override
-  public void publicKeyVerify(
+  public void publicKeyVerifyAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
     JwtVerifyResponse response;

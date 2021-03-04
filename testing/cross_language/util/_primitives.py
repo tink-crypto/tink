@@ -437,21 +437,21 @@ class JwtMac():
     self._stub = stub
     self._keyset = keyset
 
-  def sign(self, raw_jwt: jwt.RawJwt) -> Text:
+  def compute_mac_and_encode(self, raw_jwt: jwt.RawJwt) -> Text:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
-    response = self._stub.MacSign(request)
+    response = self._stub.ComputeMacAndEncode(request)
     if response.err:
       raise tink.TinkError(response.err)
     return response.signed_compact_jwt
 
-  def verify(self, signed_compact_jwt: Text,
-             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+  def verify_mac_and_decode(self, signed_compact_jwt: Text,
+                            validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
     request = testing_api_pb2.JwtVerifyRequest(
         keyset=self._keyset,
         validator=jwt_validator_to_proto(validator),
         signed_compact_jwt=signed_compact_jwt)
-    response = self._stub.MacVerify(request)
+    response = self._stub.VerifyMacAndDecode(request)
     if response.err:
       raise tink.TinkError(response.err)
     return proto_to_verified_jwt(response.verified_jwt)
@@ -466,10 +466,10 @@ class JwtPublicKeySign():
     self._stub = stub
     self._keyset = keyset
 
-  def sign(self, raw_jwt: jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: jwt.RawJwt) -> Text:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
-    response = self._stub.PublicKeySign(request)
+    response = self._stub.PublicKeySignAndEncode(request)
     if response.err:
       raise tink.TinkError(response.err)
     return response.signed_compact_jwt
@@ -484,13 +484,13 @@ class JwtPublicKeyVerify():
     self._stub = stub
     self._keyset = keyset
 
-  def verify(self, signed_compact_jwt: Text,
-             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
+  def verify_and_decode(self, signed_compact_jwt: Text,
+                        validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
     request = testing_api_pb2.JwtVerifyRequest(
         keyset=self._keyset,
         validator=jwt_validator_to_proto(validator),
         signed_compact_jwt=signed_compact_jwt)
-    response = self._stub.PublicKeyVerify(request)
+    response = self._stub.PublicKeyVerifyAndDecode(request)
     if response.err:
       raise tink.TinkError(response.err)
     return proto_to_verified_jwt(response.verified_jwt)

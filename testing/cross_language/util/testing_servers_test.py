@@ -195,9 +195,9 @@ class TestingServersTest(parameterized.TestCase):
         jwt_id='jwt_id',
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
-    compact = jwt_mac_primitive.sign(token)
+    compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(audience='audience1', fixed_now=now)
-    verified_jwt = jwt_mac_primitive.verify(compact, validator)
+    verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
@@ -206,7 +206,7 @@ class TestingServersTest(parameterized.TestCase):
 
     validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
-      jwt_mac_primitive.verify(compact, validator2)
+      jwt_mac_primitive.verify_mac_and_decode(compact, validator2)
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_public_key_sign_verify(self, lang):
@@ -230,9 +230,9 @@ class TestingServersTest(parameterized.TestCase):
         jwt_id='jwt_id',
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
-    compact = signer.sign(token)
+    compact = signer.sign_and_encode(token)
     validator = jwt.new_validator(audience='audience1', fixed_now=now)
-    verified_jwt = verifier.verify(compact, validator)
+    verified_jwt = verifier.verify_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
@@ -241,7 +241,7 @@ class TestingServersTest(parameterized.TestCase):
 
     validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
-      verifier.verify(compact, validator2)
+      verifier.verify_and_decode(compact, validator2)
 
 
 if __name__ == '__main__':
