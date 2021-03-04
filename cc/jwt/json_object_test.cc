@@ -217,65 +217,6 @@ TEST(JsonObject, EmptyStringToListInvalidArgument) {
               StatusIs(util::error::INVALID_ARGUMENT));
 }
 
-TEST(JsonObject, EmptyListOk) {
-  std::vector<std::string> emptyList;
-
-  auto proto_or = JsonStructBuilder::FromString(R"({"some_key": []})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-
-  auto json = JsonObject(proto);
-
-  ASSERT_THAT(json.GetValueAsStringList("some_key"), IsOkAndHolds(emptyList));
-}
-
-TEST(JsonObject, ParseThenSerializeNumberListOk) {
-  auto proto_or = JsonStructBuilder::FromString(R"({"some_key":[1,2,3]})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-
-  ASSERT_THAT(JsonStructBuilder::ToString(proto),
-              IsOkAndHolds(R"({"some_key":[1,2,3]})"));
-
-  auto json = JsonObject(proto);
-  ASSERT_THAT(json.ToString(), IsOkAndHolds(R"({"some_key":[1,2,3]})"));
-}
-
-TEST(JsonObject, ParseThenSerializeStringListOk) {
-  auto proto_or =
-      JsonStructBuilder::FromString(R"({"some_key":["hello","world","!"]})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-
-  ASSERT_THAT(JsonStructBuilder::ToString(proto),
-              IsOkAndHolds(R"({"some_key":["hello","world","!"]})"));
-
-  auto json = JsonObject(proto);
-  ASSERT_THAT(json.ToString(),
-              IsOkAndHolds(R"({"some_key":["hello","world","!"]})"));
-}
-
-TEST(JsonObject, ParseThenSerializeNumberOk) {
-  auto proto_or = JsonStructBuilder::FromString(R"({"some_key":-12345})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-
-  ASSERT_THAT(JsonStructBuilder::ToString(proto),
-              IsOkAndHolds(R"({"some_key":-12345})"));
-
-  auto json = JsonObject(proto);
-  ASSERT_THAT(json.ToString(), IsOkAndHolds(R"({"some_key":-12345})"));
-}
-
-TEST(JsonObject, ParseThenSerializeBoolOk) {
-  auto proto_or = JsonStructBuilder::FromString(R"({"some_key":false})");
-  ASSERT_THAT(proto_or.status(), IsOk());
-  google::protobuf::Struct proto = proto_or.ValueOrDie();
-
-  ASSERT_THAT(JsonStructBuilder::ToString(proto),
-              IsOkAndHolds(R"({"some_key":false})"));
-}
-
 TEST(JsonObject, BuildThenSerializeNumberListOk) {
   auto json = JsonObject();
   ASSERT_THAT(json.AppendValueToNumberList("some_key", 1), IsOk());

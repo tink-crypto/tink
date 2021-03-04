@@ -50,3 +50,29 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "json_util",
+    srcs = ["json_util.cc"],
+    hdrs = ["json_util.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "json_util_test",
+    size = "small",
+    srcs = ["json_util_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":json_util",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -1,4 +1,4 @@
-tink_module(internal)
+tink_module(jwt::internal)
 
 tink_cc_library(
   NAME raw_jwt_hmac_key_manager
@@ -26,6 +26,18 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME json_util
+  SRCS
+    json_util.cc
+    json_util.h
+  DEPS
+    protobuf::libprotobuf
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
 tink_cc_test(
   NAME raw_jwt_hmac_key_manager_test
   SRCS raw_jwt_hmac_key_manager_test.cc
@@ -33,6 +45,9 @@ tink_cc_test(
     tink::jwt::internal::raw_jwt_hmac_key_manager
     tink::core::key_manager_impl
     tink::core::mac
+    tink::mac::mac_config
+    tink::core::registry
+    tink::core::keyset_handle
     tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status

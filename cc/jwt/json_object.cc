@@ -17,6 +17,7 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
+#include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/json_struct_util.h"
 
 namespace crypto {
@@ -192,7 +193,7 @@ util::Status JsonObject::AppendValueToNumberList(absl::string_view name,
 }
 
 util::StatusOr<std::string> JsonObject::ToString() {
-  return JsonStructBuilder::ToString(json_proto_);
+  return ProtoStructToJsonString(json_proto_);
 }
 
 util::StatusOr<absl::flat_hash_map<std::string, enum JsonFieldType>>

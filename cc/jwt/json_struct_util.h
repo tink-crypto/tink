@@ -184,11 +184,6 @@ class JsonStructBuilder {
     return ValueBuilder(&(*struct_->mutable_fields())[std::string(key)]);
   }
 
-  static util::StatusOr<google::protobuf::Struct> FromString(
-      absl::string_view json_string);
-  static util::StatusOr<std::string> ToString(
-      const google::protobuf::Struct& proto);
-
  private:
   google::protobuf::Struct* struct_;
 };

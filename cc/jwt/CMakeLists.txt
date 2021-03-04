@@ -1,5 +1,7 @@
 tink_module(jwt)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME jwt_names
   SRCS
@@ -30,6 +32,7 @@ tink_cc_library(
     json_object.cc
     json_object.h
   DEPS
+    tink::jwt::internal::json_util
     tink::jwt::json_util
     tink::jwt::json_field_types
     protobuf::libprotobuf
@@ -44,7 +47,6 @@ tink_cc_library(
   NAME json_util
   SRCS
     json_struct_util.h
-    json_struct_util.cc
   DEPS
     protobuf::libprotobuf
     tink::util::status
@@ -67,6 +69,21 @@ tink_cc_library(
     absl::time
     tink::util::status
     tink::util::statusor
+)
+
+tink_cc_library(
+  NAME raw_jwt
+  SRCS
+    raw_jwt.cc
+    raw_jwt.h
+  DEPS
+    tink::jwt::jwt_names
+    tink::jwt::internal::json_util
+    tink::util::status
+    tink::util::statusor
+    protobuf::libprotobuf
+    absl::strings
+    absl::time
 )
 
 # tests
@@ -100,5 +117,19 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     protobuf::libprotobuf
+    gmock
+)
+
+tink_cc_test(
+  NAME raw_jwt_test
+  SRCS raw_jwt_test.cc
+  DEPS
+    tink::jwt::jwt_names
+    tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    protobuf::libprotobuf
+    absl::strings
     gmock
 )

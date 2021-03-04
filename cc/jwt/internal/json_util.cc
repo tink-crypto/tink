@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/jwt/json_struct_util.h"
+#include "tink/jwt/internal/json_util.h"
 
 #include <google/protobuf/util/json_util.h>
 #include "absl/strings/substitute.h"
@@ -20,12 +20,16 @@
 namespace crypto {
 namespace tink {
 
+namespace {
+
 util::Status ConvertProtoStatus(const google::protobuf::util::Status& status) {
   return util::Status(static_cast<util::error::Code>(status.error_code()),
                                     std::string(status.message().data(), status.message().length()));
 }
 
-util::StatusOr<google::protobuf::Struct> JsonStructBuilder::FromString(
+}  // namespace
+
+util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
     absl::string_view json_string) {
   google::protobuf::Struct proto;
   google::protobuf::util::JsonParseOptions json_parse_options;
@@ -38,7 +42,7 @@ util::StatusOr<google::protobuf::Struct> JsonStructBuilder::FromString(
   return proto;
 }
 
-util::StatusOr<std::string> JsonStructBuilder::ToString(
+util::StatusOr<std::string> ProtoStructToJsonString(
     const google::protobuf::Struct& proto) {
   std::string output;
   auto status = google::protobuf::util::MessageToJsonString(proto, &output);
