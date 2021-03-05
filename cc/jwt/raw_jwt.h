@@ -38,6 +38,8 @@ class RawJwt {
   util::StatusOr<std::string> GetIssuer() const;
   bool HasSubject() const;
   util::StatusOr<std::string> GetSubject() const;
+  bool HasAudiences() const;
+  util::StatusOr<std::vector<std::string>> GetAudiences() const;
   bool HasJwtId() const;
   util::StatusOr<std::string> GetJwtId() const;
   bool HasExpiration() const;
@@ -68,6 +70,7 @@ class RawJwtBuilder {
 
   RawJwtBuilder& SetIssuer(absl::string_view issuer);
   RawJwtBuilder& SetSubject(absl::string_view subject);
+  RawJwtBuilder& AddAudience(absl::string_view audience);
   RawJwtBuilder& SetJwtId(absl::string_view jwid);
   RawJwtBuilder& SetExpiration(absl::Time expiration);
   RawJwtBuilder& SetNotBefore(absl::Time notBefore);

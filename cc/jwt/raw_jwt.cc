@@ -73,8 +73,35 @@ util::StatusOr<std::string> RawJwt::GetSubject() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Subject is not a string");
   }
-  return fields[std::string(kJwtClaimSubject)].string_value();
+  return value.string_value();
 }
+
+bool RawJwt::HasAudiences() const {
+  return json_proto_.fields().contains(std::string(kJwtClaimAudience));
+}
+
+util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
+  auto fields = json_proto_.fields();
+  if (!fields.contains(std::string(kJwtClaimAudience))) {
+    return util::Status(util::error::INVALID_ARGUMENT, "No Audiences found");
+  }
+  auto list = fields[std::string(kJwtClaimAudience)];
+  if (list.kind_case() != google::protobuf::Value::kListValue) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Audiences is not a list");
+  }
+  std::vector<std::string> audiences;
+  for (const auto& value : list.list_value().values()) {
+    if (value.kind_case() != google::protobuf::Value::kStringValue) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "Audiences is not a list of strings");
+    }
+    audiences.push_back(value.string_value());
+  }
+  return audiences;
+}
+
 
 bool RawJwt::HasJwtId() const {
   return json_proto_.fields().contains(std::string(kJwtClaimJwtId));
@@ -89,7 +116,7 @@ util::StatusOr<std::string> RawJwt::GetJwtId() const {
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
     return util::Status(util::error::INVALID_ARGUMENT, "JwtId is not a string");
   }
-  return fields[std::string(kJwtClaimJwtId)].string_value();
+  return value.string_value();
 }
 
 bool RawJwt::HasExpiration() const {
@@ -106,7 +133,7 @@ util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Expiration is not a number");
   }
-  double sec = fields[std::string(kJwtClaimExpiration)].number_value();
+  double sec = value.number_value();
   return absl::FromUnixSeconds(sec);
 }
 
@@ -124,7 +151,7 @@ util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "NotBefore is not a number");
   }
-  double sec = fields[std::string(kJwtClaimNotBefore)].number_value();
+  double sec = value.number_value();
   return absl::FromUnixSeconds(sec);
 }
 
@@ -142,7 +169,7 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "IssuedAt is not a number");
   }
-  double sec = fields[std::string(kJwtClaimIssuedAt)].number_value();
+  double sec = value.number_value();
   return absl::FromUnixSeconds(sec);
 }
 
@@ -161,6 +188,15 @@ RawJwtBuilder& RawJwtBuilder::SetSubject(absl::string_view subject) {
   google::protobuf::Value value;
   value.set_string_value(std::string(subject));
   (*fields)[std::string(kJwtClaimSubject)] = value;
+  return *this;
+}
+
+RawJwtBuilder& RawJwtBuilder::AddAudience(absl::string_view audience) {
+  auto fields = json_proto_.mutable_fields();
+  auto insertion_result = fields->insert(
+      {std::string(kJwtClaimAudience), google::protobuf::Value()});
+  auto list_value = insertion_result.first->second.mutable_list_value();
+  list_value->add_values()->set_string_value(std::string(audience));
   return *this;
 }
 

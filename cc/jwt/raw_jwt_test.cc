@@ -75,6 +75,19 @@ TEST(RawJwt, TimestampsOK) {
   EXPECT_GT(exp, now + absl::Seconds(299));
 }
 
+TEST(RawJwt, AddGetAudiencesOK) {
+  auto jwt_or = RawJwtBuilder()
+                    .AddAudience("audience1")
+                    .AddAudience("audience2")
+                    .Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  std::vector<std::string> expected = {"audience1", "audience2"};
+  EXPECT_TRUE(jwt.HasAudiences());
+  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
+}
+
 TEST(RawJwt, EmptyGetIssuerSubjectJwtIdNotOK) {
   auto jwt_or = RawJwtBuilder().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
@@ -84,6 +97,8 @@ TEST(RawJwt, EmptyGetIssuerSubjectJwtIdNotOK) {
   EXPECT_FALSE(jwt.GetIssuer().ok());
   EXPECT_FALSE(jwt.HasSubject());
   EXPECT_FALSE(jwt.GetSubject().ok());
+  EXPECT_FALSE(jwt.HasAudiences());
+  EXPECT_FALSE(jwt.GetAudiences().ok());
   EXPECT_FALSE(jwt.HasJwtId());
   EXPECT_FALSE(jwt.GetJwtId().ok());
   EXPECT_FALSE(jwt.HasExpiration());
