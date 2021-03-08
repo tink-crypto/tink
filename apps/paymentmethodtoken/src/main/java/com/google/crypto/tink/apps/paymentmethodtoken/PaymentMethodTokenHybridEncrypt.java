@@ -16,11 +16,12 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
@@ -42,6 +43,21 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
     this.protocolVersionConfig = protocolVersionConfig;
   }
 
+  static String jsonEncodeCiphertext(byte[] ciphertext, byte[] tag, byte[] ephemeralPublicKey)
+      throws GeneralSecurityException {
+    try {
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext))
+          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
+          .put(
+              PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
+              Base64.encode(ephemeralPublicKey))
+          .toString();
+    } catch (JSONException e) {
+      throw new GeneralSecurityException("cannot encrypt; JSON error", e);
+    }
+  }
+
   @Override
   public byte[] encrypt(final byte[] plaintext, final byte[] contextInfo)
       throws GeneralSecurityException {
@@ -54,25 +70,15 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
             contextInfo,
             symmetricKeySize,
             PaymentMethodTokenConstants.UNCOMPRESSED_POINT_FORMAT);
-    byte[] aesCtrKey =
-        Arrays.copyOfRange(kemKey.getSymmetricKey(), 0, protocolVersionConfig.aesCtrKeySize);
+    byte[] aesCtrKey = Arrays.copyOf(kemKey.getSymmetricKey(), protocolVersionConfig.aesCtrKeySize);
     byte[] ciphertext = PaymentMethodTokenUtil.aesCtr(aesCtrKey, plaintext);
     byte[] hmacSha256Key =
         Arrays.copyOfRange(
             kemKey.getSymmetricKey(), protocolVersionConfig.aesCtrKeySize, symmetricKeySize);
     byte[] tag = PaymentMethodTokenUtil.hmacSha256(hmacSha256Key, ciphertext);
     byte[] ephemeralPublicKey = kemKey.getKemBytes();
-    try {
-      return new JSONObject()
-          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext))
-          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
-          .put(
-              PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
-              Base64.encode(ephemeralPublicKey))
-          .toString()
-          .getBytes(StandardCharsets.UTF_8);
-    } catch (JSONException e) {
-      throw new GeneralSecurityException("cannot encrypt; JSON error");
-    }
+
+    String jsonEncodedCiphertext = jsonEncodeCiphertext(ciphertext, tag, ephemeralPublicKey);
+    return jsonEncodedCiphertext.getBytes(UTF_8);
   }
 }

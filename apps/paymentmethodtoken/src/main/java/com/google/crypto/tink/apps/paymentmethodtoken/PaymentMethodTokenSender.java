@@ -16,13 +16,14 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -233,19 +234,15 @@ public final class PaymentMethodTokenSender {
         protocolVersionConfig.isEncryptionRequired
             ? new String(
                 hybridEncrypter.encrypt(
-                    message.getBytes(StandardCharsets.UTF_8),
-                    PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
-                StandardCharsets.UTF_8)
+                    message.getBytes(UTF_8), PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+                UTF_8)
             : message;
     return signV1OrV2(signedMessage);
   }
 
-  private String signV1OrV2(String message) throws GeneralSecurityException {
-    byte[] toSignBytes =
-        PaymentMethodTokenUtil.toLengthValue(
-            // The order of the parameters matters.
-            senderId, recipientId, protocolVersion, message);
-    byte[] signature = signer.sign(toSignBytes);
+  static String jsonEncodeSignedMessage(
+      String message, String protocolVersion, byte[] signature, String senderIntermediateCert)
+      throws GeneralSecurityException {
     try {
       JSONObject result =
           new JSONObject()
@@ -261,6 +258,15 @@ public final class PaymentMethodTokenSender {
     } catch (JSONException e) {
       throw new GeneralSecurityException("cannot seal; JSON error");
     }
+  }
+
+  private String signV1OrV2(String message) throws GeneralSecurityException {
+    byte[] toSignBytes =
+        PaymentMethodTokenUtil.toLengthValue(
+            // The order of the parameters matters.
+            senderId, recipientId, protocolVersion, message);
+    byte[] signature = signer.sign(toSignBytes);
+    return jsonEncodeSignedMessage(message, protocolVersion, signature, senderIntermediateCert);
   }
 
   private static void validateV1(Builder builder) {
