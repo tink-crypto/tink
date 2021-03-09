@@ -17,13 +17,14 @@ package com.google.crypto.tink.apps.paymentmethodtoken;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Unit tests for the exact Json-Encoding produced. */
 @RunWith(JUnit4.class)
-public final class PaymentMethodJsonEncodingTest {
+public final class PaymentMethodJsonEncodingTest { // /
 
   @Test
   public void testExactOutputOfJsonEncodeCiphertext() throws Exception {
@@ -76,5 +77,57 @@ public final class PaymentMethodJsonEncodingTest {
     String jsonEncodedSignedMessage2 =
         PaymentMethodTokenSender.jsonEncodeSignedMessage(message, version, signature, null);
     assertEquals(expected2, jsonEncodedSignedMessage2);
+  }
+
+  @Test
+  public void testExactOutputOfJsonEncodedSignedKey() throws Exception {
+    String intermediateSigningKey =
+        "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSA"
+            + "M43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==";
+    long expiration = 1520836260646L;
+    assertEquals(
+        "{\"keyValue\":\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSAM43yRydzqdg1"
+            + "TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw\\u003d\\u003d\",\"keyExpiration\""
+            + ":\"1520836260646\"}",
+        SenderIntermediateCertFactory.jsonEncodeSignedKey(intermediateSigningKey, expiration));
+  }
+
+  @Test
+  public void testExactOutputOfJsonEncodeCertificate() throws Exception {
+    String intermediateSigningKey =
+        "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE/1+3HBVSbdv+j7NaArdgMyoSA"
+            + "M43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRxyCw==";
+    long expiration = 1520836260646L;
+    String signedKey =
+        SenderIntermediateCertFactory.jsonEncodeSignedKey(intermediateSigningKey, expiration);
+    ArrayList<String> signatures = new ArrayList<>();
+    signatures.add("iTzFvzFRxyCw==");
+    signatures.add("abcde090/+==");
+    signatures.add("xyz");
+    String expected =
+        "{\"signedKey\":\"{\\\"keyValue\\\":\\\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE"
+            + "/1+3HBVSbdv+j7NaArdgMyoSAM43yRydzqdg1TxodSzA96Dj4Mc1EiKroxxunavVIvdxGnJeFViTzFvzFRx"
+            + "yCw\\\\u003d\\\\u003d\\\",\\\"keyExpiration\\\":\\\"1520836260646\\\"}\",\"signatur"
+            + "es\":[\"iTzFvzFRxyCw\\u003d\\u003d\",\"abcde090/+\\u003d\\u003d\",\"xyz\"]}";
+    assertEquals(
+        expected, SenderIntermediateCertFactory.jsonEncodeCertificate(signedKey, signatures));
+  }
+
+  @Test
+  public void testExactOutputOfWeirdJsonEncodeCertificate() throws Exception {
+    String intermediateSigningKey =
+        "\"\\==";
+    long expiration = -123;
+    String signedKey =
+        SenderIntermediateCertFactory.jsonEncodeSignedKey(intermediateSigningKey, expiration);
+    ArrayList<String> signatures = new ArrayList<>();
+    signatures.add("");
+    signatures.add("\\\"/+==");
+    String expected =
+        "{\"signedKey\":\"{\\\"keyValue\\\":\\\"\\\\\\\"\\\\\\\\\\\\u003d\\\\u003d"
+            + "\\\",\\\"keyExpiration\\\":\\\"-123\\\"}\",\"signatures\":[\"\",\"\\\\\\\"/+\\u003d"
+            + "\\u003d\"]}";
+    assertEquals(
+        expected, SenderIntermediateCertFactory.jsonEncodeCertificate(signedKey, signatures));
   }
 }

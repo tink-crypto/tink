@@ -145,6 +145,32 @@ public class SenderIntermediateCertFactory {
     }
   }
 
+  static String jsonEncodeSignedKey(String intermediateSigningKey, long expiration) {
+    try {
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY, intermediateSigningKey)
+          .put(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY, Long.toString(expiration))
+          .toString();
+    } catch (JSONException e) {
+      throw new AssertionError("Failed to perform JSON encoding", e);
+    }
+  }
+
+  static String jsonEncodeCertificate(String signedKey, ArrayList<String> signatures) {
+    try {
+      JSONArray jsonSignatures = new JSONArray();
+      for (String signature : signatures) {
+        jsonSignatures.put(signature);
+      }
+      return new JSONObject()
+          .put(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY, signedKey)
+          .put(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY, jsonSignatures)
+          .toString();
+    } catch (JSONException e) {
+      throw new AssertionError("Failed to perform JSON encoding", e);
+    }
+  }
+
   /**
    * Creates the certificate.
    *
@@ -164,27 +190,16 @@ public class SenderIntermediateCertFactory {
    * </pre>
    */
   public String create() throws GeneralSecurityException {
-    try {
-      String signedKey =
-          new JSONObject()
-              .put(PaymentMethodTokenConstants.JSON_KEY_VALUE_KEY, intermediateSigningKey)
-              .put(PaymentMethodTokenConstants.JSON_KEY_EXPIRATION_KEY, Long.toString(expiration))
-              .toString();
-      byte[] toSignBytes =
-          PaymentMethodTokenUtil.toLengthValue(
-              // The order of the parameters matters.
-              senderId, protocolVersion, signedKey);
-      JSONArray signatures = new JSONArray();
-      for (PublicKeySign signer : signers) {
-        byte[] signature = signer.sign(toSignBytes);
-        signatures.put(Base64.encode(signature));
-      }
-      return new JSONObject()
-          .put(PaymentMethodTokenConstants.JSON_SIGNED_KEY_KEY, signedKey)
-          .put(PaymentMethodTokenConstants.JSON_SIGNATURES_KEY, signatures)
-          .toString();
-    } catch (JSONException e) {
-      throw new RuntimeException("Failed to perform JSON encoding", e);
+    String signedKey = jsonEncodeSignedKey(intermediateSigningKey, expiration);
+    byte[] toSignBytes =
+        PaymentMethodTokenUtil.toLengthValue(
+            // The order of the parameters matters.
+            senderId, protocolVersion, signedKey);
+    ArrayList<String> signatures = new ArrayList<>();
+    for (PublicKeySign signer : signers) {
+      byte[] signature = signer.sign(toSignBytes);
+      signatures.add(Base64.encode(signature));
     }
+    return jsonEncodeCertificate(signedKey, signatures);
   }
 }
