@@ -18,6 +18,7 @@ from __future__ import print_function
 import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
+from tink.jwt import _jwt_key_templates as jwt_key_templates
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt

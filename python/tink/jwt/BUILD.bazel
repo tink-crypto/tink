@@ -11,6 +11,7 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_jwt_key_templates",
         ":_jwt_validator",
         ":_raw_jwt",
         ":_verified_jwt",
@@ -74,5 +75,33 @@ py_test(
         ":_jwt_validator",
         ":jwt",
         requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "_jwt_key_templates",
+    srcs = ["_jwt_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:jwt_hmac_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_key_templates_test",
+    srcs = ["_jwt_key_templates_test.py"],
+    srcs_version = "PY3",
+    data = [
+        "@tink_base//testdata/templates",
+    ],
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink/testing:helper",
     ],
 )
