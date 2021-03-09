@@ -48,6 +48,13 @@ class RawJwt {
   util::StatusOr<absl::Time> GetNotBefore() const;
   bool HasIssuedAt() const;
   util::StatusOr<absl::Time> GetIssuedAt() const;
+  bool IsNullClaim(absl::string_view name) const;
+  bool HasBooleanClaim(absl::string_view name) const;
+  util::StatusOr<bool> GetBooleanClaim(absl::string_view name) const;
+  bool HasStringClaim(absl::string_view name) const;
+  util::StatusOr<std::string> GetStringClaim(absl::string_view name) const;
+  bool HasNumberClaim(absl::string_view name) const;
+  util::StatusOr<double> GetNumberClaim(absl::string_view name) const;
 
   static util::StatusOr<RawJwt> FromString(absl::string_view json_string);
   util::StatusOr<std::string> ToString();
@@ -75,6 +82,10 @@ class RawJwtBuilder {
   RawJwtBuilder& SetExpiration(absl::Time expiration);
   RawJwtBuilder& SetNotBefore(absl::Time notBefore);
   RawJwtBuilder& SetIssuedAt(absl::Time issuedAt);
+  util::Status AddNullClaim(absl::string_view name);
+  util::Status AddBooleanClaim(absl::string_view name, bool bool_value);
+  util::Status AddStringClaim(absl::string_view name, std::string string_value);
+  util::Status AddNumberClaim(absl::string_view name, double double_value);
 
   util::StatusOr<RawJwt> Build();
 

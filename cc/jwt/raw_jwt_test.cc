@@ -88,25 +88,131 @@ TEST(RawJwt, AddGetAudiencesOK) {
   EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
 }
 
-TEST(RawJwt, EmptyGetIssuerSubjectJwtIdNotOK) {
+TEST(RawJwt, GetCustomClaimOK) {
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
+  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
+  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
+  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
+
+  auto jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.IsNullClaim("null_claim"));
+  EXPECT_TRUE(jwt.HasBooleanClaim("boolean_claim"));
+  EXPECT_THAT(jwt.GetBooleanClaim("boolean_claim"), IsOkAndHolds(true));
+  EXPECT_TRUE(jwt.HasNumberClaim("number_claim"));
+  EXPECT_THAT(jwt.GetNumberClaim("number_claim"), IsOkAndHolds(123.456));
+  EXPECT_TRUE(jwt.HasStringClaim("string_claim"));
+  EXPECT_THAT(jwt.GetStringClaim("string_claim"), IsOkAndHolds("a string"));
+}
+
+TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
+  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
+  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
+  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
+
+  auto jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_FALSE(jwt.IsNullClaim("boolean_claim"));
+  EXPECT_FALSE(jwt.HasBooleanClaim("number_claim"));
+  EXPECT_FALSE(jwt.HasNumberClaim("string_claim"));
+  EXPECT_FALSE(jwt.HasStringClaim("null_claim"));
+}
+
+TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
+  absl::Time now = absl::Now();
+  auto jwt_or = RawJwtBuilder()
+                    .SetIssuer("issuer")
+                    .SetSubject("subject")
+                    .SetJwtId("jwt_id")
+                    .SetNotBefore(now - absl::Seconds(300))
+                    .SetIssuedAt(now)
+                    .SetExpiration(now + absl::Seconds(300))
+                    .Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_FALSE(jwt.HasStringClaim("iss"));
+  EXPECT_FALSE(jwt.HasStringClaim("sub"));
+  EXPECT_FALSE(jwt.HasStringClaim("jti"));
+  EXPECT_FALSE(jwt.HasNumberClaim("nbf"));
+  EXPECT_FALSE(jwt.HasNumberClaim("iat"));
+  EXPECT_FALSE(jwt.HasNumberClaim("exp"));
+}
+
+TEST(RawJwt, GetRegisteredCustomClaimNotOK) {
+  absl::Time now = absl::Now();
+  auto jwt_or = RawJwtBuilder()
+                    .SetIssuer("issuer")
+                    .SetSubject("subject")
+                    .SetJwtId("jwt_id")
+                    .SetNotBefore(now - absl::Seconds(300))
+                    .SetIssuedAt(now)
+                    .SetExpiration(now + absl::Seconds(300))
+                    .Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_FALSE(jwt.GetStringClaim("iss").ok());
+  EXPECT_FALSE(jwt.GetStringClaim("sub").ok());
+  EXPECT_FALSE(jwt.GetStringClaim("jti").ok());
+  EXPECT_FALSE(jwt.GetNumberClaim("nbf").ok());
+  EXPECT_FALSE(jwt.GetNumberClaim("iat").ok());
+  EXPECT_FALSE(jwt.GetNumberClaim("exp").ok());
+}
+
+TEST(RawJwt, SetRegisteredCustomClaimNotOK) {
+  auto builder = RawJwtBuilder();
+  EXPECT_FALSE(builder.AddStringClaim("iss", "issuer").ok());
+  EXPECT_FALSE(builder.AddStringClaim("sub", "issuer").ok());
+  EXPECT_FALSE(builder.AddStringClaim("jti", "issuer").ok());
+  EXPECT_FALSE(builder.AddNumberClaim("nbf", 123).ok());
+  EXPECT_FALSE(builder.AddNumberClaim("iat", 123).ok());
+  EXPECT_FALSE(builder.AddNumberClaim("exp", 123).ok());
+  EXPECT_FALSE(builder.AddBooleanClaim("iss", true).ok());
+  EXPECT_FALSE(builder.AddNullClaim("iss").ok());
+}
+
+TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
   auto jwt_or = RawJwtBuilder().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
   EXPECT_FALSE(jwt.HasIssuer());
-  EXPECT_FALSE(jwt.GetIssuer().ok());
   EXPECT_FALSE(jwt.HasSubject());
-  EXPECT_FALSE(jwt.GetSubject().ok());
   EXPECT_FALSE(jwt.HasAudiences());
-  EXPECT_FALSE(jwt.GetAudiences().ok());
   EXPECT_FALSE(jwt.HasJwtId());
-  EXPECT_FALSE(jwt.GetJwtId().ok());
   EXPECT_FALSE(jwt.HasExpiration());
-  EXPECT_FALSE(jwt.GetExpiration().ok());
   EXPECT_FALSE(jwt.HasNotBefore());
-  EXPECT_FALSE(jwt.GetNotBefore().ok());
   EXPECT_FALSE(jwt.HasIssuedAt());
+  EXPECT_FALSE(jwt.IsNullClaim("null_claim"));
+  EXPECT_FALSE(jwt.HasBooleanClaim("boolean_claim"));
+  EXPECT_FALSE(jwt.HasNumberClaim("number_claim"));
+  EXPECT_FALSE(jwt.HasStringClaim("string_claim"));
+}
+
+TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
+  auto jwt_or = RawJwtBuilder().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_FALSE(jwt.GetIssuer().ok());
+  EXPECT_FALSE(jwt.GetSubject().ok());
+  EXPECT_FALSE(jwt.GetAudiences().ok());
+  EXPECT_FALSE(jwt.GetJwtId().ok());
+  EXPECT_FALSE(jwt.GetExpiration().ok());
+  EXPECT_FALSE(jwt.GetNotBefore().ok());
   EXPECT_FALSE(jwt.GetIssuedAt().ok());
+  EXPECT_FALSE(jwt.IsNullClaim("null_claim"));
+  EXPECT_FALSE(jwt.GetBooleanClaim("boolean_claim").ok());
+  EXPECT_FALSE(jwt.GetNumberClaim("number_claim").ok());
+  EXPECT_FALSE(jwt.GetStringClaim("string_claim").ok());
 }
 
 TEST(RawJwt, BuildCanBeCalledTwice) {
