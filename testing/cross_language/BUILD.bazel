@@ -175,9 +175,21 @@ py_test(
     deps = [
         "//util:supported_key_types",
         "//util:testing_servers",
-        "@tink_py//tink/testing:keyset_builder",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/prf",
+        "@tink_py//tink/testing:keyset_builder",
+    ],
+)
+
+py_test(
+    name = "jwt_test",
+    srcs = ["jwt_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
     ],
 )

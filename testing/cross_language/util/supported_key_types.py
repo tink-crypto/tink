@@ -27,6 +27,7 @@ from tink.proto import common_pb2
 from tink.proto import kms_aead_pb2
 from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
+from tink import jwt
 
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
@@ -63,10 +64,19 @@ PRF_KEY_TYPES = [
     'HmacPrfKey',
     'HkdfPrfKey',
 ]
+JWT_MAC_KEY_TYPES = [
+    'JwtHmacKey',
+]
+JWT_SIGNATURE_KEY_TYPES = [
+    'JwtEcdsaPrivateKey',
+    'JwtRsaSsaPkcs1PrivateKey',
+    'JwtRsaSsaPssPrivateKey',
+]
+
 ALL_KEY_TYPES = (
     AEAD_KEY_TYPES + DAEAD_KEY_TYPES + STREAMING_AEAD_KEY_TYPES +
     HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES +
-    PRF_KEY_TYPES)
+    PRF_KEY_TYPES + JWT_MAC_KEY_TYPES + JWT_SIGNATURE_KEY_TYPES)
 
 
 # Fake KMS keys are base64-encoded keysets. Each server must register a
@@ -125,6 +135,10 @@ SUPPORTED_LANGUAGES = {
     'AesCmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
+    'JwtHmacKey': ['java'],
+    'JwtEcdsaPrivateKey': ['java'],
+    'JwtRsaSsaPkcs1PrivateKey': ['java'],
+    'JwtRsaSsaPssPrivateKey': ['java'],
 }
 
 KEY_TYPE_FROM_URL = {
@@ -178,6 +192,16 @@ KEY_TEMPLATE_NAMES = {
     'AesCmacPrfKey': ['AES_CMAC_PRF'],
     'HmacPrfKey': ['HMAC_PRF_SHA256', 'HMAC_PRF_SHA512'],
     'HkdfPrfKey': ['HKDF_PRF_SHA256'],
+    'JwtHmacKey': ['JWT_HS256', 'JWT_HS384', 'JWT_HS512'],
+    'JwtEcdsaPrivateKey': ['JWT_ES256', 'JWT_ES384', 'JWT_ES512'],
+    'JwtRsaSsaPkcs1PrivateKey': [
+        'JWT_RS256_2048_F4', 'JWT_RS256_3072_F4', 'JWT_RS384_3072_F4',
+        'JWT_RS512_4096_F4'
+    ],
+    'JwtRsaSsaPssPrivateKey': [
+        'JWT_PS256_2048_F4', 'JWT_PS256_3072_F4', 'JWT_PS384_3072_F4',
+        'JWT_PS512_4096_F4'
+    ],
 }
 
 # KeyTemplate (as Protobuf) for each KeyTemplate name.
@@ -283,6 +307,20 @@ KEY_TEMPLATE = {
         prf.prf_key_templates.HMAC_SHA512,
     'HKDF_PRF_SHA256':
         prf.prf_key_templates.HKDF_SHA256,
+    'JWT_HS256': jwt.jwt_key_templates.JWT_HS256,
+    'JWT_HS384': jwt.jwt_key_templates.JWT_HS384,
+    'JWT_HS512': jwt.jwt_key_templates.JWT_HS512,
+    'JWT_ES256': jwt.jwt_key_templates.JWT_ES256,
+    'JWT_ES384': jwt.jwt_key_templates.JWT_ES384,
+    'JWT_ES512': jwt.jwt_key_templates.JWT_ES512,
+    'JWT_RS256_2048_F4': jwt.jwt_key_templates.JWT_RS256_2048_F4,
+    'JWT_RS256_3072_F4': jwt.jwt_key_templates.JWT_RS256_3072_F4,
+    'JWT_RS384_3072_F4': jwt.jwt_key_templates.JWT_RS384_3072_F4,
+    'JWT_RS512_4096_F4': jwt.jwt_key_templates.JWT_RS512_4096_F4,
+    'JWT_PS256_2048_F4': jwt.jwt_key_templates.JWT_PS256_2048_F4,
+    'JWT_PS256_3072_F4': jwt.jwt_key_templates.JWT_PS256_3072_F4,
+    'JWT_PS384_3072_F4': jwt.jwt_key_templates.JWT_PS384_3072_F4,
+    'JWT_PS512_4096_F4': jwt.jwt_key_templates.JWT_PS512_4096_F4,
 }
 
 
