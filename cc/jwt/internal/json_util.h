@@ -26,8 +26,14 @@ namespace tink {
 util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
     absl::string_view json_string);
 
+util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
+    absl::string_view json_string);
+
 util::StatusOr<std::string> ProtoStructToJsonString(
     const google::protobuf::Struct& proto);
+
+util::StatusOr<std::string> ProtoListToJsonString(
+    const google::protobuf::ListValue& proto);
 
 }  // namespace tink
 }  // namespace crypto

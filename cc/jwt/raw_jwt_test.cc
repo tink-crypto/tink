@@ -94,6 +94,12 @@ TEST(RawJwt, GetCustomClaimOK) {
   ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
   ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
   ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
+  ASSERT_THAT(
+      builder.AddJsonObjectClaim("object_claim", R"({ "number": 123.456})"),
+      IsOk());
+  ASSERT_THAT(
+      builder.AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])"),
+      IsOk());
 
   auto jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
@@ -106,6 +112,12 @@ TEST(RawJwt, GetCustomClaimOK) {
   EXPECT_THAT(jwt.GetNumberClaim("number_claim"), IsOkAndHolds(123.456));
   EXPECT_TRUE(jwt.HasStringClaim("string_claim"));
   EXPECT_THAT(jwt.GetStringClaim("string_claim"), IsOkAndHolds("a string"));
+  EXPECT_TRUE(jwt.HasJsonObjectClaim("object_claim"));
+  EXPECT_THAT(jwt.GetJsonObjectClaim("object_claim"),
+              IsOkAndHolds(R"({"number":123.456})"));
+  EXPECT_TRUE(jwt.HasJsonArrayClaim("array_claim"));
+  EXPECT_THAT(jwt.GetJsonArrayClaim("array_claim"),
+              IsOkAndHolds(R"([1,"one",1.2,true])"));
 }
 
 TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
@@ -177,6 +189,24 @@ TEST(RawJwt, SetRegisteredCustomClaimNotOK) {
   EXPECT_FALSE(builder.AddNumberClaim("exp", 123).ok());
   EXPECT_FALSE(builder.AddBooleanClaim("iss", true).ok());
   EXPECT_FALSE(builder.AddNullClaim("iss").ok());
+  EXPECT_FALSE(builder.AddJsonObjectClaim("iss", "{\"1\": 2}").ok());
+  EXPECT_FALSE(builder.AddJsonArrayClaim("iss", "[1,2]").ok());
+}
+
+TEST(RawJwt, SetInvalidJsonObjectClaimNotOK) {
+  auto builder = RawJwtBuilder();
+  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "invalid").ok());
+  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", R"("string")").ok());
+  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "42").ok());
+  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "[1,2]").ok());
+}
+
+TEST(RawJwt, SetInvalidJsonArrayClaimNotOK) {
+  auto builder = RawJwtBuilder();
+  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "invalid").ok());
+  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", R"("string")").ok());
+  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "42").ok());
+  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", R"({"1": 2})").ok());
 }
 
 TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
@@ -195,6 +225,8 @@ TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
   EXPECT_FALSE(jwt.HasBooleanClaim("boolean_claim"));
   EXPECT_FALSE(jwt.HasNumberClaim("number_claim"));
   EXPECT_FALSE(jwt.HasStringClaim("string_claim"));
+  EXPECT_FALSE(jwt.HasJsonObjectClaim("object_claim"));
+  EXPECT_FALSE(jwt.HasJsonArrayClaim("array_claim"));
 }
 
 TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
@@ -213,6 +245,8 @@ TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
   EXPECT_FALSE(jwt.GetBooleanClaim("boolean_claim").ok());
   EXPECT_FALSE(jwt.GetNumberClaim("number_claim").ok());
   EXPECT_FALSE(jwt.GetStringClaim("string_claim").ok());
+  EXPECT_FALSE(jwt.GetJsonObjectClaim("object_claim").ok());
+  EXPECT_FALSE(jwt.GetJsonArrayClaim("array_claim").ok());
 }
 
 TEST(RawJwt, BuildCanBeCalledTwice) {

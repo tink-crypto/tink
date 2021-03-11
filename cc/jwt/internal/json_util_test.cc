@@ -25,7 +25,7 @@ using ::crypto::tink::test::IsOkAndHolds;
 namespace crypto {
 namespace tink {
 
-TEST(JsonUtil, ParseThenSerializeStringListOk) {
+TEST(JsonUtil, ParseThenSerializeStructWtihStringListOk) {
   auto proto_or =
       JsonStringToProtoStruct(R"({"some_key":["hello","world","!"]})");
   ASSERT_THAT(proto_or.status(), IsOk());
@@ -35,7 +35,7 @@ TEST(JsonUtil, ParseThenSerializeStringListOk) {
               IsOkAndHolds(R"({"some_key":["hello","world","!"]})"));
 }
 
-TEST(JsonUtil, ParseThenSerializeNumberOk) {
+TEST(JsonUtil, ParseThenSerializeStructWtihNumberOk) {
   auto proto_or = JsonStringToProtoStruct(R"({"some_key":-12345})");
   ASSERT_THAT(proto_or.status(), IsOk());
   google::protobuf::Struct proto = proto_or.ValueOrDie();
@@ -44,7 +44,7 @@ TEST(JsonUtil, ParseThenSerializeNumberOk) {
               IsOkAndHolds(R"({"some_key":-12345})"));
 }
 
-TEST(JsonUtil, ParseThenSerializeBoolOk) {
+TEST(JsonUtil, ParseThenSerializeStructWtihBoolOk) {
   auto proto_or = JsonStringToProtoStruct(R"({"some_key":false})");
   ASSERT_THAT(proto_or.status(), IsOk());
   google::protobuf::Struct proto = proto_or.ValueOrDie();
@@ -53,12 +53,28 @@ TEST(JsonUtil, ParseThenSerializeBoolOk) {
               IsOkAndHolds(R"({"some_key":false})"));
 }
 
-TEST(JsonUtil, ParseInvalidTokenNotOk) {
+TEST(JsonUtil, ParseThenSerializeListOk) {
+  auto proto_or =
+      JsonStringToProtoList(R"(["hello", "world", 42, true])");
+  ASSERT_THAT(proto_or.status(), IsOk());
+  google::protobuf::ListValue proto = proto_or.ValueOrDie();
+
+  ASSERT_THAT(ProtoListToJsonString(proto),
+              IsOkAndHolds(R"(["hello","world",42,true])"));
+}
+
+TEST(JsonUtil, ParseInvalidStructTokenNotOk) {
   auto proto_or = JsonStringToProtoStruct(R"({"some_key":false)");
   ASSERT_FALSE(proto_or.ok());
 }
 
-TEST(JsonUtil, ParseWithoutQuotesOk) {
+TEST(JsonUtil, ParseInvalidListTokenNotOk) {
+  auto proto_or = JsonStringToProtoStruct(R"(["one", )");
+  ASSERT_FALSE(proto_or.ok());
+}
+
+TEST(JsonUtil, ParseStructWithoutQuotesOk) {
+  // TODO(b/360366279) Make parsing stricter that this is not allowed.
   auto proto_or = JsonStringToProtoStruct(R"({some_key:false})");
   ASSERT_THAT(proto_or.status(), IsOk());
   google::protobuf::Struct proto = proto_or.ValueOrDie();
@@ -66,11 +82,21 @@ TEST(JsonUtil, ParseWithoutQuotesOk) {
               IsOkAndHolds(R"({"some_key":false})"));
 }
 
-TEST(JsonUtil, ParseWithCommentOk) {
-  // TODO(b/360366279) Make parsing stricter that this is not allowed.
-  auto proto_or = JsonStringToProtoStruct(
-      R"({"some_key":false /* comment */})");
-  ASSERT_FALSE(proto_or.ok());
+TEST(JsonUtil, ParseListWithoutQuotesNotOk) {
+  auto proto_or = JsonStringToProtoList(R"([one,two])");
+  EXPECT_FALSE(proto_or.ok());
+}
+
+TEST(JsonUtil, ParseStructWithCommentNotOk) {
+  auto proto_or =
+      JsonStringToProtoStruct(R"({"some_key":false /* comment */})");
+  EXPECT_FALSE(proto_or.ok());
+}
+
+TEST(JsonUtil, ParseListWithCommentNotOk) {
+  auto proto_or =
+      JsonStringToProtoList(R"(["hello", "world" /* comment */])");
+  EXPECT_FALSE(proto_or.ok());
 }
 
 

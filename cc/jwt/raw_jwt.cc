@@ -287,6 +287,53 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
   return value.number_value();
 }
 
+bool RawJwt::HasJsonObjectClaim(absl::string_view name) const {
+  return hasClaimOfKind(json_proto_, name,
+                        google::protobuf::Value::kStructValue);
+}
+
+util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
+    absl::string_view name) const {
+  auto status = ValidatePayloadName(name);
+  if (!status.ok()) {
+    return status;
+  }
+  auto fields = json_proto_.fields();
+  auto it = fields.find(std::string(name));
+  if (it == fields.end()) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+  }
+  const auto& value = it->second;
+  if (value.kind_case() != google::protobuf::Value::kStructValue) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "claim is not a JSON object");
+  }
+  return ProtoStructToJsonString(value.struct_value());
+}
+
+bool RawJwt::HasJsonArrayClaim(absl::string_view name) const {
+  return hasClaimOfKind(json_proto_, name,
+                        google::protobuf::Value::kListValue);
+}
+
+util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
+    absl::string_view name) const {
+  auto status = ValidatePayloadName(name);
+  if (!status.ok()) {
+    return status;
+  }
+  auto fields = json_proto_.fields();
+  auto it = fields.find(std::string(name));
+  if (it == fields.end()) {
+    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+  }
+  const auto& value = it->second;
+  if (value.kind_case() != google::protobuf::Value::kListValue) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "claim is not a JSON array");
+  }
+  return ProtoListToJsonString(value.list_value());
+}
 
 RawJwtBuilder::RawJwtBuilder() {}
 
@@ -394,6 +441,40 @@ util::Status RawJwtBuilder::AddNumberClaim(absl::string_view name,
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   value.set_number_value(double_value);
+  (*fields)[std::string(name)] = value;
+  return util::OkStatus();
+}
+
+util::Status RawJwtBuilder::AddJsonObjectClaim(absl::string_view name,
+                                               absl::string_view object_value) {
+  auto status = ValidatePayloadName(name);
+  if (!status.ok()) {
+    return status;
+  }
+  auto proto_or = JsonStringToProtoStruct(object_value);
+  if (!proto_or.ok()) {
+    return proto_or.status();
+  }
+  auto fields = json_proto_.mutable_fields();
+  google::protobuf::Value value;
+  *value.mutable_struct_value() = proto_or.ValueOrDie();
+  (*fields)[std::string(name)] = value;
+  return util::OkStatus();
+}
+
+util::Status RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
+                                              absl::string_view array_value) {
+  auto status = ValidatePayloadName(name);
+  if (!status.ok()) {
+    return status;
+  }
+  auto list_or = JsonStringToProtoList(array_value);
+  if (!list_or.ok()) {
+    return list_or.status();
+  }
+  auto fields = json_proto_.mutable_fields();
+  google::protobuf::Value value;
+  *value.mutable_list_value() = list_or.ValueOrDie();
   (*fields)[std::string(name)] = value;
   return util::OkStatus();
 }

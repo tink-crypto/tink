@@ -33,7 +33,18 @@ util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
     absl::string_view json_string) {
   google::protobuf::Struct proto;
   google::protobuf::util::JsonParseOptions json_parse_options;
-  json_parse_options.case_insensitive_enum_parsing = true;
+  auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
+                                                  json_parse_options);
+  if (!status.ok()) {
+    return ConvertProtoStatus(status);
+  }
+  return proto;
+}
+
+util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
+    absl::string_view json_string) {
+  google::protobuf::ListValue proto;
+  google::protobuf::util::JsonParseOptions json_parse_options;
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
@@ -44,6 +55,16 @@ util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
 
 util::StatusOr<std::string> ProtoStructToJsonString(
     const google::protobuf::Struct& proto) {
+  std::string output;
+  auto status = google::protobuf::util::MessageToJsonString(proto, &output);
+  if (!status.ok()) {
+    return ConvertProtoStatus(status);
+  }
+  return output;
+}
+
+util::StatusOr<std::string> ProtoListToJsonString(
+    const google::protobuf::ListValue& proto) {
   std::string output;
   auto status = google::protobuf::util::MessageToJsonString(proto, &output);
   if (!status.ok()) {

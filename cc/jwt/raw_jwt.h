@@ -55,6 +55,10 @@ class RawJwt {
   util::StatusOr<std::string> GetStringClaim(absl::string_view name) const;
   bool HasNumberClaim(absl::string_view name) const;
   util::StatusOr<double> GetNumberClaim(absl::string_view name) const;
+  bool HasJsonObjectClaim(absl::string_view name) const;
+  util::StatusOr<std::string> GetJsonObjectClaim(absl::string_view name) const;
+  bool HasJsonArrayClaim(absl::string_view name) const;
+  util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
 
   static util::StatusOr<RawJwt> FromString(absl::string_view json_string);
   util::StatusOr<std::string> ToString();
@@ -86,6 +90,10 @@ class RawJwtBuilder {
   util::Status AddBooleanClaim(absl::string_view name, bool bool_value);
   util::Status AddStringClaim(absl::string_view name, std::string string_value);
   util::Status AddNumberClaim(absl::string_view name, double double_value);
+  util::Status AddJsonObjectClaim(
+      absl::string_view name, absl::string_view object_value);
+  util::Status AddJsonArrayClaim(absl::string_view name,
+                                 absl::string_view array_value);
 
   util::StatusOr<RawJwt> Build();
 
