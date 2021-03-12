@@ -122,7 +122,7 @@ util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimAudience));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "No Audiences found");
+    return util::Status(util::error::NOT_FOUND, "No Audiences found");
   }
   auto list = it->second;
   if (list.kind_case() != google::protobuf::Value::kListValue) {
@@ -150,7 +150,7 @@ util::StatusOr<std::string> RawJwt::GetJwtId() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimJwtId));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "No JwtId found");
+    return util::Status(util::error::NOT_FOUND, "No JwtId found");
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
@@ -167,7 +167,7 @@ util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimExpiration));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "No Expiration found");
+    return util::Status(util::error::NOT_FOUND, "No Expiration found");
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -186,7 +186,7 @@ util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimNotBefore));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "No NotBefore found");
+    return util::Status(util::error::NOT_FOUND, "No NotBefore found");
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -205,7 +205,7 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimIssuedAt));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "No IssuedAt found");
+    return util::Status(util::error::NOT_FOUND, "No IssuedAt found");
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -233,11 +233,13 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+    return util::Status(util::error::NOT_FOUND,
+                        absl::Substitute("claim '$0' not found", name));
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kBoolValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "claim is not a string");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::Substitute("claim '$0' is not a bool", name));
   }
   return value.bool_value();
 }
@@ -256,11 +258,13 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+    return util::Status(util::error::NOT_FOUND,
+                        absl::Substitute("claim '$0' not found", name));
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "claim is not a string");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::Substitute("claim '$0' is not a string", name));
   }
   return value.string_value();
 }
@@ -278,11 +282,13 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+    return util::Status(util::error::NOT_FOUND,
+                        absl::Substitute("claim '$0' not found", name));
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "claim is not a number");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::Substitute("claim '$0' is not a number", name));
   }
   return value.number_value();
 }
@@ -301,12 +307,14 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+    return util::Status(util::error::NOT_FOUND,
+                        absl::Substitute("claim '$0' not found", name));
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStructValue) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "claim is not a JSON object");
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::Substitute("claim '$0' is not a JSON object", name));
   }
   return ProtoStructToJsonString(value.struct_value());
 }
@@ -325,12 +333,14 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Unknown claim");
+    return util::Status(util::error::NOT_FOUND,
+                        absl::Substitute("claim '$0' not found", name));
   }
   const auto& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kListValue) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "claim is not a JSON array");
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::Substitute("claim '$0' is not a JSON array", name));
   }
   return ProtoListToJsonString(value.list_value());
 }
