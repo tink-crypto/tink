@@ -25,61 +25,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "json_field_types",
-    hdrs = ["json_field_types.h"],
-    include_prefix = "tink/jwt",
-)
-
-cc_library(
-    name = "json_object",
-    srcs = ["json_object.cc"],
-    hdrs = ["json_object.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        ":json_field_types",
-        ":json_util",
-        "//jwt/internal:json_util",
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
-        "@com_google_absl//absl/time",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
-
-cc_library(
-    name = "json_util",
-    hdrs = ["json_struct_util.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
-
-cc_library(
-    name = "jwt_object",
-    srcs = ["jwt_object.cc"],
-    hdrs = ["jwt_object.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        ":json_field_types",
-        ":json_object",
-        ":jwt_names",
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
-        "@com_google_absl//absl/time",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
 
 cc_library(
     name = "raw_jwt",
@@ -116,45 +61,7 @@ cc_library(
 )
 
 # tests
-cc_test(
-    name = "json_object_test",
-    size = "small",
-    srcs = ["json_object_test.cc"],
-    deps = [
-        ":json_field_types",
-        ":json_object",
-        ":json_util",
-        "//util:status",
-        "//util:statusor",
-        "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-        "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
 
-cc_test(
-    name = "jwt_object_test",
-    size = "small",
-    srcs = ["jwt_object_test.cc"],
-    deps = [
-        ":json_field_types",
-        ":jwt_names",
-        ":jwt_object",
-        "//util:status",
-        "//util:statusor",
-        "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-        "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
 
 cc_test(
     name = "raw_jwt_test",
