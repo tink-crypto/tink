@@ -181,7 +181,9 @@ func (km *aesCTRHMACAEADKeyManager) validateKeyFormat(format *aeadpb.AesCtrHmacA
 
 	maxTagSize := map[commonpb.HashType]uint32{
 		commonpb.HashType_SHA1:   20,
+		commonpb.HashType_SHA224: 28,
 		commonpb.HashType_SHA256: 32,
+		commonpb.HashType_SHA384: 48,
 		commonpb.HashType_SHA512: 64}
 
 	tagSize, ok := maxTagSize[hmacKeyFormat.Params.Hash]

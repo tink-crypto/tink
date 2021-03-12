@@ -92,7 +92,9 @@ Status HmacKeyManager::ValidateParams(const HmacParams& params) const {
                      params.tag_size());
   }
   std::map<HashType, uint32_t> max_tag_size = {{HashType::SHA1, 20},
+                                               {HashType::SHA224, 28},
                                                {HashType::SHA256, 32},
+                                               {HashType::SHA384, 48},
                                                {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,

@@ -37,7 +37,6 @@ using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::HmacPrfKey;
 using ::google::crypto::tink::HmacPrfKeyFormat;
 using ::google::crypto::tink::KeyData;
-using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;
@@ -46,11 +45,11 @@ using ::testing::StartsWith;
 namespace {
 
 TEST(HmacPrfKeyManagerTest, Basics) {
-  EXPECT_THAT(HmacPrfKeyManager().get_version(), Eq(0));
-  EXPECT_THAT(HmacPrfKeyManager().get_key_type(),
-              Eq("type.googleapis.com/google.crypto.tink.HmacPrfKey"));
-  EXPECT_THAT(HmacPrfKeyManager().key_material_type(),
-              Eq(google::crypto::tink::KeyData::SYMMETRIC));
+  EXPECT_EQ(HmacPrfKeyManager().get_version(), 0);
+  EXPECT_EQ(HmacPrfKeyManager().get_key_type(),
+            "type.googleapis.com/google.crypto.tink.HmacPrfKey");
+  EXPECT_EQ(HmacPrfKeyManager().key_material_type(),
+            google::crypto::tink::KeyData::SYMMETRIC);
 }
 
 TEST(HmacPrfKeyManagerTest, ValidateEmptyKey) {
@@ -69,15 +68,12 @@ TEST(HmacPrfKeyManagerTest, ValidKeyFormat) {
   EXPECT_THAT(HmacPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
-TEST(HmacPrfKeyManagerTest, ValidateKeyFormatKeySizes) {
+TEST(HmacPrfKeyManagerTest, InvalidKeyFormatShortKey) {
   HmacPrfKeyFormat key_format;
   key_format.mutable_params()->set_hash(HashType::SHA512);
 
   key_format.set_key_size(15);
   EXPECT_THAT(HmacPrfKeyManager().ValidateKeyFormat(key_format), Not(IsOk()));
-
-  key_format.set_key_size(16);
-  EXPECT_THAT(HmacPrfKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
 TEST(HmacPrfKeyManagerTest, CreateKey) {
@@ -86,9 +82,9 @@ TEST(HmacPrfKeyManagerTest, CreateKey) {
   key_format.mutable_params()->set_hash(HashType::SHA512);
   auto hmac_key_or = HmacPrfKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
-  EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().params().hash(),
-              Eq(key_format.params().hash()));
+  EXPECT_EQ(hmac_key_or.ValueOrDie().version(), 0);
+  EXPECT_EQ(hmac_key_or.ValueOrDie().params().hash(),
+            key_format.params().hash());
   EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
               SizeIs(key_format.key_size()));
 
@@ -128,8 +124,8 @@ TEST(HmacPrfKeyManagerTest, DeriveKey) {
   StatusOr<HmacPrfKey> key_or =
       HmacPrfKeyManager().DeriveKey(format, &input_stream);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(key_or.ValueOrDie().key_value(), Eq("0123456789abcdefghijklm"));
-  EXPECT_THAT(key_or.ValueOrDie().params().hash(), Eq(format.params().hash()));
+  EXPECT_EQ(key_or.ValueOrDie().key_value(), "0123456789abcdefghijklm");
+  EXPECT_EQ(key_or.ValueOrDie().params().hash(), format.params().hash());
 }
 
 TEST(HmacPrfKeyManagerTest, DeriveKeyNotEnoughRandomness) {

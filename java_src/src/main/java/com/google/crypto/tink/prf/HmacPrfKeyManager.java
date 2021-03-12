@@ -52,8 +52,12 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
             switch (hash) {
               case SHA1:
                 return new PrfHmacJce("HMACSHA1", keySpec);
+              case SHA224:
+                return new PrfHmacJce("HMACSHA224", keySpec);
               case SHA256:
                 return new PrfHmacJce("HMACSHA256", keySpec);
+              case SHA384:
+                return new PrfHmacJce("HMACSHA384", keySpec);
               case SHA512:
                 return new PrfHmacJce("HMACSHA512", keySpec);
               default:
@@ -97,7 +101,9 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
 
   private static void validateParams(HmacPrfParams params) throws GeneralSecurityException {
     if (params.getHash() != HashType.SHA1
+        && params.getHash() != HashType.SHA224
         && params.getHash() != HashType.SHA256
+        && params.getHash() != HashType.SHA384
         && params.getHash() != HashType.SHA512) {
       throw new GeneralSecurityException("unknown hash type");
     }

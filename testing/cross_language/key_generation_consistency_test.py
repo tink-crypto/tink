@@ -34,23 +34,17 @@ from util import testing_servers
 
 # Test cases that succeed in a language but should fail
 SUCCEEDS_BUT_SHOULD_FAIL = [
-    # TODO(b/159989251)
-    # HMAC with SHA384 is accepted in go, but not in other langs.
-    ('HmacKey(32,10,SHA384)', 'go'),
-    ('HmacKey(32,16,SHA384)', 'go'),
-    ('HmacKey(32,20,SHA384)', 'go'),
-    ('HmacKey(32,21,SHA384)', 'go'),
-    ('HmacKey(32,24,SHA384)', 'go'),
-    ('HmacKey(32,32,SHA384)', 'go'),
-    ('HmacKey(32,33,SHA384)', 'go'),
-    ('HmacPrfKey(32,SHA384)', 'go'),
     # TODO(b/160130470): In CC and Python Hybrid templates are not checked for
     # valid AEAD params. (These params *are* checked when the key is used.)
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'python'),
-
+    # TODO(b/182371203): CC and Python should not accept SHA224 for signatures.
+    ('RsaSsaPkcs1PrivateKey(SHA224,2048,65537)', 'cc'),
+    ('RsaSsaPkcs1PrivateKey(SHA224,2048,65537)', 'python'),
+    ('RsaSsaPssPrivateKey(SHA224,SHA224,32,2048,65537)', 'cc'),
+    ('RsaSsaPssPrivateKey(SHA224,SHA224,32,2048,65537)', 'python'),
 ]
 
 # Test cases that fail in a language but should succeed
@@ -60,6 +54,10 @@ FAILS_BUT_SHOULD_SUCCEED = [
      'java'),
     ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA1,AesGcmKey(16))',
      'go'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA224,AesGcmKey(16))',
+     'java'),
+    ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA224,AesGcmKey(16))',
+     'go'),
     ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA256,AesGcmKey(16))',
      'java'),
     ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA256,AesGcmKey(16))',
@@ -72,21 +70,11 @@ FAILS_BUT_SHOULD_SUCCEED = [
      'java'),
     ('EciesAeadHkdfPrivateKey(CURVE25519,UNCOMPRESSED,SHA512,AesGcmKey(16))',
      'go'),
-    # TODO(b/160132617) Java does not accept templates with hash type SHA384.
-    ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA384,AesGcmKey(16))',
-     'java'),
-    ('EciesAeadHkdfPrivateKey(NIST_P384,UNCOMPRESSED,SHA384,AesGcmKey(16))',
-     'java'),
-    ('EciesAeadHkdfPrivateKey(NIST_P521,UNCOMPRESSED,SHA384,AesGcmKey(16))',
-     'java'),
 ]
 
 HASH_TYPES = [
-    common_pb2.UNKNOWN_HASH,
-    common_pb2.SHA1,
-    common_pb2.SHA256,
-    common_pb2.SHA384,
-    common_pb2.SHA512
+    common_pb2.UNKNOWN_HASH, common_pb2.SHA1, common_pb2.SHA224,
+    common_pb2.SHA256, common_pb2.SHA384, common_pb2.SHA512
 ]
 
 CURVE_TYPES = [

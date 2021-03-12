@@ -30,8 +30,12 @@ class StreamingAeadUtil {
     switch (hash) {
       case SHA1:
         return "HmacSha1";
+      case SHA224:
+        return "HmacSha224";
       case SHA256:
         return "HmacSha256";
+      case SHA384:
+        return "HmacSha384";
       case SHA512:
         return "HmacSha512";
       default:
