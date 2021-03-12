@@ -28,19 +28,23 @@ namespace pqc {
 crypto::tink::util::StatusOr<crypto::tink::pqc::HrssKeyPair>
 GenerateHrssKeyPair(util::SecretData hrss_key_entropy) {
   crypto::tink::pqc::HrssKeyPair hrss_key_pair;
+  hrss_key_pair.hrss_private_key_seed = std::move(hrss_key_entropy);
+
+  struct HRSS_public_key hrss_public_key;
+  util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key =
+      util::MakeSecretUniquePtr<struct HRSS_private_key>();
 
   // Generating a HRSS key pair
-  HRSS_generate_key(&hrss_key_pair.hrss_public_key,
-                    hrss_key_pair.hrss_private_key.get(),
-                    hrss_key_entropy.data());
-  crypto::tink::subtle::ResizeStringUninitialized(
-      &(hrss_key_pair.hrss_public_key_marshaled), HRSS_PUBLIC_KEY_BYTES);
+  HRSS_generate_key(&hrss_public_key, hrss_private_key.get(),
+                    hrss_key_pair.hrss_private_key_seed.data());
 
   // Marshalling the HRSS public key
+  crypto::tink::subtle::ResizeStringUninitialized(
+      &(hrss_key_pair.hrss_public_key_marshaled), HRSS_PUBLIC_KEY_BYTES);
   HRSS_marshal_public_key(
       const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(
           hrss_key_pair.hrss_public_key_marshaled.data())),
-      &(hrss_key_pair.hrss_public_key));
+      &hrss_public_key);
 
   return hrss_key_pair;
 }

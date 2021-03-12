@@ -35,13 +35,13 @@ namespace subtle {
 // extension of this hybrid KEM to support other curves.
 // static
 util::StatusOr<std::unique_ptr<Cecpq2HkdfRecipientKemBoringSsl>>
-Cecpq2HkdfRecipientKemBoringSsl::New(
-    EllipticCurveType curve, util::SecretData ec_private_key,
-    util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key) {
+Cecpq2HkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
+                                     util::SecretData ec_private_key,
+                                     util::SecretData hrss_private_key_seed) {
   switch (curve) {
     case EllipticCurveType::CURVE25519:
       return Cecpq2HkdfX25519RecipientKemBoringSsl::New(
-          curve, std::move(ec_private_key), std::move(hrss_private_key));
+          curve, std::move(ec_private_key), std::move(hrss_private_key_seed));
     default:
       return util::Status(util::error::UNIMPLEMENTED,
                           "Unsupported elliptic curve");
@@ -52,7 +52,7 @@ Cecpq2HkdfRecipientKemBoringSsl::New(
 util::StatusOr<std::unique_ptr<Cecpq2HkdfRecipientKemBoringSsl>>
 Cecpq2HkdfX25519RecipientKemBoringSsl::New(
     EllipticCurveType curve, util::SecretData ec_private_key,
-    util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key) {
+    util::SecretData hrss_private_key_seed) {
   auto status = CheckFipsCompatibility<Cecpq2HkdfX25519RecipientKemBoringSsl>();
   if (!status.ok()) return status;
 
@@ -67,7 +67,7 @@ Cecpq2HkdfX25519RecipientKemBoringSsl::New(
   }
   // If all input parameters are ok, create a CECPQ2 Recipient KEM instance
   return {absl::WrapUnique(new Cecpq2HkdfX25519RecipientKemBoringSsl(
-      std::move(ec_private_key), std::move(hrss_private_key)))};
+      std::move(ec_private_key), std::move(hrss_private_key_seed)))};
 }
 
 crypto::tink::util::StatusOr<util::SecretData>
@@ -91,10 +91,17 @@ Cecpq2HkdfX25519RecipientKemBoringSsl::GenerateKey(
   X25519(x25519_shared_secret.data(), private_key_x25519_.data(),
          reinterpret_cast<const uint8_t*>(kem_bytes.data()));
 
-  // Recover HRSS shared secret using BoringSSL's HRSS implementation
+  // Regenerate HRSS key pair from seed
+  util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key =
+      util::MakeSecretUniquePtr<struct HRSS_private_key>();
+  struct HRSS_public_key hrss_public_key;
+  HRSS_generate_key(&hrss_public_key, hrss_private_key.get(),
+                    private_key_hrss_seed_.data());
+
+  // Recover HRSS shared secret from kem_bytes and private key
   util::SecretData hrss_shared_secret(HRSS_KEY_BYTES);
   HRSS_decap(reinterpret_cast<uint8_t*>(hrss_shared_secret.data()),
-             private_key_hrss_.get(),
+             hrss_private_key.get(),
              reinterpret_cast<const uint8_t*>(kem_bytes.data() +
                                               X25519_PUBLIC_VALUE_LEN),
              HRSS_CIPHERTEXT_BYTES);

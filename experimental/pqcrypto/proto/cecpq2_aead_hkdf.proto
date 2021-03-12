@@ -60,8 +60,7 @@ message Cecpq2HkdfKemParams {
 message Cecpq2AeadDemParams {
   // Contains e.g. AesCtrHmacAeadKeyFormat or AesGcmKeyFormat.
   // Required.
-  KeyTemplate aead_dem =
-      2;
+  KeyTemplate aead_dem = 2;
 }
 
 message Cecpq2AeadHkdfParams {
@@ -107,9 +106,9 @@ message Cecpq2AeadHkdfPrivateKey {
   // Required.
   bytes x25519_private_key = 3;  // Big integer in bigendian representation.
 
-  // HRSS private key:
+  // HRSS private key seed:
   // Required.
-  bytes hrss_private_key = 4;
+  bytes hrss_private_key_seed = 4;
 }
 
 message Cecpq2AeadHkdfKeyFormat {

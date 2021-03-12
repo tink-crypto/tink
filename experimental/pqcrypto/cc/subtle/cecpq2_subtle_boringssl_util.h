@@ -25,10 +25,7 @@ namespace tink {
 namespace pqc {
 
 struct HrssKeyPair {
-  crypto::tink::util::SecretUniquePtr<struct HRSS_private_key>
-      hrss_private_key =
-          crypto::tink::util::MakeSecretUniquePtr<struct HRSS_private_key>();
-  struct HRSS_public_key hrss_public_key;
+  crypto::tink::util::SecretData hrss_private_key_seed;
   std::string hrss_public_key_marshaled;
 };
 

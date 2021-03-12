@@ -15,6 +15,7 @@
 #include "pqcrypto/cc/util/test_util.h"
 
 #include "openssl/curve25519.h"
+#include "openssl/hrss.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
@@ -41,10 +42,11 @@ google::crypto::tink::Cecpq2AeadHkdfPrivateKey GetCecpq2AeadHkdfTestKey(
       pqc::GenerateCecpq2Keypair(util::Enums::ProtoToSubtle(curve_type));
   auto cecpq2_key_pair = std::move(cecpq2_key_pair_or_status.ValueOrDie());
 
-  std::string hrss_priv_key_str(
-      reinterpret_cast<const char*>(cecpq2_key_pair.hrss_key_pair.
-      hrss_private_key->opaque), sizeof(HRSS_private_key));
-  cecpq2_key_pair_proto.set_hrss_private_key(hrss_priv_key_str);
+  std::string hrss_priv_key_seed_str(
+      reinterpret_cast<const char *>(
+          cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed.data()),
+      HRSS_GENERATE_KEY_BYTES);
+  cecpq2_key_pair_proto.set_hrss_private_key_seed(hrss_priv_key_seed_str);
 
   cecpq2_key_pair_proto.set_x25519_private_key(
       std::string(reinterpret_cast<const char *>(cecpq2_key_pair.x25519_key_pair

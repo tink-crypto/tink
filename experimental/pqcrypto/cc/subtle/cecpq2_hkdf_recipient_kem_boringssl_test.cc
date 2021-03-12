@@ -118,20 +118,14 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  // Generating the HRSS key pair from the BoringSSL entropy test vector
-  HRSS_public_key hrss_public_key;
-  util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key =
-      util::MakeSecretUniquePtr<struct HRSS_private_key>();
-  HRSS_generate_key(&hrss_public_key, hrss_private_key.get(),
-                    reinterpret_cast<const uint8_t*>(
-                        test::HexDecodeOrDie(kHrssKeyGenEntropy).data()));
-
   // Creating the CECPQ2 recipient KEM using HRSS and X25519 private keys
+  util::SecretData hrss_private_key_seed =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kHrssKeyGenEntropy));
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::UNKNOWN_CURVE,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
-      std::move(hrss_private_key));
+      std::move(hrss_private_key_seed));
 
   // The instance creation above should fail with an unimplemented algorithm
   // error given the UNKNOWN_CURVE parameter
@@ -146,20 +140,14 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  // Generating the HRSS key pair from the BoringSSL entropy test vector
-  HRSS_public_key hrss_public_key;
-  util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key =
-      util::MakeSecretUniquePtr<struct HRSS_private_key>();
-  HRSS_generate_key(&hrss_public_key, hrss_private_key.get(),
-                    reinterpret_cast<const uint8_t*>(
-                        test::HexDecodeOrDie(kHrssKeyGenEntropy).data()));
-
   // Creating the CECPQ2 recipient KEM using HRSS and X25519 private keys
+  util::SecretData hrss_private_key_seed =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kHrssKeyGenEntropy));
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
-      std::move(hrss_private_key));
+      std::move(hrss_private_key_seed));
 
   // The instance creation above should fail with an unimplemented algorithm
   // error given the UNKNOWN_CURVE parameter
@@ -173,20 +161,14 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
   }
   int out_len = 32;
 
-  // Generating the HRSS key pair from the BoringSSL entropy test vector
-  HRSS_public_key hrss_public_key;
-  util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key =
-      util::MakeSecretUniquePtr<struct HRSS_private_key>();
-  HRSS_generate_key(&hrss_public_key, hrss_private_key.get(),
-                    reinterpret_cast<const uint8_t*>(
-                        test::HexDecodeOrDie(kHrssKeyGenEntropy).data()));
-
   // Creating the CECPQ2 recipient KEM using HRSS and X25519 private keys
+  util::SecretData hrss_private_key_seed =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kHrssKeyGenEntropy));
   auto cecpq2_recipient_kem_or = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
-      std::move(hrss_private_key));
+      std::move(hrss_private_key_seed));
   ASSERT_TRUE(cecpq2_recipient_kem_or.ok());
   auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
 
@@ -217,20 +199,14 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
   std::string kem_bytes_modified = test::HexDecodeOrDie(kCecpq2KemBytes);
   kem_bytes_modified[X25519_PUBLIC_VALUE_LEN + 50] ^= 0x04;
 
-  // Generating the HRSS key pair from the BoringSSL entropy test vector
-  HRSS_public_key public_key_hrss;
-  util::SecretUniquePtr<struct HRSS_private_key> private_key_hrss =
-      util::MakeSecretUniquePtr<struct HRSS_private_key>();
-  HRSS_generate_key(&public_key_hrss, private_key_hrss.get(),
-                    reinterpret_cast<const uint8_t*>(
-                        test::HexDecodeOrDie(kHrssKeyGenEntropy).data()));
-
   // Creating the CECPQ2 recipient KEM using HRSS and X25519 private keys
+  util::SecretData hrss_private_key_seed =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kHrssKeyGenEntropy));
   auto cecpq2_recipient_kem_or = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
-      std::move(private_key_hrss));
+      std::move(hrss_private_key_seed));
   ASSERT_TRUE(cecpq2_recipient_kem_or.ok());
   auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
 
