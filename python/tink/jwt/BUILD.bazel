@@ -105,3 +105,21 @@ py_test(
         "//tink/testing:helper",
     ],
 )
+
+py_library(
+    name = "_jwt_format",
+    srcs = ["_jwt_format.py"],
+    srcs_version = "PY3",
+    deps = [":_raw_jwt"],
+)
+
+py_test(
+    name = "_jwt_format_test",
+    srcs = ["_jwt_format_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":_jwt_format",
+        ":_raw_jwt",
+        requirement("absl-py"),
+    ],
+)
