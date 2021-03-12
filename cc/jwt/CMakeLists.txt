@@ -86,6 +86,21 @@ tink_cc_library(
     absl::time
 )
 
+tink_cc_library(
+  NAME verified_jwt
+  SRCS
+    verified_jwt.cc
+    verified_jwt.h
+  DEPS
+    tink::jwt::jwt_names
+    tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    protobuf::libprotobuf
+    absl::strings
+    absl::time
+)
+
 # tests
 
 tink_cc_test(
@@ -126,6 +141,21 @@ tink_cc_test(
   DEPS
     tink::jwt::jwt_names
     tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    protobuf::libprotobuf
+    absl::strings
+    gmock
+)
+
+tink_cc_test(
+  NAME verified_jwt_test
+  SRCS verified_jwt_test.cc
+  DEPS
+    tink::jwt::jwt_names
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
     tink::util::status
     tink::util::statusor
     tink::util::test_util
