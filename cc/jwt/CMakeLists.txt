@@ -36,6 +36,20 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME jwt_validator
+  SRCS
+    jwt_validator.cc
+    jwt_validator.h
+  DEPS
+    tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    protobuf::libprotobuf
+    absl::strings
+    absl::time
+)
+
+tink_cc_library(
   NAME verified_jwt
   SRCS
     verified_jwt.cc
@@ -73,6 +87,20 @@ tink_cc_test(
     tink::jwt::jwt_names
     tink::jwt::raw_jwt
     tink::jwt::verified_jwt
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    protobuf::libprotobuf
+    absl::strings
+    gmock
+)
+
+tink_cc_test(
+  NAME jwt_validator_test
+  SRCS jwt_validator_test.cc
+  DEPS
+    tink::jwt::raw_jwt
+    tink::jwt::jwt_validator
     tink::util::status
     tink::util::statusor
     tink::util::test_util
