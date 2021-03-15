@@ -16,9 +16,9 @@ git clone https://github.com/google/tink
 cd tink
 bazel build ...
 echo "some plaintext" > foo.txt
-./bazel-bin/examples/helloworld/cc/hello_world ./examples/helloworld/cc/aes128_gcm_test_keyset_json.txt\
+./bazel-bin/examples/cc/helloworld/hello_world ./examples/cc/helloworld/aes128_gcm_test_keyset_json.txt\
     encrypt foo.txt "some aad" bar.encrypted
-./bazel-bin/examples/helloworld/cc/hello_world ./examples/helloworld/cc/aes128_gcm_test_keyset_json.txt\
+./bazel-bin/examples/cc/helloworld/hello_world ./examples/cc/helloworld/aes128_gcm_test_keyset_json.txt\
     decrypt bar.encrypted "some aad" foo-decrypted.txt
 cat foo-decrypted.txt
 ```
