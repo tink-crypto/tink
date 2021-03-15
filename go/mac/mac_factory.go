@@ -29,7 +29,7 @@ import (
 // TODO(b/168188126) Remove once this bug is fixed.
 var enableComputeOldLegacyMac = flag.Bool(
 	"enable_compute_old_legacy_mac", false,
-	"Lets MAC primitive compute MACs for keys of type LEGACY in an old incompatible format.")
+	"This flag has no effect anymore.")
 
 // New creates a MAC primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.MAC, error) {
@@ -81,10 +81,10 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("mac_factory: not a MAC primitive")
 	}
 	if m.ps.Primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
-		if !*enableComputeOldLegacyMac {
-			return nil, fmt.Errorf(
-				"mac_factory: computation of old LEGACY MACs is disabled, to enable add flag --enable_compute_old_legacy_mac=true")
-		}
+		d := data
+		data = make([]byte, 0, len(d)+1)
+		data = append(data, d...)
+		data = append(data, byte(0))
 	}
 	mac, err := primitive.ComputeMAC(data)
 	if err != nil {
@@ -111,11 +111,17 @@ func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 	entries, err := m.ps.EntriesForPrefix(string(prefix))
 	if err == nil {
 		for i := 0; i < len(entries); i++ {
-			p, ok := (entries[i].Primitive).(tink.MAC)
+			entry := entries[i]
+			p, ok := (entry.Primitive).(tink.MAC)
 			if !ok {
 				return fmt.Errorf("mac_factory: not an MAC primitive")
 			}
-
+			if entry.PrefixType == tinkpb.OutputPrefixType_LEGACY {
+				d := data
+				data = make([]byte, 0, len(d)+1)
+				data = append(data, d...)
+				data = append(data, byte(0))
+			}
 			if err = p.VerifyMAC(macNoPrefix, data); err == nil {
 				return nil
 			}
