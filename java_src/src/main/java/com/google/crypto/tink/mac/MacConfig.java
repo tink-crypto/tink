@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.mac;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -81,9 +82,15 @@ public final class MacConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    HmacKeyManager.register(true);
-    AesCmacKeyManager.register(true);
     MacWrapper.register();
+    HmacKeyManager.register(true);
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      return;
+    }
+
+    AesCmacKeyManager.register(true);
   }
 
   /**
