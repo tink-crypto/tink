@@ -34,17 +34,8 @@ java_library(
     ],
 )
 
-# PaymentMethodJsonEncodingTest is currently broken, due different
-# versions of org.json being used.
-# TODO(b/179976658): Remove exclude once we have migrated to Gson.
 gen_java_test_rules(
-    test_files = glob(
-        include = [
-            "**/*Test.java",
-        ],
-        exclude = [
-            "**/PaymentMethodJsonEncodingTest.java",
-        ],
+    test_files = glob(["**/*Test.java"],
     ),
     deps = [
         ":generator_test",

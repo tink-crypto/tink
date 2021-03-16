@@ -22,9 +22,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for the exact Json-Encoding produced. */
+/** Tests for the exact Json-Encoding produced.
+ *
+ * These tests test implementation details. Do not depend on the this. For example, the particular
+ * ordering of the elements or the particular character escaping used may change in the future.
+ * */
 @RunWith(JUnit4.class)
-public final class PaymentMethodJsonEncodingTest { // /
+public final class PaymentMethodJsonEncodingTest {
 
   @Test
   public void testExactOutputOfJsonEncodeCiphertext() throws Exception {

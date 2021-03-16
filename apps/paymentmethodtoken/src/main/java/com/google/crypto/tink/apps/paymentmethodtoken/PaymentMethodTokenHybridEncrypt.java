@@ -22,11 +22,14 @@ import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EciesHkdfSenderKem;
+import com.google.gson.JsonObject;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * A {@link HybridEncrypt} implementation for the hybrid encryption used in <a
@@ -45,15 +48,19 @@ class PaymentMethodTokenHybridEncrypt implements HybridEncrypt {
 
   static String jsonEncodeCiphertext(byte[] ciphertext, byte[] tag, byte[] ephemeralPublicKey)
       throws GeneralSecurityException {
+    JsonObject result = new JsonObject();
+    result.addProperty(
+        PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext));
+    result.addProperty(
+        PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY, Base64.encode(ephemeralPublicKey));
+    result.addProperty(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag));
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setHtmlSafe(true);
     try {
-      return new JSONObject()
-          .put(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(ciphertext))
-          .put(PaymentMethodTokenConstants.JSON_TAG_KEY, Base64.encode(tag))
-          .put(
-              PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
-              Base64.encode(ephemeralPublicKey))
-          .toString();
-    } catch (JSONException e) {
+      Streams.write(result, jsonWriter);
+      return stringWriter.toString();
+    } catch (IOException e) {
       throw new GeneralSecurityException("cannot encrypt; JSON error", e);
     }
   }
