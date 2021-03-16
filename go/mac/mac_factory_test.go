@@ -141,9 +141,7 @@ func TestFactoryLegacyKey(t *testing.T) {
 	}
 }
 
-func TestFactoryLegacyFixedKeyTag(t *testing.T) {
-	// This test makes sure that previously created tags are still considered valid.
-	// This is needed to resolve b/168188126.
+func TestFactoryLegacyFixedKeyFixedTag(t *testing.T) {
 	tagSize := uint32(16)
 	params := testutil.NewHMACParams(commonpb.HashType_SHA256, tagSize)
 	keyValue := []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
@@ -175,12 +173,8 @@ func TestFactoryLegacyFixedKeyTag(t *testing.T) {
 		t.Errorf("mac.New failed: %s", err)
 	}
 	data := []byte("hello")
-	incompatibleTag := []byte{0, 0, 0, 0, 42, 245, 200, 101, 212, 53, 28, 131, 148, 107, 236, 152, 101, 87, 7, 59, 255}
-	if err = p.VerifyMAC(incompatibleTag, data); err == nil {
-		t.Errorf("incompatibleTag verification succeeded, want fail.")
-	}
-	compatibleTag := []byte{0, 0, 0, 0, 42, 64, 150, 12, 207, 250, 175, 32, 216, 164, 77, 69, 28, 29, 204, 235, 75}
-	if err = p.VerifyMAC(compatibleTag, data); err != nil {
+	tag := []byte{0, 0, 0, 0, 42, 64, 150, 12, 207, 250, 175, 32, 216, 164, 77, 69, 28, 29, 204, 235, 75}
+	if err = p.VerifyMAC(tag, data); err != nil {
 		t.Errorf("compatibleTag verification failed: %s", err)
 	}
 }
