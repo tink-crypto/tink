@@ -40,11 +40,6 @@ SUCCEEDS_BUT_SHOULD_FAIL = [
      'cc'),
     ('EciesAeadHkdfPrivateKey(NIST_P256,UNCOMPRESSED,SHA256,AesEaxKey(15,11))',
      'python'),
-    # TODO(b/182371203): CC and Python should not accept SHA224 for signatures.
-    ('RsaSsaPkcs1PrivateKey(SHA224,2048,65537)', 'cc'),
-    ('RsaSsaPkcs1PrivateKey(SHA224,2048,65537)', 'python'),
-    ('RsaSsaPssPrivateKey(SHA224,SHA224,32,2048,65537)', 'cc'),
-    ('RsaSsaPssPrivateKey(SHA224,SHA224,32,2048,65537)', 'python'),
 ]
 
 # Test cases that fail in a language but should succeed

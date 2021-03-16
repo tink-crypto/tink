@@ -160,8 +160,12 @@ TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {
   EXPECT_TRUE(
       SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA256).ok());
   EXPECT_TRUE(
+      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA384).ok());
+  EXPECT_TRUE(
       SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA512).ok());
   EXPECT_FALSE(SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA1).ok());
+  EXPECT_FALSE(
+      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA224).ok());
   EXPECT_FALSE(
       SubtleUtilBoringSSL::ValidateSignatureHash(HashType::UNKNOWN_HASH).ok());
 }
