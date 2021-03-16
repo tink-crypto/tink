@@ -17,7 +17,6 @@ package mac
 import (
 	"fmt"
 
-	"flag"
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
@@ -25,11 +24,6 @@ import (
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
-
-// TODO(b/168188126) Remove once this bug is fixed.
-var enableComputeOldLegacyMac = flag.Bool(
-	"enable_compute_old_legacy_mac", false,
-	"This flag has no effect anymore.")
 
 // New creates a MAC primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.MAC, error) {
