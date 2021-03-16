@@ -13,7 +13,7 @@
 
 #!/bin/bash
 
-set -ue
+set -e
 
 #############################################################################
 ##### Test for using Tink in a CMake project.
@@ -23,6 +23,14 @@ set -ue
 ##                  can be found.
 ## TEST_SRCDIR -- The directory in which Tink is stored.
 
+if [ -z $TEST_TMPDIR ];then
+    echo "Error: You must set TEST_TMPDIR to a temporary working directory"
+    exit 1
+fi
+if [ -z $TEST_SRCDIR ];then
+    echo "Error: You must set TEST_SRCDIR to the directory which Tink is stored(i.e. Tink parent directory)."
+    exit 1
+fi
 # XDG_CACHE_HOME must be set for a successful build of BoringSSL.
 export XDG_CACHE_HOME="$TEST_TMPDIR/cache"
 TEST_DATA_DIR="$TEST_SRCDIR/tink/examples/cc/helloworld"
@@ -41,6 +49,7 @@ AAD_TEXT="some associated data"
 ##### Create necessary directories, and link Tink source.
 mkdir -p $XDG_CACHE_HOME
 mkdir -p $PROJECT_DIR $PROJECT_DIR/third_party
+TINK_SRC_DIR="$TEST_SRCDIR/tink"
 ln -s $TINK_SRC_DIR $PROJECT_DIR/third_party/tink
 
 ##### Copy "my_project" files.
