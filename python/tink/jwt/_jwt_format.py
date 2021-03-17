@@ -16,7 +16,8 @@ import json
 
 from typing import Any, Text
 
-from tink.jwt import _raw_jwt
+from tink.jwt import _jwt_error
+
 
 _VALID_ALGORITHMS = frozenset({
     'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
@@ -36,31 +37,40 @@ def _base64_decode(encoded_data: bytes) -> bytes:
   return base64.urlsafe_b64decode(padded_encoded_data)
 
 
-def _json_encode(json_data: Any) -> bytes:
-  json_text = json.dumps(json_data, separators=(',', ':'))
-  return _base64_encode(json_text.encode('utf8'))
+def json_dumps(json_data: Any) -> Text:
+  return json.dumps(json_data, separators=(',', ':'))
 
 
-def _json_decode(data: bytes) -> Any:
+def json_loads(json_text: Text) -> Any:
   try:
-    return json.loads(_base64_decode(data))
+    return json.loads(json_text)
   except json.decoder.JSONDecodeError:
-    raise _raw_jwt.JwtInvalidError('Failed to parse JSON string')
+    raise _jwt_error.JwtInvalidError('Failed to parse JSON string')
 
 
 def _validate_algorithm(algorithm: Text) -> None:
   if algorithm not in _VALID_ALGORITHMS:
-    raise _raw_jwt.JwtInvalidError('Invalid algorithm %s' % algorithm)
+    raise _jwt_error.JwtInvalidError('Invalid algorithm %s' % algorithm)
 
 
-def encode_payload(payload: Any) -> bytes:
+def encode_header(header: Any) -> bytes:
+  json_header = json_dumps(header)
+  return _base64_encode(json_header.encode('utf8'))
+
+
+def decode_header(header: bytes) -> Any:
+  json_header = _base64_decode(header)
+  return json_loads(json_header.decode('utf8'))
+
+
+def encode_payload(json_payload: Text) -> bytes:
   """Encodes the payload into compact form."""
-  return _json_encode(payload)
+  return _base64_encode(json_payload.encode('utf8'))
 
 
-def decode_payload(encoded_payload: bytes) -> Any:
+def decode_payload(encoded_payload: bytes) -> Text:
   """Decodes the payload from compact form."""
-  return _json_decode(encoded_payload)
+  return _base64_decode(encoded_payload).decode('utf8')
 
 
 def encode_signature(signature: bytes) -> bytes:
@@ -75,25 +85,26 @@ def decode_signature(encoded_signature: bytes) -> bytes:
 
 def create_header(algorithm: Text) -> bytes:
   _validate_algorithm(algorithm)
-  return _json_encode({'alg': algorithm})
+  return encode_header({'alg': algorithm})
 
 
 def validate_header(header: bytes, algorithm: Text) -> None:
   """Parses the header and validates its values."""
   _validate_algorithm(algorithm)
-  decoded_header = _json_decode(header)
+  json_header = _base64_decode(header).decode('utf8')
+  decoded_header = json_loads(json_header)
   hdr_algorithm = decoded_header.get('alg', '')
   if hdr_algorithm.upper() != algorithm:
-    raise _raw_jwt.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
-                                   (algorithm, hdr_algorithm))
+    raise _jwt_error.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
+                                     (algorithm, hdr_algorithm))
   header_type = decoded_header.get('typ', None)
   if 'typ' in decoded_header:
     if decoded_header['typ'].upper() != 'JWT':
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'Invalid header type; expected JWT, got %s' % decoded_header['typ'])
 
 
-def create_unsigned_compact(algorithm: Text, payload: Any) -> bytes:
+def create_unsigned_compact(algorithm: Text, payload: Text) -> bytes:
   return create_header(algorithm) + b'.' + encode_payload(payload)
 
 

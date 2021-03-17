@@ -11,6 +11,7 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_jwt_error",
         ":_jwt_key_templates",
         ":_jwt_validator",
         ":_raw_jwt",
@@ -23,7 +24,8 @@ py_library(
     srcs = ["_raw_jwt.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/core",
+        ":_jwt_error",
+        ":_jwt_format",
     ],
 )
 
@@ -62,8 +64,8 @@ py_library(
     srcs = ["_jwt_validator.py"],
     srcs_version = "PY3",
     deps = [
+        ":_jwt_error",
         ":_raw_jwt",
-        "//tink/core",
     ],
 )
 
@@ -107,10 +109,19 @@ py_test(
 )
 
 py_library(
+    name = "_jwt_error",
+    srcs = ["_jwt_error.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+    ],
+)
+
+py_library(
     name = "_jwt_format",
     srcs = ["_jwt_format.py"],
     srcs_version = "PY3",
-    deps = [":_raw_jwt"],
+    deps = [":_jwt_error"],
 )
 
 py_test(
@@ -118,8 +129,8 @@ py_test(
     srcs = ["_jwt_format_test.py"],
     python_version = "PY3",
     deps = [
+        ":_jwt_error",
         ":_jwt_format",
-        ":_raw_jwt",
         requirement("absl-py"),
     ],
 )
