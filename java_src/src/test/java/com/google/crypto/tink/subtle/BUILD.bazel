@@ -408,6 +408,7 @@ java_test(
     srcs = ["PrfAesCmacTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
         "//src/main/java/com/google/crypto/tink/subtle:prf_mac",
