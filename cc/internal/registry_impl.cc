@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "tink/core/registry_impl.h"
+#include "tink/internal/registry_impl.h"
 
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"

@@ -83,7 +83,6 @@ PUBLIC_API_DEPS = [
     ":streaming_mac",
     ":random_access_stream",
     ":registry",
-    ":registry_impl",
     ":version",
     "//aead:aead_config",
     "//aead:aead_factory",
@@ -97,6 +96,7 @@ PUBLIC_API_DEPS = [
     "//hybrid:hybrid_encrypt_factory",
     "//hybrid:hybrid_key_templates",
     "//internal:key_info",
+    "//internal:registry_impl",
     "//mac:mac_config",
     "//mac:mac_factory",
     "//mac:mac_key_templates",
@@ -447,40 +447,10 @@ cc_library(
     hdrs = ["registry.h"],
     include_prefix = "tink",
     deps = [
-        ":registry_impl",
+        "//internal:registry_impl",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_library(
-    name = "registry_impl",
-    srcs = ["core/registry_impl.cc"],
-    hdrs = ["core/registry_impl.h"],
-    include_prefix = "tink",
-    deps = [
-        ":catalogue",
-        ":core/key_manager_impl",
-        ":core/key_type_manager",
-        ":core/private_key_manager_impl",
-        ":core/private_key_type_manager",
-        ":key_manager",
-        ":primitive_set",
-        ":primitive_wrapper",
-        "//internal:keyset_wrapper",
-        "//internal:keyset_wrapper_impl",
-        "//proto:tink_cc_proto",
-        "//util:errors",
-        "//util:protobuf_helper",
-        "//util:status",
-        "//util:statusor",
-        "//util:validation",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -674,43 +644,6 @@ config_setting(
 )
 
 # tests
-
-cc_test(
-    name = "registry_test",
-    size = "small",
-    srcs = ["core/registry_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    deps = [
-        ":aead",
-        ":catalogue",
-        ":core/key_manager_impl",
-        ":core/key_type_manager",
-        ":crypto_format",
-        ":keyset_manager",
-        ":registry",
-        "//aead:aead_wrapper",
-        "//aead:aes_gcm_key_manager",
-        "//hybrid:ecies_aead_hkdf_private_key_manager",
-        "//hybrid:ecies_aead_hkdf_public_key_manager",
-        "//proto:aes_ctr_hmac_aead_cc_proto",
-        "//proto:aes_gcm_cc_proto",
-        "//proto:common_cc_proto",
-        "//proto:ecdsa_cc_proto",
-        "//proto:tink_cc_proto",
-        "//subtle:aes_gcm_boringssl",
-        "//subtle:random",
-        "//util:istream_input_stream",
-        "//util:protobuf_helper",
-        "//util:secret_data",
-        "//util:status",
-        "//util:statusor",
-        "//util:test_keyset_handle",
-        "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/memory",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
 
 cc_test(
     name = "version_test",
