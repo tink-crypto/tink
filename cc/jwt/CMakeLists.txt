@@ -108,3 +108,35 @@ tink_cc_test(
     absl::strings
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_mac
+  SRCS mac.h
+  DEPS
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_public_key_sign
+  SRCS jwt_public_key_sign.h
+  DEPS
+    tink::jwt::raw_jwt
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_public_key_verify
+  SRCS jwt_public_key_verify.h
+  DEPS
+    tink::jwt::jwt_validator
+    tink::jwt::verified_jwt
+    tink::util::status
+    absl::strings
+)
+

@@ -76,6 +76,46 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "jwt_mac",
+    hdrs = ["jwt_mac.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":jwt_validator",
+        ":raw_jwt",
+        ":verified_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_sign",
+    hdrs = ["jwt_public_key_sign.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":raw_jwt",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_verify",
+    hdrs = ["jwt_public_key_verify.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":jwt_validator",
+        ":verified_jwt",
+        "//util:status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 # tests
 
 
