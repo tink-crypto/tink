@@ -91,7 +91,7 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-  if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
+	if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
 		return nil, errors.New("decryption failed: wrong key id")
 	}
 	return resp.Plaintext, nil
