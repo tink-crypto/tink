@@ -57,23 +57,65 @@ func TestKeyTemplates(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewHybridEncrypt(publicHandle) failed: %s", err)
 			}
-			plaintext := []byte("this data needs to be encrypted")
-			encryptionContext := []byte("encryption context")
-			ciphertext, err := enc.Encrypt(plaintext, encryptionContext)
-			if err != nil {
-				t.Fatalf("enc.Encrypt(plaintext, encryptionContext) failed: %s", err)
-			}
-
 			dec, err := NewHybridDecrypt(privateHandle)
 			if err != nil {
 				t.Fatalf("NewHybridDecrypt(privateHandle) failed: %s", err)
 			}
-			decrypted, err := dec.Decrypt(ciphertext, encryptionContext)
-			if err != nil {
-				t.Fatalf("dec.Decrypt(ciphertext, encryptionContext) failed: %s", err)
+			var testInputs = []struct {
+				plaintext []byte
+				context1  []byte
+				context2  []byte
+			}{
+				{
+					plaintext: []byte("this data needs to be encrypted"),
+					context1:  []byte("encryption context"),
+					context2:  []byte("encryption context"),
+				}, {
+					plaintext: []byte("this data needs to be encrypted"),
+					context1:  []byte(""),
+					context2:  []byte(""),
+				}, {
+					plaintext: []byte("this data needs to be encrypted"),
+					context1:  nil,
+					context2:  nil,
+				}, {
+					plaintext: []byte(""),
+					context1:  nil,
+					context2:  nil,
+				}, {
+					plaintext: nil,
+					context1:  []byte("encryption context"),
+					context2:  []byte("encryption context"),
+				}, {
+					plaintext: nil,
+					context1:  []byte(""),
+					context2:  []byte(""),
+				}, {
+					plaintext: nil,
+					context1:  nil,
+					context2:  nil,
+				}, {
+					plaintext: []byte("this data needs to be encrypted"),
+					context1:  []byte(""),
+					context2:  nil,
+				}, {
+					plaintext: []byte("this data needs to be encrypted"),
+					context1:  nil,
+					context2:  []byte(""),
+				},
 			}
-			if !bytes.Equal(plaintext, decrypted) {
-				t.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
+			for _, ti := range testInputs {
+				ciphertext, err := enc.Encrypt(ti.plaintext, ti.context1)
+				if err != nil {
+					t.Fatalf("enc.Encrypt(ti.plaintext, ti.context1) failed: %s", err)
+				}
+				decrypted, err := dec.Decrypt(ciphertext, ti.context2)
+				if err != nil {
+					t.Fatalf("dec.Decrypt(ciphertext, ti.context2) failed: %s", err)
+				}
+				if !bytes.Equal(ti.plaintext, decrypted) {
+					t.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, ti.plaintext)
+				}
 			}
 		})
 	}

@@ -18,7 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.common.truth.Truth;
 import com.google.crypto.tink.testing.TestUtil;
@@ -59,33 +59,24 @@ public class ChaCha20Test {
 
   @Test
   public void testNewCipherThrowsIllegalArgExpWhenKeyLenIsLessThan32() throws Exception {
-    try {
-      createInstance(new byte[1]);
-      fail("Expected InvalidKeyException.");
-    } catch (InvalidKeyException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    InvalidKeyException e =
+        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[1]));
+    assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testNewCipherThrowsIllegalArgExpWhenKeyLenIsGreaterThan32() throws Exception {
-    try {
-      createInstance(new byte[33]);
-      fail("Expected InvalidKeyException.");
-    } catch (InvalidKeyException e) {
-      assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
-    }
+    InvalidKeyException e =
+        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[33]));
+    assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testDecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort() throws Exception {
-    try {
-      IndCpaCipher cipher = createInstance(Random.randBytes(32));
-      cipher.decrypt(new byte[2]);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
-    }
+    IndCpaCipher cipher = createInstance(Random.randBytes(32));
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> cipher.decrypt(new byte[2]));
+    assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
   }
 
   /** https://tools.ietf.org/html/rfc7539#section-2.1.1 */

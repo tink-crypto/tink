@@ -18,7 +18,7 @@ package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -86,12 +86,9 @@ public class RsaSsaPssSignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(RsaSsaPssKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(RsaSsaPssKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -111,48 +108,28 @@ public class RsaSsaPssSignKeyManagerTest {
   public void validateKeyFormat_Sha1Disallowed_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA1, HashType.SHA1, 32, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_smallModulusDisallowed_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA256, HashType.SHA256, 32, 512, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_hashMismatchDisallowed1_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA256, 32, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_hashMismatchDisallowed2_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA256, HashType.SHA512, 32, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -160,24 +137,14 @@ public class RsaSsaPssSignKeyManagerTest {
     RsaSsaPssKeyFormat format =
         createKeyFormat(
             HashType.UNKNOWN_HASH, HashType.UNKNOWN_HASH, 32, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_negativeSaltLength_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, -5, 3072, RSAKeyGenParameterSpec.F4);
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   private static void checkConsistency(RsaSsaPssPrivateKey privateKey,
@@ -292,6 +259,38 @@ public class RsaSsaPssSignKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
+  }
+
+  @Test
+  public void createCorruptedModulusPrimitive_throws() throws Exception {
+
+    RsaSsaPssKeyFormat format =
+        createKeyFormat(HashType.SHA512, HashType.SHA512, 64, 4096, RSAKeyGenParameterSpec.F4);
+    RsaSsaPssPrivateKey originalKey = factory.createKey(format);
+    byte[] originalN = originalKey.getPublicKey().getN().toByteArray();
+    originalN[0] = (byte) (originalN[0] ^ 0x01);
+    ByteString corruptedN = ByteString.copyFrom(originalN);
+    RsaSsaPssPublicKey corruptedPub =
+        RsaSsaPssPublicKey.newBuilder()
+            .setVersion(originalKey.getPublicKey().getVersion())
+            .setN(corruptedN)
+            .setE(originalKey.getPublicKey().getE())
+            .build();
+
+    RsaSsaPssPrivateKey corruptedKey =
+        RsaSsaPssPrivateKey.newBuilder()
+            .setVersion(originalKey.getVersion())
+            .setPublicKey(corruptedPub)
+            .setD(originalKey.getD())
+            .setP(originalKey.getP())
+            .setQ(originalKey.getQ())
+            .setDp(originalKey.getDp())
+            .setDq(originalKey.getDq())
+            .setCrt(originalKey.getCrt())
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
 
   @Test

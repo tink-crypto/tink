@@ -60,13 +60,35 @@ func TestKeyTemplates(t *testing.T) {
 				t.Fatalf("mac.New(handle) failed: %v", err)
 			}
 
-			msg := []byte("this data needs to be authenticated")
-			tag, err := primitive.ComputeMAC(msg)
-			if err != nil {
-				t.Fatalf("primitive.ComputeMAC(msg) failed: %v", err)
+			var testInputs = []struct {
+				message1 []byte
+				message2 []byte
+			}{
+				{
+					message1: []byte("this data needs to be authenticated"),
+					message2: []byte("this data needs to be authenticated"),
+				}, {
+					message1: []byte(""),
+					message2: []byte(""),
+				}, {
+					message1: []byte(""),
+					message2: nil,
+				}, {
+					message1: nil,
+					message2: []byte(""),
+				}, {
+					message1: nil,
+					message2: nil,
+				},
 			}
-			if primitive.VerifyMAC(tag, msg); err != nil {
-				t.Errorf("primitive.VerifyMAC(tag, msg) failed: %v", err)
+			for _, ti := range testInputs {
+				tag, err := primitive.ComputeMAC(ti.message1)
+				if err != nil {
+					t.Fatalf("primitive.ComputeMAC(ti.message1) failed: %v", err)
+				}
+				if primitive.VerifyMAC(tag, ti.message2); err != nil {
+					t.Errorf("primitive.VerifyMAC(tag, ti.message2) failed: %v", err)
+				}
 			}
 		})
 	}

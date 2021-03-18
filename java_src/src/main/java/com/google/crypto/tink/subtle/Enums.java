@@ -21,6 +21,7 @@ public final class Enums {
   /** Hash type. */
   public enum HashType {
     SHA1, // Using SHA1 for digital signature is deprecated but HMAC-SHA1 is fine.
+    SHA224,
     SHA256,
     SHA384,
     SHA512,

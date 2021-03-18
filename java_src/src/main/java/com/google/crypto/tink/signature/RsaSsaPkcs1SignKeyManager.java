@@ -29,13 +29,12 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1SignJce;
-import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
+import com.google.crypto.tink.subtle.SelfKeyTestValidators;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -51,9 +50,7 @@ import java.security.spec.RSAPublicKeySpec;
  */
 public final class RsaSsaPkcs1SignKeyManager
     extends PrivateKeyTypeManager<RsaSsaPkcs1PrivateKey, RsaSsaPkcs1PublicKey> {
-  private static final byte[] TEST_MESSAGE =
-      "Tink and Wycheproof.".getBytes(Charset.forName("UTF-8"));
-
+ 
   RsaSsaPkcs1SignKeyManager() {
     super(
         RsaSsaPkcs1PrivateKey.class,
@@ -76,30 +73,17 @@ public final class RsaSsaPkcs1SignKeyManager
                             new BigInteger(1, keyProto.getDp().toByteArray()),
                             new BigInteger(1, keyProto.getDq().toByteArray()),
                             new BigInteger(1, keyProto.getCrt().toByteArray())));
-            // Sign and verify a test message to make sure that the key is correct.
-            RsaSsaPkcs1SignJce signer =
-                new RsaSsaPkcs1SignJce(
-                    privateKey,
-                    SigUtil.toHashType(keyProto.getPublicKey().getParams().getHashType()));
+            RsaSsaPkcs1Params params = keyProto.getPublicKey().getParams();
             RSAPublicKey publicKey =
                 (RSAPublicKey)
                     kf.generatePublic(
                         new RSAPublicKeySpec(
                             new BigInteger(1, keyProto.getPublicKey().getN().toByteArray()),
                             new BigInteger(1, keyProto.getPublicKey().getE().toByteArray())));
-            RsaSsaPkcs1VerifyJce verifier =
-                new RsaSsaPkcs1VerifyJce(
-                    publicKey,
-                    SigUtil.toHashType(keyProto.getPublicKey().getParams().getHashType()));
-            try {
-              verifier.verify(signer.sign(TEST_MESSAGE), TEST_MESSAGE);
-            } catch (GeneralSecurityException e) {
-              throw new RuntimeException(
-                  "Security bug: signing with private key followed by verifying with public key"
-                      + " failed"
-                      + e);
-            }
-            return signer;
+
+            SelfKeyTestValidators.validateRsaSsaPkcs1(
+                privateKey, publicKey, SigUtil.toHashType(params.getHashType()));
+            return new RsaSsaPkcs1SignJce(privateKey, SigUtil.toHashType(params.getHashType()));
           }
         });
   }

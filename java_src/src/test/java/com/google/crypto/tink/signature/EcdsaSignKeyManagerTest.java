@@ -18,10 +18,11 @@ package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.proto.EcdsaKeyFormat;
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -31,6 +32,7 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.TestUtil;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
 import java.util.Set;
@@ -68,12 +70,9 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(EcdsaKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(EcdsaKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -110,99 +109,111 @@ public class EcdsaSignKeyManagerTest {
 
   @Test
   public void validateKeyFormat_noSha1() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(HashType.SHA1, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA1, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_p384NotWithSha256() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_p521OnlyWithSha512() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA384, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA384, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER)));
   }
 
   @Test
   public void validateKeyFormat_unkownsProhibited() throws Exception {
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.UNKNOWN_HASH, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256, EllipticCurveType.UNKNOWN_CURVE, EcdsaSignatureEncoding.DER));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
-    try {
-      factory.validateKeyFormat(
-          createKeyFormat(
-              HashType.SHA256,
-              EllipticCurveType.NIST_P256,
-              EcdsaSignatureEncoding.UNKNOWN_ENCODING));
-      fail();
-    } catch (GeneralSecurityException expected) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.UNKNOWN_HASH,
+                    EllipticCurveType.NIST_P256,
+                    EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256, EllipticCurveType.UNKNOWN_CURVE, EcdsaSignatureEncoding.DER)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.validateKeyFormat(
+                createKeyFormat(
+                    HashType.SHA256,
+                    EllipticCurveType.NIST_P256,
+                    EcdsaSignatureEncoding.UNKNOWN_ENCODING)));
   }
 
   @Test
   public void validateKey_empty() throws Exception {
-    try {
-      manager.validateKey(EcdsaPrivateKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(EcdsaPrivateKey.getDefaultInstance()));
+  }
+
+  @Test
+  public void createCorruptedPublicKeyPrimitive_throws() throws Exception {
+
+    EcdsaKeyFormat format =
+        createKeyFormat(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
+    EcdsaPrivateKey originalKey = factory.createKey(format);
+    byte[] originalPubX = originalKey.getPublicKey().getX().toByteArray();
+    byte[] originalPubY = originalKey.getPublicKey().getY().toByteArray();
+    originalPubX[0] = (byte) (originalPubX[0] ^ 0x01);
+    ByteString corruptedPubX = ByteString.copyFrom(originalPubX);
+    EcdsaPublicKey corruptedPub =
+        EcdsaPublicKey.newBuilder()
+            .setVersion(originalKey.getPublicKey().getVersion())
+            .setParams(originalKey.getPublicKey().getParams())
+            .setX(corruptedPubX)
+            .setY(ByteString.copyFrom(originalPubY))
+            .build();
+    EcdsaPrivateKey corruptedKey =
+        EcdsaPrivateKey.newBuilder()
+            .setVersion(originalKey.getVersion())
+            .setPublicKey(corruptedPub)
+            .setKeyValue(originalKey.getKeyValue())
+            .build();
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
 
   /** Tests that a public key is extracted properly from a private key. */

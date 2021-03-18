@@ -60,6 +60,8 @@ std::string EnumToString(HashType type) {
   switch (type) {
   case HashType::SHA1:
     return "SHA1";
+  case HashType::SHA224:
+    return "SHA224";
   case HashType::SHA256:
     return "SHA256";
   case HashType::SHA384:

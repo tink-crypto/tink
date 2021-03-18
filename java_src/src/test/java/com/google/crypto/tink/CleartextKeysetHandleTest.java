@@ -18,7 +18,7 @@ package com.google.crypto.tink;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
@@ -95,37 +95,30 @@ public class CleartextKeysetHandleTest {
 
     byte[] proto = keyset.toByteArray();
     proto[0] = (byte) ~proto[0];
-    try {
-      KeysetHandle unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(proto));
-      fail("Expected IOException");
-    } catch (IOException e) {
-      // expected
-    }
+    assertThrows(
+        IOException.class,
+        () -> {
+          KeysetHandle unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(proto));
+        });
   }
 
   @Test
   public void testVoidInputs() throws Exception {
-    KeysetHandle unused;
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0])));
+    assertExceptionContains(e, "empty keyset");
 
-    try {
-      unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
+    GeneralSecurityException e2 =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0])));
+    assertExceptionContains(e2, "empty keyset");
 
-    try {
-      unused = CleartextKeysetHandle.read(BinaryKeysetReader.withBytes(new byte[0]));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
-
-    try {
-      unused = CleartextKeysetHandle.parseFrom(new byte[0]);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "empty keyset");
-    }
+    GeneralSecurityException e3 =
+        assertThrows(
+            GeneralSecurityException.class, () -> CleartextKeysetHandle.parseFrom(new byte[0]));
+    assertExceptionContains(e3, "empty keyset");
   }
 }

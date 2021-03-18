@@ -18,6 +18,7 @@ package com.google.crypto.tink.mac;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
@@ -98,13 +99,12 @@ public class MacWrapperTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modified = Arrays.copyOf(plaintextAndTag, plaintextAndTag.length);
           modified[b] ^= (byte) (1 << bit);
-          try {
-            mac.verifyMac(Arrays.copyOfRange(modified, plaintext.length, modified.length),
-                Arrays.copyOfRange(modified, 0, plaintext.length));
-            fail("Invalid tag or plaintext, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(
+              GeneralSecurityException.class,
+              () ->
+                  mac.verifyMac(
+                      Arrays.copyOfRange(modified, plaintext.length, modified.length),
+                      Arrays.copyOfRange(modified, 0, plaintext.length)));
         }
       }
 
@@ -129,13 +129,8 @@ public class MacWrapperTest {
       PrimitiveSet<Mac> primitives3 =
           TestUtil.createPrimitiveSet(TestUtil.createKeyset(random), Mac.class);
       mac2 = new MacWrapper().wrap(primitives3);
-      tag = mac2.computeMac(plaintext);
-      try {
-        mac.verifyMac(tag, plaintext);
-        fail("Invalid MAC MAC, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      byte[] tag2 = mac2.computeMac(plaintext);
+      assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(tag2, plaintext));
     }
   }
 

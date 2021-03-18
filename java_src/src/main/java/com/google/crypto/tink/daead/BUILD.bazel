@@ -51,6 +51,7 @@ java_library(
         ":aes_siv_key_manager",
         ":deterministic_aead_wrapper",
         "//proto:config_java_proto",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
@@ -61,6 +62,7 @@ android_library(
         ":aes_siv_key_manager-android",
         ":deterministic_aead_wrapper-android",
         "//proto:config_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 

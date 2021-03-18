@@ -17,7 +17,6 @@ package signature
 import (
 	"fmt"
 
-	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -80,7 +79,7 @@ func (s *wrappedSigner) Sign(data []byte) ([]byte, error) {
 	var signedData []byte
 	if primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		signedData = append(signedData, data...)
-		signedData = append(signedData, cryptofmt.LegacyStartByte)
+		signedData = append(signedData, byte(0))
 	} else {
 		signedData = data
 	}

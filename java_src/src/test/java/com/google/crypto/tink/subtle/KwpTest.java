@@ -18,16 +18,16 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyWrap;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -51,16 +51,16 @@ public class KwpTest {
   @Test
   public void testInvalidKeySizes() throws Exception {
     // Tests the wrapping key. Its key size is either 16 or 32.
-    for (int i = 0; i < 255; i++) {
+    for (int j = 0; j < 255; j++) {
+      final int i = j;
       if (i == 16 || i == 32) {
         continue;
       }
-      try {
-        KeyWrap unused = new Kwp(new byte[i]);
-        fail("Constructed wrapper with invalid key size");
-      } catch (GeneralSecurityException ex) {
-        // expected
-      }
+      assertThrows(
+          GeneralSecurityException.class,
+          () -> {
+            KeyWrap unused = new Kwp(new byte[i]);
+          });
     }
   }
 
@@ -68,44 +68,40 @@ public class KwpTest {
   public void testInvalidWrappingSizes() throws Exception {
     byte[] wrapKey = Random.randBytes(16);
     KeyWrap wrapper = new Kwp(wrapKey);
-    for (int wrappedSize = 0; wrappedSize < 16; wrappedSize++) {
-      try {
-        wrapper.wrap(new byte[wrappedSize]);
-        fail("Should not wrap short keys");
-      } catch (GeneralSecurityException ex) {
-        // expected
-      }
+    for (int i = 0; i < 16; i++) {
+      final int wrappedSize = i;
+      assertThrows(GeneralSecurityException.class, () -> wrapper.wrap(new byte[wrappedSize]));
     }
   }
 
   @Test
   public void testWycheproof() throws Exception {
     final String expectedVersion = "0.6";
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/kwp_test.json");
     Set<String> exceptions = new TreeSet<String>();
-    String generatorVersion = json.getString("generatorVersion");
+    String generatorVersion = json.get("generatorVersion").getAsString();
     if (!generatorVersion.equals(expectedVersion)) {
       System.out.printf("Expecting test vectors with version %s found version %s.\n",
                         expectedVersion, generatorVersion);
     }
     int errors = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
-        int tcid = testcase.getInt("tcId");
-        String tc = "tcId: " + tcid + " " + testcase.getString("comment");
-        byte[] key = Hex.decode(testcase.getString("key"));
-        byte[] data = Hex.decode(testcase.getString("msg"));
-        byte[] expected = Hex.decode(testcase.getString("ct"));
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonArray tests = group.getAsJsonArray("tests");
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
+        int tcid = testcase.get("tcId").getAsInt();
+        String tc = "tcId: " + tcid + " " + testcase.get("comment").getAsString();
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] data = Hex.decode(testcase.get("msg").getAsString());
+        byte[] expected = Hex.decode(testcase.get("ct").getAsString());
         // Result is one of "valid", "invalid", "acceptable".
         // "valid" are test vectors with matching plaintext, ciphertext and tag.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext and tag.
         // "acceptable" are test vectors with weak parameters or legacy formats.
-        String result = testcase.getString("result");
+        String result = testcase.get("result").getAsString();
 
         // Test wrapping
         KeyWrap wrapper;

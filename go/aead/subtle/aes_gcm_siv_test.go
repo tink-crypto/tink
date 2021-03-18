@@ -17,10 +17,7 @@ package subtle_test
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/tink/go/aead/subtle"
@@ -95,55 +92,13 @@ func TestAESGCMSIVModifyCiphertext(t *testing.T) {
 	}
 }
 
-type HexBytes []byte
-
-func (a *HexBytes) UnmarshalText(text []byte) error {
-	decoded, err := hex.DecodeString(string(text))
-	if err != nil {
-		return err
-	}
-
-	*a = decoded
-	return nil
-}
-
-type AesGcmSivCase struct {
-	testutil.WycheproofCase
-	InitVector     HexBytes `json:"iv"`
-	Key            HexBytes `json:"key"`
-	Message        HexBytes `json:"msg"`
-	AdditionalData HexBytes `json:"aad"`
-	CipherText     HexBytes `json:"ct"`
-	Tag            HexBytes `json:"tag"`
-}
-
-type AesGcmSivGroup struct {
-	testutil.WycheproofGroup
-	KeySize int              `json:"keySize"`
-	Tests   []*AesGcmSivCase `json:"tests"`
-}
-
-type AesGcmSivSuite struct {
-	testutil.WycheproofSuite
-	Groups []*AesGcmSivGroup `json:"testGroups"`
-}
-
 func TestAESGCMSIVWycheproofCases(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+	suite := new(AEADSuite)
+	if err := testutil.PopulateSuite(suite, "aes_gcm_siv_test.json"); err != nil {
+		t.Fatalf("failed populating suite: %s", err)
 	}
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/aes_gcm_siv_test.json"))
-	if err != nil {
-		t.Fatalf("cannot open file %s", err)
-	}
-
-	suite := new(AesGcmSivSuite)
-	if err := json.NewDecoder(f).Decode(suite); err != nil {
-		t.Fatalf("cannot decode test data: %s", err)
-	}
-
-	for _, group := range suite.Groups {
+	for _, group := range suite.TestGroups {
 		for _, test := range group.Tests {
 			caseName := fmt.Sprintf("%s-%s(%d):Case-%d", suite.Algorithm, group.Type, group.KeySize, test.CaseID)
 			t.Run("DecryptOnly/"+caseName, func(t *testing.T) { runWycheproofDecryptOnly(t, test) })
@@ -152,28 +107,28 @@ func TestAESGCMSIVWycheproofCases(t *testing.T) {
 	}
 }
 
-func runWycheproofDecryptOnly(t *testing.T, testCase *AesGcmSivCase) {
+func runWycheproofDecryptOnly(t *testing.T, testCase *AEADCase) {
 	aead, err := subtle.NewAESGCMSIV(testCase.Key)
 	if err != nil {
 		t.Fatalf("cannot create aead, error: %v", err)
 	}
 
 	var combinedCt []byte
-	combinedCt = append(combinedCt, testCase.InitVector...)
-	combinedCt = append(combinedCt, testCase.CipherText...)
+	combinedCt = append(combinedCt, testCase.Iv...)
+	combinedCt = append(combinedCt, testCase.Ct...)
 	combinedCt = append(combinedCt, testCase.Tag...)
-	decrypted, err := aead.Decrypt(combinedCt, testCase.AdditionalData)
+	decrypted, err := aead.Decrypt(combinedCt, testCase.Aad)
 	switch testCase.Result {
 	case "valid":
 		if err != nil {
 			t.Errorf("unexpected error in test-case: %v", err)
-		} else if !bytes.Equal(decrypted, testCase.Message) {
+		} else if !bytes.Equal(decrypted, testCase.Msg) {
 			t.Errorf(
 				"incorrect decryption: actual: %s; expected %s",
-				hex.EncodeToString(decrypted), hex.EncodeToString(testCase.Message))
+				hex.EncodeToString(decrypted), hex.EncodeToString(testCase.Msg))
 		}
 	case "invalid":
-		if err == nil && bytes.Equal(testCase.CipherText, decrypted) {
+		if err == nil && bytes.Equal(testCase.Ct, decrypted) {
 			t.Error("successfully decrypted invalid test-case")
 		}
 	default:
@@ -181,13 +136,13 @@ func runWycheproofDecryptOnly(t *testing.T, testCase *AesGcmSivCase) {
 	}
 }
 
-func runWycheproofEncryptDecrypt(t *testing.T, testCase *AesGcmSivCase) {
+func runWycheproofEncryptDecrypt(t *testing.T, testCase *AEADCase) {
 	aead, err := subtle.NewAESGCMSIV(testCase.Key)
 	if err != nil {
 		t.Fatalf("cannot create aead, error: %v", err)
 	}
 
-	ct, err := aead.Encrypt(testCase.Message, testCase.AdditionalData)
+	ct, err := aead.Encrypt(testCase.Msg, testCase.Aad)
 	if err != nil {
 		if testCase.Result != "invalid" {
 			t.Errorf("unexpected error in test-case: %v", err)
@@ -195,15 +150,15 @@ func runWycheproofEncryptDecrypt(t *testing.T, testCase *AesGcmSivCase) {
 		return
 	}
 
-	decrypted, err := aead.Decrypt(ct, testCase.AdditionalData)
+	decrypted, err := aead.Decrypt(ct, testCase.Aad)
 	switch testCase.Result {
 	case "valid":
 		if err != nil {
 			t.Errorf("unexpected error in test-case: %v", err)
-		} else if !bytes.Equal(decrypted, testCase.Message) {
+		} else if !bytes.Equal(decrypted, testCase.Msg) {
 			t.Errorf(
 				"incorrect decryption: actual: %s; expected %s",
-				hex.EncodeToString(decrypted), hex.EncodeToString(testCase.Message))
+				hex.EncodeToString(decrypted), hex.EncodeToString(testCase.Msg))
 		}
 	case "invalid":
 		if err == nil && bytes.Equal(ct, decrypted) {

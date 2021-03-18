@@ -18,7 +18,7 @@ package com.google.crypto.tink.streamingaead;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.HashType;
 import java.security.NoSuchAlgorithmException;
@@ -32,14 +32,15 @@ public class StreamingAeadUtilTest {
   @Test
   public void testToHmacAlgo() throws Exception {
     assertEquals("HmacSha1", StreamingAeadUtil.toHmacAlgo(HashType.SHA1));
+    assertEquals("HmacSha224", StreamingAeadUtil.toHmacAlgo(HashType.SHA224));
     assertEquals("HmacSha256", StreamingAeadUtil.toHmacAlgo(HashType.SHA256));
+    assertEquals("HmacSha384", StreamingAeadUtil.toHmacAlgo(HashType.SHA384));
     assertEquals("HmacSha512", StreamingAeadUtil.toHmacAlgo(HashType.SHA512));
 
-    try {
-      StreamingAeadUtil.toHmacAlgo(HashType.UNKNOWN_HASH);
-      fail("should throw NoSuchAlgorithmException");
-    } catch (NoSuchAlgorithmException ex) {
-      assertExceptionContains(ex, "hash unsupported for HMAC");
-    }
+    NoSuchAlgorithmException ex =
+        assertThrows(
+            NoSuchAlgorithmException.class,
+            () -> StreamingAeadUtil.toHmacAlgo(HashType.UNKNOWN_HASH));
+    assertExceptionContains(ex, "hash unsupported for HMAC");
   }
 }

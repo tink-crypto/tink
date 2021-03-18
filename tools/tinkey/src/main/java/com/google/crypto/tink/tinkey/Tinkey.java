@@ -49,4 +49,6 @@ public final class Tinkey {
     }
     commands.command.run();
   }
+
+  private Tinkey() {}
 }

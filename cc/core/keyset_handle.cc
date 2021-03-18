@@ -115,7 +115,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
 }
 
 util::Status KeysetHandle::Write(KeysetWriter* writer,
-                                          const Aead& master_key_aead) {
+                                 const Aead& master_key_aead) const {
   if (writer == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Writer must be non-null");
@@ -129,7 +129,7 @@ util::Status KeysetHandle::Write(KeysetWriter* writer,
   return writer->Write(*(encrypt_result.ValueOrDie().get()));
 }
 
-util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) {
+util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
   if (writer == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Writer must be non-null");

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.subtle.Enums.HashType;
@@ -41,24 +42,18 @@ public class ValidatorsTest {
     String goodUrlPrefix = "type.googleapis.com/";
 
     // Some invalid type URLs.
-    try {
-      Validators.validateTypeUrl("some.bad.url/that.is.invalid");
-      fail("Invalid type URL, should have thrown exception");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "type URL");
-      TestUtil.assertExceptionContains(e, "invalid");
-    }
-    try {
-      Validators.validateTypeUrl(goodUrlPrefix);
-      fail("Invalid type URL, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "type URL");
-      TestUtil.assertExceptionContains(e, "invalid");
-      TestUtil.assertExceptionContains(e, "has no message name");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Validators.validateTypeUrl("some.bad.url/that.is.invalid"));
+    TestUtil.assertExceptionContains(e, "type URL");
+    TestUtil.assertExceptionContains(e, "invalid");
+    GeneralSecurityException e2 =
+        assertThrows(
+            GeneralSecurityException.class, () -> Validators.validateTypeUrl(goodUrlPrefix));
+    TestUtil.assertExceptionContains(e2, "type URL");
+    TestUtil.assertExceptionContains(e2, "invalid");
+    TestUtil.assertExceptionContains(e2, "has no message name");
     // A valid type URL.
     Validators.validateTypeUrl(goodUrlPrefix + "somepackage.somemessage");
   }
@@ -68,27 +63,19 @@ public class ValidatorsTest {
     Validators.validateAesKeySize(16);
     Validators.validateAesKeySize(32);
 
-    try {
-      Validators.validateAesKeySize(24);
-      fail("Invalid AES key size, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "invalid");
-      TestUtil.assertExceptionContains(e, "key size");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Validators.validateAesKeySize(24));
+    TestUtil.assertExceptionContains(e, "invalid");
+    TestUtil.assertExceptionContains(e, "key size");
     int count = 0;
-    for (int i = -100; i <= 100; i++) {
+    for (int j = -100; j <= 100; j++) {
+      final int i = j;
       if ((i != 16) && (i != 32)) {
-        try {
-          Validators.validateAesKeySize(i);
-          fail("Invalid AES key size, should have thrown exception.");
-        } catch (GeneralSecurityException e) {
-          // Expected.
-          count++;
-          TestUtil.assertExceptionContains(e, "invalid");
-          TestUtil.assertExceptionContains(e, "key size");
-        }
+        GeneralSecurityException e2 =
+            assertThrows(GeneralSecurityException.class, () -> Validators.validateAesKeySize(i));
+        count++;
+        TestUtil.assertExceptionContains(e2, "invalid");
+        TestUtil.assertExceptionContains(e2, "key size");
       }
     }
     assertEquals(201 - 2, count);
@@ -99,29 +86,27 @@ public class ValidatorsTest {
     int maxVersion = 1;
     int count = 0;
     int countNegative = 0;
-    for (int maxExpected = -maxVersion; maxExpected <= maxVersion; maxExpected++) {
-      for (int candidate = -maxVersion; candidate <= maxVersion; candidate++) {
+    for (int i = -maxVersion; i <= maxVersion; i++) {
+      final int maxExpected = i;
+      for (int j = -maxVersion; j <= maxVersion; j++) {
+        final int candidate = j;
         if (candidate < 0 || maxExpected < 0) {
-          try {
-            Validators.validateVersion(candidate, maxExpected);
-            fail("Negative version parameters, should have thrown exception.");
-          } catch (GeneralSecurityException e) {
-            // Expected.
-            countNegative++;
-            TestUtil.assertExceptionContains(e, "version");
-          }
+          GeneralSecurityException e =
+              assertThrows(
+                  GeneralSecurityException.class,
+                  () -> Validators.validateVersion(candidate, maxExpected));
+          countNegative++;
+          TestUtil.assertExceptionContains(e, "version");
         } else {
           if (candidate <= maxExpected) {
             Validators.validateVersion(candidate, maxExpected);
           } else {
-            try {
-              Validators.validateVersion(candidate, maxExpected);
-              fail("Invalid key version, should have thrown exception.");
-            } catch (GeneralSecurityException e) {
-              // Expected.
-              count++;
-              TestUtil.assertExceptionContains(e, "version");
-            }
+            GeneralSecurityException e2 =
+                assertThrows(
+                    GeneralSecurityException.class,
+                    () -> Validators.validateVersion(candidate, maxExpected));
+            count++;
+            TestUtil.assertExceptionContains(e2, "version");
           }
         }
       }
@@ -139,29 +124,21 @@ public class ValidatorsTest {
     } catch (GeneralSecurityException e) {
       fail("Valid signature algorithm should work " + e);
     }
-    try {
-      Validators.validateSignatureHash(HashType.SHA1);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Validators.validateSignatureHash(HashType.SHA1));
+    TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
   }
 
   @Test
   public void testValidateRsaPublicExponent() throws Exception {
     Validators.validateRsaPublicExponent(BigInteger.valueOf(65537));
-    try {
-      Validators.validateRsaPublicExponent(BigInteger.valueOf(65535));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // Expected
-    }
-    try {
-      Validators.validateRsaPublicExponent(BigInteger.valueOf(65538));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // Expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Validators.validateRsaPublicExponent(BigInteger.valueOf(65535)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Validators.validateRsaPublicExponent(BigInteger.valueOf(65538)));
   }
 
   @Test
@@ -174,33 +151,20 @@ public class ValidatorsTest {
 
     // The file doesn't exist yet.
     Validators.validateNotExists(file);
-    try {
-      Validators.validateExists(file);
-      fail("File doesn't exist, should have thrown exception.");
-    } catch (IOException e) {
-      // Expected.
-    }
+    assertThrows(IOException.class, () -> Validators.validateExists(file));
 
     file.createNewFile();
 
     // Now the file exists.
     Validators.validateExists(file);
-    try {
-      Validators.validateNotExists(file);
-      fail("File exists, should have thrown exception.");
-    } catch (IOException e) {
-      // Expected.
-    }
+    assertThrows(IOException.class, () -> Validators.validateNotExists(file));
   }
 
   @Test
   public void testValidateCryptoKeyUri() throws Exception {
-    try {
-      Validators.validateCryptoKeyUri("a");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(e, "Invalid Google Cloud KMS Key URI");
-    }
+    GeneralSecurityException exception =
+        assertThrows(GeneralSecurityException.class, () -> Validators.validateCryptoKeyUri("a"));
+    TestUtil.assertExceptionContains(exception, "Invalid Google Cloud KMS Key URI");
 
     String cryptoKey =
         TestUtil.createGcpKmsKeyUri("projectId", "locationId", "ringId", "cryptoKeyId");
@@ -217,31 +181,21 @@ public class ValidatorsTest {
       fail("Valid CryptoKey URI should work: " + cryptoKey);
     }
 
-    cryptoKey = TestUtil.createGcpKmsKeyUri("projectId%", "locationId", "ringId", "cryptoKeyId");
-    try {
-      Validators.validateCryptoKeyUri(cryptoKey);
-      fail("CryptoKey URI cannot contain %");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
+    final String cryptoKey2 =
+        TestUtil.createGcpKmsKeyUri("projectId%", "locationId", "ringId", "cryptoKeyId");
+    assertThrows(GeneralSecurityException.class, () -> Validators.validateCryptoKeyUri(cryptoKey2));
 
-    cryptoKey = TestUtil.createGcpKmsKeyUri("projectId/", "locationId", "ringId", "cryptoKeyId");
-    try {
-      Validators.validateCryptoKeyUri(cryptoKey);
-      fail("CryptoKey URI cannot contain /");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-    }
+    final String cryptoKey3 =
+        TestUtil.createGcpKmsKeyUri("projectId/", "locationId", "ringId", "cryptoKeyId");
+    assertThrows(GeneralSecurityException.class, () -> Validators.validateCryptoKeyUri(cryptoKey3));
 
     String cryptoVersion =
         TestUtil.createGcpKmsKeyUri("projectId", "locationId", "ringId", "cryptoKeyId")
             + "/cryptoKeyVersions/versionId";
-    try {
-      Validators.validateCryptoKeyUri(cryptoVersion);
-      fail("CryptoKeyVersion is not a valid CryptoKey");
-    } catch (GeneralSecurityException e) {
-      TestUtil.assertExceptionContains(
-          e, "The URI must point to a CryptoKey, not a CryptoKeyVersion");
-    }
+    GeneralSecurityException e2 =
+        assertThrows(
+            GeneralSecurityException.class, () -> Validators.validateCryptoKeyUri(cryptoVersion));
+    TestUtil.assertExceptionContains(
+        e2, "The URI must point to a CryptoKey, not a CryptoKeyVersion");
   }
 }

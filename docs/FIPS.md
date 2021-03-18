@@ -77,7 +77,7 @@ In order to build Tink in FIPS-only mode, you can simply set a flag at compile
 time:
 
 ```shell
-bazel build ... --define=use_only_fips=on
+bazel build ... --//third_party/tink/cc/config:use_only_fips=True
 ```
 
 If you want to check at runtime whether Tink has been build in FIPS only mode,

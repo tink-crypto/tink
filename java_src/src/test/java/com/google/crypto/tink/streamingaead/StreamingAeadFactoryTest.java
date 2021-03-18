@@ -17,7 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
@@ -131,18 +131,16 @@ public class StreamingAeadFactoryTest {
     StreamingTestUtil.testEncryptionAndDecryption(primaryAead, primaryAead);
     StreamingTestUtil.testEncryptionAndDecryption(otherAead, otherAead);
     StreamingTestUtil.testEncryptionAndDecryption(anotherAead, anotherAead);
-    try {
-      StreamingTestUtil.testEncryptionAndDecryption(otherAead, primaryAead);
-      fail("No matching key, should have thrown an exception");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "No matching key");
-    }
-    try {
-      StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead);
-      fail("No matching key, should have thrown an exception");
-    } catch (IOException expected) {
-      assertExceptionContains(expected, "No matching key");
-    }
+    IOException expected =
+        assertThrows(
+            IOException.class,
+            () -> StreamingTestUtil.testEncryptionAndDecryption(otherAead, primaryAead));
+    assertExceptionContains(expected, "No matching key");
+    IOException expected2 =
+        assertThrows(
+            IOException.class,
+            () -> StreamingTestUtil.testEncryptionAndDecryption(anotherAead, primaryAead));
+    assertExceptionContains(expected2, "No matching key");
   }
 
   @Test
@@ -159,20 +157,16 @@ public class StreamingAeadFactoryTest {
             TestUtil.createAesSivKeyData(64), 43, KeyStatusType.ENABLED, OutputPrefixType.TINK);
 
     KeysetHandle keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(valid, invalid));
-    try {
-      StreamingAeadFactory.getPrimitive(keysetHandle);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.StreamingAead not supported");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> StreamingAeadFactory.getPrimitive(keysetHandle));
+    assertExceptionContains(e, "com.google.crypto.tink.StreamingAead not supported");
 
     // invalid as the primary key.
-    keysetHandle = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
-    try {
-      StreamingAeadFactory.getPrimitive(keysetHandle);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.StreamingAead not supported");
-    }
+    KeysetHandle keysetHandle2 = TestUtil.createKeysetHandle(TestUtil.createKeyset(invalid, valid));
+    GeneralSecurityException e2 =
+        assertThrows(
+            GeneralSecurityException.class, () -> StreamingAeadFactory.getPrimitive(keysetHandle2));
+    assertExceptionContains(e2, "com.google.crypto.tink.StreamingAead not supported");
   }
 }

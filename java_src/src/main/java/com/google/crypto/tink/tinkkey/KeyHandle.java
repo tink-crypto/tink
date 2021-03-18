@@ -13,6 +13,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.tinkkey;
 
+import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
+import com.google.crypto.tink.proto.KeyData;
 import java.security.GeneralSecurityException;
 
 /**
@@ -33,6 +35,15 @@ public final class KeyHandle {
     KeyHandle result = new KeyHandle(key);
     result.checkAccess(access);
     return result;
+  }
+
+  /**
+   * Returns a {@code KeyHandle} instance where the underlying {@code TinkKey} wraps the input
+   * {@code keyData}. The returned KeyHandle has a secret if keyData has key material of type
+   * UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
+   */
+  public static KeyHandle createFromKey(KeyData keyData, OutputPrefixType opt) {
+    return new KeyHandle(new ProtoKey(keyData, opt));
   }
 
   private final TinkKey key;

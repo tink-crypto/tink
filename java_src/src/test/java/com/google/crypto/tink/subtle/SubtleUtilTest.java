@@ -18,7 +18,7 @@ package com.google.crypto.tink.subtle;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.nio.ByteBuffer;
@@ -34,22 +34,14 @@ public final class SubtleUtilTest {
   public void testToEcdsaAlgo() throws Exception {
     assertEquals("SHA256withECDSA", SubtleUtil.toEcdsaAlgo(HashType.SHA256));
     assertEquals("SHA512withECDSA", SubtleUtil.toEcdsaAlgo(HashType.SHA512));
-    try {
-      SubtleUtil.toEcdsaAlgo(HashType.SHA1);
-      fail("Invalid hash, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-    }
+    assertThrows(GeneralSecurityException.class, () -> SubtleUtil.toEcdsaAlgo(HashType.SHA1));
   }
 
   @Test
   public void testToRsaSsaPkcs1Algo() throws Exception {
     assertEquals("SHA256withRSA", SubtleUtil.toRsaSsaPkcs1Algo(HashType.SHA256));
     assertEquals("SHA512withRSA", SubtleUtil.toRsaSsaPkcs1Algo(HashType.SHA512));
-    try {
-      SubtleUtil.toRsaSsaPkcs1Algo(HashType.SHA1);
-      fail("Invalid hash, should have thrown exception");
-    } catch (GeneralSecurityException expected) {
-    }
+    assertThrows(GeneralSecurityException.class, () -> SubtleUtil.toRsaSsaPkcs1Algo(HashType.SHA1));
   }
 
   @Test
@@ -78,22 +70,13 @@ public final class SubtleUtilTest {
   @Test
   public void testPutAsUnsigedInt_tooLargeNumber_throws() throws Exception {
     ByteBuffer buffer = ByteBuffer.allocate(4);
-    try {
-      SubtleUtil.putAsUnsigedInt(buffer, 0xFFFFFFFFL + 1L);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> SubtleUtil.putAsUnsigedInt(buffer, 0xFFFFFFFFL + 1L));
   }
 
   @Test
   public void testPutAsUnsigedInt_minusOne_throws() throws Exception {
     ByteBuffer buffer = ByteBuffer.allocate(4);
-    try {
-      SubtleUtil.putAsUnsigedInt(buffer, -1);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> SubtleUtil.putAsUnsigedInt(buffer, -1));
   }
 }

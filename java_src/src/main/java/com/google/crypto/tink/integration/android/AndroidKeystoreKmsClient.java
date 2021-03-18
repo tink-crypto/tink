@@ -203,7 +203,7 @@ public final class AndroidKeystoreKmsClient implements KmsClient {
       throws GeneralSecurityException, IOException {
     AndroidKeystoreKmsClient client = new AndroidKeystoreKmsClient();
     if (!client.hasKey(keyUri)) {
-      Log.w(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
+      Log.i(TAG, String.format("key URI %s doesn't exist, generating a new one", keyUri));
       generateNewAeadKey(keyUri);
     }
     return client.getAead(keyUri);

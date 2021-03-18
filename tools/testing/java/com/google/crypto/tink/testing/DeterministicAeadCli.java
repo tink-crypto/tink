@@ -81,4 +81,6 @@ public class DeterministicAeadCli {
 
     System.out.println("All done.");
   }
+
+  private DeterministicAeadCli() {}
 }

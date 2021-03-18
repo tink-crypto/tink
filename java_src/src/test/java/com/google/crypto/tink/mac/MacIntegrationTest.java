@@ -18,6 +18,7 @@ package com.google.crypto.tink.mac;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
@@ -70,14 +71,14 @@ public class MacIntegrationTest {
           KeyStatusType.ENABLED,
           OutputPrefixType.CRUNCHY);
     Key[] keys = new Key[] {tink, legacy, raw, crunchy};
-    int j = keys.length;
-    for (int i = 0; i < j; i++) {
-      KeysetHandle keysetHandle = TestUtil.createKeysetHandle(
-        TestUtil.createKeyset(
-            keys[i],
-            keys[(i + 1) % j],
-            keys[(i + 2) % j],
-            keys[(i + 3) % j]));
+    for (int i = 0; i < keys.length; i++) {
+      KeysetHandle keysetHandle =
+          TestUtil.createKeysetHandle(
+              TestUtil.createKeyset(
+                  keys[i],
+                  keys[(i + 1) % keys.length],
+                  keys[(i + 2) % keys.length],
+                  keys[(i + 3) % keys.length]));
       Mac mac = keysetHandle.getPrimitive(Mac.class);
       byte[] plaintext = "plaintext".getBytes("UTF-8");
       byte[] tag = mac.computeMac(plaintext);
@@ -97,13 +98,12 @@ public class MacIntegrationTest {
         for (int bit = 0; bit < 8; bit++) {
           byte[] modified = Arrays.copyOf(plaintextAndTag, plaintextAndTag.length);
           modified[b] ^= (byte) (1 << bit);
-          try {
-            mac.verifyMac(Arrays.copyOfRange(modified, plaintext.length, modified.length),
-                Arrays.copyOfRange(modified, 0, plaintext.length));
-            fail("Invalid tag or plaintext, should have thrown exception");
-          } catch (GeneralSecurityException expected) {
-            // Expected
-          }
+          assertThrows(
+              GeneralSecurityException.class,
+              () ->
+                  mac.verifyMac(
+                      Arrays.copyOfRange(modified, plaintext.length, modified.length),
+                      Arrays.copyOfRange(modified, 0, plaintext.length)));
         }
       }
 
@@ -128,13 +128,8 @@ public class MacIntegrationTest {
       keysetHandle2 = TestUtil.createKeysetHandle(
           TestUtil.createKeyset(random));
       mac2 = keysetHandle2.getPrimitive(Mac.class);
-      tag = mac2.computeMac(plaintext);
-      try {
-        mac.verifyMac(tag, plaintext);
-        fail("Invalid MAC MAC, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      byte[] tag2 = mac2.computeMac(plaintext);
+      assertThrows(GeneralSecurityException.class, () -> mac.verifyMac(tag2, plaintext));
     }
   }
 

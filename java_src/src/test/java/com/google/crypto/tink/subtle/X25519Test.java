@@ -21,10 +21,10 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -135,24 +135,24 @@ public final class X25519Test {
 
   @Test
   public void testComputeSharedSecretWithWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/x25519_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONArray tests = group.getJSONArray("tests");
-      String curve = group.getString("curve");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonArray tests = group.getAsJsonArray("tests");
+      String curve = group.get("curve").getAsString();
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
-            String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        String result = testcase.getString("result");
-        String hexPubKey = testcase.getString("public");
-        String hexPrivKey = testcase.getString("private");
-        String expectedSharedSecret = testcase.getString("shared");
+            String.format("testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        String result = testcase.get("result").getAsString();
+        String hexPubKey = testcase.get("public").getAsString();
+        String hexPrivKey = testcase.get("private").getAsString();
+        String expectedSharedSecret = testcase.get("shared").getAsString();
         if (!curve.equals("curve25519")) {
           System.out.printf("Skipping %s, unknown curve name: %s", tcId, curve);
           cntSkippedTests++;

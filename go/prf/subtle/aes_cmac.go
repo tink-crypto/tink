@@ -12,7 +12,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Package subtle provides an implementation of PRFs like AES-CMAC.
 package subtle
 
 import (
@@ -68,10 +67,6 @@ func ValidateAESCMACPRFParams(keySize uint32) error {
 // ComputePRF computes the AES-CMAC for the given key and data, returning outputLength bytes.
 // The timing of this function will only depend on len(data), and not leak any additional information about the key or the data.
 func (a AESCMACPRF) ComputePRF(data []byte, outputLength uint32) ([]byte, error) {
-	if data == nil {
-		return nil, fmt.Errorf("Input is nil")
-	}
-
 	// Setup
 	bs := a.bc.BlockSize()
 	if outputLength > uint32(bs) {

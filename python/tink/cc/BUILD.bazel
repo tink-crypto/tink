@@ -25,13 +25,24 @@ cc_library(
 )
 
 cc_library(
+    name = "cc_jwt_config",
+    srcs = ["cc_jwt_config.cc"],
+    hdrs = ["cc_jwt_config.h"],
+    deps = [
+        "@tink_cc",
+        "@tink_cc//jwt/internal:raw_jwt_hmac_key_manager",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_library(
     name = "python_file_object_adapter",
     hdrs = ["python_file_object_adapter.h"],
     include_prefix = "tink/cc",
     deps = [
+        "@com_google_absl//absl/strings",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -42,13 +53,13 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@tink_cc//:output_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -59,12 +70,12 @@ cc_test(
     deps = [
         ":python_output_stream",
         ":test_util",
-        "@tink_cc//subtle:random",
-        "@tink_cc//util:status",
-        "@tink_cc//util:statusor",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@tink_cc//subtle:random",
+        "@tink_cc//util:status",
+        "@tink_cc//util:statusor",
     ],
 )
 
@@ -74,10 +85,10 @@ cc_library(
     hdrs = ["output_stream_adapter.h"],
     include_prefix = "tink/cc",
     deps = [
+        "@com_google_absl//absl/strings",
         "@tink_cc//:output_stream",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -87,11 +98,11 @@ cc_test(
     srcs = ["output_stream_adapter_test.cc"],
     deps = [
         ":output_stream_adapter",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
         "@tink_cc//:output_stream",
         "@tink_cc//subtle:random",
         "@tink_cc//util:ostream_output_stream",
-        "@com_google_absl//absl/memory",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -101,10 +112,10 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
-        "@tink_cc//:streaming_aead",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@tink_cc//:streaming_aead",
     ],
 )
 
@@ -119,11 +130,11 @@ cc_library(
         ":python_file_object_adapter",
         ":python_input_stream",
         ":python_output_stream",
+        "@com_google_absl//absl/strings",
         "@tink_cc//:input_stream",
         "@tink_cc//:output_stream",
         "@tink_cc//:streaming_aead",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -145,13 +156,13 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -162,9 +173,9 @@ cc_test(
     deps = [
         ":python_input_stream",
         ":test_util",
-        "@tink_cc//subtle:random",
         "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@tink_cc//subtle:random",
     ],
 )
 
@@ -174,10 +185,10 @@ cc_library(
     hdrs = ["input_stream_adapter.h"],
     include_prefix = "tink/cc",
     deps = [
+        "@com_google_absl//absl/strings",
         "@tink_cc//:input_stream",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -187,10 +198,10 @@ cc_test(
     srcs = ["input_stream_adapter_test.cc"],
     deps = [
         ":input_stream_adapter",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:random",
         "@tink_cc//util:istream_input_stream",
-        "@com_google_absl//absl/memory",
-        "@com_google_googletest//:gtest_main",
     ],
 )

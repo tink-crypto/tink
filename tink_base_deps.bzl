@@ -10,14 +10,14 @@ def tink_base_deps():
     """
 
     # ----- Go
-    # Release from 2019-10-31
+    # Release from 2021-01-20
     http_archive(
         name = "io_bazel_rules_go",
+        sha256 = "dbf5a9ef855684f84cac2e7ae7886c5a001d4f66ae23f6904da0faaaef0d61fc",
         urls = [
-            "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.2/rules_go-v0.20.2.tar.gz",
-            "https://github.com/bazelbuild/rules_go/releases/download/v0.20.2/rules_go-v0.20.2.tar.gz",
+            "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.24.11/rules_go-v0.24.11.tar.gz",
+            "https://github.com/bazelbuild/rules_go/releases/download/v0.24.11/rules_go-v0.24.11.tar.gz",
         ],
-        sha256 = "b9aa86ec08a292b97ec4591cf578e020b35f98e12173bbd4a921f84f583aebd9",
     )
 
     # Release from 2019-11-07
@@ -56,13 +56,13 @@ def tink_base_deps():
     # on @com_google_protobuf//:proto, @com_google_protobuf//:cc_toolchain and
     # @com_google_protobuf//:java_toolchain, respectively.
     # This statement defines the @com_google_protobuf repo.
-    # Release from 2020-02-14
+    # Release from 2020-11-14
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-3.11.4",
-            urls = ["https://github.com/google/protobuf/archive/v3.11.4.zip"],
-            sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+            strip_prefix = "protobuf-3.14.0",
+            urls = ["https://github.com/google/protobuf/archive/v3.14.0.zip"],
+            sha256 = "bf0e5070b4b99240183b29df78155eee335885e53a8af8683964579c214ad301",
         )
 
     # Remote Build Execution

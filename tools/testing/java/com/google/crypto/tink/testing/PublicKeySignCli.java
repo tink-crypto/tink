@@ -63,4 +63,6 @@ public class PublicKeySignCli {
 
     System.out.println("All done.");
   }
+
+  private PublicKeySignCli() {}
 }

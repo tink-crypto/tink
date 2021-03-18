@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
@@ -133,7 +134,6 @@ public final class Validators {
       throw new GeneralSecurityException("Public exponent must be greater than 65536.");
     }
   }
-
 
   /*
    * @throws IOException if {@code f} exists.

@@ -18,7 +18,7 @@ package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -50,12 +50,9 @@ public class HmacKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(HmacKeyFormat.getDefaultInstance());
-      fail("At least the hash type needs to be set");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(HmacKeyFormat.getDefaultInstance()));
   }
 
   private static HmacKeyFormat makeHmacKeyFormat(int keySize, int tagSize, HashType hashType) {
@@ -82,12 +79,9 @@ public class HmacKeyManagerTest {
     factory.validateKeyFormat(makeHmacKeyFormat(16, 18, HashType.SHA1));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 19, HashType.SHA1));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 20, HashType.SHA1));
-    try {
-      factory.validateKeyFormat(makeHmacKeyFormat(16, 21, HashType.SHA1));
-      fail("SHA1 HMAC should not support tag size 21");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 21, HashType.SHA1)));
   }
 
   @Test
@@ -99,12 +93,9 @@ public class HmacKeyManagerTest {
     factory.validateKeyFormat(makeHmacKeyFormat(16, 30, HashType.SHA256));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 31, HashType.SHA256));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 32, HashType.SHA256));
-    try {
-      factory.validateKeyFormat(makeHmacKeyFormat(16, 33, HashType.SHA256));
-      fail("SHA256 HMAC should not support tag size 33");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 33, HashType.SHA256)));
   }
 
   @Test
@@ -116,23 +107,17 @@ public class HmacKeyManagerTest {
     factory.validateKeyFormat(makeHmacKeyFormat(16, 62, HashType.SHA512));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 63, HashType.SHA512));
     factory.validateKeyFormat(makeHmacKeyFormat(16, 64, HashType.SHA512));
-    try {
-      factory.validateKeyFormat(makeHmacKeyFormat(16, 65, HashType.SHA512));
-      fail("SHA256 HMAC should not support tag size 65");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeHmacKeyFormat(16, 65, HashType.SHA512)));
   }
 
   @Test
   public void validateKeyFormat_keySizes() throws Exception {
     factory.validateKeyFormat(makeHmacKeyFormat(16, 10, HashType.SHA256));
-    try {
-      factory.validateKeyFormat(makeHmacKeyFormat(15, 10, HashType.SHA256));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeHmacKeyFormat(15, 10, HashType.SHA256)));
   }
 
   @Test
@@ -167,68 +152,50 @@ public class HmacKeyManagerTest {
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
-    try {
-      manager.validateKey(HmacKey.newBuilder(validKey).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(HmacKey.newBuilder(validKey).setVersion(1).build()));
   }
 
   @Test
   public void validateKey_notValid_throws() throws Exception {
     HmacKey validKey = factory.createKey(makeHmacKeyFormat(16, 10, HashType.SHA1));
-    try {
-      manager.validateKey(
-          HmacKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              HmacKey.newBuilder(validKey)
-                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              HmacKey.newBuilder(validKey)
-                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              HmacKey.newBuilder(validKey)
-                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(21).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              HmacKey.newBuilder(validKey)
-                  .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacKey.newBuilder(validKey)
+                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacKey.newBuilder(validKey)
+                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacKey.newBuilder(validKey)
+                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(21).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacKey.newBuilder(validKey)
+                    .setParams(HmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
+                    .build()));
   }
-
 
   @Test
   public void getPrimitive_worksForSha1() throws Exception {
@@ -298,12 +265,9 @@ public class HmacKeyManagerTest {
         .build();
     HmacKeyFormat format =
         HmacKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -317,12 +281,9 @@ public class HmacKeyManagerTest {
         .build();
     HmacKeyFormat format =
         HmacKeyFormat.newBuilder().setVersion(1).setParams(params).setKeySize(keySize).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

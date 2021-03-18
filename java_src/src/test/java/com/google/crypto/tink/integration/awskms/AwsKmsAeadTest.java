@@ -17,7 +17,7 @@
 package com.google.crypto.tink.integration.awskms;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,12 +77,7 @@ public class AwsKmsAeadTest {
     Aead aead = new AwsKmsAead(mockKms, KEY_ARN);
     byte[] aad = Random.randBytes(20);
     byte[] message = Random.randBytes(20);
-    try {
-      aead.encrypt(message, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(GeneralSecurityException.class, () -> aead.encrypt(message, aad));
   }
 
   @Test
@@ -99,12 +94,7 @@ public class AwsKmsAeadTest {
     byte[] message = Random.randBytes(20);
     when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
     byte[] ciphertext = aead.encrypt(message, aad);
-    try {
-      aead.decrypt(ciphertext, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, aad));
   }
 
   @Test
@@ -122,12 +112,7 @@ public class AwsKmsAeadTest {
     when(mockEncryptResult.getCiphertextBlob()).thenReturn(ByteBuffer.wrap(message));
     when(mockDecryptResult.getKeyId()).thenReturn(KEY_ARN + "1");
     byte[] ciphertext = aead.encrypt(message, aad);
-    try {
-      aead.decrypt(ciphertext, aad);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(GeneralSecurityException.class, () -> aead.decrypt(ciphertext, aad));
   }
 
   @Test

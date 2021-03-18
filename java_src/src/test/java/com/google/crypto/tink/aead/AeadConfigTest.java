@@ -17,11 +17,13 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,29 +41,17 @@ public class AeadConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkaead");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("AeadConfig.register()");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkaead"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("AeadConfig.register()");
     // Before registration, key manager should be absent.
     String typeUrl = "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     AeadConfig.register();
@@ -71,5 +61,68 @@ public class AeadConfigTest {
 
     // Running init() manually again should succeed.
     AeadConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmKey",
+      "type.googleapis.com/google.crypto.tink.AesEaxKey",
+      // AES-GCM-SIV is not included here, as it's not available with the default JCE provider.
+      // "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Aead.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Aead.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    AeadConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesEaxKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmSivKey",
+      "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key",
+      "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      GeneralSecurityException e =
+          assertThrows(
+              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+      assertThat(e.toString()).contains("No key manager found");
+    }
   }
 }

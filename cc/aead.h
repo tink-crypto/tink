@@ -36,7 +36,7 @@ class Aead {
   // Encrypts 'plaintext' with 'associated_data' as associated data,
   // and returns the resulting ciphertext.
   // The ciphertext allows for checking authenticity and integrity
-  // of the associated data , but does not guarantee its secrecy.
+  // of the associated data, but does not guarantee its secrecy.
   virtual crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext, absl::string_view associated_data) const = 0;
 

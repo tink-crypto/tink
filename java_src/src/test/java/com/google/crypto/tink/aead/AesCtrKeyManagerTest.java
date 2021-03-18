@@ -17,7 +17,7 @@
 package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrKey;
@@ -51,12 +51,9 @@ public class AesCtrKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty_invalid() throws Exception {
-    try {
-      factory.validateKeyFormat(AesCtrKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesCtrKeyFormat.getDefaultInstance()));
   }
 
   private AesCtrKeyFormat createFormat(int ivSize, int keySize) {
@@ -83,52 +80,32 @@ public class AesCtrKeyManagerTest {
 
   @Test
   public void createKey_smallIv_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createFormat(11, 16));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> factory.validateKeyFormat(createFormat(11, 16)));
   }
 
   @Test
   public void createKey_bigIv_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createFormat(17, 16));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> factory.validateKeyFormat(createFormat(17, 16)));
   }
 
   @Test
   public void createKey_8ByteAesKey_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createFormat(16, 8));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> factory.validateKeyFormat(createFormat(16, 8)));
   }
 
   @Test
   public void createKey_15ByteAesKey_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createFormat(16, 15));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> factory.validateKeyFormat(createFormat(16, 15)));
   }
 
   @Test
   public void createKey_17ByteAesKey_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(createFormat(16, 17));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class, () -> factory.validateKeyFormat(createFormat(16, 17)));
   }
 
   @Test

@@ -80,9 +80,6 @@ func ValidateHMACParams(hash string, keySize uint32, tagSize uint32) error {
 
 // ComputeMAC computes message authentication code (MAC) for the given data.
 func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
-	if data == nil {
-		return nil, errHMACInvalidInput
-	}
 	mac := hmac.New(h.HashFunc, h.Key)
 	if _, err := mac.Write(data); err != nil {
 		return nil, err
@@ -94,9 +91,6 @@ func (h *HMAC) ComputeMAC(data []byte) ([]byte, error) {
 // VerifyMAC verifies whether the given MAC is a correct message authentication
 // code (MAC) the given data.
 func (h *HMAC) VerifyMAC(mac []byte, data []byte) error {
-	if mac == nil || data == nil {
-		return errHMACInvalidInput
-	}
 	expectedMAC, err := h.ComputeMAC(data)
 	if err != nil {
 		return err

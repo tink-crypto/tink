@@ -23,6 +23,10 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.util.KeysDownloader;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,9 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * An implementation of the verifier side of Server-Side Verification of Google AdMob Rewarded Ads.
@@ -301,14 +302,15 @@ public final class RewardedAdsVerifier {
       throws GeneralSecurityException {
     Map<Long, ECPublicKey> publicKeys = new HashMap<>();
     try {
-      JSONArray keys = new JSONObject(publicKeysJson).getJSONArray("keys");
-      for (int i = 0; i < keys.length(); i++) {
-        JSONObject key = keys.getJSONObject(i);
+      JsonArray keys =
+          JsonParser.parseString(publicKeysJson).getAsJsonObject().get("keys").getAsJsonArray();
+      for (int i = 0; i < keys.size(); i++) {
+        JsonObject key = keys.get(i).getAsJsonObject();
         publicKeys.put(
-            key.getLong("keyId"),
-            EllipticCurves.getEcPublicKey(Base64.decode(key.getString("base64"))));
+            key.get("keyId").getAsLong(),
+            EllipticCurves.getEcPublicKey(Base64.decode(key.get("base64").getAsString())));
       }
-    } catch (JSONException e) {
+    } catch (JsonParseException | IllegalStateException e) {
       throw new GeneralSecurityException("failed to extract trusted signing public keys", e);
     }
     if (publicKeys.isEmpty()) {

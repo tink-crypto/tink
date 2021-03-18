@@ -26,4 +26,6 @@ public class VersionCli {
   public static void main(String[] args) throws Exception {
     System.out.print(Version.TINK_VERSION);
   }
+
+  private VersionCli() {}
 }

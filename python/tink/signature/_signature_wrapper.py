@@ -50,7 +50,7 @@ class _WrappedPublicKeySign(_public_key_sign.PublicKeySign):
 
     sign_data = data
     if primary.output_prefix_type == tink_pb2.LEGACY:
-      sign_data = sign_data + core.crypto_format.LEGACY_START_BYTE
+      sign_data = sign_data + b'\x00'
 
     return primary.identifier + primary.primitive.sign(sign_data)
 
@@ -103,8 +103,7 @@ class _WrappedPublicKeyVerify(_public_key_verify.PublicKeyVerify):
     for entry in self._primitive_set.primitive_from_identifier(key_id):
       try:
         if entry.output_prefix_type == tink_pb2.LEGACY:
-          entry.primitive.verify(raw_sig,
-                                 data + core.crypto_format.LEGACY_START_BYTE)
+          entry.primitive.verify(raw_sig, data + b'\x00')
         else:
           entry.primitive.verify(raw_sig, data)
         # Signature is valid, we can return

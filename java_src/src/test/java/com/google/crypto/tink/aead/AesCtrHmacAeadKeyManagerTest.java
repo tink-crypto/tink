@@ -19,8 +19,8 @@ package com.google.crypto.tink.aead;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -44,7 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for AesCtrHmaAeadKeyManager. */
+/** Tests for AesCtrHmacAeadKeyManager. */
 @RunWith(JUnit4.class)
 public class AesCtrHmacAeadKeyManagerTest {
   private final AesCtrHmacAeadKeyManager manager = new AesCtrHmacAeadKeyManager();
@@ -61,14 +61,10 @@ public class AesCtrHmacAeadKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(AesCtrHmacAeadKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesCtrHmacAeadKeyFormat.getDefaultInstance()));
   }
-
 
   // Returns an AesCtrKeyFormat.Builder with valid parameters
   private static AesCtrKeyFormat.Builder createAesCtrKeyFormat() {
@@ -107,12 +103,7 @@ public class AesCtrHmacAeadKeyManagerTest {
       if (keySize == 16 || keySize == 32) {
         factory.validateKeyFormat(format);
       } else {
-        try {
-          factory.validateKeyFormat(format);
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
       }
     }
   }
@@ -125,12 +116,10 @@ public class AesCtrHmacAeadKeyManagerTest {
       if (keySize >= 16) {
         factory.validateKeyFormat(format);
       } else {
-        try {
-          factory.validateKeyFormat(format);
-          fail("For key size" + keySize);
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(
+            "For key size" + keySize,
+            GeneralSecurityException.class,
+            () -> factory.validateKeyFormat(format));
       }
     }
   }

@@ -18,7 +18,7 @@ package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.Mac;
@@ -40,12 +40,12 @@ import org.junit.runners.JUnit4;
 public class AesCmacKeyManagerTest {
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      new AesCmacKeyManager().keyFactory().validateKeyFormat(AesCmacKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new AesCmacKeyManager()
+                .keyFactory()
+                .validateKeyFormat(AesCmacKeyFormat.getDefaultInstance()));
   }
 
   private static AesCmacKeyFormat makeAesCmacKeyFormat(int keySize, int tagSize) {
@@ -70,36 +70,21 @@ public class AesCmacKeyManagerTest {
   @Test
   public void validateKeyFormat_notValid_throws() throws Exception {
     AesCmacKeyManager manager = new AesCmacKeyManager();
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 9));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 17));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 32));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(16, 16));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(64, 16));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 9)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 17)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(32, 32)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(16, 16)));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.keyFactory().validateKeyFormat(makeAesCmacKeyFormat(64, 16)));
   }
 
   @Test
@@ -139,79 +124,61 @@ public class AesCmacKeyManagerTest {
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     AesCmacKeyManager manager = new AesCmacKeyManager();
-    try {
-      AesCmacKey validKey = manager.keyFactory().createKey(makeAesCmacKeyFormat(32, 16));
-      manager.validateKey(AesCmacKey.newBuilder(validKey).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    AesCmacKey validKey = manager.keyFactory().createKey(makeAesCmacKeyFormat(32, 16));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(AesCmacKey.newBuilder(validKey).setVersion(1).build()));
   }
 
   @Test
   public void validateKey_notValid_throws() throws Exception {
     AesCmacKeyManager manager = new AesCmacKeyManager();
     AesCmacKey validKey = manager.keyFactory().createKey(makeAesCmacKeyFormat(32, 16));
-    try {
-      manager.validateKey(
-          AesCmacKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(16)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.validateKey(
-          AesCmacKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              AesCmacKey.newBuilder(validKey)
-                  .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              AesCmacKey.newBuilder(validKey)
-                  .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              AesCmacKey.newBuilder(validKey)
-                  .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(17).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager
-          .validateKey(
-              AesCmacKey.newBuilder(validKey)
-                  .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
-                  .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(16)))
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(64)))
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(0).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setParams(AesCmacParams.newBuilder(validKey.getParams()).setTagSize(9).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setParams(
+                        AesCmacParams.newBuilder(validKey.getParams()).setTagSize(17).build())
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                AesCmacKey.newBuilder(validKey)
+                    .setParams(
+                        AesCmacParams.newBuilder(validKey.getParams()).setTagSize(32).build())
+                    .build()));
   }
-
 
   @Test
   public void getPrimitive_works() throws Exception {

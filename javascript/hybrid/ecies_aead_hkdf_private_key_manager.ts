@@ -35,7 +35,24 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     const keyFormatProto =
         EciesAeadHkdfPrivateKeyFactory.getKeyFormatProto(keyFormat);
     EciesAeadHkdfValidators.validateKeyFormat(keyFormatProto);
-    return EciesAeadHkdfPrivateKeyFactory.newKeyImpl(keyFormatProto);
+    const params = keyFormatProto.getParams();
+    if (!params) {
+      throw new SecurityException('Params not set');
+    }
+    const kemParams = params.getKemParams();
+    if (!kemParams) {
+      throw new SecurityException('KEM params not set');
+    }
+    const curveTypeProto = kemParams.getCurveType();
+    const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
+    const curveName = EllipticCurves.curveToString(curveTypeSubtle);
+    const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
+    const jsonPublicKey =
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const jsonPrivateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey(
+        jsonPrivateKey, jsonPublicKey, params);
   }
 
   /**
@@ -65,33 +82,6 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
             .setTypeUrl(EciesAeadHkdfPublicKeyManager.KEY_TYPE)
             .setKeyMaterialType(PbKeyData.KeyMaterialType.ASYMMETRIC_PUBLIC);
     return publicKeyData;
-  }
-
-  /**
-   * Generates key corresponding to the given key format.
-   * WARNING: This function assume that the keyFormat has been validated.
-   *
-   */
-  private static async newKeyImpl(keyFormat: PbEciesAeadHkdfKeyFormat):
-      Promise<PbEciesAeadHkdfPrivateKey> {
-    const params = (keyFormat.getParams());
-    if (!params) {
-      throw new SecurityException('Params not set');
-    }
-    const kemParams = params.getKemParams();
-    if (!kemParams) {
-      throw new SecurityException('KEM params not set');
-    }
-    const curveTypeProto = kemParams.getCurveType();
-    const curveTypeSubtle = Util.curveTypeProtoToSubtle(curveTypeProto);
-    const curveName = EllipticCurves.curveToString(curveTypeSubtle);
-    const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-    const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
-    const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey(
-        jsonPrivateKey, jsonPublicKey, params);
   }
 
   /**

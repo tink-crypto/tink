@@ -25,7 +25,7 @@ option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_rsa_ssa_pss_go_proto";
 
 enum JwtRsaSsaPssAlgorithm {
-  UNKNOWN = 0;
+  PS_UNKNOWN = 0;
   PS256 = 1;
   PS384 = 2;
   PS512 = 3;

@@ -16,7 +16,7 @@
 package com.google.crypto.tink;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -145,56 +145,43 @@ public final class KeyTypeManagerTest {
   @Test
   public void getPrimitive_throwsForUnknownPrimitives() throws Exception {
     KeyTypeManager<AesGcmKey> keyManager = new TestKeyTypeManager();
-    try {
-      keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Primitive1.class);
-      fail();
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Primitive1.class));
   }
 
   @Test
   public void getPrimitive_throwsForVoid() throws Exception {
     KeyTypeManager<AesGcmKey> keyManager = new TestKeyTypeManager();
-    try {
-      keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Void.class);
-      fail();
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> keyManager.getPrimitive(AesGcmKey.getDefaultInstance(), Void.class));
   }
 
   @Test
   public void keyFactory_throwsUnsupported() throws Exception {
     KeyTypeManager<AesGcmKey> keyManager = new TestKeyTypeManager();
-    try {
-      keyManager.keyFactory();
-      fail();
-    } catch (UnsupportedOperationException e) {
-      // expected
-    }
+    assertThrows(UnsupportedOperationException.class, () -> keyManager.keyFactory());
   }
 
   @Test
   public void constructor_repeatedPrimitive_throwsIllegalArgument() throws Exception {
-    try {
-      new TestKeyTypeManager(
-          new TestKeyTypeManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
-            @Override
-            public Primitive1 getPrimitive(AesGcmKey key) {
-              return new Primitive1(key.getKeyValue());
-            }
-          },
-          new TestKeyTypeManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
-            @Override
-            public Primitive1 getPrimitive(AesGcmKey key) {
-              return new Primitive1(key.getKeyValue());
-            }
-          });
-      fail();
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new TestKeyTypeManager(
+                new KeyTypeManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
+                  @Override
+                  public Primitive1 getPrimitive(AesGcmKey key) {
+                    return new Primitive1(key.getKeyValue());
+                  }
+                },
+                new KeyTypeManager.PrimitiveFactory<Primitive1, AesGcmKey>(Primitive1.class) {
+                  @Override
+                  public Primitive1 getPrimitive(AesGcmKey key) {
+                    return new Primitive1(key.getKeyValue());
+                  }
+                }));
   }
 
   private static final class Primitive1 {

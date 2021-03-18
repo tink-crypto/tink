@@ -18,7 +18,7 @@ package com.google.crypto.tink.prf;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -49,12 +49,9 @@ public class HmacPrfKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(HmacPrfKeyFormat.getDefaultInstance());
-      fail("At least the hash type needs to be set");
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(HmacPrfKeyFormat.getDefaultInstance()));
   }
 
   private static HmacPrfKeyFormat makeHmacPrfKeyFormat(int keySize, HashType hashType) {
@@ -65,12 +62,9 @@ public class HmacPrfKeyManagerTest {
   @Test
   public void validateKeyFormat_keySizes() throws Exception {
     factory.validateKeyFormat(makeHmacPrfKeyFormat(16, HashType.SHA256));
-    try {
-      factory.validateKeyFormat(makeHmacPrfKeyFormat(15, HashType.SHA256));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(makeHmacPrfKeyFormat(15, HashType.SHA256)));
   }
 
   @Test
@@ -107,38 +101,31 @@ public class HmacPrfKeyManagerTest {
   @Test
   public void validateKey_wrongVersion_throws() throws Exception {
     HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    try {
-      manager.validateKey(HmacPrfKey.newBuilder(validKey).setVersion(1).build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> manager.validateKey(HmacPrfKey.newBuilder(validKey).setVersion(1).build()));
   }
 
   @Test
   public void validateKey_notValid_throws() throws Exception {
     HmacPrfKey validKey = factory.createKey(makeHmacPrfKeyFormat(16, HashType.SHA1));
-    try {
-      manager.validateKey(
-          HmacPrfKey.newBuilder(validKey)
-              .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
-    try {
-      manager.validateKey(
-          HmacPrfKey.newBuilder(validKey)
-              .setParams(
-                  HmacPrfParams.newBuilder(validKey.getParams())
-                      .setHash(HashType.UNKNOWN_HASH)
-                      .build())
-              .build());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacPrfKey.newBuilder(validKey)
+                    .setKeyValue(ByteString.copyFrom(Random.randBytes(15)))
+                    .build()));
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            manager.validateKey(
+                HmacPrfKey.newBuilder(validKey)
+                    .setParams(
+                        HmacPrfParams.newBuilder(validKey.getParams())
+                            .setHash(HashType.UNKNOWN_HASH)
+                            .build())
+                    .build()));
   }
 
   @Test
@@ -200,12 +187,9 @@ public class HmacPrfKeyManagerTest {
     HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
     HmacPrfKeyFormat format =
         HmacPrfKeyFormat.newBuilder().setVersion(0).setParams(params).setKeySize(32).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test
@@ -216,12 +200,9 @@ public class HmacPrfKeyManagerTest {
     HmacPrfParams params = HmacPrfParams.newBuilder().setHash(HashType.SHA256).build();
     HmacPrfKeyFormat format =
         HmacPrfKeyFormat.newBuilder().setVersion(1).setParams(params).setKeySize(keySize).build();
-    try {
-      factory.deriveKey(format, new ByteArrayInputStream(keyMaterial));
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.deriveKey(format, new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.KeyTypeEntry;
 import java.security.GeneralSecurityException;
@@ -30,11 +30,6 @@ public class ConfigTest {
   @Test
   public void testRegisterKeyType_NoCatalogue_shouldThrowException() throws Exception {
     KeyTypeEntry entry = KeyTypeEntry.newBuilder().setCatalogueName("DoesNotExist").build();
-    try {
-      Config.registerKeyType(entry);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> Config.registerKeyType(entry));
   }
 }

@@ -184,50 +184,45 @@ public class RegistryTest {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     HmacKey hmacKey = (HmacKey) Registry.newKey(template);
 
-    try {
-      Aead unused = wrongType.getPrimitive(hmacKey);
-      fail("Expected ClassCastException");
-    } catch (ClassCastException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Aead");
-      assertExceptionContains(e, "com.google.crypto.tink.subtle.PrfMac");
-    }
+    ClassCastException e =
+        assertThrows(
+            ClassCastException.class,
+            () -> {
+              Aead unused = wrongType.getPrimitive(hmacKey);
+            });
+    assertExceptionContains(e, "com.google.crypto.tink.Aead");
+    assertExceptionContains(e, "com.google.crypto.tink.subtle.PrfMac");
   }
 
   @Test
   public void testGetKeyManager_wrongType_shouldThrowException() throws Exception {
-    try {
-      Registry.getKeyManager(MacConfig.HMAC_TYPE_URL, Aead.class);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Mac");
-      assertExceptionContains(e, "com.google.crypto.tink.Aead not supported");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getKeyManager(MacConfig.HMAC_TYPE_URL, Aead.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac");
+    assertExceptionContains(e, "com.google.crypto.tink.Aead not supported");
   }
 
   @Test
   public void testGetKeyManager_legacy_badTypeUrl_shouldThrowException() throws Exception {
     String badTypeUrl = "bad type URL";
 
-    try {
-      Registry.getKeyManager(badTypeUrl);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "No key manager found");
-      assertExceptionContains(e, badTypeUrl);
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getKeyManager(badTypeUrl));
+    assertExceptionContains(e, "No key manager found");
+    assertExceptionContains(e, badTypeUrl);
   }
 
   @Test
   public void testGetKeyManager_badTypeUrl_shouldThrowException() throws Exception {
     String badTypeUrl = "bad type URL";
 
-    try {
-      Registry.getKeyManager(badTypeUrl, Aead.class);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "No key manager found");
-      assertExceptionContains(e, badTypeUrl);
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getKeyManager(badTypeUrl, Aead.class));
+    assertExceptionContains(e, "No key manager found");
+    assertExceptionContains(e, badTypeUrl);
   }
 
   @Test
@@ -238,12 +233,9 @@ public class RegistryTest {
 
   @Test
   public void testRegisterKeyManager_keyManagerIsNull_shouldThrowException() throws Exception {
-    try {
-      Registry.registerKeyManager(null);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      assertThat(e.toString()).contains("must be non-null");
-    }
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Registry.registerKeyManager(null));
+    assertThat(e.toString()).contains("must be non-null");
   }
 
   @Test
@@ -266,24 +258,22 @@ public class RegistryTest {
     String typeUrl = "yetAnotherTypeUrl";
     Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), false);
 
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new CustomAeadKeyManager(typeUrl), true));
   }
 
   @Test
   public void testRegisterKeyManager_keyManagerFromAnotherClass_shouldThrowException()
       throws Exception {
     // This should not overwrite the existing manager.
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL));
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("already registered");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                Registry.registerKeyManager(
+                    new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
+    assertThat(e.toString()).contains("already registered");
 
     KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
@@ -292,12 +282,11 @@ public class RegistryTest {
   @Test
   public void testRegisterKeyManager_deprecated_keyManagerIsNull_shouldThrowException()
       throws Exception {
-    try {
-      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, null);
-      fail("Expected IllegalArgumentException.");
-    } catch (IllegalArgumentException e) {
-      assertThat(e.toString()).contains("must be non-null");
-    }
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL, null));
+    assertThat(e.toString()).contains("must be non-null");
   }
 
   @Test
@@ -305,13 +294,11 @@ public class RegistryTest {
       throws Exception {
     String typeUrl = "yetSomeOtherTypeUrl";
     String differentTypeUrl = "differentTypeUrl";
-    try {
-      Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl));
-      fail("Should throw an exception.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e,
-          "Manager does not support key type " + differentTypeUrl);
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.registerKeyManager(differentTypeUrl, new CustomAeadKeyManager(typeUrl)));
+    assertExceptionContains(e, "Manager does not support key type " + differentTypeUrl);
   }
 
   @Test
@@ -333,25 +320,23 @@ public class RegistryTest {
     String typeUrl = "totallyDifferentTypeUrl";
     Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), false);
 
-    try {
-      Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(typeUrl, new CustomAeadKeyManager(typeUrl), true));
   }
 
   @Test
   public void testRegisterKeyManager_deprecated_keyManagerFromAnotherClass_shouldThrowException()
       throws Exception {
     // This should not overwrite the existing manager.
-    try {
-      Registry.registerKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
-          new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL));
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("already registered");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                Registry.registerKeyManager(
+                    AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL,
+                    new CustomAeadKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL)));
+    assertThat(e.toString()).contains("already registered");
 
     KeyManager<Aead> manager = Registry.getKeyManager(AeadConfig.AES_CTR_HMAC_AEAD_TYPE_URL);
     assertThat(manager.getClass().toString()).contains("KeyManagerImpl");
@@ -371,12 +356,11 @@ public class RegistryTest {
   @Test
   public void testGetPublicKeyData_shouldThrow() throws Exception {
     KeyData keyData = Registry.newKeyData(MacKeyTemplates.HMAC_SHA256_128BITTAG);
-    try {
-      Registry.getPublicKeyData(keyData.getTypeUrl(), keyData.getValue());
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("not a PrivateKeyManager");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getPublicKeyData(keyData.getTypeUrl(), keyData.getValue()));
+    assertThat(e.toString()).contains("not a PrivateKeyManager");
   }
 
   @Test
@@ -656,14 +640,13 @@ public class RegistryTest {
     Registry.reset();
     TestKeyTypeManager testKeyTypeManager = new TestKeyTypeManager();
     Registry.registerKeyManager(testKeyTypeManager, true);
-    try {
-      Registry.getKeyManager(testKeyTypeManager.getKeyType(), Mac.class);
-      fail();
-    } catch (GeneralSecurityException e) {
-        assertExceptionContains(e, "com.google.crypto.tink.Mac");
-        assertExceptionContains(e, "com.google.crypto.tink.Aead");
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getKeyManager(testKeyTypeManager.getKeyType(), Mac.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac");
+    assertExceptionContains(e, "com.google.crypto.tink.Aead");
         assertExceptionContains(e, "com.google.crypto.tink.RegistryTest.FakeAead");
-    }
   }
 
   // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
@@ -697,49 +680,38 @@ public class RegistryTest {
   public void testRegisterKeyTypeManager_LessRestrictedNewKeyAllowed_throws() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), false);
-    try {
-      Registry.registerKeyManager(new TestKeyTypeManager(), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new TestKeyTypeManager(), true));
   }
 
   @Test
   public void testRegisterKeyTypeManager_DifferentClass_throws() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
-    try {
-      // Note: due to the {} this is a subclass of TestKeyTypeManager.
-      Registry.registerKeyManager(new TestKeyTypeManager() {}, true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new TestKeyTypeManager() {}, true));
   }
 
   @Test
   public void testRegisterKeyTypeManager_AfterKeyManager_throws() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType()));
-    try {
-      Registry.registerKeyManager(new TestKeyTypeManager(), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new TestKeyTypeManager(), true));
   }
 
   @Test
   public void testRegisterKeyTypeManager_BeforeKeyManager_throws() throws Exception {
     Registry.reset();
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
-    try {
-      Registry.registerKeyManager(new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType()));
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.registerKeyManager(
+                new CustomAeadKeyManager(new TestKeyTypeManager().getKeyType())));
   }
 
   @Test
@@ -792,12 +764,10 @@ public class RegistryTest {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
     ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
-    try {
-      Registry.deriveKey(template, emptyInput);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "validateKeyFormat");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.deriveKey(template, emptyInput));
+    assertExceptionContains(e, "validateKeyFormat");
   }
 
   @Test
@@ -810,12 +780,10 @@ public class RegistryTest {
             .setOutputPrefixType(OutputPrefixType.TINK)
             .build();
     ByteArrayInputStream emptyInput = new ByteArrayInputStream(new byte[0]);
-    try {
-      Registry.deriveKey(template, emptyInput);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "No keymanager registered");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.deriveKey(template, emptyInput));
+    assertExceptionContains(e, "No keymanager registered");
   }
 
   private static class PublicPrimitiveA {}
@@ -986,14 +954,13 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      Registry.getKeyManager(new TestPrivateKeyTypeManager().getKeyType(), Mac.class);
-      fail();
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Mac");
-      assertExceptionContains(e, "PrivatePrimitiveA");
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getKeyManager(new TestPrivateKeyTypeManager().getKeyType(), Mac.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac");
+    assertExceptionContains(e, "PrivatePrimitiveA");
       assertExceptionContains(e, "PrivatePrimitiveB");
-    }
   }
 
   @Test
@@ -1002,14 +969,13 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      Registry.getKeyManager(new TestPublicKeyTypeManager().getKeyType(), Mac.class);
-      fail();
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "com.google.crypto.tink.Mac");
-      assertExceptionContains(e, "PublicPrimitiveA");
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getKeyManager(new TestPublicKeyTypeManager().getKeyType(), Mac.class));
+    assertExceptionContains(e, "com.google.crypto.tink.Mac");
+    assertExceptionContains(e, "PublicPrimitiveA");
       assertExceptionContains(e, "PublicPrimitiveB");
-    }
   }
 
   // Checks that calling getUntypedKeyManager will return the keymanager for the *first* implemented
@@ -1065,13 +1031,11 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false);
-    try {
-      Registry.registerAsymmetricKeyManagers(
-          new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.registerAsymmetricKeyManagers(
+                new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true));
   }
 
   @Test
@@ -1117,14 +1081,11 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      // Note: due to the {} this is a subclass of TestPrivateKeyTypeManager.
-      Registry.registerAsymmetricKeyManagers(
-          new TestPrivateKeyTypeManager() {}, new TestPublicKeyTypeManager(), true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.registerAsymmetricKeyManagers(
+                new TestPrivateKeyTypeManager() {}, new TestPublicKeyTypeManager(), true));
   }
 
   @Test
@@ -1133,14 +1094,12 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
-      Registry.registerAsymmetricKeyManagers(
-          new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager() {}, true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            Registry.registerAsymmetricKeyManagers(
+                // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
+                new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager() {}, true));
   }
 
   @Test
@@ -1149,13 +1108,10 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      // Note: due to the {} this is a subclass.
-      Registry.registerKeyManager(new TestPrivateKeyTypeManager() {}, true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
+        () -> Registry.registerKeyManager(new TestPrivateKeyTypeManager() {}, true));
   }
 
   @Test
@@ -1164,13 +1120,10 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      // Note: due to the {} this is a subclass.
-      Registry.registerKeyManager(new TestPublicKeyTypeManager() {}, true);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        // Note: due to the {} this is a subclass of TestPublicKeyTypeManager.
+        () -> Registry.registerKeyManager(new TestPublicKeyTypeManager() {}, true));
   }
 
   @Test
@@ -1179,21 +1132,20 @@ public class RegistryTest {
     Registry.reset();
     Registry.registerAsymmetricKeyManagers(
         new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), true);
-    try {
-      Registry.registerAsymmetricKeyManagers(
-          new TestPrivateKeyTypeManager(),
-          new TestPublicKeyTypeManager() {
-            @Override
-            public String getKeyType() {
-              return "bla";
-            }
-          },
-          true);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      assertExceptionContains(e, "public key manager corresponding to");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () ->
+                Registry.registerAsymmetricKeyManagers(
+                    new TestPrivateKeyTypeManager(),
+                    new TestPublicKeyTypeManager() {
+                      @Override
+                      public String getKeyType() {
+                        return "bla";
+                      }
+                    },
+                    true));
+    assertExceptionContains(e, "public key manager corresponding to");
   }
 
   @Test
@@ -1208,12 +1160,9 @@ public class RegistryTest {
             .setOutputPrefixType(OutputPrefixType.TINK)
             .build();
 
-    try {
-      Registry.deriveKey(template, new ByteArrayInputStream(new byte[0]));
-      fail();
-    } catch (UnsupportedOperationException e) {
-      // expected
-    }
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> Registry.deriveKey(template, new ByteArrayInputStream(new byte[0])));
   }
 
   @Test
@@ -1390,13 +1339,10 @@ public class RegistryTest {
   public void testWrap_noWrapperRegistered_throws() throws Exception {
     PrimitiveSet<Aead> aeadSet = createAeadPrimitiveSet();
     Registry.reset();
-    try {
-      Registry.wrap(aeadSet);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "No wrapper found");
-      assertExceptionContains(e, "Aead");
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.wrap(aeadSet));
+    assertExceptionContains(e, "No wrapper found");
+    assertExceptionContains(e, "Aead");
   }
 
   @Test

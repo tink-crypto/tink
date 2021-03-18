@@ -59,8 +59,9 @@ message EciesHkdfKemParams {
 // Parameters of AEAD DEM (Data Encapsulation Mechanism).
 message EciesAeadDemParams {
   // Required.
-  KeyTemplate aead_dem =
-      2;  // Contains e.g. AesCtrHmacAeadKeyFormat or AesGcmKeyFormat.
+  // Contains an Aead or DeterministicAead key format (e.g:
+  // AesCtrHmacAeadKeyFormat, AesGcmKeyFormat or AesSivKeyFormat).
+  KeyTemplate aead_dem = 2;
 }
 
 message EciesAeadHkdfParams {

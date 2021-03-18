@@ -21,7 +21,7 @@ import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset.Key;
@@ -250,12 +250,10 @@ public class PrimitiveSetTest {
   public void testAddPrimive_withUnknownPrefixType_shouldFail() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 = Key.newBuilder().setKeyId(1).setStatus(KeyStatusType.ENABLED).build();
-    try {
-      pset.addPrimitive(new DummyMac1(), key1);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "unknown output prefix type");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> pset.addPrimitive(new DummyMac1(), key1));
+    assertExceptionContains(e, "unknown output prefix type");
   }
 
   @Test
@@ -267,12 +265,10 @@ public class PrimitiveSetTest {
             .setStatus(KeyStatusType.DISABLED)
             .setOutputPrefixType(OutputPrefixType.TINK)
             .build();
-    try {
-      pset.addPrimitive(new DummyMac1(), key1);
-      fail("Expected GeneralSecurityException.");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "only ENABLED key is allowed");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> pset.addPrimitive(new DummyMac1(), key1));
+    assertExceptionContains(e, "only ENABLED key is allowed");
   }
 
   @Test

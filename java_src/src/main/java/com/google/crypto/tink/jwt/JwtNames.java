@@ -49,7 +49,7 @@ final class JwtNames {
     return name;
   }
 
-  private static boolean isRegisteredName(String name) {
+  static boolean isRegisteredName(String name) {
     return name.equals(CLAIM_ISSUER)
         || name.equals(CLAIM_SUBJECT)
         || name.equals(CLAIM_AUDIENCE)

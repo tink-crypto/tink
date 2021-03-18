@@ -135,7 +135,7 @@ java_library(
         ":test_util",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -146,7 +146,7 @@ java_library(
         ":test_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
-        "@maven//:org_json_json",
+        "@maven//:com_google_code_gson_gson",
     ],
 )
 
@@ -158,5 +158,23 @@ java_library(
         "@com_google_protobuf//:protobuf_java",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+    ],
+)
+
+java_library(
+    name = "fake_kms_client",
+    srcs = ["FakeKmsClient.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_reader",
+        "//src/main/java/com/google/crypto/tink:binary_keyset_writer",
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )

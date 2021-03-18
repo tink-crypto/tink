@@ -18,15 +18,14 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
+	"fmt"
 	"testing"
 
 	"golang.org/x/crypto/ed25519"
 
 	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestED25519Deterministic(t *testing.T) {
@@ -153,63 +152,16 @@ func TestED25519SignVerify(t *testing.T) {
 
 }
 
-type testDataED25519 struct {
-	Algorithm        string
-	GeneratorVersion string
-	NumberOfTests    uint32
-	TestGroups       []*testGroupED25519
-}
+func TestED25519WycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 
-type testGroupED25519 struct {
-	KeyDer string
-	KeyPem string
-	Sha    string
-	Type   string
-	Key    *testKeyED25519
-	Tests  []*testcaseED25519
-}
-
-type testKeyED25519 struct {
-	Sk string
-	Pk string
-}
-
-type testcaseED25519 struct {
-	Comment string
-	Msg     string
-	Result  string
-	Sig     string
-	TcID    uint32
-}
-
-func TestVectorsED25519(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
+	suite := new(ed25519Suite)
+	if err := testutil.PopulateSuite(suite, "eddsa_test.json"); err != nil {
+		t.Fatalf("failed populating suite: %s", err)
 	}
-
-	// signing tests are same between ecdsa and ed25519
-	f, err := os.Open(filepath.Join(srcDir, "wycheproof/testvectors/eddsa_test.json"))
-	if err != nil {
-		t.Fatalf("cannot open file: %s", err)
-	}
-	parser := json.NewDecoder(f)
-	content := new(testDataED25519)
-	if err := parser.Decode(content); err != nil {
-		t.Fatalf("cannot decode content of file: %s", err)
-	}
-	for _, g := range content.TestGroups {
-		pvtKey, err := hex.DecodeString(g.Key.Sk)
-		if err != nil {
-			t.Fatalf("cannot decode sk key: %s", err)
-		}
-		pubKey, err := hex.DecodeString(g.Key.Pk)
-		if err != nil {
-			t.Fatalf("cannot decode private key: %s", err)
-		}
-
-		private := ed25519.PrivateKey(pvtKey)
-		public := ed25519.PrivateKey(pubKey)
+	for _, group := range suite.TestGroups {
+		private := ed25519.PrivateKey(group.Key.SK)
+		public := ed25519.PrivateKey(group.Key.PK)
 		signer, err := subtleSignature.NewED25519Signer(private)
 		if err != nil {
 			continue
@@ -218,35 +170,46 @@ func TestVectorsED25519(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		for _, tc := range g.Tests {
-			message, err := hex.DecodeString(tc.Msg)
-			if err != nil {
-				t.Errorf("cannot decode message in test case %d: %s", tc.TcID, err)
-			}
-			sig, err := hex.DecodeString(tc.Sig)
-			if err != nil {
-				t.Errorf("cannot decode signature in test case %d: %s", tc.TcID, err)
-			}
-			got, err := signer.Sign(message)
-			if tc.Result == "valid" && err != nil {
-				t.Errorf("sign failed in test case %d: with error %s", tc.TcID, err)
-			}
-			if tc.Result == "valid" && err == nil && !bytes.Equal(sig, got) {
-				// Ed25519 is deterministic.
-				// Getting an alternative signature may leak the private key.
-				// This is especially the case if an attacker can also learn the valid signature.
-				t.Errorf("sign failed in test case %d: invalid signature generated %s", tc.TcID, hex.EncodeToString(got))
-			}
-			if tc.Result == "invalid" && err == nil && bytes.Equal(sig, got) {
-				t.Errorf("sign failed in test case %d: invalid signature generated", tc.TcID)
-			}
-			err = verifier.Verify(sig, message)
-			if tc.Result == "valid" && err != nil {
-				t.Errorf("verify failed in test case %d: valid signature is rejected with error %s", tc.TcID, err)
-			}
-			if tc.Result == "invalid" && err == nil {
-				t.Errorf("verify failed in test case %d: invalid signature is accepted", tc.TcID)
-			}
+		for _, test := range group.Tests {
+			caseName := fmt.Sprintf("Sign-%s-%s:Case-%d", suite.Algorithm, group.Type, test.CaseID)
+			t.Run(caseName, func(t *testing.T) {
+				got, err := signer.Sign(test.Message)
+				switch test.Result {
+				case "valid":
+					if err != nil {
+						t.Fatalf("ED25519Signer.Sign() failed in a valid test case: %s", err)
+					}
+					if !bytes.Equal(got, test.Signature) {
+						// Ed25519 is deterministic.
+						// Getting an alternative signature may leak the private key.
+						// This is especially the case if an attacker can also learn the valid signature.
+						t.Fatalf("ED25519Signer.Sign() = %s, want = %s", hex.EncodeToString(got), hex.EncodeToString(test.Signature))
+					}
+				case "invalid":
+					if err == nil && bytes.Equal(got, test.Signature) {
+						t.Fatalf("ED25519Signer.Sign() produced a matching signature in an invalid test case.")
+					}
+				default:
+					t.Fatalf("unrecognized result: %q", test.Result)
+				}
+			})
+
+			caseName = fmt.Sprintf("Verify-%s-%s:Case-%d", suite.Algorithm, group.Type, test.CaseID)
+			t.Run(caseName, func(t *testing.T) {
+				err := verifier.Verify(test.Signature, test.Message)
+				switch test.Result {
+				case "valid":
+					if err != nil {
+						t.Fatalf("ED25519Verifier.Verify() failed in a valid test case: %s", err)
+					}
+				case "invalid":
+					if err == nil {
+						t.Fatal("ED25519Verifier.Verify() succeeded in an invalid test case.")
+					}
+				default:
+					t.Fatalf("unsupported test result: %q", test.Result)
+				}
+			})
 		}
 	}
 }

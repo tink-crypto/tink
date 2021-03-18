@@ -17,12 +17,12 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -35,45 +35,45 @@ import org.junit.runners.JUnit4;
 public final class Ed25519VerifyTest {
   @Test
   public void testVerificationWithPublicKeyLengthDifferentFrom32Byte() throws Exception {
-    try {
-      Ed25519Verify unused = new Ed25519Verify(new byte[31]);
-      fail("Public key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      Ed25519Verify unused = new Ed25519Verify(new byte[33]);
-      fail("Public key length should be 32-byte");
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Verify unused = new Ed25519Verify(new byte[31]);
+        });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          Ed25519Verify unused = new Ed25519Verify(new byte[33]);
+        });
   }
 
-  private byte[] getMessage(JSONObject testcase) throws Exception {
+  private byte[] getMessage(JsonObject testcase) throws Exception {
     if (testcase.has("msg")) {
-      return Hex.decode(testcase.getString("msg"));
+      return Hex.decode(testcase.get("msg").getAsString());
     } else {
-      return Hex.decode(testcase.getString("message"));
+      return Hex.decode(testcase.get("message").getAsString());
     }
   }
 
   @Test
   public void testVerificationWithWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/eddsa_test.json");
     int errors = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      JSONObject key = group.getJSONObject("key");
-      byte[] publicKey = Hex.decode(key.getString("pk"));
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+    JsonArray testGroups = json.get("testGroups").getAsJsonArray();
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      JsonObject key = group.get("key").getAsJsonObject();
+      byte[] publicKey = Hex.decode(key.get("pk").getAsString());
+      JsonArray tests = group.get("tests").getAsJsonArray();
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
-            String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+            String.format("testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         byte[] msg = getMessage(testcase);
-        byte[] sig = Hex.decode(testcase.getString("sig"));
-        String result = testcase.getString("result");
+        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
+        String result = testcase.get("result").getAsString();
         Ed25519Verify verifier = new Ed25519Verify(publicKey);
         try {
           verifier.verify(sig, msg);

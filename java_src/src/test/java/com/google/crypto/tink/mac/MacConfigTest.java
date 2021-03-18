@@ -17,10 +17,13 @@
 package com.google.crypto.tink.mac;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,21 +41,13 @@ public class MacConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.HmacKey";
-    try {
-      Registry.getKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     MacConfig.register();
@@ -62,5 +57,59 @@ public class MacConfigTest {
 
     // Running init() manually again should succeed.
     MacConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register MAC key manager.
+    MacConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.HmacKey",
+      "type.googleapis.com/google.crypto.tink.AesCmacKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Mac.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register MAC key manager.
+    MacConfig.register();
+
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.HmacKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, Mac.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register MAC key manager.
+    MacConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCmacKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      GeneralSecurityException e =
+          assertThrows(
+              GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+      assertThat(e.toString()).contains("No key manager found");
+    }
   }
 }

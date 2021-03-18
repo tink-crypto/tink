@@ -21,7 +21,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/aead"
+	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
+	"github.com/google/tink/go/testing/fakekms"
 	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -96,6 +98,39 @@ func TestNoPrefixKeyTemplates(t *testing.T) {
 	}
 }
 
+func TestKMSEnvelopeAEADKeyTemplates(t *testing.T) {
+	fakeKmsClient, err := fakekms.NewClient("fake-kms://")
+	if err != nil {
+		t.Fatalf("fakekms.NewClient('fake-kms://') failed: %v", err)
+	}
+	registry.RegisterKMSClient(fakeKmsClient)
+
+	fixedKeyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	newKeyURI, err := fakekms.NewKeyURI()
+	if err != nil {
+		t.Fatalf("fakekms.NewKeyURI() failed: %v", err)
+	}
+	var testCases = []struct {
+		name     string
+		template *tinkpb.KeyTemplate
+	}{
+		{
+			name:     "Fixed Fake KMS Envelope AEAD Key with AES128_GCM",
+			template: aead.KMSEnvelopeAEADKeyTemplate(fixedKeyURI, aead.AES128GCMKeyTemplate()),
+		}, {
+			name:     "New Fake KMS Envelope AEAD Key with AES128_GCM",
+			template: aead.KMSEnvelopeAEADKeyTemplate(newKeyURI, aead.AES128GCMKeyTemplate()),
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := testEncryptDecrypt(tc.template); err != nil {
+				t.Errorf("%v", err)
+			}
+		})
+	}
+}
+
 func testEncryptDecrypt(template *tinkpb.KeyTemplate) error {
 	handle, err := keyset.NewHandle(template)
 	if err != nil {
@@ -106,20 +141,61 @@ func testEncryptDecrypt(template *tinkpb.KeyTemplate) error {
 		return fmt.Errorf("aead.New(handle) failed: %v", err)
 	}
 
-	plaintext := []byte("some data to encrypt")
-	aad := []byte("extra data to authenticate")
-	ciphertext, err := primitive.Encrypt(plaintext, aad)
-	if err != nil {
-		return fmt.Errorf("encryption failed, error: %v", err)
+	var testInputs = []struct {
+		plaintext []byte
+		aad1      []byte
+		aad2      []byte
+	}{
+		{
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte("extra data to authenticate"),
+			aad2:      []byte("extra data to authenticate"),
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte(""),
+			aad2:      []byte(""),
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: []byte(""),
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: nil,
+			aad1:      []byte("extra data to authenticate"),
+			aad2:      []byte("extra data to authenticate"),
+		}, {
+			plaintext: nil,
+			aad1:      []byte(""),
+			aad2:      []byte(""),
+		}, {
+			plaintext: nil,
+			aad1:      nil,
+			aad2:      nil,
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      []byte(""),
+			aad2:      nil,
+		}, {
+			plaintext: []byte("some data to encrypt"),
+			aad1:      nil,
+			aad2:      []byte(""),
+		},
 	}
-	decrypted, err := primitive.Decrypt(ciphertext, aad)
-	if err != nil {
-		return fmt.Errorf("decryption failed, error: %v", err)
+	for _, ti := range testInputs {
+		ciphertext, err := primitive.Encrypt(ti.plaintext, ti.aad1)
+		if err != nil {
+			return fmt.Errorf("encryption failed, error: %v", err)
+		}
+		decrypted, err := primitive.Decrypt(ciphertext, ti.aad2)
+		if err != nil {
+			return fmt.Errorf("decryption failed, error: %v", err)
+		}
+		if !bytes.Equal(ti.plaintext, decrypted) {
+			return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, ti.plaintext)
+		}
 	}
-
-	if !bytes.Equal(plaintext, decrypted) {
-		return fmt.Errorf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
-	}
-
 	return nil
 }

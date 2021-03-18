@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -32,9 +34,15 @@ cc_library(
     ],
 )
 
+bool_flag(
+    name = "use_only_fips",
+    build_setting_default = False,
+)
+
 config_setting(
-    name = "only_fips",
-    values = {"define": "use_only_fips=on"},
+    name = "fips_enabled",
+    flag_values = {":use_only_fips": "True"},
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -43,7 +51,7 @@ cc_library(
     hdrs = ["tink_fips.h"],
     include_prefix = "tink/config",
     defines = select({
-        "only_fips": ["TINK_USE_ONLY_FIPS"],
+        "fips_enabled": ["TINK_USE_ONLY_FIPS"],
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
@@ -92,7 +100,7 @@ cc_test(
     name = "tink_fips_test",
     size = "small",
     srcs = select({
-        "only_fips": ["tink_fips_enabled_test.cc"],
+        "fips_enabled": ["tink_fips_enabled_test.cc"],
         "//conditions:default": ["tink_fips_disabled_test.cc"],
     }),
     tags = [

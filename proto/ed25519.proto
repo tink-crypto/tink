@@ -25,7 +25,9 @@ option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/ed25519_go_proto";
 
-message Ed25519KeyFormat {}
+message Ed25519KeyFormat {
+    uint32 version = 1;
+}
 
 // key_type: type.googleapis.com/google.crypto.tink.Ed25519PublicKey
 message Ed25519PublicKey {

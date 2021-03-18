@@ -18,6 +18,7 @@ package com.google.crypto.tink;
 
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -55,12 +56,10 @@ public class UtilTest {
 
   @Test
   public void testValidateKeyset_emptyKeyset_shouldFail() throws Exception {
-    try {
-      Util.validateKeyset(Keyset.newBuilder().build());
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset must contain at least one ENABLED key");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Util.validateKeyset(Keyset.newBuilder().build()));
+    assertExceptionContains(e, "keyset must contain at least one ENABLED key");
   }
 
   @Test
@@ -79,12 +78,9 @@ public class UtilTest {
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
-    try {
-      Util.validateKeyset(invalidKeyset);
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset contains multiple primary keys");
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Util.validateKeyset(invalidKeyset));
+    assertExceptionContains(e, "keyset contains multiple primary keys");
   }
 
   @Test
@@ -103,12 +99,9 @@ public class UtilTest {
                 43,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK));
-    try {
-      Util.validateKeyset(invalidKeyset);
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Util.validateKeyset(invalidKeyset));
+    assertExceptionContains(e, "keyset doesn't contain a valid primary key");
   }
 
   @Test
@@ -127,12 +120,9 @@ public class UtilTest {
                 42,
                 KeyStatusType.DESTROYED,
                 OutputPrefixType.TINK));
-    try {
-      Util.validateKeyset(invalidKeyset);
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset must contain at least one ENABLED key");
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Util.validateKeyset(invalidKeyset));
+    assertExceptionContains(e, "keyset must contain at least one ENABLED key");
   }
 
   @Test
@@ -149,12 +139,9 @@ public class UtilTest {
                     .setOutputPrefixType(OutputPrefixType.TINK)
                     .build())
             .build();
-    try {
-      Util.validateKeyset(invalidKeyset);
-      fail("Invalid keyset. Expect GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "keyset doesn't contain a valid primary key");
-    }
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Util.validateKeyset(invalidKeyset));
+    assertExceptionContains(e, "keyset doesn't contain a valid primary key");
   }
 
   @Test

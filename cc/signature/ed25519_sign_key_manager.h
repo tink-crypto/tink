@@ -24,6 +24,7 @@
 #include "tink/public_key_sign.h"
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -72,10 +73,15 @@ class Ed25519SignKeyManager
     return private_key.public_key();
   }
 
+  crypto::tink::util::StatusOr<google::crypto::tink::Ed25519PrivateKey>
+  DeriveKey(const google::crypto::tink::Ed25519KeyFormat& key_format,
+            InputStream* input_stream) const override;
+
  private:
   const std::string key_type_ =
       absl::StrCat(kTypeGoogleapisCom,
                    google::crypto::tink::Ed25519PrivateKey().GetTypeName());
+  static constexpr int kEd25519SecretSeedSize = 32;
 };
 
 }  // namespace tink

@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -43,14 +43,14 @@ public class BytesTest {
     assertEquals(0, shouldBeZeroes[1]);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorTwoArgsSizeMismatchA() {
-    Bytes.xor(THREE_ZEROES, TWO_ONES);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(THREE_ZEROES, TWO_ONES));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorTwoArgsSizeMismatchB() {
-    Bytes.xor(TWO_ONES, THREE_ZEROES);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(TWO_ONES, THREE_ZEROES));
   }
 
   @Test
@@ -68,19 +68,19 @@ public class BytesTest {
     assertEquals(1, shouldBeOne.length);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorThreeArgsTooLong() {
-    Bytes.xor(THREE_ZEROES, 0, TWO_ONES, 0, 3);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(THREE_ZEROES, 0, TWO_ONES, 0, 3));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorThreeArgsTooLongOffsets() {
-    Bytes.xor(THREE_ZEROES, 3, TWO_ONES, 1, 1);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(THREE_ZEROES, 3, TWO_ONES, 1, 1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorThreeArgsSizeMismatchB() {
-    Bytes.xor(TWO_ONES, THREE_ZEROES);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(TWO_ONES, THREE_ZEROES));
   }
 
   @Test
@@ -92,9 +92,9 @@ public class BytesTest {
     assertEquals(3, r.length);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void xorEndSizeMismatch() {
-    Bytes.xorEnd(TWO_ONES, THREE_ZEROES);
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xorEnd(TWO_ONES, THREE_ZEROES));
   }
 
   @Test
@@ -102,12 +102,7 @@ public class BytesTest {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(10);
-    try {
-      Bytes.xor(output, x, y, -1);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException ex) {
-      // expected;
-    }
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(output, x, y, -1));
   }
 
   @Test
@@ -115,12 +110,7 @@ public class BytesTest {
     ByteBuffer output = ByteBuffer.allocate(9);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(10);
-    try {
-      Bytes.xor(output, x, y, 10);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException ex) {
-      // expected;
-    }
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(output, x, y, 10));
   }
 
   @Test
@@ -128,12 +118,7 @@ public class BytesTest {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(9);
     ByteBuffer y = ByteBuffer.allocate(10);
-    try {
-      Bytes.xor(output, x, y, 10);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException ex) {
-      // expected;
-    }
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(output, x, y, 10));
   }
 
   @Test
@@ -141,12 +126,7 @@ public class BytesTest {
     ByteBuffer output = ByteBuffer.allocate(10);
     ByteBuffer x = ByteBuffer.allocate(10);
     ByteBuffer y = ByteBuffer.allocate(9);
-    try {
-      Bytes.xor(output, x, y, 10);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException ex) {
-      // expected;
-    }
+    assertThrows(IllegalArgumentException.class, () -> Bytes.xor(output, x, y, 10));
   }
 
   @Test

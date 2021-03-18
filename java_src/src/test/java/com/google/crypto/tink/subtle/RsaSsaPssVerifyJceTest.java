@@ -17,18 +17,18 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -42,13 +42,11 @@ public class RsaSsaPssVerifyJceTest {
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);
     RSAPublicKey pub = (RSAPublicKey) keyGen.generateKeyPair().getPublic();
-    try {
-      new RsaSsaPssVerifyJce(pub, HashType.SHA1, HashType.SHA1, 20);
-      fail("Unsafe hash, should have thrown exception.");
-    } catch (GeneralSecurityException e) {
-      // Expected.
-      TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
-    }
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> new RsaSsaPssVerifyJce(pub, HashType.SHA1, HashType.SHA1, 20));
+    TestUtil.assertExceptionContains(e, "Unsupported hash: SHA1");
   }
 
   @Test
@@ -66,32 +64,32 @@ public class RsaSsaPssVerifyJceTest {
   }
 
   private static void testWycheproofVectors(String fileName) throws Exception {
-    JSONObject jsonObj = WycheproofTestUtil.readJson(fileName);
+    JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
     int errors = 0;
-    JSONArray testGroups = jsonObj.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
+    JsonArray testGroups = jsonObj.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
 
       KeyFactory kf = KeyFactory.getInstance("RSA");
-      byte[] encodedPubKey = Hex.decode(group.getString("keyDer"));
+      byte[] encodedPubKey = Hex.decode(group.get("keyDer").getAsString());
       X509EncodedKeySpec x509keySpec = new X509EncodedKeySpec(encodedPubKey);
-      HashType sigHash = WycheproofTestUtil.getHashType(group.getString("sha"));
-      HashType mgf1Hash = WycheproofTestUtil.getHashType(group.getString("mgfSha"));
-      int saltLength = group.getInt("sLen");
+      HashType sigHash = WycheproofTestUtil.getHashType(group.get("sha").getAsString());
+      HashType mgf1Hash = WycheproofTestUtil.getHashType(group.get("mgfSha").getAsString());
+      int saltLength = group.get("sLen").getAsInt();
 
-      JSONArray tests = group.getJSONArray("tests");
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      JsonArray tests = group.getAsJsonArray("tests");
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
-            String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
+            String.format("testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
         RsaSsaPssVerifyJce verifier;
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
         verifier = new RsaSsaPssVerifyJce(pubKey, sigHash, mgf1Hash, saltLength);
-        byte[] msg = Hex.decode(testcase.getString("msg"));
-        byte[] sig = Hex.decode(testcase.getString("sig"));
-        String result = testcase.getString("result");
+        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
+        byte[] sig = Hex.decode(testcase.get("sig").getAsString());
+        String result = testcase.get("result").getAsString();
         try {
           verifier.verify(sig, msg);
           if (result.equals("invalid")) {

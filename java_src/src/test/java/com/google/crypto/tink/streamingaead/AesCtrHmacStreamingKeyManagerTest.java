@@ -17,7 +17,7 @@
 package com.google.crypto.tink.streamingaead;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
@@ -74,12 +74,9 @@ public class AesCtrHmacStreamingKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty_throws() throws Exception {
-    try {
-      factory.validateKeyFormat(AesCtrHmacStreamingKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesCtrHmacStreamingKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -97,12 +94,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
       if (derivedKeySize == 16 || derivedKeySize == 32) {
         factory.validateKeyFormat(format);
       } else {
-        try {
-          factory.validateKeyFormat(format);
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
       }
     }
   }
@@ -111,24 +103,14 @@ public class AesCtrHmacStreamingKeyManagerTest {
   public void validateKeyFormat_smallKey_throws() throws Exception {
     // TODO(b/140161847): Also check for key size 16.
     AesCtrHmacStreamingKeyFormat format = createKeyFormat().setKeySize(15).build();
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
   public void validateKeyFormat_unkownHash_throws() throws Exception {
     AesCtrHmacStreamingKeyFormat format =
         createKeyFormat().setParams(createParams().setHkdfHashType(HashType.UNKNOWN_HASH)).build();
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -138,12 +120,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
             .setParams(
                 createParams().setHmacParams(createHmacParams().setHash(HashType.UNKNOWN_HASH)))
             .build();
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -151,12 +128,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
     AesCtrHmacStreamingKeyFormat format =
         createKeyFormat().setParams(createParams().setCiphertextSegmentSize(45)).build();
 
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -168,12 +140,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
                     .setHmacParams(createHmacParams().setHash(HashType.SHA1).setTagSize(21)))
             .build();
 
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -185,12 +152,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
                     .setHmacParams(createHmacParams().setHash(HashType.SHA256).setTagSize(33)))
             .build();
 
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -202,12 +164,7 @@ public class AesCtrHmacStreamingKeyManagerTest {
                     .setHmacParams(createHmacParams().setHash(HashType.SHA512).setTagSize(65)))
             .build();
 
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test

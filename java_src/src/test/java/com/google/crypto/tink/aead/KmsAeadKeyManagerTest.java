@@ -18,12 +18,10 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClient;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
+import com.google.crypto.tink.testing.FakeKmsClient;
 import com.google.crypto.tink.testing.TestUtil;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,18 +31,15 @@ import org.junit.runners.JUnit4;
 public class KmsAeadKeyManagerTest {
   @Before
   public void setUp() throws Exception {
-    KmsClient kmsClient = new GcpKmsClient().withCredentials(TestUtil.SERVICE_ACCOUNT_FILE);
-    KmsClients.add(kmsClient);
+    KmsClients.add(new FakeKmsClient());
     AeadConfig.register();
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
-  public void testGcpKmsKeyRestricted() throws Exception {
+  public void testKmsAeadWithBoundedClient_success() throws Exception {
+    String keyUri = FakeKmsClient.createFakeKeyUri();
     KeysetHandle keysetHandle =
-        KeysetHandle.generateNew(
-            AeadKeyTemplates.createKmsAeadKeyTemplate(TestUtil.RESTRICTED_CRYPTO_KEY_URI));
+        KeysetHandle.generateNew(AeadKeyTemplates.createKmsAeadKeyTemplate(keyUri));
     TestUtil.runBasicAeadTests(keysetHandle.getPrimitive(Aead.class));
   }
 }

@@ -24,7 +24,10 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.proto import common_pb2
+from tink.proto import kms_aead_pb2
+from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
+from tink import jwt
 
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
@@ -37,6 +40,8 @@ AEAD_KEY_TYPES = [
     'AesCtrHmacAeadKey',
     'ChaCha20Poly1305Key',
     'XChaCha20Poly1305Key',
+    'KmsAeadKey',
+    'KmsEnvelopeAeadKey',
 ]
 DAEAD_KEY_TYPES = ['AesSivKey']
 STREAMING_AEAD_KEY_TYPES = [
@@ -59,10 +64,53 @@ PRF_KEY_TYPES = [
     'HmacPrfKey',
     'HkdfPrfKey',
 ]
+JWT_MAC_KEY_TYPES = [
+    'JwtHmacKey',
+]
+JWT_SIGNATURE_KEY_TYPES = [
+    'JwtEcdsaPrivateKey',
+    'JwtRsaSsaPkcs1PrivateKey',
+    'JwtRsaSsaPssPrivateKey',
+]
+
 ALL_KEY_TYPES = (
     AEAD_KEY_TYPES + DAEAD_KEY_TYPES + STREAMING_AEAD_KEY_TYPES +
     HYBRID_PRIVATE_KEY_TYPES + MAC_KEY_TYPES + SIGNATURE_KEY_TYPES +
-    PRF_KEY_TYPES)
+    PRF_KEY_TYPES + JWT_MAC_KEY_TYPES + JWT_SIGNATURE_KEY_TYPES)
+
+
+# Fake KMS keys are base64-encoded keysets. Each server must register a
+# fake KmsClient that can handle these keys.
+_FAKE_KMS_KEY_URI = (
+    'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRv'
+    'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
+
+
+# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
+def _create_kms_aead_key_template(key_uri: Text) -> tink_pb2.KeyTemplate:
+  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
+  key_format = kms_aead_pb2.KmsAeadKeyFormat()
+  key_format.key_uri = key_uri
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = 'type.googleapis.com/google.crypto.tink.KmsAeadKey'
+  key_template.output_prefix_type = tink_pb2.RAW
+  return key_template
+
+
+# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
+def _create_kms_envelope_aead_key_template(
+    kek_uri: Text, dek_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
+  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
+  key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
+  key_format.kek_uri = kek_uri
+  key_format.dek_template.MergeFrom(dek_template)
+  key_template = tink_pb2.KeyTemplate()
+  key_template.value = key_format.SerializeToString()
+  key_template.type_url = (
+      'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
+  key_template.output_prefix_type = tink_pb2.RAW
+  return key_template
 
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
@@ -72,6 +120,8 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
+    'KmsAeadKey': ['cc', 'java'],
+    'KmsEnvelopeAeadKey': ['cc', 'java', 'go'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
@@ -85,6 +135,10 @@ SUPPORTED_LANGUAGES = {
     'AesCmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
+    'JwtHmacKey': ['java'],
+    'JwtEcdsaPrivateKey': ['java'],
+    'JwtRsaSsaPkcs1PrivateKey': ['java'],
+    'JwtRsaSsaPssPrivateKey': ['java'],
 }
 
 KEY_TYPE_FROM_URL = {
@@ -99,6 +153,8 @@ KEY_TEMPLATE_NAMES = {
     'AesCtrHmacAeadKey': ['AES128_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256'],
     'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
     'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
+    'KmsAeadKey': ['FAKE_KMS_AEAD'],
+    'KmsEnvelopeAeadKey': ['FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM'],
     'AesSivKey': ['AES256_SIV'],
     'AesCtrHmacStreamingKey': [
         'AES128_CTR_HMAC_SHA256_4KB',
@@ -136,6 +192,16 @@ KEY_TEMPLATE_NAMES = {
     'AesCmacPrfKey': ['AES_CMAC_PRF'],
     'HmacPrfKey': ['HMAC_PRF_SHA256', 'HMAC_PRF_SHA512'],
     'HkdfPrfKey': ['HKDF_PRF_SHA256'],
+    'JwtHmacKey': ['JWT_HS256', 'JWT_HS384', 'JWT_HS512'],
+    'JwtEcdsaPrivateKey': ['JWT_ES256', 'JWT_ES384', 'JWT_ES512'],
+    'JwtRsaSsaPkcs1PrivateKey': [
+        'JWT_RS256_2048_F4', 'JWT_RS256_3072_F4', 'JWT_RS384_3072_F4',
+        'JWT_RS512_4096_F4'
+    ],
+    'JwtRsaSsaPssPrivateKey': [
+        'JWT_PS256_2048_F4', 'JWT_PS256_3072_F4', 'JWT_PS384_3072_F4',
+        'JWT_PS512_4096_F4'
+    ],
 }
 
 # KeyTemplate (as Protobuf) for each KeyTemplate name.
@@ -163,6 +229,11 @@ KEY_TEMPLATE = {
             output_prefix_type=tink_pb2.TINK),
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
+    'FAKE_KMS_AEAD':
+        _create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
+    'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
+        _create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM),
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
     'AES128_CTR_HMAC_SHA256_4KB':
@@ -236,6 +307,20 @@ KEY_TEMPLATE = {
         prf.prf_key_templates.HMAC_SHA512,
     'HKDF_PRF_SHA256':
         prf.prf_key_templates.HKDF_SHA256,
+    'JWT_HS256': jwt.jwt_key_templates.JWT_HS256,
+    'JWT_HS384': jwt.jwt_key_templates.JWT_HS384,
+    'JWT_HS512': jwt.jwt_key_templates.JWT_HS512,
+    'JWT_ES256': jwt.jwt_key_templates.JWT_ES256,
+    'JWT_ES384': jwt.jwt_key_templates.JWT_ES384,
+    'JWT_ES512': jwt.jwt_key_templates.JWT_ES512,
+    'JWT_RS256_2048_F4': jwt.jwt_key_templates.JWT_RS256_2048_F4,
+    'JWT_RS256_3072_F4': jwt.jwt_key_templates.JWT_RS256_3072_F4,
+    'JWT_RS384_3072_F4': jwt.jwt_key_templates.JWT_RS384_3072_F4,
+    'JWT_RS512_4096_F4': jwt.jwt_key_templates.JWT_RS512_4096_F4,
+    'JWT_PS256_2048_F4': jwt.jwt_key_templates.JWT_PS256_2048_F4,
+    'JWT_PS256_3072_F4': jwt.jwt_key_templates.JWT_PS256_3072_F4,
+    'JWT_PS384_3072_F4': jwt.jwt_key_templates.JWT_PS384_3072_F4,
+    'JWT_PS512_4096_F4': jwt.jwt_key_templates.JWT_PS512_4096_F4,
 }
 
 
@@ -243,7 +328,6 @@ KEY_TEMPLATE = {
 # the list of supported languages of the whole key type.
 _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
     'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python'],
-    'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV': ['cc', 'java', 'python'],
 }
 
 

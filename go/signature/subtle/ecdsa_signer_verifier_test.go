@@ -17,16 +17,13 @@ package subtle_test
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/subtle"
+	"github.com/google/tink/go/testutil"
 )
 
 func TestSignVerify(t *testing.T) {
@@ -72,48 +69,9 @@ func TestSignVerify(t *testing.T) {
 	}
 }
 
-type testData struct {
-	Algorithm        string
-	GeneratorVersion string
-	NumberOfTests    uint32
-	TestGroups       []*testGroup
-}
+func TestECDSAWycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 
-type testGroup struct {
-	Jwk    *jwk `json:"jwk,omitempty"`
-	KeyDer string
-	KeyPem string
-	Sha    string
-	Type   string
-	Key    *testKey
-	Tests  []*testcase
-}
-
-type testKey struct {
-	Curve string
-	Type  string
-	Wx    string
-	Wy    string
-}
-
-type testcase struct {
-	Comment string
-	Msg     string
-	Result  string
-	Sig     string
-	TcID    uint32
-}
-
-type jwk struct {
-	Jwk string
-	Crv string
-	Kid string
-	Kty string
-	X   string
-	Y   string
-}
-
-func TestWycheproofVectors(t *testing.T) {
 	vectors := []struct {
 		Filename string
 		Encoding string
@@ -123,59 +81,51 @@ func TestWycheproofVectors(t *testing.T) {
 		{"ecdsa_secp384r1_sha512_p1363_test.json", "IEEE_P1363"},
 		{"ecdsa_secp521r1_sha512_p1363_test.json", "IEEE_P1363"},
 	}
-	vectorsDir := "wycheproof/testvectors"
-	for _, v := range vectors {
-		wycheproofTest(t, filepath.Join(vectorsDir, v.Filename), v.Encoding)
-	}
-}
 
-func wycheproofTest(t *testing.T, filename, encoding string) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
-	}
-	fmt.Printf("now testing wycheproof file %q, encoding %q\n", filename, encoding)
-	f, err := os.Open(filepath.Join(srcDir, filename))
-	if err != nil {
-		fmt.Printf("cannot open file: %s, this is typically caused by an older version of Wycheproof.", err)
-		return
-	}
-	parser := json.NewDecoder(f)
-	content := new(testData)
-	if err := parser.Decode(content); err != nil {
-		t.Errorf("cannot decode content of file: %s", err)
-	}
-	for _, g := range content.TestGroups {
-		hash := subtle.ConvertHashName(g.Sha)
-		curve := subtle.ConvertCurveName(g.Key.Curve)
-		if hash == "" || curve == "" {
-			continue
+	for _, v := range vectors {
+		suite := new(ecdsaSuite)
+		if err := testutil.PopulateSuite(suite, v.Filename); err != nil {
+			t.Fatalf("failed populating suite: %s", err)
 		}
-		x, err := subtle.NewBigIntFromHex(g.Key.Wx)
-		if err != nil {
-			t.Errorf("cannot decode wx: %s", err)
-		}
-		y, err := subtle.NewBigIntFromHex(g.Key.Wy)
-		if err != nil {
-			t.Errorf("cannot decode wy: %s", err)
-		}
-		verifier, err := subtleSignature.NewECDSAVerifier(hash, curve, encoding, x.Bytes(), y.Bytes())
-		if err != nil {
-			continue
-		}
-		for _, tc := range g.Tests {
-			message, err := hex.DecodeString(tc.Msg)
-			if err != nil {
-				t.Errorf("cannot decode message in test case %d: %s", tc.TcID, err)
+		for _, group := range suite.TestGroups {
+			hash := subtle.ConvertHashName(group.SHA)
+			curve := subtle.ConvertCurveName(group.Key.Curve)
+			if hash == "" || curve == "" {
+				continue
 			}
-			sig, err := hex.DecodeString(tc.Sig)
+			x, err := subtle.NewBigIntFromHex(group.Key.Wx)
 			if err != nil {
-				t.Errorf("cannot decode signature in test case %d: %s", tc.TcID, err)
+				t.Errorf("cannot decode wx: %s", err)
+				continue
 			}
-			err = verifier.Verify(sig, message)
-			if (tc.Result == "valid" && err != nil) ||
-				(tc.Result == "invalid" && err == nil) {
-				t.Errorf("failed in test case %d with error %q ", tc.TcID, err)
+			y, err := subtle.NewBigIntFromHex(group.Key.Wy)
+			if err != nil {
+				t.Errorf("cannot decode wy: %s", err)
+				continue
+			}
+			verifier, err := subtleSignature.NewECDSAVerifier(hash, curve, v.Encoding, x.Bytes(), y.Bytes())
+			if err != nil {
+				continue
+			}
+			for _, test := range group.Tests {
+				caseName := fmt.Sprintf("%s-%s:Case-%d", group.Type, group.SHA, test.CaseID)
+				t.Run(caseName, func(t *testing.T) {
+					err := verifier.Verify(test.Signature, test.Message)
+					switch test.Result {
+					case "valid":
+						if err != nil {
+							t.Fatalf("ECDSAVerifier.Verify() failed in a valid test case: %s", err)
+						}
+					case "invalid":
+						if err == nil {
+							t.Fatalf("ECDSAVerifier.Verify() succeeded in an invalid test case")
+						}
+					case "acceptable":
+						// TODO(ckl): Inspect flags to appropriately handle acceptable test cases.
+					default:
+						t.Fatalf("unsupported test result: %q", test.Result)
+					}
+				})
 			}
 		}
 	}

@@ -15,10 +15,13 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.subtle.Base64;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.security.InvalidAlgorithmParameterException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -29,8 +32,8 @@ public final class JwtFormatTest {
 
   @Test
   public void createDecodeHeader_success() throws Exception {
-    JSONObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
-    assertThat(header.getString("alg")).isEqualTo("RS256");
+    JsonObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
+    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
   }
 
   @Test
@@ -43,23 +46,29 @@ public final class JwtFormatTest {
   @Test
   public void decodeHeaderA1_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
-    JSONObject header = JwtFormat.decodeHeader("eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9");
-    assertThat(header.getString("typ")).isEqualTo("JWT");
-    assertThat(header.getString("alg")).isEqualTo("HS256");
+    JsonObject header = JwtFormat.decodeHeader("eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9");
+    assertThat(header.get("typ").getAsString()).isEqualTo("JWT");
+    assertThat(header.get("alg").getAsString()).isEqualTo("HS256");
   }
 
   @Test
   public void decodeHeaderA2_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.2
-    JSONObject header = JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9");
-    assertThat(header.getString("alg")).isEqualTo("RS256");
+    JsonObject header = JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9");
+    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
   }
 
   @Test
-  public void decodeInvalidHeader_fail() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.decodeHeader("INVALID!!!"));
+  public void decodeHeader_success() throws Exception {
+    String headerStr = Base64.urlSafeEncode("{\"alg\":\"RS256\"}".getBytes(UTF_8));
+    JsonObject header = JwtFormat.decodeHeader(headerStr);
+    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
+  }
+
+  @Test
+  public void decodeHeaderWithoutQuotes_fail() throws Exception {
+    String headerStr = Base64.urlSafeEncode("{alg:RS256}".getBytes(UTF_8));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader(headerStr));
   }
 
   @Test
@@ -73,7 +82,7 @@ public final class JwtFormatTest {
 
   @Test
   public void validateHeaderWithWrongAlgorithm_fails() throws Exception {
-    JSONObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256"));
+    JsonObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256"));
     assertThrows(
         InvalidAlgorithmParameterException.class,
         () -> JwtFormat.validateHeader("HS384", header));
@@ -81,8 +90,8 @@ public final class JwtFormatTest {
 
   @Test
   public void validateHeaderWithUnknownAlgorithm_fails() throws Exception {
-    JSONObject header = new JSONObject();
-    header.put("alg", "UnknownAlgorithm");
+    JsonObject header = new JsonObject();
+    header.addProperty("alg", "UnknownAlgorithm");
     assertThrows(
         InvalidAlgorithmParameterException.class,
         () -> JwtFormat.validateHeader("UnknownAlgorithm", header));
@@ -90,17 +99,17 @@ public final class JwtFormatTest {
 
   @Test
   public void validateHeaderWithValidLowercaseTyp_success() throws Exception {
-    JSONObject header = new JSONObject();
-    header.put("alg", "HS256");
-    header.put("typ", "jwt");
+    JsonObject header = new JsonObject();
+    header.addProperty("alg", "HS256");
+    header.addProperty("typ", "jwt");
     JwtFormat.validateHeader("HS256", header);
   }
 
   @Test
   public void validateHeaderWithBadTyp_fails() throws Exception {
-    JSONObject header = new JSONObject();
-    header.put("alg", "HS256");
-    header.put("typ", "IWT");
+    JsonObject header = new JsonObject();
+    header.addProperty("alg", "HS256");
+    header.addProperty("typ", "IWT");
     assertThrows(
         JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", header));
@@ -108,9 +117,9 @@ public final class JwtFormatTest {
 
   @Test
   public void validateHeaderWithUnknownEntry_fails() throws Exception {
-    JSONObject header = new JSONObject();
-    header.put("alg", "HS256");
-    header.put("unknown", "header");
+    JsonObject header = new JsonObject();
+    header.addProperty("alg", "HS256");
+    header.addProperty("unknown", "header");
     assertThrows(
         JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", header));
@@ -118,7 +127,7 @@ public final class JwtFormatTest {
 
   @Test
   public void validateEmptyHeader_fails() throws Exception {
-    JSONObject emptyHeader = new JSONObject();
+    JsonObject emptyHeader = new JsonObject();
     assertThrows(
         JwtInvalidException.class,
         () -> JwtFormat.validateHeader("HS256", emptyHeader));
@@ -126,41 +135,33 @@ public final class JwtFormatTest {
 
   @Test
   public void encodeDecodePayload_equal() throws Exception {
-    JSONObject payload = new JSONObject();
-    payload.put("iss", "joe");
-    payload.put("exp", 1300819380);
-    payload.put("http://example.com/is_root", true);
-    String encodedPayload = JwtFormat.encodePayload(payload);
-    JSONObject decodedPayload = JwtFormat.decodePayload(encodedPayload);
-    assertThat(decodedPayload.getString("iss")).isEqualTo("joe");
-    assertThat(decodedPayload.getInt("exp")).isEqualTo(1300819380);
-    assertThat(decodedPayload.getBoolean("http://example.com/is_root")).isTrue();
+    JsonObject payload = new JsonObject();
+    payload.addProperty("iss", "joe");
+    payload.addProperty("exp", 1300819380);
+    payload.addProperty("http://example.com/is_root", true);
+    String jsonPayload = payload.toString();
+    String encodedPayload = JwtFormat.encodePayload(jsonPayload);
+    String decodedPayload = JwtFormat.decodePayload(encodedPayload);
+    assertThat(decodedPayload).isEqualTo(jsonPayload);
   }
 
   @Test
   public void decodePayload_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
-    JSONObject payload =
-        JwtFormat.decodePayload(
-            "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt"
-                + "cGxlLmNvbS9pc19yb290Ijp0cnVlfQ");
-    assertThat(payload.getString("iss")).isEqualTo("joe");
-    assertThat(payload.getInt("exp")).isEqualTo(1300819380);
-    assertThat(payload.getBoolean("http://example.com/is_root")).isTrue();
-  }
-
-  @Test
-  public void decodeInvalidPayload_fails() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.decodePayload("INVALID!!!"));
+    JsonObject payload =
+        JsonParser.parseString(
+                JwtFormat.decodePayload(
+                    "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt"
+                        + "cGxlLmNvbS9pc19yb290Ijp0cnVlfQ"))
+            .getAsJsonObject();
+    assertThat(payload.get("iss").getAsString()).isEqualTo("joe");
+    assertThat(payload.get("exp").getAsInt()).isEqualTo(1300819380);
+    assertThat(payload.get("http://example.com/is_root").getAsBoolean()).isTrue();
   }
 
   @Test
   public void createUnsignedCompact_success() throws Exception {
-    JSONObject payload = new JSONObject();
-    payload.put("iss", "joe");
-    assertThat(JwtFormat.createUnsignedCompact("RS256", payload)).isEqualTo(
+    assertThat(JwtFormat.createUnsignedCompact("RS256", "{\"iss\":\"joe\"}")).isEqualTo(
             "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
   }
 

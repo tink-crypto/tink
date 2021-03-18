@@ -35,7 +35,10 @@ java_library(
     srcs = ["KeyHandle.java"],
     deps = [
         ":key_access",
+        ":proto_key",
         ":tink_key",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
     ],
 )
 
@@ -79,7 +82,10 @@ android_library(
     srcs = ["KeyHandle.java"],
     deps = [
         ":key_access-android",
+        ":proto_key-android",
         ":tink_key-android",
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
     ],
 )
 

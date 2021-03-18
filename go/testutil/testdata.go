@@ -25,6 +25,8 @@ import (
 )
 
 // SkipTestIfTestSrcDirIsNotSet skips the test if TEST_SRCDIR is not set.
+// This is necessary when not using Blaze/Bazel, as we don't have a solution for referencing non-Go
+// resources that are external to the repository with Go tooling.
 func SkipTestIfTestSrcDirIsNotSet(t *testing.T) {
 	t.Helper()
 	if _, ok := os.LookupEnv("TEST_SRCDIR"); !ok {

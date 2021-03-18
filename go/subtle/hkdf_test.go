@@ -23,9 +23,7 @@ import (
 	"github.com/google/tink/go/subtle/random"
 )
 
-// Tests sourced from
-// //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/HkdfTest.java
-
+// Tests the implementation against the test vectors from RFC 5869.
 var hkdfTests = []struct {
 	hashAlg     string
 	key         string
@@ -135,7 +133,7 @@ func TestHKDFBasic(t *testing.T) {
 
 func TestNewHMACWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := ComputeHKDF("SHA224", random.GetRandomBytes(16), nil, nil, 32)
+	_, err := ComputeHKDF("SHA0", random.GetRandomBytes(16), nil, nil, 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}

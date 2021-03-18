@@ -17,11 +17,13 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,35 +41,24 @@ public class HybridConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
-    try {
-      Registry.getCatalogue("tinkmac");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("MacConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybridencrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-    try {
-      Registry.getCatalogue("tinkhybriddecrypt");
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("no catalogue found");
-      assertThat(e.toString()).contains("HybridConfig.register()");
-    }
-
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("MacConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybridencrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
+    e =
+        assertThrows(
+            GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
+    assertThat(e.toString()).contains("no catalogue found");
+    assertThat(e.toString()).contains("HybridConfig.register()");
     String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    try {
-      Registry.getUntypedKeyManager(typeUrl);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertThat(e.toString()).contains("No key manager found");
-    }
+    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     HybridConfig.register();
@@ -76,5 +67,39 @@ public class HybridConfigTest {
 
     // Running init() manually again should succeed.
     HybridConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register Hybrid key manager
+    HybridConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, HybridDecrypt.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register Hybrid key manager
+    HybridConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    }
   }
 }

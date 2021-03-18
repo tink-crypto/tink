@@ -28,7 +28,12 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-/** PEM key types that Tink supports */
+/**
+ * PEM key types that Tink supports
+ *
+ * @deprecated Use com.google.crypto.tink.PemKeyType instead.
+ */
+@Deprecated
 public enum PemKeyType {
   // RSASSA-PSS 2048 bit key with a SHA256 digest.
   RSA_PSS_2048_SHA256("RSA", "RSASSA-PSS", 2048, HashType.SHA256),

@@ -39,7 +39,7 @@ _SERVER_PATHS = {
         'testing/cc/testing_server'
     ],
     'go': [
-        'testing/go/bazel-bin/linux_amd64_stripped/testing_server',
+        'testing/go/bazel-bin/testing_server_/testing_server',
         'testing/go/testing_server'
     ],
     'java': [
@@ -67,6 +67,7 @@ _PRIMITIVE_STUBS = {
     'mac': testing_api_pb2_grpc.MacStub,
     'signature': testing_api_pb2_grpc.SignatureStub,
     'prf': testing_api_pb2_grpc.PrfSetStub,
+    'jwt': testing_api_pb2_grpc.JwtStub,
 }
 
 # All primitives.
@@ -80,6 +81,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
     'prf': ['cc', 'java', 'go', 'python'],
+    'jwt': ['java'],
 }
 
 
@@ -119,6 +121,7 @@ class _TestingServers():
     self._mac_stub = {}
     self._signature_stub = {}
     self._prf_stub = {}
+    self._jwt_stub = {}
     for lang in LANGUAGES:
       port = portpicker.pick_unused_port()
       cmd = _server_cmd(lang, port)
@@ -185,6 +188,9 @@ class _TestingServers():
 
   def prf_stub(self, lang) -> testing_api_pb2_grpc.PrfSetStub:
     return self._prf_stub[lang]
+
+  def jwt_stub(self, lang) -> testing_api_pb2_grpc.JwtStub:
+    return self._jwt_stub[lang]
 
   def metadata_stub(self, lang) -> testing_api_pb2_grpc.MetadataStub:
     return self._metadata_stub[lang]
@@ -318,3 +324,23 @@ def prf_set(lang: Text, keyset: bytes) -> _primitives.PrfSet:
   """Returns an PrfSet primitive, implemented in lang."""
   global _ts
   return _primitives.PrfSet(lang, _ts.prf_stub(lang), keyset)
+
+
+def jwt_mac(lang: Text, keyset: bytes) -> _primitives.JwtMac:
+  """Returns a JwtMac primitive, implemented in lang."""
+  global _ts
+  return _primitives.JwtMac(lang, _ts.jwt_stub(lang), keyset)
+
+
+def jwt_public_key_sign(lang: Text,
+                        keyset: bytes) -> _primitives.JwtPublicKeySign:
+  """Returns a JwtPublicKeySign primitive, implemented in lang."""
+  global _ts
+  return _primitives.JwtPublicKeySign(lang, _ts.jwt_stub(lang), keyset)
+
+
+def jwt_public_key_verify(lang: Text,
+                          keyset: bytes) -> _primitives.JwtPublicKeyVerify:
+  """Returns a JwtPublicKeyVerify primitive, implemented in lang."""
+  global _ts
+  return _primitives.JwtPublicKeyVerify(lang, _ts.jwt_stub(lang), keyset)

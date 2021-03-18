@@ -16,6 +16,7 @@
 package com.google.crypto.tink.signature;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.KeyTypeManager;
@@ -95,12 +96,9 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
   @Test
   public void validateKey_empty_throws() throws Exception {
-    try {
-      verifyManager.validateKey(RsaSsaPkcs1PublicKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifyManager.validateKey(RsaSsaPkcs1PublicKey.getDefaultInstance()));
   }
 
   @Test
@@ -133,12 +131,7 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
     RsaSsaPkcs1PublicKey invalidKey =
         RsaSsaPkcs1PublicKey.newBuilder(publicKey).setVersion(1).build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -150,12 +143,7 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
             .setN(ByteString.copyFrom(TestUtil.hexDecode("23")))
             .setE(ByteString.copyFrom(TestUtil.hexDecode("03")))
             .build();
-    try {
-      verifyManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifyManager.validateKey(invalidKey));
   }
 
   @Test
@@ -203,12 +191,7 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
     byte[] message = Random.randBytes(135);
     byte[] signature = signer.sign(message);
-    try {
-      verifier.verify(signature, message);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> verifier.verify(signature, message));
   }
 
   @Test

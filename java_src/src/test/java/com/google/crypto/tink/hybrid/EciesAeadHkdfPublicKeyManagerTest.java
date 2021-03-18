@@ -14,7 +14,7 @@
 package com.google.crypto.tink.hybrid;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
@@ -64,12 +64,9 @@ public final class EciesAeadHkdfPublicKeyManagerTest {
 
   @Test
   public void validateKey_empty_throws() throws Exception {
-    try {
-      publicManager.validateKey(EciesAeadHkdfPublicKey.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> publicManager.validateKey(EciesAeadHkdfPublicKey.getDefaultInstance()));
   }
 
   private EciesAeadHkdfKeyFormat createKeyFormat(
@@ -118,12 +115,7 @@ public final class EciesAeadHkdfPublicKeyManagerTest {
     EciesAeadHkdfPrivateKey privateKey = createValidPrivateKey();
     EciesAeadHkdfPublicKey publicKey = privateManager.getPublicKey(privateKey);
     EciesAeadHkdfPublicKey invalidKey = EciesAeadHkdfPublicKey.newBuilder().setVersion(1).build();
-    try {
-      publicManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> publicManager.validateKey(invalidKey));
   }
 
   @Test
@@ -140,12 +132,7 @@ public final class EciesAeadHkdfPublicKeyManagerTest {
                         AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
                         "some salt".getBytes("UTF-8"))
                     .getParams()).build();
-    try {
-      publicManager.validateKey(invalidKey);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> publicManager.validateKey(invalidKey));
   }
 
   @Test

@@ -18,16 +18,17 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,34 +68,35 @@ public class AesEaxJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_eax_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      int keySize = group.getInt("keySize");
-      int ivSize = group.getInt("ivSize");
-      JSONArray tests = group.getJSONArray("tests");
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      int keySize = group.get("keySize").getAsInt();
+      int ivSize = group.get("ivSize").getAsInt();
+      JsonArray tests = group.getAsJsonArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)
           || !Arrays.asList(ivSizeInBytes).contains(ivSize / 8)) {
-        cntSkippedTests += tests.length();
+        cntSkippedTests += tests.size();
         continue;
       }
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
             String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        byte[] iv = Hex.decode(testcase.getString("iv"));
-        byte[] key = Hex.decode(testcase.getString("key"));
-        byte[] msg = Hex.decode(testcase.getString("msg"));
-        byte[] aad = Hex.decode(testcase.getString("aad"));
-        byte[] ct = Hex.decode(testcase.getString("ct"));
-        byte[] tag = Hex.decode(testcase.getString("tag"));
+                "testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        byte[] iv = Hex.decode(testcase.get("iv").getAsString());
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
+        byte[] aad = Hex.decode(testcase.get("aad").getAsString());
+        byte[] ct = Hex.decode(testcase.get("ct").getAsString());
+        byte[] tag = Hex.decode(testcase.get("tag").getAsString());
         byte[] ciphertext = Bytes.concat(iv, ct, tag);
-        String result = testcase.getString("result");
+        String result = testcase.get("result").getAsString();
         try {
           AesEaxJce eax = new AesEaxJce(key, iv.length);
           byte[] decrypted = eax.decrypt(ciphertext, aad);
@@ -199,32 +201,27 @@ public class AesEaxJceTest {
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
     AesEaxJce eax = new AesEaxJce(Random.randBytes(KEY_SIZE), IV_SIZE);
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = eax.encrypt(null, aad);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = eax.encrypt(null, null);
-      fail("Encrypting a null plaintext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] aad = new byte[] {1, 2, 3};
-      byte[] unused = eax.decrypt(null, aad);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
-    try {
-      byte[] unused = eax.decrypt(null, null);
-      fail("Decrypting a null ciphertext should fail");
-    } catch (NullPointerException ex) {
-      // This is expected.
-    }
+    byte[] aad = new byte[] {1, 2, 3};
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = eax.encrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = eax.encrypt(null, null);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = eax.decrypt(null, aad);
+        });
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          byte[] unused = eax.decrypt(null, null);
+        });
   }
 
   @Test
@@ -240,13 +237,12 @@ public class AesEaxJceTest {
         assertArrayEquals(message, decrypted);
         byte[] decrypted2 = eax.decrypt(ciphertext, null);
         assertArrayEquals(message, decrypted2);
-        try {
-          byte[] badAad = new byte[] {1, 2, 3};
-          byte[] unused = eax.decrypt(ciphertext, badAad);
-          fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
-          // This is expected.
-        }
+        byte[] badAad = new byte[] {1, 2, 3};
+        assertThrows(
+            AEADBadTagException.class,
+            () -> {
+              byte[] unused = eax.decrypt(ciphertext, badAad);
+            });
       }
       {  // encrypting with aad equal to null
         byte[] ciphertext = eax.encrypt(message, null);
@@ -254,13 +250,12 @@ public class AesEaxJceTest {
         assertArrayEquals(message, decrypted);
         byte[] decrypted2 = eax.decrypt(ciphertext, null);
         assertArrayEquals(message, decrypted2);
-        try {
-          byte[] badAad = new byte[] {1, 2, 3};
-          byte[] unused = eax.decrypt(ciphertext, badAad);
-          fail("Decrypting with modified aad should fail");
-        } catch (AEADBadTagException ex) {
-          // This is expected.
-        }
+        byte[] badAad = new byte[] {1, 2, 3};
+        assertThrows(
+            AEADBadTagException.class,
+            () -> {
+              byte[] unused = eax.decrypt(ciphertext, badAad);
+            });
       }
     }
   }

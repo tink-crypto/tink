@@ -17,11 +17,13 @@ package com.google.crypto.tink.jwt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.subtle.Base64;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.Iterator;
 import java.util.Locale;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 final class JwtFormat {
 
@@ -49,73 +51,68 @@ final class JwtFormat {
 
   static String createHeader(String algorithm) throws InvalidAlgorithmParameterException {
     validateAlgorithm(algorithm);
-    JSONObject header = new JSONObject();
-    try {
-      header.put(JwtNames.HEADER_ALGORITHM, algorithm);
-    } catch (JSONException ex) {
-      // Should never happen.
-      throw new IllegalStateException(ex);
-    }
+    JsonObject header = new JsonObject();
+    header.addProperty(JwtNames.HEADER_ALGORITHM, algorithm);
     return Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
   }
 
-  static void validateHeader(String expectedAlgorithm, JSONObject header)
+  static void validateHeader(String expectedAlgorithm, JsonObject header)
       throws InvalidAlgorithmParameterException, JwtInvalidException {
     validateAlgorithm(expectedAlgorithm);
-    try {
-      if (!header.has(JwtNames.HEADER_ALGORITHM)) {
-        throw new JwtInvalidException("missing algorithm in header");
-      }
-      Iterator<String> headerIterator = header.keys();
-      while (headerIterator.hasNext()) {
-        String name = headerIterator.next();
-        if (name.equals(JwtNames.HEADER_ALGORITHM)) {
-          String algorithm = header.getString(JwtNames.HEADER_ALGORITHM);
-          if (!algorithm.equals(expectedAlgorithm)) {
-            throw new InvalidAlgorithmParameterException(
-                String.format(
-                    "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
-          }
-        } else if (name.equals(JwtNames.HEADER_TYPE)) {
-          String headerType = header.getString(JwtNames.HEADER_TYPE);
-          if (!headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
-            throw new JwtInvalidException(
-                String.format(
-                    "invalid header type; expected %s, got %s",
-                    JwtNames.HEADER_TYPE_VALUE, headerType));
-          }
-        } else {
-          throw new JwtInvalidException(
-              String.format("invalid JWT header: unexpected header %s", name));
+
+    if (!header.has(JwtNames.HEADER_ALGORITHM)) {
+      throw new JwtInvalidException("missing algorithm in header");
+    }
+    for (String name : header.keySet()) {
+      if (name.equals(JwtNames.HEADER_ALGORITHM)) {
+        String algorithm = getStringHeader(header, JwtNames.HEADER_ALGORITHM);
+        if (!algorithm.equals(expectedAlgorithm)) {
+          throw new InvalidAlgorithmParameterException(
+              String.format(
+                  "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
         }
+      } else if (name.equals(JwtNames.HEADER_TYPE)) {
+        String headerType = getStringHeader(header, JwtNames.HEADER_TYPE);
+        if (!headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
+          throw new JwtInvalidException(
+              String.format(
+                  "invalid header type; expected %s, got %s",
+                  JwtNames.HEADER_TYPE_VALUE, headerType));
+        }
+      } else {
+        throw new JwtInvalidException(
+            String.format("invalid JWT header: unexpected header %s", name));
       }
-    } catch (JSONException ex) {
+    }
+  }
+
+  private static String getStringHeader(JsonObject header, String name) throws JwtInvalidException {
+    if (!header.has(name)) {
+      throw new JwtInvalidException("header " + name + " does not exist");
+    }
+    if (!header.get(name).isJsonPrimitive() || !header.get(name).getAsJsonPrimitive().isString()) {
+      throw new JwtInvalidException("header " + name + " is not a string");
+    }
+    return header.get(name).getAsString();
+  }
+
+  static JsonObject decodeHeader(String headerStr) throws JwtInvalidException {
+    try {
+      String jsonHeader = new String(Base64.urlSafeDecode(headerStr), UTF_8);
+      JsonReader jsonReader = new JsonReader(new StringReader(jsonHeader));
+      jsonReader.setLenient(false);
+      return Streams.parse(jsonReader).getAsJsonObject();
+    } catch (JsonParseException | IllegalArgumentException ex) {
       throw new JwtInvalidException("invalid JWT header: " + ex);
     }
   }
 
-  static JSONObject decodeHeader(String headerStr) throws JwtInvalidException {
-    JSONObject json;
-    try {
-      json = new JSONObject(new String(Base64.urlSafeDecode(headerStr), UTF_8));
-    } catch (JSONException | IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT header: " + ex);
-    }
-    return json;
+  static String encodePayload(String jsonPayload) {
+    return Base64.urlSafeEncode(jsonPayload.getBytes(UTF_8));
   }
 
-  static String encodePayload(JSONObject json) {
-    return Base64.urlSafeEncode(json.toString().getBytes(UTF_8));
-  }
-
-  static JSONObject decodePayload(String payloadStr) throws JwtInvalidException{
-    JSONObject json;
-    try {
-      json = new JSONObject(new String(Base64.urlSafeDecode(payloadStr), UTF_8));
-    } catch (JSONException | IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT payload: " + ex);
-    }
-    return json;
+  static String decodePayload(String payloadStr) {
+    return new String(Base64.urlSafeDecode(payloadStr), UTF_8);
   }
 
   static String encodeSignature(byte[] signature) {
@@ -130,13 +127,20 @@ final class JwtFormat {
     }
   }
 
-  static String createUnsignedCompact(String algorithm, JSONObject payload)
+  static String createUnsignedCompact(String algorithm, String jsonPayload)
       throws InvalidAlgorithmParameterException {
-    return createHeader(algorithm) + "." + encodePayload(payload);
+    return createHeader(algorithm) + "." + encodePayload(jsonPayload);
   }
 
   static String createSignedCompact(String unsignedCompact, byte[] signature) {
     return unsignedCompact + "." + encodeSignature(signature);
   }
 
+  static void validateASCII(String data) throws JwtInvalidException {
+    for (char c : data.toCharArray()) {
+      if ((c & 0x80) > 0) {
+        throw new JwtInvalidException("Non ascii character");
+      }
+    }
+  }
 }

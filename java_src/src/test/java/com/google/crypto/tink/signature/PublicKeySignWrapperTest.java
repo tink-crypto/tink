@@ -17,6 +17,7 @@
 package com.google.crypto.tink.signature;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.CryptoFormat;
@@ -147,7 +148,7 @@ public class PublicKeySignWrapperTest {
       EcdsaPrivateKey randomPrivKey =
           TestUtil.generateEcdsaPrivKey(
               EllipticCurveType.NIST_P521, HashType.SHA512, EcdsaSignatureEncoding.DER);
-      verifier =
+      final PublicKeyVerify verifier2 =
           PublicKeyVerifyFactory.getPrimitive(
               TestUtil.createKeysetHandle(
                   TestUtil.createKeyset(
@@ -159,12 +160,7 @@ public class PublicKeySignWrapperTest {
                           keys[i].getKeyId(),
                           KeyStatusType.ENABLED,
                           keys[i].getOutputPrefixType()))));
-      try {
-        verifier.verify(sig, plaintext);
-        fail("Invalid signature, should have thrown exception");
-      } catch (GeneralSecurityException expected) {
-        // Expected
-      }
+      assertThrows(GeneralSecurityException.class, () -> verifier2.verify(sig, plaintext));
     }
   }
 }

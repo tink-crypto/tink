@@ -184,6 +184,67 @@ public class PaymentMethodTokenSenderTest {
   }
 
   @Test
+  public void testECV1WithTestdataSeal() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+    // Seal where "=" has been escaped by \u003d.
+    // - tag is "bkd9lJMV/8Na34/9ZtZmDmgrZcxJ71ALhT/KpraqzR8=", = gets escapced by \u003d, so
+    //   signedMessage contains "tag": "bkd9lJMV/8Na34/9ZtZmDmgrZcxJ71ALhT/KpraqzR8\u003d"
+    // - this gets escaped in the 2nd encoding with \ -> \\ and " -> \". So the final seal
+    //   contains \"tag\":\"bkd9lJMV/8Na34/9ZtZmDmgrZcxJ71ALhT/KpraqzR8\\u003d\"
+    // Note that to encode this string in Java, we have to escape \ -> \\ and " -> \" again.
+    String testdataSeal =
+        "{\"signedMessage\":\"{\\\"tag\\\":\\\"bkd9lJMV/8Na34/9ZtZmDmgrZcxJ71ALhT/KpraqzR8\\\\u003d"
+            + "\\\",\\\"ephemeralPublicKey\\\":\\\"BLyk1Iwcx+yRQbCSsZgAwb8s/ChNDTlcCovgL5/37qDdia3x"
+            + "PM5GUb+HmbW9bF/c12p0ySxtU/MDcNkJZ0nWCVs\\\\u003d\\\",\\\"encryptedMessage\\\":\\\"ue"
+            + "63Gg\\\\u003d\\\\u003d\\\"}\",\"protocolVersion\":\"ECv1\",\"signature\":\"MEQCIFFdW"
+            + "ve35+jh7CT9QC9W6Leqx32P41oNxG2NDm6PaY1fAiAKHvklWHDPiLKYPb0zyXRGIl6GYvfQ3LAl1z5sR3CbS"
+            + "w\\u003d\\u003d\"}";
+
+    // Seal where "=" has not been escaped, but " and \ have to be escaped as before.
+    String testdataSeal2 =
+        "{\"signedMessage\":\"{\\\"encryptedMessage\\\":\\\"Ih3e7g==\\\",\\\"tag\\\":\\\"GlZ332kL5u"
+            + "ZICWrCsSSQ6KrFFqQyKI84SH2Wh6UTv8c=\\\",\\\"ephemeralPublicKey\\\":\\\"BBb/VaSEYJphhs"
+            + "ma1X24QrjdFr/DHo7IDu8owi6NR0tW9p5F9jn6wxu5by5Rs/bYkVdr8HNT9+MEpBOnL7Si/dQ=\\\"}\",\""
+            + "protocolVersion\":\"ECv1\",\"signature\":\"MEYCIQD6rOV4l9pm/MDr2jPkqnU2GSHbbnUaLYQow"
+            + "/0Y+S1axAIhAKUUO7N9eoBNuXySDDWDYrdu7r0IHxeeFtkubDxhplYU\"}";
+
+    // Seal where "=" has only been escaped in the outer encoding:
+    // - tag is "Jv2KH2lCVyNgGcQMbWSMf+N8RQCgTfkRq3J3f9qrBKE=", so
+    //   signedMessage contains "tag": "Jv2KH2lCVyNgGcQMbWSMf+N8RQCgTfkRq3J3f9qrBKE="
+    // - this gets escaped in the 2nd encoding with \ -> \\, " -> \" and = -> \u003d. So the final
+    //   seal contains \"tag\":\"Jv2KH2lCVyNgGcQMbWSMf+N8RQCgTfkRq3J3f9qrBKE\u003d\"
+    // Note that to encode this string in Java, we have to escape \ -> \\ and " -> \" again.
+    String testdataSeal3 =
+        "{\"signedMessage\":\"{\\\"encryptedMessage\\\":\\\"eTBsng\\u003d\\u003d\\\",\\\"tag\\\":\\"
+            + "\"Jv2KH2lCVyNgGcQMbWSMf+N8RQCgTfkRq3J3f9qrBKE\\u003d\\\",\\\"ephemeralPublicKey\\\":"
+            + "\\\"BGPS6h2ddaOA+H71e28xZ2OQZBJuVrCK3qUXc6G6ykHTr8ab9pmS7B87n9jg8qwYAWpFcRNgC2fxnrPL"
+            + "+p2Gk5U\\u003d\\\"}\",\"protocolVersion\":\"ECv1\",\"signature\":\"MEUCIQC+8NTo1xbem"
+            + "5lPhXuEwcYc0W03jdj3Q1YNI4XvoVAbuAIgT5WXy1wZ2GNXoaLauNGo0iHeOjsZT3wYUziZPHkSAlk\\u003"
+            + "d\"}";
+
+    // Weird token where for no reason the characters { -> \u007b and s -> \u0073 have been escaped.
+    String testdataSeal4 =
+        "{\"\\u0073ignedMe\\u0073\\u0073age\":\"\\u007b\\\"encryptedMe\\\\u0073\\\\u0073age\\\":\\"
+            + "\"tfAPcA\\\\u003d\\\\u003d\\\",\\\"tag\\\":\\\"bB72KLdziA4Oca77w7g7a4fbKpgFXVrtUr56W"
+            + "NpIL6M\\\\u003d\\\",\\\"ephemeralPublicKey\\\":\\\"BKYBrgWkOP7gqCcIqRjT1t0HjMdbEIMeP"
+            + "82VtfC7IaCNbHgL9vojnQ/Yxy8Kutn+MCvG3gRdTxGN+Pwl+1QjM6w\\\\u003d\\\"}\",\"protocolVer"
+            + "\\u0073ion\":\"ECv1\",\"\\u0073ignature\":\"MEUCIHDW7JS51iy1LeyiNri7tNqe0HYdPwmDoi/M"
+            + "j2RD+3f1AiEA9FBSpqDhQzEvn849IrxXWQlIkuJdUfLE1NxCBQ8mCj0\\u003d\"}";
+
+    String plaintext = "blah";
+    assertEquals(plaintext, recipient.unseal(testdataSeal));
+    assertEquals(plaintext, recipient.unseal(testdataSeal2));
+    assertEquals(plaintext, recipient.unseal(testdataSeal3));
+    assertEquals(plaintext, recipient.unseal(testdataSeal4));
+  }
+
+  @Test
   public void testECV2WithPrecomputedKeys() throws Exception {
     PaymentMethodTokenSender sender =
         new PaymentMethodTokenSender.Builder()

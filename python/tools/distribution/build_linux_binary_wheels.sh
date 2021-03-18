@@ -1,50 +1,57 @@
 #!/bin/bash
+
 # This script builds binary wheels of Tink for Linux based on PEP 599. It
 # should be run inside a manylinux2014 Docker container to have the correct
 # environment setup.
 
 set -euo pipefail
 
-# Get dependencies which are needed for building Tink
-# Install Bazel which is needed for building C++ extensions
-BAZEL_VERSION='3.1.0'
-curl -OL https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
-chmod +x bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
-./bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh
+# The following assoicative array contains:
+#   ["<Python version>"]="<python tag>-<abi tag>"
+# where:
+#   <Python version> = language version, e.g "3.7"
+#   <python tag-<abi tag> = tags as specified in in PEP 491, e.g. "cp37-37m"
+declare -A PYTHON_VERSIONS
+PYTHON_VERSIONS["3.7"]="cp37-cp37m"
+PYTHON_VERSIONS["3.8"]="cp38-cp38"
+# TODO(ckl): Enable when macOS solution is in place.
+#PYTHON_VERSIONS["3.9"]="cp39-cp39"
+readonly -A PYTHON_VERSIONS
 
-# Install Protoc which is needed for compiling the protos
-PROTOC_ZIP='protoc-3.11.4-linux-x86_64.zip'
-curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/${PROTOC_ZIP}
+readonly BAZEL_VERSION='3.1.0'
+readonly PROTOC_VERSION='3.14.0'
+
+# Get dependencies which are needed for building Tink.
+
+# Install Bazel. Needed for building C++ extensions.
+curl -OL "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+chmod +x "bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+./"bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+
+# Install protoc. Needed for protocol buffer compilation.
+PROTOC_ZIP="protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}"
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
 # Setup required for Tink
-export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH=/tmp/tink
+export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="/tmp/tink"
+
 # Required to fix https://github.com/pypa/manylinux/issues/357.
-export LD_LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH="/usr/local/lib"
 
-# Build wheel for Python 3.7
-(
-  # Set Path to Python3.7
-  export PATH=$PATH:/opt/python/cp37-cp37m/bin
+for v in "${!PYTHON_VERSIONS[@]}"; do
+  (
+    # Executing in a subshell to make the PATH modification temporary.
+    export PATH="${PATH}:/opt/python/${PYTHON_VERSIONS[$v]}/bin"
+    pip wheel .
+  )
 
-  # Create binary wheel
-  pip wheel .
-)
-
-# This is needed to ensure we get a clean build, as otherwise parts of the
-# Python 3.8 package use compiled code for Python 3.7.
-bazel clean --expunge
-
-# Build wheel for Python 3.8
-(
-  # Set Path to Python3.8
-  export PATH=$PATH:/opt/python/cp38-cp38/bin
-
-  # Create binary wheel
-  pip wheel .
-)
+  # This is needed to ensure we get a clean build, otherwise parts of the
+  # compiled code from a previous build may be reused in a subsequent build.
+  bazel clean --expunge
+done
 
 # Repair wheels to convert them from linux to manylinux.
 for wheel in ./tink*.whl; do
-    auditwheel repair "$wheel" -w release
+    auditwheel repair "${wheel}" -w release
 done

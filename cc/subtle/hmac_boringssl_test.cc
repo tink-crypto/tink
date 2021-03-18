@@ -170,6 +170,8 @@ TEST_F(HmacBoringSslTest, TestFipsFailWithoutBoringCrypto) {
 
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA1, 16, key128).status(),
               StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA224, 16, key128).status(),
+              StatusIs(util::error::INTERNAL));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA256, 16, key128).status(),
               StatusIs(util::error::INTERNAL));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA384, 16, key128).status(),

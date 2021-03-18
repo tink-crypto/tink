@@ -121,7 +121,7 @@ public final class AesEaxJce implements Aead {
     }
     // Shifts the least significant block by 1 bit and reduces the msb modulo the polynomial.
     res[BLOCK_SIZE_IN_BYTES - 1] =
-        (byte) ((block[BLOCK_SIZE_IN_BYTES - 1] << 1) ^ ((block[0] & 0x80) == 0 ? 0 : 0x87));
+        (byte) ((block[BLOCK_SIZE_IN_BYTES - 1] << 1) ^ ((block[0] >> 7) & 0x87));
     return res;
   }
 

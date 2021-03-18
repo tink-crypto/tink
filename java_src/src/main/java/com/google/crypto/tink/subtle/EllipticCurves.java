@@ -228,7 +228,7 @@ public final class EllipticCurves {
    * @param curve must be a prime order elliptic curve
    * @return the size of an element in bits
    */
-  static int fieldSizeInBits(EllipticCurve curve) throws GeneralSecurityException {
+  public static int fieldSizeInBits(EllipticCurve curve) throws GeneralSecurityException {
     return getModulus(curve).subtract(BigInteger.ONE).bitLength();
   }
 

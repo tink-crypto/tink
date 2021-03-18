@@ -140,4 +140,6 @@ public class StreamingAeadCli {
 
     System.out.println("All done.");
   }
+
+  private StreamingAeadCli() {}
 }

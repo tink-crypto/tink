@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.aead;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
@@ -96,16 +97,23 @@ public final class AeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
+    AeadWrapper.register();
+
     MacConfig.register();
     AesCtrHmacAeadKeyManager.register(/*newKeyAllowed=*/ true);
-    AesEaxKeyManager.register(/*newKeyAllowed=*/ true);
     AesGcmKeyManager.register(/*newKeyAllowed=*/ true);
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      return;
+    }
+
+    AesEaxKeyManager.register(/*newKeyAllowed=*/ true);
     AesGcmSivKeyManager.register(/*newKeyAllowed=*/ true);
     ChaCha20Poly1305KeyManager.register(/*newKeyAllowed=*/ true);
     KmsAeadKeyManager.register(/*newKeyAllowed=*/ true);
     KmsEnvelopeAeadKeyManager.register(/*newKeyAllowed=*/ true);
     XChaCha20Poly1305KeyManager.register(/*newKeyAllowed=*/ true);
-    AeadWrapper.register();
   }
 
   /**

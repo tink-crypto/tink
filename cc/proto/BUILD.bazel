@@ -6,6 +6,7 @@ licenses(["notice"])
 
 cc_proto_library(
     name = "common_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:common_proto"],
 )
 
@@ -16,8 +17,8 @@ cc_proto_library(
 
 cc_proto_library(
     name = "tink_cc_proto",
-    deps = ["@tink_base//proto:tink_proto"],
     visibility = ["//visibility:public"],
+    deps = ["@tink_base//proto:tink_proto"],
 )
 
 cc_proto_library(
@@ -27,11 +28,13 @@ cc_proto_library(
 
 cc_proto_library(
     name = "aes_siv_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:aes_siv_proto"],
 )
 
 cc_proto_library(
     name = "hmac_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:hmac_proto"],
 )
 
@@ -52,21 +55,25 @@ cc_proto_library(
 
 cc_proto_library(
     name = "aes_eax_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:aes_eax_proto"],
 )
 
 cc_proto_library(
     name = "aes_gcm_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:aes_gcm_proto"],
 )
 
 cc_proto_library(
     name = "aes_ctr_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:aes_ctr_proto"],
 )
 
 cc_proto_library(
     name = "aes_ctr_hmac_aead_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:aes_ctr_hmac_aead_proto"],
 )
 
@@ -77,6 +84,7 @@ cc_proto_library(
 
 cc_proto_library(
     name = "xchacha20_poly1305_cc_proto",
+    visibility = ["//visibility:public"],
     deps = ["@tink_base//proto:xchacha20_poly1305_proto"],
 )
 
@@ -120,7 +128,6 @@ cc_proto_library(
     deps = ["@tink_base//proto:aes_gcm_hkdf_streaming_proto"],
 )
 
-
 cc_proto_library(
     name = "aes_cmac_prf_cc_proto",
     deps = ["@tink_base//proto:aes_cmac_prf_proto"],
@@ -148,4 +155,3 @@ filegroup(
         ":tink_cc_proto",
     ],
 )
-

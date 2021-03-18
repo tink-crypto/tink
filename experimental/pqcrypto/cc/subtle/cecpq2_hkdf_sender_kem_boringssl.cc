@@ -15,6 +15,7 @@
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
@@ -22,7 +23,6 @@
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
 namespace tink {
@@ -104,7 +104,8 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
   // X25519_kem_bytes holds the X25519 public key
   util::SecretData ephemeral_x25519_private_key(X25519_PRIVATE_KEY_LEN);
   std::string x25519_kem_bytes(X25519_PUBLIC_VALUE_LEN, '\0');
-  X25519_keypair(reinterpret_cast<uint8_t*>(x25519_kem_bytes.data()),
+  X25519_keypair(const_cast<uint8_t*>(
+                 reinterpret_cast<const uint8_t*>(x25519_kem_bytes.data())),
                  ephemeral_x25519_private_key.data());
 
   // Generate the x25519 shared secret using peer's X25519 public key and
@@ -131,7 +132,8 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
 
   // Generate a random shared secret and encapsulate it using peer's HRSS public
   // key
-  HRSS_encap(reinterpret_cast<uint8_t*>(hrss_kem_bytes.data()),
+  HRSS_encap(const_cast<uint8_t*>(
+             reinterpret_cast<const uint8_t*>(hrss_kem_bytes.data())),
              reinterpret_cast<uint8_t*>(hrss_shared_secret.data()),
              &peer_public_key_hrss, encaps_entropy.data());
 

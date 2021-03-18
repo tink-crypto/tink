@@ -19,7 +19,7 @@ package com.google.crypto.tink.hybrid;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
@@ -72,12 +72,9 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(EciesAeadHkdfKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(EciesAeadHkdfKeyFormat.getDefaultInstance()));
   }
 
   private static EciesAeadHkdfKeyFormat createKeyFormat(
@@ -115,12 +112,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             EcPointFormat.UNKNOWN_FORMAT,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
             TestUtil.hexDecode("aabbccddeeff"));
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -132,12 +124,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             EcPointFormat.UNCOMPRESSED,
             KeyTemplate.create("", new byte[0], KeyTemplate.OutputPrefixType.TINK),
             TestUtil.hexDecode("aabbccddeeff"));
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -149,12 +136,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
             TestUtil.hexDecode("aabbccddeeff"));
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -166,12 +148,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
             EcPointFormat.UNCOMPRESSED,
             AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template(),
             TestUtil.hexDecode("aabbccddeeff"));
-    try {
-      factory.validateKeyFormat(format);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
@@ -210,12 +187,7 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
   public void validateKey_invalidVersion_throws() throws Exception {
     EciesAeadHkdfPrivateKey key =
         EciesAeadHkdfPrivateKey.newBuilder(createValidKey()).setVersion(1).build();
-    try {
-      manager.validateKey(key);
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected
-    }
+    assertThrows(GeneralSecurityException.class, () -> manager.validateKey(key));
   }
 
   @Test

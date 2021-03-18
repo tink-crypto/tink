@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package subtle
+package subtle_test
 
 import (
 	"bytes"
@@ -20,17 +20,18 @@ import (
 	"crypto/elliptic"
 	"crypto/x509"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
-	"os"
-	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/google/tink/go/hybrid/subtle"
+	"github.com/google/tink/go/testutil"
 )
 
+// The tests are from
+// http://google.github.io/end-to-end/api/source/src/javascript/crypto/e2e/ecc/ecdh_testdata.js.src.html.
 type testEC1 struct {
 	elliptic.Curve
 	pubX, pubY string
@@ -43,38 +44,7 @@ type testEC2 struct {
 	X, Y        string
 }
 
-type testData struct {
-	Algorithm        string
-	GeneratorVersion string
-	NumberOfTests    uint32
-	Schema           string
-	TestGroups       []*testGroup
-}
-
-type testGroup struct {
-	Curve    string
-	Encoding string
-	Type     string
-	Tests    []*testcase
-}
-
-type testcase struct {
-	Comment string
-	Public  string
-	Private string
-	Shared  string
-	Result  string
-	Flags   []string
-	TcID    uint32
-}
-
-// Test cases same as the java tests from
-// //third_party/tink/java/src/test/java/com/google/crypto/tink/subtle/EllipticCurvesTest.java
 var (
-	testVectors = []string{
-		"wycheproof/testvectors/ecdh_test.json",
-		"wycheproof/testvectors/ecdh_test.json",
-	}
 	tEC1 = []testEC1{
 		{
 			elliptic.P256(),
@@ -477,11 +447,11 @@ func TestPointEncode(t *testing.T) {
 		x, y := new(big.Int), new(big.Int)
 		x.SetString(tEC2[i].X, 10)
 		y.SetString(tEC2[i].Y, 10)
-		p := ECPoint{
+		p := subtle.ECPoint{
 			X: x,
 			Y: y,
 		}
-		encodedpoint, err := PointEncode(tEC2[i].Curve, tEC2[i].pointFormat, p)
+		encodedpoint, err := subtle.PointEncode(tEC2[i].Curve, tEC2[i].pointFormat, p)
 		if err != nil {
 			t.Errorf("error in point encoding in test case %d : %v", i, err)
 		}
@@ -504,11 +474,11 @@ func TestPointDecode(t *testing.T) {
 		if err != nil {
 			t.Errorf("error reading encoded point in test case %d", i)
 		}
-		pt, err := PointDecode(tEC2[i].Curve, tEC2[i].pointFormat, e)
+		pt, err := subtle.PointDecode(tEC2[i].Curve, tEC2[i].pointFormat, e)
 		if err != nil {
 			t.Errorf("error in point decoding in test case %d: %v", i, err)
 		}
-		spt := ECPoint{
+		spt := subtle.ECPoint{
 			X: x,
 			Y: y,
 		}
@@ -531,8 +501,8 @@ func checkFlag(t *testing.T, flags []string, check []string) bool {
 	return false
 }
 
-// getX509PublicKey converts a stored public key to ECPublicKey.
-func getX509PublicKey(t *testing.T, b []byte) (*ECPublicKey, error) {
+// convertX509PublicKey converts an encoded public key to an ECPublicKey.
+func convertX509PublicKey(t *testing.T, b []byte) (*subtle.ECPublicKey, error) {
 	t.Helper()
 	pkey, err := x509.ParsePKIXPublicKey(b)
 	if err != nil {
@@ -542,104 +512,121 @@ func getX509PublicKey(t *testing.T, b []byte) (*ECPublicKey, error) {
 	if !ok {
 		return nil, errors.New("invalid elliptic curve key")
 	}
-	return &ECPublicKey{
+	return &subtle.ECPublicKey{
 		Curve: ecdsaP.Curve,
-		Point: ECPoint{
+		Point: subtle.ECPoint{
 			X: ecdsaP.X,
 			Y: ecdsaP.Y,
 		},
 	}, nil
 }
 
-func TestVectors(t *testing.T) {
-	srcDir, ok := os.LookupEnv("TEST_SRCDIR")
-	if !ok {
-		t.Skip("TEST_SRCDIR not set")
+// convertPointPublicKey converts an EC point public key to an ECPublicKey.
+func convertPointPublicKey(t *testing.T, pk []byte, curve elliptic.Curve, flags []string) (*subtle.ECPublicKey, error) {
+	ptFormat := "UNCOMPRESSED"
+	if checkFlag(t, flags, []string{"CompressedPoint"}) {
+		ptFormat = "COMPRESSED"
 	}
-	for _, i := range testVectors {
-		f, err := os.Open(filepath.Join(srcDir, i))
-		if err != nil {
-			t.Fatalf("cannot open file: %s", err)
-		}
-		parser := json.NewDecoder(f)
-		data := new(testData)
-		if err := parser.Decode(data); err != nil {
-			t.Fatalf("cannot decode test data: %s", err)
-		}
+	pt, err := subtle.PointDecode(curve, ptFormat, pk)
+	if err != nil {
+		return nil, err
+	}
+	return &subtle.ECPublicKey{
+		Curve: curve,
+		Point: *pt,
+	}, nil
+}
 
-		for _, g := range data.TestGroups {
-			curve, err := GetCurve(g.Curve)
+func TestECWycheproofCases(t *testing.T) {
+	testutil.SkipTestIfTestSrcDirIsNotSet(t)
+
+	vectors := []string{
+		"ecdh_test.json",
+		"ecdh_secp224r1_ecpoint_test.json",
+		"ecdh_secp256r1_ecpoint_test.json",
+		"ecdh_secp384r1_ecpoint_test.json",
+		"ecdh_secp521r1_ecpoint_test.json",
+	}
+	for _, v := range vectors {
+		suite := new(ecdhSuite)
+		if err := testutil.PopulateSuite(suite, v); err != nil {
+			t.Fatalf("failed populating suite: %s", err)
+		}
+		for _, group := range suite.TestGroups {
+			curve, err := subtle.GetCurve(group.Curve)
 			if err != nil {
-				t.Logf("unsupported curve: %s", g.Curve)
+				t.Logf("unsupported curve: %s", group.Curve)
 				continue
 			}
-			for _, test := range g.Tests {
+			for _, test := range group.Tests {
+				caseName := fmt.Sprintf("%s-%s:Case-%d", suite.Algorithm, group.Type, test.CaseID)
+				t.Run(caseName, func(t *testing.T) {
+					pvtKey := subtle.GetECPrivateKey(curve, test.Private)
 
-				tcID := fmt.Sprintf("testcase %d (%s)", test.TcID, test.Comment)
-				pvtHex := test.Private
-				if len(test.Private)%2 == 1 {
-					pvtHex = fmt.Sprintf("0%s", test.Private)
-				}
-				pvt, err := hex.DecodeString(pvtHex)
-				if err != nil {
-					t.Errorf("error decoding from hex private key in test case %s: %v", tcID, err)
-				}
-				pvtKey := GetECPrivateKey(curve, pvt)
-				p, err := hex.DecodeString(test.Public)
-				if err != nil {
-					t.Errorf("error decoding from hex public key in test case %s: %v", tcID, err)
-				}
-				pubKey := &ECPublicKey{}
-				var errPub error
-				switch data.Schema {
-				case "ecdh_test_schema.json":
-					pubKey, errPub = getX509PublicKey(t, p)
-				case "ecdh_ecpoint_test_schema.json":
-					ptFormat := "UNCOMPRESSED"
-					pt := &ECPoint{}
-					if checkFlag(t, test.Flags, []string{"CompressedPoint"}) {
-						ptFormat = "COMPRESSED"
+					var pubKey *subtle.ECPublicKey
+					var errPub error
+					switch suite.Schema {
+					case "ecdh_test_schema.json":
+						pubKey, errPub = convertX509PublicKey(t, test.Public)
+					case "ecdh_ecpoint_test_schema.json":
+						pubKey, errPub = convertPointPublicKey(t, test.Public, curve, test.Flags)
+					default:
+						t.Logf("Unsupported schema: %q", suite.Schema)
+						return
 					}
-					pt, errPub = PointDecode(curve, ptFormat, p)
-					pubKey = &ECPublicKey{
-						Curve: curve,
-						Point: *pt,
-					}
-				default:
-					errPub = errors.New("invalid schema")
-				}
-				if errPub != nil && test.Result != "valid" {
-					t.Logf("test case %s failing as expected for invalid result : %v", tcID, err)
-					continue
 
-				}
+					switch test.Result {
+					case "valid":
+						if errPub != nil {
+							t.Fatalf("failed decoding public key: %s", errPub)
+						}
 
-				if reflect.DeepEqual(&ECPublicKey{}, pubKey) {
-					t.Logf("error decoding public key in test case %s: %v", tcID, err)
-					// Some test vectors have incorrect public key encoding which
-					// leads to runtime errors. For more details please see the
-					// java test file referenced above.
-					continue
-				}
-				cShared, err := ComputeSharedSecret(&pubKey.Point, pvtKey)
-				got := hex.EncodeToString(cShared)
-				want := test.Shared
-				if test.Result == "invalid" {
-					if err != nil { // shared secret was not computed
-						continue
-					}
-					if strings.Compare(got, want) == 0 && checkFlag(t, test.Flags, []string{"WrongOrder", "WeakPublicKey", "UnnamedCurve"}) {
-						fmt.Printf("test case %s accepted invalid parameters but shared secret is correct\n", tcID)
-						continue
-					}
-					t.Errorf("test case %s accepted invalid parameters, shared secret: %s", tcID, want)
-				} else if strings.Compare(got, want) != 0 {
-					t.Errorf("test case %s incorrect shared secret, want: %s, got: %s", tcID, want, got)
-				}
-				fmt.Printf("test :%s done\n", tcID)
+						shared, err := subtle.ComputeSharedSecret(&pubKey.Point, pvtKey)
+						if err != nil {
+							t.Errorf("subtle.ComputeSharedSecret() failed: %s", err)
+						}
+						if !bytes.Equal(shared, test.Shared) {
+							t.Error("valid test case, incorrect shared secret")
+						}
 
+					case "invalid":
+						if errPub != nil {
+							// Public key not decoded. OK for invalid test case.
+							return
+						}
+
+						shared, err := subtle.ComputeSharedSecret(&pubKey.Point, pvtKey)
+						if err != nil {
+							// Shared secret was not computed. OK for invalid test case.
+							return
+						}
+						validReason := checkFlag(t, test.Flags, []string{"WrongOrder", "WeakPublicKey", "UnnamedCurve"})
+						if validReason && bytes.Equal(shared, test.Shared) {
+							t.Log("accepted invalid parameters but shared secret is correct")
+							return
+						}
+						t.Error("accepted invalid parameters")
+
+					case "acceptable":
+						if errPub != nil {
+							// Public key not decoded. OK for acceptable test case.
+							return
+						}
+
+						shared, err := subtle.ComputeSharedSecret(&pubKey.Point, pvtKey)
+						if err != nil {
+							// Shared secret was not computed. OK for acceptable test case.
+							return
+						}
+						if !bytes.Equal(shared, test.Shared) {
+							t.Error("acceptable test case, incorrect shared secret")
+						}
+
+					default:
+						t.Errorf("unsupported test result: %q", test.Result)
+					}
+				})
 			}
-			fmt.Printf("curve :%s done\n", g.Curve)
 		}
 	}
 }

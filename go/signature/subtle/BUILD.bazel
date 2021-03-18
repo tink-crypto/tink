@@ -11,6 +11,8 @@ go_library(
         "ed25519_signer.go",
         "ed25519_verifier.go",
         "encoding.go",
+        "rsa.go",
+        "subtle.go",
     ],
     importpath = "github.com/google/tink/go/signature/subtle",
     deps = [
@@ -25,6 +27,8 @@ go_test(
         "ecdsa_signer_verifier_test.go",
         "ecdsa_test.go",
         "ed25519_signer_verifier_test.go",
+        "rsa_test.go",
+        "subtle_test.go",
     ],
     data = [
         "@wycheproof//testvectors:all",
@@ -33,6 +37,7 @@ go_test(
         ":go_default_library",
         "//subtle:go_default_library",
         "//subtle/random:go_default_library",
+        "//testutil:go_default_library",
         "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )

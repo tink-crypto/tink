@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead.subtle;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hex;
@@ -27,14 +27,14 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.Cipher;
 import org.conscrypt.Conscrypt;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,73 +114,64 @@ public class AesGcmSivTest {
     byte[] ciphertext = gcm.encrypt(message, aad);
 
     for (BytesMutation mutation : TestUtil.generateMutations(ciphertext)) {
-      try {
-        byte[] unused = gcm.decrypt(mutation.value, aad);
-        fail(
-            String.format(
-                "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
-                    + " description = %s",
-                Hex.encode(mutation.value), Hex.encode(aad), mutation.description));
-      } catch (GeneralSecurityException ex) {
-        // This is expected.
-        // This could be a AeadBadTagException when the tag verification
-        // fails or some not yet specified Exception when the ciphertext is too short.
-        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-      }
+      assertThrows(
+          String.format(
+              "Decrypting modified ciphertext should fail : ciphertext = %s, aad = %s,"
+                  + " description = %s",
+              Hex.encode(mutation.value), Hex.encode(aad), mutation.description),
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(mutation.value, aad);
+          });
     }
 
     // Modify AAD
     for (BytesMutation mutation : TestUtil.generateMutations(aad)) {
-      try {
-        byte[] unused = gcm.decrypt(ciphertext, mutation.value);
-        fail(
-            String.format(
-                "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
-                    + " description = %s",
-                Arrays.toString(ciphertext),
-                Arrays.toString(mutation.value),
-                mutation.description));
-      } catch (GeneralSecurityException ex) {
-        // This is expected.
-        // This could be a AeadBadTagException when the tag verification
-        // fails or some not yet specified Exception when the ciphertext is too short.
-        // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-      }
+      assertThrows(
+          String.format(
+              "Decrypting with modified aad should fail: ciphertext = %s, aad = %s,"
+                  + " description = %s",
+              Arrays.toString(ciphertext), Arrays.toString(mutation.value), mutation.description),
+          GeneralSecurityException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(ciphertext, mutation.value);
+          });
     }
   }
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    JSONObject json =
+    JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_siv_test.json");
     int errors = 0;
     int cntSkippedTests = 0;
-    JSONArray testGroups = json.getJSONArray("testGroups");
-    for (int i = 0; i < testGroups.length(); i++) {
-      JSONObject group = testGroups.getJSONObject(i);
-      int keySize = group.getInt("keySize");
-      JSONArray tests = group.getJSONArray("tests");
+    JsonArray testGroups = json.getAsJsonArray("testGroups");
+    for (int i = 0; i < testGroups.size(); i++) {
+      JsonObject group = testGroups.get(i).getAsJsonObject();
+      int keySize = group.get("keySize").getAsInt();
+      JsonArray tests = group.getAsJsonArray("tests");
       if (!Arrays.asList(keySizeInBytes).contains(keySize / 8)) {
-        cntSkippedTests += tests.length();
+        cntSkippedTests += tests.size();
         continue;
       }
-      for (int j = 0; j < tests.length(); j++) {
-        JSONObject testcase = tests.getJSONObject(j);
+      for (int j = 0; j < tests.size(); j++) {
+        JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
             String.format(
-                "testcase %d (%s)", testcase.getInt("tcId"), testcase.getString("comment"));
-        byte[] iv = Hex.decode(testcase.getString("iv"));
-        byte[] key = Hex.decode(testcase.getString("key"));
-        byte[] msg = Hex.decode(testcase.getString("msg"));
-        byte[] aad = Hex.decode(testcase.getString("aad"));
-        byte[] ct = Hex.decode(testcase.getString("ct"));
-        byte[] tag = Hex.decode(testcase.getString("tag"));
+                "testcase %d (%s)",
+                testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
+        byte[] iv = Hex.decode(testcase.get("iv").getAsString());
+        byte[] key = Hex.decode(testcase.get("key").getAsString());
+        byte[] msg = Hex.decode(testcase.get("msg").getAsString());
+        byte[] aad = Hex.decode(testcase.get("aad").getAsString());
+        byte[] ct = Hex.decode(testcase.get("ct").getAsString());
+        byte[] tag = Hex.decode(testcase.get("tag").getAsString());
         byte[] ciphertext = Bytes.concat(iv, ct, tag);
         // Result is one of "valid", "invalid", "acceptable".
         // "valid" are test vectors with matching plaintext, ciphertext and tag.
         // "invalid" are test vectors with invalid parameters or invalid ciphertext and tag.
         // "acceptable" are test vectors with weak parameters or legacy formats.
-        String result = testcase.getString("result");
+        String result = testcase.get("result").getAsString();
         // Tink only supports 12-byte iv.
         if (iv.length != 12) {
           result = "invalid";
@@ -219,32 +210,27 @@ public class AesGcmSivTest {
   public void testNullPlaintextOrCiphertext() throws Exception {
     for (int keySize : keySizeInBytes) {
       AesGcmSiv gcm = new AesGcmSiv(Random.randBytes(keySize));
-      try {
-        byte[] aad = new byte[] {1, 2, 3};
-        byte[] unused = gcm.encrypt(null, aad);
-        fail("Encrypting a null plaintext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] unused = gcm.encrypt(null, null);
-        fail("Encrypting a null plaintext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] aad = new byte[] {1, 2, 3};
-        byte[] unused = gcm.decrypt(null, aad);
-        fail("Decrypting a null ciphertext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
-      try {
-        byte[] unused = gcm.decrypt(null, null);
-        fail("Decrypting a null ciphertext should fail");
-      } catch (NullPointerException ex) {
-        // This is expected.
-      }
+      byte[] aad = new byte[] {1, 2, 3};
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.encrypt(null, aad);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.encrypt(null, null);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(null, aad);
+          });
+      assertThrows(
+          NullPointerException.class,
+          () -> {
+            byte[] unused = gcm.decrypt(null, null);
+          });
     }
   }
 
@@ -262,16 +248,12 @@ public class AesGcmSivTest {
           assertArrayEquals(message, decrypted);
           byte[] decrypted2 = gcm.decrypt(ciphertext, null);
           assertArrayEquals(message, decrypted2);
-          try {
-            byte[] badAad = new byte[] {1, 2, 3};
-            byte[] unused = gcm.decrypt(ciphertext, badAad);
-            fail("Decrypting with modified aad should fail");
-          } catch (GeneralSecurityException ex) {
-            // This is expected.
-            // This could be a AeadBadTagException when the tag verification
-            // fails or some not yet specified Exception when the ciphertext is too short.
-            // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-          }
+          byte[] badAad = new byte[] {1, 2, 3};
+          assertThrows(
+              GeneralSecurityException.class,
+              () -> {
+                byte[] unused = gcm.decrypt(ciphertext, badAad);
+              });
         }
         { // encrypting with aad equal to null
           byte[] ciphertext = gcm.encrypt(message, null);
@@ -279,16 +261,12 @@ public class AesGcmSivTest {
           assertArrayEquals(message, decrypted);
           byte[] decrypted2 = gcm.decrypt(ciphertext, null);
           assertArrayEquals(message, decrypted2);
-          try {
-            byte[] badAad = new byte[] {1, 2, 3};
-            byte[] unused = gcm.decrypt(ciphertext, badAad);
-            fail("Decrypting with modified aad should fail");
-          } catch (GeneralSecurityException ex) {
-            // This is expected.
-            // This could be a AeadBadTagException when the tag verification
-            // fails or some not yet specified Exception when the ciphertext is too short.
-            // In all cases a GeneralSecurityException or a subclass of it must be thrown.
-          }
+          byte[] badAad = new byte[] {1, 2, 3};
+          assertThrows(
+              GeneralSecurityException.class,
+              () -> {
+                byte[] unused = gcm.decrypt(ciphertext, badAad);
+              });
         }
       }
     }

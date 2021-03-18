@@ -19,7 +19,7 @@ package com.google.crypto.tink.aead;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CryptoFormat;
@@ -140,13 +140,11 @@ public class AeadWrapperTest {
     aead2 =
         new AeadWrapper()
             .wrap(TestUtil.createPrimitiveSet(TestUtil.createKeyset(random), Aead.class));
-    ciphertext = aead2.encrypt(plaintext, associatedData);
-    try {
-      aead.decrypt(ciphertext, associatedData);
-      fail("Expected GeneralSecurityException");
-    } catch (GeneralSecurityException e) {
-      assertExceptionContains(e, "decryption failed");
-    }
+    final byte[] ciphertext2 = aead2.encrypt(plaintext, associatedData);
+    GeneralSecurityException e =
+        assertThrows(
+            GeneralSecurityException.class, () -> aead.decrypt(ciphertext2, associatedData));
+    assertExceptionContains(e, "decryption failed");
   }
 
   @Test

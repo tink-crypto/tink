@@ -35,7 +35,7 @@ NOTE: `tink::static` provides the `tink/...` include path. It is just a shortcut
 for your convenience, and you might still refer to Tink headers using a
 filesystem path, such as `third_party/tink/cc/...`, if you prefer or need to.
 
-You can see a full example in `examples/helloworld/cc/hello_world.cc`.
+You can see a full example in `examples/cc/helloworld/hello_world.cc`.
 
 Generate the build directory as you normally would and invoke your build system
 of choice:

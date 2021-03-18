@@ -24,17 +24,21 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * A {@link KeysetReader} that can read from source source cleartext or encrypted keysets in <a
@@ -47,20 +51,17 @@ public final class JsonKeysetReader implements KeysetReader {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   private final InputStream inputStream;
-  private final JSONObject json;
-  private final boolean closeStreamAfterReading;
+  private final JsonObject json;
   private boolean urlSafeBase64 = false;
 
-  private JsonKeysetReader(InputStream inputStream, boolean closeStreamAfterReading) {
+  private JsonKeysetReader(InputStream inputStream) {
     this.inputStream = inputStream;
-    this.closeStreamAfterReading = closeStreamAfterReading;
     json = null;
   }
 
-  private JsonKeysetReader(JSONObject json) {
+  private JsonKeysetReader(JsonObject json) {
     this.json = json;
     this.inputStream = null;
-    this.closeStreamAfterReading = false;
   }
 
   /**
@@ -70,23 +71,27 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    */
   public static KeysetReader withInputStream(InputStream input) throws IOException {
-    return new JsonKeysetReader(input, /*closeStreamAfterReading=*/ false);
+    return new JsonKeysetReader(input);
   }
 
-  /** Static method to create a JsonKeysetReader from an {@link JSONObject}. */
-  public static JsonKeysetReader withJsonObject(JSONObject input) {
-    return new JsonKeysetReader(input);
+  /**
+   * Static method to create a JsonKeysetReader from an {@link JsonObject}.
+   *
+   * @deprecated Use {@code #withString}
+   */
+  @Deprecated
+  public static JsonKeysetReader withJsonObject(Object input) {
+    return withString(input.toString());
   }
 
   /** Static method to create a JsonKeysetReader from a string. */
   public static JsonKeysetReader withString(String input) {
-    return new JsonKeysetReader(
-        new ByteArrayInputStream(input.getBytes(UTF_8)), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new ByteArrayInputStream(input.getBytes(UTF_8)));
   }
 
   /** Static method to create a JsonKeysetReader from a byte array. */
   public static JsonKeysetReader withBytes(final byte[] bytes) {
-    return new JsonKeysetReader(new ByteArrayInputStream(bytes), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new ByteArrayInputStream(bytes));
   }
 
   /**
@@ -96,7 +101,7 @@ public final class JsonKeysetReader implements KeysetReader {
    * JsonKeysetReader#readEncrypted} is called.
    */
   public static JsonKeysetReader withFile(File file) throws IOException {
-    return new JsonKeysetReader(new FileInputStream(file), /*closeStreamAfterReading=*/ true);
+    return new JsonKeysetReader(new FileInputStream(file));
   }
 
   /**
@@ -134,13 +139,15 @@ public final class JsonKeysetReader implements KeysetReader {
       if (json != null) {
         return keysetFromJson(json);
       } else {
-        return keysetFromJson(new JSONObject(
-            new String(Util.readAll(inputStream), UTF_8)));
+        JsonReader jsonReader = new JsonReader(
+            new StringReader(new String(Util.readAll(inputStream), UTF_8)));
+        jsonReader.setLenient(false);
+        return keysetFromJson(Streams.parse(jsonReader).getAsJsonObject());
       }
-    } catch (JSONException e) {
+    } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
-      if (inputStream != null && closeStreamAfterReading) {
+      if (inputStream != null) {
         inputStream.close();
       }
     }
@@ -152,103 +159,103 @@ public final class JsonKeysetReader implements KeysetReader {
       if (json != null) {
         return encryptedKeysetFromJson(json);
       } else {
-        return encryptedKeysetFromJson(new JSONObject(
-            new String(Util.readAll(inputStream), UTF_8)));
+        return encryptedKeysetFromJson(
+            JsonParser.parseString(new String(Util.readAll(inputStream), UTF_8)).getAsJsonObject());
       }
-    } catch (JSONException e) {
+    } catch (JsonParseException | IllegalStateException e) {
       throw new IOException(e);
     } finally {
-      if (inputStream != null && closeStreamAfterReading) {
+      if (inputStream != null) {
         inputStream.close();
       }
     }
   }
 
-  private Keyset keysetFromJson(JSONObject json) throws JSONException {
+  private Keyset keysetFromJson(JsonObject json) {
     validateKeyset(json);
     Keyset.Builder builder = Keyset.newBuilder();
     if (json.has("primaryKeyId")) {
-      builder.setPrimaryKeyId(json.getInt("primaryKeyId"));
+      builder.setPrimaryKeyId(json.get("primaryKeyId").getAsInt());
     }
-    JSONArray keys = json.getJSONArray("key");
-    for (int i = 0; i < keys.length(); i++) {
-      builder.addKey(keyFromJson(keys.getJSONObject(i)));
+    JsonArray keys = json.getAsJsonArray("key");
+    for (int i = 0; i < keys.size(); i++) {
+      builder.addKey(keyFromJson(keys.get(i).getAsJsonObject()));
     }
     return builder.build();
   }
 
-  private EncryptedKeyset encryptedKeysetFromJson(JSONObject json) throws JSONException {
+  private EncryptedKeyset encryptedKeysetFromJson(JsonObject json) {
     validateEncryptedKeyset(json);
     byte[] encryptedKeyset;
     if (urlSafeBase64) {
-      encryptedKeyset = Base64.urlSafeDecode(json.getString("encryptedKeyset"));
+      encryptedKeyset = Base64.urlSafeDecode(json.get("encryptedKeyset").getAsString());
     } else {
-      encryptedKeyset = Base64.decode(json.getString("encryptedKeyset"));
+      encryptedKeyset = Base64.decode(json.get("encryptedKeyset").getAsString());
     }
     return EncryptedKeyset.newBuilder()
         .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
-        .setKeysetInfo(keysetInfoFromJson(json.getJSONObject("keysetInfo")))
+        .setKeysetInfo(keysetInfoFromJson(json.getAsJsonObject("keysetInfo")))
         .build();
   }
 
-  private Keyset.Key keyFromJson(JSONObject json) throws JSONException {
+  private Keyset.Key keyFromJson(JsonObject json) {
     validateKey(json);
     return Keyset.Key.newBuilder()
-        .setStatus(getStatus(json.getString("status")))
-        .setKeyId(json.getInt("keyId"))
-        .setOutputPrefixType(getOutputPrefixType(json.getString("outputPrefixType")))
-        .setKeyData(keyDataFromJson(json.getJSONObject("keyData")))
+        .setStatus(getStatus(json.get("status").getAsString()))
+        .setKeyId(json.get("keyId").getAsInt())
+        .setOutputPrefixType(getOutputPrefixType(json.get("outputPrefixType").getAsString()))
+        .setKeyData(keyDataFromJson(json.getAsJsonObject("keyData")))
         .build();
   }
 
-  private static KeysetInfo keysetInfoFromJson(JSONObject json) throws JSONException {
+  private static KeysetInfo keysetInfoFromJson(JsonObject json) {
     KeysetInfo.Builder builder = KeysetInfo.newBuilder();
     if (json.has("primaryKeyId")) {
-      builder.setPrimaryKeyId(json.getInt("primaryKeyId"));
+      builder.setPrimaryKeyId(json.get("primaryKeyId").getAsInt());
     }
     if (json.has("keyInfo")) {
-      JSONArray keyInfos = json.getJSONArray("keyInfo");
-      for (int i = 0; i < keyInfos.length(); i++) {
-        builder.addKeyInfo(keyInfoFromJson(keyInfos.getJSONObject(i)));
+      JsonArray keyInfos = json.getAsJsonArray("keyInfo");
+      for (int i = 0; i < keyInfos.size(); i++) {
+        builder.addKeyInfo(keyInfoFromJson(keyInfos.get(i).getAsJsonObject()));
       }
     }
     return builder.build();
   }
 
-  private static KeysetInfo.KeyInfo keyInfoFromJson(JSONObject json) throws JSONException {
+  private static KeysetInfo.KeyInfo keyInfoFromJson(JsonObject json) {
     return KeysetInfo.KeyInfo.newBuilder()
-        .setStatus(getStatus(json.getString("status")))
-        .setKeyId(json.getInt("keyId"))
-        .setOutputPrefixType(getOutputPrefixType(json.getString("outputPrefixType")))
-        .setTypeUrl(json.getString("typeUrl"))
+        .setStatus(getStatus(json.get("status").getAsString()))
+        .setKeyId(json.get("keyId").getAsInt())
+        .setOutputPrefixType(getOutputPrefixType(json.get("outputPrefixType").getAsString()))
+        .setTypeUrl(json.get("typeUrl").getAsString())
         .build();
   }
 
-  private KeyData keyDataFromJson(JSONObject json) throws JSONException {
+  private KeyData keyDataFromJson(JsonObject json) {
     validateKeyData(json);
     byte[] value;
     if (urlSafeBase64) {
-      value = Base64.urlSafeDecode(json.getString("value"));
+      value = Base64.urlSafeDecode(json.get("value").getAsString());
     } else {
-      value = Base64.decode(json.getString("value"));
+      value = Base64.decode(json.get("value").getAsString());
     }
     return KeyData.newBuilder()
-        .setTypeUrl(json.getString("typeUrl"))
+        .setTypeUrl(json.get("typeUrl").getAsString())
         .setValue(ByteString.copyFrom(value))
-        .setKeyMaterialType(getKeyMaterialType(json.getString("keyMaterialType")))
+        .setKeyMaterialType(getKeyMaterialType(json.get("keyMaterialType").getAsString()))
         .build();
   }
 
-  private static KeyStatusType getStatus(String status) throws JSONException {
+  private static KeyStatusType getStatus(String status) {
     if (status.equals("ENABLED")) {
       return KeyStatusType.ENABLED;
     } else if (status.equals("DISABLED")) {
       return KeyStatusType.DISABLED;
     }
-    throw new JSONException("unknown status: " + status);
+    throw new JsonParseException("unknown status: " + status);
   }
 
-  private static OutputPrefixType getOutputPrefixType(String type) throws JSONException {
+  private static OutputPrefixType getOutputPrefixType(String type) {
     if (type.equals("TINK")) {
       return OutputPrefixType.TINK;
     } else if (type.equals("RAW")) {
@@ -258,10 +265,10 @@ public final class JsonKeysetReader implements KeysetReader {
     } else if (type.equals("CRUNCHY")) {
       return OutputPrefixType.CRUNCHY;
     }
-    throw new JSONException("unknown output prefix type: " + type);
+    throw new JsonParseException("unknown output prefix type: " + type);
   }
 
-  private static KeyMaterialType getKeyMaterialType(String type) throws JSONException {
+  private static KeyMaterialType getKeyMaterialType(String type) {
     if (type.equals("SYMMETRIC")) {
       return KeyMaterialType.SYMMETRIC;
     } else if (type.equals("ASYMMETRIC_PRIVATE")) {
@@ -271,33 +278,33 @@ public final class JsonKeysetReader implements KeysetReader {
     } else if (type.equals("REMOTE")) {
       return KeyMaterialType.REMOTE;
     }
-    throw new JSONException("unknown key material type: " + type);
+    throw new JsonParseException("unknown key material type: " + type);
   }
 
-  private static void validateKeyset(JSONObject json) throws JSONException {
-    if (!json.has("key") || json.getJSONArray("key").length() == 0) {
-      throw new JSONException("invalid keyset");
+  private static void validateKeyset(JsonObject json) {
+    if (!json.has("key") || json.getAsJsonArray("key").size() == 0) {
+      throw new JsonParseException("invalid keyset");
     }
   }
 
-  private static void validateEncryptedKeyset(JSONObject json) throws JSONException {
+  private static void validateEncryptedKeyset(JsonObject json) {
     if (!json.has("encryptedKeyset")) {
-      throw new JSONException("invalid encrypted keyset");
+      throw new JsonParseException("invalid encrypted keyset");
     }
   }
 
-  private static void validateKey(JSONObject json) throws JSONException {
+  private static void validateKey(JsonObject json) {
     if (!json.has("keyData")
         || !json.has("status")
         || !json.has("keyId")
         || !json.has("outputPrefixType")) {
-      throw new JSONException("invalid key");
+      throw new JsonParseException("invalid key");
     }
   }
 
-  private static void validateKeyData(JSONObject json) throws JSONException {
+  private static void validateKeyData(JsonObject json) {
     if (!json.has("typeUrl") || !json.has("value") || !json.has("keyMaterialType")) {
-      throw new JSONException("invalid keyData");
+      throw new JsonParseException("invalid keyData");
     }
   }
 }

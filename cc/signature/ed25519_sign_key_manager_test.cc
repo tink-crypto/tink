@@ -24,6 +24,7 @@
 #include "tink/signature/ed25519_verify_key_manager.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -105,7 +106,7 @@ TEST(Ed25519SignKeyManagerTest, GetPublicKey) {
               Eq(key_or.ValueOrDie().public_key().key_value()));
 }
 
-TEST(EcdsaSignKeyManagerTest, Create) {
+TEST(Ed25519SignKeyManagerTest, Create) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
   ASSERT_THAT(key_or.status(), IsOk());
@@ -126,7 +127,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
               IsOk());
 }
 
-TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
+TEST(Ed25519SignKeyManagerTest, CreateDifferentKey) {
   StatusOr<Ed25519PrivateKey> key_or =
       Ed25519SignKeyManager().CreateKey(Ed25519KeyFormat());
   ASSERT_THAT(key_or.status(), IsOk());
@@ -146,6 +147,50 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
                   signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
               Not(IsOk()));
 }
+
+TEST(Ed25519SignKeyManagerTest, DeriveKey) {
+  Ed25519KeyFormat format;
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  StatusOr<Ed25519PrivateKey> key_or =
+      Ed25519SignKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+              Eq("0123456789abcdef0123456789abcdef"));
+}
+
+TEST(Ed25519SignKeyManagerTest, DeriveKeySignVerify) {
+  Ed25519KeyFormat format;
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  Ed25519PrivateKey key =
+      Ed25519SignKeyManager().DeriveKey(format, &input_stream).ValueOrDie();
+  auto signer_or = Ed25519SignKeyManager().GetPrimitive<PublicKeySign>(key);
+  ASSERT_THAT(signer_or.status(), IsOk());
+
+  std::string message = "Some message";
+  auto signature = signer_or.ValueOrDie()->Sign(message).ValueOrDie();
+
+  auto verifier_or =
+      Ed25519VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key.public_key());
+
+  EXPECT_THAT(verifier_or.ValueOrDie()->Verify(signature, message), IsOk());
+}
+
+TEST(Ed25519SignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
+  Ed25519KeyFormat format;
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("tooshort")};
+
+  ASSERT_THAT(Ed25519SignKeyManager().DeriveKey(format, &input_stream).status(),
+              test::StatusIs(util::error::INVALID_ARGUMENT));
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

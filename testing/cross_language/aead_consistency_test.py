@@ -33,23 +33,15 @@ from util import supported_key_types
 from util import testing_servers
 
 HASH_TYPES = [
-    common_pb2.UNKNOWN_HASH,
-    common_pb2.SHA1,
-    common_pb2.SHA256,
-    common_pb2.SHA384,
-    common_pb2.SHA512
+    common_pb2.UNKNOWN_HASH, common_pb2.SHA1, common_pb2.SHA224,
+    common_pb2.SHA256, common_pb2.SHA384, common_pb2.SHA512
 ]
 
 # Test cases that succeed in a language but should fail
-SUCCEEDS_BUT_SHOULD_FAIL = [
-    # TODO(b/159989251)
-    # HMAC with SHA384 is accepted in go, but not in other langs.
-    ('AesCtrHmacAeadKey(16,16,16,16,SHA384,0,0,0)', 'go'),
-]
+SUCCEEDS_BUT_SHOULD_FAIL = []
 
 # Test cases that fail in a language but should succeed
-FAILS_BUT_SHOULD_SUCCEED = [
-]
+FAILS_BUT_SHOULD_SUCCEED = []
 
 
 def setUpModule():

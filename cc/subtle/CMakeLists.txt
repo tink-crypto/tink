@@ -558,6 +558,7 @@ tink_cc_library(
   DEPS
     tink::config::tink_fips
     tink::subtle::common_enums
+    tink::subtle::random
     tink::util::errors
     tink::util::secret_data
     tink::util::status

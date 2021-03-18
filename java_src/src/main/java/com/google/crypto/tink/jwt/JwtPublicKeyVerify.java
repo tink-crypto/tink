@@ -28,20 +28,20 @@ public interface JwtPublicKeyVerify {
   /**
    * Verifies and decodes a JWT in the JWS compact serialization format.
    *
-   * <p>The JWT is validated against the rules in {@code validator}. That is, every header or claim
-   * in {@code validator} must also be present in the JWT. For example, if {@code validator}
-   * contains an {@code iss} claim, the JWT must contain an identical claim. Validation for custom
-   * claims are also supported. The JWT can contain claims or headers that are {@code NOT} in the
-   * {@code validator}. However, if the JWT contains a list of audiences, the validator must also
-   * contain an audience in the list.
+   * <p>The JWT is validated against the rules in {@code validator}. That is, every claim in {@code
+   * validator} must also be present in the JWT. For example, if {@code validator} contains an
+   * {@code iss} claim, the JWT must contain an identical claim. The JWT can contain claims that are
+   * {@code NOT} in the {@code validator}. However, if the JWT contains a list of audiences, the
+   * validator must also contain an audience in the list.
    *
    * <p>If the JWT contains timestamp claims such as {@code exp}, {@code iat} or {@code nbf}, they
    * will also be validated. {@code validator} allows to set a clock skew, to deal with small clock
    * differences among different machines.
    *
    * @throws GeneralSecurityException when the signature of the token could not be verified, the
-   *   token contains an invalid claim or header, the token has been expired or can't be used yet
+   *     token contains an invalid claim or header, the token has been expired or can't be used yet
    */
-  Jwt verify(String compact, JwtValidator validator) throws GeneralSecurityException;
+  VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
+      throws GeneralSecurityException;
 }
 

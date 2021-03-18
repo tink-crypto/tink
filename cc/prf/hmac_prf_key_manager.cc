@@ -87,8 +87,9 @@ StatusOr<HmacPrfKey> HmacPrfKeyManager::DeriveKey(
 
 Status HmacPrfKeyManager::ValidateParams(const HmacPrfParams& params) const {
   static const std::set<HashType>* supported_hash_types =
-      new std::set<HashType>(
-          {HashType::SHA1, HashType::SHA256, HashType::SHA512});
+      new std::set<HashType>({HashType::SHA1, HashType::SHA224,
+                              HashType::SHA256, HashType::SHA384,
+                              HashType::SHA512});
   if (supported_hash_types->find(Enums::ProtoToSubtle(params.hash())) ==
       supported_hash_types->end()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,

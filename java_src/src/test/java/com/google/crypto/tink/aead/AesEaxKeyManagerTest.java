@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -66,12 +67,9 @@ public class AesEaxKeyManagerTest {
 
   @Test
   public void validateKeyFormat_empty() throws Exception {
-    try {
-      factory.validateKeyFormat(AesEaxKeyFormat.getDefaultInstance());
-      fail();
-    } catch (GeneralSecurityException e) {
-      // expected.
-    }
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> factory.validateKeyFormat(AesEaxKeyFormat.getDefaultInstance()));
   }
 
   @Test
@@ -89,12 +87,7 @@ public class AesEaxKeyManagerTest {
       if (len == 16 || len == 32) {
         factory.validateKeyFormat(format);
       } else {
-        try {
-          factory.validateKeyFormat(format);
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
       }
     }
   }
@@ -106,12 +99,7 @@ public class AesEaxKeyManagerTest {
       if (ivSize == 12 || ivSize == 16) {
         factory.validateKeyFormat(format);
       } else {
-        try {
-          factory.validateKeyFormat(format);
-          fail();
-        } catch (GeneralSecurityException e) {
-          // expected
-        }
+        assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
       }
     }
   }

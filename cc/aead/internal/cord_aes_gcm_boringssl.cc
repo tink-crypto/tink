@@ -90,10 +90,12 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
     }
   }
 
-  char* buffer = new char[plaintext.size()];
+  char* buffer = std::allocator<char>().allocate(plaintext.size());
   absl::Cord ciphertext_buffer = absl::MakeCordFromExternal(
-      absl::string_view(buffer, plaintext.size()),
-      [buffer](absl::string_view) { delete[] buffer; });
+      absl::string_view(buffer, plaintext.size()), [](absl::string_view sv) {
+        std::allocator<char>().deallocate(const_cast<char*>(sv.data()),
+                                          sv.size());
+      });
   uint64_t ciphertext_buffer_offset = 0;
 
   for (auto plaintext_chunk : plaintext.Chunks()) {
@@ -163,12 +165,15 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
   }
 
   uint64_t plaintext_len = ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes;
-  char* plaintext_buffer = new char[plaintext_len];
+  char* plaintext_buffer = std::allocator<char>().allocate(plaintext_len);
   uint64_t plaintext_buffer_offset = 0;
 
   absl::Cord result = absl::MakeCordFromExternal(
       absl::string_view(plaintext_buffer, plaintext_len),
-      [plaintext_buffer](absl::string_view) { delete[] plaintext_buffer; });
+      [](absl::string_view sv) {
+        std::allocator<char>().deallocate(const_cast<char*>(sv.data()),
+                                          sv.size());
+      });
 
   for (auto ct_chunk : raw_ciphertext.Chunks()) {
     if (!EVP_DecryptUpdate(ctx.get(),
