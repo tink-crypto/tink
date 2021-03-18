@@ -51,6 +51,8 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
+
 namespace {
 
 using ::crypto::tink::test::AddLegacyKey;
@@ -1740,5 +1742,6 @@ TEST(RegistryImplTest, CanDelegateGetPublicKey) {
 }
 
 }  // namespace
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

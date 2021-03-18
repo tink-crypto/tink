@@ -47,6 +47,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 class RegistryImpl {
  public:
@@ -759,6 +760,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
   return std::move(primitive_result);
 }
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 

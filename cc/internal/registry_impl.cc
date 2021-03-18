@@ -25,6 +25,7 @@ using google::crypto::tink::KeyTemplate;
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
     const std::string& type_url) const {
@@ -112,5 +113,6 @@ void RegistryImpl::Reset() {
   primitive_to_wrapper_.clear();
 }
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

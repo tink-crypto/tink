@@ -55,7 +55,8 @@ class Registry {
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
       const std::string& catalogue_name) {
-    return RegistryImpl::GlobalInstance().get_catalogue<P>(catalogue_name);
+    return internal::RegistryImpl::GlobalInstance().get_catalogue<P>(
+        catalogue_name);
   }
 
   // Adds the given 'catalogue' under the specified 'catalogue_name',
@@ -69,8 +70,8 @@ class Registry {
   static crypto::tink::util::Status
       AddCatalogue(const std::string& catalogue_name,
                    std::unique_ptr<ConcreteCatalogue> catalogue) {
-    return RegistryImpl::GlobalInstance().AddCatalogue(catalogue_name,
-                                                       catalogue.release());
+    return internal::RegistryImpl::GlobalInstance().AddCatalogue(
+        catalogue_name, catalogue.release());
   }
 
   // AddCatalogue has the same functionality as the overload which uses a
@@ -89,8 +90,8 @@ class Registry {
   template <class ConcreteKeyManager>
   static crypto::tink::util::Status RegisterKeyManager(
       std::unique_ptr<ConcreteKeyManager> manager, bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterKeyManager(manager.release(),
-                                                             new_key_allowed);
+    return internal::RegistryImpl::GlobalInstance().RegisterKeyManager(
+        manager.release(), new_key_allowed);
   }
 
   // Same functionality as the overload which takes a unique pointer, for
@@ -113,7 +114,7 @@ class Registry {
   template <class KTManager>
   static crypto::tink::util::Status RegisterKeyTypeManager(
       std::unique_ptr<KTManager> manager, bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance()
+    return internal::RegistryImpl::GlobalInstance()
         .RegisterKeyTypeManager<typename KTManager::KeyProto,
                                 typename KTManager::KeyFormatProto,
                                 typename KTManager::PrimitiveList>(
@@ -125,15 +126,16 @@ class Registry {
       std::unique_ptr<PrivateKeyTypeManager> private_key_manager,
       std::unique_ptr<KeyTypeManager> public_key_manager,
       bool new_key_allowed) {
-    return RegistryImpl::GlobalInstance().RegisterAsymmetricKeyManagers(
-        private_key_manager.release(), public_key_manager.release(),
-        new_key_allowed);
+    return internal::RegistryImpl::GlobalInstance()
+        .RegisterAsymmetricKeyManagers(private_key_manager.release(),
+                                       public_key_manager.release(),
+                                       new_key_allowed);
   }
 
   template <class ConcretePrimitiveWrapper>
   static crypto::tink::util::Status RegisterPrimitiveWrapper(
       std::unique_ptr<ConcretePrimitiveWrapper> wrapper) {
-    return RegistryImpl::GlobalInstance().RegisterPrimitiveWrapper(
+    return internal::RegistryImpl::GlobalInstance().RegisterPrimitiveWrapper(
         wrapper.release());
   }
 
@@ -146,7 +148,8 @@ class Registry {
   template <class P>
   static crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
       const std::string& type_url) {
-    return RegistryImpl::GlobalInstance().get_key_manager<P>(type_url);
+    return internal::RegistryImpl::GlobalInstance().get_key_manager<P>(
+        type_url);
   }
 
   // Convenience method for creating a new primitive for the key given
@@ -155,7 +158,7 @@ class Registry {
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const google::crypto::tink::KeyData& key_data) {
-    return RegistryImpl::GlobalInstance().GetPrimitive<P>(key_data);
+    return internal::RegistryImpl::GlobalInstance().GetPrimitive<P>(key_data);
   }
   // Convenience method for creating a new primitive for the key given
   // in 'key'.  It looks up a KeyManager identified by type_url,
@@ -163,7 +166,8 @@ class Registry {
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
       const std::string& type_url, const portable_proto::MessageLite& key) {
-    return RegistryImpl::GlobalInstance().GetPrimitive<P>(type_url, key);
+    return internal::RegistryImpl::GlobalInstance().GetPrimitive<P>(type_url,
+                                                                    key);
   }
 
   // Generates a new KeyData for the specified 'key_template'.
@@ -173,7 +177,7 @@ class Registry {
   static crypto::tink::util::StatusOr<
       std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(const google::crypto::tink::KeyTemplate& key_template) {
-    return RegistryImpl::GlobalInstance().NewKeyData(key_template);
+    return internal::RegistryImpl::GlobalInstance().NewKeyData(key_template);
   }
 
   // Convenience method for extracting the public key data from the
@@ -184,7 +188,7 @@ class Registry {
       std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(const std::string& type_url,
                    const std::string& serialized_private_key) {
-    return RegistryImpl::GlobalInstance().GetPublicKeyData(
+    return internal::RegistryImpl::GlobalInstance().GetPublicKeyData(
         type_url, serialized_private_key);
   }
 
@@ -193,13 +197,16 @@ class Registry {
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) {
-    return RegistryImpl::GlobalInstance().Wrap<P>(std::move(primitive_set));
+    return internal::RegistryImpl::GlobalInstance().Wrap<P>(
+        std::move(primitive_set));
   }
 
   // Resets the registry.
   // After reset the registry is empty, i.e. it contains neither catalogues
   // nor key managers. This method is intended for testing only.
-  static void Reset() { return RegistryImpl::GlobalInstance().Reset(); }
+  static void Reset() {
+    return internal::RegistryImpl::GlobalInstance().Reset();
+  }
 };
 
 }  // namespace tink
