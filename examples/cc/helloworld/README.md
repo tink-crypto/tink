@@ -12,13 +12,22 @@ obtaining a primitive, and using the primitive to do crypto.
 ### Bazel
 
 ```shell
+# Build the code.
 git clone https://github.com/google/tink
-cd tink
+cd tink/examples/cc
 bazel build ...
+
+# Create some input.
 echo "some plaintext" > foo.txt
-./bazel-bin/examples/cc/helloworld/hello_world ./examples/cc/helloworld/aes128_gcm_test_keyset_json.txt\
-    encrypt foo.txt "some aad" bar.encrypted
-./bazel-bin/examples/cc/helloworld/hello_world ./examples/cc/helloworld/aes128_gcm_test_keyset_json.txt\
-    decrypt bar.encrypted "some aad" foo-decrypted.txt
+
+# Encrypt.
+./bazel-bin/helloworld/hello_world ./helloworld/aes128_gcm_test_keyset_json.txt \
+    encrypt foo.txt "some aad" foo.encrypted
+
+# Decrypt.
+./bazel-bin/helloworld/hello_world ./helloworld/aes128_gcm_test_keyset_json.txt \
+    decrypt foo.encrypted "some aad" foo-decrypted.txt
+
+# Inspect the output.
 cat foo-decrypted.txt
 ```

@@ -158,7 +158,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
   // Initializing recipient's KEM data structure using recipient's private keys
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.priv,
-      std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key));
+      std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed));
   ASSERT_TRUE(status_or_recipient_kem.ok());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 
@@ -203,12 +203,6 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
   ASSERT_TRUE(status_or_sender_kem.ok());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
 
-  // storing an HRSS private key backup needed for the defective testing flow:
-  struct HRSS_private_key recipient_hrss_priv_copy;
-  std::memcpy(recipient_hrss_priv_copy.opaque,
-              cecpq2_key_pair.hrss_key_pair.hrss_private_key->opaque,
-              sizeof(recipient_hrss_priv_copy.opaque));
-
   // Generating sender's shared secret (using salt_hex1)
   auto status_or_kem_key = sender_kem->GenerateKey(
       HashType::SHA256, test::HexDecodeOrDie(salt_hex),
@@ -219,7 +213,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
   // Initializing recipient's KEM data structure using recipient's private keys
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.priv,
-      std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key));
+      std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed));
   ASSERT_TRUE(status_or_recipient_kem.ok());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 

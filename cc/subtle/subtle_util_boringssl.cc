@@ -509,14 +509,15 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
 // static
 util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
   switch (sig_hash) {
-    case HashType::SHA224: /* fall through */
-    case HashType::SHA256:
+    case HashType::SHA256: /* fall through */
     case HashType::SHA384:
     case HashType::SHA512:
       return util::Status::OK;
-    case HashType::SHA1:
+    case HashType::SHA1: /* fall through */
+    case HashType::SHA224:
       return util::Status(util::error::INVALID_ARGUMENT,
-                          "SHA1 is not safe for digital signature");
+                          absl::StrCat("Hash function ", EnumToString(sig_hash),
+                                       " is not safe for digital signature"));
     default:
       return util::Status(util::error::INVALID_ARGUMENT,
                           "Unsupported hash function");

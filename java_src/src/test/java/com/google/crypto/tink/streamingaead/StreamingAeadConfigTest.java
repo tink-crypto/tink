@@ -21,7 +21,9 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +41,7 @@ public class StreamingAeadConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class, () -> Registry.getCatalogue("tinkstreamingaead"));
@@ -62,5 +65,41 @@ public class StreamingAeadConfigTest {
 
     // Running init() manually again should succeed.
     StreamingAeadConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register streaming AEAD key manager
+    StreamingAeadConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      Registry.getKeyManager(typeUrl, StreamingAead.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register streaming AEAD key manager
+    StreamingAeadConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey",
+      "type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    }
   }
 }

@@ -33,7 +33,7 @@ final class TinkFipsStatus {
 
   static Boolean checkConscryptUsesFipsBoringSsl() {
     try {
-      Class<?> cls = Class.forName("Conscrypt");
+      Class<?> cls = Class.forName("org.conscrypt.Conscrypt");
       Method isBoringSslFIPSBuild = cls.getMethod("isBoringSslFIPSBuild");
       return (Boolean) isBoringSslFIPSBuild.invoke(null);
     } catch (ReflectiveOperationException e) {

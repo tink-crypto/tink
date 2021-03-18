@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_CORE_REGISTRY_IMPL_H_
-#define TINK_CORE_REGISTRY_IMPL_H_
+#ifndef TINK_INTERNAL_REGISTRY_IMPL_H_
+#define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
 #include <tuple>
@@ -762,4 +762,4 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_REGISTRY_IMPL_H_
+#endif  // TINK_INTERNAL_REGISTRY_IMPL_H_

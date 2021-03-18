@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 @Immutable
 public interface JwtPublicKeyVerify {
   /**
-   * Decodes and verifies a JWT in the JWS compact serialization format.
+   * Verifies and decodes a JWT in the JWS compact serialization format.
    *
    * <p>The JWT is validated against the rules in {@code validator}. That is, every claim in {@code
    * validator} must also be present in the JWT. For example, if {@code validator} contains an
@@ -39,8 +39,9 @@ public interface JwtPublicKeyVerify {
    * differences among different machines.
    *
    * @throws GeneralSecurityException when the signature of the token could not be verified, the
-   *   token contains an invalid claim or header, the token has been expired or can't be used yet
+   *     token contains an invalid claim or header, the token has been expired or can't be used yet
    */
-  VerifiedJwt verify(String compact, JwtValidator validator) throws GeneralSecurityException;
+  VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
+      throws GeneralSecurityException;
 }
 

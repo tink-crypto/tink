@@ -16,7 +16,6 @@
 
 package com.google.crypto.tink.signature;
 
-import com.google.crypto.tink.CryptoFormat;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.PublicKeySign;
@@ -43,7 +42,7 @@ public class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign, Pub
     @Override
     public byte[] sign(final byte[] data) throws GeneralSecurityException {
       if (primitives.getPrimary().getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-        byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
+        byte[] formatVersion = new byte[] {0};
         return Bytes.concat(
             primitives.getPrimary().getIdentifier(),
             primitives.getPrimary().getPrimitive().sign(Bytes.concat(data, formatVersion)));

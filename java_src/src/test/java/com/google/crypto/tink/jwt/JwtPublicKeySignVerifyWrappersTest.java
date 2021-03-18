@@ -97,9 +97,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
-    String signedCompact = signer.sign(rawToken);
+    String signedCompact = signer.signAndEncode(rawToken);
     JwtValidator validator = new JwtValidator.Builder().build();
-    VerifiedJwt verifiedToken = verifier.verify(signedCompact, validator);
+    VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
   }
 
@@ -124,15 +124,19 @@ public class JwtPublicKeySignVerifyWrappersTest {
         newHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
-    String oldSignedCompact = oldSigner.sign(rawToken);
-    String newSignedCompact = newSigner.sign(rawToken);
+    String oldSignedCompact = oldSigner.signAndEncode(rawToken);
+    String newSignedCompact = newSigner.signAndEncode(rawToken);
 
     JwtValidator validator = new JwtValidator.Builder().build();
-    assertThat(oldVerifier.verify(oldSignedCompact, validator).getJwtId()).isEqualTo("blah");
-    assertThat(newVerifier.verify(oldSignedCompact, validator).getJwtId()).isEqualTo("blah");
-    assertThat(newVerifier.verify(newSignedCompact, validator).getJwtId()).isEqualTo("blah");
+    assertThat(oldVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("blah");
+    assertThat(newVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("blah");
+    assertThat(newVerifier.verifyAndDecode(newSignedCompact, validator).getJwtId())
+        .isEqualTo("blah");
     assertThrows(
-        GeneralSecurityException.class, () -> oldVerifier.verify(newSignedCompact, validator));
+        GeneralSecurityException.class,
+        () -> oldVerifier.verifyAndDecode(newSignedCompact, validator));
   }
 
   @Test
@@ -141,7 +145,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSign = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawJwt = new RawJwt.Builder().build();
-    String compact = jwtSign.sign(rawJwt);
+    String compact = jwtSign.signAndEncode(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
 
     KeysetHandle wrongKeysetHandle = KeysetHandle.generateNew(template);
@@ -149,7 +153,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
     JwtPublicKeyVerify wrongJwtVerify =
         wrongPublicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
-    assertThrows(GeneralSecurityException.class, () -> wrongJwtVerify.verify(compact, validator));
+    assertThrows(
+        GeneralSecurityException.class, () -> wrongJwtVerify.verifyAndDecode(compact, validator));
   }
 
   @Test
@@ -160,9 +165,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
     KeysetHandle publicHandle = keysetHandle.getPublicKeysetHandle();
     JwtPublicKeyVerify jwtVerifier = publicHandle.getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawJwt = new RawJwt.Builder().setIssuer("Justus").build();
-    String compact = jwtSigner.sign(rawJwt);
+    String compact = jwtSigner.signAndEncode(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().setIssuer("Peter").build();
-    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verify(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 
   @Test
@@ -179,9 +184,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
             .setExpiration(now.minusSeconds(100)) // exipired 100 seconds ago
             .setIssuedAt(now.minusSeconds(200))
             .build();
-    String compact = jwtSigner.sign(rawJwt);
+    String compact = jwtSigner.signAndEncode(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
-    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verify(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 
   @Test
@@ -198,8 +203,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
             .setNotBefore(now.plusSeconds(3600)) // is valid in 1 hour, but not before
             .setIssuedAt(now)
             .build();
-    String compact = jwtSigner.sign(rawJwt);
+    String compact = jwtSigner.signAndEncode(rawJwt);
     JwtValidator validator = new JwtValidator.Builder().build();
-    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verify(compact, validator));
+    assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 }

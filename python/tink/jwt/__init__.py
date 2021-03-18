@@ -18,11 +18,13 @@ from __future__ import print_function
 import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
+from tink.jwt import _jwt_error
+from tink.jwt import _jwt_key_templates as jwt_key_templates
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
 
-JwtInvalidError = _raw_jwt.JwtInvalidError
+JwtInvalidError = _jwt_error.JwtInvalidError
 RawJwt = _raw_jwt.RawJwt
 VerifiedJwt = _verified_jwt.VerifiedJwt
 JwtValidator = _jwt_validator.JwtValidator

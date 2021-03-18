@@ -125,7 +125,7 @@ public final class JwtServiceImplTest {
   }
 
   @Test
-  public void jwtMacSignVerify_success() throws Exception {
+  public void jwtComputeVerifyMac_success() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -135,7 +135,7 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator =
@@ -150,13 +150,13 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
     assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
   }
 
   @Test
-  public void jwtMacEmptySignVerify_success() throws Exception {
+  public void jwtEmptyTokenComputeVerifyMac_success() throws Exception {
     byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -166,7 +166,7 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator = JwtValidator.getDefaultInstance();
@@ -177,7 +177,7 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
     assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
   }
@@ -201,7 +201,7 @@ public final class JwtServiceImplTest {
             .setKeyset(ByteString.copyFrom(privateKeyset))
             .setRawJwt(token)
             .build();
-    JwtSignResponse signResponse = jwtStub.publicKeySign(signRequest);
+    JwtSignResponse signResponse = jwtStub.publicKeySignAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator =
@@ -216,7 +216,7 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
     assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
   }
@@ -231,7 +231,7 @@ public final class JwtServiceImplTest {
             .setKeyset(ByteString.copyFrom(badKeyset))
             .setRawJwt(token)
             .build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isNotEmpty();
   }
 
@@ -246,7 +246,7 @@ public final class JwtServiceImplTest {
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator =
@@ -261,7 +261,7 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isNotEmpty();
   }
 
@@ -279,7 +279,7 @@ public final class JwtServiceImplTest {
             .setKeyset(ByteString.copyFrom(keyset))
             .setRawJwt(token)
             .build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     JwtValidator validator =
@@ -294,7 +294,7 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isNotEmpty();
   }
 
@@ -313,7 +313,7 @@ public final class JwtServiceImplTest {
             .setKeyset(ByteString.copyFrom(keyset))
             .setRawJwt(token)
             .build();
-    JwtSignResponse signResponse = jwtStub.macSign(signRequest);
+    JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
     KeysetGenerateResponse wrongKeysetResponse = generateKeyset(keysetStub, template);
@@ -331,7 +331,7 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
-    JwtVerifyResponse verifyResponse = jwtStub.macVerify(verifyRequest);
+    JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isNotEmpty();
   }
 }

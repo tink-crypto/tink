@@ -52,8 +52,7 @@ class _WrappedMac(_mac.Mac):
     for entry in self._primitive_set.primitive_from_identifier(prefix):
       try:
         if entry.output_prefix_type == tink_pb2.LEGACY:
-          entry.primitive.verify_mac(
-              mac_no_prefix, data + core.crypto_format.LEGACY_START_BYTE)
+          entry.primitive.verify_mac(mac_no_prefix, data + b'\x00')
         else:
           entry.primitive.verify_mac(mac_no_prefix, data)
         # If there is no exception, the MAC is valid and we can return.

@@ -82,8 +82,14 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
+	if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
 		return nil, errors.New("decryption failed: wrong key id")
 	}
 	return resp.Plaintext, nil
+}
+
+// isKeyArnFormat returns true if the keyURI is the KMS Key ARN format; false otherwise.
+func isKeyArnFormat(keyURI string) bool {
+	tokens := strings.Split(keyURI, ":")
+	return len(tokens) == 6 && strings.HasPrefix(tokens[5], "key/")
 }

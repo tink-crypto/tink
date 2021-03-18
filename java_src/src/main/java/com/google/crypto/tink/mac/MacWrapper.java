@@ -42,7 +42,7 @@ class MacWrapper implements PrimitiveWrapper<Mac, Mac> {
 
   private static class WrappedMac implements Mac {
     private final PrimitiveSet<Mac> primitives;
-    private final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
+    private final byte[] formatVersion = new byte[] {0};
 
     private WrappedMac(PrimitiveSet<Mac> primitives) {
       this.primitives = primitives;

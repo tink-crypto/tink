@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include "tink/core/registry_impl.h"
+#include "tink/internal/registry_impl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

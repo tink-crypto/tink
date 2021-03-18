@@ -112,7 +112,8 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Creates a signed compact JWT. */
   @Override
-  public void macSign(JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
+  public void computeMacAndEncode(
+      JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
     JwtSignResponse response;
     try {
       KeysetHandle keysetHandle =
@@ -120,7 +121,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      String signedCompactJwt = jwtMac.sign(rawJwt);
+      String signedCompactJwt = jwtMac.computeMacAndEncode(rawJwt);
       response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
       response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
@@ -134,7 +135,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Creates a signed compact JWT. */
   @Override
-  public void publicKeySign(
+  public void publicKeySignAndEncode(
       JwtSignRequest request, StreamObserver<JwtSignResponse> responseObserver) {
     JwtSignResponse response;
     try {
@@ -143,7 +144,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       RawJwt rawJwt = convertJwtTokenToRawJwt(request.getRawJwt());
       JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
-      String signedCompactJwt = signer.sign(rawJwt);
+      String signedCompactJwt = signer.signAndEncode(rawJwt);
       response = JwtSignResponse.newBuilder().setSignedCompactJwt(signedCompactJwt).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e)  {
       response = JwtSignResponse.newBuilder().setErr(e.toString()).build();
@@ -209,13 +210,16 @@ public final class JwtServiceImpl extends JwtImplBase {
         builder.setJwtId(StringValue.newBuilder().setValue(verifiedJwt.getJwtId()));
     }
     if (verifiedJwt.hasExpiration()) {
-        builder.setExpiration(Timestamp.newBuilder().setSeconds(verifiedJwt.getExpiration().getEpochSecond()));
+      builder.setExpiration(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getExpiration().getEpochSecond()));
     }
     if (verifiedJwt.hasNotBefore()) {
-        builder.setNotBefore(Timestamp.newBuilder().setSeconds(verifiedJwt.getNotBefore().getEpochSecond()));
+      builder.setNotBefore(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getNotBefore().getEpochSecond()));
     }
     if (verifiedJwt.hasIssuedAt()) {
-        builder.setIssuedAt(Timestamp.newBuilder().setSeconds(verifiedJwt.getIssuedAt().getEpochSecond()));
+      builder.setIssuedAt(
+          Timestamp.newBuilder().setSeconds(verifiedJwt.getIssuedAt().getEpochSecond()));
     }
     for (String claimName : verifiedJwt.customClaimNames()) {
       addCustomClaimToBuilder(verifiedJwt, claimName, builder);
@@ -248,7 +252,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Decodes and verifies a signed, compact JWT. */
   @Override
-  public void macVerify(
+  public void verifyMacAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
     JwtVerifyResponse response;
@@ -258,7 +262,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
-      VerifiedJwt verifiedJwt = jwtMac.verify(request.getSignedCompactJwt(), validator);
+      VerifiedJwt verifiedJwt = jwtMac.verifyMacAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
       response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
@@ -273,7 +277,7 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   /** Decodes and verifies a signed, compact JWT. */
   @Override
-  public void publicKeyVerify(
+  public void publicKeyVerifyAndDecode(
       JwtVerifyRequest request,
       StreamObserver<JwtVerifyResponse> responseObserver) {
     JwtVerifyResponse response;
@@ -283,7 +287,7 @@ public final class JwtServiceImpl extends JwtImplBase {
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
       JwtValidator validator = convertProtoValidatorToValidator(request.getValidator());
       JwtPublicKeyVerify verifier = keysetHandle.getPrimitive(JwtPublicKeyVerify.class);
-      VerifiedJwt verifiedJwt = verifier.verify(request.getSignedCompactJwt(), validator);
+      VerifiedJwt verifiedJwt = verifier.verifyAndDecode(request.getSignedCompactJwt(), validator);
       JwtToken token = convertVerifiedJwtToJwtToken(verifiedJwt);
       response = JwtVerifyResponse.newBuilder().setVerifiedJwt(token).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
