@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -30,6 +31,8 @@ import javax.crypto.spec.SecretKeySpec;
  */
 @Immutable
 public final class PrfAesCmac implements Prf {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   @SuppressWarnings("Immutable")
   private final SecretKey keySpec;
@@ -41,6 +44,9 @@ public final class PrfAesCmac implements Prf {
   private byte[] subKey2;
 
   private static Cipher instance() throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use AES-CMAC in FIPS-mode.");
+    }
     return EngineFactory.CIPHER.getInstance("AES/ECB/NoPadding");
   }
 

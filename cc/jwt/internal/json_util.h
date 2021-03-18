@@ -12,21 +12,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_JWT_JSON_FIELD_TYPES_H_
-#define TINK_JWT_JSON_FIELD_TYPES_H_
+#ifndef TINK_JWT_INTERNAL_JWT_UTIL_H_
+#define TINK_JWT_INTERNAL_JWT_UTIL_H_
+
+#include "google/protobuf/struct.pb.h"
+#include "absl/strings/substitute.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 
-enum class JsonFieldType {
-  kNull,
-  kNumber,
-  kString,
-  kBool,
-  kStringList,
-  kNumberList,
-};
+util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
+    absl::string_view json_string);
+
+util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
+    absl::string_view json_string);
+
+util::StatusOr<std::string> ProtoStructToJsonString(
+    const google::protobuf::Struct& proto);
+
+util::StatusOr<std::string> ProtoListToJsonString(
+    const google::protobuf::ListValue& proto);
+
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_JWT_JSON_FIELD_TYPES_H_
+#endif  // TINK_JWT_INTERNAL_JWT_UTIL_H_

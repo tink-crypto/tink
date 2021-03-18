@@ -12,7 +12,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/jwt/json_struct_util.h"
+#include "tink/jwt/internal/json_util.h"
 
 #include <google/protobuf/util/json_util.h>
 #include "absl/strings/substitute.h"
@@ -20,16 +20,19 @@
 namespace crypto {
 namespace tink {
 
+namespace {
+
 util::Status ConvertProtoStatus(const google::protobuf::util::Status& status) {
   return util::Status(static_cast<util::error::Code>(status.error_code()),
                                     std::string(status.message().data(), status.message().length()));
 }
 
-util::StatusOr<google::protobuf::Struct> JsonStructBuilder::FromString(
+}  // namespace
+
+util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
     absl::string_view json_string) {
   google::protobuf::Struct proto;
   google::protobuf::util::JsonParseOptions json_parse_options;
-  json_parse_options.case_insensitive_enum_parsing = true;
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
@@ -38,8 +41,30 @@ util::StatusOr<google::protobuf::Struct> JsonStructBuilder::FromString(
   return proto;
 }
 
-util::StatusOr<std::string> JsonStructBuilder::ToString(
+util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
+    absl::string_view json_string) {
+  google::protobuf::ListValue proto;
+  google::protobuf::util::JsonParseOptions json_parse_options;
+  auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
+                                                  json_parse_options);
+  if (!status.ok()) {
+    return ConvertProtoStatus(status);
+  }
+  return proto;
+}
+
+util::StatusOr<std::string> ProtoStructToJsonString(
     const google::protobuf::Struct& proto) {
+  std::string output;
+  auto status = google::protobuf::util::MessageToJsonString(proto, &output);
+  if (!status.ok()) {
+    return ConvertProtoStatus(status);
+  }
+  return output;
+}
+
+util::StatusOr<std::string> ProtoListToJsonString(
+    const google::protobuf::ListValue& proto) {
   std::string output;
   auto status = google::protobuf::util::MessageToJsonString(proto, &output);
   if (!status.ok()) {

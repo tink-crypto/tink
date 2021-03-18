@@ -27,6 +27,6 @@ import java.security.GeneralSecurityException;
 public interface JwtPublicKeySign {
   /** Computes a signature, and encodes the JWT and the signature in the
    * JWS compact serialization format. */
-  String sign(RawJwt token) throws GeneralSecurityException;
+  String signAndEncode(RawJwt token) throws GeneralSecurityException;
 }
 

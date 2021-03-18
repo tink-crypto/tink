@@ -342,9 +342,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
-    String signedCompact = signer.sign(rawToken);
+    String signedCompact = signer.signAndEncode(rawToken);
     JwtValidator validator = new JwtValidator.Builder().build();
-    VerifiedJwt verifiedToken = verifier.verify(signedCompact, validator);
+    VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
   }
 
@@ -355,14 +355,15 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
-    String signedCompact = signer.sign(rawToken);
+    String signedCompact = signer.signAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtPublicKeyVerify otherVerifier =
         otherHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
-        GeneralSecurityException.class, () -> otherVerifier.verify(signedCompact, validator));
+        GeneralSecurityException.class,
+        () -> otherVerifier.verifyAndDecode(signedCompact, validator));
   }
 
   @Test
@@ -374,7 +375,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
-    String signedCompact = signer.sign(rawToken);
+    String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the header by adding a space at the end.
     String[] parts = signedCompact.split("\\.", -1);
@@ -383,7 +384,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
 
     JwtValidator validator = new JwtValidator.Builder().build();
-    assertThrows(GeneralSecurityException.class, () -> verifier.verify(modifiedCompact, validator));
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
   @Test
@@ -395,7 +397,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
-    String signedCompact = signer.sign(rawToken);
+    String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the payload by adding a space at the end.
     String[] parts = signedCompact.split("\\.", -1);
@@ -404,7 +406,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     String modifiedCompact = parts[0] + "." + payloadBase64 + "." + parts[2];
 
     JwtValidator validator = new JwtValidator.Builder().build();
-    assertThrows(GeneralSecurityException.class, () -> verifier.verify(modifiedCompact, validator));
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
   private static final RSAPrivateCrtKey createPrivateKey(JwtRsaSsaPssPrivateKey keyProto)
@@ -429,7 +432,8 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     String payloadBase64 = Base64.urlSafeEncode(payload.toString().getBytes(UTF_8));
     String headerBase64 = Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
     String unsignedCompact = headerBase64 + "." + payloadBase64;
-    String signature = Base64.urlSafeEncode(rawSigner.sign(unsignedCompact.getBytes(UTF_8)));
+    String signature =
+        Base64.urlSafeEncode(rawSigner.sign(unsignedCompact.getBytes(UTF_8)));
     return unsignedCompact + "." + signature;
   }
 
@@ -460,20 +464,22 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verify(goodSignedCompact, validator);
+    verifier.verifyAndDecode(goodSignedCompact, validator);
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
     String emptyHeaderSignedCompact = generateSignedCompact(rawSigner, emptyHeader, payload);
     assertThrows(
-        GeneralSecurityException.class, () -> verifier.verify(emptyHeaderSignedCompact, validator));
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(emptyHeaderSignedCompact, validator));
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
     badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
-        GeneralSecurityException.class, () -> verifier.verify(badAlgoSignedCompact, validator));
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
 
     // invalid token with an unknown "typ" in the header
     JsonObject badTypeHheader = new JsonObject();
@@ -481,6 +487,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     badTypeHheader.addProperty("typ", "IWT");
     String badTypeSignedCompact = generateSignedCompact(rawSigner, badTypeHheader, payload);
     assertThrows(
-        GeneralSecurityException.class, () -> verifier.verify(badTypeSignedCompact, validator));
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(badTypeSignedCompact, validator));
   }
 }

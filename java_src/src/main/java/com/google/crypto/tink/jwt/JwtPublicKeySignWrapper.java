@@ -50,8 +50,8 @@ class JwtPublicKeySignWrapper implements PrimitiveWrapper<JwtPublicKeySign, JwtP
     }
 
     @Override
-    public String sign(RawJwt token) throws GeneralSecurityException {
-      return primitives.getPrimary().getPrimitive().sign(token);
+    public String signAndEncode(RawJwt token) throws GeneralSecurityException {
+      return primitives.getPrimary().getPrimitive().signAndEncode(token);
     }
   }
 

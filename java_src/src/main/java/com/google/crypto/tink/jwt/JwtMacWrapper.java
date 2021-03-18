@@ -44,19 +44,19 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMac, JwtMac> {
     }
 
     @Override
-    public String sign(RawJwt token) throws GeneralSecurityException {
-      return primitives.getPrimary().getPrimitive().sign(token);
+    public String computeMacAndEncode(RawJwt token) throws GeneralSecurityException {
+      return primitives.getPrimary().getPrimitive().computeMacAndEncode(token);
     }
 
     @Override
-    public VerifiedJwt verify(String compact, JwtValidator validator)
+    public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
       // All JWT keys are raw.
       List<PrimitiveSet.Entry<JwtMac>> entries = primitives.getRawPrimitives();
       GeneralSecurityException interestingException = null;
       for (PrimitiveSet.Entry<JwtMac> entry : entries) {
         try {
-          return entry.getPrimitive().verify(compact, validator);
+          return entry.getPrimitive().verifyMacAndDecode(compact, validator);
         } catch (GeneralSecurityException e) {
           if (e instanceof JwtInvalidException) {
             // Keep this exception so that we are able to throw a meaningful message in the end

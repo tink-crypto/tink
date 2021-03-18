@@ -111,29 +111,17 @@ TEST(CreatesNewCecpq2KeyPairTest, GeneratesDifferentKeysEveryTime) {
       crypto::tink::subtle::Random::GetRandomKeyBytes(HRSS_GENERATE_KEY_BYTES);
   auto keypair2 = crypto::tink::pqc::GenerateHrssKeyPair(hrss_key_entropy2);
 
-  size_t priv_key_size = sizeof(keypair1.ValueOrDie().hrss_private_key->opaque);
-  size_t pub_key_size = sizeof(keypair1.ValueOrDie().hrss_public_key.opaque);
+  std::string keypair1_pub_marsh_str(
+      reinterpret_cast<const char*>(
+          keypair1.ValueOrDie().hrss_public_key_marshaled.data()),
+      HRSS_PUBLIC_KEY_BYTES);
+  std::string keypair2_pub_marsh_str(
+      reinterpret_cast<const char*>(
+          keypair2.ValueOrDie().hrss_public_key_marshaled.data()),
+      HRSS_PUBLIC_KEY_BYTES);
 
-  std::string keypair1_priv_str(
-      reinterpret_cast<const char*>(
-          keypair1.ValueOrDie().hrss_private_key->opaque),
-      priv_key_size);
-  std::string keypair1_pub_str(
-      reinterpret_cast<const char*>(
-          keypair2.ValueOrDie().hrss_private_key->opaque),
-      priv_key_size);
-  std::string keypair2_priv_str(
-      reinterpret_cast<const char*>(
-          keypair1.ValueOrDie().hrss_public_key.opaque),
-      pub_key_size);
-  std::string keypair2_pub_str(
-      reinterpret_cast<const char*>(
-          keypair2.ValueOrDie().hrss_public_key.opaque),
-      pub_key_size);
-
-  // the two HRSS key pais should be different with very high probability
-  EXPECT_NE(keypair1_priv_str, keypair2_priv_str);
-  EXPECT_NE(keypair1_pub_str, keypair2_pub_str);
+  // the two HRSS key pairs should be different with very high probability
+  EXPECT_NE(keypair1_pub_marsh_str, keypair2_pub_marsh_str);
 }
 
 TEST(CreatesNewCecpq2KeyPairTest, SuccessfullHrssKeyGen) {

@@ -66,7 +66,7 @@ class Cecpq2HkdfRecipientKemBoringSsl {
   static crypto::tink::util::StatusOr<
       std::unique_ptr<Cecpq2HkdfRecipientKemBoringSsl>>
   New(EllipticCurveType curve, util::SecretData ec_private_key,
-      util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key);
+      util::SecretData hrss_private_key_seed);
 
   virtual ~Cecpq2HkdfRecipientKemBoringSsl() = default;
 
@@ -93,7 +93,7 @@ class Cecpq2HkdfX25519RecipientKemBoringSsl
   static crypto::tink::util::StatusOr<
       std::unique_ptr<Cecpq2HkdfRecipientKemBoringSsl>>
   New(EllipticCurveType curve, util::SecretData ec_private_key,
-      util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key);
+      util::SecretData hrss_private_key_seed);
 
   // Computes the shared secret from X25519 private key and peer's X25519
   // encoded public key, and the shared secret from the HRSS private key, then
@@ -108,15 +108,13 @@ class Cecpq2HkdfX25519RecipientKemBoringSsl
   // The private constructor only takes the X25519 and HRSS private keys and
   // assign them to the class private members.
   explicit Cecpq2HkdfX25519RecipientKemBoringSsl(
-      util::SecretData ec_private_key,
-      util::SecretUniquePtr<struct HRSS_private_key> hrss_private_key)
+      util::SecretData ec_private_key, util::SecretData hrss_private_key_seed)
       : private_key_x25519_(std::move(ec_private_key)),
-        private_key_hrss_(std::move(hrss_private_key)) {}
+        private_key_hrss_seed_(std::move(hrss_private_key_seed)) {}
 
   // X25519 and HRSS private key containers
   util::SecretData private_key_x25519_;
-  util::SecretUniquePtr<struct HRSS_private_key> private_key_hrss_ =
-      util::MakeSecretUniquePtr<struct HRSS_private_key>();
+  util::SecretData private_key_hrss_seed_;
 };
 
 }  // namespace subtle

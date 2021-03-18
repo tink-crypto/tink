@@ -77,7 +77,7 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
 
             return new JwtPublicKeyVerify() {
               @Override
-              public VerifiedJwt verify(String compact, JwtValidator validator)
+              public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
                   throws GeneralSecurityException {
                 JwtFormat.validateASCII(compact);
                 String[] parts = compact.split("\\.", -1);

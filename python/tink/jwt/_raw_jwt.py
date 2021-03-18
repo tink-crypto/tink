@@ -17,12 +17,10 @@ import json
 from typing import cast, Mapping, Set, List, Dict, Optional, Text, Union, Any
 
 from tink import core
+from tink.jwt import _jwt_error
+from tink.jwt import _jwt_format
 
 _REGISTERED_NAMES = frozenset({'iss', 'sub', 'jti', 'aud', 'exp', 'nbf', 'iat'})
-
-
-class JwtInvalidError(core.TinkError):
-  pass
 
 
 Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
@@ -30,7 +28,7 @@ Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
 
 def _from_datetime(t: datetime.datetime) -> int:
   if not t.tzinfo:
-    raise JwtInvalidError('datetime must have tzinfo')
+    raise _jwt_error.JwtInvalidError('datetime must have tzinfo')
   return int(t.timestamp())
 
 
@@ -40,7 +38,7 @@ def _to_datetime(timestamp: int) -> datetime.datetime:
 
 def _validate_custom_claim_name(name: Text) -> None:
   if name in _REGISTERED_NAMES:
-    raise JwtInvalidError(
+    raise _jwt_error.JwtInvalidError(
         'registered name %s cannot be custom claim name' % name)
 
 
@@ -57,6 +55,8 @@ class RawJwt(object):
   def __init__(self, payload: Dict[Text, Any]) -> None:
     # No need to copy payload, because only create and from_json_payload
     # call this method.
+    if not isinstance(payload, Dict):
+      raise _jwt_error.JwtInvalidError('payload must be a dict')
     self._payload = payload
     self._validate_string_claim('iss')
     self._validate_string_claim('sub')
@@ -69,12 +69,12 @@ class RawJwt(object):
   def _validate_string_claim(self, name: Text):
     if name in self._payload:
       if not isinstance(self._payload[name], Text):
-        raise JwtInvalidError('claim %s must be a String' % name)
+        raise _jwt_error.JwtInvalidError('claim %s must be a String' % name)
 
   def _validate_number_claim(self, name: Text):
     if name in self._payload:
       if not isinstance(self._payload[name], (int, float)):
-        raise JwtInvalidError('claim %s must be a Number' % name)
+        raise _jwt_error.JwtInvalidError('claim %s must be a Number' % name)
 
   def _validate_audience_claim(self):
     if 'aud' in self._payload:
@@ -83,9 +83,9 @@ class RawJwt(object):
         self._payload['aud'] = [audiences]
         return
       if not isinstance(audiences, list) or not audiences:
-        raise JwtInvalidError('audiences must be a non-empty list')
+        raise _jwt_error.JwtInvalidError('audiences must be a non-empty list')
       if not all(isinstance(value, Text) for value in audiences):
-        raise JwtInvalidError('audiences must only contain Text')
+        raise _jwt_error.JwtInvalidError('audiences must only contain Text')
 
   # TODO(juerg): Consider adding a raw_ prefix to all access methods
   def has_issuer(self) -> bool:
@@ -143,7 +143,7 @@ class RawJwt(object):
 
   def json_payload(self) -> Text:
     """Returns the payload encoded as JSON string."""
-    return json.dumps(self._payload)
+    return _jwt_format.json_dumps(self._payload)
 
   @classmethod
   def create(cls,
@@ -175,7 +175,7 @@ class RawJwt(object):
       for name, value in custom_claims.items():
         _validate_custom_claim_name(name)
         if not isinstance(name, Text):
-          raise JwtInvalidError('claim name must be Text')
+          raise _jwt_error.JwtInvalidError('claim name must be Text')
         if (value is None or isinstance(value, (bool, int, float, Text))):
           payload[name] = value
         elif isinstance(value, list):
@@ -183,7 +183,7 @@ class RawJwt(object):
         elif isinstance(value, dict):
           payload[name] = json.loads(json.dumps(value))
         else:
-          raise JwtInvalidError('claim %s has unknown type' % name)
+          raise _jwt_error.JwtInvalidError('claim %s has unknown type' % name)
     raw_jwt = object.__new__(cls)
     raw_jwt.__init__(payload)
     return raw_jwt
@@ -192,5 +192,5 @@ class RawJwt(object):
   def from_json_payload(cls, payload: Text) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
-    raw_jwt.__init__(json.loads(payload))
+    raw_jwt.__init__(_jwt_format.json_loads(payload))
     return raw_jwt

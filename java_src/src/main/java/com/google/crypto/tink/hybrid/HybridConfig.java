@@ -17,6 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.aead.AeadConfig;
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -93,9 +94,18 @@ public final class HybridConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    AeadConfig.register();
-    EciesAeadHkdfPrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
     HybridDecryptWrapper.register();
     HybridEncryptWrapper.register();
+
+    AeadConfig.register();
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      // Currently there is no hybrid encryption scheme which is part of FIPS 140-2, therefore
+      // we do not register any in FIPS-mode.
+      return;
+    }
+
+    EciesAeadHkdfPrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
   }
 }

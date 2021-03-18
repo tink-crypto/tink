@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.streamingaead;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -74,8 +75,16 @@ public final class StreamingAeadConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
+    StreamingAeadWrapper.register();
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      // Currently there are no FIPS compliant Streaming AEADs available, therefore no
+      // key manager will be registered.
+      return;
+    }
+
     AesCtrHmacStreamingKeyManager.register(/* newKeyAllowed = */ true);
     AesGcmHkdfStreamingKeyManager.register(/* newKeyAllowed = */ true);
-    StreamingAeadWrapper.register();
   }
 }

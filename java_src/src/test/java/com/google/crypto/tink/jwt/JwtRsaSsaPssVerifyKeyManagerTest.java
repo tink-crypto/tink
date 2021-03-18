@@ -105,7 +105,7 @@ public final class JwtRsaSsaPssVerifyKeyManagerTest {
     JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
     RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
-    verifier.verify(signer.sign(token), validator);
+    verifier.verifyAndDecode(signer.signAndEncode(token), validator);
   }
 
   @Test
@@ -130,6 +130,7 @@ public final class JwtRsaSsaPssVerifyKeyManagerTest {
     RawJwt token = new RawJwt.Builder().build();
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThrows(
-        GeneralSecurityException.class, () -> verifier.verify(signer.sign(token), validator));
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(signer.signAndEncode(token), validator));
   }
 }

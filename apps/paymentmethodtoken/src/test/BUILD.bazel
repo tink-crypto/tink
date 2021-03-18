@@ -35,9 +35,8 @@ java_library(
 )
 
 gen_java_test_rules(
-    test_files = glob([
-        "**/*Test.java",
-    ]),
+    test_files = glob(["**/*Test.java"],
+    ),
     deps = [
         ":generator_test",
     ],

@@ -16,18 +16,24 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstants.ProtocolVersionConfig;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
-import java.nio.charset.StandardCharsets;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * An implementation of the sender side of <a
@@ -233,11 +239,33 @@ public final class PaymentMethodTokenSender {
         protocolVersionConfig.isEncryptionRequired
             ? new String(
                 hybridEncrypter.encrypt(
-                    message.getBytes(StandardCharsets.UTF_8),
-                    PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
-                StandardCharsets.UTF_8)
+                    message.getBytes(UTF_8), PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+                UTF_8)
             : message;
     return signV1OrV2(signedMessage);
+  }
+
+  static String jsonEncodeSignedMessage(
+      String message, String protocolVersion, byte[] signature, String senderIntermediateCert)
+      throws GeneralSecurityException {
+    try {
+      JsonObject result = new JsonObject();
+      result.addProperty(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY, Base64.encode(signature));
+      if (senderIntermediateCert != null) {
+        result.add(
+            PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY,
+            JsonParser.parseString(senderIntermediateCert).getAsJsonObject());
+      }
+      result.addProperty(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, protocolVersion);
+      result.addProperty(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, message);
+      StringWriter stringWriter = new StringWriter();
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.setHtmlSafe(true);
+      Streams.write(result, jsonWriter);
+      return stringWriter.toString();
+    } catch (JsonParseException | IllegalStateException | IOException e) {
+      throw new GeneralSecurityException("cannot seal; JSON error", e);
+    }
   }
 
   private String signV1OrV2(String message) throws GeneralSecurityException {
@@ -246,21 +274,7 @@ public final class PaymentMethodTokenSender {
             // The order of the parameters matters.
             senderId, recipientId, protocolVersion, message);
     byte[] signature = signer.sign(toSignBytes);
-    try {
-      JSONObject result =
-          new JSONObject()
-              .put(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY, message)
-              .put(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY, protocolVersion)
-              .put(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY, Base64.encode(signature));
-      if (senderIntermediateCert != null) {
-        result.put(
-            PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY,
-            new JSONObject(senderIntermediateCert));
-      }
-      return result.toString();
-    } catch (JSONException e) {
-      throw new GeneralSecurityException("cannot seal; JSON error");
-    }
+    return jsonEncodeSignedMessage(message, protocolVersion, signature, senderIntermediateCert);
   }
 
   private static void validateV1(Builder builder) {

@@ -37,22 +37,23 @@ def tearDownModule():
   testing_servers.stop()
 
 
-# TODO(b/168188126) Add LEGACY when Go supportes it.
-def all_mac_key_template_names() -> Iterable[Text]:
-  """Yields all MAC key template names."""
+def mac_key_templates() -> Iterable[Tuple[Text, tink_pb2.KeyTemplate]]:
+  """Yields (mac_key_template_name, mac_key_template) tuples."""
   for key_type in supported_key_types.MAC_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    for name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      template = supported_key_types.KEY_TEMPLATE[name]
+      yield (name, template)
+      yield (name + '-raw', keyset_builder.raw_template(template))
+      yield (name + '-legacy', keyset_builder.legacy_template(template))
 
 
 class MacTest(parameterized.TestCase):
 
-  @parameterized.parameters(all_mac_key_template_names())
-  def test_compute_verify_mac(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        key_template_name]
+  @parameterized.parameters(mac_key_templates())
+  def test_compute_verify_mac(self, key_template_name, key_template):
+    key_type = supported_key_types.KEY_TYPE_FROM_URL[key_template.type_url]
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     supported_macs = [
@@ -96,25 +97,15 @@ KEY_ROTATION_TEMPLATES = [
     keyset_builder.raw_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG),
     keyset_builder.legacy_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG)
 ]
-KEY_ROTATION_TEMPLATES_NO_LEGACY = [
-    mac.mac_key_templates.HMAC_SHA512_512BITTAG,
-    keyset_builder.raw_template(mac.mac_key_templates.HMAC_SHA512_512BITTAG)
-]
 
 
 def key_rotation_test_cases(
 ) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for compute_lang in SUPPORTED_LANGUAGES:
     for verify_lang in SUPPORTED_LANGUAGES:
-      if compute_lang == 'go' or verify_lang == 'go':
-        # TODO(b/168188126) Enable tests for Go when LEGACY is supported.
-        for old_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
-          for new_key_tmpl in KEY_ROTATION_TEMPLATES_NO_LEGACY:
-            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
-      else:
-        for old_key_tmpl in KEY_ROTATION_TEMPLATES:
-          for new_key_tmpl in KEY_ROTATION_TEMPLATES:
-            yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
+      for old_key_tmpl in KEY_ROTATION_TEMPLATES:
+        for new_key_tmpl in KEY_ROTATION_TEMPLATES:
+          yield (compute_lang, verify_lang, old_key_tmpl, new_key_tmpl)
 
 
 class MacKeyRotationTest(parameterized.TestCase):

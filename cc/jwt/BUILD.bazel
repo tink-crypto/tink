@@ -25,77 +25,112 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "json_field_types",
-    hdrs = ["json_field_types.h"],
-    include_prefix = "tink/jwt",
-)
 
 cc_library(
-    name = "json_object",
-    srcs = ["json_object.cc"],
-    hdrs = ["json_object.h"],
+    name = "raw_jwt",
+    srcs = ["raw_jwt.cc"],
+    hdrs = ["raw_jwt.h"],
     include_prefix = "tink/jwt",
     deps = [
-        ":json_util",
-        "//util:status",
-        "//util:statusor",
-        ":json_field_types",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings:str_format",
-        "@com_google_absl//absl/time",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
-
-cc_library(
-    name = "json_util",
-    srcs = ["json_struct_util.cc"],
-    hdrs = ["json_struct_util.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:protobuf",
-    ],
-)
-
-cc_library(
-    name = "jwt_object",
-    srcs = ["jwt_object.cc"],
-    hdrs = ["jwt_object.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        ":json_object",
         ":jwt_names",
-        ":json_field_types",
+        "//jwt/internal:json_util",
         "//util:status",
         "//util:statusor",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/time",
         "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_library(
+    name = "verified_jwt",
+    srcs = ["verified_jwt.cc"],
+    hdrs = ["verified_jwt.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":jwt_names",
+        ":raw_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_library(
+    name = "jwt_validator",
+    srcs = ["jwt_validator.cc"],
+    hdrs = ["jwt_validator.h"],
+    include_prefix = "tink/jwt",
+    deps = [
+        ":raw_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/time",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_library(
+    name = "jwt_mac",
+    hdrs = ["jwt_mac.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":jwt_validator",
+        ":raw_jwt",
+        ":verified_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_sign",
+    hdrs = ["jwt_public_key_sign.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":raw_jwt",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_verify",
+    hdrs = ["jwt_public_key_verify.h"],
+    include_prefix = "tink",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":jwt_validator",
+        ":verified_jwt",
+        "//util:status",
+        "@com_google_absl//absl/strings",
     ],
 )
 
 # tests
+
+
 cc_test(
-    name = "json_object_test",
+    name = "raw_jwt_test",
     size = "small",
-    srcs = ["json_object_test.cc"],
+    srcs = ["raw_jwt_test.cc"],
     deps = [
-        ":json_object",
-        ":json_util",
+        ":jwt_names",
+        ":raw_jwt",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
-        ":json_field_types",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
         "@com_google_protobuf//:protobuf",
@@ -103,18 +138,35 @@ cc_test(
 )
 
 cc_test(
-    name = "jwt_object_test",
+    name = "verified_jwt_test",
     size = "small",
-    srcs = ["jwt_object_test.cc"],
+    srcs = ["verified_jwt_test.cc"],
     deps = [
-        ":jwt_object",
-        ":json_field_types",
         ":jwt_names",
+        ":raw_jwt",
+        ":verified_jwt",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
-        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "jwt_validator_test",
+    size = "small",
+    srcs = ["jwt_validator_test.cc"],
+    deps = [
+        ":raw_jwt",
+        ":jwt_validator",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",

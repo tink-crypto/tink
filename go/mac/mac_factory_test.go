@@ -19,7 +19,6 @@ import (
 	"strings"
 	"testing"
 
-	"flag"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/tink/go/core/cryptofmt"
 	"github.com/google/tink/go/keyset"
@@ -118,8 +117,6 @@ func TestFactoryRawKey(t *testing.T) {
 }
 
 func TestFactoryLegacyKey(t *testing.T) {
-	flag.Set("enable_compute_old_legacy_mac", "true")
-	defer flag.Set("enable_compute_old_legacy_mac", "false")
 	tagSize := uint32(16)
 	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_LEGACY)
 	primaryKey := keyset.Key[0]
@@ -144,38 +141,7 @@ func TestFactoryLegacyKey(t *testing.T) {
 	}
 }
 
-func TestFactoryDisableLegacyKey(t *testing.T) {
-	tagSize := uint32(16)
-	keyset := testutil.NewTestHMACKeyset(tagSize, tinkpb.OutputPrefixType_LEGACY)
-	primaryKey := keyset.Key[0]
-	if primaryKey.OutputPrefixType != tinkpb.OutputPrefixType_LEGACY {
-		t.Errorf("expect a legacy key")
-	}
-	keysetHandle, err := testkeyset.NewHandle(keyset)
-	if err != nil {
-		t.Errorf("testkeyset.NewHandle failed: %s", err)
-	}
-	p, err := mac.New(keysetHandle)
-	if err != nil {
-		t.Errorf("mac.New failed: %s", err)
-	}
-	data := []byte("some data")
-	if _, err := p.ComputeMAC(data); err == nil {
-		t.Errorf("computation of old legacy mac succeeded, but was disabled")
-	}
-	flag.Set("enable_compute_old_legacy_mac", "true")
-	if _, err := p.ComputeMAC(data); err != nil {
-		t.Errorf("computation of old legacy mac failed, but was enabled: %s", err)
-	}
-	flag.Set("enable_compute_old_legacy_mac", "false")
-	if _, err := p.ComputeMAC(data); err == nil {
-		t.Errorf("computation of old legacy mac succeeded, but was disabled")
-	}
-}
-
-func TestFactoryLegacyFixedKeyTag(t *testing.T) {
-	// This test makes sure that previously created tags are still considered valid.
-	// This is needed to resolve b/168188126.
+func TestFactoryLegacyFixedKeyFixedTag(t *testing.T) {
 	tagSize := uint32(16)
 	params := testutil.NewHMACParams(commonpb.HashType_SHA256, tagSize)
 	keyValue := []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
@@ -207,13 +173,9 @@ func TestFactoryLegacyFixedKeyTag(t *testing.T) {
 		t.Errorf("mac.New failed: %s", err)
 	}
 	data := []byte("hello")
-	incompatibleTag := []byte{0, 0, 0, 0, 42, 245, 200, 101, 212, 53, 28, 131, 148, 107, 236, 152, 101, 87, 7, 59, 255}
-	if err = p.VerifyMAC(incompatibleTag, data); err != nil {
-		t.Errorf("incompatibleTag verification failed: %s", err)
-	}
-	compatibleTag := []byte{0, 0, 0, 0, 42, 64, 150, 12, 207, 250, 175, 32, 216, 164, 77, 69, 28, 29, 204, 235, 75}
-	if err = p.VerifyMAC(compatibleTag, data); err == nil {
-		t.Errorf("compatibleTag verification succeeded, want fail.")
+	tag := []byte{0, 0, 0, 0, 42, 64, 150, 12, 207, 250, 175, 32, 216, 164, 77, 69, 28, 29, 204, 235, 75}
+	if err = p.VerifyMAC(tag, data); err != nil {
+		t.Errorf("compatibleTag verification failed: %s", err)
 	}
 }
 
