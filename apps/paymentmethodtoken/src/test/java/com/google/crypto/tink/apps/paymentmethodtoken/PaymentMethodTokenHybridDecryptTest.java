@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;
 
@@ -25,7 +26,8 @@ import com.google.crypto.tink.apps.paymentmethodtoken.PaymentMethodTokenConstant
 import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Random;
-import java.nio.charset.StandardCharsets;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -33,7 +35,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.Arrays;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -60,26 +61,27 @@ public class PaymentMethodTokenHybridDecryptTest {
   public void testModifyDecrypt(HybridEncrypt hybridEncrypt, HybridDecrypt hybridDecrypt)
       throws Exception {
     byte[] plaintext = Random.randBytes(111);
-    byte[] context = "context info".getBytes(StandardCharsets.UTF_8);
+    byte[] context = "context info".getBytes(UTF_8);
 
     byte[] ciphertext = hybridEncrypt.encrypt(plaintext, context);
     byte[] decrypted = hybridDecrypt.decrypt(ciphertext, context);
     assertArrayEquals(plaintext, decrypted);
 
-    JSONObject json = new JSONObject(new String(ciphertext, StandardCharsets.UTF_8));
+    JsonObject json = JsonParser.parseString(new String(ciphertext, UTF_8)).getAsJsonObject();
 
     // Modify public key.
     byte[] kem =
-        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY));
+        Base64.decode(
+            json.get(PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY).getAsString());
     for (int bytes = 0; bytes < kem.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPublicKey = Arrays.copyOf(kem, kem.length);
         modifiedPublicKey[bytes] ^= (byte) (1 << bit);
-        json.put(
+        json.addProperty(
             PaymentMethodTokenConstants.JSON_EPHEMERAL_PUBLIC_KEY,
             Base64.encode(modifiedPublicKey));
         try {
-          hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
+          hybridDecrypt.decrypt(json.toString().getBytes(UTF_8), context);
           fail("Invalid ciphertext, should have thrown exception");
         } catch (GeneralSecurityException expected) {
           // Expected
@@ -89,15 +91,16 @@ public class PaymentMethodTokenHybridDecryptTest {
 
     // Modify payload.
     byte[] payload =
-        Base64.decode(json.getString(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY));
+        Base64.decode(
+            json.get(PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY).getAsString());
     for (int bytes = 0; bytes < payload.length; bytes++) {
       for (int bit = 0; bit < 8; bit++) {
         byte[] modifiedPayload = Arrays.copyOf(payload, payload.length);
         modifiedPayload[bytes] ^= (byte) (1 << bit);
-        json.put(
+        json.addProperty(
             PaymentMethodTokenConstants.JSON_ENCRYPTED_MESSAGE_KEY, Base64.encode(modifiedPayload));
         try {
-          hybridDecrypt.decrypt(json.toString().getBytes(StandardCharsets.UTF_8), context);
+          hybridDecrypt.decrypt(json.toString().getBytes(UTF_8), context);
           fail("Invalid ciphertext, should have thrown exception");
         } catch (GeneralSecurityException expected) {
           // Expected
