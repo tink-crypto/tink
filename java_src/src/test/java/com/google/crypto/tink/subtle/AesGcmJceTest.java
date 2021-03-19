@@ -22,15 +22,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.TestUtil.BytesMutation;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.Cipher;
+import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,8 +58,24 @@ public class AesGcmJceTest {
     }
   }
 
+  @Before
+  public void useConscrypt() throws Exception {
+    // If Tink is build in FIPS-only mode, then we register Conscrypt for the tests.
+    if (TinkFips.useOnlyFips()) {
+      try {
+        Conscrypt.checkAvailability();
+        Security.addProvider(Conscrypt.newProvider());
+      } catch (Throwable cause) {
+        throw new IllegalStateException(
+            "Cannot test AesGcm in FIPS-mode without Conscrypt Provider", cause);
+      }
+    }
+  }
+
   @Test
   public void testEncryptDecrypt() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     byte[] aad = generateAad();
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -71,9 +91,9 @@ public class AesGcmJceTest {
 
   @Test
   public void testEncryptWithAad_shouldFailOnAndroid19OrOlder() throws Exception {
-    if (!SubtleUtil.isAndroid() || SubtleUtil.androidApiLevel() > 19) {
-      return;
-    }
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeFalse(!SubtleUtil.isAndroid() || SubtleUtil.androidApiLevel() > 19);
+
     AesGcmJce gcm = new AesGcmJce(Random.randBytes(16));
     byte[] message = Random.randBytes(20);
     byte[] aad = Random.randBytes(20);
@@ -84,10 +104,9 @@ public class AesGcmJceTest {
   @Test
   /** BC had a bug, where GCM failed for messages of size > 8192 */
   public void testLongMessages() throws Exception {
-    if (TestUtil.isAndroid()) {
-      System.out.println("testLongMessages doesn't work on Android, skipping");
-      return;
-    }
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeFalse(TestUtil.isAndroid()); // doesn't work on Android
+
     int dataSize = 16;
     while (dataSize <= (1 << 24)) {
       byte[] plaintext = Random.randBytes(dataSize);
@@ -105,6 +124,8 @@ public class AesGcmJceTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     byte[] aad = generateAad();
     byte[] key = Random.randBytes(16);
     byte[] message = Random.randBytes(32);
@@ -141,6 +162,8 @@ public class AesGcmJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_gcm_test.json");
     int errors = 0;
@@ -211,6 +234,8 @@ public class AesGcmJceTest {
 
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     for (int keySize : keySizeInBytes) {
       AesGcmJce gcm = new AesGcmJce(Random.randBytes(keySize));
       byte[] aad = generateAad();
@@ -239,6 +264,8 @@ public class AesGcmJceTest {
 
   @Test
   public void testEmptyAssociatedData() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     byte[] aad = new byte[0];
     for (int keySize : keySizeInBytes) {
       byte[] key = Random.randBytes(keySize);
@@ -293,6 +320,8 @@ public class AesGcmJceTest {
    * multiple ciphertexts of the same message are distinct.
    */
   public void testRandomNonce() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     final int samples = 1 << 17;
     byte[] key = Random.randBytes(16);
     byte[] message = new byte[0];
@@ -315,5 +344,13 @@ public class AesGcmJceTest {
       aad = new byte[0];
     }
     return aad;
+  }
+
+  @Test
+  public void testFailIfFipsModuleNotAvailable() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+
+    byte[] key = Random.randBytes(16);
+    assertThrows(GeneralSecurityException.class, () -> new AesGcmJce(key));
   }
 }

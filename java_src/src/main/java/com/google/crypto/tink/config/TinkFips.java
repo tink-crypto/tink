@@ -45,5 +45,9 @@ public final class TinkFips {
     return TinkFipsStatus.useOnlyFips();
   }
 
+  public static boolean fipsModuleAvailable() {
+    return TinkFipsStatus.fipsModuleAvailable();
+  }
+
   private TinkFips() {}
 }

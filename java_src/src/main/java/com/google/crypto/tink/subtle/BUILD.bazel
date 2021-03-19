@@ -286,6 +286,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
