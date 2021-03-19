@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
@@ -29,6 +30,7 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +70,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_eax_test.json");
     int errors = 0;
@@ -128,6 +132,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] aad = new byte[] {1, 2, 3};
     byte[] key = Random.randBytes(KEY_SIZE);
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
@@ -141,6 +147,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testModifyCiphertext() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testModifyCiphertext(16, 16);
     testModifyCiphertext(16, 12);
     // TODO(bleichen): Skipping test with key sizes larger than 128 bits because of b/35928521.
@@ -149,6 +157,8 @@ public class AesEaxJceTest {
   }
 
   public void testModifyCiphertext(int keySizeInBytes, int ivSizeInBytes) throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] aad = new byte[] {1, 2, 3};
     byte[] key = Random.randBytes(KEY_SIZE);
     byte[] message = Random.randBytes(32);
@@ -200,6 +210,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testNullPlaintextOrCiphertext() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     AesEaxJce eax = new AesEaxJce(Random.randBytes(KEY_SIZE), IV_SIZE);
     byte[] aad = new byte[] {1, 2, 3};
     assertThrows(
@@ -226,6 +238,8 @@ public class AesEaxJceTest {
 
   @Test
   public void testEmptyAssociatedData() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] aad = new byte[0];
     byte[] key = Random.randBytes(KEY_SIZE);
     AesEaxJce eax = new AesEaxJce(key, IV_SIZE);
@@ -258,6 +272,14 @@ public class AesEaxJceTest {
             });
       }
     }
+  }
+
+  @Test
+  public void testFailIfFipsModeUsed() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    byte[] key = Random.randBytes(16);
+    assertThrows(GeneralSecurityException.class, () -> new AesEaxJce(key, IV_SIZE));
   }
 
 }

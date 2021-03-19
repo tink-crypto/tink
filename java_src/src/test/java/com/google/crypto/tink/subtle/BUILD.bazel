@@ -202,6 +202,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:aes_eax_jce",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:hex",

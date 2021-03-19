@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
@@ -48,6 +49,9 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesEaxJce implements Aead {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+
   private static final ThreadLocal<Cipher> localEcbCipher =
       new ThreadLocal<Cipher>() {
         @Override
@@ -84,6 +88,10 @@ public final class AesEaxJce implements Aead {
 
   @SuppressWarnings("InsecureCryptoUsage")
   public AesEaxJce(final byte[] key, int ivSizeInBytes) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use AES-EAX in FIPS-mode.");
+    }
+
     if (ivSizeInBytes != 12 && ivSizeInBytes != 16) {
       throw new IllegalArgumentException("IV size should be either 12 or 16 bytes");
     }
