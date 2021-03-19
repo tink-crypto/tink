@@ -49,8 +49,7 @@ class PrimitiveSet(Generic[P]):
   """
 
   def __init__(self, primitive_class: Type[P]):
-    # map from identifier to a list of Entry
-    self._primitives = {}
+    self._primitives = {}  # Dict[bytes, List[Entry]]
     self._primary = None
     self._primitive_class = primitive_class
 
@@ -62,6 +61,10 @@ class PrimitiveSet(Generic[P]):
     # Copy the list so that if the user modifies the list, it does not affect
     # the internal data structure.
     return self._primitives.get(identifier, [])[:]
+
+  def all(self) -> List[List[Entry]]:
+    """Returns a list of copies of all lists of entries in the primitive set."""
+    return list(entries[:] for entries in self._primitives.values())
 
   def primitive(self, key: tink_pb2.Keyset.Key) -> List[Entry]:
     """Returns a copy of the list of entries for a given key."""
