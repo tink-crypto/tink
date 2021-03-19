@@ -54,6 +54,7 @@ java_library(
         ":random",
         ":subtle_util_cluster",
         ":validators",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 

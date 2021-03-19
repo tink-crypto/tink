@@ -19,9 +19,15 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.TestUtil;
+import java.security.GeneralSecurityException;
+import java.security.Security;
 import java.util.Arrays;
+import org.conscrypt.Conscrypt;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,11 +35,10 @@ import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for AesCtrJceCipher.
- *
- * <p>TODO(quangnguyen): Add more tests.
  */
 @RunWith(JUnit4.class)
 public class AesCtrJceCipherTest {
+
   // NIST SP 800-38A pp 55.
   private static final String NIST_KEY = "2b7e151628aed2a6abf7158809cf4f3c";
   private static final String NIST_PLAINTEXT =
@@ -62,8 +67,24 @@ public class AesCtrJceCipherTest {
     }
   }
 
+  @Before
+  public void useConscrypt() throws Exception {
+    // If Tink is build in FIPS-only mode, then we register Conscrypt for the tests.
+    if (TinkFips.useOnlyFips()) {
+      try {
+        Conscrypt.checkAvailability();
+        Security.addProvider(Conscrypt.newProvider());
+      } catch (Throwable cause) {
+        throw new IllegalStateException(
+            "Cannot test AesCtr in FIPS-mode without Conscrypt Provider", cause);
+      }
+    }
+  }
+
   @Test
   public void testNistVector() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     byte[] rawCiphertext = TestUtil.hexDecode(NIST_CIPHERTEXT);
     byte[] iv = TestUtil.hexDecode(NIST_IV);
     byte[] ciphertext = new byte[iv.length + rawCiphertext.length];
@@ -75,6 +96,8 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testMultipleEncrypts() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     // Checks whether multiple encryptions result in different ciphertexts.
     byte[] key = Random.randBytes(16);
     int ivSize = 16;
@@ -87,6 +110,8 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testCtrProperty() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     // Counter mode is malleable, i.e., if we flip the ciphertext, the plaintext is flipped.
     byte[] key = Random.randBytes(16);
     int ivSize = 16;
@@ -107,10 +132,21 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
     byte[] key = Random.randBytes(16);
     int ivSize = 16;
     AesCtrJceCipher c = new AesCtrJceCipher(key, ivSize);
     byte[] ciphertext = c.encrypt(msg);
     assertArrayEquals(msg, c.decrypt(ciphertext));
+  }
+
+  @Test
+  public void testFailIfFipsModuleNotAvailable() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+
+    byte[] key = Random.randBytes(16);
+    int ivSize = 16;
+    assertThrows(GeneralSecurityException.class, () -> new AesCtrJceCipher(key, ivSize));
   }
 }

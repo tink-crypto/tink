@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -32,6 +33,9 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesCtrJceCipher implements IndCpaCipher {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   private static final ThreadLocal<Cipher> localCipher =
       new ThreadLocal<Cipher>() {
         @Override
@@ -61,6 +65,11 @@ public final class AesCtrJceCipher implements IndCpaCipher {
   private final int blockSize;
 
   public AesCtrJceCipher(final byte[] key, int ivSize) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use AES-CTR in FIPS-mode, as BoringCrypto module is not available.");
+    }
+
     Validators.validateAesKeySize(key.length);
     this.keySpec = new SecretKeySpec(key, KEY_ALGORITHM);
     this.blockSize = localCipher.get().getBlockSize();
