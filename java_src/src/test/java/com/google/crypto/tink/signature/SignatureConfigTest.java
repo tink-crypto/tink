@@ -108,7 +108,6 @@ public class SignatureConfigTest {
     // Check if all FIPS-compliant key types are registered when using FIPS mode.
     String[] keyTypeUrlsSign = {
       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
-      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
     };
 
@@ -118,7 +117,6 @@ public class SignatureConfigTest {
 
     String[] keyTypeUrlsVerify = {
       "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
-      "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey",
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
     };
 
@@ -138,6 +136,8 @@ public class SignatureConfigTest {
     String[] keyTypeUrls = {
       "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
       "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
