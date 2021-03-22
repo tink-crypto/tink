@@ -98,7 +98,7 @@ func TestNoPrefixKeyTemplates(t *testing.T) {
 	}
 }
 
-func TestKMSEnvelopeAEADKeyTemplates(t *testing.T) {
+func TestKMSEnvelopeAEADKeyTemplate(t *testing.T) {
 	fakeKmsClient, err := fakekms.NewClient("fake-kms://")
 	if err != nil {
 		t.Fatalf("fakekms.NewClient('fake-kms://') failed: %v", err)
@@ -124,10 +124,60 @@ func TestKMSEnvelopeAEADKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.template.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW {
+				t.Errorf("KMS envelope template %s does not use RAW prefix, found '%s'", tc.name, tc.template.GetOutputPrefixType())
+			}
 			if err := testEncryptDecrypt(tc.template); err != nil {
 				t.Errorf("%v", err)
 			}
 		})
+	}
+}
+
+// Tests that two KMSEnvelopeAEAD keys that use the same KEK and DEK template should be able to
+// decrypt each  other's ciphertexts.
+func TestKMSEnvelopeAEADKeyTemplateMultipleKeysSameKEK(t *testing.T) {
+	fakeKmsClient, err := fakekms.NewClient("fake-kms://")
+	if err != nil {
+		t.Fatalf("fakekms.NewClient('fake-kms://') failed: %v", err)
+	}
+	registry.RegisterKMSClient(fakeKmsClient)
+
+	fixedKeyURI := "fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRvLnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE"
+	template1 := aead.KMSEnvelopeAEADKeyTemplate(fixedKeyURI, aead.AES128GCMKeyTemplate())
+	template2 := aead.KMSEnvelopeAEADKeyTemplate(fixedKeyURI, aead.AES128GCMKeyTemplate())
+
+	handle1, err := keyset.NewHandle(template1)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(template1) failed: %v", err)
+	}
+	aead1, err := aead.New(handle1)
+	if err != nil {
+		t.Fatalf("aead.New(handle) failed: %v", err)
+	}
+
+	handle2, err := keyset.NewHandle(template2)
+	if err != nil {
+		t.Fatalf("keyset.NewHandle(template2) failed: %v", err)
+	}
+	aead2, err := aead.New(handle2)
+	if err != nil {
+		t.Fatalf("aead.New(handle) failed: %v", err)
+	}
+
+	plaintext := []byte("some data to encrypt")
+	aad := []byte("extra data to authenticate")
+
+	ciphertext, err := aead1.Encrypt(plaintext, aad)
+	if err != nil {
+		t.Fatalf("encryption failed, error: %v", err)
+	}
+	decrypted, err := aead2.Decrypt(ciphertext, aad)
+	if err != nil {
+		t.Fatalf("decryption failed, error: %v", err)
+	}
+	if !bytes.Equal(plaintext, decrypted) {
+		t.Fatalf("decrypted data doesn't match plaintext, got: %q, want: %q", decrypted, plaintext)
 	}
 }
 
