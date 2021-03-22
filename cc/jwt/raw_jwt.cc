@@ -68,7 +68,7 @@ util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
   return token;
 }
 
-util::StatusOr<std::string> RawJwt::ToString() {
+util::StatusOr<std::string> RawJwt::ToString() const {
   return ProtoStructToJsonString(json_proto_);
 }
 

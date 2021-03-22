@@ -88,3 +88,42 @@ tink_cc_test(
     tink::proto::jwt_hmac_cc_proto
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_mac_impl
+  SRCS
+    jwt_mac_impl.cc
+    jwt_mac_impl.h
+  DEPS
+    tink::jwt::internal::json_util
+    tink::jwt::internal::jwt_format
+    tink::core::mac
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::jwt_mac
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_test(
+  NAME jwt_mac_impl_test
+  SRCS jwt_mac_impl_test.cc
+  DEPS
+    tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_mac_impl
+    tink::jwt::jwt_mac
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    tink::subtle::hmac_boringssl
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+    absl::strings
+)

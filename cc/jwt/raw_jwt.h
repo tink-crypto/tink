@@ -61,7 +61,7 @@ class RawJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
 
   static util::StatusOr<RawJwt> FromString(absl::string_view json_string);
-  util::StatusOr<std::string> ToString();
+  util::StatusOr<std::string> ToString() const;
 
   // RawJwt objects are copiable and movable.
   RawJwt(const RawJwt&) = default;

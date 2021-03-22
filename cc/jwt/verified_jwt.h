@@ -38,6 +38,7 @@ class VerifiedJwt {
   // VerifiedJwt object should only be constructed by JWT primitives and maybe
   // the VerifedJwt Tests. I first have to figure out what's the best way to do
   // this.
+  VerifiedJwt();
   explicit VerifiedJwt(RawJwt raw_jwt);
 
   // VerifiedJwt objects are copiable and movable.

@@ -23,6 +23,8 @@
 namespace crypto {
 namespace tink {
 
+VerifiedJwt::VerifiedJwt() {}
+
 VerifiedJwt::VerifiedJwt(RawJwt raw_jwt) {
   raw_jwt_ = raw_jwt;
 }
