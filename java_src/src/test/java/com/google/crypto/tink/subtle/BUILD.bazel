@@ -303,6 +303,7 @@ java_test(
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:aes_siv",
         "//src/main/java/com/google/crypto/tink/subtle:aes_util",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
