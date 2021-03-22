@@ -213,32 +213,41 @@ using the credentials in `credentials.json` as follows:
 
 ```cpp
   #include "tink/aead.h"
+  #include "tink/aead_key_templates.h"
+  #include "tink/keyset_handle.h"
   #include "tink/integration/gcpkms/gcp_kms_client.h"
 
   using crypto::tink::Aead;
   using crypto::tink::integration::gcpkms::GcpKmsClient;
 
-  // Create GcpKmsClient.
-  auto client_result = GcpKmsClient::New("", "credentials.json");
+  std::string kek_uri = "gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar";
+  std::string credentials = "credentials.json";
+  const KeyTemplate& dek_template = AeadKeyTemplates::Aes128Gcm();
+
+  // Register GcpKmsClient.
+  auto client_result = GcpKmsClient::RegisterNewClient(kek_uri, credentials);
   if (!client_result.ok()) {
-    std::clog << "Aead creation failed: "
+    std::clog << "GCP KMS client registration failed: "
               << client_result.status().error_message()
               << "\n";
     exit(1);
   }
-  auto client = std::move(client_result.ValueOrDie());
 
-  // Create Aead-primitive.
-  auto aead_result = client->GetAead("gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar");
-  if (!aead_result.ok()) {
-    std::clog << "Aead creation failed: "
-              << aead_result.status().error_message()
-              << "\n";
-    exit(1);
-  }
-  std::unique_ptr<Aead> aead(std::move(aead_result.ValueOrDie()));
 
-  // Use the primitive.
+  // 1. Get a handle to the key material.
+  const KeyTemplate& envelope_kt = AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  auto new_keyset_handle_result = KeysetHandle::GenerateNew(envelope_kt);
+  if (!new_keyset_handle_result.ok()) return new_keyset_handle_result.status();
+  // The nice thing about envelope encryption is that you don't have to store
+  // this keyset handle because it only contains a reference to the remote KEK.
+  auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
+
+  // 2. Get the primitive.
+  auto aead_result= keyset_handle.GetPrimitive<Aead>();
+  if (!aead_result.ok()) return aead_result.status();
+  auto aead = std::move(aead_result.ValueOrDie());
+
+  // 3. Use the primitive.
   auto ciphertext_result = aead->Encrypt(plaintext, aad);
   if (!ciphertext_result.ok()) return ciphertext_result.status();
   auto ciphertext = std::move(ciphertext_result.ValueOrDie());

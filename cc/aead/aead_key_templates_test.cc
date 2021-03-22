@@ -18,18 +18,26 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/aead.h"
+#include "tink/aead/aead_config.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/aes_gcm_siv_key_manager.h"
+#include "tink/aead/kms_envelope_aead.h"
+#include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/keyset_handle.h"
+#include "tink/subtle/aead_test_util.h"
+#include "tink/util/fake_kms_client.h"
 #include "tink/util/test_matchers.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
+#include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -39,6 +47,7 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::AesGcmSivKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::KmsEnvelopeAeadKeyFormat;
 using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
@@ -317,6 +326,68 @@ TEST(AeadKeyTemplatesTest, testXChaCha20Poly1305KeyTemplates) {
   auto new_key_result =
       key_manager->get_key_factory().NewKey(key_template.value());
   EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
+TEST(AeadKeyTemplatesTest, testKmsEnvelopeAead) {
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+  std::string kek_uri = "foo/bar";
+  const KeyTemplate& dek_template = AeadKeyTemplates::Aes128Gcm();
+
+  // Check that returned template is correct.
+  const KeyTemplate& key_template =
+      AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::RAW, key_template.output_prefix_type());
+
+  KmsEnvelopeAeadKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_EQ(kek_uri, key_format.kek_uri());
+  EXPECT_EQ(dek_template.type_url(), key_format.dek_template().type_url());
+  EXPECT_EQ(dek_template.value(), key_format.dek_template().value());
+
+  // Check that the template works with the key manager.
+  KmsEnvelopeAeadKeyManager key_type_manager;
+  auto key_manager = internal::MakeKeyManager<Aead>(&key_type_manager);
+  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
+  auto new_key_result =
+      key_manager->get_key_factory().NewKey(key_template.value());
+  EXPECT_TRUE(new_key_result.ok()) << new_key_result.status();
+}
+
+TEST(AeadKeyTemplatesTest, testKmsEnvelopeAeadMultipleKeysSameKek) {
+  // Initialize the registry.
+  ASSERT_TRUE(AeadConfig::Register().ok());
+
+  auto kek_uri_result = test::FakeKmsClient::CreateFakeKeyUri();
+  EXPECT_TRUE(kek_uri_result.ok()) << kek_uri_result.status();
+  std::string kek_uri = kek_uri_result.ValueOrDie();
+  auto register_fake_kms_client_status = test::FakeKmsClient::RegisterNewClient(
+      kek_uri, /* credentials_path= */ "");
+
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey";
+  const KeyTemplate& dek_template = AeadKeyTemplates::Aes128Gcm();
+
+  const KeyTemplate& key_template1 =
+      AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  auto handle_result1 = KeysetHandle::GenerateNew(key_template1);
+  EXPECT_TRUE(handle_result1.ok());
+  auto handle1 = std::move(handle_result1.ValueOrDie());
+  auto aead_result1 = handle1->GetPrimitive<Aead>();
+  EXPECT_TRUE(aead_result1.ok());
+  auto aead1 = std::move(aead_result1.ValueOrDie());
+
+  const KeyTemplate& key_template2 =
+      AeadKeyTemplates::KmsEnvelopeAead(kek_uri, dek_template);
+  auto handle_result2 = KeysetHandle::GenerateNew(key_template2);
+  EXPECT_TRUE(handle_result2.ok());
+  auto handle2 = std::move(handle_result2.ValueOrDie());
+  auto aead_result2 = handle2->GetPrimitive<Aead>();
+  EXPECT_TRUE(aead_result2.ok());
+  auto aead2 = std::move(aead_result2.ValueOrDie());
+
+  EXPECT_THAT(EncryptThenDecrypt(*aead1, *aead2, "message", "aad"), IsOk());
 }
 
 }  // namespace
