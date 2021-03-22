@@ -195,15 +195,15 @@ java_library(
     name = "selfkeytests_validators",
     srcs = ["SelfKeyTestValidators.java"],
     deps = [
-        ":enums",
-        "@com_google_protobuf//:protobuf_javalite",
         ":ecdsa_sign_jce",
         ":ecdsa_verify_jce",
         ":elliptic_curves",
+        ":enums",
         ":rsa_ssa_pkcs1_sign_jce",
         ":rsa_ssa_pkcs1_verify_jce",
         ":rsa_ssa_pss_sign_jce",
         ":rsa_ssa_pss_verify_jce",
+        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
@@ -352,6 +352,7 @@ java_library(
         ":cha_cha20_base",
         ":poly1305",
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 

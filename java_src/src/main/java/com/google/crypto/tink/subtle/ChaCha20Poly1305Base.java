@@ -20,6 +20,7 @@ import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
 import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.config.TinkFips;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -34,10 +35,18 @@ import javax.crypto.AEADBadTagException;
  * actual_ciphertext || tag} and only decrypts the same format.
  */
 abstract class ChaCha20Poly1305Base implements Aead {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+
   private final ChaCha20Base chacha20;
   private final ChaCha20Base macKeyChaCha20;
 
-  public ChaCha20Poly1305Base(final byte[] key) throws InvalidKeyException {
+  public ChaCha20Poly1305Base(final byte[] key)
+      throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use ChaCha20Poly1305 in FIPS-mode.");
+    }
+
     this.chacha20 = newChaCha20Instance(key, 1);
     this.macKeyChaCha20 = newChaCha20Instance(key, 0);
   }

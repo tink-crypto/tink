@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 
 /**
@@ -23,7 +24,7 @@ import java.security.InvalidKeyException;
  * https://tools.ietf.org/html/draft-arciszewski-xchacha-01.
  */
 public final class XChaCha20Poly1305 extends ChaCha20Poly1305Base {
-  public XChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
+  public XChaCha20Poly1305(final byte[] key) throws GeneralSecurityException {
     super(key);
   }
 

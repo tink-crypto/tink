@@ -370,6 +370,7 @@ java_test(
     tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:cha_cha20_poly1305",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
