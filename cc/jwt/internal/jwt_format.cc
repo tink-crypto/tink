@@ -1,0 +1,95 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#include "tink/jwt/internal/jwt_format.h"
+
+#include "absl/strings/escaping.h"
+#include "absl/strings/str_split.h"
+#include "tink/jwt/internal/json_util.h"
+
+namespace crypto {
+namespace tink {
+namespace jwt_internal {
+
+std::string EncodeHeader(absl::string_view json_header) {
+  return absl::WebSafeBase64Escape(json_header);
+}
+
+bool DecodeHeader(absl::string_view header, std::string* json_header) {
+  return absl::WebSafeBase64Unescape(header, json_header);
+}
+
+std::string CreateHeader(absl::string_view algorithm) {
+  std::string header = absl::StrCat(R"({"alg":")", algorithm, R"("})");
+  return EncodeHeader(header);
+}
+
+util::Status ValidateHeader(absl::string_view encoded_header,
+                            absl::string_view algorithm) {
+  std::string json_header;
+  if (!DecodeHeader(encoded_header, &json_header)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
+  }
+  auto proto_or = JsonStringToProtoStruct(json_header);
+  if (!proto_or.ok()) {
+    return proto_or.status();
+  }
+  auto fields = proto_or.ValueOrDie().fields();
+  auto it = fields.find("alg");
+  if (it == fields.end()) {
+    return util::Status(util::error::INVALID_ARGUMENT, "header is missing alg");
+  }
+  const auto& alg = it->second;
+  if (alg.kind_case() != google::protobuf::Value::kStringValue) {
+    return util::Status(util::error::INVALID_ARGUMENT, "alg is not a string");
+  }
+  if (alg.string_value() != algorithm) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid alg");
+  }
+  auto it2 = fields.find("typ");
+  if (it2 == fields.end()) {
+    return util::OkStatus();
+  }
+  const auto& typ_value = it2->second;
+  if (typ_value.kind_case() != google::protobuf::Value::kStringValue) {
+    return util::Status(util::error::INVALID_ARGUMENT, "typ is not a string");
+  }
+  std::string typ = std::string(typ_value.string_value());
+  std::transform(typ.begin(), typ.end(), typ.begin(), ::toupper);
+  if (typ != "JWT") {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid typ");
+  }
+  return util::OkStatus();
+}
+
+std::string EncodePayload(absl::string_view json_payload) {
+  return absl::WebSafeBase64Escape(json_payload);
+}
+
+bool DecodePayload(absl::string_view payload, std::string* json_payload) {
+  return absl::WebSafeBase64Unescape(payload, json_payload);
+}
+
+std::string EncodeSignature(absl::string_view signature) {
+  return absl::WebSafeBase64Escape(signature);
+}
+
+bool DecodeSignature(absl::string_view encoded_signature,
+                     std::string* signature) {
+  return absl::WebSafeBase64Unescape(encoded_signature, signature);
+}
+
+}  // namespace jwt_internal
+}  // namespace tink
+}  // namespace crypto

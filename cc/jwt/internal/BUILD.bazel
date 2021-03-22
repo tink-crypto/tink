@@ -76,3 +76,27 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "jwt_format",
+    srcs = ["jwt_format.cc"],
+    hdrs = ["jwt_format.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":json_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "jwt_format_test",
+    srcs = ["jwt_format_test.cc"],
+    deps = [
+        ":jwt_format",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

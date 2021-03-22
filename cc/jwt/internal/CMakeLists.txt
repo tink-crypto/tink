@@ -39,6 +39,38 @@ tink_cc_library(
 )
 
 tink_cc_test(
+  NAME json_util_test
+  SRCS json_util_test.cc
+  DEPS
+    tink::jwt::internal::json_util
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)
+
+tink_cc_library(
+  NAME jwt_format
+  SRCS
+    jwt_format.cc
+    jwt_format.h
+  DEPS
+    tink::jwt::internal::json_util
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_test(
+  NAME jwt_format_test
+  SRCS jwt_format_test.cc
+  DEPS
+    tink::jwt::internal::jwt_format
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)
+
+tink_cc_test(
   NAME raw_jwt_hmac_key_manager_test
   SRCS raw_jwt_hmac_key_manager_test.cc
   DEPS
