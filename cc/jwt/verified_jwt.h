@@ -78,10 +78,8 @@ class VerifiedJwt {
 
   util::StatusOr<std::string> ToString();
 
-
-
  private:
-  explicit VerifiedJwt(RawJwt raw_jwt);
+  explicit VerifiedJwt(const RawJwt& raw_jwt);
   friend class jwt_internal::JwtMacImpl;
   RawJwt raw_jwt_;
 };
