@@ -26,6 +26,13 @@
 namespace crypto {
 namespace tink {
 
+namespace jwt_internal {
+
+// For friend declaration
+class JwtMacImpl;
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // A read-only JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
 //
@@ -34,12 +41,7 @@ namespace tink {
 // information (typ, cty, alg and kid).
 class VerifiedJwt {
  public:
-  // TODO(juerg): Restrict access to this constructor.
-  // VerifiedJwt object should only be constructed by JWT primitives and maybe
-  // the VerifedJwt Tests. I first have to figure out what's the best way to do
-  // this.
   VerifiedJwt();
-  explicit VerifiedJwt(RawJwt raw_jwt);
 
   // VerifiedJwt objects are copiable and movable.
   VerifiedJwt(const VerifiedJwt&) = default;
@@ -79,6 +81,8 @@ class VerifiedJwt {
 
 
  private:
+  explicit VerifiedJwt(RawJwt raw_jwt);
+  friend class jwt_internal::JwtMacImpl;
   RawJwt raw_jwt_;
 };
 

@@ -25,7 +25,6 @@ cc_library(
     ],
 )
 
-
 cc_library(
     name = "raw_jwt",
     srcs = ["raw_jwt.cc"],
@@ -118,7 +117,6 @@ cc_library(
 
 # tests
 
-
 cc_test(
     name = "raw_jwt_test",
     size = "small",
@@ -142,9 +140,18 @@ cc_test(
     size = "small",
     srcs = ["verified_jwt_test.cc"],
     deps = [
+        ":jwt_mac",
         ":jwt_names",
+        ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
+        "//jwt/internal:jwt_mac_impl",
+        "//subtle:hmac_boringssl",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
@@ -161,8 +168,8 @@ cc_test(
     size = "small",
     srcs = ["jwt_validator_test.cc"],
     deps = [
-        ":raw_jwt",
         ":jwt_validator",
+        ":raw_jwt",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",

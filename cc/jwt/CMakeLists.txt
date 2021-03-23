@@ -84,9 +84,18 @@ tink_cc_test(
   NAME verified_jwt_test
   SRCS verified_jwt_test.cc
   DEPS
+    tink::jwt::jwt_mac
     tink::jwt::jwt_names
+    tink::jwt::jwt_validator
     tink::jwt::raw_jwt
     tink::jwt::verified_jwt
+    tink::jwt::internal::jwt_mac_impl
+    tink::subtle::hmac_boringssl
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_util
