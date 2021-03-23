@@ -13,6 +13,7 @@ tink_cc_library(
     tink::subtle::random
     tink::util::constants
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -93,6 +94,7 @@ tink_cc_test(
   DEPS
     tink::daead::aes_siv_key_manager
     tink::core::deterministic_aead
+    tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

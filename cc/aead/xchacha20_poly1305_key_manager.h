@@ -26,6 +26,7 @@
 #include "tink/subtle/xchacha20_poly1305_boringssl.h"
 #include "tink/util/constants.h"
 #include "tink/util/errors.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -89,6 +90,29 @@ class XChaCha20Poly1305KeyManager
     result.set_version(get_version());
     result.set_key_value(subtle::Random::GetRandomBytes(kKeySizeInBytes));
     return result;
+  }
+
+  crypto::tink::util::StatusOr<google::crypto::tink::XChaCha20Poly1305Key>
+  DeriveKey(const google::crypto::tink::XChaCha20Poly1305KeyFormat& key_format,
+            InputStream* input_stream) const override {
+    crypto::tink::util::Status status =
+        ValidateVersion(key_format.version(), get_version());
+    if (!status.ok()) return status;
+
+    crypto::tink::util::StatusOr<std::string> randomness =
+        ReadBytesFromStream(kKeySizeInBytes, input_stream);
+    if (!randomness.ok()) {
+      if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+        return crypto::tink::util::Status(
+            crypto::tink::util::error::INVALID_ARGUMENT,
+            "Could not get enough pseudorandomness from input stream");
+      }
+      return randomness.status();
+    }
+    google::crypto::tink::XChaCha20Poly1305Key key;
+    key.set_version(get_version());
+    key.set_key_value(randomness.ValueOrDie());
+    return key;
   }
 
  private:

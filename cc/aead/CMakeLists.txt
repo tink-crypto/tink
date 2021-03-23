@@ -163,6 +163,7 @@ tink_cc_library(
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::random
     tink::util::constants
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -217,6 +218,7 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -446,6 +448,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::key_manager_impl
     tink::subtle::aead_test_util
+    tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
