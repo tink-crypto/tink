@@ -400,6 +400,27 @@ tink_cc_test(
 )
 
 tink_cc_library(
+  NAME secret_proto
+  SRCS
+    secret_proto.h
+  DEPS
+    absl::memory
+    tink::util::secret_data
+    protobuf::libprotobuf-lite
+)
+
+tink_cc_test(
+  NAME secret_proto_test
+  SRCS secret_proto_test.cc
+  DEPS
+    tink::util::secret_data
+    tink::proto::test_proto_cc_proto
+    absl::memory
+    gmock
+    protobuf::libprotobuf
+)
+
+tink_cc_library(
   NAME fake_kms_client
   SRCS
     fake_kms_client.h

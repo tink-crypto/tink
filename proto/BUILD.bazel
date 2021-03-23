@@ -372,3 +372,15 @@ proto_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+# ----------------------------------------------------------------------------
+# test_proto
+# ----------------------------------------------------------------------------
+proto_library(
+    name = "test_proto_proto",
+    testonly = True,
+    srcs = [
+        "test_proto.proto",
+    ],
+    visibility = ["//visibility:public"],
+)

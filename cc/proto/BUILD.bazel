@@ -148,6 +148,12 @@ cc_proto_library(
     deps = ["@tink_base//proto:aes_ctr_hmac_streaming_proto"],
 )
 
+cc_proto_library(
+    name = "test_proto_cc_proto",
+    testonly = True,
+    deps = ["@tink_base//proto:test_proto_proto"],
+)
+
 filegroup(
     name = "public_cc_protos",
     srcs = [

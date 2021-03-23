@@ -55,6 +55,28 @@ struct SanitizingAllocator {
   bool operator==(const SanitizingAllocator&) { return true; }
   bool operator!=(const SanitizingAllocator&) { return false; }
 };
+
+// Specialization for malloc-like aligned storage.
+template <>
+struct SanitizingAllocator<void> {
+  typedef void value_type;
+
+  SanitizingAllocator() = default;
+  template <class U>
+  explicit constexpr SanitizingAllocator(
+      const SanitizingAllocator<U>&) noexcept {}
+
+  ABSL_MUST_USE_RESULT void* allocate(std::size_t n) { return std::malloc(n); }
+
+  void deallocate(void* ptr, std::size_t n) noexcept {
+    SafeZeroMemory(reinterpret_cast<char*>(ptr), n);
+    std::free(ptr);
+  }
+
+  // Allocator requirements mandate definition of eq and neq operators
+  bool operator==(const SanitizingAllocator&) { return true; }
+  bool operator!=(const SanitizingAllocator&) { return false; }
+};
 // placeholder 2 for sanitization_functions, please ignore
 
 template <typename T>

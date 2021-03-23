@@ -181,6 +181,11 @@ tink_cc_proto(
   SRCS empty.proto
 )
 
+tink_cc_proto(
+  NAME test_proto_cc_proto
+  SRCS test_proto.proto
+)
+
 tink_target_group(
   NAME public_protos_cc_proto
   DEPS
