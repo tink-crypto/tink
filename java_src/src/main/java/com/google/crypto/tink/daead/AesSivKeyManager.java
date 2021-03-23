@@ -29,6 +29,8 @@ import com.google.crypto.tink.subtle.Validators;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -49,6 +51,8 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
         });
   }
 
+  private static final int KEY_SIZE_IN_BYTES = 64;
+
   @Override
   public String getKeyType() {
     return "type.googleapis.com/google.crypto.tink.AesSivKey";
@@ -67,9 +71,13 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
   @Override
   public void validateKey(AesSivKey key) throws GeneralSecurityException {
     Validators.validateVersion(key.getVersion(), getVersion());
-    if (key.getKeyValue().size() != 64) {
+    if (key.getKeyValue().size() != KEY_SIZE_IN_BYTES) {
       throw new InvalidKeyException(
-          "invalid key size: " + key.getKeyValue().size() + ". Valid keys must have 64 bytes.");
+          "invalid key size: "
+              + key.getKeyValue().size()
+              + ". Valid keys must have "
+              + KEY_SIZE_IN_BYTES
+              + " bytes.");
     }
   }
 
@@ -83,9 +91,13 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
     return new KeyFactory<AesSivKeyFormat, AesSivKey>(AesSivKeyFormat.class) {
       @Override
       public void validateKeyFormat(AesSivKeyFormat format) throws GeneralSecurityException {
-        if (format.getKeySize() != 64) {
+        if (format.getKeySize() != KEY_SIZE_IN_BYTES) {
           throw new InvalidAlgorithmParameterException(
-              "invalid key size: " + format.getKeySize() + ". Valid keys must have 64 bytes.");
+              "invalid key size: "
+                  + format.getKeySize()
+                  + ". Valid keys must have "
+                  + KEY_SIZE_IN_BYTES
+                  + " bytes.");
         }
       }
 
@@ -102,6 +114,26 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
             .setVersion(getVersion())
             .build();
       }
+
+      @Override
+      public AesSivKey deriveKey(AesSivKeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        Validators.validateVersion(format.getVersion(), getVersion());
+
+        byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
+        try {
+          int read = inputStream.read(pseudorandomness);
+          if (read != KEY_SIZE_IN_BYTES) {
+            throw new GeneralSecurityException("Not enough pseudorandomness given");
+          }
+          return AesSivKey.newBuilder()
+              .setKeyValue(ByteString.copyFrom(pseudorandomness))
+              .setVersion(getVersion())
+              .build();
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
+      }
     };
   }
 
@@ -111,7 +143,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
 
   /** @return a {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys. */
   public static final KeyTemplate aes256SivTemplate() {
-    return createKeyTemplate(64, KeyTemplate.OutputPrefixType.TINK);
+    return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.TINK);
   }
 
   /**
@@ -119,7 +151,7 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
    *     from this template create ciphertexts compatible with other libraries.
    */
   public static final KeyTemplate rawAes256SivTemplate() {
-    return createKeyTemplate(64, KeyTemplate.OutputPrefixType.RAW);
+    return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.RAW);
   }
 
   /**

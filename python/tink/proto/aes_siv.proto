@@ -25,6 +25,7 @@ option go_package = "github.com/google/tink/proto/aes_siv_go_proto";
 message AesSivKeyFormat {
   // Only valid value is: 64.
   uint32 key_size = 1;
+  uint32 version = 2;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.AesSivKey
