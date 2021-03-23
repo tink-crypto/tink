@@ -127,3 +127,48 @@ tink_cc_test(
     gmock
     absl::strings
 )
+
+tink_cc_library(
+  NAME jwt_hmac_key_manager
+  SRCS
+    jwt_hmac_key_manager.cc
+    jwt_hmac_key_manager.h
+  DEPS
+    tink::core::key_type_manager
+    tink::core::mac
+    tink::jwt::jwt_mac
+    tink::jwt::internal::jwt_mac_impl
+    tink::jwt::internal::raw_jwt_hmac_key_manager
+    tink::subtle::hmac_boringssl
+    tink::subtle::random
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::input_stream_util
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::proto::common_cc_proto
+    tink::proto::jwt_hmac_cc_proto
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME jwt_hmac_key_manager_test
+  SRCS jwt_hmac_key_manager_test.cc
+  DEPS
+    tink::jwt::internal::jwt_hmac_key_manager
+    tink::core::key_manager_impl
+    tink::core::mac
+    tink::jwt::jwt_mac
+    tink::util::istream_input_stream
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::proto::jwt_hmac_cc_proto
+    gmock
+)
