@@ -25,6 +25,8 @@ from tink.proto import aes_eax_pb2
 from tink.proto import aes_gcm_pb2
 from tink.proto import aes_gcm_siv_pb2
 from tink.proto import common_pb2
+from tink.proto import kms_aead_pb2
+from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink.testing import helper
@@ -102,6 +104,31 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(common_pb2.SHA1, key_format.hmac_key_format.params.hash)
     self.assertEqual(99, key_format.hmac_key_format.params.tag_size)
     self.assertEqual(46, key_format.hmac_key_format.key_size)
+
+  def test_create_kms_aead_key_template(self):
+    template = aead.aead_key_templates.create_kms_aead_key_template(
+        key_uri='fake://kek/uri')
+    self.assertEqual(template.type_url,
+                     'type.googleapis.com/google.crypto.tink.KmsAeadKey')
+    self.assertEqual(template.output_prefix_type, tink_pb2.RAW)
+    key_format = kms_aead_pb2.KmsAeadKeyFormat()
+    key_format.ParseFromString(template.value)
+    self.assertEqual(key_format.key_uri, 'fake://kek/uri')
+
+  def test_create_kms_envelope_aead_key_template(self):
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri='fake://kek/uri',
+        dek_template=aead.aead_key_templates.AES128_GCM)
+    self.assertEqual(
+        template.type_url,
+        'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
+    self.assertEqual(template.output_prefix_type, tink_pb2.RAW)
+    key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
+    key_format.ParseFromString(template.value)
+    self.assertEqual(key_format.kek_uri, 'fake://kek/uri')
+    self.assertEqual(key_format.dek_template.type_url,
+                     aead.aead_key_templates.AES128_GCM.type_url)
+
 
 if __name__ == '__main__':
   absltest.main()
