@@ -172,3 +172,33 @@ tink_cc_test(
     tink::proto::jwt_hmac_cc_proto
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_mac_wrapper
+  SRCS
+    jwt_mac_wrapper.cc
+    jwt_mac_wrapper.h
+  DEPS
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::jwt::jwt_mac
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME jwt_mac_wrapper_test
+  SRCS jwt_mac_wrapper_test.cc
+  DEPS
+    tink::jwt::internal::jwt_hmac_key_manager
+    tink::jwt::internal::jwt_mac_wrapper
+    tink::core::keyset_manager
+    tink::core::primitive_set
+    tink::proto::jwt_hmac_cc_proto
+    tink::proto::tink_cc_proto
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)
