@@ -15,16 +15,15 @@
 set -euo pipefail
 
 #############################################################################
-##### Tests for file_mac python example.
+##### Tests for MAC Python example.
 
-FILE_MAC_CLI="$1"
+MAC_CLI="$1"
 KEYSET_FILE="$2"
 
 DATA_FILE="$TEST_TMPDIR/example_data.txt"
-EXPECTED_MAC_FILE="$TEST_TMPDIR/expected_mac.txt"
+MAC_FILE="$TEST_TMPDIR/expected_mac.txt"
 
 echo "This is some message to be verified." > $DATA_FILE
-CORRECT_MAC="01293CE659EBCFB08AF02C9B2E564D8352CD8EB58A363E7DE62BAA0BED9CA92BD257F76F4F"
 
 #############################################################################
 
@@ -40,80 +39,66 @@ test_command() {
   set -e
 }
 
-#############################################################################
-#### Test good key and correct MAC verification.
-test_name="normal_verification"
-echo "+++ Starting test $test_name..."
-
-##### Create a plaintext and actual MAC.
-echo "$CORRECT_MAC" > $EXPECTED_MAC_FILE
-
-##### Run verification
-test_command $FILE_MAC_CLI $KEYSET_FILE $DATA_FILE $EXPECTED_MAC_FILE
-
-if [[ $TEST_STATUS -eq 0 ]]; then
-  echo "+++ Success: MAC outputs matched."
-else
-  echo "--- Failure: the MAC outputs did not match"
-  exit 1
-fi
-
 
 #############################################################################
-#### Test good key and incorrect MAC verification.
-test_name="incorrect_mac_verification"
+#### Test MAC computation and verification.
+test_name="mac_computation_and_verification"
 echo "+++ Starting test $test_name..."
-
-##### Create a plaintext and incorrect MAC.
-echo "ABCABCABCD" > $EXPECTED_MAC_FILE
-
-##### Run verification.
-test_command $FILE_MAC_CLI $KEYSET_FILE $DATA_FILE $EXPECTED_MAC_FILE
-
-if [[ $TEST_STATUS -ne 0 ]]; then
-  echo "+++ Success: MAC verification reported non-match for incorrect MAC."
-else
-  echo "--- Failure: MAC verification reported match for incorrect MAC"
-  exit 1
-fi
-
-
-#############################################################################
-#### Test good key and non-hexadecimal MAC verification.
-test_name="non_hex_mac_verification"
-echo "+++ Starting test $test_name..."
-
-##### Create a plaintext and non-hexadecimal MAC.
-echo "SMDHTBFYGM" > $EXPECTED_MAC_FILE
-
-##### Run verification.
-test_command $FILE_MAC_CLI $KEYSET_FILE $DATA_FILE $EXPECTED_MAC_FILE
-
-if [[ $TEST_STATUS -ne 0 ]]; then
-  echo "+++ Success: MAC verification reported non-match for non-hex MAC."
-else
-  echo "--- Failure: MAC verification reported match for non-hex MAC"
-  exit 1
-fi
-
-
-#############################################################################
-#### Test good key MAC computation.
-test_name="mac_computation"
-echo "+++ Starting test $test_name..."
-
-##### Create a plaintext and actual MAC.
-MAC_OUTPUT_FILE="$TEST_TMPDIR/computed_mac_log.txt"
 
 ##### Run computation.
-$FILE_MAC_CLI $KEYSET_FILE $DATA_FILE --alsologtostderr 2> $MAC_OUTPUT_FILE
-##### Check that the correct MAC was produced in the logs
-test_command grep --quiet --ignore-case "$CORRECT_MAC" "$MAC_OUTPUT_FILE"
+$MAC_CLI compute $KEYSET_FILE $DATA_FILE $MAC_FILE
+
+##### Run verification.
+test_command $MAC_CLI verify $KEYSET_FILE $DATA_FILE $MAC_FILE
 
 if [[ $TEST_STATUS -eq 0 ]]; then
   echo "+++ Success: MAC computation was successful."
 else
   echo "--- Failure: MAC computation was unsuccessful"
+  exit 1
+fi
+
+
+#############################################################################
+#### Test MAC verification fails with incorrect MAC.
+test_name="mac_verification_fails_with_incorrect_mac"
+echo "+++ Starting test $test_name..."
+
+##### Run computation.
+$MAC_CLI compute $KEYSET_FILE $DATA_FILE $MAC_FILE
+
+# Modify MAC.
+echo "DEADBEEF" >> "$MAC_FILE"
+
+##### Run verification.
+test_command $MAC_CLI verify $KEYSET_FILE $DATA_FILE $MAC_FILE
+
+if [[ $TEST_STATUS -ne 0 ]]; then
+  echo "+++ Success: MAC verification failed for a modified mac."
+else
+  echo "--- Failure: MAC verification passed for a modified mac."
+  exit 1
+fi
+
+
+#############################################################################
+#### Test MAC verification fails with modified message.
+test_name="mac_verification_fails_with_modified_message"
+echo "+++ Starting test $test_name..."
+
+##### Run computation.
+$MAC_CLI compute $KEYSET_FILE $DATA_FILE $MAC_FILE
+
+# Modify MAC.
+echo "modified" >> "$DATA_FILE"
+
+##### Run verification.
+test_command $MAC_CLI verify $KEYSET_FILE $DATA_FILE $MAC_FILE
+
+if [[ $TEST_STATUS -ne 0 ]]; then
+  echo "+++ Success: MAC verification failed for a modified message."
+else
+  echo "--- Failure: MAC verification passed for a modified message."
   exit 1
 fi
 
@@ -128,7 +113,7 @@ BAD_KEY_FILE="$TEST_TMPDIR/bad_key.txt"
 echo "not a key" > $BAD_KEY_FILE
 
 ##### Run computation.
-test_command $FILE_MAC_CLI $BAD_KEY_FILE $DATA_FILE
+test_command $MAC_CLI compute $BAD_KEY_FILE $DATA_FILE $MAC_FILE
 
 if [[ $TEST_STATUS -ne 0 ]]; then
   echo "+++ Success: MAC computation failed with bad keyset."
