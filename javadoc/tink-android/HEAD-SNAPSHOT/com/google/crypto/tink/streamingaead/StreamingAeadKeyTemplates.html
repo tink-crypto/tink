@@ -75,13 +75,13 @@ var activeTableTab = "activeTableTab";
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
@@ -150,6 +150,22 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_1MB">AES128_CTR_HMAC_SHA256_1MB</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 16 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-CTR derived keys: 16 bytes
+   Tag algo: HMAC-SHA256
+   Tag size: 32 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
+ </div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_4KB">AES128_CTR_HMAC_SHA256_4KB</a></span></code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
@@ -161,6 +177,20 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
    Tag algo: HMAC-SHA256
    Tag size: 32 bytes
    Ciphertext segment size: 4096
+ </div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_GCM_HKDF_1MB">AES128_GCM_HKDF_1MB</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 16 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-GCM derived keys: 16 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
  </div>
 </td>
 </tr>
@@ -180,6 +210,22 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_1MB">AES256_CTR_HMAC_SHA256_1MB</a></span></code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 32 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-CTR derived keys: 32 bytes
+   Tag algo: HMAC-SHA256
+   Tag size: 32 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
+ </div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_4KB">AES256_CTR_HMAC_SHA256_4KB</a></span></code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
@@ -194,7 +240,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  </div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_1MB">AES256_GCM_HKDF_1MB</a></span></code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
@@ -208,7 +254,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  </div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyTemplate</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_GCM_HKDF_4KB">AES256_GCM_HKDF_4KB</a></span></code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
@@ -221,25 +267,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
    Ciphertext segment size: 4096 bytes
  </div>
 </td>
-</tr>
-</table>
-</li>
-</ul>
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.summary">
-<!--   -->
-</a>
-<h3>Constructor Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
-<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colOne" scope="col">Constructor and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#StreamingAeadKeyTemplates--">StreamingAeadKeyTemplates</a></span>()</code>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
-&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -318,6 +345,26 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  </ul></div>
 </li>
 </ul>
+<a name="AES128_CTR_HMAC_SHA256_1MB">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>AES128_CTR_HMAC_SHA256_1MB</h4>
+<pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES128_CTR_HMAC_SHA256_1MB</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ <ul>
+   <li>Size of the main key: 16 bytes
+   <li>HKDF algo: HMAC-SHA256
+   <li>Size of AES-CTR derived keys: 16 bytes
+   <li>Tag algo: HMAC-SHA256
+   <li>Tag size: 32 bytes
+   <li>Ciphertext segment size: 1048576 bytes (1 MB)
+ </ul></div>
+</li>
+</ul>
 <a name="AES256_CTR_HMAC_SHA256_4KB">
 <!--   -->
 </a>
@@ -338,6 +385,26 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  </ul></div>
 </li>
 </ul>
+<a name="AES256_CTR_HMAC_SHA256_1MB">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>AES256_CTR_HMAC_SHA256_1MB</h4>
+<pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES256_CTR_HMAC_SHA256_1MB</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ <ul>
+   <li>Size of the main key: 32 bytes
+   <li>HKDF algo: HMAC-SHA256
+   <li>Size of AES-CTR derived keys: 32 bytes
+   <li>Tag algo: HMAC-SHA256
+   <li>Tag size: 32 bytes
+   <li>Ciphertext segment size: 1048576 bytes (1 MB)
+ </ul></div>
+</li>
+</ul>
 <a name="AES128_GCM_HKDF_4KB">
 <!--   -->
 </a>
@@ -353,6 +420,24 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
    <li>HKDF algo: HMAC-SHA256
    <li>Size of AES-GCM derived keys: 16 bytes
    <li>Ciphertext segment size: 4096 bytes
+ </ul></div>
+</li>
+</ul>
+<a name="AES128_GCM_HKDF_1MB">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>AES128_GCM_HKDF_1MB</h4>
+<pre>public static final&nbsp;com.google.crypto.tink.proto.KeyTemplate AES128_GCM_HKDF_1MB</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
+
+ <ul>
+   <li>Size of the main key: 16 bytes
+   <li>HKDF algo: HMAC-SHA256
+   <li>Size of AES-GCM derived keys: 16 bytes
+   <li>Ciphertext segment size: 1048576 bytes (1 MB)
  </ul></div>
 </li>
 </ul>
@@ -390,24 +475,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
    <li>Size of AES-GCM derived keys: 32 bytes
    <li>Ciphertext segment size: 1048576 bytes (1 MB)
  </ul></div>
-</li>
-</ul>
-</li>
-</ul>
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="constructor.detail">
-<!--   -->
-</a>
-<h3>Constructor Detail</h3>
-<a name="StreamingAeadKeyTemplates--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>StreamingAeadKeyTemplates</h4>
-<pre>public&nbsp;StreamingAeadKeyTemplates()</pre>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </li>
 </ul>
 </li>
@@ -511,13 +578,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
-<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
