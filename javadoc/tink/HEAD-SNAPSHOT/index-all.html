@@ -161,6 +161,20 @@
    HMAC hash function: SHA256
  </div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_1MB">AES128_CTR_HMAC_SHA256_1MB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 16 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-CTR derived keys: 16 bytes
+   Tag algo: HMAC-SHA256
+   Tag size: 32 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
+ </div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_CTR_HMAC_SHA256_4KB">AES128_CTR_HMAC_SHA256_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -192,6 +206,18 @@
 
  
    Key size: 16 bytes
+ </div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_GCM_HKDF_1MB">AES128_GCM_HKDF_1MB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesGcmHkdfStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 16 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-GCM derived keys: 16 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES128_GCM_HKDF_4KB">AES128_GCM_HKDF_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
@@ -241,6 +267,20 @@
    HMAC key size: 32 bytes
    HMAC tag size: 32 bytes
    HMAC hash function: SHA256
+ </div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_1MB">AES256_CTR_HMAC_SHA256_1MB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
+<dd>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+<div class="block">A <code>KeyTemplate</code> that generates new instances of <code>AesCtrHmacStreamingKey</code> with the following parameters:
+
+ 
+   Size of the main key: 32 bytes
+   HKDF algo: HMAC-SHA256
+   Size of AES-CTR derived keys: 32 bytes
+   Tag algo: HMAC-SHA256
+   Tag size: 32 bytes
+   Ciphertext segment size: 1048576 bytes (1 MB)
  </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#AES256_CTR_HMAC_SHA256_4KB">AES256_CTR_HMAC_SHA256_4KB</a></span> - Static variable in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
@@ -2178,7 +2218,7 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#init--">init()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>StreamingAeadConfig.register()</code></a></span></div>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>register()</code></a></span></div>
 </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init(ByteBuffer, byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle">StreamSegmentDecrypter</a></dt>
@@ -3447,10 +3487,6 @@
      AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate().</span></div>
 </div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html#StreamingAeadKeyTemplates--">StreamingAeadKeyTemplates()</a></span> - Constructor for class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadKeyTemplates.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadKeyTemplates</a></dt>
-<dd>
-<div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
-&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/streamingaead/StreamingAeadWrapper.html" title="class in com.google.crypto.tink.streamingaead"><span class="typeNameLink">StreamingAeadWrapper</span></a> - Class in <a href="com/google/crypto/tink/streamingaead/package-summary.html">com.google.crypto.tink.streamingaead</a></dt>
 <dd>
 <div class="block">StreamingAeadWrapper is the implementation of PrimitiveWrapper for the StreamingAead primitive.</div>
