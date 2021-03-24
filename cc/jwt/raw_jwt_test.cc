@@ -22,6 +22,8 @@
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
+using ::testing::UnorderedElementsAreArray;
+using ::testing::IsEmpty;
 
 namespace crypto {
 namespace tink {
@@ -118,6 +120,12 @@ TEST(RawJwt, GetCustomClaimOK) {
   EXPECT_TRUE(jwt.HasJsonArrayClaim("array_claim"));
   EXPECT_THAT(jwt.GetJsonArrayClaim("array_claim"),
               IsOkAndHolds(R"([1,"one",1.2,true])"));
+
+  std::vector<std::string> expected_claim_names = {
+      "object_claim", "number_claim", "boolean_claim",
+      "array_claim",  "null_claim",   "string_claim"};
+  EXPECT_THAT(jwt.CustomClaimNames(),
+              UnorderedElementsAreArray(expected_claim_names));
 }
 
 TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
@@ -156,6 +164,8 @@ TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   EXPECT_FALSE(jwt.HasNumberClaim("nbf"));
   EXPECT_FALSE(jwt.HasNumberClaim("iat"));
   EXPECT_FALSE(jwt.HasNumberClaim("exp"));
+
+  EXPECT_THAT(jwt.CustomClaimNames(), IsEmpty());
 }
 
 TEST(RawJwt, GetRegisteredCustomClaimNotOK) {

@@ -59,6 +59,7 @@ class RawJwt {
   util::StatusOr<std::string> GetJsonObjectClaim(absl::string_view name) const;
   bool HasJsonArrayClaim(absl::string_view name) const;
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
+  std::vector<std::string> CustomClaimNames() const;
 
   static util::StatusOr<RawJwt> FromString(absl::string_view json_string);
   util::StatusOr<std::string> ToString() const;

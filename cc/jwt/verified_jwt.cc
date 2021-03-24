@@ -134,6 +134,10 @@ util::StatusOr<std::string> VerifiedJwt::GetJsonArrayClaim(
   return raw_jwt_.GetJsonArrayClaim(name);
 }
 
+std::vector<std::string> VerifiedJwt::CustomClaimNames() const {
+  return raw_jwt_.CustomClaimNames();
+}
+
 util::StatusOr<std::string> VerifiedJwt::ToString() {
   return raw_jwt_.ToString();
 }

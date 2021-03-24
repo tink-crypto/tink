@@ -345,6 +345,17 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
   return ProtoListToJsonString(value.list_value());
 }
 
+std::vector<std::string> RawJwt::CustomClaimNames() const {
+  auto fields = json_proto_.fields();
+  std::vector<std::string> values;
+  for (auto it = fields.begin(); it != fields.end(); it++) {
+    if (!IsRegisteredClaimName(it->first)) {
+      values.push_back(it->first);
+    }
+  }
+  return values;
+}
+
 RawJwtBuilder::RawJwtBuilder() {}
 
 RawJwtBuilder& RawJwtBuilder::SetIssuer(absl::string_view issuer) {

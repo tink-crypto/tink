@@ -173,6 +173,12 @@ TEST(VerifiedJwt, GetCustomClaimOK) {
   EXPECT_TRUE(jwt.HasJsonArrayClaim("array_claim"));
   EXPECT_THAT(jwt.GetJsonArrayClaim("array_claim"),
               IsOkAndHolds(R"([1,"one",1.2,true])"));
+
+  std::vector<std::string> expected_claim_names = {
+      "object_claim", "number_claim", "boolean_claim",
+      "array_claim",  "null_claim",   "string_claim"};
+  EXPECT_THAT(jwt.CustomClaimNames(),
+              testing::UnorderedElementsAreArray(expected_claim_names));
 }
 
 TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
@@ -215,6 +221,8 @@ TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   EXPECT_FALSE(jwt.HasNumberClaim("nbf"));
   EXPECT_FALSE(jwt.HasNumberClaim("iat"));
   EXPECT_FALSE(jwt.HasNumberClaim("exp"));
+
+  EXPECT_THAT(jwt.CustomClaimNames(), testing::IsEmpty());
 }
 
 TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
