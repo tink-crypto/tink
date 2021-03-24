@@ -1,0 +1,11 @@
+{
+  "primaryKeyId":646750478,
+  "key":[{
+    "keyData":{
+      "typeUrl":"type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+      "value":"EkwSBggDEAIYAhogQize3DetIS6sranu+JIGslvc7eVVGiDmd74DJpk2o8MiIAeM+KTUD1EgPmdmw0Z8Fa5PYVgybse/la3H2N6mXGyXGiBp3iULXOQBKfr/24De3jw3QDy+kwhb3VqJIxNjztDrHQ==",
+      "keyMaterialType":"ASYMMETRIC_PRIVATE"},
+    "status":"ENABLED",
+    "keyId":646750478,
+    "outputPrefixType":"TINK"}]
+}

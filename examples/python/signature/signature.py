@@ -9,17 +9,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# [START digital-signature-example]
+
 """A command-line utility for using digital signature for a file.
 
 It loads cleartext keys from disk - this is not recommended!
 
-It requires 3 or 4 arguments:
+It requires the following arguments:
   mode: either 'sign' or 'verify'
   keyset-file: name of the file with the keyset to be used for the digital
     signature
   data-file:  name of the file with the input data to be signed / verified
-  [optional] expected-signature-file:  name of the file containing a hexadecimal
-    signature with which to compare to
+  signature-file:  name of the file containing a hexadecimal
+  signature of the input file
 """
 
 from __future__ import absolute_import
@@ -41,28 +44,29 @@ FLAGS = flags.FLAGS
 
 
 def main(argv):
-  if len(argv) not in (4, 5):
+  if len(argv) != 5:
     raise app.UsageError(
-        'Expected 3 or 4 arguments, got %d.\n Usage: %s sign/verify keyset-file'
-        ' data-file [expected-signature-file]' %
+        'Expected 4 arguments, got %d.\n'
+        'Usage: %s sign/verify keyset-file data-file signature-file' %
         (len(argv) - 1, argv[0]))
 
   mode = argv[1]
   keyset_filename = argv[2]
   data_filename = argv[3]
+  signature_filename = argv[4]
 
   if mode not in ['sign', 'verify']:
     logging.error('Incorrect mode. Please select "sign" or "verify".')
     return 1
 
-  # Initialise Tink.
+  # Initialise Tink
   try:
     signature.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset into a keyset_handle.
+  # Read the keyset into a keyset_handle
   with open(keyset_filename, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
@@ -71,62 +75,49 @@ def main(argv):
       logging.error('Error reading key: %s', e)
       return 1
 
-  # Get the primitive.
-  try:
-    if mode == 'sign':
-      cipher = keyset_handle.primitive(signature.PublicKeySign)
-    else:
-      cipher = keyset_handle.primitive(signature.PublicKeyVerify)
-  except tink.TinkError as e:
-    logging.error('Error creating primitive: %s', e)
-    return 1
-
   with open(data_filename, 'rb') as data_file:
     data = data_file.read()
 
-  # Compute the signature.
   if mode == 'sign':
-    if len(argv) != 4:
-      logging.error('Invalid number of parameters for signing.'
-                    'Expected 3 arguments, got %d.\n Usage: %s sign '
-                    'keyset-file data-file')
+    # Get the primitive
+    try:
+      cipher = keyset_handle.primitive(signature.PublicKeySign)
+    except tink.TinkError as e:
+      logging.exception('Error creating primitive: %s', e)
       return 1
 
-    code = cipher.sign(data)
-    logging.info('Signature output is %s',
-                 binascii.hexlify(code).decode('utf-8'))
+    # Sign data
+    sig = cipher.sign(data)
+    with open(signature_filename, 'wb') as signature_file:
+      signature_file.write(binascii.hexlify(sig))
     return 0
 
-  if mode == 'verify':
-    if len(argv) != 5:
-      logging.error('Invalid number of parameters for verification.'
-                    'Expected 4 arguments, got %d.\n Usage: %s verify '
-                    'keyset-file data-file [expected-signature-file]')
-      return 1
+  # Get the primitive
+  try:
+    cipher = keyset_handle.primitive(signature.PublicKeyVerify)
+  except tink.TinkError as e:
+    logging.exception('Error creating primitive: %s', e)
+    return 1
 
-    expected_code_filename = argv[4]
-
-    with open(expected_code_filename, 'rb') as expected_code_file:
-      expected_code_hex = expected_code_file.read().strip()
-
-    logging.info(
-        'Using keyset from file %s to verify file %s against expected signature on %s',
-        keyset_filename, data_filename, expected_code_hex.decode('utf-8'))
-
+  # Verify data
+  with open(signature_filename, 'rb') as signature_file:
     try:
-      expected_signature = binascii.unhexlify(expected_code_hex)
+      expected_signature = binascii.unhexlify(signature_file.read().strip())
     except binascii.Error as e:
-      logging.error('Error reading expected signature: %s', e)
+      logging.exception('Error reading expected code: %s', e)
       return 1
-
-    try:
-      cipher.verify(expected_signature, data)
-      logging.info('Signature outputs matched. Success!')
-      return 0
-    except tink.TinkError as e:
-      logging.info('Signature outputs did not match!')
-      return 1
+  try:
+    cipher.verify(expected_signature, data)
+    logging.info('Signature verification succeeded.')
+    return 0
+  except binascii.Error as e:
+    logging.exception('Error reading expected signature: %s', e)
+  except tink.TinkError as e:
+    logging.info('Signature verification failed.')
+    return 1
 
 
 if __name__ == '__main__':
   app.run(main)
+
+# [END digital-signature-example]
