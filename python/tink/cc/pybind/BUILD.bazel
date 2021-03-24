@@ -325,27 +325,12 @@ tink_pybind_library(
     ],
 )
 
-tink_pybind_library(
-    name = "cc_fake_kms_client_testonly",
-    srcs = ["cc_fake_kms_client_testonly.cc"],
-    hdrs = ["cc_fake_kms_client_testonly.h"],
-    deps = [
-        "//tink/cc/pybind:status_casters",
-        "@pybind11",
-        "@tink_cc//util:fake_kms_client_pybind",
-        "@tink_cc//util:statusor",
-    ],
-)
-
-# To avoid getting multiple instances of KmsClients, ":aead" and
-# ":cc_fake_kms_client_testonly" need to be in the same pybind exension.
 tink_pybind_extension(
     name = "tink_bindings",
     srcs = ["tink_bindings.cc"],
     deps = [
         ":aead",
         ":cc_aws_kms_client",
-        ":cc_fake_kms_client_testonly",
         ":cc_gcp_kms_client",
         ":cc_jwt_config",
         ":cc_key_manager",
