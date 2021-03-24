@@ -5,6 +5,8 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+exports_files(["aead_test_keyset.json"])
+
 py_binary(
     name = "aead",
     srcs = ["aead.py"],
@@ -23,11 +25,11 @@ sh_test(
     srcs = ["aead_test.sh"],
     args = [
         "$(rootpath :aead)",
-        "$(rootpath :aes128_gcm_test_keyset.json)",
+        "$(rootpath :aead_test_keyset.json)",
     ],
     data = [
         ":aead",
-        ":aes128_gcm_test_keyset.json",
+        ":aead_test_keyset.json",
     ],
 )
 
@@ -39,10 +41,10 @@ sh_test(
     srcs = ["aead_test.sh"],
     args = [
         "'python3 $(rootpath :aead.py)'",
-        "$(rootpath :aes128_gcm_test_keyset.json)",
+        "$(rootpath :aead_test_keyset.json)",
     ],
     data = [
         ":aead.py",
-        ":aes128_gcm_test_keyset.json",
+        ":aead_test_keyset.json",
     ],
 )

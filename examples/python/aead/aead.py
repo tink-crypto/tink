@@ -9,6 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# [START aead-example]
 """A command-line utility for encrypting small files with AEAD.
 
 It loads cleartext keys from disk - this is not recommended!
@@ -35,25 +36,26 @@ from tink import cleartext_keyset_handle
 
 
 def main(argv):
-  if len(argv) != 5:
+  if len(argv) != 5 and len(argv) != 6:
     raise app.UsageError(
-        'Expected 4 arguments, got %d.\n'
-        'Usage: %s encrypt/decrypt key-file input-file output-file' %
-        (len(argv) - 1, argv[0]))
+        'Expected 4 or 5 arguments, got %d.\n'
+        'Usage: %s encrypt/decrypt key-file input-file output-file '
+        '[associated-data]' % (len(argv) - 1, argv[0]))
 
   mode = argv[1]
   key_file_path = argv[2]
   input_file_path = argv[3]
   output_file_path = argv[4]
+  associated_data = b'' if len(argv) == 5 else bytes(argv[5], 'utf-8')
 
-  # Initialise Tink.
+  # Initialise Tink
   try:
     aead.register()
   except tink.TinkError as e:
     logging.error('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset into a keyset_handle.
+  # Read the keyset into a keyset_handle
   with open(key_file_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
@@ -62,7 +64,7 @@ def main(argv):
       logging.exception('Error reading key: %s', e)
       return 1
 
-  # Get the primitive.
+  # Get the primitive
   try:
     cipher = keyset_handle.primitive(aead.Aead)
   except tink.TinkError as e:
@@ -72,9 +74,9 @@ def main(argv):
   with open(input_file_path, 'rb') as input_file:
     input_data = input_file.read()
     if mode == 'decrypt':
-      output_data = cipher.decrypt(input_data, b'envelope_example')
+      output_data = cipher.decrypt(input_data, associated_data)
     elif mode == 'encrypt':
-      output_data = cipher.encrypt(input_data, b'envelope_example')
+      output_data = cipher.encrypt(input_data, associated_data)
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
@@ -85,3 +87,4 @@ def main(argv):
 
 if __name__ == '__main__':
   app.run(main)
+# [END aead-example]

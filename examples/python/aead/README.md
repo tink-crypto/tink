@@ -1,7 +1,7 @@
-# Python Envelope Encryption
+# Python AEAD example
 
-This is a command-line tool that can encrypt files using
-[Authenticated Encryption with Associated Data](https://en.wikipedia.org/wiki/Authenticated_encryption#Authenticated_encryption_with_associated_data_\(AEAD\))
+This example shows how to encrypt files with Tink using Authenticated Encryption
+with Associated Data (AEAD).
 
 It demonstrates the basic steps of using Tink, namely loading key material,
 obtaining a primitive, and using the primitive to do crypto.
@@ -10,7 +10,7 @@ The key material was generated with Tinkey:
 
 ```shell
 tinkey create-keyset --key-template AES128_GCM --out-format JSON \
-    --out aes128_gcm_test_keyset.json
+    --out aead_test_keyset.json
 ```
 
 ## Build and Run
