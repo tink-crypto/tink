@@ -1,0 +1,50 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["deterministic_aead_test_keyset.json"])
+
+py_binary(
+    name = "deterministic_aead",
+    srcs = ["deterministic_aead.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/daead",
+    ],
+)
+
+sh_test(
+    name = "deterministic_aead_test",
+    size = "small",
+    srcs = ["deterministic_aead_test.sh"],
+    args = [
+        "$(rootpath :deterministic_aead)",
+        "$(rootpath :deterministic_aead_test_keyset.json)",
+    ],
+    data = [
+        ":deterministic_aead",
+        ":deterministic_aead_test_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "deterministic_aead_test_package",
+    size = "small",
+    srcs = ["deterministic_aead_test.sh"],
+    args = [
+        "'python3 $(rootpath :deterministic_aead.py)'",
+        "$(rootpath :deterministic_aead_test_keyset.json)",
+    ],
+    data = [
+        ":deterministic_aead.py",
+        ":deterministic_aead_test_keyset.json",
+    ],
+)
