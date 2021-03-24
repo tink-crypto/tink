@@ -9,11 +9,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# [START hybrid-encryption-example]
 """A command-line utility for encrypting a file using hybrid encryption.
 
 It loads cleartext keys from disk - this is not recommended!
 
-It requires 3 arguments (and one optional one):
+It requires the following arguments:
+  mode: either 'encrypt' or 'decrypt'.
   keyset_path: name of the file with the public key to be used for encryption.
   input_path: name of the file with the input data to be encrypted.
   output_path: name of the file to write the ciphertext to.
@@ -36,6 +38,8 @@ from tink import hybrid
 
 FLAGS = flags.FLAGS
 
+flags.DEFINE_string('mode', None,
+                    'Either encrypt or decrypt.')
 flags.DEFINE_string('keyset_path', None,
                     'Path to the keyset used for encryption.')
 flags.DEFINE_string('input_path', None, 'Path to the input file.')
@@ -49,17 +53,21 @@ FLAGS = flags.FLAGS
 def main(argv):
   del argv  # Unused
 
+  mode = FLAGS.mode
+  if mode not in ('encrypt', 'decrypt'):
+    logging.error('Incorrect mode. Please select "encrypt" or "decrypt".')
+    return 1
   context_info = b'' if not FLAGS.context_info else bytes(
       FLAGS.context_info, 'utf-8')
 
-  # Initialise Tink.
+  # Initialise Tink
   try:
     hybrid.register()
   except tink.TinkError as e:
     logging.exception('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset into a keyset_handle.
+  # Read the keyset into a keyset_handle
   with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
@@ -68,21 +76,39 @@ def main(argv):
       logging.exception('Error reading key: %s', e)
       return 1
 
-  # Get the primitive.
+  with open(FLAGS.input_path, 'rb') as input_file:
+    data = input_file.read()
+
+  if mode == 'encrypt':
+    # Get the primitive
+    try:
+      primitive = keyset_handle.primitive(hybrid.HybridEncrypt)
+    except tink.TinkError as e:
+      logging.exception(
+          'Error creating hybrid encrypt primitive from keyset: %s', e)
+      return 1
+    # Encrypt data
+    with open(FLAGS.output_path, 'wb') as output_file:
+      ciphertext = primitive.encrypt(data, context_info)
+      output_file.write(ciphertext)
+      return 0
+
+  # Get the primitive
   try:
-    primitive = keyset_handle.primitive(hybrid.HybridEncrypt)
+    primitive = keyset_handle.primitive(hybrid.HybridDecrypt)
   except tink.TinkError as e:
     logging.exception(
         'Error creating hybrid encrypt primitive from keyset: %s', e)
     return 1
+  # Decrypt data
+  with open(FLAGS.output_path, 'wb') as output_file:
+    plaintext = primitive.decrypt(data, context_info)
+    output_file.write(plaintext)
 
-  with open(FLAGS.input_path, 'rb') as input_file:
-    with open(FLAGS.output_path, 'wb') as output_file:
-      data = input_file.read()
-      ciphertext = primitive.encrypt(data, context_info)
-      output_file.write(ciphertext)
-
+  return 0
 
 if __name__ == '__main__':
-  flags.mark_flags_as_required(['keyset_path', 'input_path', 'output_path'])
+  flags.mark_flags_as_required(
+      ['mode', 'keyset_path', 'input_path', 'output_path'])
   app.run(main)
+# [END hybrid-encryption-example]

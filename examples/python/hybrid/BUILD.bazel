@@ -1,0 +1,57 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "hybrid_test_public_keyset.json",
+    "hybrid_test_private_keyset.json",
+])
+
+py_binary(
+    name = "hybrid",
+    srcs = ["hybrid.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/hybrid",
+    ],
+)
+
+sh_test(
+    name = "hybrid_test",
+    size = "small",
+    srcs = ["hybrid_test.sh"],
+    args = [
+        "$(rootpath :hybrid)",
+        "$(rootpath :hybrid_test_public_keyset.json)",
+        "$(rootpath :hybrid_test_private_keyset.json)",
+    ],
+    data = [
+        ":hybrid",
+        ":hybrid_test_private_keyset.json",
+        ":hybrid_test_public_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "hybrid_test_package",
+    size = "small",
+    srcs = ["hybrid_test.sh"],
+    args = [
+        "'python3 $(rootpath :hybrid)'",
+        "$(rootpath :hybrid_test_public_keyset.json)",
+        "$(rootpath :hybrid_test_private_keyset.json)",
+    ],
+    data = [
+        ":hybrid",
+        ":hybrid_test_private_keyset.json",
+        ":hybrid_test_public_keyset.json",
+    ],
+)
