@@ -440,6 +440,7 @@ java_library(
     srcs = ["PrfHmacJce.java"],
     deps = [
         ":subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],

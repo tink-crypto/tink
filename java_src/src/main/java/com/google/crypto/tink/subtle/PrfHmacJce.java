@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.prf.Prf;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
@@ -27,6 +28,9 @@ import javax.crypto.Mac;
 /** {@link Prf} implementation using JCE. */
 @Immutable
 public final class PrfHmacJce implements Prf {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   static final int MIN_KEY_SIZE_IN_BYTES = 16;
 
   // We do not mutate the underlying mac and it is bound to the containing PrfHmacJce instance.
@@ -52,6 +56,11 @@ public final class PrfHmacJce implements Prf {
   private final int maxOutputLength;
 
   public PrfHmacJce(String algorithm, java.security.Key key) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use HMAC in FIPS-mode, as BoringCrypto module is not available.");
+    }
+
     this.algorithm = algorithm;
     this.key = key;
     if (key.getEncoded().length < MIN_KEY_SIZE_IN_BYTES) {

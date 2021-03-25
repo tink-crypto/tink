@@ -325,6 +325,7 @@ java_test(
     srcs = ["PrfHmacJceTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
@@ -332,6 +333,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
 
