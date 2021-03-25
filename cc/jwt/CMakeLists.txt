@@ -149,3 +149,49 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME jwt_mac_config
+  SRCS
+    jwt_mac_config.cc
+    jwt_mac_config.h
+  DEPS
+    tink::jwt::internal::jwt_hmac_key_manager
+    tink::jwt::internal::jwt_mac_wrapper
+    tink::config::config_util
+    tink::config::tink_fips
+    tink::core::registry
+    tink::util::status
+    tink::proto::config_cc_proto
+    absl::base
+    absl::memory
+)
+
+tink_cc_library(
+  NAME jwt_key_templates
+  SRCS
+    jwt_key_templates.cc
+    jwt_key_templates.h
+  DEPS
+    tink::proto::common_cc_proto
+    tink::proto::jwt_hmac_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_test(
+  NAME jwt_key_templates_test
+  SRCS jwt_key_templates_test.cc
+  DEPS
+    tink::jwt::jwt_key_templates
+    tink::jwt::jwt_mac_config
+    tink::jwt::jwt_mac
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    protobuf::libprotobuf
+    absl::strings
+    gmock
+)
