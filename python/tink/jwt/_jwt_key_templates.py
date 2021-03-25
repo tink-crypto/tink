@@ -21,7 +21,7 @@ from tink.proto import tink_pb2
 _F4 = 65537
 
 
-def _create_hs_template(
+def _create_jwt_hmac_template(
     hash_type: common_pb2.HashType) -> tink_pb2.KeyTemplate:
   key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
       hash_type=hash_type, key_size=32)
@@ -31,7 +31,7 @@ def _create_hs_template(
       output_prefix_type=tink_pb2.RAW)
 
 
-def _create_es_template(
+def _create_jwt_ecdsa_template(
     algorithm: jwt_ecdsa_pb2.JwtEcdsaAlgorithm) -> tink_pb2.KeyTemplate:
   key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
       algorithm=algorithm)
@@ -55,7 +55,7 @@ def _num_to_bytes(n: int) -> bytes:
   return bytes(octets[::-1])
 
 
-def _create_rs_template(
+def _create_jwt_rsa_ssa_pkcs1_template(
     algorithm: jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1Algorithm,
     modulus_size: int
 ) -> tink_pb2.KeyTemplate:
@@ -69,7 +69,7 @@ def _create_rs_template(
       output_prefix_type=tink_pb2.RAW)
 
 
-def _create_ps_template(
+def _create_jwt_rsa_ssa_pss_template(
     algorithm: jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssAlgorithm,
     modulus_size: int
 ) -> tink_pb2.KeyTemplate:
@@ -83,20 +83,61 @@ def _create_ps_template(
       output_prefix_type=tink_pb2.RAW)
 
 
-JWT_HS256 = _create_hs_template(common_pb2.SHA256)
-JWT_HS384 = _create_hs_template(common_pb2.SHA384)
-JWT_HS512 = _create_hs_template(common_pb2.SHA512)
+# Hmac Templates
+def jwt_hs256_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_hmac_template(common_pb2.SHA256)
 
-JWT_ES256 = _create_es_template(jwt_ecdsa_pb2.ES256)
-JWT_ES384 = _create_es_template(jwt_ecdsa_pb2.ES384)
-JWT_ES512 = _create_es_template(jwt_ecdsa_pb2.ES512)
 
-JWT_RS256_2048_F4 = _create_rs_template(jwt_rsa_ssa_pkcs1_pb2.RS256, 2048)
-JWT_RS256_3072_F4 = _create_rs_template(jwt_rsa_ssa_pkcs1_pb2.RS256, 3072)
-JWT_RS384_3072_F4 = _create_rs_template(jwt_rsa_ssa_pkcs1_pb2.RS384, 3072)
-JWT_RS512_4096_F4 = _create_rs_template(jwt_rsa_ssa_pkcs1_pb2.RS512, 4096)
+def jwt_hs384_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_hmac_template(common_pb2.SHA384)
 
-JWT_PS256_2048_F4 = _create_ps_template(jwt_rsa_ssa_pss_pb2.PS256, 2048)
-JWT_PS256_3072_F4 = _create_ps_template(jwt_rsa_ssa_pss_pb2.PS256, 3072)
-JWT_PS384_3072_F4 = _create_ps_template(jwt_rsa_ssa_pss_pb2.PS384, 3072)
-JWT_PS512_4096_F4 = _create_ps_template(jwt_rsa_ssa_pss_pb2.PS512, 4096)
+
+def jwt_hs512_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_hmac_template(common_pb2.SHA512)
+
+
+# ECDSA Templates
+def jwt_es256_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256)
+
+
+def jwt_es384_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES384)
+
+
+def jwt_es512_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES512)
+
+
+# RSA SSA PKCS1 Templates
+def jwt_rs256_2048_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pkcs1_template(jwt_rsa_ssa_pkcs1_pb2.RS256, 2048)
+
+
+def jwt_rs256_3072_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pkcs1_template(jwt_rsa_ssa_pkcs1_pb2.RS256, 3072)
+
+
+def jwt_rs384_3072_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pkcs1_template(jwt_rsa_ssa_pkcs1_pb2.RS384, 3072)
+
+
+def jwt_rs512_4096_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pkcs1_template(jwt_rsa_ssa_pkcs1_pb2.RS512, 4096)
+
+
+# RSA SSA PSS Templates
+def jwt_ps256_2048_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pss_template(jwt_rsa_ssa_pss_pb2.PS256, 2048)
+
+
+def jwt_ps256_3072_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pss_template(jwt_rsa_ssa_pss_pb2.PS256, 3072)
+
+
+def jwt_ps384_3072_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pss_template(jwt_rsa_ssa_pss_pb2.PS384, 3072)
+
+
+def jwt_ps512_4096_f4_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_rsa_ssa_pss_template(jwt_rsa_ssa_pss_pb2.PS512, 4096)
