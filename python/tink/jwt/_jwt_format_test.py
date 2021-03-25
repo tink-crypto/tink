@@ -43,6 +43,23 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(_jwt_format._base64_encode(payload), encoded_payload)
     self.assertEqual(_jwt_format._base64_decode(encoded_payload), payload)
 
+  def test_base64_decode_fails_with_unknown_chars(self):
+    self.assertNotEmpty(
+        _jwt_format._base64_decode(
+            b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-')
+    )
+    self.assertEqual(_jwt_format._base64_decode(b''), b'')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b'[')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b'@')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b'/')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b':')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b'{')
+
   def test_decodeencode_header_hs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
     encoded_header = b'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'

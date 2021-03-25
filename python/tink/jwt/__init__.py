@@ -19,7 +19,9 @@ import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
 from tink.jwt import _jwt_error
+from tink.jwt import _jwt_hmac_key_manager
 from tink.jwt import _jwt_key_templates
+from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -29,6 +31,7 @@ RawJwt = _raw_jwt.RawJwt
 VerifiedJwt = _verified_jwt.VerifiedJwt
 JwtValidator = _jwt_validator.JwtValidator
 Claim = _raw_jwt.Claim
+JwtMac = _jwt_mac.JwtMac
 
 
 def raw_jwt_from_json_payload(payload: Text) -> RawJwt:

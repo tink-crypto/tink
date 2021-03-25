@@ -26,14 +26,29 @@ _VALID_ALGORITHMS = frozenset({
 
 
 def _base64_encode(data: bytes) -> bytes:
-  data = base64.urlsafe_b64encode(data)
-  while data and data[-1] == ord('='):
-    data = data[:-1]
-  return data
+  return base64.urlsafe_b64encode(data).rstrip(b'=')
+
+
+def _is_valid_urlsafe_base64_char(c: int) -> bool:
+  if c >= ord('a') and c <= ord('z'):
+    return True
+  if c >= ord('A') and c <= ord('Z'):
+    return True
+  if c >= ord('0') and c <= ord('9'):
+    return True
+  if c == ord('-') or c == ord('_'):
+    return True
+  return False
 
 
 def _base64_decode(encoded_data: bytes) -> bytes:
-  padded_encoded_data = encoded_data + b'=' * (-len(encoded_data) % 4)
+  # base64.urlsafe_b64decode ignores all non-base64 chars. We don't want that.
+  for c in encoded_data:
+    if not _is_valid_urlsafe_base64_char(c):
+      raise _jwt_error.JwtInvalidError('invalid token')
+  # base64.urlsafe_b64decode requires padding, but does not mind too much
+  # padding. So we simply add the maximum ammount of padding needed.
+  padded_encoded_data = encoded_data + b'==='
   return base64.urlsafe_b64decode(padded_encoded_data)
 
 
