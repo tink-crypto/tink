@@ -41,19 +41,19 @@ class KeyFactory {
       const crypto::tink::util::Status& status);
 
   // Generates a new random key, based on the specified 'key_format'.
-  virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format'.
-  virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const = 0;
 
   // Generates a new random key, based on the specified 'serialized_key_format',
   // and wraps it in a KeyData-proto.
-  virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const = 0;
 
   virtual ~KeyFactory() {}
@@ -62,8 +62,8 @@ class KeyFactory {
 class PrivateKeyFactory : public virtual KeyFactory {
  public:
   // Returns public key data extracted from the given serialized_private_key.
-  virtual
-  crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
+  virtual crypto::tink::util::StatusOr<
+      std::unique_ptr<google::crypto::tink::KeyData>>
   GetPublicKeyData(absl::string_view serialized_private_key) const = 0;
 
   virtual ~PrivateKeyFactory() {}
@@ -78,17 +78,8 @@ class PrivateKeyFactory : public virtual KeyFactory {
  *
  * - P: the primitive implemented by keys understood by this manager
  */
-template<class P>
-class KeyManager {
+class KeyManagerBase {
  public:
-  // Constructs an instance of P for the given 'key_data'.
-  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
-  GetPrimitive(const google::crypto::tink::KeyData& key_data) const = 0;
-
-  // Constructs an instance of P for the given 'key'.
-  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>>
-  GetPrimitive(const portable_proto::MessageLite& key) const = 0;
-
   // Returns the type_url identifying the key type handled by this manager.
   virtual const std::string& get_key_type() const = 0;
 
@@ -103,7 +94,19 @@ class KeyManager {
     return (key_type == get_key_type());
   }
 
-  virtual ~KeyManager<P>() {}
+  virtual ~KeyManagerBase() {}
+};
+
+template <class P>
+class KeyManager : public KeyManagerBase {
+ public:
+  // Constructs an instance of P for the given 'key_data'.
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      const google::crypto::tink::KeyData& key_data) const = 0;
+
+  // Constructs an instance of P for the given 'key'.
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
+      const portable_proto::MessageLite& key) const = 0;
 };
 
 }  // namespace tink
