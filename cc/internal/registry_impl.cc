@@ -28,7 +28,7 @@ namespace tink {
 namespace internal {
 
 StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
-    const std::string& type_url) const {
+    absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
@@ -53,8 +53,8 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
 }
 
 StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
-    const std::string& type_url,
-    const std::string& serialized_private_key) const {
+    absl::string_view type_url,
+    absl::string_view serialized_private_key) const {
   auto key_type_info_or = get_key_type_info(type_url);
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   auto factory = dynamic_cast<const PrivateKeyFactory*>(
@@ -70,7 +70,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
 }
 
 crypto::tink::util::Status RegistryImpl::CheckInsertable(
-    const std::string& type_url, const std::type_index& key_manager_type_index,
+    absl::string_view type_url, const std::type_index& key_manager_type_index,
     bool new_key_allowed) const {
   auto it = type_url_to_info_.find(type_url);
 

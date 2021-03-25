@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/strings/string_view.h"
 #include "tink/internal/registry_impl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -54,7 +55,7 @@ class Registry {
   template <class P>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      const std::string& catalogue_name) {
+      absl::string_view catalogue_name) {
     return internal::RegistryImpl::GlobalInstance().get_catalogue<P>(
         catalogue_name);
   }
@@ -68,7 +69,7 @@ class Registry {
   template <class ConcreteCatalogue>
   ABSL_DEPRECATED("Catalogues are not supported anymore.")
   static crypto::tink::util::Status
-      AddCatalogue(const std::string& catalogue_name,
+      AddCatalogue(absl::string_view catalogue_name,
                    std::unique_ptr<ConcreteCatalogue> catalogue) {
     return internal::RegistryImpl::GlobalInstance().AddCatalogue(
         catalogue_name, catalogue.release());
@@ -82,7 +83,7 @@ class Registry {
   template <class P>
   ABSL_DEPRECATED("Use AddCatalogue with a unique_ptr input instead.")
   static crypto::tink::util::Status
-      AddCatalogue(const std::string& catalogue_name, Catalogue<P>* catalogue) {
+      AddCatalogue(absl::string_view catalogue_name, Catalogue<P>* catalogue) {
     return AddCatalogue(catalogue_name, absl::WrapUnique(catalogue));
   }
 
@@ -147,7 +148,7 @@ class Registry {
   // but should be test only anyhow.
   template <class P>
   static crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url) {
+      absl::string_view type_url) {
     return internal::RegistryImpl::GlobalInstance().get_key_manager<P>(
         type_url);
   }
@@ -165,7 +166,7 @@ class Registry {
   // and calls manager's GetPrimitive(key)-method.
   template <class P>
   static crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& type_url, const portable_proto::MessageLite& key) {
+      absl::string_view type_url, const portable_proto::MessageLite& key) {
     return internal::RegistryImpl::GlobalInstance().GetPrimitive<P>(type_url,
                                                                     key);
   }
@@ -186,8 +187,8 @@ class Registry {
   // a PrivateKeyFactory, and calls PrivateKeyFactory::GetPublicKeyData.
   static crypto::tink::util::StatusOr<
       std::unique_ptr<google::crypto::tink::KeyData>>
-  GetPublicKeyData(const std::string& type_url,
-                   const std::string& serialized_private_key) {
+  GetPublicKeyData(absl::string_view type_url,
+                   absl::string_view serialized_private_key) {
     return internal::RegistryImpl::GlobalInstance().GetPublicKeyData(
         type_url, serialized_private_key);
   }

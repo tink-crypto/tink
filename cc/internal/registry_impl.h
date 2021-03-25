@@ -63,10 +63,10 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const Catalogue<P>*> get_catalogue(
-      const std::string& catalogue_name) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+      absl::string_view catalogue_name) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
-  crypto::tink::util::Status AddCatalogue(const std::string& catalogue_name,
+  crypto::tink::util::Status AddCatalogue(absl::string_view catalogue_name,
                                           Catalogue<P>* catalogue)
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
@@ -97,7 +97,7 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<const KeyManager<P>*> get_key_manager(
-      const std::string& type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+      absl::string_view type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Takes ownership of 'wrapper', which must be non-nullptr.
   template <class P, class Q>
@@ -111,7 +111,7 @@ class RegistryImpl {
 
   template <class P>
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& type_url, const portable_proto::MessageLite& key) const
+      absl::string_view type_url, const portable_proto::MessageLite& key) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
@@ -119,8 +119,8 @@ class RegistryImpl {
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
-  GetPublicKeyData(const std::string& type_url,
-                   const std::string& serialized_private_key) const
+  GetPublicKeyData(absl::string_view type_url,
+                   absl::string_view serialized_private_key) const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   template <class P>
@@ -388,15 +388,14 @@ class RegistryImpl {
   // key type infos, the pointers will stay valid for the lifetime of the
   // binary.
   crypto::tink::util::StatusOr<const KeyTypeInfo*> get_key_type_info(
-      const std::string& type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
+      absl::string_view type_url) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   // Returns OK if the key manager with the given type index can be inserted
   // for type url type_url and parameter new_key_allowed. Otherwise returns
   // an error to be returned to the user.
   crypto::tink::util::Status CheckInsertable(
-      const std::string& type_url,
-      const std::type_index& key_manager_type_index, bool new_key_allowed) const
-      ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
+      absl::string_view type_url, const std::type_index& key_manager_type_index,
+      bool new_key_allowed) const ABSL_SHARED_LOCKS_REQUIRED(maps_mutex_);
 
   mutable absl::Mutex maps_mutex_;
   // A map from the type_url to the given KeyTypeInfo. Once emplaced KeyTypeInfo
@@ -418,7 +417,7 @@ class RegistryImpl {
 
 template <class P>
 crypto::tink::util::Status RegistryImpl::AddCatalogue(
-    const std::string& catalogue_name, Catalogue<P>* catalogue) {
+    absl::string_view catalogue_name, Catalogue<P>* catalogue) {
   if (catalogue == nullptr) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INVALID_ARGUMENT,
@@ -447,7 +446,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
 
 template <class P>
 crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
-    const std::string& catalogue_name) const {
+    absl::string_view catalogue_name) const {
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
@@ -656,7 +655,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
 
 template <class P>
 crypto::tink::util::StatusOr<const KeyManager<P>*>
-RegistryImpl::get_key_manager(const std::string& type_url) const {
+RegistryImpl::get_key_manager(absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
@@ -678,7 +677,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
 
 template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
-    const std::string& type_url, const portable_proto::MessageLite& key) const {
+    absl::string_view type_url, const portable_proto::MessageLite& key) const {
   auto key_manager_result = get_key_manager<P>(type_url);
   if (key_manager_result.ok()) {
     return key_manager_result.ValueOrDie()->GetPrimitive(key);
