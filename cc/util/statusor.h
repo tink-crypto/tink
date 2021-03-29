@@ -82,7 +82,7 @@ class StatusOr {
       std::cerr << status() << std::endl;
       std::_Exit(1);
     }
-    return value_;
+    return *value_;
   }
   inline T& ValueOrDie() & {
     if (!ok()) {
@@ -90,7 +90,7 @@ class StatusOr {
       std::cerr << status() << std::endl;
       std::_Exit(1);
     }
-    return value_;
+    return *value_;
   }
   inline const T&& ValueOrDie() const&& {
     if (!ok()) {
@@ -98,7 +98,7 @@ class StatusOr {
       std::cerr << status() << std::endl;
       std::_Exit(1);
     }
-    return std::move(value_);
+    return *std::move(value_);
   }
   inline T&& ValueOrDie() && {
     if (!ok()) {
@@ -106,7 +106,7 @@ class StatusOr {
       std::cerr << status() << std::endl;
       std::_Exit(1);
     }
-    return std::move(value_);
+    return *std::move(value_);
   }
 
   // Implicitly convertible to absl::StatusOr. Implicit conversions explicitly
@@ -119,7 +119,7 @@ class StatusOr {
 
  private:
   Status status_;
-  T value_;
+  absl::optional<T> value_;
 };
 
 // Implementation.
@@ -167,7 +167,9 @@ template <typename T>
 inline const StatusOr<T>& StatusOr<T>::operator=(const StatusOr& other) {
   status_ = other.status_;
   if (status_.ok()) {
-    value_ = other.value_;
+    value_ = *other.value_;
+  } else {
+    value_ = absl::nullopt;
   }
   return *this;
 }
@@ -177,7 +179,9 @@ template <typename U>
 inline const StatusOr<T>& StatusOr<T>::operator=(const StatusOr<U>& other) {
   status_ = other.status_;
   if (status_.ok()) {
-    value_ = other.value_;
+    value_ = *other.value_;
+  } else {
+    value_ = absl::nullopt;
   }
   return *this;
 }
@@ -185,13 +189,13 @@ inline const StatusOr<T>& StatusOr<T>::operator=(const StatusOr<U>& other) {
 template <typename T>
 StatusOr<T>::operator ::absl::StatusOr<T>() const& {
   if (!ok()) return ::absl::Status(status_);
-  return value_;
+  return *value_;
 }
 
 template <typename T>
 StatusOr<T>::operator ::absl::StatusOr<T>() && {
   if (!ok()) return ::absl::Status(std::move(status_));
-  return std::move(value_);
+  return std::move(*value_);
 }
 
 }  // namespace util

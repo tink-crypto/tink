@@ -117,8 +117,10 @@ cc_test(
     deps = [
         ":status",
         ":statusor",
+        ":test_matchers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

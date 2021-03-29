@@ -463,7 +463,9 @@ tink_cc_test(
   DEPS
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     gmock
+    absl::memory
     absl::status
     absl::statusor
 )
