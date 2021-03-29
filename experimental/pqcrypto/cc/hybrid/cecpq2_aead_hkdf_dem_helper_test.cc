@@ -64,7 +64,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, InvalidKey) {
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesGcmKeyType) {
   google::crypto::tink::AesGcmKeyFormat key_format;
   key_format.set_key_size(32);
-  std::unique_ptr<AesGcmKeyManager> key_manager(new AesGcmKeyManager());
+  auto key_manager(absl::make_unique<AesGcmKeyManager>());
   std::string dem_key_type = key_manager->get_key_type();
   ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
               IsOk());
@@ -92,7 +92,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesGcmKeyType) {
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesSivKeyType) {
   google::crypto::tink::AesSivKeyFormat key_format;
   key_format.set_key_size(64);
-  std::unique_ptr<AesSivKeyManager> key_manager(new AesSivKeyManager());
+  auto key_manager(absl::make_unique<AesSivKeyManager>());
   std::string dem_key_type = key_manager->get_key_type();
   ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
               IsOk());
@@ -121,8 +121,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesSivKeyType) {
 
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithXchacha20Poly1305KeyType) {
   google::crypto::tink::XChaCha20Poly1305KeyFormat key_format;
-  std::unique_ptr<XChaCha20Poly1305KeyManager> key_manager(
-      new XChaCha20Poly1305KeyManager());
+  auto key_manager(absl::make_unique<XChaCha20Poly1305KeyManager>());
   std::string dem_key_type = key_manager->get_key_type();
   ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
               IsOk());
@@ -145,6 +144,66 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithXchacha20Poly1305KeyType) {
   auto aead_or_daead = std::move(aead_or_daead_result_or.ValueOrDie());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),
               IsOk());
+}
+
+TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialXChacha20Poly1305) {
+  google::crypto::tink::XChaCha20Poly1305KeyFormat key_format;
+  auto key_manager(absl::make_unique<XChaCha20Poly1305KeyManager>());
+  std::string dem_key_type = key_manager->get_key_type();
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
+              IsOk());
+
+  google::crypto::tink::KeyTemplate dem_key_template;
+  dem_key_template.set_type_url(dem_key_type);
+  dem_key_template.set_value(key_format.SerializeAsString());
+
+  auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
+  ASSERT_THAT(dem_helper_or.status(), IsOk());
+  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+
+  auto key_material_size_or = dem_helper->GetKeyMaterialSize();
+  ASSERT_THAT(key_material_size_or.status(), IsOk());
+  ASSERT_EQ(key_material_size_or.ValueOrDie(), 32);
+}
+
+TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesGcm) {
+  google::crypto::tink::AesGcmKeyFormat key_format;
+  auto key_manager(absl::make_unique<AesGcmKeyManager>());
+  std::string dem_key_type = key_manager->get_key_type();
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
+              IsOk());
+
+  google::crypto::tink::KeyTemplate dem_key_template;
+  dem_key_template.set_type_url(dem_key_type);
+  dem_key_template.set_value(key_format.SerializeAsString());
+
+  auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
+  ASSERT_THAT(dem_helper_or.status(), IsOk());
+  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+
+  auto key_material_size_or = dem_helper->GetKeyMaterialSize();
+  ASSERT_THAT(key_material_size_or.status(), IsOk());
+  ASSERT_EQ(key_material_size_or.ValueOrDie(), 32);
+}
+
+TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesSiv) {
+  google::crypto::tink::AesSivKeyFormat key_format;
+  auto key_manager(absl::make_unique<AesSivKeyManager>());
+  std::string dem_key_type = key_manager->get_key_type();
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(std::move(key_manager), true),
+              IsOk());
+
+  google::crypto::tink::KeyTemplate dem_key_template;
+  dem_key_template.set_type_url(dem_key_type);
+  dem_key_template.set_value(key_format.SerializeAsString());
+
+  auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
+  ASSERT_THAT(dem_helper_or.status(), IsOk());
+  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+
+  auto key_material_size_or = dem_helper->GetKeyMaterialSize();
+  ASSERT_THAT(key_material_size_or.status(), IsOk());
+  ASSERT_EQ(key_material_size_or.ValueOrDie(), 64);
 }
 
 }  // namespace
