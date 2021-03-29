@@ -41,8 +41,6 @@ class JwtMacImpl;
 // information (typ, cty, alg and kid).
 class VerifiedJwt {
  public:
-  VerifiedJwt();
-
   // VerifiedJwt objects are copiable and movable.
   VerifiedJwt(const VerifiedJwt&) = default;
   VerifiedJwt& operator=(const VerifiedJwt&) = default;
@@ -80,6 +78,7 @@ class VerifiedJwt {
   util::StatusOr<std::string> ToString();
 
  private:
+  VerifiedJwt();
   explicit VerifiedJwt(const RawJwt& raw_jwt);
   friend class jwt_internal::JwtMacImpl;
   RawJwt raw_jwt_;
