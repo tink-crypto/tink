@@ -306,6 +306,7 @@ java_library(
         ":field25519",
         ":random",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
@@ -343,6 +344,7 @@ java_library(
         ":field25519",
         ":immutable_byte_array",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 

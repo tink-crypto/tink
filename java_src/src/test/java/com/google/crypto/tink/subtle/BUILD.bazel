@@ -8,6 +8,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -117,6 +118,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_verify",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
