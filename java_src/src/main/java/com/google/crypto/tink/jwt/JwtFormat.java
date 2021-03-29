@@ -39,6 +39,26 @@ final class JwtFormat {
     }
   }
 
+  static boolean isValidUrlsafeBase64Char(char c) {
+    return (((c >= 'a') && (c <= 'z'))
+        || ((c >= 'A') && (c <= 'Z'))
+        || ((c >= '0') && (c <= '9'))
+        || ((c == '-') || (c == '_')));
+  }
+
+  static byte[] strictUrlSafeDecode(String encodedData) throws JwtInvalidException {
+    for (char c : encodedData.toCharArray()) {
+      if (!isValidUrlsafeBase64Char(c)) {
+        throw new JwtInvalidException("invalid encoding");
+      }
+    }
+    try {
+      return Base64.urlSafeDecode(encodedData);
+    } catch (IllegalArgumentException ex) {
+      throw new JwtInvalidException("invalid encoding: " + ex);
+    }
+  }
+
   private static String validateAlgorithm(String algo) throws InvalidAlgorithmParameterException {
     switch (algo) {
       case "HS256":
@@ -107,11 +127,7 @@ final class JwtFormat {
   }
 
   static String decodeHeader(String headerStr) throws JwtInvalidException {
-    try {
-      return new String(Base64.urlSafeDecode(headerStr), UTF_8);
-    } catch (IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT header: " + ex);
-    }
+    return new String(strictUrlSafeDecode(headerStr), UTF_8);
 
   }
 
@@ -120,11 +136,7 @@ final class JwtFormat {
   }
 
   static String decodePayload(String payloadStr) throws JwtInvalidException {
-    try {
-      return new String(Base64.urlSafeDecode(payloadStr), UTF_8);
-    } catch (IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT payload: " + ex);
-    }
+    return new String(strictUrlSafeDecode(payloadStr), UTF_8);
   }
 
   static String encodeSignature(byte[] signature) {
@@ -132,11 +144,7 @@ final class JwtFormat {
   }
 
   static byte[] decodeSignature(String signatureStr) throws JwtInvalidException {
-    try {
-      return Base64.urlSafeDecode(signatureStr);
-    } catch (IllegalArgumentException ex) {
-      throw new JwtInvalidException("invalid JWT signature: " + ex);
-    }
+    return strictUrlSafeDecode(signatureStr);
   }
 
   static String createUnsignedCompact(String algorithm, String jsonPayload)

@@ -75,6 +75,15 @@ public final class JwtFormatTest {
   }
 
   @Test
+  public void decodeModifiedHeader_success() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9?"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGciOiJ SUzI1NiJ9"));
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGci\r\nOiJSUzI1NiJ9"));
+  }
+
+
+  @Test
   public void decodeHeader_success() throws Exception {
     String headerStr = Base64.urlSafeEncode("{\"alg\":\"RS256\"}".getBytes(UTF_8));
     String header = JwtFormat.decodeHeader(headerStr);
