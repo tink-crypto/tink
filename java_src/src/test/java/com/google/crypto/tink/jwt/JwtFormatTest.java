@@ -31,6 +31,23 @@ import org.junit.runners.JUnit4;
 public final class JwtFormatTest {
 
   @Test
+  public void parseJson_success() throws Exception {
+    JsonObject header = JwtFormat.parseJson("{\"bool\":false}");
+    assertThat(header.get("bool").getAsBoolean()).isFalse();
+  }
+
+  @Test
+  public void parseJsonWithoutQuotes_fail() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
+  }
+
+  @Test
+  public void parseJsonWithoutComments_fail() throws Exception {
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.parseJson("{\"bool\":false /* comment */}"));
+  }
+
+  @Test
   public void createDecodeHeader_success() throws Exception {
     JsonObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
     assertThat(header.get("alg").getAsString()).isEqualTo("RS256");

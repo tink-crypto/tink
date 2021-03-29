@@ -29,6 +29,16 @@ final class JwtFormat {
 
   private JwtFormat() {}
 
+  static JsonObject parseJson(String jsonString) throws JwtInvalidException {
+    try {
+      JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+      jsonReader.setLenient(false);
+      return Streams.parse(jsonReader).getAsJsonObject();
+    } catch (IllegalStateException | JsonParseException ex) {
+      throw new JwtInvalidException("invalid JSON: " + ex);
+    }
+  }
+
   private static String validateAlgorithm(String algo) throws InvalidAlgorithmParameterException {
     switch (algo) {
       case "HS256":
@@ -97,14 +107,13 @@ final class JwtFormat {
   }
 
   static JsonObject decodeHeader(String headerStr) throws JwtInvalidException {
+    String jsonHeader;
     try {
-      String jsonHeader = new String(Base64.urlSafeDecode(headerStr), UTF_8);
-      JsonReader jsonReader = new JsonReader(new StringReader(jsonHeader));
-      jsonReader.setLenient(false);
-      return Streams.parse(jsonReader).getAsJsonObject();
-    } catch (JsonParseException | IllegalArgumentException ex) {
+      jsonHeader = new String(Base64.urlSafeDecode(headerStr), UTF_8);
+    } catch (IllegalArgumentException ex) {
       throw new JwtInvalidException("invalid JWT header: " + ex);
     }
+    return parseJson(jsonHeader);
   }
 
   static String encodePayload(String jsonPayload) {
