@@ -66,23 +66,23 @@ final class JwtFormat {
     return Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
   }
 
-  static void validateHeader(String expectedAlgorithm, JsonObject header)
+  static void validateHeader(String expectedAlgorithm, String header)
       throws InvalidAlgorithmParameterException, JwtInvalidException {
     validateAlgorithm(expectedAlgorithm);
-
-    if (!header.has(JwtNames.HEADER_ALGORITHM)) {
+    JsonObject parsedHeader = parseJson(header);
+    if (!parsedHeader.has(JwtNames.HEADER_ALGORITHM)) {
       throw new JwtInvalidException("missing algorithm in header");
     }
-    for (String name : header.keySet()) {
+    for (String name : parsedHeader.keySet()) {
       if (name.equals(JwtNames.HEADER_ALGORITHM)) {
-        String algorithm = getStringHeader(header, JwtNames.HEADER_ALGORITHM);
+        String algorithm = getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
         if (!algorithm.equals(expectedAlgorithm)) {
           throw new InvalidAlgorithmParameterException(
               String.format(
                   "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
         }
       } else if (name.equals(JwtNames.HEADER_TYPE)) {
-        String headerType = getStringHeader(header, JwtNames.HEADER_TYPE);
+        String headerType = getStringHeader(parsedHeader, JwtNames.HEADER_TYPE);
         if (!headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
           throw new JwtInvalidException(
               String.format(
@@ -106,22 +106,25 @@ final class JwtFormat {
     return header.get(name).getAsString();
   }
 
-  static JsonObject decodeHeader(String headerStr) throws JwtInvalidException {
-    String jsonHeader;
+  static String decodeHeader(String headerStr) throws JwtInvalidException {
     try {
-      jsonHeader = new String(Base64.urlSafeDecode(headerStr), UTF_8);
+      return new String(Base64.urlSafeDecode(headerStr), UTF_8);
     } catch (IllegalArgumentException ex) {
       throw new JwtInvalidException("invalid JWT header: " + ex);
     }
-    return parseJson(jsonHeader);
+
   }
 
   static String encodePayload(String jsonPayload) {
     return Base64.urlSafeEncode(jsonPayload.getBytes(UTF_8));
   }
 
-  static String decodePayload(String payloadStr) {
-    return new String(Base64.urlSafeDecode(payloadStr), UTF_8);
+  static String decodePayload(String payloadStr) throws JwtInvalidException {
+    try {
+      return new String(Base64.urlSafeDecode(payloadStr), UTF_8);
+    } catch (IllegalArgumentException ex) {
+      throw new JwtInvalidException("invalid JWT payload: " + ex);
+    }
   }
 
   static String encodeSignature(byte[] signature) {
