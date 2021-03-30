@@ -15,6 +15,7 @@ py_library(
         ":_jwt_hmac_key_manager",
         ":_jwt_key_templates",
         ":_jwt_mac",
+        ":_jwt_mac_wrapper",
         ":_jwt_validator",
         ":_raw_jwt",
         ":_verified_jwt",
@@ -87,6 +88,7 @@ py_library(
     srcs = ["_jwt_key_templates.py"],
     srcs_version = "PY3",
     deps = [
+        "//tink:tink_python",
         "//tink/proto:common_py_pb2",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_hmac_py_pb2",
@@ -193,5 +195,32 @@ py_test(
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/proto:jwt_hmac_py_pb2",
+    ],
+)
+
+py_library(
+    name = "_jwt_mac_wrapper",
+    srcs = ["_jwt_mac_wrapper.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_error",
+        ":_jwt_mac",
+        ":_jwt_validator",
+        ":_raw_jwt",
+        ":_verified_jwt",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_mac_wrapper_test",
+    srcs = ["_jwt_mac_wrapper_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/testing:keyset_builder",
     ],
 )

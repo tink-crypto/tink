@@ -17,8 +17,14 @@ from __future__ import print_function
 
 from absl.testing import absltest
 from absl.testing import parameterized
+
+import tink
 from tink import jwt
 from tink.testing import helper
+
+
+def setUpModule():
+  jwt.register_jwt_mac()
 
 
 class JwtKeyTemplatesTest(parameterized.TestCase):
@@ -48,6 +54,20 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
   def test_num_to_bytes(self, number, expected):
     self.assertEqual(jwt._jwt_key_templates._num_to_bytes(number),
                      expected)
+
+  @parameterized.named_parameters([
+      ('JWT_HS256', jwt.jwt_hs256_template()),
+      ('JWT_HS384', jwt.jwt_hs384_template()),
+      ('JWT_HS512', jwt.jwt_hs512_template()),
+  ])
+  def test_mac_success(self, key_template):
+    keyset_handle = tink.new_keyset_handle(key_template)
+    jwt_hmac = keyset_handle.primitive(jwt.JwtMac)
+    token = jwt.new_raw_jwt(issuer='issuer', subject='subject')
+    compact = jwt_hmac.compute_mac_and_encode(token)
+    output_token = jwt_hmac.verify_mac_and_decode(compact, jwt.new_validator())
+    self.assertEqual(output_token.issuer(), token.issuer())
+    self.assertEqual(output_token.subject(), token.subject())
 
 if __name__ == '__main__':
   absltest.main()

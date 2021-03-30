@@ -22,6 +22,7 @@ from tink.jwt import _jwt_error
 from tink.jwt import _jwt_hmac_key_manager
 from tink.jwt import _jwt_key_templates
 from tink.jwt import _jwt_mac
+from tink.jwt import _jwt_mac_wrapper
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -58,6 +59,7 @@ def new_validator(issuer: Optional[Text] = None,
                   ) -> JwtValidator:
   return JwtValidator(issuer, subject, audience, clock_skew, fixed_now)
 
+
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
 jwt_hs384_template = _jwt_key_templates.jwt_hs384_template
 jwt_hs512_template = _jwt_key_templates.jwt_hs512_template
@@ -73,3 +75,7 @@ jwt_ps256_3072_f4_template = _jwt_key_templates.jwt_ps256_3072_f4_template
 jwt_ps384_3072_f4_template = _jwt_key_templates.jwt_ps384_3072_f4_template
 jwt_ps512_4096_f4_template = _jwt_key_templates.jwt_ps512_4096_f4_template
 
+
+def register_jwt_mac() -> None:
+  _jwt_hmac_key_manager.register()
+  _jwt_mac_wrapper.register()
