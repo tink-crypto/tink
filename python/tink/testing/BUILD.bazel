@@ -83,3 +83,25 @@ py_test(
         "@tink_py//tink/hybrid",
     ],
 )
+
+py_library(
+    name = "fake_kms",
+    testonly = 1,
+    srcs = ["fake_kms.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/cc/pybind:tink_bindings",
+    ],
+)
+
+py_test(
+    name = "fake_kms_test",
+    srcs = ["fake_kms_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":fake_kms",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/aead",
+    ],
+)
