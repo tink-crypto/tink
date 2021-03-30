@@ -24,8 +24,6 @@ from tink import signature
 from tink import streaming_aead
 
 from tink.proto import common_pb2
-from tink.proto import kms_aead_pb2
-from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 from tink import jwt
 
@@ -86,32 +84,6 @@ _FAKE_KMS_KEY_URI = (
     'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
 
 
-# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
-def _create_kms_aead_key_template(key_uri: Text) -> tink_pb2.KeyTemplate:
-  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
-  key_format = kms_aead_pb2.KmsAeadKeyFormat()
-  key_format.key_uri = key_uri
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = 'type.googleapis.com/google.crypto.tink.KmsAeadKey'
-  key_template.output_prefix_type = tink_pb2.RAW
-  return key_template
-
-
-# TODO(b/175292261): Do not add to aead_key_templates before bug is resolved.
-def _create_kms_envelope_aead_key_template(
-    kek_uri: Text, dek_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
-  """Creates a KMS Envelope AEAD KeyTemplate, and fills in its values."""
-  key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
-  key_format.kek_uri = kek_uri
-  key_format.dek_template.MergeFrom(dek_template)
-  key_template = tink_pb2.KeyTemplate()
-  key_template.value = key_format.SerializeToString()
-  key_template.type_url = (
-      'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
-  key_template.output_prefix_type = tink_pb2.RAW
-  return key_template
-
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
     'AesEaxKey': ['cc', 'java', 'python'],
@@ -120,8 +92,8 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],
-    'KmsAeadKey': ['cc', 'java'],
-    'KmsEnvelopeAeadKey': ['cc', 'java', 'go'],
+    'KmsAeadKey': ['cc', 'java', 'python'],
+    'KmsEnvelopeAeadKey': ['cc', 'java', 'go', 'python'],
     'AesSivKey': ['cc', 'java', 'go', 'python'],
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
@@ -233,9 +205,9 @@ KEY_TEMPLATE = {
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
     'FAKE_KMS_AEAD':
-        _create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
+        aead.aead_key_templates.create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
     'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
-        _create_kms_envelope_aead_key_template(
+        aead.aead_key_templates.create_kms_envelope_aead_key_template(
             _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM),
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,

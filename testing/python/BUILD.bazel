@@ -71,5 +71,6 @@ py_binary(
         "@tink_py//tink/mac",
         "@tink_py//tink/signature",
         "@tink_py//tink/streaming_aead",
+        "@tink_py//tink/testing:fake_kms",
     ],
 )
