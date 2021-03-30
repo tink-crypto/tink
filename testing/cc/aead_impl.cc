@@ -27,8 +27,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-AeadImpl::AeadImpl() {}
-
 // Encrypts a message
 ::grpc::Status AeadImpl::Encrypt(grpc::ServerContext* context,
                                  const AeadEncryptRequest* request,

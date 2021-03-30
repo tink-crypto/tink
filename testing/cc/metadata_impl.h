@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A Metadata Service.
 class MetadataImpl final : public Metadata::Service {
  public:
-  MetadataImpl();
-
-  ~MetadataImpl() override = default;
-
   // Returns server info.
   grpc::Status GetServerInfo(grpc::ServerContext* context,
                              const ServerInfoRequest* request,

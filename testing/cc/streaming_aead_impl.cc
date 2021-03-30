@@ -35,9 +35,6 @@ using ::crypto::tink::util::OstreamOutputStream;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-
-StreamingAeadImpl::StreamingAeadImpl() {}
-
 // Encrypts a message
 ::grpc::Status StreamingAeadImpl::Encrypt(
     grpc::ServerContext* context,

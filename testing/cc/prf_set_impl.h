@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A PrfSet Service.
 class PrfSetImpl final : public PrfSet::Service {
  public:
-  PrfSetImpl();
-
-  ~PrfSetImpl() override = default;
-
   grpc::Status KeyIds(grpc::ServerContext* context,
                       const PrfSetKeyIdsRequest* request,
                       PrfSetKeyIdsResponse* response) override;
