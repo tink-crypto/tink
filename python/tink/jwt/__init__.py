@@ -23,6 +23,8 @@ from tink.jwt import _jwt_hmac_key_manager
 from tink.jwt import _jwt_key_templates
 from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_mac_wrapper
+from tink.jwt import _jwt_public_key_sign
+from tink.jwt import _jwt_public_key_verify
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -33,6 +35,8 @@ VerifiedJwt = _verified_jwt.VerifiedJwt
 JwtValidator = _jwt_validator.JwtValidator
 Claim = _raw_jwt.Claim
 JwtMac = _jwt_mac.JwtMac
+JwtPublicKeySign = _jwt_public_key_sign.JwtPublicKeySign
+JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
 
 def raw_jwt_from_json_payload(payload: Text) -> RawJwt:
