@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import java.io.File;
 import java.io.IOException;
@@ -110,6 +110,16 @@ public final class Validators {
       throw new GeneralSecurityException(
           String.format(
               "Modulus size is %d; only modulus size >= 2048-bit is supported", modulusSize));
+    }
+    // In FIPS only mode we check here if the modulus is 3072, as this is the
+    // only size which is covered by the FIPS validation and supported by Tink.
+    // See
+    // https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3318
+    if (TinkFips.useOnlyFips() && (modulusSize != 3072)) {
+      throw new GeneralSecurityException(
+          String.format(
+              "Modulus size is %d; only modulus size 3072-bit is supported in FIPS mode",
+              modulusSize));
     }
   }
 
