@@ -3,6 +3,8 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
+./kokoro/copy_credentials.sh
+
 install_temp_protoc() {
   local protoc_version='3.14.0'
   local protoc_zip="protoc-${protoc_version}-osx-x86_64.zip"

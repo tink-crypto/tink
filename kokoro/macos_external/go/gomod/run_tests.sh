@@ -12,6 +12,11 @@ GO_MOD_DIR="${TMP_DIR}/go-mod-test"
 
 REPO_URL_PREFIX="github.com/google/tink"
 
+(
+  cd "${REPO_DIR}"
+  ./kokoro/copy_credentials.sh
+)
+
 #######################################
 # Test an individual Go module within the Tink repository.
 # Globals:
