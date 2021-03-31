@@ -5,17 +5,28 @@ This document presents instructions and Python code snippets for common tasks in
 
 ## Setup instructions
 
+Tink requires Python 3.7 or above.
+
 The simplest way is to install a binary release from
 [PyPi](https://pypi.org/project/tink/):
 
 ```shell
-pip install tink
+pip3 install tink
 ```
 
-Currently, this includes binary wheels for:
+Currently, the following set of binary wheels are published:
 
-*   Linux: Python 3.7, Python 3.8
-*   MacOs: Python 3.7, Python 3.8
+*   Linux
+    *   Python 3.7
+    *   Python 3.8
+*   macOS
+    *   Python 3.7
+    *   Python 3.8
+
+In addition to the binary wheels, a source distribution is also published. If
+`pip` does not find a suitable binary wheel for your environment, it will fall
+back to building the project using the source distribution. This process has the
+same requirements as building from source instructions below.
 
 ### Common setup issues
 
@@ -25,13 +36,13 @@ Currently, this includes binary wheels for:
 
 ## Building from source
 
-Tink currently supports two build systems for the use with Python:
+Tink currently supports two build systems for use with Python:
 
 *   [Bazel](https://bazel.build/)
 *   Setuptools to create a Python package
 
-Note that in both cases you will require [Bazel](https://bazel.build/), as it is
-used to compile the wrapper around the C++ implementation which uses
+Note that in both cases [Bazel](https://bazel.build/) is required, as it is
+needed to compile the wrapper around the C++ implementation which uses
 [pybind11](https://github.com/pybind/pybind11).
 
 ### Build with Bazel
@@ -49,8 +60,8 @@ A setup script is provided which allows building a Python package using pip.
 
 The setup script requires:
 
- * Bazel
- * [protobuf compiler](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation).
+*   Bazel
+*   [protobuf compiler](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation).
 
 To build and install the Python package:
 
@@ -67,7 +78,6 @@ To run all tests, you can:
 cd python
 bazel test ...
 ```
-
 
 ## Initializing Tink
 
