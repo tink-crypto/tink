@@ -79,19 +79,10 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
               @Override
               public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
                   throws GeneralSecurityException {
-                JwtFormat.validateASCII(compact);
-                String[] parts = compact.split("\\.", -1);
-                if (parts.length != 3) {
-                  throw new JwtInvalidException(
-                      "only tokens in JWS compact serialization format are supported");
-                }
-                String unsignedCompact = parts[0] + "." + parts[1];
-                byte[] expectedSignature = JwtFormat.decodeSignature(parts[2]);
-
-                verifier.verify(expectedSignature, unsignedCompact.getBytes(US_ASCII));
-                JwtFormat.validateHeader(algorithmName, JwtFormat.decodeHeader(parts[0]));
-                String payload = JwtFormat.decodePayload(parts[1]);
-                RawJwt token = RawJwt.fromJsonPayload(payload);
+                JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
+                verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
+                JwtFormat.validateHeader(algorithmName, parts.header);
+                RawJwt token = RawJwt.fromJsonPayload(parts.payload);
                 return validator.validate(token);
               }
             };

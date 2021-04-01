@@ -27,6 +27,22 @@ import java.util.Locale;
 
 final class JwtFormat {
 
+  static class Parts {
+
+    String unsignedCompact;
+    byte[] signatureOrMac;
+    String header;
+    String payload;
+
+    Parts(
+        String unsignedCompact, byte[] signatureOrMac, String header, String payload) {
+      this.unsignedCompact = unsignedCompact;
+      this.signatureOrMac = signatureOrMac;
+      this.header = header;
+      this.payload = payload;
+    }
+  }
+
   private JwtFormat() {}
 
   static JsonObject parseJson(String jsonString) throws JwtInvalidException {
@@ -145,6 +161,32 @@ final class JwtFormat {
 
   static byte[] decodeSignature(String signatureStr) throws JwtInvalidException {
     return strictUrlSafeDecode(signatureStr);
+  }
+
+  static Parts splitSignedCompact(String signedCompact) throws JwtInvalidException {
+      validateASCII(signedCompact);
+      int sigPos = signedCompact.lastIndexOf('.');
+      if (sigPos < 0) {
+        throw new JwtInvalidException(
+            "only tokens in JWS compact serialization format are supported");
+      }
+      String unsignedCompact = signedCompact.substring(0, sigPos);
+      String encodedMac = signedCompact.substring(sigPos + 1);
+      byte[] mac = decodeSignature(encodedMac);
+      int payloadPos = unsignedCompact.indexOf('.');
+      if (payloadPos < 0) {
+        throw new JwtInvalidException(
+            "only tokens in JWS compact serialization format are supported");
+      }
+      String encodedHeader = unsignedCompact.substring(0, payloadPos);
+      String encodedPayload = unsignedCompact.substring(payloadPos + 1);
+      if (encodedPayload.indexOf('.') > 0) {
+        throw new JwtInvalidException(
+            "only tokens in JWS compact serialization format are supported");
+      }
+      String header = decodeHeader(encodedHeader);
+      String payload = decodePayload(encodedPayload);
+      return new Parts(unsignedCompact, mac, header, payload);
   }
 
   static String createUnsignedCompact(String algorithm, String jsonPayload)

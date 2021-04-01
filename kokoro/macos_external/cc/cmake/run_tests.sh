@@ -3,6 +3,8 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
+./kokoro/copy_credentials.sh
+
 echo "========================================================= Running cmake"
 cmake --version
 cmake . cmake . -DTINK_BUILD_TESTS=ON -DCMAKE_CXX_STANDARD=11

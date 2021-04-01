@@ -3,6 +3,8 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
+./kokoro/copy_credentials.sh
+
 cd tools
 use_bazel.sh $(cat .bazelversion)
 time bazel build -- ...

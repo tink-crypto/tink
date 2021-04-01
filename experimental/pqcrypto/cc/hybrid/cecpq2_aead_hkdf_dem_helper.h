@@ -42,6 +42,9 @@ class Cecpq2AeadHkdfDemHelper {
   virtual crypto::tink::util::StatusOr<
       std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
   GetAeadOrDaead(const util::SecretData& seed) const = 0;
+
+  // Return the key material size.
+  virtual crypto::tink::util::StatusOr<uint32_t> GetKeyMaterialSize() const = 0;
 };
 
 }  // namespace tink

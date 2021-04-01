@@ -179,11 +179,13 @@ java_test(
     size = "large",
     srcs = ["RsaSsaPkcs1SignJceTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
 
@@ -452,6 +454,7 @@ java_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
@@ -459,6 +462,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:wycheproof_test_util",
         "@maven//:com_google_code_gson_gson",
         "@maven//:junit_junit",
+        "@maven//:org_conscrypt_conscrypt_openjdk_uber",
     ],
 )
 

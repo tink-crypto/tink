@@ -17,6 +17,8 @@ set -e
 
 cd git*/tink
 
+./kokoro/copy_credentials.sh
+
 echo "========================================================= Running cmake"
 cmake --version
 cmake . -DTINK_BUILD_TESTS=ON -DCMAKE_CXX_STANDARD=11

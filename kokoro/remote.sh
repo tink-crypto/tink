@@ -30,6 +30,8 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   rm -f ~/.bazelrc
 
   use_bazel.sh $(cat .bazelversion)
+
+  ./kokoro/copy_credentials.sh
 fi
 
 echo "Using bazel binary: $(which bazel)"

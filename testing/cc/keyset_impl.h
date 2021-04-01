@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A Keyset Service.
 class KeysetImpl final : public Keyset::Service {
  public:
-  KeysetImpl();
-
-  ~KeysetImpl() override = default;
-
   // Generates a new keyset with one key from a template.
   grpc::Status Generate(grpc::ServerContext* context,
                         const KeysetGenerateRequest* request,

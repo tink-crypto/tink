@@ -22,12 +22,31 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
+namespace {
+
+bool isValidUrlsafeBase64Char(char c) {
+  return (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) ||
+          ((c >= '0') && (c <= '9')) || ((c == '-') || (c == '_')));
+}
+
+bool StrictWebSafeBase64Unescape(absl::string_view src, std::string* dest) {
+  for (char c : src) {
+    if (!isValidUrlsafeBase64Char(c)) {
+      return false;
+    }
+  }
+  return absl::WebSafeBase64Unescape(src, dest);
+}
+
+}  // namespace
+
+
 std::string EncodeHeader(absl::string_view json_header) {
   return absl::WebSafeBase64Escape(json_header);
 }
 
 bool DecodeHeader(absl::string_view header, std::string* json_header) {
-  return absl::WebSafeBase64Unescape(header, json_header);
+  return StrictWebSafeBase64Unescape(header, json_header);
 }
 
 std::string CreateHeader(absl::string_view algorithm) {
@@ -78,7 +97,7 @@ std::string EncodePayload(absl::string_view json_payload) {
 }
 
 bool DecodePayload(absl::string_view payload, std::string* json_payload) {
-  return absl::WebSafeBase64Unescape(payload, json_payload);
+  return StrictWebSafeBase64Unescape(payload, json_payload);
 }
 
 std::string EncodeSignature(absl::string_view signature) {
@@ -87,7 +106,7 @@ std::string EncodeSignature(absl::string_view signature) {
 
 bool DecodeSignature(absl::string_view encoded_signature,
                      std::string* signature) {
-  return absl::WebSafeBase64Unescape(encoded_signature, signature);
+  return StrictWebSafeBase64Unescape(encoded_signature, signature);
 }
 
 }  // namespace jwt_internal

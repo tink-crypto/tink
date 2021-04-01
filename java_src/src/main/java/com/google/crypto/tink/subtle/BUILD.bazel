@@ -157,6 +157,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -189,7 +190,10 @@ java_library(
 java_library(
     name = "validators",
     srcs = ["Validators.java"],
-    deps = [":enums"],
+    deps = [
+        ":enums",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+    ],
 )
 
 java_library(
@@ -373,6 +377,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )

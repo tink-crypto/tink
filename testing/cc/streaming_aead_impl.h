@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A StreamingAead Service.
 class StreamingAeadImpl final : public StreamingAead::Service {
  public:
-  StreamingAeadImpl();
-
-  ~StreamingAeadImpl() override = default;
-
   grpc::Status Encrypt(grpc::ServerContext* context,
                        const StreamingAeadEncryptRequest* request,
                        StreamingAeadEncryptResponse* response) override;
