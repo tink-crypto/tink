@@ -15,7 +15,7 @@ The example comes with a Podfile that demonstrates how to install Tink from Coco
 
 ```shell
 git clone https://github.com/google/tink
-cd tink/examples/helloworld/objc
+cd tink/examples/objc/helloworld
 pod install
 open TinkExampleApp.xcworkspace
 ```

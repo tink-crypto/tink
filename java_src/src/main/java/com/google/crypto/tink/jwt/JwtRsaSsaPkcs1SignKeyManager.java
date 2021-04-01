@@ -100,7 +100,7 @@ public final class JwtRsaSsaPkcs1SignKeyManager
       final String algorithmName = algorithm.name();
       return new JwtPublicKeySign() {
         @Override
-        public String sign(RawJwt token) throws GeneralSecurityException {
+        public String signAndEncode(RawJwt token) throws GeneralSecurityException {
           String unsignedCompact =
               JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
           return JwtFormat.createSignedCompact(

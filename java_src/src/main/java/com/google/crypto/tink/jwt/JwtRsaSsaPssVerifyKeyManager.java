@@ -92,7 +92,7 @@ class JwtRsaSsaPssVerifyKeyManager extends KeyTypeManager<JwtRsaSsaPssPublicKey>
             final String algorithmName = keyProto.getAlgorithm().name();
             return new JwtPublicKeyVerify() {
               @Override
-              public VerifiedJwt verify(String compact, JwtValidator validator)
+              public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
                   throws GeneralSecurityException {
                 JwtFormat.validateASCII(compact);
                 String[] parts = compact.split("\\.", -1);

@@ -11,6 +11,7 @@
 # limitations under the License.
 """Tests for tink.testing.cross_language.util.testing_server."""
 
+import datetime
 import io
 
 from absl.testing import absltest
@@ -25,6 +26,11 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
+from tink.proto import common_pb2
+from tink.proto import jwt_ecdsa_pb2
+from tink.proto import jwt_hmac_pb2
+from tink.proto import tink_pb2
+from tink import jwt
 from util import testing_servers
 
 _SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE
@@ -168,6 +174,74 @@ class TestingServersTest(parameterized.TestCase):
 
     with self.assertRaises(tink.TinkError):
       prf_set_primitive.primary().compute(input_data, output_length=123456)
+
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
+  def test_jwt_mac(self, lang):
+    key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
+        hash_type=common_pb2.SHA256, key_size=32)
+    key_template = tink_pb2.KeyTemplate(
+        type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
+        value=key_format.SerializeToString(),
+        output_prefix_type=tink_pb2.RAW)
+    keyset = testing_servers.new_keyset(lang, key_template)
+
+    jwt_mac_primitive = testing_servers.jwt_mac(lang, keyset)
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    token = jwt.new_raw_jwt(
+        issuer='issuer',
+        subject='subject',
+        audiences=['audience1', 'audience2'],
+        jwt_id='jwt_id',
+        expiration=now + datetime.timedelta(seconds=10),
+        custom_claims={'switch': True, 'pi': 3.14159})
+    compact = jwt_mac_primitive.compute_mac_and_encode(token)
+    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+    self.assertEqual(verified_jwt.subject(), 'subject')
+    self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
+    self.assertEqual(verified_jwt.custom_claim('switch'), True)
+    self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
+
+    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac_primitive.verify_mac_and_decode(compact, validator2)
+
+  @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
+  def test_jwt_public_key_sign_verify(self, lang):
+    key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
+        algorithm=jwt_ecdsa_pb2.ES256)
+    key_template = tink_pb2.KeyTemplate(
+        type_url='type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey',
+        value=key_format.SerializeToString(),
+        output_prefix_type=tink_pb2.RAW)
+    private_keyset = testing_servers.new_keyset(lang, key_template)
+    public_keyset = testing_servers.public_keyset(lang, private_keyset)
+
+    signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
+    verifier = testing_servers.jwt_public_key_verify(lang, public_keyset)
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    token = jwt.new_raw_jwt(
+        issuer='issuer',
+        subject='subject',
+        audiences=['audience1', 'audience2'],
+        jwt_id='jwt_id',
+        expiration=now + datetime.timedelta(seconds=10),
+        custom_claims={'switch': True, 'pi': 3.14159})
+    compact = signer.sign_and_encode(token)
+    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    verified_jwt = verifier.verify_and_decode(compact, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+    self.assertEqual(verified_jwt.subject(), 'subject')
+    self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
+    self.assertEqual(verified_jwt.custom_claim('switch'), True)
+    self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
+
+    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    with self.assertRaises(tink.TinkError):
+      verifier.verify_and_decode(compact, validator2)
 
 
 if __name__ == '__main__':

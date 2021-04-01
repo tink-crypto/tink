@@ -17,6 +17,7 @@
 #ifndef TINK_AEAD_AEAD_KEY_TEMPLATES_H_
 #define TINK_AEAD_AEAD_KEY_TEMPLATES_H_
 
+#include "absl/strings/string_view.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -117,6 +118,19 @@ class AeadKeyTemplates {
   //   - IV size: 24 bytes
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate& XChaCha20Poly1305();
+
+  // Returns a KeyTemplate that generates new instances of KmsEnvelopeAeadKey
+  // with the following parameters:
+  //   - KEK is pointing to kek_uri
+  //   - DEK template is dek_template
+  //   - OutputPrefixType: RAW. This uses RAW output prefix to make it
+  //   compatible with the remote KMS' encrypt/decrypt operations. Unlike other
+  //   templates, when you generate new keys with this template, Tink does not
+  //   generate new key material, but only creates a reference to the remote
+  //   KEK.
+  static google::crypto::tink::KeyTemplate KmsEnvelopeAead(
+      absl::string_view kek_uri,
+      const google::crypto::tink::KeyTemplate& dek_template);
 };
 
 }  // namespace tink

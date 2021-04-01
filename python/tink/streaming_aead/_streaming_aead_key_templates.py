@@ -35,6 +35,8 @@ _AES_GCM_HKDF_STREAMING_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey')
 _AES_CTR_HMAC_STREAMING_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey')
+SEGMENT_SIZE_1MB = 1024 * 1024
+SEGMENT_SIZE_4KB = 4 * 1024
 
 
 def create_aes_gcm_hkdf_streaming_key_template(
@@ -80,19 +82,25 @@ AES128_GCM_HKDF_4KB = create_aes_gcm_hkdf_streaming_key_template(
     aes_key_size=16,
     hash_type=common_pb2.HashType.SHA256,
     derived_key_size=16,
-    ciphertext_segment_size=4096)
+    ciphertext_segment_size=SEGMENT_SIZE_4KB)
+
+AES128_GCM_HKDF_1MB = create_aes_gcm_hkdf_streaming_key_template(
+    aes_key_size=16,
+    hash_type=common_pb2.HashType.SHA256,
+    derived_key_size=16,
+    ciphertext_segment_size=SEGMENT_SIZE_1MB)
 
 AES256_GCM_HKDF_4KB = create_aes_gcm_hkdf_streaming_key_template(
     aes_key_size=32,
     hash_type=common_pb2.HashType.SHA256,
     derived_key_size=32,
-    ciphertext_segment_size=4096)
+    ciphertext_segment_size=SEGMENT_SIZE_4KB)
 
 AES256_GCM_HKDF_1MB = create_aes_gcm_hkdf_streaming_key_template(
     aes_key_size=32,
     hash_type=common_pb2.HashType.SHA256,
     derived_key_size=32,
-    ciphertext_segment_size=1048576)
+    ciphertext_segment_size=SEGMENT_SIZE_1MB)
 
 AES128_CTR_HMAC_SHA256_4KB = create_aes_ctr_hmac_streaming_key_template(
     aes_key_size=16,
@@ -100,7 +108,15 @@ AES128_CTR_HMAC_SHA256_4KB = create_aes_ctr_hmac_streaming_key_template(
     derived_key_size=16,
     mac_hash_type=common_pb2.HashType.SHA256,
     tag_size=32,
-    ciphertext_segment_size=4096)
+    ciphertext_segment_size=SEGMENT_SIZE_4KB)
+
+AES128_CTR_HMAC_SHA256_1MB = create_aes_ctr_hmac_streaming_key_template(
+    aes_key_size=16,
+    hkdf_hash_type=common_pb2.HashType.SHA256,
+    derived_key_size=16,
+    mac_hash_type=common_pb2.HashType.SHA256,
+    tag_size=32,
+    ciphertext_segment_size=SEGMENT_SIZE_1MB)
 
 AES256_CTR_HMAC_SHA256_4KB = create_aes_ctr_hmac_streaming_key_template(
     aes_key_size=32,
@@ -108,4 +124,13 @@ AES256_CTR_HMAC_SHA256_4KB = create_aes_ctr_hmac_streaming_key_template(
     derived_key_size=32,
     mac_hash_type=common_pb2.HashType.SHA256,
     tag_size=32,
-    ciphertext_segment_size=4096)
+    ciphertext_segment_size=SEGMENT_SIZE_4KB)
+
+AES256_CTR_HMAC_SHA256_1MB = create_aes_ctr_hmac_streaming_key_template(
+    aes_key_size=32,
+    hkdf_hash_type=common_pb2.HashType.SHA256,
+    derived_key_size=32,
+    mac_hash_type=common_pb2.HashType.SHA256,
+    tag_size=32,
+    ciphertext_segment_size=SEGMENT_SIZE_1MB)
+

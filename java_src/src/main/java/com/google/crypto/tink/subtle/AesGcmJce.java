@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
@@ -31,6 +32,9 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesGcmJce implements Aead {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   private static final ThreadLocal<Cipher> localCipher =
       new ThreadLocal<Cipher>() {
         @Override
@@ -50,6 +54,10 @@ public final class AesGcmJce implements Aead {
   private final SecretKey keySpec;
 
   public AesGcmJce(final byte[] key) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use AES-GCM in FIPS-mode, as BoringCrypto module is not available.");
+    }
     Validators.validateAesKeySize(key.length);
     keySpec = new SecretKeySpec(key, "AES");
   }

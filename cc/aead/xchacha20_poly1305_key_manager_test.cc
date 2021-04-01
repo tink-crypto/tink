@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -36,6 +37,7 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::XChaCha20Poly1305Key;
 using ::google::crypto::tink::XChaCha20Poly1305KeyFormat;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;
 
@@ -101,6 +103,57 @@ TEST(XChaCha20Poly1305KeyManagerTest, CreateKey) {
   ASSERT_THAT(key_or.status(), IsOk());
   EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
   EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, DeriveKey) {
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(0);
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(32));
+  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyFromLongSeed) {
+  util::IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef0123456789abcdefXXX")};
+
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(0);
+  auto key_or = XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(),
+              Eq("0123456789abcdef0123456789abcdef"));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyWithoutEnoughEntropy) {
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0")};
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(0);
+
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(), StatusIs(util::error::INVALID_ARGUMENT,
+                                        HasSubstr("pseudorandomness")));
+}
+
+TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyWrongVersion) {
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+  XChaCha20Poly1305KeyFormat format;
+  format.set_version(1);
+  StatusOr<XChaCha20Poly1305Key> key_or =
+      XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(),
+              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {

@@ -13,6 +13,7 @@
 import datetime
 
 from typing import Optional, Text
+from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
 _MAX_CLOCK_SKEW = datetime.timedelta(minutes=10)
@@ -98,34 +99,34 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
   if (raw_jwt.has_expiration() and
       raw_jwt.expiration() < now - validator.clock_skew()):
-    raise _raw_jwt.JwtInvalidError('token has expired since %s' %
-                                   raw_jwt.expiration())
+    raise _jwt_error.JwtInvalidError('token has expired since %s' %
+                                     raw_jwt.expiration())
   if (raw_jwt.has_not_before() and
       raw_jwt.not_before() > now + validator.clock_skew()):
-    raise _raw_jwt.JwtInvalidError('token cannot be used before %s' %
-                                   raw_jwt.not_before())
+    raise _jwt_error.JwtInvalidError('token cannot be used before %s' %
+                                     raw_jwt.not_before())
   if validator.has_issuer():
     if not raw_jwt.has_issuer():
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; missing expected issuer %s.' % validator.issuer())
     if validator.issuer() != raw_jwt.issuer():
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; expected issuer %s, but got %s' %
           (validator.issuer(), raw_jwt.issuer()))
   if validator.has_subject():
     if not raw_jwt.has_subject():
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; missing expected subject %s.' % validator.subject())
     if validator.subject() != raw_jwt.subject():
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; expected subject %s, but got %s' %
           (validator.subject(), raw_jwt.subject()))
   if validator.has_audience():
     if (not raw_jwt.has_audiences() or
         validator.audience() not in raw_jwt.audiences()):
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; missing expected audience %s.' % validator.audience())
   else:
     if raw_jwt.has_audiences():
-      raise _raw_jwt.JwtInvalidError(
+      raise _jwt_error.JwtInvalidError(
           'invalid JWT; token has audience set, but validator not.')

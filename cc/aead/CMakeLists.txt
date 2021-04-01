@@ -99,8 +99,10 @@ tink_cc_library(
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_gcm_siv_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
+    absl::strings
 )
 
 tink_cc_library(
@@ -161,6 +163,7 @@ tink_cc_library(
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::random
     tink::util::constants
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -215,6 +218,7 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::xchacha20_poly1305_boringssl
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -341,19 +345,27 @@ tink_cc_test(
   NAME aead_key_templates_test
   SRCS aead_key_templates_test.cc
   DEPS
+    tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_eax_key_manager
     tink::aead::aes_gcm_key_manager
     tink::aead::aes_gcm_siv_key_manager
+    tink::aead::kms_envelope_aead
+    tink::aead::kms_envelope_aead_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::core::key_manager_impl
+    tink::core::aead
+    tink::core::keyset_handle
+    tink::subtle::aead_test_util
+    tink::util::fake_kms_client
     tink::util::test_matchers
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_eax_cc_proto
     tink::proto::aes_gcm_cc_proto
     tink::proto::aes_gcm_siv_cc_proto
     tink::proto::common_cc_proto
+    tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
 )
@@ -436,6 +448,7 @@ tink_cc_test(
     tink::core::aead
     tink::core::key_manager_impl
     tink::subtle::aead_test_util
+    tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

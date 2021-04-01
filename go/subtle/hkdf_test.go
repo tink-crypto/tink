@@ -133,7 +133,7 @@ func TestHKDFBasic(t *testing.T) {
 
 func TestNewHMACWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := ComputeHKDF("SHA224", random.GetRandomBytes(16), nil, nil, 32)
+	_, err := ComputeHKDF("SHA0", random.GetRandomBytes(16), nil, nil, 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}

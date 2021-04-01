@@ -55,14 +55,14 @@ class PublicKeyVerifyWrapper implements PrimitiveWrapper<PublicKeyVerify, Public
         // schemes that output signatures that small.
         throw new GeneralSecurityException("signature too short");
       }
-      byte[] prefix = Arrays.copyOfRange(signature, 0, CryptoFormat.NON_RAW_PREFIX_SIZE);
+      byte[] prefix = Arrays.copyOf(signature, CryptoFormat.NON_RAW_PREFIX_SIZE);
       byte[] sigNoPrefix =
           Arrays.copyOfRange(signature, CryptoFormat.NON_RAW_PREFIX_SIZE, signature.length);
       List<PrimitiveSet.Entry<PublicKeyVerify>> entries = primitives.getPrimitive(prefix);
       for (PrimitiveSet.Entry<PublicKeyVerify> entry : entries) {
         try {
           if (entry.getOutputPrefixType().equals(OutputPrefixType.LEGACY)) {
-            final byte[] formatVersion = new byte[] {CryptoFormat.LEGACY_START_BYTE};
+            final byte[] formatVersion = new byte[] {0};
             final byte[] dataWithFormatVersion = Bytes.concat(data, formatVersion);
             entry.getPrimitive().verify(sigNoPrefix, dataWithFormatVersion);
           } else {

@@ -573,10 +573,10 @@ message.
         .getKeysetHandle();
 ```
 
-Some common specifications are available as pre-generated templates in
-[examples/keytemplates](https://github.com/google/tink/tree/master/examples/keytemplates),
-and can be accessed via the `...KeyTemplates.java` classes of the respective
-primitives.
+Factory methods to create key templates can be found in the key manager classes.
+For example, the method `hmacSha512Template()` in
+[HmacKeyManager](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/mac/HmacKeyManager.java)
+returns a key template for `HMAC-SHA512`.
 
 After a successful rotation, the resulting keyset contains a new key generated
 according to the specification in `keyTemplate`, and the new key becomes the

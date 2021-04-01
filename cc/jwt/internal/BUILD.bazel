@@ -50,3 +50,174 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "json_util",
+    srcs = ["json_util.cc"],
+    hdrs = ["json_util.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "json_util_test",
+    size = "small",
+    srcs = ["json_util_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":json_util",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_format",
+    srcs = ["jwt_format.cc"],
+    hdrs = ["jwt_format.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":json_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "jwt_format_test",
+    srcs = ["jwt_format_test.cc"],
+    deps = [
+        ":jwt_format",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_mac_impl",
+    srcs = ["jwt_mac_impl.cc"],
+    hdrs = ["jwt_mac_impl.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":json_util",
+        ":jwt_format",
+        "//:mac",
+        "//jwt:jwt_mac",
+        "//jwt:jwt_validator",
+        "//jwt:raw_jwt",
+        "//jwt:verified_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "jwt_mac_impl_test",
+    srcs = ["jwt_mac_impl_test.cc"],
+    deps = [
+        ":jwt_format",
+        ":jwt_mac_impl",
+        "//jwt:jwt_mac",
+        "//jwt:jwt_validator",
+        "//jwt:raw_jwt",
+        "//jwt:verified_jwt",
+        "//subtle:hmac_boringssl",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_hmac_key_manager",
+    srcs = ["jwt_hmac_key_manager.cc"],
+    hdrs = ["jwt_hmac_key_manager.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":jwt_mac_impl",
+        ":raw_jwt_hmac_key_manager",
+        "//:core/key_type_manager",
+        "//:mac",
+        "//jwt:jwt_mac",
+        "//proto:common_cc_proto",
+        "//proto:jwt_hmac_cc_proto",
+        "//subtle:hmac_boringssl",
+        "//subtle:random",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:input_stream_util",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "jwt_hmac_key_manager_test",
+    srcs = ["jwt_hmac_key_manager_test.cc"],
+    deps = [
+        ":jwt_hmac_key_manager",
+        "//:core/key_manager_impl",
+        "//:mac",
+        "//util:istream_input_stream",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_mac_wrapper",
+    srcs = ["jwt_mac_wrapper.cc"],
+    hdrs = ["jwt_mac_wrapper.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//jwt:jwt_mac",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "jwt_mac_wrapper_test",
+    srcs = ["jwt_mac_wrapper_test.cc"],
+    deps = [
+        ":jwt_hmac_key_manager",
+        ":jwt_mac_wrapper",
+        "//:keyset_manager",
+        "//:primitive_set",
+        "//proto:jwt_hmac_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

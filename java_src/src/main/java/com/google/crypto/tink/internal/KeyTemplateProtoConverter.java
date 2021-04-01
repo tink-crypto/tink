@@ -14,7 +14,6 @@
 
 package com.google.crypto.tink.internal;
 
-
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.protobuf.ByteString;
@@ -25,8 +24,8 @@ import java.security.GeneralSecurityException;
 /** KeyTemplateProtoConverter converts KeyTemplate to and from the binary proto format. */
 public final class KeyTemplateProtoConverter {
 
-  private static KeyTemplate.OutputPrefixType prefixFromProto(
-      OutputPrefixType outputPrefixType) throws GeneralSecurityException {
+  public static KeyTemplate.OutputPrefixType prefixFromProto(OutputPrefixType outputPrefixType)
+      throws GeneralSecurityException {
     switch (outputPrefixType) {
       case TINK:
         return KeyTemplate.OutputPrefixType.TINK;
@@ -41,8 +40,8 @@ public final class KeyTemplateProtoConverter {
     }
   }
 
-  private static OutputPrefixType prefixToProto(
-      KeyTemplate.OutputPrefixType outputPrefixType) throws GeneralSecurityException {
+  private static OutputPrefixType prefixToProto(KeyTemplate.OutputPrefixType outputPrefixType)
+      throws GeneralSecurityException {
     switch (outputPrefixType) {
       case TINK:
         return OutputPrefixType.TINK;
@@ -88,6 +87,5 @@ public final class KeyTemplateProtoConverter {
     }
   }
 
-  private KeyTemplateProtoConverter() {
-  }
+  private KeyTemplateProtoConverter() {}
 }

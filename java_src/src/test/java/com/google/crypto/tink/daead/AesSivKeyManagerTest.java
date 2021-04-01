@@ -29,6 +29,7 @@ import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
+import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.util.TreeSet;
 import javax.crypto.Cipher;
@@ -126,6 +127,50 @@ public class AesSivKeyManagerTest {
       keys.add(TestUtil.hexEncode(factory.createKey(format).toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void testDeriveKey() throws Exception {
+    final int keySize = 64;
+    byte[] keyMaterial = Random.randBytes(100);
+    AesSivKey key =
+        new AesSivKeyManager()
+            .keyFactory()
+            .deriveKey(
+                AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+                new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  @Test
+  public void testDeriveKeyNotEnoughRandomness() throws Exception {
+    final int keySize = 64;
+    byte[] keyMaterial = Random.randBytes(10);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new AesSivKeyManager()
+                .keyFactory()
+                .deriveKey(
+                    AesSivKeyFormat.newBuilder().setVersion(0).setKeySize(keySize).build(),
+                    new ByteArrayInputStream(keyMaterial)));
+  }
+
+  @Test
+  public void testDeriveKeyWrongVersion() throws Exception {
+    final int keySize = 64;
+    byte[] keyMaterial = Random.randBytes(64);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            new AesSivKeyManager()
+                .keyFactory()
+                .deriveKey(
+                    AesSivKeyFormat.newBuilder().setVersion(1).setKeySize(keySize).build(),
+                    new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -30,6 +31,7 @@ import java.security.InvalidKeyException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.Cipher;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +57,8 @@ public class AesSivTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     JsonObject json =
         WycheproofTestUtil.readJson("../wycheproof/testvectors/aes_siv_cmac_test.json");
     JsonArray testGroups = json.getAsJsonArray("testGroups");
@@ -100,6 +104,8 @@ public class AesSivTest {
 
   @Test
   public void testEncryptDecryptWithEmptyPlaintext() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -115,6 +121,8 @@ public class AesSivTest {
 
   @Test
   public void testEncryptDecryptWithEmptyAssociatedData() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -130,6 +138,8 @@ public class AesSivTest {
   @Test
   public void testEncryptDecryptWithEmptyPlaintextAndEmptyAssociatedData()
       throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -144,6 +154,8 @@ public class AesSivTest {
 
   @Test
   public void testEncryptDecryptWithNullAssociatedData() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -158,6 +170,8 @@ public class AesSivTest {
   @Test
   public void testEncryptDecryptWithNullAndEmptyAssociatedDataEquivalent()
       throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -170,7 +184,7 @@ public class AesSivTest {
         byte[] nullAadCipherText = dead.encryptDeterministically(plaintext, null);
         byte[] nullAadRebuiltPlaintext =
                 dead.decryptDeterministically(nullAadCipherText, null);
-        
+
         assertEquals(Hex.encode(plaintext), Hex.encode(emptyAadRebuiltPlaintext));
         assertEquals(Hex.encode(plaintext), Hex.encode(nullAadRebuiltPlaintext));
         assertEquals(Hex.encode(emptyAadCiphertext), Hex.encode(nullAadCipherText));
@@ -181,6 +195,8 @@ public class AesSivTest {
   @Test
   public void testEncryptDecryptWithEmptyPlaintextAndNullAssociatedData()
       throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
       for (int triesPlaintext = 0; triesPlaintext < 100; triesPlaintext++) {
@@ -194,6 +210,8 @@ public class AesSivTest {
 
   @Test
   public void testEncryptDecrypt() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       DeterministicAead dead = new AesSiv(Random.randBytes(keySize));
 
@@ -208,6 +226,8 @@ public class AesSivTest {
   }
 
   private static void testModifiedCiphertext(int keySize) throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] key = Random.randBytes(keySize);
     DeterministicAead crypter = new AesSiv(key);
     byte[] plaintext = Random.randBytes(10);
@@ -244,12 +264,16 @@ public class AesSivTest {
 
   @Test
   public void testModifiedCiphertext() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       testModifiedCiphertext(keySize);
     }
   }
 
   private static void testModifiedAssociatedData(int keySize) throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] key = Random.randBytes(keySize);
     DeterministicAead crypter = new AesSiv(key);
     byte[] plaintext = Random.randBytes(10);
@@ -272,6 +296,8 @@ public class AesSivTest {
 
   @Test
   public void testModifiedAssociatedData() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     for (int keySize : keySizeInBytes) {
       testModifiedAssociatedData(keySize);
     }
@@ -279,6 +305,8 @@ public class AesSivTest {
 
   @Test
   public void testInvalidKeySizes() throws GeneralSecurityException {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     assertThrows(InvalidKeyException.class, () -> new AesSiv(Random.randBytes(32)));
 
     for (int i = 0; i < 100; i++) {
@@ -292,5 +320,13 @@ public class AesSivTest {
           InvalidKeyException.class,
           () -> new AesSiv(Random.randBytes(j)));
     }
+  }
+
+  @Test
+  public void testFailIfFipsModuleNotAvailable() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    byte[] key = Random.randBytes(16);
+    assertThrows(GeneralSecurityException.class, () -> new AesSiv(key));
   }
 }

@@ -64,6 +64,8 @@ public class SubtleUtil {
     switch (hash) {
       case SHA1:
         return "SHA-1";
+      case SHA224:
+        return "SHA-224";
       case SHA256:
         return "SHA-256";
       case SHA384:

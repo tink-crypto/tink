@@ -212,14 +212,14 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testCreateKmsEnvelopeAeadKeyFormat() throws Exception {
+  public void testCreateKmsEnvelopeAeadKeyTemplate() throws Exception {
     // Intentionally using "weird" or invalid values for parameters,
     // to test that the function correctly puts them in the resulting template.
     String kekUri = "some example KEK URI";
     KeyTemplate dekTemplate = AeadKeyTemplates.AES256_GCM;
     KeyTemplate template = AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(kekUri, dekTemplate);
     assertEquals(new KmsEnvelopeAeadKeyManager().getKeyType(), template.getTypeUrl());
-    assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
+    assertEquals(OutputPrefixType.RAW, template.getOutputPrefixType());
 
     KmsEnvelopeAeadKeyFormat format =
         KmsEnvelopeAeadKeyFormat.parseFrom(

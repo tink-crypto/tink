@@ -18,15 +18,20 @@ from __future__ import print_function
 import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
+from tink.jwt import _jwt_error
+from tink.jwt import _jwt_hmac_key_manager
+from tink.jwt import _jwt_key_templates
+from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
 
-JwtInvalidError = _raw_jwt.JwtInvalidError
+JwtInvalidError = _jwt_error.JwtInvalidError
 RawJwt = _raw_jwt.RawJwt
 VerifiedJwt = _verified_jwt.VerifiedJwt
 JwtValidator = _jwt_validator.JwtValidator
 Claim = _raw_jwt.Claim
+JwtMac = _jwt_mac.JwtMac
 
 
 def raw_jwt_from_json_payload(payload: Text) -> RawJwt:
@@ -52,3 +57,19 @@ def new_validator(issuer: Optional[Text] = None,
                   fixed_now: Optional[datetime.datetime] = None
                   ) -> JwtValidator:
   return JwtValidator(issuer, subject, audience, clock_skew, fixed_now)
+
+jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
+jwt_hs384_template = _jwt_key_templates.jwt_hs384_template
+jwt_hs512_template = _jwt_key_templates.jwt_hs512_template
+jwt_es256_template = _jwt_key_templates.jwt_es256_template
+jwt_es384_template = _jwt_key_templates.jwt_es384_template
+jwt_es512_template = _jwt_key_templates.jwt_es512_template
+jwt_rs256_2048_f4_template = _jwt_key_templates.jwt_rs256_2048_f4_template
+jwt_rs256_3072_f4_template = _jwt_key_templates.jwt_rs256_3072_f4_template
+jwt_rs384_3072_f4_template = _jwt_key_templates.jwt_rs384_3072_f4_template
+jwt_rs512_4096_f4_template = _jwt_key_templates.jwt_rs512_4096_f4_template
+jwt_ps256_2048_f4_template = _jwt_key_templates.jwt_ps256_2048_f4_template
+jwt_ps256_3072_f4_template = _jwt_key_templates.jwt_ps256_3072_f4_template
+jwt_ps384_3072_f4_template = _jwt_key_templates.jwt_ps384_3072_f4_template
+jwt_ps512_4096_f4_template = _jwt_key_templates.jwt_ps512_4096_f4_template
+

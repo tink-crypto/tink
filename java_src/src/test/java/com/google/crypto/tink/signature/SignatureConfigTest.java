@@ -20,8 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.PublicKeySign;
+import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
+import org.junit.Assume;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +42,7 @@ public class SignatureConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     GeneralSecurityException e =
         assertThrows(
             GeneralSecurityException.class, () -> Registry.getCatalogue("tinkpublickeysign"));
@@ -61,5 +65,83 @@ public class SignatureConfigTest {
 
     // Running init() manually again should succeed.
     SignatureConfig.register();
+  }
+
+  @Test
+  public void testNoFipsRegister() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
+    // Register signature key manager
+    SignatureConfig.register();
+
+    // Check if all key types are registered when not using FIPS mode.
+    String[] keyTypeUrlsSign = {
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"
+    };
+
+    for (String typeUrl : keyTypeUrlsSign) {
+      Registry.getKeyManager(typeUrl, PublicKeySign.class);
+    }
+
+    String[] keyTypeUrlsVerify = {
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey",
+      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+      "type.googleapis.com/google.crypto.tink.Ed25519PublicKey"
+    };
+
+    for (String typeUrl : keyTypeUrlsVerify) {
+      Registry.getKeyManager(typeUrl, PublicKeyVerify.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register AEAD key manager
+    SignatureConfig.register();
+
+    // Check if all FIPS-compliant key types are registered when using FIPS mode.
+    String[] keyTypeUrlsSign = {
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey",
+      "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey",
+    };
+
+    for (String typeUrl : keyTypeUrlsSign) {
+      Registry.getKeyManager(typeUrl, PublicKeySign.class);
+    }
+
+    String[] keyTypeUrlsVerify = {
+      "type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PublicKey",
+      "type.googleapis.com/google.crypto.tink.EcdsaPublicKey",
+    };
+
+    for (String typeUrl : keyTypeUrlsVerify) {
+      Registry.getKeyManager(typeUrl, PublicKeyVerify.class);
+    }
+  }
+
+  @Test
+  public void testFipsRegisterNonFipsKeys() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // Register signature key manager
+    SignatureConfig.register();
+
+    // List of algorithms which are not part of FIPS and should not be registered.
+    String[] keyTypeUrls = {
+      "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey",
+      "type.googleapis.com/google.crypto.tink.Ed25519PublicKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPrivateKey",
+      "type.googleapis.com/google.crypto.tink.RsaSsaPssPublicKey",
+    };
+
+    for (String typeUrl : keyTypeUrls) {
+      assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+    }
   }
 }

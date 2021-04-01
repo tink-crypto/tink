@@ -205,6 +205,47 @@ class PrimitiveSetTest(absltest.TestCase):
                      entries[1].identifier)
     self.assertEqual(3, entries[1].key_id)
 
+  def test_all_primitives(self):
+    primitive_set = core.new_primitive_set(mac.Mac)
+
+    key0 = new_key(MAC_TEMPLATE, key_id=88, output_prefix_type=tink_pb2.TINK)
+    primitive0 = core.Registry.primitive(key0.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive0, key0)
+
+    key1 = new_key(MAC_TEMPLATE, key_id=88, output_prefix_type=tink_pb2.LEGACY)
+    primitive1 = core.Registry.primitive(key1.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive1, key1)
+
+    key2 = new_key(MAC_TEMPLATE, key_id=88, output_prefix_type=tink_pb2.RAW)
+    primitive2 = core.Registry.primitive(key2.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive2, key2)
+
+    key3 = new_key(
+        MAC_TEMPLATE,
+        key_id=89,
+        output_prefix_type=tink_pb2.RAW,
+        status=tink_pb2.DISABLED)
+    primitive3 = core.Registry.primitive(key3.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive3, key3)
+
+    key4 = new_key(MAC_TEMPLATE, key_id=88, output_prefix_type=tink_pb2.TINK)
+    primitive0 = core.Registry.primitive(key4.key_data, mac.Mac)
+    primitive_set.add_primitive(primitive0, key4)
+
+    list_of_entries = primitive_set.all()
+
+    v = []
+    for entries in list_of_entries:
+      v.append(
+          sorted([
+              (e.identifier, e.output_prefix_type, e.key_id) for e in entries
+          ]))
+    self.assertCountEqual(v, [
+        [(b'', tink_pb2.RAW, 88), (b'', tink_pb2.RAW, 89)],
+        [(b'\x01\x00\x00\x00X', tink_pb2.TINK, 88),
+         (b'\x01\x00\x00\x00X', tink_pb2.TINK, 88)],
+        [(b'\x00\x00\x00\x00X', tink_pb2.LEGACY, 88)],
+    ])
 
 if __name__ == '__main__':
   absltest.main()

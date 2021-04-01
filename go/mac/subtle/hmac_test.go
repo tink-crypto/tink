@@ -79,7 +79,7 @@ func TestHMACBasic(t *testing.T) {
 
 func TestNewHMACWithInvalidInput(t *testing.T) {
 	// invalid hash algorithm
-	_, err := subtle.NewHMAC("SHA224", random.GetRandomBytes(16), 32)
+	_, err := subtle.NewHMAC("MD5", random.GetRandomBytes(16), 32)
 	if err == nil || !strings.Contains(err.Error(), "invalid hash algorithm") {
 		t.Errorf("expect an error when hash algorithm is invalid")
 	}

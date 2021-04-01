@@ -66,6 +66,15 @@ func (a *AWSAEAD) Encrypt(plaintext, additionalData []byte) ([]byte, error) {
 }
 
 // Decrypt AEAD decrypts the data and verified the additional data.
+//
+// Returns an error if the KeyId field in the response does not match the KeyURI
+// provided when creating the client. If we don't do this, the possibility exists
+// for the ciphertext to be replaced by one under a key we don't control/expect,
+// but do have decrypt permissions on.
+//
+// This check is disabled if AWSAEAD.keyURI is not in key ARN format.
+//
+// See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
 func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	ad := hex.EncodeToString(additionalData)
 	req := &kms.DecryptInput{
@@ -82,8 +91,14 @@ func (a *AWSAEAD) Decrypt(ciphertext, additionalData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if strings.Compare(*resp.KeyId, a.keyURI) != 0 {
+	if isKeyArnFormat(a.keyURI) && strings.Compare(*resp.KeyId, a.keyURI) != 0 {
 		return nil, errors.New("decryption failed: wrong key id")
 	}
 	return resp.Plaintext, nil
+}
+
+// isKeyArnFormat returns true if the keyURI is the KMS Key ARN format; false otherwise.
+func isKeyArnFormat(keyURI string) bool {
+	tokens := strings.Split(keyURI, ":")
+	return len(tokens) == 6 && strings.HasPrefix(tokens[5], "key/")
 }

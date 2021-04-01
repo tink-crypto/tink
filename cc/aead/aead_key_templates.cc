@@ -16,11 +16,13 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include "absl/strings/string_view.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/aes_gcm_siv.pb.h"
 #include "proto/common.pb.h"
+#include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 #include "proto/xchacha20_poly1305.pb.h"
 
@@ -30,6 +32,7 @@ using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::AesGcmSivKeyFormat;
 using google::crypto::tink::HashType;
 using google::crypto::tink::KeyTemplate;
+using google::crypto::tink::KmsEnvelopeAeadKeyFormat;
 using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
@@ -178,6 +181,20 @@ const KeyTemplate& AeadKeyTemplates::Aes256CtrHmacSha256() {
 const KeyTemplate& AeadKeyTemplates::XChaCha20Poly1305() {
   static const KeyTemplate* key_template = NewXChaCha20Poly1305KeyTemplate();
   return *key_template;
+}
+
+// static
+KeyTemplate AeadKeyTemplates::KmsEnvelopeAead(absl::string_view kek_uri,
+                                              const KeyTemplate& dek_template) {
+  KeyTemplate key_template;
+  key_template.set_type_url(
+      "type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey");
+  key_template.set_output_prefix_type(OutputPrefixType::RAW);
+  KmsEnvelopeAeadKeyFormat key_format;
+  key_format.set_kek_uri(std::string(kek_uri));
+  key_format.mutable_dek_template()->MergeFrom(dek_template);
+  key_format.SerializeToString(key_template.mutable_value());
+  return key_template;
 }
 
 }  // namespace tink

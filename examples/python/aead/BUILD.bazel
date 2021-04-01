@@ -1,0 +1,50 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["aead_test_keyset.json"])
+
+py_binary(
+    name = "aead",
+    srcs = ["aead.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+    ],
+)
+
+sh_test(
+    name = "aead_test",
+    size = "small",
+    srcs = ["aead_test.sh"],
+    args = [
+        "$(rootpath :aead)",
+        "$(rootpath :aead_test_keyset.json)",
+    ],
+    data = [
+        ":aead",
+        ":aead_test_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "aead_test_package",
+    size = "small",
+    srcs = ["aead_test.sh"],
+    args = [
+        "'python3 $(rootpath :aead.py)'",
+        "$(rootpath :aead_test_keyset.json)",
+    ],
+    data = [
+        ":aead.py",
+        ":aead_test_keyset.json",
+    ],
+)

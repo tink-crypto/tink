@@ -1,0 +1,50 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["mac_test_keyset.json"])
+
+py_binary(
+    name = "mac",
+    srcs = ["mac.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/mac",
+    ],
+)
+
+sh_test(
+    name = "mac_test",
+    size = "small",
+    srcs = ["mac_test.sh"],
+    args = [
+        "$(rootpath :mac)",
+        "$(rootpath :mac_test_keyset.json)",
+    ],
+    data = [
+        ":mac",
+        ":mac_test_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "mac_test_package",
+    size = "small",
+    srcs = ["mac_test.sh"],
+    args = [
+        "'python3 $(rootpath :mac.py)'",
+        "$(rootpath :mac_test_keyset.json)",
+    ],
+    data = [
+        ":mac.py",
+        ":mac_test_keyset.json",
+    ],
+)

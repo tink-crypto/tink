@@ -326,13 +326,13 @@ message PrfSetComputeResponse {
 // Service for JSON Web Tokens (JWT)
 service Jwt {
   // Computes a signed compact JWT token.
-  rpc MacSign(JwtSignRequest) returns (JwtSignResponse) {}
+  rpc ComputeMacAndEncode(JwtSignRequest) returns (JwtSignResponse) {}
   // Verifies the validity of the signed compact JWT token
-  rpc MacVerify(JwtVerifyRequest) returns (JwtVerifyResponse) {}
+  rpc VerifyMacAndDecode(JwtVerifyRequest) returns (JwtVerifyResponse) {}
   // Computes a signed compact JWT token.
-  rpc PublicKeySign(JwtSignRequest) returns (JwtSignResponse) {}
+  rpc PublicKeySignAndEncode(JwtSignRequest) returns (JwtSignResponse) {}
   // Verifies the validity of the signed compact JWT token
-  rpc PublicKeyVerify(JwtVerifyRequest) returns (JwtVerifyResponse) {}
+  rpc PublicKeyVerifyAndDecode(JwtVerifyRequest) returns (JwtVerifyResponse) {}
 }
 
 //  Used to represent the JSON null value.

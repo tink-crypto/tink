@@ -22,7 +22,9 @@ option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/xchacha20_poly1305_go_proto";
 
-message XChaCha20Poly1305KeyFormat {}
+message XChaCha20Poly1305KeyFormat {
+  uint32 version = 1;
+}
 
 // key_type: type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key
 message XChaCha20Poly1305Key {

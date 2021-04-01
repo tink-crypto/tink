@@ -25,7 +25,6 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.HashSet;
 import javax.crypto.AEADBadTagException;
@@ -106,29 +105,29 @@ public class XChaCha20Poly1305Test {
     }
   }
 
-  public Aead createInstance(byte[] key) throws InvalidKeyException {
+  public Aead createInstance(byte[] key) throws GeneralSecurityException {
     return new XChaCha20Poly1305(key);
   }
 
   @Test
   public void testSnufflePoly1305ThrowsIllegalArgExpWhenKeyLenIsGreaterThan32()
-      throws InvalidKeyException {
-    InvalidKeyException e =
-        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[KEY_SIZE + 1]));
+      throws GeneralSecurityException {
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> createInstance(new byte[KEY_SIZE + 1]));
     assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testSnufflePoly1305ThrowsIllegalArgExpWhenKeyLenIsLessThan32()
-      throws InvalidKeyException {
-    InvalidKeyException e =
-        assertThrows(InvalidKeyException.class, () -> createInstance(new byte[KEY_SIZE - 1]));
+      throws GeneralSecurityException {
+    GeneralSecurityException e =
+        assertThrows(GeneralSecurityException.class, () -> createInstance(new byte[KEY_SIZE - 1]));
     assertThat(e).hasMessageThat().containsMatch("The key length in bytes must be 32.");
   }
 
   @Test
   public void testDecryptThrowsGeneralSecurityExpWhenCiphertextIsTooShort()
-      throws InvalidKeyException {
+      throws GeneralSecurityException {
     Aead cipher = createInstance(new byte[KEY_SIZE]);
     GeneralSecurityException e =
         assertThrows(

@@ -29,6 +29,8 @@ import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 /**
@@ -100,6 +102,27 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
             .setVersion(getVersion())
             .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
             .build();
+      }
+
+      @Override
+      public XChaCha20Poly1305Key deriveKey(
+          XChaCha20Poly1305KeyFormat format, InputStream inputStream)
+          throws GeneralSecurityException {
+        Validators.validateVersion(format.getVersion(), getVersion());
+
+        byte[] pseudorandomness = new byte[KEY_SIZE_IN_BYTES];
+        try {
+          int read = inputStream.read(pseudorandomness);
+          if (read != KEY_SIZE_IN_BYTES) {
+            throw new GeneralSecurityException("Not enough pseudorandomness given");
+          }
+          return XChaCha20Poly1305Key.newBuilder()
+              .setKeyValue(ByteString.copyFrom(pseudorandomness))
+              .setVersion(getVersion())
+              .build();
+        } catch (IOException e) {
+          throw new GeneralSecurityException("Reading pseudorandomness failed", e);
+        }
       }
     };
   }

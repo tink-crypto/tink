@@ -31,9 +31,26 @@ import org.junit.runners.JUnit4;
 public final class JwtFormatTest {
 
   @Test
+  public void parseJson_success() throws Exception {
+    JsonObject header = JwtFormat.parseJson("{\"bool\":false}");
+    assertThat(header.get("bool").getAsBoolean()).isFalse();
+  }
+
+  @Test
+  public void parseJsonWithoutQuotes_fail() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
+  }
+
+  @Test
+  public void parseJsonWithoutComments_fail() throws Exception {
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.parseJson("{\"bool\":false /* comment */}"));
+  }
+
+  @Test
   public void createDecodeHeader_success() throws Exception {
-    JsonObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
-    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
+    String header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
+    assertThat(header).isEqualTo("{\"alg\":\"RS256\"}");
   }
 
   @Test
@@ -46,29 +63,41 @@ public final class JwtFormatTest {
   @Test
   public void decodeHeaderA1_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
-    JsonObject header = JwtFormat.decodeHeader("eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9");
-    assertThat(header.get("typ").getAsString()).isEqualTo("JWT");
-    assertThat(header.get("alg").getAsString()).isEqualTo("HS256");
+    String header = JwtFormat.decodeHeader("eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9");
+    assertThat(header).isEqualTo("{\"typ\":\"JWT\",\r\n \"alg\":\"HS256\"}");
   }
 
   @Test
   public void decodeHeaderA2_success() throws Exception {
     // Example from https://tools.ietf.org/html/rfc7515#appendix-A.2
-    JsonObject header = JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9");
-    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
+    String header = JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9");
+    assertThat(header).isEqualTo("{\"alg\":\"RS256\"}");
   }
+
+  @Test
+  public void decodeModifiedHeader_success() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGciOiJSUzI1NiJ9?"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGciOiJ SUzI1NiJ9"));
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGci\r\nOiJSUzI1NiJ9"));
+  }
+
 
   @Test
   public void decodeHeader_success() throws Exception {
     String headerStr = Base64.urlSafeEncode("{\"alg\":\"RS256\"}".getBytes(UTF_8));
-    JsonObject header = JwtFormat.decodeHeader(headerStr);
-    assertThat(header.get("alg").getAsString()).isEqualTo("RS256");
+    String header = JwtFormat.decodeHeader(headerStr);
+    assertThat(header).isEqualTo("{\"alg\":\"RS256\"}");
   }
 
   @Test
-  public void decodeHeaderWithoutQuotes_fail() throws Exception {
-    String headerStr = Base64.urlSafeEncode("{alg:RS256}".getBytes(UTF_8));
-    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader(headerStr));
+  public void decodeInvalidHeader_fails() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodeHeader("?="));
+  }
+
+  @Test
+  public void validateHeaderWithoutQuotes_fails() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.validateHeader("RS256", "{alg:RS256}"));
   }
 
   @Test
@@ -80,9 +109,10 @@ public final class JwtFormatTest {
     JwtFormat.validateHeader("RS256", JwtFormat.decodeHeader(JwtFormat.createHeader("RS256")));
   }
 
+
   @Test
   public void validateHeaderWithWrongAlgorithm_fails() throws Exception {
-    JsonObject header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256"));
+    String header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256"));
     assertThrows(
         InvalidAlgorithmParameterException.class,
         () -> JwtFormat.validateHeader("HS384", header));
@@ -90,47 +120,35 @@ public final class JwtFormatTest {
 
   @Test
   public void validateHeaderWithUnknownAlgorithm_fails() throws Exception {
-    JsonObject header = new JsonObject();
-    header.addProperty("alg", "UnknownAlgorithm");
     assertThrows(
         InvalidAlgorithmParameterException.class,
-        () -> JwtFormat.validateHeader("UnknownAlgorithm", header));
+        () -> JwtFormat.validateHeader("UnknownAlgorithm", "{\"alg\": \"UnknownAlgorithm\"}"));
   }
 
   @Test
   public void validateHeaderWithValidLowercaseTyp_success() throws Exception {
-    JsonObject header = new JsonObject();
-    header.addProperty("alg", "HS256");
-    header.addProperty("typ", "jwt");
-    JwtFormat.validateHeader("HS256", header);
+    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"jwt\"}");
   }
 
   @Test
   public void validateHeaderWithBadTyp_fails() throws Exception {
-    JsonObject header = new JsonObject();
-    header.addProperty("alg", "HS256");
-    header.addProperty("typ", "IWT");
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", header));
+        () -> JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"IWT\"}"));
   }
 
   @Test
   public void validateHeaderWithUnknownEntry_fails() throws Exception {
-    JsonObject header = new JsonObject();
-    header.addProperty("alg", "HS256");
-    header.addProperty("unknown", "header");
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", header));
+        () -> JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"unknown\": \"header\"}"));
   }
 
   @Test
   public void validateEmptyHeader_fails() throws Exception {
-    JsonObject emptyHeader = new JsonObject();
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", emptyHeader));
+        () -> JwtFormat.validateHeader("HS256", "{}"));
   }
 
   @Test
@@ -157,6 +175,11 @@ public final class JwtFormatTest {
     assertThat(payload.get("iss").getAsString()).isEqualTo("joe");
     assertThat(payload.get("exp").getAsInt()).isEqualTo(1300819380);
     assertThat(payload.get("http://example.com/is_root").getAsBoolean()).isTrue();
+  }
+
+  @Test
+  public void decodeInvalidPayload_fails() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodePayload("?="));
   }
 
   @Test

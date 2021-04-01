@@ -55,8 +55,12 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
             switch (hash) {
               case SHA1:
                 return new PrfMac(new PrfHmacJce("HMACSHA1", keySpec), tagSize);
+              case SHA224:
+                return new PrfMac(new PrfHmacJce("HMACSHA224", keySpec), tagSize);
               case SHA256:
                 return new PrfMac(new PrfHmacJce("HMACSHA256", keySpec), tagSize);
+              case SHA384:
+                return new PrfMac(new PrfHmacJce("HMACSHA384", keySpec), tagSize);
               case SHA512:
                 return new PrfMac(new PrfHmacJce("HMACSHA512", keySpec), tagSize);
               default:
@@ -111,8 +115,18 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
           throw new GeneralSecurityException("tag size too big");
         }
         break;
+      case SHA224:
+        if (params.getTagSize() > 28) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
       case SHA256:
         if (params.getTagSize() > 32) {
+          throw new GeneralSecurityException("tag size too big");
+        }
+        break;
+      case SHA384:
+        if (params.getTagSize() > 48) {
           throw new GeneralSecurityException("tag size too big");
         }
         break;

@@ -17,14 +17,14 @@
 package com.google.crypto.tink.apps.paymentmethodtoken;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -64,21 +64,30 @@ public class SenderIntermediateCertFactoryTest {
             .build()
             .create();
 
-    JSONObject decodedSignedIntermediateSigningKey = new JSONObject(encoded);
-    assertTrue(decodedSignedIntermediateSigningKey.get("signedKey") instanceof String);
-    assertTrue(decodedSignedIntermediateSigningKey.get("signatures") instanceof JSONArray);
-    assertEquals(2, decodedSignedIntermediateSigningKey.length());
-    JSONObject signedKey =
-        new JSONObject(decodedSignedIntermediateSigningKey.getString("signedKey"));
-    assertTrue(signedKey.get("keyValue") instanceof String);
-    assertTrue(signedKey.get("keyExpiration") instanceof String);
-    assertEquals(2, signedKey.length());
+    JsonObject decodedSignedIntermediateSigningKey =
+        JsonParser.parseString(encoded).getAsJsonObject();
+    assertTrue(decodedSignedIntermediateSigningKey.get("signedKey").isJsonPrimitive());
+    assertTrue(decodedSignedIntermediateSigningKey.get("signatures").isJsonArray());
+    assertEquals(2, decodedSignedIntermediateSigningKey.size());
+
+    JsonObject signedKey =
+        JsonParser.parseString(decodedSignedIntermediateSigningKey.get("signedKey").getAsString())
+            .getAsJsonObject();
+    assertTrue(signedKey.get("keyValue").getAsJsonPrimitive().isString());
+    assertTrue(signedKey.get("keyExpiration").getAsJsonPrimitive().isString());
+    assertEquals(2, signedKey.size());
     assertEquals(
-        GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64, signedKey.getString("keyValue"));
-    assertEquals("123456", signedKey.getString("keyExpiration"));
-    assertEquals(1, decodedSignedIntermediateSigningKey.getJSONArray("signatures").length());
-    assertNotEquals(
-        0, decodedSignedIntermediateSigningKey.getJSONArray("signatures").getString(0).length());
+        GOOGLE_SIGNING_EC_V2_INTERMEDIATE_PUBLIC_KEY_X509_BASE64,
+        signedKey.get("keyValue").getAsString());
+    assertEquals("123456", signedKey.get("keyExpiration").getAsString());
+    assertEquals(1, decodedSignedIntermediateSigningKey.get("signatures").getAsJsonArray().size());
+    assertFalse(
+        decodedSignedIntermediateSigningKey
+            .get("signatures")
+            .getAsJsonArray()
+            .get(0)
+            .getAsString()
+            .isEmpty());
   }
 
   @Test

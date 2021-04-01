@@ -46,6 +46,18 @@ cc_library(
 )
 
 cc_library(
+    name = "secret_proto",
+    hdrs = ["secret_proto.h"],
+    include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":secret_data",
+        "@com_google_absl//absl/memory",
+        "@com_google_protobuf//:protobuf_lite",
+    ],
+)
+
+cc_library(
     name = "errors",
     hdrs = ["errors.h"],
     include_prefix = "tink/util",
@@ -105,8 +117,10 @@ cc_test(
     deps = [
         ":status",
         ":statusor",
+        ":test_matchers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -314,8 +328,33 @@ cc_library(
     ],
 )
 
+# This should only be used by tink/python/tink/cc/pybind,
+# where we need this target without the testonly flag.
+cc_library(
+    name = "fake_kms_client_pybind",
+    srcs = ["fake_kms_client.cc"],
+    hdrs = ["fake_kms_client.h"],
+    include_prefix = "tink/util",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":errors",
+        ":status",
+        ":statusor",
+        "//:aead",
+        "//:binary_keyset_reader",
+        "//:binary_keyset_writer",
+        "//:cleartext_keyset_handle",
+        "//:keyset_handle",
+        "//:kms_client",
+        "//:kms_clients",
+        "//aead:aead_key_templates",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_library(
     name = "fake_kms_client",
+    testonly = 1,
     srcs = ["fake_kms_client.cc"],
     hdrs = ["fake_kms_client.h"],
     include_prefix = "tink/util",
@@ -468,6 +507,18 @@ cc_test(
         ":secret_data",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "secret_proto_test",
+    srcs = ["secret_proto_test.cc"],
+    deps = [
+        ":secret_proto",
+        "//proto:test_proto_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
     ],
 )
 

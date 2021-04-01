@@ -11,6 +11,10 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_jwt_error",
+        ":_jwt_hmac_key_manager",
+        ":_jwt_key_templates",
+        ":_jwt_mac",
         ":_jwt_validator",
         ":_raw_jwt",
         ":_verified_jwt",
@@ -22,7 +26,8 @@ py_library(
     srcs = ["_raw_jwt.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/core",
+        ":_jwt_error",
+        ":_jwt_format",
     ],
 )
 
@@ -61,8 +66,8 @@ py_library(
     srcs = ["_jwt_validator.py"],
     srcs_version = "PY3",
     deps = [
+        ":_jwt_error",
         ":_raw_jwt",
-        "//tink/core",
     ],
 )
 
@@ -74,5 +79,119 @@ py_test(
         ":_jwt_validator",
         ":jwt",
         requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "_jwt_key_templates",
+    srcs = ["_jwt_key_templates.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:jwt_hmac_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_key_templates_test",
+    srcs = ["_jwt_key_templates_test.py"],
+    data = [
+        "@tink_base//testdata/templates",
+    ],
+    srcs_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink/testing:helper",
+    ],
+)
+
+py_library(
+    name = "_jwt_error",
+    srcs = ["_jwt_error.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+    ],
+)
+
+py_library(
+    name = "_jwt_format",
+    srcs = ["_jwt_format.py"],
+    srcs_version = "PY3",
+    deps = [":_jwt_error"],
+)
+
+py_test(
+    name = "_jwt_format_test",
+    srcs = ["_jwt_format_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":_jwt_error",
+        ":_jwt_format",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
+    name = "_jwt_mac",
+    srcs = ["_jwt_mac.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_validator",
+        ":_raw_jwt",
+        ":_verified_jwt",
+    ],
+)
+
+py_library(
+    name = "_jwt_public_key_sign",
+    srcs = ["_jwt_public_key_sign.py"],
+    srcs_version = "PY3",
+    deps = [":_raw_jwt"],
+)
+
+py_library(
+    name = "_jwt_public_key_verify",
+    srcs = ["_jwt_public_key_verify.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_validator",
+        ":_verified_jwt",
+    ],
+)
+
+py_library(
+    name = "_jwt_hmac_key_manager",
+    srcs = ["_jwt_hmac_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_error",
+        ":_jwt_format",
+        ":_jwt_mac",
+        ":_jwt_validator",
+        ":_raw_jwt",
+        ":_verified_jwt",
+        "//tink/cc/pybind:tink_bindings",
+        "//tink/core",
+        "//tink/proto:common_py_pb2",
+        "//tink/proto:jwt_hmac_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_hmac_key_manager_test",
+    srcs = ["_jwt_hmac_key_manager_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/proto:jwt_hmac_py_pb2",
     ],
 )

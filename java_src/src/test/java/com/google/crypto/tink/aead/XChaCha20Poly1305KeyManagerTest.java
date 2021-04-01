@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
+import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
@@ -30,6 +31,8 @@ import com.google.crypto.tink.subtle.XChaCha20Poly1305;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
+import java.io.ByteArrayInputStream;
+import java.security.GeneralSecurityException;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Test;
@@ -86,6 +89,42 @@ public class XChaCha20Poly1305KeyManagerTest {
                   .toByteArray()));
     }
     assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void testDeriveKey() throws Exception {
+    final int keySize = 32;
+    byte[] keyMaterial = Random.randBytes(100);
+    XChaCha20Poly1305Key key =
+        factory.deriveKey(
+            XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
+            new ByteArrayInputStream(keyMaterial));
+    assertThat(key.getKeyValue()).hasSize(keySize);
+    for (int i = 0; i < keySize; ++i) {
+      assertThat(key.getKeyValue().byteAt(i)).isEqualTo(keyMaterial[i]);
+    }
+  }
+
+  @Test
+  public void testDeriveKeyNotEnoughRandomness() throws Exception {
+    byte[] keyMaterial = Random.randBytes(10);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.deriveKey(
+                XChaCha20Poly1305KeyFormat.newBuilder().setVersion(0).build(),
+                new ByteArrayInputStream(keyMaterial)));
+  }
+
+  @Test
+  public void testDeriveKeyWrongVersion() throws Exception {
+    byte[] keyMaterial = Random.randBytes(32);
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            factory.deriveKey(
+                XChaCha20Poly1305KeyFormat.newBuilder().setVersion(1).build(),
+                new ByteArrayInputStream(keyMaterial)));
   }
 
   @Test

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -36,6 +37,9 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.1.0
  */
 public final class AesSiv implements DeterministicAead {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+
   // Do not support 128-bit keys because it might not provide 128-bit security level in
   // multi-user setting.
   private static final Collection<Integer> KEY_SIZES = Arrays.asList(64);
@@ -51,6 +55,11 @@ public final class AesSiv implements DeterministicAead {
   private final byte[] aesCtrKey;
 
   public AesSiv(final byte[] key) throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use AES-SIV in FIPS-mode.");
+    }
+
     if (!KEY_SIZES.contains(key.length)) {
       throw new InvalidKeyException(
           "invalid key size: " + key.length + " bytes; key must have 64 bytes");

@@ -18,12 +18,13 @@ package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.config.TinkFips;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Arrays;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -67,20 +68,32 @@ public class PrfAesCmacTest {
   };
 
   @Test
+  public void testFipsCompatibility() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    // In FIPS-mode we expect that creating a PrfAesCmac fails.
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> new PrfMac(new PrfAesCmac(CMAC_TEST_VECTORS[0].key), 16));
+  }
+
+  @Test
   public void testMacTestVectors() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     for (MacTestVector t : CMAC_TEST_VECTORS) {
       Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       assertArrayEquals(t.tag, mac.computeMac(t.message));
       try {
         mac.verifyMac(t.tag, t.message);
       } catch (GeneralSecurityException e) {
-        fail("Valid MAC, should not throw exception");
+        throw new AssertionError("Valid MAC, should not throw exception", e);
       }
     }
   }
 
   @Test
   public void testTagTruncation() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     for (MacTestVector t : CMAC_TEST_VECTORS) {
       Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int j = 1; j < t.tag.length; j++) {
@@ -100,6 +113,7 @@ public class PrfAesCmacTest {
 
   @Test
   public void testBitFlipMessage() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     for (MacTestVector t : CMAC_TEST_VECTORS) {
       Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int b = 0; b < t.message.length; b++) {
@@ -122,6 +136,7 @@ public class PrfAesCmacTest {
 
   @Test
   public void testBitFlipTag() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     for (MacTestVector t : CMAC_TEST_VECTORS) {
       Mac mac = new PrfMac(new PrfAesCmac(t.key), t.tag.length);
       for (int b = 0; b < t.tag.length; b++) {
@@ -147,6 +162,7 @@ public class PrfAesCmacTest {
 
   @Test
   public void testThrowExceptionIfTagSizeIsTooSmall() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     for (int i = 0; i < PrfMac.MIN_TAG_SIZE_IN_BYTES; i++) {
       final int j = i;
       assertThrows(
@@ -157,6 +173,7 @@ public class PrfAesCmacTest {
 
   @Test
   public void testThrowExceptionIfTagSizeIsTooLarge() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
     assertThrows(
         InvalidAlgorithmParameterException.class,
         () -> new PrfMac(new PrfAesCmac(Random.randBytes(16)), 17));

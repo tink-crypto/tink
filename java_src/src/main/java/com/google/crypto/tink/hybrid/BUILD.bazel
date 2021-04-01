@@ -86,6 +86,7 @@ java_library(
         ":hybrid_encrypt_wrapper",
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
@@ -251,6 +252,7 @@ android_library(
         ":hybrid_encrypt_wrapper-android",
         "//proto:config_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/aead:aead_config-android",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 

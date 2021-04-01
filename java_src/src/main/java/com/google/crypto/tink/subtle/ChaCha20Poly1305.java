@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 
 /**
@@ -26,7 +27,7 @@ import java.security.InvalidKeyException;
  * @since 1.1.0
  */
 public final class ChaCha20Poly1305 extends ChaCha20Poly1305Base {
-  public ChaCha20Poly1305(final byte[] key) throws InvalidKeyException {
+  public ChaCha20Poly1305(final byte[] key) throws GeneralSecurityException {
     super(key);
   }
 

@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.signature;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -89,12 +90,19 @@ public final class SignatureConfig {
    * @since 1.2.0
    */
   public static void register() throws GeneralSecurityException {
-    EcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
-    Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
-    RsaSsaPkcs1SignKeyManager.registerPair(/*newKeyAllowed=*/ true);
-    RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
-
     PublicKeySignWrapper.register();
     PublicKeyVerifyWrapper.register();
+
+    EcdsaSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    RsaSsaPkcs1SignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+
+    if (TinkFips.useOnlyFips()) {
+      // If Tink is built in FIPS-mode do not register algorithms which are not compatible.
+      return;
+    }
+
+    RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
+    Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
+
   }
 }

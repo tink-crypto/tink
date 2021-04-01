@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/deterministic_aead.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -29,9 +30,11 @@ namespace crypto {
 namespace tink {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 using ::google::crypto::tink::AesSivKey;
 using ::google::crypto::tink::AesSivKeyFormat;
 using ::testing::Eq;
+using ::testing::HasSubstr;
 using ::testing::Ne;
 using ::testing::Not;
 using ::testing::SizeIs;
@@ -103,6 +106,57 @@ TEST(AesSivKeyManagerTest, MultipleCreateCallsCreateDifferentKeys) {
   ASSERT_THAT(key2_or.status(), IsOk());
   EXPECT_THAT(key1_or.ValueOrDie().key_value(),
               Ne(key2_or.ValueOrDie().key_value()));
+}
+
+TEST(AesSivKeyManagerTest, DeriveKey) {
+  util::IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")};
+  AesSivKeyFormat format;
+  format.set_key_size(64);
+  format.set_version(0);
+  auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(key_or.ValueOrDie().key_value(), SizeIs(64));
+  EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
+}
+
+TEST(AesSivKeyManagerTest, DeriveKeyFromLongSeed) {
+  util::IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdefXXXXX")};
+
+  AesSivKeyFormat format;
+  format.set_key_size(64);
+  format.set_version(0);
+  auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(), IsOk());
+  EXPECT_THAT(
+      key_or.ValueOrDie().key_value(),
+      Eq("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
+}
+
+TEST(AesSivKeyManagerTest, DeriveKeyWithoutEnoughEntropy) {
+  AesSivKeyFormat format;
+  format.set_key_size(64);
+  format.set_version(0);
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+  auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
+  ASSERT_THAT(key_or.status(), StatusIs(util::error::INVALID_ARGUMENT,
+                                        HasSubstr("pseudorandomness")));
+}
+
+TEST(AesSivKeyManagerTest, DeriveKeyWrongVersion) {
+  util::IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")};
+  AesSivKeyFormat format;
+  format.set_key_size(64);
+  format.set_version(1);
+  auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
+
+  ASSERT_THAT(key_or.status(),
+              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
 }
 
 TEST(AesSivKeyManagerTest, ValidateKey) {
