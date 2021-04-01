@@ -42,10 +42,10 @@ TEST(JwtFormat, EncodeFixedHeader) {
               Eq("eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9"));
 }
 
-TEST(JwtFormat, DecodeInvalidHeader_fails) {
+TEST(JwtFormat, DecodedHeaderWithLineFeedFails) {
   std::string output;
   ASSERT_FALSE(
-      DecodeHeader("eyJ0eXAiOiJKV1Q?LA0KICJhbGciOiJIUzI1NiJ9", &output));
+      DecodeHeader("eyJ0eXAiOiJKV1Qi\nLA0KICJhbGciOiJIUzI1NiJ9", &output));
 }
 
 TEST(JwtFormat, EncodeDecodePayload) {
@@ -152,6 +152,17 @@ TEST(JwtFormat, DecodeFixedPayload) {
   EXPECT_THAT(output, Eq(expected));
 }
 
+TEST(JwtFormat, DecodePayloadWithLineFeedFails) {
+  // A linefeed as part of the payload (as in test DecodeFixedPayload) is fine,
+  // but a linefeed in the encoded payload is not.
+  std::string encoded_header_with_line_feed =
+      "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0\n"
+      "dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ";
+  std::string output;
+  ASSERT_FALSE(
+      DecodePayload(encoded_header_with_line_feed, &output));
+}
+
 TEST(JwtFormat, EncodeFixedSignature) {
   std::string encoded_signature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
   std::string signature;
@@ -159,10 +170,10 @@ TEST(JwtFormat, EncodeFixedSignature) {
   EXPECT_THAT(EncodeSignature(signature), Eq(encoded_signature));
 }
 
-TEST(JwtFormat, DecodeInvalidSignatureFails) {
+TEST(JwtFormat, DecodeSignatureWithLineFeedFails) {
   std::string output;
   ASSERT_FALSE(
-      DecodePayload("dBjftJeZ4CVP-mB92K2?uhbUJU1p1r_wW1gFWFOEjXk", &output));
+      DecodePayload("dBjftJeZ4CVP-mB92K2\n7uhbUJU1p1r_wW1gFWFOEjXk", &output));
 }
 
 }  // namespace jwt_internal

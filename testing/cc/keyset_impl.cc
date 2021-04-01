@@ -35,8 +35,6 @@ using ::google::crypto::tink::KeyTemplate;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-KeysetImpl::KeysetImpl() {}
-
 // Generates a new keyset with one key from a template.
 ::grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
                                     const KeysetGenerateRequest* request,

@@ -21,6 +21,8 @@ set -e
 # Display commands to stderr.
 set -x
 
+./kokoro/copy_credentials.sh
+
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
 # TODO(b/140615798): Remove once fixed.

@@ -27,8 +27,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-PrfSetImpl::PrfSetImpl() {}
-
 // Returns the Key Ids of the Keyset.
 ::grpc::Status PrfSetImpl::KeyIds(ServerContext* context,
                                   const PrfSetKeyIdsRequest* request,

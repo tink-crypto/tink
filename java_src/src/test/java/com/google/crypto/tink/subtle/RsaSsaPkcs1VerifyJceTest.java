@@ -19,6 +19,7 @@ package com.google.crypto.tink.subtle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.testing.WycheproofTestUtil;
@@ -27,8 +28,12 @@ import com.google.gson.JsonObject;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
+import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import org.conscrypt.Conscrypt;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,8 +42,24 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RsaSsaPkcs1VerifyJceTest {
 
+  @Before
+  public void useConscrypt() throws Exception {
+    // If Tink is build in FIPS-only mode, then we register Conscrypt for the tests.
+    if (TinkFips.useOnlyFips()) {
+      try {
+        Conscrypt.checkAvailability();
+        Security.addProvider(Conscrypt.newProvider());
+      } catch (Throwable cause) {
+        throw new IllegalStateException(
+            "Cannot test RSA PKCS1.5 verify in FIPS-mode without Conscrypt Provider", cause);
+      }
+    }
+  }
+
   @Test
   public void testConstructorExceptions() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips()); // Only 3072-bit modulus is supported in FIPS.
+
     int keySize = 2048;
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
     keyGen.initialize(keySize);
@@ -51,9 +72,17 @@ public class RsaSsaPkcs1VerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips()); // Only 3072-bit modulus is supported in FIPS.
+
     testWycheproofVectors("../wycheproof/testvectors/rsa_signature_2048_sha256_test.json");
-    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
     testWycheproofVectors("../wycheproof/testvectors/rsa_signature_4096_sha512_test.json");
+  }
+
+  @Test
+  public void testWycheproofVectors3072() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+
+    testWycheproofVectors("../wycheproof/testvectors/rsa_signature_3072_sha512_test.json");
   }
 
   private static void testWycheproofVectors(String fileName) throws Exception {
@@ -110,5 +139,16 @@ public class RsaSsaPkcs1VerifyJceTest {
     } else {
       return Hex.decode(testcase.get("message").getAsString());
     }
+  }
+
+  @Test
+  public void testFailIfFipsModuleNotAvailable() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () ->
+            testWycheproofVectors(
+                "../wycheproof/testvectors/rsa_signature_3072_sha512_test.json"));
   }
 }

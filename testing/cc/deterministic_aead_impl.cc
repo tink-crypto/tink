@@ -27,8 +27,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-DeterministicAeadImpl::DeterministicAeadImpl() {}
-
 // Encrypts a message
 ::grpc::Status DeterministicAeadImpl::EncryptDeterministically(
     grpc::ServerContext* context,

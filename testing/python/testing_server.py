@@ -31,6 +31,7 @@ from tink import streaming_aead
 
 from proto.testing import testing_api_pb2_grpc
 
+from tink.testing import fake_kms
 import services
 
 FLAGS = flags.FLAGS
@@ -46,6 +47,7 @@ def main(unused_argv):
   prf.register()
   signature.register()
   streaming_aead.register()
+  fake_kms.register_client()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
       services.MetadataServicer(), server)

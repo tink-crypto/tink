@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A Hybrid encryption Service
 class HybridImpl final : public Hybrid::Service {
  public:
-  HybridImpl();
-
-  ~HybridImpl() override = default;
-
   grpc::Status Encrypt(grpc::ServerContext* context,
                        const HybridEncryptRequest* request,
                        HybridEncryptResponse* response) override;

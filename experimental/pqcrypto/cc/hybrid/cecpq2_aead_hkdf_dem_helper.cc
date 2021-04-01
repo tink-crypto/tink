@@ -64,6 +64,22 @@ class Cecpq2AeadHkdfDemHelperImpl : public Cecpq2AeadHkdfDemHelper {
     return absl::make_unique<AeadOrDaead>(std::move(primitive_or.ValueOrDie()));
   }
 
+  crypto::tink::util::StatusOr<uint32_t> GetKeyMaterialSize() const override {
+    absl::string_view dem_type_url = key_template_.type_url();
+    // For AES-SIV, two keys of 32 bytes each are needed
+    if (dem_type_url == "type.googleapis.com/google.crypto.tink.AesSivKey") {
+      return 64;
+    } else if (
+        dem_type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey" ||
+        dem_type_url ==
+            "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
+      return 32;
+    } else {
+      return ToStatusF(util::error::INVALID_ARGUMENT,
+                       "Unsupported DEM key type '%s'.", dem_type_url);
+    }
+  }
+
  private:
   const google::crypto::tink::KeyTemplate key_template_;
 };

@@ -34,6 +34,7 @@ main() {
   if [[ -n "${KOKORO_ROOT:-}" ]] ; then
     install_python3
     cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+    ./kokoro/copy_credentials.sh
   fi
   (
     cd testing/cc

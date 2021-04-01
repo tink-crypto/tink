@@ -28,8 +28,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-SignatureImpl::SignatureImpl() {}
-
 // Signs a message
 ::grpc::Status SignatureImpl::Sign(grpc::ServerContext* context,
                                    const SignatureSignRequest* request,

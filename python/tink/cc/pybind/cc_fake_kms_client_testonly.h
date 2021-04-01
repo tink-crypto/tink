@@ -11,30 +11,19 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_
 
-#ifndef TINK_TESTING_METADATA_IMPL_H_
-#define TINK_TESTING_METADATA_IMPL_H_
+#include "pybind11/pybind11.h"
 
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/server_context.h>
-#include <grpcpp/support/status.h>
+namespace crypto {
+namespace tink {
+namespace test {
 
-#include "proto/testing/testing_api.grpc.pb.h"
+void PybindRegisterCcFakeKmsClientTestonly(pybind11::module* m);
 
-namespace tink_testing_api {
+}  // namespace test
+}  // namespace tink
+}  // namespace crypto
 
-// A Metadata Service.
-class MetadataImpl final : public Metadata::Service {
- public:
-  // Returns server info.
-  grpc::Status GetServerInfo(grpc::ServerContext* context,
-                             const ServerInfoRequest* request,
-                             ServerInfoResponse* response) override;
-};
-
-}  // namespace tink_testing_api
-
-
-
-
-#endif  // TINK_TESTING_METADATA_IMPL_H_
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_CC_FAKE_KMS_CLIENT_H_

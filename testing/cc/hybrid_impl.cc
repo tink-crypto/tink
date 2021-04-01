@@ -28,8 +28,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-HybridImpl::HybridImpl() {}
-
 // Encrypts a message
 ::grpc::Status HybridImpl::Encrypt(grpc::ServerContext* context,
                                    const HybridEncryptRequest* request,

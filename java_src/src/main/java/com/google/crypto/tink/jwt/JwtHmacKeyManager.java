@@ -87,18 +87,10 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     @Override
     public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
-      JwtFormat.validateASCII(compact);
-      String[] parts = compact.split("\\.", -1);
-      if (parts.length != 3) {
-        throw new JwtInvalidException(
-            "only tokens in JWS compact serialization format are supported");
-      }
-      String unsignedCompact = parts[0] + "." + parts[1];
-      byte[] expectedTag = JwtFormat.decodeSignature(parts[2]);
-      prfMac.verifyMac(expectedTag, unsignedCompact.getBytes(US_ASCII));
-      JwtFormat.validateHeader(algorithm, JwtFormat.decodeHeader(parts[0]));
-      String payload = JwtFormat.decodePayload(parts[1]);
-      RawJwt token = RawJwt.fromJsonPayload(payload);
+      JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
+      prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
+      JwtFormat.validateHeader(algorithm, parts.header);
+      RawJwt token = RawJwt.fromJsonPayload(parts.payload);
       return validator.validate(token);
     }
   };

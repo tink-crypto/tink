@@ -183,9 +183,77 @@ public final class JwtFormatTest {
   }
 
   @Test
-  public void createUnsignedCompact_success() throws Exception {
-    assertThat(JwtFormat.createUnsignedCompact("RS256", "{\"iss\":\"joe\"}")).isEqualTo(
-            "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
+  public void signedCompactCreateSplit_success() throws Exception {
+    String payload = "{\"iss\":\"joe\"}";
+    String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    byte[] signature = JwtFormat.decodeSignature(encodedSignature);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", payload);
+    String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
+    JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
+    JwtFormat.validateHeader("RS256", parts.header);
+
+    assertThat(unsignedCompact).isEqualTo("eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
+    assertThat(signedCompact).isEqualTo(
+        "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk");
+    assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
+    assertThat(parts.signatureOrMac).isEqualTo(signature);
+    assertThat(parts.header).isEqualTo("{\"alg\":\"RS256\"}");
+    assertThat(parts.payload).isEqualTo(payload);
+  }
+
+  @Test
+  public void splitEmptySignedCompact_success() throws Exception {
+    JwtFormat.Parts parts = JwtFormat.splitSignedCompact("..");
+    assertThat(parts.unsignedCompact).isEqualTo(".");
+    assertThat(parts.signatureOrMac).isEmpty();
+    assertThat(parts.header).isEmpty();
+    assertThat(parts.payload).isEmpty();
+  }
+
+  @Test
+  public void splitSignedCompactWithBadFormat_fails() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact("e30.e30.YWJj.abc"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact("e30.e30.YWJj."));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact(".e30.e30.YWJj"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact(".e30.e30."));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact("e30.e30"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact("e30"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.splitSignedCompact(""));
+  }
+
+  @Test
+  public void splitSignedCompactWithBadCharacters_fails() throws Exception {
+    // check that unmodified token works
+    JwtFormat.Parts parts = JwtFormat.splitSignedCompact("e30.e30.YWJj");
+    assertThat(parts.unsignedCompact).isEqualTo("e30.e30");
+
+    // add bad characters
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("{e30.e30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact(" e30.e30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30. e30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.e30.YWJj "));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.e30.\nYWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.\re30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30$.e30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.$e30.YWJj"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.e30.YWJj$"));
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.e30.YWJj$"));
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.splitSignedCompact("e30.e30.YWJj\ud83c"));
   }
 
   @Test

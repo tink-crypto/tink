@@ -27,8 +27,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::grpc::ServerContext;
 using ::grpc::Status;
 
-MacImpl::MacImpl() {}
-
 // Computes a MAC
 ::grpc::Status MacImpl::ComputeMac(grpc::ServerContext* context,
                                    const ComputeMacRequest* request,

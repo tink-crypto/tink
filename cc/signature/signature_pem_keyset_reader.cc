@@ -78,7 +78,7 @@ util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
 // `key_material_type`.
 Keyset::Key NewKeysetKey(uint32_t key_id, absl::string_view key_type,
                          const KeyData::KeyMaterialType& key_material_type,
-                         absl::string_view key_data) {
+                         const std::string& key_data) {
   Keyset::Key key;
   // Populate KeyData for the new key.
   key.set_key_id(key_id);
@@ -87,7 +87,7 @@ Keyset::Key NewKeysetKey(uint32_t key_id, absl::string_view key_type,
   key.set_output_prefix_type(OutputPrefixType::RAW);
   KeyData* key_data_proto = key.mutable_key_data();
   key_data_proto->set_type_url(key_type.data(), key_type.size());
-  key_data_proto->set_value(key_data.data(), key_data.size());
+  key_data_proto->set_value(key_data);
   key_data_proto->set_key_material_type(key_material_type);
   return key;
 }

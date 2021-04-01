@@ -26,10 +26,6 @@ namespace tink_testing_api {
 // A Signature Service
 class SignatureImpl final : public Signature::Service {
  public:
-  SignatureImpl();
-
-  ~SignatureImpl() override = default;
-
   grpc::Status Sign(grpc::ServerContext* context,
                     const SignatureSignRequest* request,
                     SignatureSignResponse* response) override;
