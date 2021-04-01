@@ -9,6 +9,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# [START streaming-aead-example]
 """A command-line utility for using streaming AEAD for a file.
 
 It loads cleartext keys from disk - this is not recommended!
@@ -159,3 +161,5 @@ if __name__ == '__main__':
   flags.mark_flag_as_required('input_path')
   flags.mark_flag_as_required('output_path')
   app.run(main)
+
+# [END streaming-aead-example]
