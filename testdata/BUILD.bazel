@@ -9,18 +9,17 @@ filegroup(
         "aws_credentials_cc.txt",
         "aws_key_arn.txt",
         "bad_access_keys_aws.csv",
-        "bad_aws_key_arn.txt",
         "bad_aws_credentials_cc.txt",
+        "bad_aws_key_arn.txt",
         "bad_credentials_aws.csv",
         "bad_gcp_credentials.json",
         "bad_gcp_key_name.txt",
-        "gcp_key_name.txt",
         "credential.json",
-        "credentials_aws.csv",
         "credentials_aws.cred",
+        "credentials_aws.csv",
         "credentials_aws.ini",
-        "README_AWS.txt",
-],
+        "gcp_key_name.txt",
+    ],
 )
 
 filegroup(
