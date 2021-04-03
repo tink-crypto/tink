@@ -17,9 +17,9 @@ set -euo pipefail
 #############################################################################
 ##### Tests for envelope python example.
 
-ENVELOPE_CLI="$1"
-CRED_FILE="$2"
-KEY_URI="gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key"
+CLI="$1"
+KEY_URI="$2"
+CRED_FILE="$3"
 
 # Root certificates for GRPC.
 # Referece:
@@ -28,15 +28,15 @@ export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${TEST_SRCDIR}/google_root_pem/file/dow
 
 DATA_FILE="$TEST_TMPDIR/example_data.txt"
 
-echo "This is some plaintext to be encrypted." > $DATA_FILE
+echo "This is some plaintext to be encrypted." > ${DATA_FILE}
 
 #############################################################################
 
 # A helper function for getting the return code of a command that may fail
-# Temporarily disables error safety and stores return value in $TEST_STATUS
+# Temporarily disables error safety and stores return value in ${TEST_STATUS}
 # Usage:
 # % test_command somecommand some args
-# % echo $TEST_STATUS
+# % echo ${TEST_STATUS}
 test_command() {
   set +e
   "$@"
@@ -44,41 +44,39 @@ test_command() {
   set -e
 }
 
-# TODO(b/154273145): re-enable this
 #############################################################################
 #### Test initialization and encryption
-# test_name="encrypt"
-# echo "+++ Starting test $test_name..."
+test_name="encrypt"
+echo "+++ Starting test $test_name..."
 
 # ##### Run encryption
-# test_command $ENVELOPE_CLI encrypt $CRED_FILE $KEY_URI $DATA_FILE "$DATA_FILE".encrypted
+test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted"
 
-# if [[ $TEST_STATUS -eq 0 ]]; then
-#   echo "+++ Success: file was encrypted."
-# else
-#   echo "--- Failure: could not encrypt file."
-#   exit 1
-# fi
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Success: file was encrypted."
+else
+  echo "--- Failure: could not encrypt file."
+  exit 1
+fi
 
-# TODO(b/154273145): re-enable this
 #############################################################################
 #### Test if decryption succeeds and returns original file
-# test_name="decrypt"
-# echo "+++ Starting test $test_name..."
+test_name="decrypt"
+echo "+++ Starting test $test_name..."
 
-# ##### Run decryption
-# test_command $ENVELOPE_CLI decrypt $CRED_FILE $KEY_URI "$DATA_FILE".encrypted "$DATA_FILE".decrypted
+##### Run decryption
+test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted"
 
-# if [[ $TEST_STATUS -eq 0 ]]; then
-#   echo "+++ Success: file was successfully decrypted."
-# else
-#   echo "--- Failure: could not decrypt file."
-#   exit 1
-# fi
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Success: file was successfully decrypted."
+else
+  echo "--- Failure: could not decrypt file."
+  exit 1
+fi
 
-# if cmp -s $DATA_FILE $DATA_FILE.decrypted; then
-#   echo "+++ Success: file content is the same after decryption."
-# else
-#   echo "--- Failure: file content is not the same after decryption."
-#   exit 1
-# fi
+if cmp -s ${DATA_FILE} "${DATA_FILE}.decrypted"; then
+  echo "+++ Success: file content is the same after decryption."
+else
+  echo "--- Failure: file content is not the same after decryption."
+  exit 1
+fi

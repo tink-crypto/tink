@@ -9,13 +9,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A command-line utility for envelope encryption with GCP.
+# [START envelope-example]
+"""A command-line utility for encrypting small files using envelope encryption with GCP.
 
-It requires 5 arguments:
+It requires five arguments:
   mode: Can be "encrypt" or "decrypt" to encrypt/decrypt the input to the
         output.
-  gcp-credentials: Name of the file with the GCP credentials in JSON.
-  key-uri: The key-uri used for envelope encryption.
+  kek-uri: Use this Cloud KMS' key as the key-encrypting-key for envelope
+        encryption.
+  gcp-credential-file: Use this JSON credential file to connect to Cloud KMS.
   input-file: Read the input from this file.
   output-file: Write the result to this file.
 """
@@ -37,16 +39,16 @@ def main(argv):
   if len(argv) != 6:
     raise app.UsageError(
         'Expected 5 arguments, got %d.\n'
-        'Usage: %s gcp-credentials key-uri input-file output-file [decrypt]' %
-        (len(argv) - 1, argv[0]))
+        'Usage: %s encrypt/decrypt kek-uri gcp-credential-file '
+        'input-file output-file' % (len(argv) - 1, argv[0]))
 
   mode = argv[1]
-  gcp_credentials = argv[2]
-  key_uri = argv[3]
+  kek_uri = argv[2]
+  gcp_credential_file = argv[3]
   input_file_path = argv[4]
   output_file_path = argv[5]
 
-  # Initialise Tink.
+  # Initialise Tink
   try:
     aead.register()
   except tink.TinkError as e:
@@ -55,16 +57,18 @@ def main(argv):
 
   # Read the GCP credentials and setup client
   try:
-    gcp_client = gcpkms.GcpKmsClient(key_uri, gcp_credentials)
-    gcp_aead = gcp_client.get_aead(key_uri)
+    gcpkms.GcpKmsClient.register_client(kek_uri, gcp_credential_file)
   except tink.TinkError as e:
     logging.error('Error initializing GCP client: %s', e)
     return 1
 
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
-    key_template = aead.aead_key_templates.AES256_GCM
-    env_aead = aead.KmsEnvelopeAead(key_template, gcp_aead)
+    template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
+        kek_uri=kek_uri,
+        dek_template=aead.aead_key_templates.AES256_GCM)
+    handle = tink.KeysetHandle.generate_new(template)
+    env_aead = handle.primitive(aead.Aead)
   except tink.TinkError as e:
     logging.error('Error creating primitive: %s', e)
     return 1
@@ -85,3 +89,4 @@ def main(argv):
 
 if __name__ == '__main__':
   app.run(main)
+# [END envelope-example]

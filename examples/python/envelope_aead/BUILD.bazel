@@ -16,22 +16,27 @@ py_binary(
     ],
 )
 
+# In order to run this test, use your own Cloud KMS key and credential:
 sh_test(
     name = "envelope_test",
     size = "small",
     srcs = ["envelope_test.sh"],
     args = [
         "$(rootpath :envelope)",
+        # Change this to your key.
+        "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
+        # Change this to your credential.
         "$(rootpath @tink_base//testdata:credential.json)",
     ],
     data = [
         ":envelope",
         "@google_root_pem//file",
+        # Change this to your credential.
         "@tink_base//testdata:credential.json",
     ],
 )
 
-# This runs the previous test assuming the Tink python package has been
+# This runs the previous test, assuming the Tink python package has been
 # installed previously with pip3 install.
 sh_test(
     name = "envelope_test_package",
@@ -39,11 +44,15 @@ sh_test(
     srcs = ["envelope_test.sh"],
     args = [
         "'python3 $(rootpath :envelope.py)'",
+        # Change this to your key.
+        "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
+        # Change this to your credential.
         "$(rootpath @tink_base//testdata:credential.json)",
     ],
     data = [
         ":envelope.py",
         "@google_root_pem//file",
+        # Change this to your credential.
         "@tink_base//testdata:credential.json",
     ],
 )
