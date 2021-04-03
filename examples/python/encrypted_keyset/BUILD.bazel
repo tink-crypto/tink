@@ -1,0 +1,38 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_binary(
+    name = "encrypted_keyset",
+    srcs = ["encrypted_keyset.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/aead",
+        "@tink_py//tink/integration/gcpkms",
+    ],
+)
+
+# In order to run this test, you'd have to use your own Cloud KMS key and credential.
+sh_test(
+    name = "encrypted_keyset_test",
+    size = "small",
+    srcs = ["encrypted_keyset_test.sh"],
+    args = [
+        "$(rootpath :encrypted_keyset)",
+        # Change this to your key.
+        "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
+        # Change this to your credential.
+        "$(rootpath @tink_base//testdata:credential.json)",
+    ],
+    data = [
+        ":encrypted_keyset",
+        "@google_root_pem//file",
+        # Change this to your credential.
+        "@tink_base//testdata:credential.json",
+    ],
+)
