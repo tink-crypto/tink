@@ -16,6 +16,7 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 #include "gtest/gtest.h"
+#include "absl/memory/memory.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_sign.h"
@@ -96,12 +97,12 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
         pk_sign_set->AddPrimitive(std::move(pk_sign), keyset_info.key_info(0));
     ASSERT_TRUE(entry_result.ok());
 
-    pk_sign.reset(new DummyPublicKeySign(signature_name_1));
+    pk_sign = absl::make_unique<DummyPublicKeySign>(signature_name_1);
     entry_result =
         pk_sign_set->AddPrimitive(std::move(pk_sign), keyset_info.key_info(1));
     ASSERT_TRUE(entry_result.ok());
 
-    pk_sign.reset(new DummyPublicKeySign(signature_name_2));
+    pk_sign = absl::make_unique<DummyPublicKeySign>(signature_name_2);
     entry_result =
         pk_sign_set->AddPrimitive(std::move(pk_sign), keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());

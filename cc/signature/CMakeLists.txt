@@ -385,6 +385,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
+    absl::memory
 )
 
 tink_cc_test(

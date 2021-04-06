@@ -47,7 +47,6 @@ using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Gt;
-using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::SizeIs;
 
