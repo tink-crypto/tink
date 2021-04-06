@@ -116,7 +116,8 @@ message KeyData {
   // Required.
   string type_url = 1;  // In format type.googleapis.com/packagename.messagename
   // Required.
-  bytes value = 2;  // contains specific serialized *Key proto
+  // Contains specific serialized *Key proto
+  bytes value = 2;  // placeholder for ctype
   enum KeyMaterialType {
     UNKNOWN_KEYMATERIAL = 0;
     SYMMETRIC = 1;
