@@ -295,16 +295,13 @@ public final class Registry {
       @Override
       public KeyData deriveKey(ByteString serializedKeyFormat, InputStream stream)
           throws GeneralSecurityException {
-        KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory;
-        keyFactory = keyManager.keyFactory();
+        KeyTypeManager.KeyFactory<?, KeyProtoT> keyFactory = keyManager.keyFactory();
         MessageLite keyValue = deriveKeyWithFactory(serializedKeyFormat, stream, keyFactory);
-        KeyData keyData =
-            KeyData.newBuilder()
-                .setTypeUrl(keyManager.getKeyType())
-                .setValue(keyValue.toByteString())
-                .setKeyMaterialType(keyManager.keyMaterialType())
-                .build();
-        return keyData;
+        return KeyData.newBuilder()
+            .setTypeUrl(keyManager.getKeyType())
+            .setValue(keyValue.toByteString())
+            .setKeyMaterialType(keyManager.keyMaterialType())
+            .build();
       }
     };
   }
@@ -355,7 +352,7 @@ public final class Registry {
     }
     if (catalogueMap.containsKey(catalogueName.toLowerCase(Locale.US))) {
       Catalogue<?> existing = catalogueMap.get(catalogueName.toLowerCase(Locale.US));
-      if (!catalogue.getClass().equals(existing.getClass())) {
+      if (!catalogue.getClass().getName().equals(existing.getClass().getName())) {
         logger.warning(
             "Attempted overwrite of a catalogueName catalogue for name " + catalogueName);
         throw new GeneralSecurityException(
@@ -526,7 +523,9 @@ public final class Registry {
       Class<?> existingPublicKeyManagerClass =
           keyManagerMap.get(privateTypeUrl).publicKeyManagerClassOrNull();
       if (existingPublicKeyManagerClass != null) {
-        if (!existingPublicKeyManagerClass.equals(publicKeyTypeManager.getClass())) {
+        if (!existingPublicKeyManagerClass
+            .getName()
+            .equals(publicKeyTypeManager.getClass().getName())) {
           logger.warning(
               "Attempted overwrite of a registered key manager for key type "
                   + privateTypeUrl
@@ -624,11 +623,12 @@ public final class Registry {
       @SuppressWarnings("unchecked") // We know that we only inserted objects of the correct type.
       PrimitiveWrapper<?, P> existingWrapper =
           (PrimitiveWrapper<?, P>) primitiveWrapperMap.get(classObject);
-      if (!wrapper.getClass().equals(existingWrapper.getClass())) {
-        logger.warning("Attempted overwrite of a registered SetWrapper for type " + classObject);
+      if (!wrapper.getClass().getName().equals(existingWrapper.getClass().getName())) {
+        logger.warning(
+            "Attempted overwrite of a registered PrimitiveWrapper for type " + classObject);
         throw new GeneralSecurityException(
             String.format(
-                "SetWrapper for primitive (%s) is already registered to be %s, "
+                "PrimitiveWrapper for primitive (%s) is already registered to be %s, "
                     + "cannot be re-registered with %s",
                 classObject.getName(),
                 existingWrapper.getClass().getName(),
