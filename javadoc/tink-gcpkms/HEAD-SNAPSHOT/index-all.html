@@ -68,11 +68,15 @@
 <!--   -->
 </a></div>
 <!-- ========= END OF TOP NAVBAR ========= -->
-<div class="contentContainer"><a href="#I:A">A</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a name="I:A">
+<div class="contentContainer"><a href="#I:A">A</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a name="I:A">
 <!--   -->
 </a>
 <h2 class="title">A</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-">add(KmsClient)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
+<dd>
+<div class="block">Adds a client to the list of known <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Aead</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">Interface for Authenticated Encryption with Associated Data (AEAD).</div>
@@ -160,17 +164,30 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient--">GcpKmsClient()</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
 <dd>
-<div class="block">Constructs a generic GcpKmsClient that is not bound to any specific key.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#register-java.util.Optional-java.util.Optional-"><code>GcpKmsClient.register(java.util.Optional&lt;java.lang.String&gt;, java.util.Optional&lt;java.lang.String&gt;)</code></a></span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-">GcpKmsClient(String)</a></span> - Constructor for class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
 <dd>
-<div class="block">Constructs a specific GcpKmsClient that is bound to a single key identified by <code>uri</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">use <code>register</code></span></div>
+</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#get-java.lang.String-">get(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
+<dd>
+<div class="block">Returns the first <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> registered with <a href="com/google/crypto/tink/KmsClients.html#add-com.google.crypto.tink.KmsClient-"><code>KmsClients.add(com.google.crypto.tink.KmsClient)</code></a> that supports <code>keyUri</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClient.html#getAead-java.lang.String-">getAead(String)</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></dt>
 <dd>
 <div class="block">Gets an <code>Aead</code> backed by <code>keyUri</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#getAutoLoaded-java.lang.String-">getAutoLoaded(String)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
+<dd>
+<div class="block">Returns the first <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a> automatically loaded with <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html?is-external=true" title="class or interface in java.util"><code>ServiceLoader</code></a>
+ that supports <code>keyUri</code>.</div>
 </dd>
 </dl>
 <a name="I:I">
@@ -190,6 +207,13 @@
 <dd>
 <div class="block">A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KmsClients</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">A container for <a href="com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects that are needed by <code>KeyManager</code>-objects for
+ primitives that use KMS-managed keys.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KmsClients.html#KmsClients--">KmsClients()</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:P">
 <!--   -->
@@ -199,6 +223,16 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#PREFIX">PREFIX</a></span> - Static variable in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
 <dd>
 <div class="block">The prefix of all keys stored in Google Cloud KMS.</div>
+</dd>
+</dl>
+<a name="I:R">
+<!--   -->
+</a>
+<h2 class="title">R</h2>
+<dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#register-java.util.Optional-java.util.Optional-">register(Optional&lt;String&gt;, Optional&lt;String&gt;)</a></span> - Static method in class com.google.crypto.tink.integration.gcpkms.<a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html" title="class in com.google.crypto.tink.integration.gcpkms">GcpKmsClient</a></dt>
+<dd>
+<div class="block">Creates and registers a <a href="com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-"><code>GcpKmsClient.GcpKmsClient(java.lang.String)</code></a> with the Tink runtime.</div>
 </dd>
 </dl>
 <a name="I:T">
@@ -317,7 +351,7 @@ the order they are declared.</div>
 <div class="block">Loads the default credentials.</div>
 </dd>
 </dl>
-<a href="#I:A">A</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;</div>
+<a href="#I:A">A</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;</div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->
 <div class="bottomNav"><a name="navbar.bottom">
 <!--   -->

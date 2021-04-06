@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":10,"i1":10,"i2":9,"i3":10,"i4":10,"i5":10};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -162,12 +162,16 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient--">GcpKmsClient</a></span>()</code>
-<div class="block">Constructs a generic GcpKmsClient that is not bound to any specific key.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#register-java.util.Optional-java.util.Optional-"><code>register(java.util.Optional&lt;java.lang.String&gt;, java.util.Optional&lt;java.lang.String&gt;)</code></a></span></div>
+</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-">GcpKmsClient</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</code>
-<div class="block">Constructs a specific GcpKmsClient that is bound to a single key identified by <code>uri</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">use <code>register</code></span></div>
+</div>
 </td>
 </tr>
 </table>
@@ -180,7 +184,7 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -199,18 +203,25 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#register-java.util.Optional-java.util.Optional-">register</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;keyUri,
+        <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;credentialPath)</code>
+<div class="block">Creates and registers a <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-"><code>GcpKmsClient(java.lang.String)</code></a> with the Tink runtime.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#withCredentials-com.google.api.client.googleapis.auth.oauth2.GoogleCredential-">withCredentials</a></span>(com.google.api.client.googleapis.auth.oauth2.GoogleCredential&nbsp;credential)</code>
 <div class="block">Loads the provided credential.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#withCredentials-java.lang.String-">withCredentials</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;credentialPath)</code>
 <div class="block">Loads credentials from a service account JSON file <code>credentialPath</code>.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#withDefaultCredentials--">withDefaultCredentials</a></span>()</code>
 <div class="block">Loads <a href="https://developers.google.com/accounts/docs/application-default-credentials"
@@ -267,7 +278,9 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 <ul class="blockList">
 <li class="blockList">
 <h4>GcpKmsClient</h4>
-<pre>public&nbsp;GcpKmsClient()</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;GcpKmsClient()</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#register-java.util.Optional-java.util.Optional-"><code>register(java.util.Optional&lt;java.lang.String&gt;, java.util.Optional&lt;java.lang.String&gt;)</code></a></span></div>
 <div class="block">Constructs a generic GcpKmsClient that is not bound to any specific key.</div>
 </li>
 </ul>
@@ -277,7 +290,9 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 <ul class="blockListLast">
 <li class="blockList">
 <h4>GcpKmsClient</h4>
-<pre>public&nbsp;GcpKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</pre>
+<pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
+public&nbsp;GcpKmsClient(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">use <code>register</code></span></div>
 <div class="block">Constructs a specific GcpKmsClient that is bound to a single key identified by <code>uri</code>.</div>
 </li>
 </ul>
@@ -358,7 +373,7 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 <a name="getAead-java.lang.String-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getAead</h4>
 <pre>public&nbsp;<a href="../../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;getAead(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;uri)
@@ -370,6 +385,28 @@ implements <a href="../../../../../../com/google/crypto/tink/KmsClient.html" tit
 <dd><code><a href="../../../../../../com/google/crypto/tink/KmsClient.html#getAead-java.lang.String-">getAead</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink">KmsClient</a></code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the URI is not supported or invalid</dd>
+</dl>
+</li>
+</ul>
+<a name="register-java.util.Optional-java.util.Optional-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>register</h4>
+<pre>public static&nbsp;void&nbsp;register(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;keyUri,
+                            <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;credentialPath)
+                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Creates and registers a <a href="../../../../../../com/google/crypto/tink/integration/gcpkms/GcpKmsClient.html#GcpKmsClient-java.lang.String-"><code>GcpKmsClient(java.lang.String)</code></a> with the Tink runtime.
+
+ <p>If <code>keyUri</code> is present, it is the only key that the new client will support. Otherwise
+ the new client supports all GCP KMS keys.
+
+ <p>If <code>credentialPath</code> is present, load the credentials from that. Otherwise use the
+ default credentials.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
