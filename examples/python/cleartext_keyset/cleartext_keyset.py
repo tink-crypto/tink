@@ -12,6 +12,8 @@
 # [START cleartext-keyset-example]
 """A command-line utility for generating, storing and using cleartext AES128_GCM keysets.
 
+It loads cleartext keys from disk - this is not recommended!
+
 It requires the following arguments:
   mode: Can be "generate", "encrypt" or "decrypt".
   key-file: Read/write the key material from this file.

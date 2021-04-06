@@ -15,7 +15,7 @@
 set -euo pipefail
 
 #############################################################################
-##### Tests for envelope python example.
+##### Tests for envelope encryption AEAD example.
 
 CLI="$1"
 KEY_URI="$2"
@@ -78,5 +78,56 @@ if cmp -s ${DATA_FILE} "${DATA_FILE}.decrypted"; then
   echo "+++ Success: file content is the same after decryption."
 else
   echo "--- Failure: file content is not the same after decryption."
+  exit 1
+fi
+
+#############################################################################
+#### Test correct encryption and decryption with associated data
+test_name="test_encrypt_decrypt_succeeds_with_associated_data"
+echo "+++ Starting test ${test_name}..."
+
+##### Run encryption
+ASSOCIATED_DATA="header information"
+test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted" "${ASSOCIATED_DATA}"
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Encryption successful."
+else
+  echo "--- Encryption failed."
+  exit 1
+fi
+
+##### Run decryption
+test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted" "${ASSOCIATED_DATA}"
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Decryption successful."
+else
+  echo "--- Decryption failed."
+  exit 1
+fi
+
+cmp --silent ${DATA_FILE} ${DATA_FILE}.decrypted
+
+#############################################################################
+#### Test decryption fails with modified associated data
+test_name="test_encrypt_decrypt_fails_with_modified_associated_data"
+echo "+++ Starting test ${test_name}..."
+
+##### Run encryption
+ASSOCIATED_DATA="header information"
+test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted" "${ASSOCIATED_DATA}"
+if [[ ${TEST_STATUS} -eq 0 ]]; then
+  echo "+++ Encryption successful."
+else
+  echo "--- Encryption failed."
+  exit 1
+fi
+
+##### Run decryption
+MODIFIED_ASSOCIATED_DATA="modified header information"
+test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted" "${MODIFIED_ASSOCIATED_DATA}"
+if [[ ${TEST_STATUS} -eq 1 ]]; then
+  echo "+++ Decryption failed as expected."
+else
+  echo "--- Decryption succeeded but expected to fail."
   exit 1
 fi

@@ -14,12 +14,14 @@
 
 It loads cleartext keys from disk - this is not recommended!
 
-It requires 4 arguments:
+It requires the following arguments:
   mode: Can be "encrypt" or "decrypt" to encrypt/decrypt the input to the
         output.
   key-file: Read the key material from this file.
   input-file: Read the input from this file.
   output-file: Write the result to this file.
+  [optional] associated-data: Associated data used for the encryption or
+        decryption.
 """
 
 from __future__ import absolute_import

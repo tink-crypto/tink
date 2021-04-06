@@ -13,7 +13,11 @@
 """A command-line utility for generating, encrypting and storing keysets.
 
 It requires the following arguments:
-  mode: Can be "generate", "encrypt" or "decrypt".
+  mode: Can be "generate", "encrypt" or "decrypt". If mode is "generate", it
+       will generate a keyset, encrypt it and store it in the key-file argument.
+       If mode is "encrypt" or "decrypt", it will read and decrypt an keyset
+       from the key-file argument, and use it to encrypt or decrypt the
+       input-file argument.
   key-file: Read the encrypted key material from this file.
   kek-uri: Use this KEK URI in Cloud KMS to encrypt/decrypt the key file.
   gcp-credential-file: USe this JSON credential file to connect to Cloud KMS.
@@ -122,9 +126,9 @@ def main(argv):
   with open(input_file_path, 'rb') as input_file:
     input_data = input_file.read()
     if mode == 'decrypt':
-      output_data = cipher.decrypt(input_data, b'envelope_example')
+      output_data = cipher.decrypt(input_data, b'encrypted-keyset-example')
     elif mode == 'encrypt':
-      output_data = cipher.encrypt(input_data, b'envelope_example')
+      output_data = cipher.encrypt(input_data, b'encrypted-keyset-example')
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')

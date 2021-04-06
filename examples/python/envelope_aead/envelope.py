@@ -20,6 +20,8 @@ It requires five arguments:
   gcp-credential-file: Use this JSON credential file to connect to Cloud KMS.
   input-file: Read the input from this file.
   output-file: Write the result to this file.
+  [optional] associated-data: Associated data used for the encryption or
+        decryption.
 """
 
 from __future__ import absolute_import
@@ -36,17 +38,18 @@ from tink.integration import gcpkms
 
 
 def main(argv):
-  if len(argv) != 6:
+  if len(argv) != 6 and len(argv) != 7:
     raise app.UsageError(
         'Expected 5 arguments, got %d.\n'
         'Usage: %s encrypt/decrypt kek-uri gcp-credential-file '
-        'input-file output-file' % (len(argv) - 1, argv[0]))
+        'input-file output-file [associated-data]' % (len(argv) - 1, argv[0]))
 
   mode = argv[1]
   kek_uri = argv[2]
   gcp_credential_file = argv[3]
   input_file_path = argv[4]
   output_file_path = argv[5]
+  associated_data = b'' if len(argv) == 6 else argv[6].encode('utf-8')
 
   # Initialise Tink
   try:
@@ -76,9 +79,9 @@ def main(argv):
   with open(input_file_path, 'rb') as input_file:
     input_data = input_file.read()
     if mode == 'decrypt':
-      output_data = env_aead.decrypt(input_data, b'envelope_example')
+      output_data = env_aead.decrypt(input_data, associated_data)
     elif mode == 'encrypt':
-      output_data = env_aead.encrypt(input_data, b'envelope_example')
+      output_data = env_aead.encrypt(input_data, associated_data)
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
