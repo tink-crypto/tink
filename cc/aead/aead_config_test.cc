@@ -20,17 +20,17 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "openssl/crypto.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/config.h"
+#include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
-#include "tink/config/tink_fips.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
-
 
 namespace crypto {
 namespace tink {
@@ -47,6 +47,9 @@ class AeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(AeadConfigTest, RegisterWorks) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
@@ -95,8 +98,8 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
   EXPECT_THAT(AeadConfig::Register(), IsOk());
@@ -116,8 +119,8 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
   EXPECT_THAT(AeadConfig::Register(), IsOk());
@@ -132,6 +135,18 @@ TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(), IsOk());
   }
+}
+
+TEST_F(AeadConfigTest, RegisterFailsIfBoringCryptoNotAvailable) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Only supported in FIPS-only mode with BoringCrypto not available.";
+  }
+
+  EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(AeadConfig::Register(), StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

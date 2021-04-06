@@ -126,6 +126,10 @@ class AesGcmKeyManager
     return key;
   }
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::AesGcmKey().GetTypeName());

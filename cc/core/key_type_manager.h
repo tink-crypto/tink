@@ -20,6 +20,7 @@
 #include <tuple>
 
 #include "absl/strings/str_cat.h"
+#include "tink/config/tink_fips.h"
 #include "tink/core/template_util.h"
 #include "tink/input_stream.h"
 #include "tink/util/status.h"
@@ -138,6 +139,11 @@ class KeyTypeManager<KeyProtoParam, KeyFormatProtoParam, List<Primitives...>>
   util::StatusOr<std::unique_ptr<Primitive>> GetPrimitive(
       const KeyProto& key) const {
     return GetPrimitiveImpl<Primitive>(key);
+  }
+
+  // Returns the FIPS compatibility of this KeyTypeManager.
+  virtual FipsCompatibility FipsStatus() const {
+    return FipsCompatibility::kNotFips;
   }
 
  private:

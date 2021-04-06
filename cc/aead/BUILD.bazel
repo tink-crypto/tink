@@ -72,6 +72,7 @@ cc_library(
         "//mac:mac_config",
         "//proto:config_cc_proto",
         "//util:status",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
     ],

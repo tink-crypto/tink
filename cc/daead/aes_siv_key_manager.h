@@ -107,6 +107,10 @@ class AesSivKeyManager
     return key;
   }
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kNotFips;
+  }
+
  private:
   crypto::tink::util::Status ValidateKeySize(uint32_t key_size) const {
     if (key_size != kKeySizeInBytes) {

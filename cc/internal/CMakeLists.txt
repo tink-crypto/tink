@@ -38,6 +38,7 @@ tink_cc_library(
     registry_impl.cc
     registry_impl.h
   DEPS
+    tink::config::tink_fips
     tink::core::catalogue
     tink::core::key_manager
     tink::core::key_type_manager

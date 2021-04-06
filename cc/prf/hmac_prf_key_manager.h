@@ -93,6 +93,10 @@ class HmacPrfKeyManager
       const google::crypto::tink::HmacPrfKeyFormat& hmac_prf_key_format,
       InputStream* input_stream) const override;
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   util::Status ValidateParams(
       const google::crypto::tink::HmacPrfParams& params) const;

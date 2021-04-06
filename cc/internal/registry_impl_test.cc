@@ -14,8 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/registry.h"
-
+#include <memory>
 #include <thread>  // NOLINT(build/c++11)
 #include <vector>
 
@@ -23,16 +22,19 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "openssl/crypto.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/catalogue.h"
+#include "tink/config/tink_fips.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
+#include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/util/istream_input_stream.h"
@@ -228,6 +230,8 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
     key.set_key_value(randomness.ValueOrDie());
     return key;
   }
+
+  MOCK_METHOD(FipsCompatibility, FipsStatus, (), (const, override));
 
  private:
   static constexpr int kVersion = 0;
@@ -876,13 +880,22 @@ std::string AddAesGcmKey(uint32_t key_id, OutputPrefixType output_prefix_type,
 
 // Tests that wrapping of a keyset works in the usual case.
 TEST_F(RegistryTest, KeysetWrappingTest) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Not supported when BoringSSL is not built in FIPS-mode.";
+  }
+
   Keyset keyset;
   std::string raw_key =
       AddAesGcmKey(13, OutputPrefixType::TINK, KeyStatusType::ENABLED, keyset);
   keyset.set_primary_key_id(13);
 
+  auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
+
+  ON_CALL(*fips_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<ExampleKeyTypeManager>(), true),
+                  std::move(fips_key_manager), true),
               IsOk());
   ASSERT_THAT(Registry::RegisterPrimitiveWrapper(
                   absl::make_unique<AeadVariantWrapper>()),
@@ -896,6 +909,10 @@ TEST_F(RegistryTest, KeysetWrappingTest) {
 
 // Tests that wrapping of a keyset works.
 TEST_F(RegistryTest, TransformingKeysetWrappingTest) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   Keyset keyset;
   std::string raw_key =
       AddAesGcmKey(13, OutputPrefixType::TINK, KeyStatusType::ENABLED, keyset);
@@ -918,6 +935,10 @@ TEST_F(RegistryTest, TransformingKeysetWrappingTest) {
 // Aead, but the wrapper is in fact from something else into Aead, we give a
 // correct error message.
 TEST_F(RegistryTest, TransformingPrimitiveWrapperCustomKeyManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -964,12 +985,51 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
 }
 
+TEST_F(RegistryTest, RegisterFipsKeyTypeManager) {
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Only supported in FIPS-mode with BoringCrypto available.";
+  }
+
+  auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
+
+  ON_CALL(*fips_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+
+  EXPECT_THAT(
+      Registry::RegisterKeyTypeManager(std::move(fips_key_manager), true),
+      IsOk());
+}
+
+TEST_F(RegistryTest, RegisterFipsKeyTypeManagerNoBoringCrypto) {
+  if (!kUseOnlyFips || FIPS_mode()) {
+    GTEST_SKIP()
+        << "Only supported in FIPS-mode with BoringCrypto not available.";
+  }
+
+  auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
+
+  ON_CALL(*fips_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kNotFips));
+
+  EXPECT_THAT(
+      Registry::RegisterKeyTypeManager(std::move(fips_key_manager), true),
+      StatusIs(util::error::INTERNAL));
+}
+
 TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -987,6 +1047,10 @@ TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
 }
 
 TEST_F(RegistryTest, KeyTypeManagerGetSecondKeyManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1002,6 +1066,10 @@ TEST_F(RegistryTest, KeyTypeManagerGetSecondKeyManager) {
 }
 
 TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1016,6 +1084,10 @@ TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
 // get_key_manager, the key manager previously obtained with "get_key_manager()"
 // remains valid.
 TEST_F(RegistryTest, GetKeyManagerRemainsValidForKeyTypeManagers) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1031,6 +1103,10 @@ TEST_F(RegistryTest, GetKeyManagerRemainsValidForKeyTypeManagers) {
 }
 
 TEST_F(RegistryTest, KeyTypeManagerNewKey) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1052,6 +1128,10 @@ TEST_F(RegistryTest, KeyTypeManagerNewKey) {
 }
 
 TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1066,6 +1146,10 @@ TEST_F(RegistryTest, KeyTypeManagerNewKeyInvalidSize) {
 }
 
 TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1093,6 +1177,10 @@ TEST_F(RegistryTest, KeyTypeManagerDeriveKey) {
 // The same, but we register the key manager twice. This should catch some of
 // the possible lifetime issues.
 TEST_F(RegistryTest, KeyTypeManagerDeriveKeyRegisterTwice) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1146,6 +1234,10 @@ TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1155,6 +1247,10 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwice) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1170,6 +1266,10 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerTwice) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerLessRestrictive) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), false),
               IsOk());
@@ -1179,6 +1279,10 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerLessRestrictive) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
               IsOk());
@@ -1190,6 +1294,10 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::RegisterKeyManager(
                   absl::make_unique<TestAeadKeyManager>(
                       "type.googleapis.com/google.crypto.tink.AesGcmKey"),
@@ -1385,6 +1493,10 @@ TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
 
 
 TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
                   absl::make_unique<TestPrivateKeyTypeManager>(), true)
                   .ok());
@@ -1538,6 +1650,10 @@ class TestPrivateKeyTypeManager2 : public TestPrivateKeyTypeManager {};
 class TestPublicKeyTypeManager2 : public TestPublicKeyTypeManager {};
 
 TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithWrongClasses) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
@@ -1668,6 +1784,10 @@ class DelegatingKeyTypeManager
 
 // Check that we can call the registry again from within NewKeyData
 TEST(RegistryImplTest, CanDelegateCreateKey) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   RegistryImpl registry_impl;
   auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
   delegating_key_manager->set_registry(&registry_impl);
@@ -1693,6 +1813,10 @@ TEST(RegistryImplTest, CanDelegateCreateKey) {
 
 // Check that we can call the registry again from within NewKeyData
 TEST(RegistryImplTest, CanDelegateDeriveKey) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   RegistryImpl registry_impl;
   auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
   delegating_key_manager->set_registry(&registry_impl);
@@ -1717,6 +1841,10 @@ TEST(RegistryImplTest, CanDelegateDeriveKey) {
 }
 
 TEST(RegistryImplTest, CanDelegateGetPublicKey) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   RegistryImpl registry_impl;
   auto delegating_key_manager = absl::make_unique<DelegatingKeyTypeManager>();
   delegating_key_manager->set_registry(&registry_impl);

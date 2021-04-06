@@ -65,6 +65,10 @@ class AesCtrHmacAeadKeyManager
   CreateKey(const google::crypto::tink::AesCtrHmacAeadKeyFormat& key_format)
       const override;
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const std::string key_type_ =
       absl::StrCat(kTypeGoogleapisCom,

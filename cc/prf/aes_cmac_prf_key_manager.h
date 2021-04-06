@@ -121,6 +121,10 @@ class AesCmacPrfKeyManager
     return key;
   }
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kNotFips;
+  }
+
  private:
   // Due to https://www.math.uwaterloo.ca/~ajmeneze/publications/tightness.pdf,
   // we only allow key sizes of 256 bit.

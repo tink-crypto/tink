@@ -263,6 +263,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@boringssl//:crypto",
         "@com_google_googletest//:gtest_main",
     ],
 )

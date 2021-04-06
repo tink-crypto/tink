@@ -95,6 +95,10 @@ class AesCtrHmacStreamingKeyManager
 
   ~AesCtrHmacStreamingKeyManager() override {}
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kNotFips;
+  }
+
  private:
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom,

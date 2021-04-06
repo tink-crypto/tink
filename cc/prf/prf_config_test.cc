@@ -41,6 +41,10 @@ class PrfConfigTest : public ::testing::Test {
 };
 
 TEST_F(PrfConfigTest, RegisterWorks) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   EXPECT_THAT(Registry::get_key_manager<Prf>(HmacPrfKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
@@ -52,7 +56,7 @@ TEST_F(PrfConfigTest, RegisterWorks) {
 
 // FIPS-only mode tests
 TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
+  if (!kUseOnlyFips || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -70,7 +74,7 @@ TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips) {
+  if (!kUseOnlyFips || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
