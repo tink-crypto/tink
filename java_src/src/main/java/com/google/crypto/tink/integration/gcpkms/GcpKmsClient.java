@@ -24,6 +24,7 @@ import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.auto.service.AutoService;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.Version;
 import com.google.crypto.tink.subtle.Validators;
 import java.io.File;
@@ -31,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * An implementation of {@code KmsClient} for <a href="https://cloud.google.com/kms/">Google Cloud
@@ -49,10 +51,20 @@ public final class GcpKmsClient implements KmsClient {
   private CloudKMS client;
   private String keyUri;
 
-  /** Constructs a generic GcpKmsClient that is not bound to any specific key. */
+  /**
+   * Constructs a generic GcpKmsClient that is not bound to any specific key.
+   *
+   * @deprecated use {@link #register}
+   */
+  @Deprecated
   public GcpKmsClient() {}
 
-  /** Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}. */
+  /**
+   * Constructs a specific GcpKmsClient that is bound to a single key identified by {@code uri}.
+   *
+   * @deprecated use {@link register}
+   */
+  @Deprecated
   public GcpKmsClient(String uri) {
     if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
@@ -130,5 +142,30 @@ public final class GcpKmsClient implements KmsClient {
               this.keyUri, uri));
     }
     return new GcpKmsAead(client, Validators.validateKmsKeyUriAndRemovePrefix(PREFIX, uri));
+  }
+
+  /**
+   * Creates and registers a {@link #GcpKmsClient} with the Tink runtime.
+   *
+   * <p>If {@code keyUri} is present, it is the only key that the new client will support. Otherwise
+   * the new client supports all GCP KMS keys.
+   *
+   * <p>If {@code credentialPath} is present, load the credentials from that. Otherwise use the
+   * default credentials.
+   */
+  public static void register(Optional<String> keyUri, Optional<String> credentialPath)
+      throws GeneralSecurityException {
+    GcpKmsClient client;
+    if (keyUri.isPresent()) {
+      client = new GcpKmsClient(keyUri.get());
+    } else {
+      client = new GcpKmsClient();
+    }
+    if (credentialPath.isPresent()) {
+      client.withCredentials(credentialPath.get());
+    } else {
+      client.withDefaultCredentials();
+    }
+    KmsClients.add(client);
   }
 }

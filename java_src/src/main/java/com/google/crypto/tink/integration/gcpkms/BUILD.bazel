@@ -12,6 +12,7 @@ java_library(
         ":gcp_kms_aead",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink:version",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_google_api_client_google_api_client",

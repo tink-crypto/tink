@@ -27,9 +27,12 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Splitter;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
+import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.subtle.Validators;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 /**
  * An implementation of {@link KmsClient} for <a href="https://aws.amazon.com/kms/">AWS KMS</a>.
@@ -44,12 +47,22 @@ public final class AwsKmsClient implements KmsClient {
   private String keyUri;
   private AWSCredentialsProvider provider;
 
-  /** Constructs a generic AwsKmsClient that is not bound to any specific key. */
+  /**
+   * Constructs a generic AwsKmsClient that is not bound to any specific key.
+   *
+   * @deprecated use {@link #register}
+   */
+  @Deprecated
   public AwsKmsClient() {}
 
-  /** Constructs a specific AwsKmsClient that is bound to a single key identified by {@code uri}. */
+  /**
+   * Constructs a specific AwsKmsClient that is bound to a single key identified by {@code uri}.
+   *
+   * @deprecated use {@link #register}
+   */
+  @Deprecated
   public AwsKmsClient(String uri) {
-    if (!uri.toLowerCase().startsWith(PREFIX)) {
+    if (!uri.toLowerCase(Locale.US).startsWith(PREFIX)) {
       throw new IllegalArgumentException("key URI must starts with " + PREFIX);
     }
     this.keyUri = uri;
@@ -65,7 +78,7 @@ public final class AwsKmsClient implements KmsClient {
     if (this.keyUri != null && this.keyUri.equals(uri)) {
       return true;
     }
-    return this.keyUri == null && uri.toLowerCase().startsWith(PREFIX);
+    return this.keyUri == null && uri.toLowerCase(Locale.US).startsWith(PREFIX);
   }
 
   /**
@@ -138,5 +151,30 @@ public final class AwsKmsClient implements KmsClient {
     } catch (AmazonServiceException e) {
       throw new GeneralSecurityException("cannot load credentials from provider", e);
     }
+  }
+
+  /**
+   * Creates and registers a {@link #AwsKmsClient} with the Tink runtime.
+   *
+   * <p>If {@code keyUri} is present, it is the only key that the new client will support. Otherwise
+   * the new client supports all AWS KMS keys.
+   *
+   * <p>If {@code credentialPath} is present, load the credentials from that. Otherwise use the
+   * default credentials.
+   */
+  public static void register(Optional<String> keyUri, Optional<String> credentialPath)
+      throws GeneralSecurityException {
+    AwsKmsClient client;
+    if (keyUri.isPresent()) {
+      client = new AwsKmsClient(keyUri.get());
+    } else {
+      client = new AwsKmsClient();
+    }
+    if (credentialPath.isPresent()) {
+      client.withCredentials(credentialPath.get());
+    } else {
+      client.withDefaultCredentials();
+    }
+    KmsClients.add(client);
   }
 }

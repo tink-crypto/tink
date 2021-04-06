@@ -14,3 +14,16 @@ java_test(
         "@maven//:org_mockito_mockito_core",
     ],
 )
+
+java_test(
+    name = "AwsKmsClientTest",
+    size = "small",
+    srcs = ["AwsKmsClientTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:kms_clients",
+        "//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

@@ -23,6 +23,7 @@ java_library(
         ":aws_kms_aead",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:kms_client",
+        "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_amazonaws_aws_java_sdk_kms",
