@@ -202,3 +202,86 @@ tink_cc_test(
     tink::util::test_util
     gmock
 )
+
+tink_cc_library(
+  NAME raw_jwt_ecdsa_sign_key_manager
+  SRCS
+    raw_jwt_ecdsa_sign_key_manager.cc
+    raw_jwt_ecdsa_sign_key_manager.h
+  DEPS
+    tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
+    tink::proto::jwt_ecdsa_cc_proto
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    tink::subtle::ecdsa_sign_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::core::public_key_sign
+    tink::core::private_key_type_manager
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME raw_jwt_ecdsa_sign_key_manager_test
+  SRCS raw_jwt_ecdsa_sign_key_manager_test.cc
+  DEPS
+    tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
+    tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::subtle::ecdsa_verify_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::util::enums
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)
+
+tink_cc_library(
+  NAME raw_jwt_ecdsa_verify_key_manager
+  SRCS
+    raw_jwt_ecdsa_verify_key_manager.cc
+    raw_jwt_ecdsa_verify_key_manager.h
+  DEPS
+    tink::core::key_type_manager
+    tink::core::public_key_verify
+    tink::subtle::ecdsa_verify_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::proto::common_cc_proto
+    tink::proto::jwt_ecdsa_cc_proto
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::status
+    tink::util::statusor
+    tink::util::validation
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME raw_jwt_ecdsa_verify_key_manager_test
+  SRCS raw_jwt_ecdsa_verify_key_manager_test.cc
+  DEPS
+    tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
+    tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::subtle::ecdsa_sign_boringssl
+    tink::subtle::subtle_util_boringssl
+    tink::util::enums
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    tink::util::test_util
+    tink::proto::jwt_ecdsa_cc_proto
+    gmock
+)

@@ -144,6 +144,21 @@ cc_proto_library(
 )
 
 cc_proto_library(
+    name = "jwt_ecdsa_cc_proto",
+    deps = ["@tink_base//proto:jwt_ecdsa_proto"],
+)
+
+cc_proto_library(
+    name = "jwt_rsa_ssa_pkcs1_cc_proto",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pkcs1_proto"],
+)
+
+cc_proto_library(
+    name = "jwt_rsa_ssa_pss_cc_proto",
+    deps = ["@tink_base//proto:jwt_rsa_ssa_pss_proto"],
+)
+
+cc_proto_library(
     name = "aes_ctr_hmac_streaming_cc_proto",
     deps = ["@tink_base//proto:aes_ctr_hmac_streaming_proto"],
 )
