@@ -54,12 +54,41 @@ py_test(
     ],
 )
 
+py_library(
+    name = "jwt_service",
+    srcs = ["jwt_service.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":testing_api_python_library",
+        "@com_google_protobuf//:protobuf_python",
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
+py_test(
+    name = "jwt_service_test",
+    srcs = ["jwt_service_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":jwt_service",
+        ":services",
+        ":testing_api_python_library",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
 py_binary(
     name = "testing_server",
     srcs = ["testing_server.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        ":jwt_service",
         ":services",
         ":testing_api_python_library",
         "@com_google_protobuf//:protobuf_python",
@@ -68,6 +97,7 @@ py_binary(
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
         "@tink_py//tink/mac",
         "@tink_py//tink/signature",
         "@tink_py//tink/streaming_aead",

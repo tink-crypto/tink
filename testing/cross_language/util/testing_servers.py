@@ -81,7 +81,7 @@ SUPPORTED_LANGUAGES_BY_PRIMITIVE = {
     'mac': ['cc', 'go', 'java', 'python'],
     'signature': ['cc', 'go', 'java', 'python'],
     'prf': ['cc', 'java', 'go', 'python'],
-    'jwt': ['java'],
+    'jwt': ['java', 'python'],
 }
 
 

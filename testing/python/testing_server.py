@@ -31,7 +31,10 @@ from tink import streaming_aead
 
 from proto.testing import testing_api_pb2_grpc
 
+from tink import jwt
 from tink.testing import fake_kms
+
+import jwt_service
 import services
 
 FLAGS = flags.FLAGS
@@ -47,6 +50,7 @@ def main(unused_argv):
   prf.register()
   signature.register()
   streaming_aead.register()
+  jwt.register_jwt_mac()
   fake_kms.register_client()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(
@@ -67,6 +71,8 @@ def main(unused_argv):
       services.SignatureServicer(), server)
   testing_api_pb2_grpc.add_StreamingAeadServicer_to_server(
       services.StreamingAeadServicer(), server)
+  testing_api_pb2_grpc.add_JwtServicer_to_server(jwt_service.JwtServicer(),
+                                                 server)
   server.add_secure_port('[::]:%d' % FLAGS.port,
                          grpc.local_server_credentials())
   server.start()

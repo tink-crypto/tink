@@ -210,6 +210,9 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_public_key_sign_verify(self, lang):
+    if lang == 'python':
+      # TODO(juerg): Remove this once this key type is supported in Python.
+      return
     key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
         algorithm=jwt_ecdsa_pb2.ES256)
     key_template = tink_pb2.KeyTemplate(
