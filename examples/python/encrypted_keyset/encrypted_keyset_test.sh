@@ -21,6 +21,11 @@ CLI="$1"
 KEK_URI="$2"
 CREDENTIAL_FILE="$3"
 
+# Root certificates for GRPC.
+# Referece:
+#   https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
+export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${TEST_SRCDIR}/google_root_pem/file/downloaded"
+
 DATA_FILE="${TEST_TMPDIR}/example_data.txt"
 KEYSET_FILE="${TEST_TMPDIR}/example_encrypted_keyset.json"
 
