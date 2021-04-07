@@ -60,74 +60,72 @@ class JwtFormatTest(parameterized.TestCase):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format._base64_decode(b'{')
 
-  def test_decodeencode_header_hs256(self):
+  def test_decode_encode_header_hs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
     encoded_header = b'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'
     json_header = _jwt_format.decode_header(encoded_header)
-    self.assertEqual(json_header['alg'], 'HS256')
-    self.assertEqual(json_header['typ'], 'JWT')
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['alg'], 'HS256')
+    self.assertEqual(header['typ'], 'JWT')
     self.assertEqual(
         _jwt_format.decode_header(_jwt_format.encode_header(json_header)),
         json_header)
 
-  def test_decodeencode_header_rs256(self):
+  def test_decode_encode_header_rs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.2
     encoded_header = b'eyJhbGciOiJSUzI1NiJ9'
     json_header = _jwt_format.decode_header(encoded_header)
-    self.assertEqual(json_header['alg'], 'RS256')
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['alg'], 'RS256')
     self.assertEqual(
         _jwt_format.decode_header(_jwt_format.encode_header(json_header)),
         json_header)
 
-  def testdecode_header(self):
-    encoded_header = _jwt_format._base64_encode(b'{"alg":"RS256"}')
+  def test_encode_decode_header(self):
+    encoded_header = _jwt_format.encode_header('{ "alg": "RS256"} ')
     json_header = _jwt_format.decode_header(encoded_header)
-    self.assertEqual(json_header['alg'], 'RS256')
-
-  def testdecode_header_without_quotes(self):
-    encoded_header = _jwt_format._base64_encode(b'{alg:"RS256"}')
-    with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.decode_header(encoded_header)
+    self.assertEqual(json_header, '{ "alg": "RS256"} ')
 
   @parameterized.parameters([
       'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
       'RS384', 'RS512', 'PS256', 'PS384', 'PS512'
   ])
   def test_create_validate_header(self, algorithm):
-    header = _jwt_format.create_header(algorithm)
+    encoded_header = _jwt_format.create_header(algorithm)
+    header = _jwt_format.decode_header(encoded_header)
     _jwt_format.validate_header(header, algorithm)
 
   def test_create_unknown_header_fails(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.create_header('unknown')
 
-  def test_verify_wrong_header_fails(self):
-    header = _jwt_format.create_header('HS256')
+  def test_create_verify_different_algorithms_fails(self):
+    encoded_header = _jwt_format.create_header('HS256')
+    header = _jwt_format.decode_header(encoded_header)
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.validate_header(header, 'ES256')
 
   def test_verify_empty_header_fails(self):
-    header = _jwt_format.encode_header({})
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header(header, 'ES256')
+      _jwt_format.validate_header('{}', 'ES256')
 
   def test_validate_header_with_unknown_algorithm_fails(self):
-    header = _jwt_format.encode_header({})
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header(header, 'HS123')
+      _jwt_format.validate_header('{"alg":"HS123"}', 'HS123')
+
+  def test_validate_header_without_quotes(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.validate_header('{alg:"RS256"}', 'RS256')
 
   def test_validate_header_with_uppercase_typ_success(self):
-    header = _jwt_format.encode_header({'alg': 'HS256', 'typ': 'JWT'})
-    _jwt_format.validate_header(header, 'HS256')
+    _jwt_format.validate_header('{"alg":"HS256","typ":"JWT"}', 'HS256')
 
   def test_validate_header_with_lowercase_typ_success(self):
-    header = _jwt_format.encode_header({'alg': 'HS256', 'typ': 'jwt'})
-    _jwt_format.validate_header(header, 'HS256')
+    _jwt_format.validate_header('{"alg":"HS256","typ":"jwt"}', 'HS256')
 
   def test_validate_header_with_bad_typ_fails(self):
-    header = _jwt_format.encode_header({'alg': 'HS256', 'typ': 'IWT'})
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header(header, 'HS256')
+      _jwt_format.validate_header('{"alg":"HS256","typ":"IWT"}', 'HS256')
 
   def test_json_decode_encode_payload_fixed_data(self):
     # Example from https://tools.ietf.org/html/rfc7519#section-3.1
@@ -170,15 +168,76 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(encoded, b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     self.assertEqual(_jwt_format.decode_signature(encoded), signature)
 
-  def test_create_signed_compact(self):
-    unsigned_compact = b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ'
+  def test_signed_compact_create_split(self):
+    payload = '{"iss":"joe"}'
     signature = _jwt_format.decode_signature(
         b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+    unsigned_compact = _jwt_format.create_unsigned_compact('RS256', payload)
+    signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
+                                                       signature)
+    un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
+
     self.assertEqual(
-        _jwt_format.create_signed_compact(
-            unsigned_compact, signature),
-        'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ.'
+        unsigned_compact,
+        b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ')
+    self.assertEqual(
+        signed_compact, 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ.'
         'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+    self.assertEqual(un_comp, unsigned_compact)
+    self.assertEqual(sig, signature)
+    self.assertEqual(hdr, '{"alg":"RS256"}')
+    _jwt_format.validate_header(hdr, 'RS256')
+    self.assertEqual(pay, payload)
+
+  def test_split_empty_signed_compact(self):
+    un_comp, hdr, pay, sig = _jwt_format.split_signed_compact('..')
+    self.assertEqual(un_comp, b'.')
+    self.assertEmpty(sig)
+    self.assertEmpty(hdr)
+    self.assertEmpty(pay)
+
+  def test_split_signed_compact_success(self):
+    un_comp, hdr, pay, sig = _jwt_format.split_signed_compact('e30.e30.YWJj')
+    self.assertEqual(un_comp, b'e30.e30')
+    self.assertEqual(sig, b'abc')
+    self.assertEqual(hdr, '{}')
+    self.assertEqual(pay, '{}')
+
+  def test_split_signed_compact_with_bad_format_fails(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.YWJj.abc')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.YWJj.')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('.e30.e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('.e30.e30.')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('')
+
+  def test_split_signed_compact_with_bad_characters_fails(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('{e30.e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact(' e30.e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30. e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.YWJj ')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.\nYWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.\re30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30$.e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.$e30.YWJj')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.YWJj$')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact('e30.e30.YWJj\ud83c')
 
 if __name__ == '__main__':
   absltest.main()

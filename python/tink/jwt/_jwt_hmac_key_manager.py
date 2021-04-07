@@ -65,21 +65,10 @@ class _JwtHmac(_jwt_mac.JwtMac):
       self, compact: Text,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token."""
-    encoded = compact.encode('utf8')
-    try:
-      unsigned_compact, encoded_signature = encoded.rsplit(b'.', 1)
-    except ValueError:
-      raise _jwt_error.JwtInvalidError('invalid token')
-    signature = _jwt_format.decode_signature(encoded_signature)
-    self._verify_mac(signature, unsigned_compact)
-
-    try:
-      encoded_header, encoded_payload = unsigned_compact.split(b'.')
-    except ValueError:
-      raise _jwt_error.JwtInvalidError('invalid token')
-    _jwt_format.validate_header(encoded_header, self._algorithm)
-
-    json_payload = _jwt_format.decode_payload(encoded_payload)
+    parts = _jwt_format.split_signed_compact(compact)
+    unsigned_compact, json_header, json_payload, mac = parts
+    self._verify_mac(mac, unsigned_compact)
+    _jwt_format.validate_header(json_header, self._algorithm)
     raw_jwt = _raw_jwt.RawJwt.from_json_payload(json_payload)
     _jwt_validator.validate(validator, raw_jwt)
     return _verified_jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access

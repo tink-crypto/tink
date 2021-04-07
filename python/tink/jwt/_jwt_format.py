@@ -14,7 +14,7 @@
 import base64
 import json
 
-from typing import Any, Text
+from typing import Any, Text, Tuple
 
 from tink.jwt import _jwt_error
 
@@ -68,14 +68,12 @@ def _validate_algorithm(algorithm: Text) -> None:
     raise _jwt_error.JwtInvalidError('Invalid algorithm %s' % algorithm)
 
 
-def encode_header(header: Any) -> bytes:
-  json_header = json_dumps(header)
+def encode_header(json_header: Text) -> bytes:
   return _base64_encode(json_header.encode('utf8'))
 
 
-def decode_header(header: bytes) -> Any:
-  json_header = _base64_decode(header)
-  return json_loads(json_header.decode('utf8'))
+def decode_header(encoded_header: bytes) -> Text:
+  return _base64_decode(encoded_header).decode('utf8')
 
 
 def encode_payload(json_payload: Text) -> bytes:
@@ -100,13 +98,42 @@ def decode_signature(encoded_signature: bytes) -> bytes:
 
 def create_header(algorithm: Text) -> bytes:
   _validate_algorithm(algorithm)
-  return encode_header({'alg': algorithm})
+  return encode_header(json_dumps({'alg': algorithm}))
 
 
-def validate_header(header: bytes, algorithm: Text) -> None:
+def split_signed_compact(
+    signed_compact: Text) -> Tuple[bytes, Text, Text, bytes]:
+  """Splits a signed compact into its parts.
+
+  Args:
+    signed_compact: A signed compact JWT.
+  Returns:
+    A (unsigned_compact, json_header, json_payload, signature_or_mac) tuple.
+  Raises:
+    _jwt_error.JwtInvalidError if it fails.
+  """
+  try:
+    encoded = signed_compact.encode('utf8')
+  except UnicodeEncodeError:
+    raise _jwt_error.JwtInvalidError('invalid token')
+  try:
+    unsigned_compact, encoded_signature = encoded.rsplit(b'.', 1)
+  except ValueError:
+    raise _jwt_error.JwtInvalidError('invalid token')
+  signature_or_mac = decode_signature(encoded_signature)
+  try:
+    encoded_header, encoded_payload = unsigned_compact.split(b'.')
+  except ValueError:
+    raise _jwt_error.JwtInvalidError('invalid token')
+
+  json_header = decode_header(encoded_header)
+  json_payload = decode_payload(encoded_payload)
+  return (unsigned_compact, json_header, json_payload, signature_or_mac)
+
+
+def validate_header(json_header: Text, algorithm: Text) -> None:
   """Parses the header and validates its values."""
   _validate_algorithm(algorithm)
-  json_header = _base64_decode(header).decode('utf8')
   decoded_header = json_loads(json_header)
   hdr_algorithm = decoded_header.get('alg', '')
   if hdr_algorithm.upper() != algorithm:
@@ -119,8 +146,8 @@ def validate_header(header: bytes, algorithm: Text) -> None:
           'Invalid header type; expected JWT, got %s' % decoded_header['typ'])
 
 
-def create_unsigned_compact(algorithm: Text, payload: Text) -> bytes:
-  return create_header(algorithm) + b'.' + encode_payload(payload)
+def create_unsigned_compact(algorithm: Text, json_payload: Text) -> bytes:
+  return create_header(algorithm) + b'.' + encode_payload(json_payload)
 
 
 def create_signed_compact(unsigned_compact: bytes, signature: bytes) -> Text:
