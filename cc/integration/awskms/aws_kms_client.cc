@@ -70,6 +70,11 @@ StatusOr<Aws::Client::ClientConfiguration>
   config.scheme = Aws::Http::Scheme::HTTPS;
   config.connectTimeoutMs = 30000;
   config.requestTimeoutMs = 60000;
+  config.proxyUserName = std::getenv("PROXY_USERNAME");
+  config.proxyPassword = std::getenv("PROXY_PASSWORD");
+  config.proxyHost = std::getenv("PROXY_HOST");
+  config.proxyPort = atoi(std::getenv("PROXY_PORT"));
+  config.proxyScheme = Aws::Http::Scheme::HTTP;
   return config;
 }
 
