@@ -41,11 +41,9 @@ class JwtMacImpl;
 // information (typ, cty, alg and kid).
 class VerifiedJwt {
  public:
-  // VerifiedJwt objects are copiable and movable.
+  // VerifiedJwt objects are copiable and implicitly movable.
   VerifiedJwt(const VerifiedJwt&) = default;
   VerifiedJwt& operator=(const VerifiedJwt&) = default;
-  VerifiedJwt(VerifiedJwt&& other) = default;
-  VerifiedJwt& operator=(VerifiedJwt&& other) = default;
 
   bool HasIssuer() const;
   util::StatusOr<std::string> GetIssuer() const;

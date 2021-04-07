@@ -302,6 +302,19 @@ TEST(VerifiedJwt, ToString) {
   EXPECT_THAT(jwt.ToString(), IsOkAndHolds(R"({"iss":"issuer"})"));
 }
 
+TEST(VerifiedJwt, MoveMakesCopy) {
+  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  ASSERT_THAT(raw_jwt_or.status(), IsOk());
+  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
+  ASSERT_THAT(verified_jwt_or.status(), IsOk());
+  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  VerifiedJwt jwt2 = std::move(jwt);
+  EXPECT_TRUE(jwt.HasIssuer());
+  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_TRUE(jwt2.HasIssuer());
+  EXPECT_THAT(jwt2.GetIssuer(), IsOkAndHolds("issuer"));
+}
+
 }  // namespace
 
 }  // namespace tink
