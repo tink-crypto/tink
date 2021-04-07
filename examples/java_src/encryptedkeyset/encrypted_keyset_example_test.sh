@@ -61,7 +61,8 @@ test_name="encrypt"
 echo "+++ Starting test ${test_name}..."
 
 ##### Run encryption
-test_command ${CLI} encrypt ${KEYSET_FILE} ${KEK_URI} ${CREDENTIAL_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted"
+test_command ${CLI} encrypt ${KEYSET_FILE} ${KEK_URI} ${CREDENTIAL_FILE} \
+    ${DATA_FILE} "${DATA_FILE}.encrypted"
 
 if [[ ${TEST_STATUS} -eq 0 ]]; then
   echo "+++ Success: file was encrypted."
@@ -76,7 +77,8 @@ test_name="decrypt"
 echo "+++ Starting test $test_name..."
 
 ##### Run decryption
-test_command ${CLI} decrypt ${KEYSET_FILE} ${KEK_URI} ${CREDENTIAL_FILE} ${DATA_FILE}.encrypted "${DATA_FILE}.decrypted"
+test_command ${CLI} decrypt ${KEYSET_FILE} ${KEK_URI} ${CREDENTIAL_FILE} \
+    ${DATA_FILE}.encrypted "${DATA_FILE}.decrypted"
 
 if [[ ${TEST_STATUS} -eq 0 ]]; then
   echo "+++ Success: file was successfully decrypted."
