@@ -148,8 +148,8 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  if (!kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
   EXPECT_THAT(SignatureConfig::Register(), IsOk());
