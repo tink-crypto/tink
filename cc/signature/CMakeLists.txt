@@ -587,6 +587,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     absl::memory
+    crypto
 )
 
 tink_cc_test(

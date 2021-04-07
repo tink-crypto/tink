@@ -91,7 +91,10 @@ class RegistryTest : public ::testing::Test {
   void SetUp() override {
     Registry::Reset();
   }
+
   void TearDown() override {
+    // Reset is needed here to ensure Mock objects get deleted and do not leak.
+    Registry::Reset();
   }
 };
 
@@ -1366,6 +1369,8 @@ class TestPrivateKeyTypeManager
     return private_key.public_key();
   }
 
+  MOCK_METHOD(FipsCompatibility, FipsStatus, (), (const, override));
+
  private:
   const std::string kKeyType =
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
@@ -1410,57 +1415,96 @@ class TestPublicKeyTypeManager
 
   const std::string& get_key_type() const override { return kKeyType; }
 
+  MOCK_METHOD(FipsCompatibility, FipsStatus, (), (const, override));
+
  private:
   const std::string kKeyType =
       "type.googleapis.com/google.crypto.tink.EcdsaPublicKey";
 };
 
+std::unique_ptr<TestPrivateKeyTypeManager>
+CreateTestPrivateKeyManagerFipsCompatible() {
+  auto private_key_manager = absl::make_unique<TestPrivateKeyTypeManager>();
+  ON_CALL(*private_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+  return private_key_manager;
+}
+
+std::unique_ptr<TestPublicKeyTypeManager>
+CreateTestPublicKeyManagerFipsCompatible() {
+  auto public_key_manager = absl::make_unique<TestPublicKeyTypeManager>();
+  ON_CALL(*public_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+  return public_key_manager;
+}
+
 TEST_F(RegistryTest, RegisterAsymmetricKeyManagers) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), true);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), true);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricMoreRestrictiveNewKey) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
+
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), false);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), false);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricSameNewKey) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), true);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), true);
   ASSERT_TRUE(status.ok()) << status;
 
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), false)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), false)
                   .ok());
   status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), false);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), false);
   ASSERT_TRUE(status.ok()) << status;
 }
 
 TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), false);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), false);
   ASSERT_TRUE(status.ok()) << status;
   EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true),
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true),
               StatusIs(util::error::ALREADY_EXISTS,
                        HasSubstr("forbidden new key operation")));
 }
@@ -1470,9 +1514,15 @@ TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
 // remains valid.
 
 TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true),
+              IsOk());
 
   crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveA>*>
       private_key_manager = Registry::get_key_manager<PrivatePrimitiveA>(
@@ -1482,8 +1532,9 @@ TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
           TestPublicKeyTypeManager().get_key_type());
 
   ASSERT_THAT(Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), true), IsOk());
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true),
+              IsOk());
 
   EXPECT_THAT(private_key_manager.ValueOrDie()->get_key_type(),
               Eq(TestPrivateKeyTypeManager().get_key_type()));
@@ -1493,35 +1544,41 @@ TEST_F(RegistryTest, RegisterAsymmetricKeyManagersGetKeyManagerStaysValid) {
 
 
 TEST_F(RegistryTest, AsymmetricPrivateRegisterAlone) {
-  if (kUseOnlyFips) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
   }
 
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<TestPrivateKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(), true)
                   .ok());
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   // Registering the same as asymmetric key managers must fail, because doing so
   // would mean we invalidate key managers previously obtained with
   // get_key_manager().
   ASSERT_FALSE(Registry::RegisterAsymmetricKeyManagers(
-                   absl::make_unique<TestPrivateKeyTypeManager>(),
-                   absl::make_unique<TestPublicKeyTypeManager>(), true)
+                   CreateTestPrivateKeyManagerFipsCompatible(),
+                   CreateTestPublicKeyManagerFipsCompatible(), true)
                    .ok());
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<TestPrivateKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(), true)
                   .ok());
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
 }
 
 TEST_F(RegistryTest, AsymmetricGetPrimitiveA) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveA>*> km =
       Registry::get_key_manager<PrivatePrimitiveA>(
@@ -1532,9 +1589,14 @@ TEST_F(RegistryTest, AsymmetricGetPrimitiveA) {
 }
 
 TEST_F(RegistryTest, AsymmetricGetPrimitiveB) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PrivatePrimitiveB>*> km =
       Registry::get_key_manager<PrivatePrimitiveB>(
@@ -1545,9 +1607,14 @@ TEST_F(RegistryTest, AsymmetricGetPrimitiveB) {
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveA) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*> km =
       Registry::get_key_manager<PublicPrimitiveA>(
@@ -1558,9 +1625,14 @@ TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveA) {
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveB) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveB>*> km =
       Registry::get_key_manager<PublicPrimitiveB>(
@@ -1571,9 +1643,14 @@ TEST_F(RegistryTest, AsymmetricGetPublicPrimitiveB) {
 }
 
 TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   crypto::tink::util::StatusOr<const KeyManager<PublicPrimitiveA>*> km =
       Registry::get_key_manager<PublicPrimitiveA>(
@@ -1587,12 +1664,22 @@ class PrivateKeyManagerImplTest : public testing::Test {
   void SetUp() override {
     Registry::Reset();
   }
+
+  void TearDown() override {
+    // Reset is needed here to ensure Mock objects get deleted and do not leak.
+    Registry::Reset();
+  }
 };
 
 TEST_F(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
 
   EcdsaKeyFormat key_format;
@@ -1612,13 +1699,18 @@ TEST_F(PrivateKeyManagerImplTest, AsymmetricFactoryNewKeyFromMessage) {
 }
 
 TEST_F(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), true)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), true)
                   .ok());
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
-                  absl::make_unique<TestPrivateKeyTypeManager>(),
-                  absl::make_unique<TestPublicKeyTypeManager>(), false)
+                  CreateTestPrivateKeyManagerFipsCompatible(),
+                  CreateTestPublicKeyManagerFipsCompatible(), false)
                   .ok());
 
   KeyTemplate key_template;
@@ -1628,9 +1720,14 @@ TEST_F(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicKeyData) {
+  if (kUseOnlyFips && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
+                    "not available";
+  }
+
   crypto::tink::util::Status status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<TestPrivateKeyTypeManager>(),
-      absl::make_unique<TestPublicKeyTypeManager>(), true);
+      CreateTestPrivateKeyManagerFipsCompatible(),
+      CreateTestPublicKeyManagerFipsCompatible(), true);
   EcdsaPrivateKey private_key;
   private_key.mutable_public_key()->mutable_params()->set_encoding(
       EcdsaSignatureEncoding::DER);
@@ -1692,6 +1789,10 @@ class TestPublicKeyTypeManagerWithDifferentKeyType
 };
 
 TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   ASSERT_TRUE(Registry::RegisterAsymmetricKeyManagers(
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)

@@ -71,6 +71,10 @@ class EcdsaSignKeyManager
     return private_key.public_key();
   }
 
+  FipsCompatibility FipsStatus() const override {
+    return FipsCompatibility::kRequiresBoringCrypto;
+  }
+
  private:
   const std::string key_type_ =
       absl::StrCat(kTypeGoogleapisCom,

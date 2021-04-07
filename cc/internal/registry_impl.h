@@ -557,6 +557,30 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   std::string public_type_url = public_key_manager->get_key_type();
 
   absl::MutexLock lock(&maps_mutex_);
+
+  // Check FIPS status
+  auto private_fips_status =
+      ChecksFipsCompatibility(private_key_manager->FipsStatus());
+
+  if (!private_fips_status.ok()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INTERNAL,
+        absl::StrCat("Failed registering the key manager for ",
+                     typeid(*private_key_manager).name(),
+                     " as it is not FIPS compatible."));
+  }
+
+  auto public_fips_status =
+      ChecksFipsCompatibility(public_key_manager->FipsStatus());
+
+  if (!public_fips_status.ok()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INTERNAL,
+        absl::StrCat("Failed registering the key manager for ",
+                     typeid(*public_key_manager).name(),
+                     " as it is not FIPS compatible."));
+  }
+
   crypto::tink::util::Status status = CheckInsertable(
       private_type_url, std::type_index(typeid(*private_key_manager)),
       new_key_allowed);
