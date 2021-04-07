@@ -95,9 +95,6 @@ proto_library(
         "jwt_rsa_ssa_pkcs1.proto",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":common_proto",
-    ],
 )
 
 # -----------------------------------------------
@@ -109,9 +106,6 @@ proto_library(
         "jwt_rsa_ssa_pss.proto",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":common_proto",
-    ],
 )
 
 # -----------------------------------------------
@@ -123,9 +117,6 @@ proto_library(
         "jwt_ecdsa.proto",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":common_proto",
-    ],
 )
 
 # -----------------------------------------------

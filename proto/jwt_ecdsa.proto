@@ -18,8 +18,6 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-import "proto/common.proto";
-
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_ecdsa_go_proto";
