@@ -85,6 +85,11 @@ Cecpq2HkdfX25519RecipientKemBoringSsl::GenerateKey(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "kem_bytes has unexpected size");
   }
+  if (key_size_in_bytes < 32) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "key size length is smaller than 32 bytes "
+                        "and thus not post-quantum secure.");
+  }
 
   // Recover X25519 shared secret
   util::SecretData x25519_shared_secret(X25519_SHARED_KEY_LEN);

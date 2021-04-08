@@ -31,6 +31,9 @@
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
 
+using ::crypto::tink::test::StatusIs;
+using ::testing::HasSubstr;
+
 namespace crypto {
 namespace tink {
 namespace subtle {
@@ -84,6 +87,43 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
   // This test should fail with an unimplemented algorithm error
   EXPECT_EQ(util::error::UNIMPLEMENTED,
             status_or_sender_kem.status().error_code());
+}
+
+// This test checks that an error is triggered if an output key lenth smaller
+// than 32 bytes is specified.
+TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  // Declaring auxiliary parameters
+  std::string salt_hex = "0b0b0b0b";
+  std::string info_hex = "0b0b0b0b0b0b0b0b";
+
+  // Not post-quantum secure output key length
+  int out_len = 31;
+
+  auto statur_or_cecpq2_key =
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+  ASSERT_TRUE(statur_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+
+  // Creating an instance of Cecpq2HkdfSenderKemBoringSsl
+  auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(
+      EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
+      cecpq2_key_pair.x25519_key_pair.pub_y,
+      cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+  auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  // Generating a symmetric key
+  auto status_or_kem_key = sender_kem->GenerateKey(
+      HashType::SHA256, test::HexDecodeOrDie(salt_hex),
+      test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
+
+  EXPECT_THAT(status_or_kem_key.status(),
+              StatusIs(util::error::INVALID_ARGUMENT,
+                       HasSubstr("not post-quantum secure")));
 }
 
 // This test evaluates if a Sender can successfully generate a symmetric key.

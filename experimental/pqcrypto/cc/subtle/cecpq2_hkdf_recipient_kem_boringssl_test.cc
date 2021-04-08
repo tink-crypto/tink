@@ -22,6 +22,9 @@
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
+using ::crypto::tink::test::StatusIs;
+using ::testing::HasSubstr;
+
 namespace crypto {
 namespace tink {
 namespace subtle {
@@ -153,6 +156,37 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
   // error given the UNKNOWN_CURVE parameter
   EXPECT_EQ(util::error::UNIMPLEMENTED,
             status_or_recipient_kem.status().error_code());
+}
+
+// This test checks that an error is triggered if an output key lenth smaller
+// than 32 bytes is specified.
+TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
+  if (kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  // Not post-quantum secure output key length
+  int out_len = 31;
+
+  // Creating the CECPQ2 recipient KEM using HRSS and X25519 private keys
+  util::SecretData hrss_private_key_seed =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kHrssKeyGenEntropy));
+  auto cecpq2_recipient_kem_or = Cecpq2HkdfRecipientKemBoringSsl::New(
+      EllipticCurveType::CURVE25519,
+      util::SecretDataFromStringView(
+          test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
+      std::move(hrss_private_key_seed));
+  ASSERT_TRUE(cecpq2_recipient_kem_or.ok());
+  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
+
+  // Recovering the symmetric key
+  auto kem_key_or = cecpq2_recipient_kem->GenerateKey(
+      test::HexDecodeOrDie(kCecpq2KemBytes), HashType::SHA256,
+      test::HexDecodeOrDie(kSaltHex), test::HexDecodeOrDie(kInfoHex), out_len,
+      EcPointFormat::COMPRESSED);
+  EXPECT_THAT(kem_key_or.status(),
+              StatusIs(util::error::INVALID_ARGUMENT,
+                       HasSubstr("not post-quantum secure")));
 }
 
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {

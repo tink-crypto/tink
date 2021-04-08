@@ -99,6 +99,11 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
         util::error::INVALID_ARGUMENT,
         "X25519 only supports compressed elliptic curve points");
   }
+  if (key_size_in_bytes < 32) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "key size length is smaller than 32 bytes "
+                        "and thus not post-quantum secure.");
+  }
 
   // Generate the ephemeral X25519 key pair. Note that the
   // X25519_kem_bytes holds the X25519 public key
