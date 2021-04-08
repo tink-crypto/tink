@@ -31,6 +31,7 @@ using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
@@ -189,5 +190,6 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
 }
 
 }  // namespace
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

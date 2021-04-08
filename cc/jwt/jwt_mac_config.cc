@@ -29,14 +29,14 @@ namespace tink {
 // static
 util::Status JwtMacRegister() {
   // Register primitive wrapper.
-  auto status =
-      Registry::RegisterPrimitiveWrapper(absl::make_unique<JwtMacWrapper>());
+  auto status = Registry::RegisterPrimitiveWrapper(
+      absl::make_unique<jwt_internal::JwtMacWrapper>());
   if (!status.ok()) return status;
 
   // Register key managers which utilize the FIPS validated BoringCrypto
   // implementations.
   status = Registry::RegisterKeyTypeManager(
-      absl::make_unique<JwtHmacKeyManager>(), true);
+      absl::make_unique<jwt_internal::JwtHmacKeyManager>(), true);
   if (!status.ok()) return status;
 
   if (kUseOnlyFips) {

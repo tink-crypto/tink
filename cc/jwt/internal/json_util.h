@@ -22,6 +22,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
     absl::string_view json_string);
@@ -35,6 +36,7 @@ util::StatusOr<std::string> ProtoStructToJsonString(
 util::StatusOr<std::string> ProtoListToJsonString(
     const google::protobuf::ListValue& proto);
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
 

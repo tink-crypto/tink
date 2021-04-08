@@ -21,6 +21,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 using google::crypto::tink::OutputPrefixType;
 
@@ -93,5 +94,6 @@ util::StatusOr<std::unique_ptr<JwtMac>> JwtMacWrapper::Wrap(
   return std::move(jwt_mac);
 }
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

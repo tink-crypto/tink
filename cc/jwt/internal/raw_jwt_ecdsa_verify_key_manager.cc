@@ -30,6 +30,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
@@ -113,5 +114,6 @@ Status RawJwtEcdsaVerifyKeyManager::ValidateKey(
   return ValidateAlgorithm(key.algorithm());
 }
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

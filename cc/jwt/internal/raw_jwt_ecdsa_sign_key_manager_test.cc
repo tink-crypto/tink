@@ -32,6 +32,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
@@ -197,5 +198,6 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateDifferentKey) {
 }
 
 }  // namespace
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

@@ -24,6 +24,7 @@ using ::crypto::tink::test::IsOkAndHolds;
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 TEST(JsonUtil, ParseThenSerializeStructWtihStringListOk) {
   auto proto_or =
@@ -99,6 +100,6 @@ TEST(JsonUtil, ParseListWithCommentNotOk) {
   EXPECT_FALSE(proto_or.ok());
 }
 
-
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

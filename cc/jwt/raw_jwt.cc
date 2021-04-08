@@ -60,7 +60,7 @@ bool hasClaimOfKind(const google::protobuf::Struct& json_proto,
 }  // namespace
 
 util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
-  auto proto_or = JsonStringToProtoStruct(json_string);
+  auto proto_or = jwt_internal::JsonStringToProtoStruct(json_string);
   if (!proto_or.ok()) {
     return proto_or.status();
   }
@@ -69,7 +69,7 @@ util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
 }
 
 util::StatusOr<std::string> RawJwt::ToString() const {
-  return ProtoStructToJsonString(json_proto_);
+  return jwt_internal::ProtoStructToJsonString(json_proto_);
 }
 
 RawJwt::RawJwt() {}
@@ -316,7 +316,7 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
         util::error::INVALID_ARGUMENT,
         absl::Substitute("claim '$0' is not a JSON object", name));
   }
-  return ProtoStructToJsonString(value.struct_value());
+  return jwt_internal::ProtoStructToJsonString(value.struct_value());
 }
 
 bool RawJwt::HasJsonArrayClaim(absl::string_view name) const {
@@ -342,7 +342,7 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
         util::error::INVALID_ARGUMENT,
         absl::Substitute("claim '$0' is not a JSON array", name));
   }
-  return ProtoListToJsonString(value.list_value());
+  return jwt_internal::ProtoListToJsonString(value.list_value());
 }
 
 std::vector<std::string> RawJwt::CustomClaimNames() const {
@@ -472,7 +472,7 @@ util::Status RawJwtBuilder::AddJsonObjectClaim(absl::string_view name,
   if (!status.ok()) {
     return status;
   }
-  auto proto_or = JsonStringToProtoStruct(object_value);
+  auto proto_or = jwt_internal::JsonStringToProtoStruct(object_value);
   if (!proto_or.ok()) {
     return proto_or.status();
   }
@@ -489,7 +489,7 @@ util::Status RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
   if (!status.ok()) {
     return status;
   }
-  auto list_or = JsonStringToProtoList(array_value);
+  auto list_or = jwt_internal::JsonStringToProtoList(array_value);
   if (!list_or.ok()) {
     return list_or.status();
   }

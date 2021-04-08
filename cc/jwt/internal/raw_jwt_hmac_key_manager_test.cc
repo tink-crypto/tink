@@ -32,7 +32,7 @@
 
 namespace crypto {
 namespace tink {
-namespace internal {
+namespace jwt_internal {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
@@ -194,6 +194,6 @@ TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
 }
 
 }  // namespace
-}  // namespace internal
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

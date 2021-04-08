@@ -31,6 +31,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 class RawJwtEcdsaSignKeyManager
     : public PrivateKeyTypeManager<google::crypto::tink::JwtEcdsaPrivateKey,
@@ -77,6 +78,11 @@ class RawJwtEcdsaSignKeyManager
       absl::StrCat(kTypeGoogleapisCom,
                    google::crypto::tink::JwtEcdsaPrivateKey().GetTypeName());
 };
+
+}  // namespace jwt_internal
+
+// TODO(juerg): remove this once all users are migrated.
+typedef jwt_internal::RawJwtEcdsaSignKeyManager RawJwtEcdsaSignKeyManager;
 
 }  // namespace tink
 }  // namespace crypto

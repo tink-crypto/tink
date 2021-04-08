@@ -35,7 +35,7 @@
 
 namespace crypto {
 namespace tink {
-namespace internal {
+namespace jwt_internal {
 
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
@@ -97,6 +97,6 @@ Status RawJwtHmacKeyManager::ValidateKeyFormat(
   return ValidateHashType(key_format.hash_type());
 }
 
-}  // namespace internal
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

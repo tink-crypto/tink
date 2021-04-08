@@ -22,6 +22,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 // Wraps a set of JwtMac-instances that correspond to a keyset,
 // and combines them into a single JwtMac-primitive, that uses the provided
@@ -35,6 +36,7 @@ class JwtMacWrapper : public PrimitiveWrapper<JwtMac, JwtMac> {
       std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set) const override;
 };
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
 

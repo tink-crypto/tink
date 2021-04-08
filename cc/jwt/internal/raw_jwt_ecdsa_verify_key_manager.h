@@ -32,6 +32,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 class RawJwtEcdsaVerifyKeyManager
     : public KeyTypeManager<google::crypto::tink::JwtEcdsaPublicKey, void,
@@ -75,6 +76,11 @@ class RawJwtEcdsaVerifyKeyManager
                    google::crypto::tink::JwtEcdsaPublicKey().GetTypeName());
   friend class RawJwtEcdsaSignKeyManager;
 };
+
+}  // namespace jwt_internal
+
+// TODO(juerg): remove this once all users are migrated.
+typedef jwt_internal::RawJwtEcdsaVerifyKeyManager RawJwtEcdsaVerifyKeyManager;
 
 }  // namespace tink
 }  // namespace crypto

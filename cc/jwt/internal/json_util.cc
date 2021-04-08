@@ -19,6 +19,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 namespace {
 
@@ -73,5 +74,6 @@ util::StatusOr<std::string> ProtoListToJsonString(
   return output;
 }
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto

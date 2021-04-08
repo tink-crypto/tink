@@ -35,7 +35,7 @@
 
 namespace crypto {
 namespace tink {
-namespace internal {
+namespace jwt_internal {
 
 ///////////////////////////////////////////////////////////////////////////////
 // This key manager creates MAC primitives from JwtHmacKeys. It is by the Tink
@@ -99,7 +99,13 @@ class RawJwtHmacKeyManager
       kTypeGoogleapisCom, google::crypto::tink::JwtHmacKey().GetTypeName());
 };
 
+}  // namespace jwt_internal
+
+// TODO(juerg): remove this once all users are migrated.
+namespace internal {
+  typedef jwt_internal::RawJwtHmacKeyManager RawJwtHmacKeyManager;
 }  // namespace internal
+
 }  // namespace tink
 }  // namespace crypto
 

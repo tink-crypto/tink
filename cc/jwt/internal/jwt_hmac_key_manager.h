@@ -34,6 +34,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 class JwtHmacKeyManager
     : public KeyTypeManager<google::crypto::tink::JwtHmacKey,
@@ -102,11 +103,12 @@ class JwtHmacKeyManager
       InputStream* input_stream) const override;
 
  private:
-  const internal::RawJwtHmacKeyManager raw_key_manager_;
+  const RawJwtHmacKeyManager raw_key_manager_;
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::JwtHmacKey().GetTypeName());
 };
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
 
