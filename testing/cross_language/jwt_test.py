@@ -72,11 +72,10 @@ class JwtTest(parameterized.TestCase):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     raw_jwt = jwt.new_raw_jwt(
         issuer='issuer',
-        audiences=['audience1', 'audience2'],
         expiration=now + datetime.timedelta(seconds=100))
     for p in supported_jwt_macs:
       compact = p.compute_mac_and_encode(raw_jwt)
-      validator = jwt.new_validator(audience='audience1', fixed_now=now)
+      validator = jwt.new_validator(fixed_now=now)
       for p2 in supported_jwt_macs:
         verified_jwt = p2.verify_mac_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
@@ -124,11 +123,10 @@ class JwtTest(parameterized.TestCase):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     raw_jwt = jwt.new_raw_jwt(
         issuer='issuer',
-        audiences=['audience1', 'audience2'],
         expiration=now + datetime.timedelta(seconds=100))
     for signer in supported_signers:
       compact = signer.sign_and_encode(raw_jwt)
-      validator = jwt.new_validator(audience='audience1', fixed_now=now)
+      validator = jwt.new_validator(fixed_now=now)
       for verifier in supported_verifiers:
         verified_jwt = verifier.verify_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')

@@ -197,6 +197,7 @@ class TestingServersTest(parameterized.TestCase):
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    # HERE
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
@@ -210,8 +211,8 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_public_key_sign_verify(self, lang):
-    if lang == 'python':
-      # TODO(juerg): Remove this once this key type is supported in Python.
+    if lang == 'cc' or lang == 'python':
+      # TODO(juerg): Remove this once this key type is supported.
       return
     key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
         algorithm=jwt_ecdsa_pb2.ES256)

@@ -251,6 +251,38 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "jwt_impl",
+    srcs = ["jwt_impl.cc"],
+    hdrs = ["jwt_impl.h"],
+    deps = [
+        ":testing_api_cpp_library",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/time",
+        "@tink_cc",
+        "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//jwt:jwt_mac",
+        "@tink_cc//jwt:raw_jwt",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_test(
+    name = "jwt_impl_test",
+    srcs = ["jwt_impl_test.cc"],
+    deps = [
+        ":jwt_impl",
+        ":testing_api_cpp_library",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//:binary_keyset_writer",
+        "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//jwt:jwt_key_templates",
+        "@tink_cc//jwt:jwt_mac_config",
+        "@tink_cc//util:test_matchers",
+    ],
+)
+
 cc_binary(
     name = "testing_server",
     srcs = ["testing_server.cc"],
@@ -258,6 +290,7 @@ cc_binary(
         ":aead_impl",
         ":deterministic_aead_impl",
         ":hybrid_impl",
+        ":jwt_impl",
         ":keyset_impl",
         ":mac_impl",
         ":metadata_impl",
@@ -269,6 +302,7 @@ cc_binary(
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@tink_cc//config:tink_config",
+        "@tink_cc//jwt:jwt_mac_config",
         "@tink_cc//util:fake_kms_client",
     ],
 )

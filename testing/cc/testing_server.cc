@@ -17,6 +17,7 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "tink/config/tink_config.h"
+#include "tink/jwt/jwt_mac_config.h"
 #include "tink/util/fake_kms_client.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
@@ -28,6 +29,7 @@
 #include "prf_set_impl.h"
 #include "signature_impl.h"
 #include "streaming_aead_impl.h"
+#include "jwt_impl.h"
 
 ABSL_FLAG(int, port, 23456, "the port");
 
@@ -35,6 +37,12 @@ void RunServer() {
   auto status = crypto::tink::TinkConfig::Register();
   if (!status.ok()) {
     std::cout << "TinkConfig::Register() failed: " << status.error_message()
+              << std::endl;
+    return;
+  }
+  auto jwt_status = crypto::tink::JwtMacRegister();
+  if (!jwt_status.ok()) {
+    std::cout << "JwtMacRegister() failed: " << status.error_message()
               << std::endl;
     return;
   }
@@ -59,6 +67,7 @@ void RunServer() {
   tink_testing_api::SignatureImpl signature;
   tink_testing_api::StreamingAeadImpl streaming_aead;
   tink_testing_api::PrfSetImpl prf_set;
+  tink_testing_api::JwtImpl jwt;
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(
@@ -73,6 +82,7 @@ void RunServer() {
   builder.RegisterService(&signature);
   builder.RegisterService(&prf_set);
   builder.RegisterService(&streaming_aead);
+  builder.RegisterService(&jwt);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << server_address << std::endl;

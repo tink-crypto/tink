@@ -30,6 +30,7 @@ cc_library(
     srcs = ["raw_jwt.cc"],
     hdrs = ["raw_jwt.h"],
     include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         ":jwt_names",
         "//jwt/internal:json_util",
@@ -47,6 +48,7 @@ cc_library(
     srcs = ["verified_jwt.cc"],
     hdrs = ["verified_jwt.h"],
     include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         ":jwt_names",
         ":raw_jwt",
@@ -64,6 +66,7 @@ cc_library(
     srcs = ["jwt_validator.cc"],
     hdrs = ["jwt_validator.h"],
     include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         ":raw_jwt",
         "//util:status",
@@ -120,6 +123,7 @@ cc_library(
     srcs = ["jwt_mac_config.cc"],
     hdrs = ["jwt_mac_config.h"],
     include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         "//:registry",
         "//config:config_util",
@@ -138,6 +142,7 @@ cc_library(
     srcs = ["jwt_key_templates.cc"],
     hdrs = ["jwt_key_templates.h"],
     include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         "//proto:common_cc_proto",
         "//proto:jwt_hmac_cc_proto",
