@@ -77,9 +77,7 @@ class BinaryKeysetReader(KeysetReader):
     if not self._serialized_keyset:
       raise core.TinkError('No keyset found')
     try:
-      keyset = tink_pb2.Keyset()
-      keyset.ParseFromString(self._serialized_keyset)
-      return keyset
+      return tink_pb2.Keyset.FromString(self._serialized_keyset)
     except message.DecodeError as e:
       raise core.TinkError(e)
 
@@ -87,8 +85,6 @@ class BinaryKeysetReader(KeysetReader):
     if not self._serialized_keyset:
       raise core.TinkError('No keyset found')
     try:
-      encrypted_keyset = tink_pb2.EncryptedKeyset()
-      encrypted_keyset.ParseFromString(self._serialized_keyset)
-      return encrypted_keyset
+      return tink_pb2.EncryptedKeyset.FromString(self._serialized_keyset)
     except message.DecodeError as e:
       raise core.TinkError(e)

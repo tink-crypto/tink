@@ -52,8 +52,8 @@ class HybridKeyTemplatesTest(parameterized.TestCase):
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
         template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat.FromString(
+        template.value)
     self.assertEqual(key_format.params.kem_params.curve_type,
                      common_pb2.NIST_P521)
     self.assertEqual(key_format.params.kem_params.hkdf_hash_type,

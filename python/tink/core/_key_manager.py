@@ -29,13 +29,6 @@ from tink.core import _tink_error
 P = TypeVar('P')
 
 
-def deserialize_key_data(serialized_proto):
-  """Convert serialized KeyData proto to native Python proto."""
-  key_data = tink_pb2.KeyData()
-  key_data.ParseFromString(serialized_proto)
-  return key_data
-
-
 @six.add_metaclass(abc.ABCMeta)
 class KeyManager(Generic[P]):
   """Generates keys and provides primitives for the keys.
@@ -131,7 +124,7 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
   @_tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
-    return deserialize_key_data(
+    return tink_pb2.KeyData.FromString(
         self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
 
@@ -160,10 +153,10 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
   @_tink_error.use_tink_errors
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
-    return deserialize_key_data(
+    return tink_pb2.KeyData.FromString(
         self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
   @_tink_error.use_tink_errors
   def public_key_data(self, key_data: tink_pb2.KeyData) -> tink_pb2.KeyData:
-    return deserialize_key_data(
+    return tink_pb2.KeyData.FromString(
         self._cc_key_manager.public_key_data(key_data.SerializeToString()))

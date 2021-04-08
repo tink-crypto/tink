@@ -59,8 +59,7 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesEaxKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = aes_eax_pb2.AesEaxKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = aes_eax_pb2.AesEaxKeyFormat.FromString(template.value)
     self.assertEqual(42, key_format.key_size)
     self.assertEqual(72, key_format.params.iv_size)
 
@@ -71,8 +70,7 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = aes_gcm_pb2.AesGcmKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = aes_gcm_pb2.AesGcmKeyFormat.FromString(template.value)
     self.assertEqual(42, key_format.key_size)
 
   def test_create_aes_gcm_siv_key_template(self):
@@ -81,8 +79,7 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesGcmSivKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat.FromString(template.value)
     self.assertEqual(42, key_format.key_size)
 
   def test_create_aes_ctr_hmac_aead_key_template(self):
@@ -97,8 +94,8 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual('type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKeyFormat.FromString(
+        template.value)
     self.assertEqual(93, key_format.aes_ctr_key_format.params.iv_size)
     self.assertEqual(34, key_format.aes_ctr_key_format.key_size)
     self.assertEqual(common_pb2.SHA1, key_format.hmac_key_format.params.hash)
@@ -111,8 +108,7 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual(template.type_url,
                      'type.googleapis.com/google.crypto.tink.KmsAeadKey')
     self.assertEqual(template.output_prefix_type, tink_pb2.RAW)
-    key_format = kms_aead_pb2.KmsAeadKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = kms_aead_pb2.KmsAeadKeyFormat.FromString(template.value)
     self.assertEqual(key_format.key_uri, 'fake://kek/uri')
 
   def test_create_kms_envelope_aead_key_template(self):
@@ -123,8 +119,8 @@ class AeadKeyTemplatesTest(parameterized.TestCase):
         template.type_url,
         'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
     self.assertEqual(template.output_prefix_type, tink_pb2.RAW)
-    key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = kms_envelope_pb2.KmsEnvelopeAeadKeyFormat.FromString(
+        template.value)
     self.assertEqual(key_format.kek_uri, 'fake://kek/uri')
     self.assertEqual(key_format.dek_template.type_url,
                      aead.aead_key_templates.AES128_GCM.type_url)

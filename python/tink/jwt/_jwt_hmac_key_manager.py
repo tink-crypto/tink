@@ -100,9 +100,7 @@ class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMac]):
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
     data = self._cc_key_manager.new_key_data(key_template.SerializeToString())
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(data)
-    return key_data
+    return tink_pb2.KeyData.FromString(data)
 
 
 def register():

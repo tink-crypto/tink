@@ -63,12 +63,10 @@ class AeadKeyManagerTest(absltest.TestCase):
   def test_new_key_data(self):
     key_template = self.new_aes_eax_key_template(12, 16)
     serialized_key_data = self.key_manager.new_key_data(key_template)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(serialized_key_data)
+    key_data = tink_pb2.KeyData.FromString(serialized_key_data)
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
-    key = aes_eax_pb2.AesEaxKey()
-    key.ParseFromString(key_data.value)
+    key = aes_eax_pb2.AesEaxKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertEqual(key.params.iv_size, 12)
     self.assertLen(key.key_value, 16)
@@ -111,12 +109,11 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def test_new_key_data(self):
     key_template = self.new_aes_siv_key_template(64)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    key_data = tink_pb2.KeyData.FromString(
+        self.key_manager.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
-    key = aes_siv_pb2.AesSivKey()
-    key.ParseFromString(key_data.value)
+    key = aes_siv_pb2.AesSivKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 64)
 
@@ -150,16 +147,14 @@ class HybridKeyManagerTest(absltest.TestCase):
 
   def test_new_key_data(self):
     key_manager = self.hybrid_decrypt_key_manager()
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(
+    key_data = tink_pb2.KeyData.FromString(
         key_manager.new_key_data(
             hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM
             .SerializeToString()))
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type,
                      tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
-    key = ecies_aead_hkdf_pb2.EciesAeadHkdfPrivateKey()
-    key.ParseFromString(key_data.value)
+    key = ecies_aead_hkdf_pb2.EciesAeadHkdfPrivateKey.FromString(key_data.value)
     self.assertLen(key.key_value, 32)
     self.assertEqual(key.public_key.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
@@ -222,11 +217,10 @@ class MacKeyManagerTest(absltest.TestCase):
 
   def test_new_key_data(self):
     key_template = self.new_hmac_key_template(common_pb2.SHA256, 24, 16)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    key_data = tink_pb2.KeyData.FromString(
+        self.key_manager.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
-    key = hmac_pb2.HmacKey()
-    key.ParseFromString(key_data.value)
+    key = hmac_pb2.HmacKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertEqual(key.params.hash, common_pb2.SHA256)
     self.assertEqual(key.params.tag_size, 24)
@@ -278,11 +272,10 @@ class JwtMacKeyManagerTest(absltest.TestCase):
 
   def test_new_key_data(self):
     key_template = self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    key_data = tink_pb2.KeyData.FromString(
+        self.key_manager.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
-    key = jwt_hmac_pb2.JwtHmacKey()
-    key.ParseFromString(key_data.value)
+    key = jwt_hmac_pb2.JwtHmacKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertEqual(key.hash_type, common_pb2.SHA256)
     self.assertLen(key.key_value, 32)
@@ -335,11 +328,10 @@ class PrfKeyManagerTest(absltest.TestCase):
   def test_new_key_data(self):
     key_template = self.new_hmac_prf_key_template(
         hash_type=common_pb2.SHA256, key_size=16)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(self.key_manager.new_key_data(key_template))
+    key_data = tink_pb2.KeyData.FromString(
+        self.key_manager.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
-    key = hmac_pb2.HmacKey()
-    key.ParseFromString(key_data.value)
+    key = hmac_pb2.HmacKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertEqual(key.params.hash, common_pb2.SHA256)
     self.assertLen(key.key_value, 16)
@@ -405,11 +397,10 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
   def test_new_key_data_sign(self):
     key_template = self.new_ecdsa_key_template(
         common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER)
-    key_data = tink_pb2.KeyData()
-    key_data.ParseFromString(self.key_manager_sign.new_key_data(key_template))
+    key_data = tink_pb2.KeyData.FromString(
+        self.key_manager_sign.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager_sign.key_type())
-    key = ecdsa_pb2.EcdsaPrivateKey()
-    key.ParseFromString(key_data.value)
+    key = ecdsa_pb2.EcdsaPrivateKey.FromString(key_data.value)
     public_key = key.public_key
     self.assertEqual(key.version, 0)
     self.assertEqual(public_key.version, 0)

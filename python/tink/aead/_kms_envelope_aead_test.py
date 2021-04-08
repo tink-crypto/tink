@@ -129,8 +129,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
     dek_bytes = remote_aead.decrypt(encrypted_dek_bytes, b'')
 
     # Try to deserialize key
-    key = aes_gcm_pb2.AesGcmKey()
-    key.ParseFromString(dek_bytes)
+    key = aes_gcm_pb2.AesGcmKey.FromString(dek_bytes)
 
     self.assertLen(key.key_value, 32)
 

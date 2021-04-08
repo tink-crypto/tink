@@ -52,8 +52,8 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
     key_data = core.Registry.new_key_data(key_template)
     self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
-    key = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKey()
-    key.ParseFromString(key_data.value)
+    key = aes_gcm_hkdf_streaming_pb2.AesGcmHkdfStreamingKey.FromString(
+        key_data.value)
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 16)
     self.assertEqual(key.params.hkdf_hash_type, common_pb2.HashType.SHA256)
@@ -66,8 +66,8 @@ class StreamingAeadKeyManagerTest(parameterized.TestCase):
     key_data = core.Registry.new_key_data(key_template)
     self.assertEqual(key_data.type_url, key_template.type_url)
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
-    key = aes_ctr_hmac_streaming_pb2.AesCtrHmacStreamingKey()
-    key.ParseFromString(key_data.value)
+    key = aes_ctr_hmac_streaming_pb2.AesCtrHmacStreamingKey.FromString(
+        key_data.value)
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 16)
     self.assertEqual(key.params.hkdf_hash_type, common_pb2.HashType.SHA256)

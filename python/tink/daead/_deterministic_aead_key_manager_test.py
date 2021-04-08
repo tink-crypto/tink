@@ -39,8 +39,7 @@ class DeterministicAeadKeyManagerTest(absltest.TestCase):
     key_data = key_manager.new_key_data(key_template)
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type, tink_pb2.KeyData.SYMMETRIC)
-    key = aes_siv_pb2.AesSivKey()
-    key.ParseFromString(key_data.value)
+    key = aes_siv_pb2.AesSivKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
     self.assertLen(key.key_value, 64)
 

@@ -47,8 +47,7 @@ class MacKeyTemplatesTest(parameterized.TestCase):
     self.assertEqual('type.googleapis.com/google.crypto.tink.HmacKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)
-    key_format = hmac_pb2.HmacKeyFormat()
-    key_format.ParseFromString(template.value)
+    key_format = hmac_pb2.HmacKeyFormat.FromString(template.value)
     self.assertEqual(42, key_format.key_size)
     self.assertEqual(24, key_format.params.tag_size)
     self.assertEqual(common_pb2.SHA512, key_format.params.hash)

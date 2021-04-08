@@ -117,8 +117,7 @@ class KeysetBuilder(object):
 
 def from_keyset(keyset: bytes) -> KeysetBuilder:
   """Return a KeysetBuilder for a Keyset copied from a KeysetHandle."""
-  keyset_proto = tink_pb2.Keyset()
-  keyset_proto.ParseFromString(keyset)
+  keyset_proto = tink_pb2.Keyset.FromString(keyset)
   return KeysetBuilder(keyset_proto)
 
 

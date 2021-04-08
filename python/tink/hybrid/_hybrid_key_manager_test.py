@@ -44,8 +44,7 @@ class HybridKeyManagerTest(parameterized.TestCase):
     self.assertEqual(key_data.type_url, key_manager.key_type())
     self.assertEqual(key_data.key_material_type,
                      tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
-    key = ecies_aead_hkdf_pb2.EciesAeadHkdfPrivateKey()
-    key.ParseFromString(key_data.value)
+    key = ecies_aead_hkdf_pb2.EciesAeadHkdfPrivateKey.FromString(key_data.value)
     self.assertLen(key.key_value, 32)
     self.assertEqual(key.public_key.params.kem_params.curve_type,
                      common_pb2.NIST_P256)
