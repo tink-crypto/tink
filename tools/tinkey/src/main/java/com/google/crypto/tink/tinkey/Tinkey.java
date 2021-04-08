@@ -35,6 +35,7 @@ public final class Tinkey {
     SignatureConfig.register();
     StreamingAeadConfig.register();
     // place holder for KeyderivationConfig. DO NOT EDIT.
+    // place holder for Internal Prps. DO NOT EDIT.
     TinkeyCommands commands = new TinkeyCommands();
     CmdLineParser parser = new CmdLineParser(commands);
 
