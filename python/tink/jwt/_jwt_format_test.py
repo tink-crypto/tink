@@ -43,6 +43,10 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(_jwt_format._base64_encode(payload), encoded_payload)
     self.assertEqual(_jwt_format._base64_decode(encoded_payload), payload)
 
+  def test_base64_decode_bad_format_raises_jwt_invalid_error(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format._base64_decode(b'aeyJh')
+
   def test_base64_decode_fails_with_unknown_chars(self):
     self.assertNotEmpty(
         _jwt_format._base64_decode(

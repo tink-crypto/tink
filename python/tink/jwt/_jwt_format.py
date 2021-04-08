@@ -12,6 +12,7 @@
 """Functions that help to serialize and deserialize from/to the JWT format."""
 
 import base64
+import binascii
 import json
 
 from typing import Any, Text, Tuple
@@ -26,6 +27,7 @@ _VALID_ALGORITHMS = frozenset({
 
 
 def _base64_encode(data: bytes) -> bytes:
+  """Does a URL-safe base64 encoding without padding."""
   return base64.urlsafe_b64encode(data).rstrip(b'=')
 
 
@@ -42,6 +44,7 @@ def _is_valid_urlsafe_base64_char(c: int) -> bool:
 
 
 def _base64_decode(encoded_data: bytes) -> bytes:
+  """Does a URL-safe base64 decoding without padding."""
   # base64.urlsafe_b64decode ignores all non-base64 chars. We don't want that.
   for c in encoded_data:
     if not _is_valid_urlsafe_base64_char(c):
@@ -49,7 +52,11 @@ def _base64_decode(encoded_data: bytes) -> bytes:
   # base64.urlsafe_b64decode requires padding, but does not mind too much
   # padding. So we simply add the maximum ammount of padding needed.
   padded_encoded_data = encoded_data + b'==='
-  return base64.urlsafe_b64decode(padded_encoded_data)
+  try:
+    return base64.urlsafe_b64decode(padded_encoded_data)
+  except binascii.Error:
+    # Throws when the length of encoded_data is (4*i + 1) for some i
+    raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def json_dumps(json_data: Any) -> Text:
