@@ -16,14 +16,22 @@
 
 #include "tink/cc/cc_jwt_config.h"
 
+#include "tink/jwt/internal/raw_jwt_ecdsa_sign_key_manager.h"
+#include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 
 namespace crypto {
 namespace tink {
 
 util::Status CcJwtConfigRegister() {
-  return Registry::RegisterKeyTypeManager(
+  auto status = Registry::RegisterKeyTypeManager(
       absl::make_unique<internal::RawJwtHmacKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  return Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<RawJwtEcdsaSignKeyManager>(),
+      absl::make_unique<RawJwtEcdsaVerifyKeyManager>(), true);
 }
 
 }  // namespace tink

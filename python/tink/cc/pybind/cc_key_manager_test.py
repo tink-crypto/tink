@@ -27,6 +27,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import aead
@@ -458,6 +459,51 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'Signature is not valid'):
+      verifier.verify(b'wrongsignature', data)
+
+
+class JwtPublicKeySignVerifyKeyManagerTest(absltest.TestCase):
+
+  def setUp(self):
+    super(JwtPublicKeySignVerifyKeyManagerTest, self).setUp()
+    public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
+    self.key_manager_verify = public_key_verify_manager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')
+    public_key_sign_manager = tink_bindings.PublicKeySignKeyManager
+    self.key_manager_sign = public_key_sign_manager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey')
+
+  def test_new_key_data_verify_fails(self):
+    key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(algorithm=jwt_ecdsa_pb2.ES256)
+    key_template = tink_pb2.KeyTemplate()
+    key_template.type_url = (
+        'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')
+    key_template.value = key_format.SerializeToString()
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk, 'not supported'):
+      self.key_manager_verify.new_key_data(key_template.SerializeToString())
+
+  def test_signature_success(self):
+    key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(algorithm=jwt_ecdsa_pb2.ES256)
+    key_template = tink_pb2.KeyTemplate()
+    key_template.type_url = (
+        'type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey')
+    key_template.value = key_format.SerializeToString()
+
+    priv_key = self.key_manager_sign.new_key_data(
+        key_template.SerializeToString())
+    pub_key = self.key_manager_sign.public_key_data(priv_key)
+
+    verifier = self.key_manager_verify.primitive(pub_key)
+    signer = self.key_manager_sign.primitive(priv_key)
+
+    data = b'data'
+    signature = signer.sign(data)
+    verifier.verify(signature, data)
+
+    with self.assertRaises(tink_bindings.StatusNotOk):
+      verifier.verify(signature, b'wrongdata')
+
+    with self.assertRaises(tink_bindings.StatusNotOk):
       verifier.verify(b'wrongsignature', data)
 
 

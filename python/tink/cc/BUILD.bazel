@@ -30,6 +30,8 @@ cc_library(
     hdrs = ["cc_jwt_config.h"],
     deps = [
         "@tink_cc",
+        "@tink_cc//jwt/internal:raw_jwt_ecdsa_sign_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_ecdsa_verify_key_manager",
         "@tink_cc//jwt/internal:raw_jwt_hmac_key_manager",
         "@tink_cc//util:status",
     ],
