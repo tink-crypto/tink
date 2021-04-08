@@ -30,6 +30,7 @@ namespace jwt_internal {
 
 // For friend declaration
 class JwtMacImpl;
+class JwtPublicKeyVerifyImpl;
 
 }
 
@@ -79,6 +80,7 @@ class VerifiedJwt {
   VerifiedJwt();
   explicit VerifiedJwt(const RawJwt& raw_jwt);
   friend class jwt_internal::JwtMacImpl;
+  friend class jwt_internal::JwtPublicKeyVerifyImpl;
   RawJwt raw_jwt_;
 };
 

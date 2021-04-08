@@ -285,3 +285,54 @@ tink_cc_test(
     tink::proto::jwt_ecdsa_cc_proto
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_public_key_sign_impl
+  SRCS
+    jwt_public_key_sign_impl.cc
+    jwt_public_key_sign_impl.h
+  DEPS
+    tink::jwt::internal::jwt_format
+    tink::core::public_key_sign
+    tink::jwt::jwt_public_key_sign
+    tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_public_key_verify_impl
+  SRCS
+    jwt_public_key_verify_impl.cc
+    jwt_public_key_verify_impl.h
+  DEPS
+    tink::jwt::internal::jwt_format
+    tink::core::public_key_verify
+    tink::jwt::jwt_public_key_verify
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_test(
+  NAME jwt_public_key_sign_verify_impl_test
+  SRCS jwt_public_key_sign_verify_impl_test.cc
+  DEPS
+    tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_public_key_sign_impl
+    tink::jwt::internal::jwt_public_key_verify_impl
+    tink::jwt::jwt_public_key_sign
+    tink::jwt::jwt_public_key_verify
+    tink::jwt::jwt_validator
+    tink::jwt::raw_jwt
+    tink::jwt::verified_jwt
+    tink::subtle::ecdsa_sign_boringssl
+    tink::subtle::ecdsa_verify_boringssl
+    tink::util::test_matchers
+    absl::strings
+    gmock
+)

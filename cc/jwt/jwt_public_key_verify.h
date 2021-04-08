@@ -43,8 +43,8 @@ class JwtPublicKeyVerify {
   // (iat) or not_before (nbf), they will also be validated. validator allows to
   // set a clock skew, to deal with small clock differences among different
   // machines.
-  virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyMacAndDecode(
-      absl::string_view token, const JwtValidator& validator) const = 0;
+  virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyAndDecode(
+      absl::string_view compact, const JwtValidator& validator) const = 0;
 
   virtual ~JwtPublicKeyVerify() {}
 };

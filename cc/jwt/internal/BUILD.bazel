@@ -315,3 +315,58 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "jwt_public_key_sign_impl",
+    srcs = ["jwt_public_key_sign_impl.cc"],
+    hdrs = ["jwt_public_key_sign_impl.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":jwt_format",
+        "//:public_key_sign",
+        "//jwt:jwt_public_key_sign",
+        "//jwt:raw_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_verify_impl",
+    srcs = ["jwt_public_key_verify_impl.cc"],
+    hdrs = ["jwt_public_key_verify_impl.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":jwt_format",
+        "//:public_key_verify",
+        "//jwt:jwt_public_key_verify",
+        "//jwt:jwt_validator",
+        "//jwt:raw_jwt",
+        "//jwt:verified_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "jwt_public_key_sign_verify_impl_test",
+    srcs = ["jwt_public_key_sign_verify_impl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":jwt_format",
+        ":jwt_public_key_sign_impl",
+        ":jwt_public_key_verify_impl",
+        "//jwt:jwt_public_key_sign",
+        "//jwt:jwt_public_key_verify",
+        "//jwt:jwt_validator",
+        "//jwt:raw_jwt",
+        "//jwt:verified_jwt",
+        "//subtle:ecdsa_sign_boringssl",
+        "//subtle:ecdsa_verify_boringssl",
+        "//util:test_matchers",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
