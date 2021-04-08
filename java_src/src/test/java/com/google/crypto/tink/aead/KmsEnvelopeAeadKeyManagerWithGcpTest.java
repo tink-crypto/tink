@@ -19,10 +19,10 @@ package com.google.crypto.tink.aead;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.KmsClients;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.testing.TestUtil;
+import java.util.Optional;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,8 +37,7 @@ import org.junit.runners.JUnit4;
 public class KmsEnvelopeAeadKeyManagerWithGcpTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    KmsClients.add(new GcpKmsClient()
-        .withCredentials(TestUtil.SERVICE_ACCOUNT_FILE));
+    GcpKmsClient.register(Optional.empty(), Optional.of(TestUtil.SERVICE_ACCOUNT_FILE));
     AeadConfig.register();
   }
 

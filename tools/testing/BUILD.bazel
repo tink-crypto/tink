@@ -68,8 +68,6 @@ java_binary(
     deps = [
         ":cli_util",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_client",
-        "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/integration/awskms:aws_kms_client",

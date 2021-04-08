@@ -88,7 +88,6 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:crypto_format",
-        "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
@@ -198,8 +197,6 @@ java_test(
     tags = ["no_rbe"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:kms_client",
-        "//src/main/java/com/google/crypto/tink:kms_clients",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
