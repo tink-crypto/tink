@@ -16,6 +16,7 @@ cc_library(
         "@tink_cc//aead:aes_ctr_hmac_aead_key_manager",
         "@tink_cc//daead/subtle:aead_or_daead",
         "@tink_cc//proto:tink_cc_proto",
+        "@tink_cc//subtle:common_enums",
         "@tink_cc//util:istream_input_stream",
         "@tink_cc//util:statusor",
         "@tink_experimental//pqcrypto/cc/subtle:cecpq2_hkdf_sender_kem_boringssl",
