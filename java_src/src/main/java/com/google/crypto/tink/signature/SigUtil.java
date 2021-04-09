@@ -86,18 +86,10 @@ final class SigUtil {
    * Validates RsaSsaPss's parameters.
    *
    * <ul>
-   *   <li>As SHA1 is unsafe, we will only support SHA256 and SHA512 for digital signature.
-   *   <li>The most common use case is that MGF1 hash is the same as signature hash. This is
-   *       recommended by RFC https://tools.ietf.org/html/rfc8017#section-8.1. While using different
-   *       hashes doesn't cause security vulnerabilities, there is also no good reason to support
-   *       different hashes. Furthermore:
-   *       <ul>
-   *         <li>Golang does not support different hashes.
-   *         <li>BoringSSL supports different hashes just because of historical reason. There is no
-   *             real use case.
-   *         <li>Conscrypt/BouncyCastle do not support different hashes.
-   *       </ul>
-   * </ul>
+   *   <li>The MGF1 hash function must be the same as the signature hash function.
+   *   <li>The hash function used must be either SHA256, SHA384, or SHA512.
+   *   <li>The salt length must be non-zero.
+   * <ul>
    *
    * @param params the RsaSsaPssParams protocol buffer.
    * @throws GeneralSecurityException iff it's invalid.
@@ -113,7 +105,11 @@ final class SigUtil {
     }
   }
 
-  /** Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}. */
+  /**
+   * Converts protobuf enum {@code HashType} to raw Java enum {@code Enums.HashType}.
+   *
+   * @throws GeneralSecurityException if the HashType is not SHA256, SHA384, or SHA512.
+   */
   public static Enums.HashType toHashType(HashType hash) throws GeneralSecurityException {
     switch (hash) {
       case SHA256:
