@@ -36,7 +36,7 @@ class Cecpq2AeadHkdfHybridEncrypt : public HybridEncrypt {
   // Returns an HybridEncrypt-primitive that uses the key material
   // given in 'recipient_key'
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridEncrypt>> New(
-      const Cecpq2AeadHkdfPublicKeyInternal& recipient_key);
+      const google::crypto::tink::Cecpq2AeadHkdfPublicKey& recipient_key);
 
   crypto::tink::util::StatusOr<std::string> Encrypt(
       absl::string_view plaintext,
@@ -44,14 +44,14 @@ class Cecpq2AeadHkdfHybridEncrypt : public HybridEncrypt {
 
  private:
   Cecpq2AeadHkdfHybridEncrypt(
-      const Cecpq2AeadHkdfPublicKeyInternal& recipient_key,
+      const google::crypto::tink::Cecpq2AeadHkdfPublicKey& recipient_key,
       std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl> sender_kem,
       std::unique_ptr<const Cecpq2AeadHkdfDemHelper> dem_helper)
       : recipient_key_(recipient_key),
         sender_kem_(std::move(sender_kem)),
         dem_helper_(std::move(dem_helper)) {}
 
-  Cecpq2AeadHkdfPublicKeyInternal recipient_key_;
+  google::crypto::tink::Cecpq2AeadHkdfPublicKey recipient_key_;
   std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl> sender_kem_;
   std::unique_ptr<const Cecpq2AeadHkdfDemHelper> dem_helper_;
 };

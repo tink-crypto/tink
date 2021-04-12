@@ -25,6 +25,7 @@
 #include "pqcrypto/cc/hybrid/cecpq2_aead_hkdf_dem_helper.h"
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
+#include "pqcrypto/proto/cecpq2_aead_hkdf.proto.h"
 
 namespace crypto {
 namespace tink {
@@ -36,7 +37,7 @@ class Cecpq2AeadHkdfHybridDecrypt : public HybridDecrypt {
   // Returns an HybridDecrypt-primitive that uses the key material
   // given in 'recipient_key'
   static crypto::tink::util::StatusOr<std::unique_ptr<HybridDecrypt>> New(
-      const Cecpq2AeadHkdfPrivateKeyInternal& private_key_internal);
+      const google::crypto::tink::Cecpq2AeadHkdfPrivateKey& private_key);
 
   crypto::tink::util::StatusOr<std::string> Decrypt(
       absl::string_view ciphertext,
@@ -44,14 +45,14 @@ class Cecpq2AeadHkdfHybridDecrypt : public HybridDecrypt {
 
  private:
   Cecpq2AeadHkdfHybridDecrypt(
-      const Cecpq2AeadHkdfParamsInternal& recipient_key_params,
+      const google::crypto::tink::Cecpq2AeadHkdfParams& recipient_key_params,
       std::unique_ptr<const subtle::Cecpq2HkdfRecipientKemBoringSsl> kem,
       std::unique_ptr<const Cecpq2AeadHkdfDemHelper> dem_helper)
       : recipient_key_params_(recipient_key_params),
         recipient_kem_(std::move(kem)),
         dem_helper_(std::move(dem_helper)) {}
 
-  Cecpq2AeadHkdfParamsInternal recipient_key_params_;
+  google::crypto::tink::Cecpq2AeadHkdfParams recipient_key_params_;
   std::unique_ptr<const subtle::Cecpq2HkdfRecipientKemBoringSsl> recipient_kem_;
   std::unique_ptr<const Cecpq2AeadHkdfDemHelper> dem_helper_;
 };

@@ -27,16 +27,18 @@ namespace tink {
 
 namespace {
 
-util::Status Validate(const Cecpq2AeadHkdfPublicKeyInternal& key) {
-  if (key.x25519_public_key_x.empty() ||
-      key.hrss_public_key_marshaled.empty()) {
+util::Status Validate(
+    const google::crypto::tink::Cecpq2AeadHkdfPublicKey& key) {
+  if (key.x25519_public_key_x().empty() ||
+      key.hrss_public_key_marshalled().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid Cecpq2AeadHkdfPublicKeyInternal: missing KEM "
                         "required fields.");
   }
 
-  if (key.params.curve_type == subtle::EllipticCurveType::CURVE25519 &&
-      !key.x25519_public_key_y.empty()) {
+  if (key.params().kem_params().curve_type() ==
+          google::crypto::tink::EllipticCurveType::CURVE25519 &&
+      !key.x25519_public_key_y().empty()) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         "Invalid Cecpq2AeadHkdfPublicKeyInternal: has KEM unexpected field.");
@@ -49,19 +51,22 @@ util::Status Validate(const Cecpq2AeadHkdfPublicKeyInternal& key) {
 
 // static
 util::StatusOr<std::unique_ptr<HybridEncrypt>> Cecpq2AeadHkdfHybridEncrypt::New(
-    const Cecpq2AeadHkdfPublicKeyInternal& recipient_key) {
+    const google::crypto::tink::Cecpq2AeadHkdfPublicKey& recipient_key) {
   util::Status status = Validate(recipient_key);
   if (!status.ok()) return status;
 
   util::StatusOr<std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl>>
       kem_result = subtle::Cecpq2HkdfSenderKemBoringSsl::New(
-          recipient_key.params.curve_type, recipient_key.x25519_public_key_x,
-          recipient_key.x25519_public_key_y,
-          recipient_key.hrss_public_key_marshaled);
+          util::Enums::ProtoToSubtle(
+              recipient_key.params().kem_params().curve_type()),
+          recipient_key.x25519_public_key_x(),
+          recipient_key.x25519_public_key_y(),
+          recipient_key.hrss_public_key_marshalled());
   if (!kem_result.ok()) return kem_result.status();
 
   util::StatusOr<std::unique_ptr<const Cecpq2AeadHkdfDemHelper>> dem_result =
-      Cecpq2AeadHkdfDemHelper::New(recipient_key.params.key_template);
+      Cecpq2AeadHkdfDemHelper::New(
+          recipient_key.params().dem_params().aead_dem());
   if (!dem_result.ok()) return dem_result.status();
 
   return {absl::WrapUnique(new Cecpq2AeadHkdfHybridEncrypt(
@@ -81,8 +86,12 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridEncrypt::Encrypt(
   util::StatusOr<
       std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl::KemKey>>
       kem_key_result = sender_kem_->GenerateKey(
-          recipient_key_.params.hash_type, recipient_key_.params.hkdf_salt,
-          context_info, key_material_size, recipient_key_.params.point_format);
+          util::Enums::ProtoToSubtle(
+              recipient_key_.params().kem_params().hkdf_hash_type()),
+          recipient_key_.params().kem_params().hkdf_salt(), context_info,
+          key_material_size,
+          util::Enums::ProtoToSubtle(
+              recipient_key_.params().kem_params().ec_point_format()));
   if (!kem_key_result.ok()) return kem_key_result.status();
   std::unique_ptr<const subtle::Cecpq2HkdfSenderKemBoringSsl::KemKey> kem_key =
       std::move(kem_key_result.ValueOrDie());

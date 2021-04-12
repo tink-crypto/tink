@@ -19,6 +19,7 @@ cc_library(
         "@tink_cc//util:statusor",
         "@tink_experimental//pqcrypto/cc/hybrid:cecpq2_aead_hkdf_dem_helper",
         "@tink_experimental//pqcrypto/cc/subtle:cecpq2_hkdf_recipient_kem_boringssl",
+        "@tink_experimental//pqcrypto/proto:cecpq2_aead_hkdf_cc_proto",
     ],
 )
 

@@ -33,25 +33,26 @@ namespace crypto {
 namespace tink {
 
 namespace {
-util::Status Validate(const Cecpq2AeadHkdfPrivateKeyInternal& key) {
-  if (key.hrss_private_key_seed.empty() || key.x25519_private_key.empty() ||
-      key.cecpq2_public_key.hrss_public_key_marshaled.empty() ||
-      key.cecpq2_public_key.x25519_public_key_x.empty()) {
+util::Status Validate(
+    const google::crypto::tink::Cecpq2AeadHkdfPrivateKey& key) {
+  if (key.hrss_private_key_seed().empty() || key.x25519_private_key().empty() ||
+      key.public_key().hrss_public_key_marshalled().empty() ||
+      key.public_key().x25519_public_key_x().empty()) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid Cecpq2AeadHkdfPrivateKeyInternal: missing KEM "
                         "required fields.");
   }
 
-  if (key.cecpq2_public_key.params.curve_type ==
-      subtle::EllipticCurveType::CURVE25519) {
-    if (!key.cecpq2_public_key.x25519_public_key_y.empty()) {
+  if (key.public_key().params().kem_params().curve_type() ==
+      google::crypto::tink::EllipticCurveType::CURVE25519) {
+    if (!key.public_key().x25519_public_key_y().empty()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "Invalid Cecpq2AeadHkdfPrivateKeyInternal: has KEM "
                           "unexpected field.");
     }
 
-    if (key.cecpq2_public_key.params.point_format !=
-        subtle::EcPointFormat::COMPRESSED) {
+    if (key.public_key().params().kem_params().ec_point_format() !=
+        google::crypto::tink::EcPointFormat::COMPRESSED) {
       return util::Status(
           util::error::INVALID_ARGUMENT,
           "X25519 only supports compressed elliptic curve points.");
@@ -64,32 +65,36 @@ util::Status Validate(const Cecpq2AeadHkdfPrivateKeyInternal& key) {
 
 // static
 util::StatusOr<std::unique_ptr<HybridDecrypt>> Cecpq2AeadHkdfHybridDecrypt::New(
-    const Cecpq2AeadHkdfPrivateKeyInternal& private_key_internal) {
-  util::Status status = Validate(private_key_internal);
+    const google::crypto::tink::Cecpq2AeadHkdfPrivateKey& private_key) {
+  util::Status status = Validate(private_key);
   if (!status.ok()) return status;
 
   util::StatusOr<std::unique_ptr<subtle::Cecpq2HkdfRecipientKemBoringSsl>>
       kem_result = subtle::Cecpq2HkdfRecipientKemBoringSsl::New(
-          private_key_internal.cecpq2_public_key.params.curve_type,
-          private_key_internal.x25519_private_key,
-          private_key_internal.hrss_private_key_seed);
+          util::Enums::ProtoToSubtle(
+              private_key.public_key().params().kem_params().curve_type()),
+          util::SecretDataFromStringView(private_key.x25519_private_key()),
+          util::SecretDataFromStringView(private_key.hrss_private_key_seed()));
   if (!kem_result.ok()) return kem_result.status();
 
   util::StatusOr<std::unique_ptr<const Cecpq2AeadHkdfDemHelper>> dem_result =
       Cecpq2AeadHkdfDemHelper::New(
-          private_key_internal.cecpq2_public_key.params.key_template);
+          private_key.public_key().params().dem_params().aead_dem());
   if (!dem_result.ok()) return dem_result.status();
 
   return {absl::WrapUnique(new Cecpq2AeadHkdfHybridDecrypt(
-      private_key_internal.cecpq2_public_key.params,
-      std::move(kem_result).ValueOrDie(), std::move(dem_result).ValueOrDie()))};
+      private_key.public_key().params(), std::move(kem_result).ValueOrDie(),
+      std::move(dem_result).ValueOrDie()))};
 }
 
 util::StatusOr<std::string> Cecpq2AeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
   util::StatusOr<uint32_t> cecpq2_header_size_result =
-      subtle::EcUtil::EncodingSizeInBytes(recipient_key_params_.curve_type,
-                                          recipient_key_params_.point_format);
+      subtle::EcUtil::EncodingSizeInBytes(
+          util::Enums::ProtoToSubtle(
+              recipient_key_params_.kem_params().curve_type()),
+          util::Enums::ProtoToSubtle(
+              recipient_key_params_.kem_params().ec_point_format()));
   if (!cecpq2_header_size_result.ok())
     return cecpq2_header_size_result.status();
   uint32_t cecpq2_header_size =
@@ -108,8 +113,12 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridDecrypt::Decrypt(
   util::StatusOr<util::SecretData> symmetric_key_result =
       recipient_kem_->GenerateKey(
           absl::string_view(ciphertext).substr(0, cecpq2_header_size),
-          recipient_key_params_.hash_type, recipient_key_params_.hkdf_salt,
-          context_info, key_material_size, recipient_key_params_.point_format);
+          util::Enums::ProtoToSubtle(
+              recipient_key_params_.kem_params().hkdf_hash_type()),
+          recipient_key_params_.kem_params().hkdf_salt(), context_info,
+          key_material_size,
+          util::Enums::ProtoToSubtle(
+              recipient_key_params_.kem_params().ec_point_format()));
   if (!symmetric_key_result.ok()) return symmetric_key_result.status();
   util::SecretData symmetric_key = std::move(symmetric_key_result.ValueOrDie());
 
