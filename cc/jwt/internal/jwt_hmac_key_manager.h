@@ -106,8 +106,6 @@ class JwtHmacKeyManager
 
  private:
   const RawJwtHmacKeyManager raw_key_manager_;
-  const std::string key_type_ = absl::StrCat(
-      kTypeGoogleapisCom, google::crypto::tink::JwtHmacKey().GetTypeName());
 };
 
 }  // namespace jwt_internal

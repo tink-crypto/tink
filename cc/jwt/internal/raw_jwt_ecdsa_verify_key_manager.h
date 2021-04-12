@@ -40,7 +40,7 @@ class RawJwtEcdsaVerifyKeyManager
  public:
   class PublicKeyVerifyFactory : public PrimitiveFactory<PublicKeyVerify> {
     crypto::tink::util::StatusOr<std::unique_ptr<PublicKeyVerify>> Create(
-        const google::crypto::tink::JwtEcdsaPublicKey& ecdsa_public_key)
+        const google::crypto::tink::JwtEcdsaPublicKey& jwt_ecdsa_public_key)
         const override;
   };
 

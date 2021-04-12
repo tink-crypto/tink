@@ -42,16 +42,16 @@ using google::crypto::tink::HashType;
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
-    const JwtEcdsaPublicKey& ecdsa_public_key) const {
+      const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
   subtle::SubtleUtilBoringSSL::EcKey ec_key;
-  auto curve_or = CurveForEcdsaAlgorithm(ecdsa_public_key.algorithm());
+  auto curve_or = CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
   if (!curve_or.ok()) {
     return curve_or.status();
   }
   ec_key.curve = Enums::ProtoToSubtle(curve_or.ValueOrDie());
-  ec_key.pub_x = ecdsa_public_key.x();
-  ec_key.pub_y = ecdsa_public_key.y();
-  auto hash_type_or = HashForEcdsaAlgorithm(ecdsa_public_key.algorithm());
+  ec_key.pub_x = jwt_ecdsa_public_key.x();
+  ec_key.pub_y = jwt_ecdsa_public_key.y();
+  auto hash_type_or = HashForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
   if (!hash_type_or.ok()) {
     return hash_type_or.status();
   }
