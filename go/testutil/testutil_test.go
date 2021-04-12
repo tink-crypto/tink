@@ -28,6 +28,49 @@ import (
 func TestDummyAEAD(t *testing.T) {
 	// Assert that DummyAEAD implements the AEAD interface.
 	var _ tink.AEAD = (*testutil.DummyAEAD)(nil)
+
+	// try to encrypt/decrypt some data
+	data := []byte{0, 1, 1, 2, 3, 5}
+	additionalData := []byte{3, 1, 4, 1, 5}
+
+	dummy := &testutil.DummyAEAD{Name: "name"}
+	cipher, err := dummy.Encrypt(data, additionalData)
+	if err != nil {
+		t.Fatalf("DummyAEAD.Encrypt(%+v, %+v) gave error: %v", data, additionalData, err)
+	}
+	decrypt, err := dummy.Decrypt(cipher, additionalData)
+	if err != nil {
+		t.Fatalf("DummyAEAD.Decrypt(ciphertext, %+v) gave errr: %v", additionalData, err)
+	}
+	if !bytes.Equal(data, decrypt) {
+		t.Errorf("DummyAEAD round-tripped data %+v back to %+v", data, decrypt)
+	}
+}
+
+func TestDummySigner(t *testing.T) {
+	var _ tink.Signer = testutil.NewDummySigner("name")
+}
+
+func TestDummyVerifier(t *testing.T) {
+	var _ tink.Verifier = testutil.NewDummyVerifier("name")
+}
+
+func TestDummySignerVerifier(t *testing.T) {
+	signer := testutil.NewDummySigner("")
+	verifier := testutil.NewDummyVerifier("")
+
+	data := []byte{2, 7, 1, 8, 2, 8}
+	if err := verifier.Verify(nil, data); err == nil {
+		t.Errorf("DummyVerifier.Verify(invalid signature, %+v) succeeded; want error", data)
+	}
+
+	sig, err := signer.Sign(data)
+	if err != nil {
+		t.Fatalf("DummySigner.Sign(%+v) gave error: %v", data, err)
+	}
+	if err := verifier.Verify(sig, data); err != nil {
+		t.Errorf("DummyVerifier.Verify(valid signature, %+v) gave error: %v", data, err)
+	}
 }
 
 func TestDummyMAC(t *testing.T) {

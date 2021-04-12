@@ -18,8 +18,11 @@
 package testutil
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/rand"
+	"encoding/gob"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -85,17 +88,79 @@ func (km *DummyAEADKeyManager) TypeURL() string {
 	return AESGCMTypeURL
 }
 
-// DummyAEAD is a dummy implementation of AEAD interface.
-type DummyAEAD struct{}
+// DummyAEAD is a dummy implementation of AEAD interface. It "encrypts" data
+// with a simple serialization capturing the dummy name, plaintext, and
+// additional data, and "decrypts" it by reversing this and checking that the
+// name and additional data match.
+type DummyAEAD struct {
+	Name string
+}
+
+type dummyAEADData struct {
+	Name           string
+	Plaintext      []byte
+	AdditionalData []byte
+}
 
 // Encrypt encrypts the plaintext.
 func (a *DummyAEAD) Encrypt(plaintext []byte, additionalData []byte) ([]byte, error) {
-	return nil, fmt.Errorf("dummy aead encrypt")
+	buf := new(bytes.Buffer)
+	encoder := gob.NewEncoder(buf)
+	err := encoder.Encode(dummyAEADData{
+		Name:           a.Name,
+		Plaintext:      plaintext,
+		AdditionalData: additionalData,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("dummy aead encrypt: %v", err)
+	}
+	return buf.Bytes(), nil
 }
 
 // Decrypt decrypts the ciphertext.
 func (a *DummyAEAD) Decrypt(ciphertext []byte, additionalData []byte) ([]byte, error) {
-	return nil, fmt.Errorf("dummy aead decrypt")
+	data := dummyAEADData{}
+	decoder := gob.NewDecoder(bytes.NewBuffer(ciphertext))
+	if err := decoder.Decode(&data); err != nil {
+		return nil, fmt.Errorf("dummy aead decrypt: invalid data: %v", err)
+	}
+	if data.Name != a.Name || !bytes.Equal(data.AdditionalData, additionalData) {
+		return nil, errors.New("dummy aead encrypt: name/additional data mismatch")
+	}
+	return data.Plaintext, nil
+}
+
+// DummySigner is a dummy implementation of the Signer interface.
+type DummySigner struct {
+	aead DummyAEAD
+}
+
+// NewDummySigner creates a new dummy signer with the specified name. The name
+// is used to pair with the DummyVerifier.
+func NewDummySigner(name string) *DummySigner {
+	return &DummySigner{DummyAEAD{Name: "dummy public key:" + name}}
+}
+
+// Sign signs data.
+func (s *DummySigner) Sign(data []byte) ([]byte, error) {
+	return s.aead.Encrypt(nil, data)
+}
+
+// DummyVerifier is a dummy implementation of the Signer interface.
+type DummyVerifier struct {
+	aead DummyAEAD
+}
+
+// Verify verifies data.
+func (v *DummyVerifier) Verify(sig, data []byte) error {
+	_, err := v.aead.Decrypt(sig, data)
+	return err
+}
+
+// NewDummyVerifier creates a new dummy verifier with the specified name. The
+// name is used to pair with the DummySigner.
+func NewDummyVerifier(name string) *DummyVerifier {
+	return &DummyVerifier{DummyAEAD{Name: "dummy public key:" + name}}
 }
 
 // DummyMAC is a dummy implementation of Mac interface.
