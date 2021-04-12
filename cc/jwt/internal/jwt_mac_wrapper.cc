@@ -92,7 +92,8 @@ util::StatusOr<std::unique_ptr<JwtMac>> JwtMacWrapper::Wrap(
     std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set) const {
   util::Status status = Validate(jwt_mac_set.get());
   if (!status.ok()) return status;
-  std::unique_ptr<JwtMac> jwt_mac(new JwtMacSetWrapper(std::move(jwt_mac_set)));
+  std::unique_ptr<JwtMac> jwt_mac =
+      absl::make_unique<JwtMacSetWrapper>(std::move(jwt_mac_set));
   return std::move(jwt_mac);
 }
 

@@ -53,12 +53,12 @@ KeyTemplate createTemplate(OutputPrefixType output_prefix) {
 class JwtMacWrapperTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    EXPECT_TRUE(
-        Registry::RegisterPrimitiveWrapper(absl::make_unique<JwtMacWrapper>())
-            .ok());
-    EXPECT_TRUE(Registry::RegisterKeyTypeManager(
-                    absl::make_unique<JwtHmacKeyManager>(), true)
-                    .ok());
+    ASSERT_THAT(
+        Registry::RegisterPrimitiveWrapper(absl::make_unique<JwtMacWrapper>()),
+        IsOk());
+    ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                    absl::make_unique<JwtHmacKeyManager>(), true),
+                IsOk());
   }
 };
 
@@ -68,7 +68,7 @@ TEST_F(JwtMacWrapperTest, WrapNullptr) {
 }
 
 TEST_F(JwtMacWrapperTest, WrapEmpty) {
-  std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set(new PrimitiveSet<JwtMac>());
+  auto jwt_mac_set = absl::make_unique<PrimitiveSet<JwtMac>>();
   auto jwt_mac_result = JwtMacWrapper().Wrap(std::move(jwt_mac_set));
   EXPECT_FALSE(jwt_mac_result.ok());
 }
@@ -133,13 +133,13 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
   ASSERT_THAT(jwt_mac2_or.status(), IsOk());
   std::unique_ptr<JwtMac> jwt_mac2 = std::move(jwt_mac2_or.ValueOrDie());
 
-  ASSERT_TRUE(manager.SetPrimary(new_id).ok());
+  ASSERT_THAT(manager.SetPrimary(new_id), IsOk());
   std::unique_ptr<KeysetHandle> handle3 = manager.GetKeysetHandle();
   auto jwt_mac3_or = handle3->GetPrimitive<JwtMac>();
   ASSERT_THAT(jwt_mac3_or.status(), IsOk());
   std::unique_ptr<JwtMac> jwt_mac3 = std::move(jwt_mac3_or.ValueOrDie());
 
-  ASSERT_TRUE(manager.Disable(old_id).ok());
+  ASSERT_THAT(manager.Disable(old_id), IsOk());
   std::unique_ptr<KeysetHandle> handle4 = manager.GetKeysetHandle();
   auto jwt_mac4_or = handle4->GetPrimitive<JwtMac>();
   ASSERT_THAT(jwt_mac4_or.status(), IsOk());
@@ -170,25 +170,37 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
   ASSERT_THAT(compact4_or.status(), IsOk());
   std::string compact4 = compact4_or.ValueOrDie();
 
-  EXPECT_TRUE(jwt_mac1->VerifyMacAndDecode(compact1, validator).ok());
-  EXPECT_TRUE(jwt_mac2->VerifyMacAndDecode(compact1, validator).ok());
-  EXPECT_TRUE(jwt_mac3->VerifyMacAndDecode(compact1, validator).ok());
+  EXPECT_THAT(jwt_mac1->VerifyMacAndDecode(compact1, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac2->VerifyMacAndDecode(compact1, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac3->VerifyMacAndDecode(compact1, validator).status(),
+              IsOk());
   EXPECT_FALSE(jwt_mac4->VerifyMacAndDecode(compact1, validator).ok());
 
-  EXPECT_TRUE(jwt_mac1->VerifyMacAndDecode(compact2, validator).ok());
-  EXPECT_TRUE(jwt_mac2->VerifyMacAndDecode(compact2, validator).ok());
-  EXPECT_TRUE(jwt_mac3->VerifyMacAndDecode(compact2, validator).ok());
+  EXPECT_THAT(jwt_mac1->VerifyMacAndDecode(compact2, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac2->VerifyMacAndDecode(compact2, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac3->VerifyMacAndDecode(compact2, validator).status(),
+              IsOk());
   EXPECT_FALSE(jwt_mac4->VerifyMacAndDecode(compact2, validator).ok());
 
   EXPECT_FALSE(jwt_mac1->VerifyMacAndDecode(compact3, validator).ok());
-  EXPECT_TRUE(jwt_mac2->VerifyMacAndDecode(compact3, validator).ok());
-  EXPECT_TRUE(jwt_mac3->VerifyMacAndDecode(compact3, validator).ok());
-  EXPECT_TRUE(jwt_mac4->VerifyMacAndDecode(compact3, validator).ok());
+  EXPECT_THAT(jwt_mac2->VerifyMacAndDecode(compact3, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac3->VerifyMacAndDecode(compact3, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac4->VerifyMacAndDecode(compact3, validator).status(),
+              IsOk());
 
   EXPECT_FALSE(jwt_mac1->VerifyMacAndDecode(compact4, validator).ok());
-  EXPECT_TRUE(jwt_mac2->VerifyMacAndDecode(compact4, validator).ok());
-  EXPECT_TRUE(jwt_mac3->VerifyMacAndDecode(compact4, validator).ok());
-  EXPECT_TRUE(jwt_mac4->VerifyMacAndDecode(compact4, validator).ok());
+  EXPECT_THAT(jwt_mac2->VerifyMacAndDecode(compact4, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac3->VerifyMacAndDecode(compact4, validator).status(),
+              IsOk());
+  EXPECT_THAT(jwt_mac4->VerifyMacAndDecode(compact4, validator).status(),
+              IsOk());
 }
 
 }  // namespace
