@@ -1,0 +1,36 @@
+type_url: "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey"
+# value: [type.googleapis.com/google.crypto.tink.EciesAeadHkdfKeyFormat] {
+#   params {
+#     kem_params {
+#       curve_type: NIST_P256
+#       hkdf_hash_type: SHA256
+#       hkdf_salt: ""
+#     }
+#     dem_params {
+#       aead_dem {
+#         type_url: "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey"
+#         # value: [type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKeyFormat] {
+#         #   aes_ctr_key_format {
+#         #     params {
+#         #       iv_size: 16
+#         #     }
+#         #     key_size: 16
+#         #   }
+#         #   hmac_key_format {
+#         #     params {
+#         #       hash: SHA256
+#         #       tag_size: 16
+#         #     }
+#         #     key_size: 32
+#         #     version: 0
+#         #   }
+#         # }
+#         value: "\n\006\n\002\010\020\020\020\022\010\n\004\010\003\020\020\020 "
+#         output_prefix_type: TINK
+#       }
+#     }
+#     ec_point_format: COMPRESSED
+#   }
+# }
+value: "\n\\\n\004\010\002\020\003\022R\022P\n8type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey\022\022\n\006\n\002\010\020\020\020\022\010\n\004\010\003\020\020\020 \030\001\030\002"
+output_prefix_type: TINK

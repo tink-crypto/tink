@@ -33,8 +33,16 @@ class HybridKeyTemplatesTest(parameterized.TestCase):
   @parameterized.parameters([
       ('ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM),
-      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256', hybrid
-       .hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
+      ('ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM',
+       hybrid.hybrid_key_templates
+       .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM),
+      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
+       hybrid.hybrid_key_templates
+       .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256),
+      ('ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
+       hybrid.hybrid_key_templates
+       .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
+
   ])
   def test_template(self, template_name, template):
     self.assertEqual(template,

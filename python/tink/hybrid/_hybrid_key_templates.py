@@ -57,9 +57,22 @@ ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM = create_ecies_aead_hkdf_key_template(
     hash_type=common_pb2.SHA256,
     dem_key_template=aead.aead_key_templates.AES128_GCM)
 
+ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM = create_ecies_aead_hkdf_key_template(
+    curve_type=common_pb2.NIST_P256,
+    ec_point_format=common_pb2.COMPRESSED,
+    hash_type=common_pb2.SHA256,
+    dem_key_template=aead.aead_key_templates.AES128_GCM)
+
 ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 = (
     create_ecies_aead_hkdf_key_template(
         curve_type=common_pb2.NIST_P256,
         ec_point_format=common_pb2.UNCOMPRESSED,
+        hash_type=common_pb2.SHA256,
+        dem_key_template=aead.aead_key_templates.AES128_CTR_HMAC_SHA256))
+
+ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 = (
+    create_ecies_aead_hkdf_key_template(
+        curve_type=common_pb2.NIST_P256,
+        ec_point_format=common_pb2.COMPRESSED,
         hash_type=common_pb2.SHA256,
         dem_key_template=aead.aead_key_templates.AES128_CTR_HMAC_SHA256))
