@@ -394,3 +394,47 @@ tink_cc_test(
     absl::strings
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_public_key_sign_wrapper
+  SRCS
+    jwt_public_key_sign_wrapper.cc
+    jwt_public_key_sign_wrapper.h
+  DEPS
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::jwt::jwt_public_key_sign
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
+  NAME jwt_public_key_verify_wrapper
+  SRCS
+    jwt_public_key_verify_wrapper.cc
+    jwt_public_key_verify_wrapper.h
+  DEPS
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::jwt::jwt_public_key_verify
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME jwt_public_key_wrappers_test
+  SRCS jwt_public_key_wrappers_test.cc
+  DEPS
+    tink::jwt::internal::jwt_ecdsa_sign_key_manager
+    tink::jwt::internal::jwt_ecdsa_verify_key_manager
+    tink::jwt::internal::jwt_public_key_sign_wrapper
+    tink::jwt::internal::jwt_public_key_verify_wrapper
+    tink::core::keyset_manager
+    tink::core::primitive_set
+    tink::proto::jwt_ecdsa_cc_proto
+    tink::proto::tink_cc_proto
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+    gmock
+)

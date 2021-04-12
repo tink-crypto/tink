@@ -379,10 +379,9 @@ cc_library(
     deps = [
         ":jwt_public_key_sign_impl",
         ":raw_jwt_ecdsa_sign_key_manager",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
         "//:core/key_type_manager",
         "//jwt:jwt_public_key_sign",
+        "//proto:jwt_ecdsa_cc_proto",
         "//util:constants",
         "//util:enums",
         "//util:errors",
@@ -390,7 +389,8 @@ cc_library(
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
-        "//proto:jwt_ecdsa_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -402,10 +402,9 @@ cc_library(
     deps = [
         ":jwt_public_key_verify_impl",
         ":raw_jwt_ecdsa_verify_key_manager",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
         "//:core/key_type_manager",
         "//jwt:jwt_public_key_verify",
+        "//proto:jwt_ecdsa_cc_proto",
         "//util:constants",
         "//util:enums",
         "//util:errors",
@@ -413,7 +412,8 @@ cc_library(
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
-        "//proto:jwt_ecdsa_cc_proto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -424,11 +424,59 @@ cc_test(
     deps = [
         ":jwt_ecdsa_sign_key_manager",
         ":jwt_ecdsa_verify_key_manager",
-        "@com_google_googletest//:gtest_main",
-        "@com_google_absl//absl/time",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_sign_wrapper",
+    srcs = ["jwt_public_key_sign_wrapper.cc"],
+    hdrs = ["jwt_public_key_sign_wrapper.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//jwt:jwt_public_key_sign",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_verify_wrapper",
+    srcs = ["jwt_public_key_verify_wrapper.cc"],
+    hdrs = ["jwt_public_key_verify_wrapper.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//jwt:jwt_public_key_verify",
+        "//util:status",
+        "//util:statusor",
+    ],
+)
+
+cc_test(
+    name = "jwt_public_key_wrappers_test",
+    srcs = ["jwt_public_key_wrappers_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":jwt_ecdsa_sign_key_manager",
+        ":jwt_ecdsa_verify_key_manager",
+        ":jwt_public_key_sign_wrapper",
+        ":jwt_public_key_verify_wrapper",
+        "//:keyset_manager",
+        "//:primitive_set",
+        "//proto:jwt_ecdsa_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
     ],
 )
