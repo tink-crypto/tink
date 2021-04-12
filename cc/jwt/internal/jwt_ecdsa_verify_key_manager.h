@@ -35,6 +35,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 
 class JwtEcdsaVerifyKeyManager
@@ -66,6 +67,7 @@ class JwtEcdsaVerifyKeyManager
   const RawJwtEcdsaVerifyKeyManager raw_key_manager_;
 };
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
 

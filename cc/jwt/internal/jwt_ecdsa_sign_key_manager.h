@@ -35,6 +35,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 class JwtEcdsaSignKeyManager
     : public PrivateKeyTypeManager<google::crypto::tink::JwtEcdsaPrivateKey,
@@ -78,6 +79,7 @@ class JwtEcdsaSignKeyManager
   const RawJwtEcdsaSignKeyManager raw_key_manager_;
 };
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
 

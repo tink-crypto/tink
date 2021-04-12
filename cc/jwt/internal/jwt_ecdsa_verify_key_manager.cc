@@ -18,6 +18,7 @@
 
 namespace crypto {
 namespace tink {
+namespace jwt_internal {
 
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
@@ -70,5 +71,6 @@ Status JwtEcdsaVerifyKeyManager::ValidateKey(
   return raw_key_manager_.ValidateKey(key);
 }
 
+}  // namespace jwt_internal
 }  // namespace tink
 }  // namespace crypto
