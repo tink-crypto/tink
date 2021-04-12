@@ -370,3 +370,65 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "jwt_ecdsa_sign_key_manager",
+    srcs = ["jwt_ecdsa_sign_key_manager.cc"],
+    hdrs = ["jwt_ecdsa_sign_key_manager.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":jwt_public_key_sign_impl",
+        ":raw_jwt_ecdsa_sign_key_manager",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "//:core/key_type_manager",
+        "//jwt:jwt_public_key_sign",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//proto:jwt_ecdsa_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "jwt_ecdsa_verify_key_manager",
+    srcs = ["jwt_ecdsa_verify_key_manager.cc"],
+    hdrs = ["jwt_ecdsa_verify_key_manager.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":jwt_public_key_verify_impl",
+        ":raw_jwt_ecdsa_verify_key_manager",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "//:core/key_type_manager",
+        "//jwt:jwt_public_key_verify",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//proto:jwt_ecdsa_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "jwt_ecdsa_sign_verify_key_manager_test",
+    srcs = ["jwt_ecdsa_sign_verify_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":jwt_ecdsa_sign_key_manager",
+        ":jwt_ecdsa_verify_key_manager",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/time",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+    ],
+)

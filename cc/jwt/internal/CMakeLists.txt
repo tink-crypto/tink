@@ -336,3 +336,61 @@ tink_cc_test(
     absl::strings
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_ecdsa_sign_key_manager
+  SRCS
+    jwt_ecdsa_sign_key_manager.cc
+    jwt_ecdsa_sign_key_manager.h
+  DEPS
+    tink::jwt::internal::jwt_public_key_sign_impl
+    tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
+    tink::core::key_type_manager
+    tink::jwt::jwt_public_key_sign
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::proto::jwt_ecdsa_cc_proto
+    absl::memory
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_ecdsa_verify_key_manager
+  SRCS
+    jwt_ecdsa_verify_key_manager.cc
+    jwt_ecdsa_verify_key_manager.h
+  DEPS
+    tink::jwt::internal::jwt_public_key_verify_impl
+    tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
+    tink::core::key_type_manager
+    tink::jwt::jwt_public_key_verify
+    tink::util::constants
+    tink::util::enums
+    tink::util::errors
+    tink::util::protobuf_helper
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::proto::jwt_ecdsa_cc_proto
+    absl::memory
+    absl::strings
+)
+
+tink_cc_test(
+  NAME jwt_ecdsa_sign_verify_key_manager_test
+  SRCS jwt_ecdsa_sign_verify_key_manager_test.cc
+  DEPS
+    tink::jwt::internal::jwt_ecdsa_sign_key_manager
+    tink::jwt::internal::jwt_ecdsa_verify_key_manager
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    tink::util::test_matchers
+    absl::strings
+    gmock
+)
