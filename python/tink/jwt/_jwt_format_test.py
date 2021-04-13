@@ -129,6 +129,9 @@ class JwtFormatTest(parameterized.TestCase):
   def test_validate_header_with_lowercase_typ_success(self):
     _jwt_format.validate_header('{"alg":"HS256","typ":"jwt"}', 'HS256')
 
+  def test_validate_header_with_unknown_entry_success(self):
+    _jwt_format.validate_header('{"alg":"HS256","unknown":"header"}', 'HS256')
+
   def test_validate_header_with_bad_typ_fails(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.validate_header('{"alg":"HS256","typ":"IWT"}', 'HS256')

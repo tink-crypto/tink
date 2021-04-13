@@ -140,10 +140,8 @@ public final class JwtFormatTest {
   }
 
   @Test
-  public void validateHeaderWithUnknownEntry_fails() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"unknown\": \"header\"}"));
+  public void validateHeaderWithUnknownEntry_success() throws Exception {
+    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"unknown\": \"header\"}");
   }
 
   @Test

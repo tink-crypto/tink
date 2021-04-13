@@ -127,10 +127,8 @@ final class JwtFormat {
                   "invalid header type; expected %s, got %s",
                   JwtNames.HEADER_TYPE_VALUE, headerType));
         }
-      } else {
-        throw new JwtInvalidException(
-            String.format("invalid JWT header: unexpected header %s", name));
       }
+      // Ignore all other headers
     }
   }
 
