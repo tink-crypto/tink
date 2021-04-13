@@ -181,6 +181,20 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     }
 
     /**
+     * A container that contains key format and other information that form key templates supported
+     * by this factory.
+     */
+    public static final class KeyFormat<KeyFormatProtoT> {
+      public KeyFormatProtoT keyFormat;
+      public KeyTemplate.OutputPrefixType outputPrefixType;
+
+      public KeyFormat(KeyFormatProtoT keyFormat, KeyTemplate.OutputPrefixType outputPrefixType) {
+        this.keyFormat = keyFormat;
+        this.outputPrefixType = outputPrefixType;
+      }
+    }
+
+    /**
      * Returns the class corresponding to the key format protobuffer.
      */
     public final Class<KeyFormatProtoT> getKeyFormatClass() {
@@ -208,14 +222,14 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
     public abstract KeyT createKey(KeyFormatProtoT keyFormat) throws GeneralSecurityException;
 
     /**
-     * Derives a new key from a given format, using the given {@param pseudoRandomness}.
+     * Derives a new key from a given format, using the given {@code pseudoRandomness}.
      *
-     * <p>Implementations need to note that the given paramter {@param pseudoRandomness} may only
+     * <p>Implementations need to note that the given paramter {@code pseudoRandomness} may only
      * produce a finite amount of randomness. Hence, proper implementations will first obtain all
      * the pseudorandom bytes needed; and only after produce the key.
      *
      * <p>While {@link validateKeyFormat} is called before this method will be called,
-     * implementations must check the version of the given {@param keyFormat}, as {@link
+     * implementations must check the version of the given {@code keyFormat}, as {@link
      * validateKeyFormat} is also called from {@link createKey}.
      *
      * <p>Not every KeyTypeManager needs to implement this; if not implemented a {@link
@@ -223,8 +237,12 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
      */
     public KeyT deriveKey(KeyFormatProtoT keyFormat, InputStream pseudoRandomness)
         throws GeneralSecurityException {
-      throw new GeneralSecurityException(
-          "deriveKey not implemented for key of type " + clazz.toString());
+      throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
+    }
+
+    /** Returns supported key formats and their names. */
+    public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() {
+      return Collections.emptyMap();
     }
   }
 

@@ -465,4 +465,13 @@ public class AesGcmKeyManagerTest {
     testKeyTemplateCompatible(manager, AesGcmKeyManager.aes256GcmTemplate());
     testKeyTemplateCompatible(manager, AesGcmKeyManager.rawAes256GcmTemplate());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_RAW").keyFormat);
+  }
 }

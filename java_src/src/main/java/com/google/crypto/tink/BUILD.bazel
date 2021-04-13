@@ -247,6 +247,7 @@ java_library(
     name = "key_type_manager",
     srcs = ["KeyTypeManager.java"],
     deps = [
+        ":key_template",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "@com_google_protobuf//:protobuf_javalite",
@@ -257,6 +258,7 @@ android_library(
     name = "key_type_manager-android",
     srcs = ["KeyTypeManager.java"],
     deps = [
+        ":key_template-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
         "@com_google_protobuf//:protobuf_javalite",

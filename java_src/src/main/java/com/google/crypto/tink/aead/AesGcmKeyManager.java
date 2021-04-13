@@ -32,6 +32,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesGcmKey} keys and produces new instances of {@code
@@ -116,6 +119,16 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> result = new HashMap<>();
+        result.put("AES128_GCM", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES128_GCM_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));
+        result.put("AES256_GCM", createKeyFormat(32, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES256_GCM_RAW", createKeyFormat(32, KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -196,5 +209,11 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
     return KeyTemplate.create(
         new AesGcmKeyManager().getKeyType(), format.toByteArray(), prefixType);
+  }
+
+  private static KeyFactory.KeyFormat<AesGcmKeyFormat> createKeyFormat(
+      int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

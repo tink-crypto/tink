@@ -117,6 +117,7 @@ java_test(
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
 
