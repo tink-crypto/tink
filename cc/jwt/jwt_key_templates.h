@@ -37,6 +37,10 @@ const google::crypto::tink::KeyTemplate& JwtHs256Template();
 const google::crypto::tink::KeyTemplate& JwtHs384Template();
 const google::crypto::tink::KeyTemplate& JwtHs512Template();
 
+const google::crypto::tink::KeyTemplate& JwtEs256Template();
+const google::crypto::tink::KeyTemplate& JwtEs384Template();
+const google::crypto::tink::KeyTemplate& JwtEs512Template();
+
 }  // namespace tink
 }  // namespace crypto
 

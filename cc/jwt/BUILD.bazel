@@ -134,8 +134,30 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//proto:common_cc_proto",
+        "//proto:jwt_ecdsa_cc_proto",
         "//proto:jwt_hmac_cc_proto",
         "//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "jwt_signature_config",
+    srcs = ["jwt_signature_config.cc"],
+    hdrs = ["jwt_signature_config.h"],
+    include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:registry",
+        "//config:config_util",
+        "//config:tink_fips",
+        "//jwt/internal:jwt_ecdsa_sign_key_manager",
+        "//jwt/internal:jwt_ecdsa_verify_key_manager",
+        "//jwt/internal:jwt_public_key_sign_wrapper",
+        "//jwt/internal:jwt_public_key_verify_wrapper",
+        "//proto:config_cc_proto",
+        "//util:status",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -212,6 +234,9 @@ cc_test(
         ":jwt_key_templates",
         ":jwt_mac",
         ":jwt_mac_config",
+        ":jwt_public_key_sign",
+        ":jwt_public_key_verify",
+        ":jwt_signature_config",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",

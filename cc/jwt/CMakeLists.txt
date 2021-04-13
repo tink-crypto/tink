@@ -158,6 +158,26 @@ tink_cc_library(
     absl::memory
 )
 
+
+tink_cc_library(
+  NAME jwt_signature_config
+  SRCS
+    jwt_signature_config.cc
+    jwt_signature_config.h
+  DEPS
+    tink::jwt::internal::jwt_ecdsa_sign_key_manager
+    tink::jwt::internal::jwt_ecdsa_verify_key_manager
+    tink::jwt::internal::jwt_public_key_sign_wrapper
+    tink::jwt::internal::jwt_public_key_verify_wrapper
+    tink::config::config_util
+    tink::config::tink_fips
+    tink::core::registry
+    tink::util::status
+    tink::proto::config_cc_proto
+    absl::base
+    absl::memory
+)
+
 tink_cc_library(
   NAME jwt_key_templates
   SRCS
@@ -165,6 +185,7 @@ tink_cc_library(
     jwt_key_templates.h
   DEPS
     tink::proto::common_cc_proto
+    tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_hmac_cc_proto
     tink::proto::tink_cc_proto
 )
@@ -173,8 +194,11 @@ tink_cc_test(
   NAME jwt_key_templates_test
   SRCS jwt_key_templates_test.cc
   DEPS
+    tink::jwt::jwt_public_key_sign
+    tink::jwt::jwt_public_key_verify
     tink::jwt::jwt_key_templates
     tink::jwt::jwt_mac_config
+    tink::jwt::jwt_signature_config
     tink::jwt::jwt_mac
     tink::jwt::jwt_validator
     tink::jwt::raw_jwt

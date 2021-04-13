@@ -18,19 +18,22 @@
 
 #include "proto/common.pb.h"
 #include "proto/jwt_hmac.pb.h"
+#include "proto/jwt_ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::HashType;
-using google::crypto::tink::JwtHmacKeyFormat;
-using google::crypto::tink::KeyTemplate;
-using google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::JwtHmacKeyFormat;
+using ::google::crypto::tink::JwtEcdsaKeyFormat;
+using ::google::crypto::tink::JwtEcdsaAlgorithm;
+using ::google::crypto::tink::KeyTemplate;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace crypto {
 namespace tink {
 
 namespace {
 
-KeyTemplate* NewHmacKeyTemplate(HashType hash_type) {
+KeyTemplate* NewJwtHmacKeyTemplate(HashType hash_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtHmacKey");
@@ -42,20 +45,52 @@ KeyTemplate* NewHmacKeyTemplate(HashType hash_type) {
   return key_template;
 }
 
+KeyTemplate* NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm algorithm) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey");
+  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  JwtEcdsaKeyFormat key_format;
+  key_format.set_algorithm(algorithm);
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
+
 }  // anonymous namespace
 
 const KeyTemplate& JwtHs256Template() {
-  static const KeyTemplate* key_template = NewHmacKeyTemplate(HashType::SHA256);
+  static const KeyTemplate* key_template =
+      NewJwtHmacKeyTemplate(HashType::SHA256);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs384Template() {
-  static const KeyTemplate* key_template = NewHmacKeyTemplate(HashType::SHA384);
+  static const KeyTemplate* key_template =
+      NewJwtHmacKeyTemplate(HashType::SHA384);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs512Template() {
-  static const KeyTemplate* key_template = NewHmacKeyTemplate(HashType::SHA512);
+  static const KeyTemplate* key_template =
+      NewJwtHmacKeyTemplate(HashType::SHA512);
+  return *key_template;
+}
+
+const KeyTemplate& JwtEs256Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES256);
+  return *key_template;
+}
+
+const KeyTemplate& JwtEs384Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES384);
+  return *key_template;
+}
+
+const KeyTemplate& JwtEs512Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES512);
   return *key_template;
 }
 
