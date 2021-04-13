@@ -63,9 +63,9 @@ Cecpq2HkdfX25519RecipientKemBoringSsl::New(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "curve is not CURVE25519");
   }
-  if (ec_private_key.size() != X25519_PUBLIC_VALUE_LEN) {
+  if (ec_private_key.size() != X25519_PRIVATE_KEY_LEN) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        "pubx has unexpected length");
+                        "priv has unexpected length");
   }
   // If all input parameters are ok, create a CECPQ2 Recipient KEM instance
   return {absl::WrapUnique(new Cecpq2HkdfX25519RecipientKemBoringSsl(

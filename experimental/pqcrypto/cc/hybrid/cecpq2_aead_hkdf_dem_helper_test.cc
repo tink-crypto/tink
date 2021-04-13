@@ -23,7 +23,6 @@
 #include "tink/config/tink_config.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/registry.h"
-#include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"

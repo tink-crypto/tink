@@ -21,7 +21,6 @@
 
 #include "tink/aead.h"
 #include "tink/daead/subtle/aead_or_daead.h"
-#include "tink/subtle/common_enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -29,27 +28,6 @@
 
 namespace crypto {
 namespace tink {
-
-struct Cecpq2AeadHkdfParamsInternal {
-  subtle::EllipticCurveType curve_type;
-  subtle::EcPointFormat point_format;
-  subtle::HashType hash_type;
-  google::crypto::tink::KeyTemplate key_template;
-  absl::string_view hkdf_salt;
-};
-
-struct Cecpq2AeadHkdfPublicKeyInternal {
-  struct Cecpq2AeadHkdfParamsInternal params;
-  std::string hrss_public_key_marshaled;
-  std::string x25519_public_key_x;
-  std::string x25519_public_key_y;
-};
-
-struct Cecpq2AeadHkdfPrivateKeyInternal {
-  crypto::tink::util::SecretData hrss_private_key_seed;
-  util::SecretData x25519_private_key;
-  struct Cecpq2AeadHkdfPublicKeyInternal cecpq2_public_key;
-};
 
 // A helper for DEM (data encapsulation mechanism) of CECPQ2-AEAD-HKDF.
 class Cecpq2AeadHkdfDemHelper {
