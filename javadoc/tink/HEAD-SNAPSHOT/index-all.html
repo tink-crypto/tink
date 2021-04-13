@@ -901,7 +901,7 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#deriveKey-KeyFormatProtoT-java.io.InputStream-">deriveKey(KeyFormatProtoT, InputStream)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
 <dd>
-<div class="block">Derives a new key from a given format, using the given .</div>
+<div class="block">Derives a new key from a given format, using the given <code>pseudoRandomness</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetManager.html#destroy-int-">destroy(int)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></dt>
 <dd>
@@ -2350,6 +2350,14 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html#keyFactory--">keyFactory()</a></span> - Method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/AesGcmHkdfStreamingKeyManager.html" title="class in com.google.crypto.tink.streamingaead">AesGcmHkdfStreamingKeyManager</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html#KeyFormat-KeyFormatProtoT-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">KeyFormat(KeyFormatProtoT, KeyTemplate.OutputPrefixType)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html#keyFormat">keyFormat</a></span> - Variable in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html#keyFormats--">keyFormats()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a></dt>
+<dd>
+<div class="block">Returns supported key formats and their names.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
 <dd>
 <div class="block">Wraps a <code>TinkKey</code> and enforces access to the underlying <code>TinkKey</code> with <code>KeyAccess</code>.</div>
@@ -2450,6 +2458,11 @@
 <dd>
 <div class="block">Tink produces and accepts ciphertexts or signatures that consist of a prefix and a payload.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#keyTemplates--">keyTemplates()</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
+<dd>
+<div class="block">Returns an immutable map of key templates and their names supported by registered key managers
+ that are allowed to generate new keys.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PemKeyType.html#keyType">keyType</a></span> - Variable in enum com.google.crypto.tink.<a href="com/google/crypto/tink/PemKeyType.html" title="enum in com.google.crypto.tink">PemKeyType</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PemKeyType.html#keyType">keyType</a></span> - Variable in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></dt>
@@ -2468,6 +2481,11 @@
 <dt><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyTypeManager.KeyFactory</span></a>&lt;<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyT</a>&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyTypeManager.KeyFactory.KeyFormat</span></a>&lt;<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="type parameter in KeyTypeManager.KeyFactory.KeyFormat">KeyFormatProtoT</a>&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
+<dd>
+<div class="block">A container that contains key format and other information that form key templates supported
+ by this factory.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyTypeManager.PrimitiveFactory</span></a>&lt;<a href="com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">PrimitiveT</a>,<a href="com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html" title="type parameter in KeyTypeManager.PrimitiveFactory">KeyT</a>&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
@@ -2726,6 +2744,8 @@
 <dd>
 <div class="block">Wrap an immutable byte array over a slice of a bytearray</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html#outputPrefixType">outputPrefixType</a></span> - Variable in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <a name="I:P">
 <!--   -->
@@ -3210,7 +3230,9 @@
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyTypeManager-boolean-">registerKeyManager(KeyTypeManager&lt;KeyProtoT&gt;, boolean)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerKeyManager-java.lang.String-com.google.crypto.tink.KeyManager-">registerKeyManager(String, KeyManager&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>

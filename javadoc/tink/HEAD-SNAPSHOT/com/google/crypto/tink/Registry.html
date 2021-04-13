@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":41,"i1":41,"i2":9,"i3":41,"i4":9,"i5":41,"i6":9,"i7":41,"i8":9,"i9":41,"i10":9,"i11":41,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":41,"i24":41,"i25":9,"i26":9,"i27":9};
+var methods = {"i0":41,"i1":41,"i2":9,"i3":41,"i4":9,"i5":41,"i6":9,"i7":41,"i8":9,"i9":41,"i10":9,"i11":41,"i12":9,"i13":9,"i14":9,"i15":9,"i16":9,"i17":9,"i18":9,"i19":9,"i20":9,"i21":9,"i22":9,"i23":9,"i24":41,"i25":41,"i26":9,"i27":9,"i28":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -282,31 +282,38 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#getUntypedKeyManager-java.lang.String-">getUntypedKeyManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
 </tr>
 <tr id="i15" class="rowColor">
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#keyTemplates--">keyTemplates</a></span>()</code>
+<div class="block">Returns an immutable map of key templates and their names supported by registered key managers
+ that are allowed to generate new keys.</div>
+</td>
+</tr>
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>static com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-">newKey</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new key for the specified <code>keyTemplate</code>.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>static com.google.protobuf.MessageLite</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKey-java.lang.String-com.google.protobuf.MessageLite-">newKey</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
       com.google.protobuf.MessageLite&nbsp;format)</code>
 <div class="block">Convenience method for generating a new key for the specified <code>format</code>.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyData</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.proto.KeyTemplate-">newKeyData</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new <code>KeyData</code> for the specified <code>template</code>.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>static com.google.crypto.tink.proto.KeyData</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.KeyTemplate-">newKeyData</a></span>(<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Convenience method for generating a new <code>KeyData</code> for the specified <code>template</code>.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static &lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerAsymmetricKeyManagers-com.google.crypto.tink.PrivateKeyTypeManager-com.google.crypto.tink.KeyTypeManager-boolean-">registerAsymmetricKeyManagers</a></span>(<a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;KeyProtoT,PublicKeyProtoT&gt;&nbsp;privateKeyTypeManager,
                              <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;PublicKeyProtoT&gt;&nbsp;publicKeyTypeManager,
@@ -314,25 +321,27 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager)</code>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyManager-boolean-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager,
                   boolean&nbsp;newKeyAllowed)</code>
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>static &lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;<br>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-com.google.crypto.tink.KeyTypeManager-boolean-">registerKeyManager</a></span>(<a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
-                  boolean&nbsp;newKeyAllowed)</code>&nbsp;</td>
+                  boolean&nbsp;newKeyAllowed)</code>
+<div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>.</div>
+</td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-java.lang.String-com.google.crypto.tink.KeyManager-">registerKeyManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
                   <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager)</code>
@@ -341,7 +350,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerKeyManager-java.lang.String-com.google.crypto.tink.KeyManager-boolean-">registerKeyManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl,
                   <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a>&lt;P&gt;&nbsp;manager,
@@ -351,13 +360,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>static &lt;B,P&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a>&lt;B,P&gt;&nbsp;wrapper)</code>
 <div class="block">Tries to register <code>wrapper</code> as a new SetWrapper for primitive <code>P</code>.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>static &lt;B,P&gt;&nbsp;P</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#wrap-com.google.crypto.tink.PrimitiveSet-java.lang.Class-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;B&gt;&nbsp;primitiveSet,
     <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;clazz)</code>
@@ -365,7 +374,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  PrimitiveSet with it.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>static &lt;P&gt;&nbsp;P</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap</a></span>(<a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;&nbsp;primitiveSet)</code>&nbsp;</td>
 </tr>
@@ -485,9 +494,21 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/Catalogue.html" t
 <pre>public static&nbsp;&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;&nbsp;void&nbsp;registerKeyManager(<a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT&gt;&nbsp;manager,
                                                                                           boolean&nbsp;newKeyAllowed)
                                                                                    throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>. If <code>newKeyAllowed</code> is
+ true, users can generate new keys with this manager using the <a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-"><code>newKey(com.google.crypto.tink.proto.KeyTemplate)</code></a> methods.
+
+ <p>If there is an existing key manager, throws an exception if <code>manager</code> and the existing
+ key manager aren't instances of the same class, or if <code>newKeyAllowed</code> is true while the
+ existing key manager could not create new keys. Otherwise registration succeeds.
+
+ <p>If <code>newKeyAllowed</code> is true, also tries to register the key templates supported by
+ <code>manager</code>.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
+     class of <code>manager</code>, or the registration tries to re-enable the generation of new
+     keys.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key template.</dd>
 </dl>
 </li>
 </ul>
@@ -504,6 +525,9 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/Catalogue.html" t
 <div class="block">Tries to register <code>manager</code> for <code>manager.getKeyType()</code>. If <code>newKeyAllowed</code> is
  true, users can generate new keys with this manager using the <a href="../../../../com/google/crypto/tink/Registry.html#newKey-com.google.crypto.tink.proto.KeyTemplate-"><code>newKey(com.google.crypto.tink.proto.KeyTemplate)</code></a> methods.
 
+ <p>If <code>newKeyAllowed</code> is true, also tries to register the key templates supported by
+ <code>manager</code>.
+
  <p>If there is an existing key manager, throws an exception if <code>manager</code> and the existing
  key manager aren't instances of the same class, or if <code>newKeyAllowed</code> is true while the
  existing key manager could not create new keys. Otherwise registration succeeds.</div>
@@ -512,6 +536,7 @@ public static&nbsp;<a href="../../../../com/google/crypto/tink/Catalogue.html" t
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key manager is not an instance of the
      class of <code>manager</code>, or the registration tries to re-enable the generation of new
      keys.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if there's an existing key template.</dd>
 </dl>
 </li>
 </ul>
@@ -939,6 +964,17 @@ public static&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(com.google.crypto.tink.pro
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
+</li>
+</ul>
+<a name="keyTemplates--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>keyTemplates</h4>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&gt;&nbsp;keyTemplates()</pre>
+<div class="block">Returns an immutable map of key templates and their names supported by registered key managers
+ that are allowed to generate new keys.</div>
 </li>
 </ul>
 <a name="getInputPrimitive-java.lang.Class-">
