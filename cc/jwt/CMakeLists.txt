@@ -13,14 +13,6 @@ tink_cc_library(
 )
 
 tink_cc_library(
-  NAME jwt_algorithms
-  SRCS
-    jwt_algorithms.h
-  DEPS
-    absl::strings
-)
-
-tink_cc_library(
   NAME raw_jwt
   SRCS
     raw_jwt.cc

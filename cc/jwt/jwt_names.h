@@ -20,7 +20,6 @@
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "tink/jwt/jwt_algorithms.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -45,11 +44,6 @@ constexpr absl::string_view kJwtHeaderAlgorithm = "alg";
 constexpr absl::string_view kJwtHeaderKeyId = "kid";
 constexpr absl::string_view kJwtHeaderType = "typ";
 constexpr absl::string_view kJwtHeaderContentType = "cty";
-
-// Algorithms
-constexpr absl::string_view kJwtAlgorithmHs256 = "HS256";
-constexpr absl::string_view kJwtAlgorithmEs256 = "ES256";
-constexpr absl::string_view kJwtAlgorithmRs256 = "RS256";
 
 }  // namespace tink
 }  // namespace crypto
