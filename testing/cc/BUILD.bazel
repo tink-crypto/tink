@@ -263,6 +263,8 @@ cc_library(
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//jwt:jwt_mac",
+        "@tink_cc//jwt:jwt_public_key_sign",
+        "@tink_cc//jwt:jwt_public_key_verify",
         "@tink_cc//jwt:raw_jwt",
         "@tink_cc//util:status",
     ],
@@ -279,6 +281,7 @@ cc_test(
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//jwt:jwt_key_templates",
         "@tink_cc//jwt:jwt_mac_config",
+        "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:test_matchers",
     ],
 )
@@ -303,6 +306,7 @@ cc_binary(
         "@com_google_absl//absl/flags:parse",
         "@tink_cc//config:tink_config",
         "@tink_cc//jwt:jwt_mac_config",
+        "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:fake_kms_client",
     ],
 )

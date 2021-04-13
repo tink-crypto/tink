@@ -20,6 +20,7 @@
 #include "absl/flags/parse.h"
 #include "tink/config/tink_config.h"
 #include "tink/jwt/jwt_mac_config.h"
+#include "tink/jwt/jwt_signature_config.h"
 #include "tink/util/fake_kms_client.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "aead_impl.h"
@@ -42,10 +43,16 @@ void RunServer() {
               << std::endl;
     return;
   }
-  auto jwt_status = crypto::tink::JwtMacRegister();
-  if (!jwt_status.ok()) {
-    std::cout << "JwtMacRegister() failed: " << status.error_message()
+  auto jwt_mac_status = crypto::tink::JwtMacRegister();
+  if (!jwt_mac_status.ok()) {
+    std::cout << "JwtMacRegister() failed: " << jwt_mac_status.error_message()
               << std::endl;
+    return;
+  }
+  auto jwt_signature_status = crypto::tink::JwtSignatureRegister();
+  if (!jwt_signature_status.ok()) {
+    std::cout << "JwtSignatureRegister() failed: "
+              << jwt_signature_status.error_message() << std::endl;
     return;
   }
   auto register_fake_kms_client_status =
