@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # This script creates a Tinkey distribution and uploads it to Google Cloud
 # Storage.
 # Prerequisites:
