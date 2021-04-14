@@ -33,6 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
@@ -119,6 +122,19 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> result = new HashMap<>();
+
+        result.put("AES128_GCM_SIV", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES128_GCM_SIV_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));
+
+        result.put("AES256_GCM_SIV", createKeyFormat(32, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES256_GCM_SIV_RAW", createKeyFormat(32, KeyTemplate.OutputPrefixType.RAW));
+
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -202,5 +218,11 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
     AesGcmSivKeyFormat format = AesGcmSivKeyFormat.newBuilder().setKeySize(keySize).build();
     return KeyTemplate.create(
         new AesGcmSivKeyManager().getKeyType(), format.toByteArray(), prefixType);
+  }
+
+  private static KeyFactory.KeyFormat<AesGcmSivKeyFormat> createKeyFormat(
+      int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    AesGcmSivKeyFormat format = AesGcmSivKeyFormat.newBuilder().setKeySize(keySize).build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

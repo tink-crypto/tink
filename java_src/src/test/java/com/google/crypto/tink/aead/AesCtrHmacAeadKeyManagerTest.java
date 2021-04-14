@@ -222,4 +222,13 @@ public class AesCtrHmacAeadKeyManagerTest {
     testKeyTemplateCompatible(manager, AesCtrHmacAeadKeyManager.aes256CtrHmacSha256Template());
     testKeyTemplateCompatible(manager, AesCtrHmacAeadKeyManager.aes128CtrHmacSha256Template());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_CTR_HMAC_SHA256").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_CTR_HMAC_SHA256_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_CTR_HMAC_SHA256").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_CTR_HMAC_SHA256_RAW").keyFormat);
+  }
 }

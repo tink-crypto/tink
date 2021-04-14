@@ -166,4 +166,10 @@ public class XChaCha20Poly1305KeyManagerTest {
     testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template());
     testKeyTemplateCompatible(manager, XChaCha20Poly1305KeyManager.rawXChaCha20Poly1305Template());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("XCHACHA20_POLY1305").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("XCHACHA20_POLY1305_RAW").keyFormat);
+  }
 }

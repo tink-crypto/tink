@@ -30,6 +30,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This instance of {@code KeyManager} generates new {@code ChaCha20Poly1305} keys and produces new
@@ -99,6 +102,20 @@ public class ChaCha20Poly1305KeyManager extends KeyTypeManager<ChaCha20Poly1305K
             .setVersion(getVersion())
             .setKeyValue(ByteString.copyFrom(Random.randBytes(KEY_SIZE_IN_BYTES)))
             .build();
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<ChaCha20Poly1305KeyFormat>> result = new HashMap<>();
+        result.put(
+            "CHACHA20_POLY1305",
+            new KeyFactory.KeyFormat<>(
+                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "CHACHA20_POLY1305_RAW",
+            new KeyFactory.KeyFormat<>(
+                ChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }

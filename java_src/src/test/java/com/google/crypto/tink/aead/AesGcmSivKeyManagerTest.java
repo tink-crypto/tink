@@ -271,4 +271,13 @@ public class AesGcmSivKeyManagerTest {
     testKeyTemplateCompatible(manager, AesGcmSivKeyManager.aes256GcmSivTemplate());
     testKeyTemplateCompatible(manager, AesGcmSivKeyManager.rawAes256GcmSivTemplate());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_SIV").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_SIV_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_SIV").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_SIV_RAW").keyFormat);
+  }
 }

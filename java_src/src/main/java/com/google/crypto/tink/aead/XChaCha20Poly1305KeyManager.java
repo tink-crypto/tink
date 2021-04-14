@@ -32,6 +32,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This instance of {@code KeyManager} generates new {@code XChaCha20Poly1305} keys and produces new
@@ -123,6 +126,21 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
         } catch (IOException e) {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<XChaCha20Poly1305KeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<XChaCha20Poly1305KeyFormat>> result = new HashMap<>();
+        result.put(
+            "XCHACHA20_POLY1305",
+            new KeyFactory.KeyFormat<>(
+                XChaCha20Poly1305KeyFormat.getDefaultInstance(),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "XCHACHA20_POLY1305_RAW",
+            new KeyFactory.KeyFormat<>(
+                XChaCha20Poly1305KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }

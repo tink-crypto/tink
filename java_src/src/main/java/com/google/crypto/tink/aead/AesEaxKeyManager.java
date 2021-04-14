@@ -31,6 +31,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesEaxKey} keys and produces new instances of {@code
@@ -104,6 +107,18 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
             .setVersion(getVersion())
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> result = new HashMap<>();
+        result.put("AES128_EAX", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES128_EAX_RAW", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.RAW));
+
+        result.put("AES256_EAX", createKeyFormat(32, 16, KeyTemplate.OutputPrefixType.TINK));
+        result.put("AES256_EAX_RAW", createKeyFormat(32, 16, KeyTemplate.OutputPrefixType.RAW));
+
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -176,5 +191,15 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
             .build();
     return KeyTemplate.create(
         new AesEaxKeyManager().getKeyType(), format.toByteArray(), prefixType);
+  }
+
+  private static KeyFactory.KeyFormat<AesEaxKeyFormat> createKeyFormat(
+      int keySize, int ivSize, KeyTemplate.OutputPrefixType prefixType) {
+    AesEaxKeyFormat format =
+        AesEaxKeyFormat.newBuilder()
+            .setKeySize(keySize)
+            .setParams(AesEaxParams.newBuilder().setIvSize(ivSize).build())
+            .build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

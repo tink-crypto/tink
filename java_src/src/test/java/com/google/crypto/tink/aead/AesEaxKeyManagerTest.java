@@ -351,4 +351,13 @@ public class AesEaxKeyManagerTest {
     testKeyTemplateCompatible(manager, AesEaxKeyManager.aes256EaxTemplate());
     testKeyTemplateCompatible(manager, AesEaxKeyManager.rawAes256EaxTemplate());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_EAX").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_EAX_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_EAX").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_EAX_RAW").keyFormat);
+  }
 }

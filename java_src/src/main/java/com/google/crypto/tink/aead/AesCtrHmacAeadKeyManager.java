@@ -39,6 +39,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@link AesCtrHmacAeadKey} keys and produces new instances of
@@ -119,6 +122,27 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
             .setVersion(getVersion())
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> result = new HashMap<>();
+
+        result.put(
+            "AES128_CTR_HMAC_SHA256",
+            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "AES128_CTR_HMAC_SHA256_RAW",
+            createKeyFormat(16, 16, 32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+
+        result.put(
+            "AES256_CTR_HMAC_SHA256",
+            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "AES256_CTR_HMAC_SHA256_RAW",
+            createKeyFormat(32, 16, 32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -162,6 +186,27 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    */
   private static KeyTemplate createKeyTemplate(
       int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
+    AesCtrHmacAeadKeyFormat format =
+        createKeyFormat(aesKeySize, ivSize, hmacKeySize, tagSize, hashType);
+    return KeyTemplate.create(
+        new AesCtrHmacAeadKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  private static KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat> createKeyFormat(
+      int aesKeySize,
+      int ivSize,
+      int hmacKeySize,
+      int tagSize,
+      HashType hashType,
+      KeyTemplate.OutputPrefixType prefixType) {
+    return new KeyFactory.KeyFormat<>(
+        createKeyFormat(aesKeySize, ivSize, hmacKeySize, tagSize, hashType), prefixType);
+  }
+
+  private static AesCtrHmacAeadKeyFormat createKeyFormat(
+      int aesKeySize, int ivSize, int hmacKeySize, int tagSize, HashType hashType) {
     AesCtrKeyFormat aesCtrKeyFormat =
         AesCtrKeyFormat.newBuilder()
             .setParams(AesCtrParams.newBuilder().setIvSize(ivSize).build())
@@ -172,14 +217,9 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
             .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
             .setKeySize(hmacKeySize)
             .build();
-    AesCtrHmacAeadKeyFormat format =
-        AesCtrHmacAeadKeyFormat.newBuilder()
-            .setAesCtrKeyFormat(aesCtrKeyFormat)
-            .setHmacKeyFormat(hmacKeyFormat)
-            .build();
-    return KeyTemplate.create(
-        new AesCtrHmacAeadKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.TINK);
+    return AesCtrHmacAeadKeyFormat.newBuilder()
+        .setAesCtrKeyFormat(aesCtrKeyFormat)
+        .setHmacKeyFormat(hmacKeyFormat)
+        .build();
   }
 }

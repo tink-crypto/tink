@@ -40,6 +40,10 @@ import org.junit.runners.JUnit4;
 /** Test for ChaCha20Poly1305KeyManager. */
 @RunWith(JUnit4.class)
 public class ChaCha20Poly1305KeyManagerTest {
+  private final ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
+  private final KeyTypeManager.KeyFactory<ChaCha20Poly1305KeyFormat, ChaCha20Poly1305Key> factory =
+      manager.keyFactory();
+
   @Test
   public void basics() throws Exception {
     assertThat(new ChaCha20Poly1305KeyManager().getKeyType())
@@ -67,7 +71,6 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void validateKey_checkAllLengths() throws Exception {
-    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
     for (int j = 0; j < 100; j++) {
       final int i = j;
       if (i == 32) {
@@ -82,8 +85,6 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void validateKey_version() throws Exception {
-    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
-
     assertThrows(
         GeneralSecurityException.class,
         () ->
@@ -95,14 +96,12 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void createKey_valid() throws Exception {
-    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
     manager.validateKey(
         manager.keyFactory().createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance()));
   }
 
   @Test
   public void createKey_values() throws Exception {
-    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
     ChaCha20Poly1305Key key =
         manager.keyFactory().createKey(ChaCha20Poly1305KeyFormat.getDefaultInstance());
     assertThat(key.getVersion()).isEqualTo(0);
@@ -162,9 +161,13 @@ public class ChaCha20Poly1305KeyManagerTest {
 
   @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    ChaCha20Poly1305KeyManager manager = new ChaCha20Poly1305KeyManager();
-
     testKeyTemplateCompatible(manager, ChaCha20Poly1305KeyManager.chaCha20Poly1305Template());
     testKeyTemplateCompatible(manager, ChaCha20Poly1305KeyManager.rawChaCha20Poly1305Template());
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("CHACHA20_POLY1305").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("CHACHA20_POLY1305_RAW").keyFormat);
   }
 }
