@@ -1,1 +1,3 @@
 absl-py
+google-cloud-core
+google-cloud-storage

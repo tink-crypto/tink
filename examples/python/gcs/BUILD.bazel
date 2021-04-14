@@ -1,0 +1,68 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+py_binary(
+    name = "gcs_envelope_aead",
+    srcs = ["gcs_envelope_aead.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        requirement("google-cloud-core"),
+        requirement("google-cloud-storage"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/integration/gcpkms",
+    ],
+)
+
+# In order to run this test, use your own Cloud KMS key and credential:
+sh_test(
+    name = "gcs_envelope_aead_test",
+    size = "small",
+    srcs = ["gcs_envelope_aead_test.sh"],
+    args = [
+        "$(rootpath :gcs_envelope_aead)",
+        # Change this to your key
+        "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
+        # Change this to your credential
+        "$(rootpath @tink_base//testdata:credential.json)",
+        # Change this to your project ID
+        "tink-test-infrastructure",
+        # Change this to your GCS bucket
+        "gs://tink-gcs-examples",
+    ],
+    data = [
+        ":gcs_envelope_aead",
+        "@google_root_pem//file",
+        # Change this to your credential.
+        "@tink_base//testdata:credential.json",
+    ],
+)
+
+# This runs the previous test, assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "gcs_envelope_aead_test_package",
+    size = "small",
+    srcs = ["gcs_envelope_aead_test.sh"],
+    args = [
+        "'python3 $(rootpath :gcs_envelope_aead.py)'",
+        # Change this to your key
+        "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
+        # Change this to your credential
+        "$(rootpath @tink_base//testdata:credential.json)",
+        # Change this to your project ID
+        "tink-test-infrastructure",
+        # Change this to your GCS bucket
+        "gs://tink-gcs-examples",
+    ],
+    data = [
+        ":gcs_envelope_aead.py",
+        "@google_root_pem//file",
+        # Change this to your credential.
+        "@tink_base//testdata:credential.json",
+    ],
+)

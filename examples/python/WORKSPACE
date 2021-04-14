@@ -69,24 +69,18 @@ tink_cc_deps()
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 tink_cc_deps_init()
 
-# Load rules_python for your pip dependencies.
+# Use rules-python 0.2.0 which contains a pip_install that works with
+# google-cloud-storage.
+# See https://github.com/bazelbuild/rules_python/issues/93#issuecomment-710085646.
 http_archive(
-    name = "rules_python",
-    strip_prefix = "rules_python-94677401bc56ed5d756f50b441a6a5c7f735a6d4",
-    url = "https://github.com/bazelbuild/rules_python/archive/94677401bc56ed5d756f50b441a6a5c7f735a6d4.zip",
-    sha256 = "de39bc4d6605e6d395faf5e07516c64c8d833404ee3eb132b5ff1161f9617dec",
+    name = "rules_python0.2.0",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.2.0/rules_python-0.2.0.tar.gz",
+    sha256 = "778197e26c5fbeb07ac2a2c5ae405b30f6cb7ad1f5510ea6fdac03bded96cc6f",
 )
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
-py_repositories()
+load("@rules_python0.2.0//python:pip.bzl", "pip_install")
 
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
-pip_repositories()
-
-pip3_import(
+pip_install(
    name = "pip_deps",
-   requirements = "//:requirements.txt",
+   requirements = "@examples_python//:requirements.txt",
 )
-
-load("@pip_deps//:requirements.bzl", "pip_install")
-pip_install()

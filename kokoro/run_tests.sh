@@ -111,6 +111,9 @@ install_tink_via_pip() {
   pip3 install "${PIP_FLAGS[@]}" --upgrade pip
   pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
   pip3 install "${PIP_FLAGS[@]}" ./python
+
+  # Install dependencies for the examples/python tests
+  pip3 install "${PIP_FLAGS[@]}" google-cloud-storage
 }
 
 install_temp_protoc() {
