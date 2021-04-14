@@ -20,7 +20,6 @@
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"

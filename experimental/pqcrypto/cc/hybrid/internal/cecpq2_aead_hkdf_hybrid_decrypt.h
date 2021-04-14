@@ -25,7 +25,7 @@
 #include "pqcrypto/cc/hybrid/cecpq2_aead_hkdf_dem_helper.h"
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
-#include "pqcrypto/proto/cecpq2_aead_hkdf.proto.h"
+#include "pqcrypto/proto/cecpq2_aead_hkdf.pb.h"
 
 namespace crypto {
 namespace tink {

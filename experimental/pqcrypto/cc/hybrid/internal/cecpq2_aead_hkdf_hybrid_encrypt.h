@@ -22,9 +22,9 @@
 #include "tink/hybrid_encrypt.h"
 #include "tink/util/statusor.h"
 #include "pqcrypto/cc/hybrid/cecpq2_aead_hkdf_dem_helper.h"
-#include "pqcrypto/cc/hybrid/internal/cecpq2_aead_hkdf_hybrid_decrypt.h"
 #include "pqcrypto/cc/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
+#include "pqcrypto/proto/cecpq2_aead_hkdf.pb.h"
 
 namespace crypto {
 namespace tink {

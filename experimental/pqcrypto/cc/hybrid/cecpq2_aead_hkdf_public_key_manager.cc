@@ -18,7 +18,6 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
-#include "tink/key_manager.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"

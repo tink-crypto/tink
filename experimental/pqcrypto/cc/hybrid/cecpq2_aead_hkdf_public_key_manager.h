@@ -22,8 +22,6 @@
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/hybrid_encrypt.h"
-#include "tink/key_manager.h"
-#include "tink/util/constants.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -69,7 +67,7 @@ class Cecpq2AeadHkdfPublicKeyManager
 
  private:
   const std::string key_type_ = absl::StrCat(
-      kTypeGoogleapisCom,
+      "type.googleapis.com/",
       google::crypto::tink::Cecpq2AeadHkdfPublicKey().GetTypeName());
 };
 

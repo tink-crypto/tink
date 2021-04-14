@@ -32,6 +32,7 @@
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
 #include "pqcrypto/cc/util/test_util.h"
 
+using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::HasSubstr;
 
@@ -61,7 +62,7 @@ google::crypto::tink::Cecpq2AeadHkdfPublicKey CreateValidKey() {
 TEST(Cecpq2AeadHkdfHybridEncryptTest, ValidKey) {
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key = CreateValidKey();
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(sender_key);
-  EXPECT_OK(result.status());
+  EXPECT_THAT(result.status(), IsOk());
 }
 
 TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyNoFieldSet) {
@@ -94,7 +95,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedEcType) {
 TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedDemKeyType) {
   auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(subtle::EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  ASSERT_THAT(status_or_cecpq2_key.status(), IsOk());
   auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   google::crypto::tink::Cecpq2AeadHkdfPublicKey sender_key = CreateValidKey();
@@ -112,9 +113,9 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, Basic) {
   auto cecpq2_key = CreateValidKey();
 
   // Register DEM key manager
-  ASSERT_TRUE(Registry::RegisterKeyTypeManager(
-                  absl::make_unique<AesGcmKeyManager>(), true)
-                  .ok());
+  ASSERT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<AesGcmKeyManager>(), true),
+              IsOk());
   std::string dem_key_type = AesGcmKeyManager().get_key_type();
 
   // Generate and test many keys with various parameters
@@ -148,13 +149,13 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, Basic) {
               ->set_type_url(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey");
           auto key_or = Cecpq2AeadHkdfHybridEncrypt::New(cecpq2_key);
-          ASSERT_OK(key_or.status());
+          ASSERT_THAT(key_or.status(), IsOk());
           std::unique_ptr<HybridEncrypt> hybrid_encrypt(
               std::move(key_or.ValueOrDie()));
           // Use the primitive
           auto encrypt_result =
               hybrid_encrypt->Encrypt(plaintext, context_info);
-          EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
+          EXPECT_THAT(encrypt_result.status(), IsOk());
         }
       }
     }

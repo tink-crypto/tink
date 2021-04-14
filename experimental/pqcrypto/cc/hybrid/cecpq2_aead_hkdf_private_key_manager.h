@@ -24,11 +24,7 @@
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/hybrid_decrypt.h"
-#include "tink/key_manager.h"
-#include "tink/util/constants.h"
 #include "tink/util/enums.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "pqcrypto/cc/hybrid/cecpq2_aead_hkdf_dem_helper.h"
@@ -82,7 +78,7 @@ class Cecpq2AeadHkdfPrivateKeyManager
 
  private:
   const std::string key_type_ = absl::StrCat(
-      kTypeGoogleapisCom,
+      "type.googleapis.com/",
       google::crypto::tink::Cecpq2AeadHkdfPrivateKey().GetTypeName());
 };
 
