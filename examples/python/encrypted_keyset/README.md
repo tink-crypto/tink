@@ -16,15 +16,15 @@ In order to run this example, you need to:
     format:
     `projects/<my-project>/locations/global/keyRings/<my-key-ring>/cryptoKeys/<my-key>`.
 
-*   Create and download a service account that is allowed to encrypt and decrypt
-    with the above key.
+*   Create service account that is allowed to encrypt and decrypt with the above
+    key and download a JSON credentials file.
 
 ### Bazel
 
 ```shell
-git clone https://github.com/google/tink
-cd tink/examples/python
-bazel build ...
+$ git clone https://github.com/google/tink
+$ cd tink/examples/python
+$ bazel build ...
 ```
 
 You can generate an encrypted keyset:
@@ -32,29 +32,30 @@ You can generate an encrypted keyset:
 ```shell
 # Replace `<my-key-uri>` in `gcp-kms://<my-key-uri>` with your key URI, and
 # my-service-account.json with your service account's credential JSON file.
-./bazel-bin/encrypted_keyset/encrypted_keyset generate \
-    aes128_gcm_test_encrypted_keyset.json \
-    gcp-kms://<my-key-uri> \
-    my-service-account.json
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode generate \
+    --keyset_path aes128_gcm_test_encrypted_keyset.json \
+    --kek_uri gcp-kms://<my-key-uri> \
+    --gcp_credential_path my-service-account.json
 ```
 
 You can then encrypt a file:
 
 ```shell
-echo "some data" > testdata.txt
-./bazel-bin/encrypted_keyset/encrypted_keyset encrypt \
-    aes128_gcm_test_encrypted_keyset.json \
-    gcp-kms://<my-key-uri> \
-    my-service-account.json \
-    testdata.txt testdata.txt.encrypted
+$ echo "some data" > testdata.txt
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode encrypt \
+    --keyset_path aes128_gcm_test_encrypted_keyset.json \
+    --kek_uri gcp-kms://<my-key-uri> \
+    --gcp_credential_path my-service-account.json \
+    --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
 
-or decrypt the file with:
+Or decrypt the file with:
 
 ```shell
-./bazel-bin/encrypted_keyset/encrypted_keyset decrypt \
-    gcp-kms://<my-key-uri> \
-    my-service-account.json \
-    testdata.txt.encrypted testdata.txt.decrypted
+$ ./bazel-bin/encrypted_keyset/encrypted_keyset --mode decrypt \
+    --keyset_path aes128_gcm_test_encrypted_keyset.json \
+    --kek_uri gcp-kms://<my-key-uri> \
+    --gcp_credential_path my-service-account.json \
+    --input_path testdata.txt.encrypted --output_path testdata.txt.decrypted
 $ diff testdata.txt testdata.txt.decrypted
 ```

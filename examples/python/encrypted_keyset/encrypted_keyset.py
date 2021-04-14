@@ -12,20 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # [START encrypted-keyset-example]
-"""A command-line utility for generating, encrypting and storing keysets.
-
-It requires the following arguments:
-  mode: Can be "generate", "encrypt" or "decrypt". If mode is "generate", it
-       will generate a keyset, encrypt it and store it in the key-file argument.
-       If mode is "encrypt" or "decrypt", it will read and decrypt an keyset
-       from the key-file argument, and use it to encrypt or decrypt the
-       input-file argument.
-  key-file: Read the encrypted key material from this file.
-  kek-uri: Use this KEK URI in Cloud KMS to encrypt/decrypt the key file.
-  gcp-credential-file: USe this JSON credential file to connect to Cloud KMS.
-  input-file: If mode is "encrypt" or "decrypt", read the input from this file.
-  output-file: If mode is "encrypt" or "decrypt", write the result to this file.
-"""
+"""A command-line utility for generating, encrypting and storing keysets."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -33,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
+from absl import flags
 from absl import logging
 
 import tink
@@ -40,25 +28,28 @@ from tink import aead
 from tink.integration import gcpkms
 
 
+FLAGS = flags.FLAGS
+
+flags.DEFINE_enum('mode', None, ['generate', 'encrypt', 'decrypt'],
+                  'The operation to perform.')
+flags.DEFINE_string('keyset_path', None,
+                    'Path to the keyset used for encryption.')
+flags.DEFINE_string('kek_uri', None,
+                    'The Cloud KMS URI of the key encryption key.')
+flags.DEFINE_string('gcp_credential_path', None,
+                    'Path to the GCP credentials JSON file.')
+flags.DEFINE_string('input_path', None, 'Path to the input file.')
+flags.DEFINE_string('output_path', None, 'Path to the output file.')
+flags.DEFINE_string('associated_data', None,
+                    'Optional associated data to use with the '
+                    'encryption operation.')
+
+
 def main(argv):
-  if len(argv) != 5 and len(argv) != 7:
-    raise app.UsageError(
-        'Invalid arguments.\n'
-        'Usage: %s generate key-file kek-uri gcp-credential-file.\n'
-        'Usage: %s encrypt/decrypt key-file kek-uri gcp-credential-file '
-        'input-file output-file.' % (argv[0], argv[0])
-        )
+  del argv  # Unused.
 
-  mode = argv[1]
-  if mode not in ('encrypt', 'decrypt', 'generate'):
-    raise app.UsageError(
-        'The first argument should be either encrypt, decrypt or generate')
-
-  key_file_path = argv[2]
-  kek_uri = argv[3]
-  gcp_credential_file = argv[4]
-  input_file_path = argv[5] if len(argv) == 7 else None
-  output_file_path = argv[6] if len(argv) == 7 else None
+  associated_data = b'' if not FLAGS.associated_data else bytes(
+      FLAGS.associated_data, 'utf-8')
 
   # Initialise Tink
   try:
@@ -69,7 +60,8 @@ def main(argv):
 
   # Read the GCP credentials and set up a client
   try:
-    gcpkms.GcpKmsClient.register_client(kek_uri, gcp_credential_file)
+    gcpkms.GcpKmsClient.register_client(
+        FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
     logging.error('Error initializing GCP client: %s', e)
     return 1
@@ -78,13 +70,14 @@ def main(argv):
   # Tink keysets
   try:
     handle = tink.KeysetHandle.generate_new(
-        aead.aead_key_templates.create_kms_aead_key_template(key_uri=kek_uri))
+        aead.aead_key_templates.create_kms_aead_key_template(
+            key_uri=FLAGS.kek_uri))
     gcp_aead = handle.primitive(aead.Aead)
   except tink.TinkError as e:
     logging.exception('Error creating KMS AEAD primitive: %s', e)
     return 1
 
-  if mode == 'generate':
+  if FLAGS.mode == 'generate':
     # [START generate-a-new-keyset]
     # Generate a new keyset
     try:
@@ -97,7 +90,7 @@ def main(argv):
 
     # [START encrypt-a-keyset]
     # Encrypt the keyset_handle with the remote key-encryption key (KEK)
-    with open(key_file_path, 'wt') as keyset_file:
+    with open(FLAGS.keyset_path, 'wt') as keyset_file:
       try:
         keyset_handle.write(tink.JsonKeysetWriter(keyset_file), gcp_aead)
       except tink.TinkError as e:
@@ -109,7 +102,7 @@ def main(argv):
   # Use the keyset to encrypt/decrypt data
 
   # Read the encrypted keyset into a keyset_handle
-  with open(key_file_path, 'rt') as keyset_file:
+  with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = tink.KeysetHandle.read(
@@ -125,20 +118,23 @@ def main(argv):
     logging.error('Error creating primitive: %s', e)
     return 1
 
-  with open(input_file_path, 'rb') as input_file:
+  with open(FLAGS.input_path, 'rb') as input_file:
     input_data = input_file.read()
-    if mode == 'decrypt':
-      output_data = cipher.decrypt(input_data, b'encrypted-keyset-example')
-    elif mode == 'encrypt':
-      output_data = cipher.encrypt(input_data, b'encrypted-keyset-example')
+    if FLAGS.mode == 'decrypt':
+      output_data = cipher.decrypt(input_data, associated_data)
+    elif FLAGS.mode == 'encrypt':
+      output_data = cipher.encrypt(input_data, associated_data)
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
       return 1
 
-    with open(output_file_path, 'wb') as output_file:
+    with open(FLAGS.output_path, 'wb') as output_file:
       output_file.write(output_data)
 
+
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'keyset_path', 'kek_uri', 'gcp_credential_path'])
   app.run(main)
 # [END encrypted-keyset-example]
