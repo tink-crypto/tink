@@ -25,7 +25,7 @@ namespace tink {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre-generated KeyTemplate for Jwt key types. One can use these templates
 // to generate new KeysetHandle object with fresh keys.
-// To generate a new keyset that contains a single AesGcmKey, one can do:
+// To generate a new keyset that contains a single JwtHmacKey, one can do:
 //
 //   auto status = JwtMacRegister();
 //   if (!status.ok()) { /* fail with error */ }
@@ -40,6 +40,11 @@ const google::crypto::tink::KeyTemplate& JwtHs512Template();
 const google::crypto::tink::KeyTemplate& JwtEs256Template();
 const google::crypto::tink::KeyTemplate& JwtEs384Template();
 const google::crypto::tink::KeyTemplate& JwtEs512Template();
+
+const google::crypto::tink::KeyTemplate& JwtRs256_2048_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtRs256_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtRs384_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtRs512_4096_F4_Template();
 
 }  // namespace tink
 }  // namespace crypto

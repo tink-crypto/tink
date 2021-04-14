@@ -122,7 +122,10 @@ cc_library(
         "//proto:common_cc_proto",
         "//proto:jwt_ecdsa_cc_proto",
         "//proto:jwt_hmac_cc_proto",
+        "//proto:jwt_rsa_ssa_pkcs1_cc_proto",
         "//proto:tink_cc_proto",
+        "//subtle:subtle_util_boringssl",
+        "@boringssl//:crypto",
     ],
 )
 
@@ -140,6 +143,8 @@ cc_library(
         "//jwt/internal:jwt_ecdsa_verify_key_manager",
         "//jwt/internal:jwt_public_key_sign_wrapper",
         "//jwt/internal:jwt_public_key_verify_wrapper",
+        "//jwt/internal:jwt_rsa_ssa_pkcs1_sign_key_manager",
+        "//jwt/internal:jwt_rsa_ssa_pkcs1_verify_key_manager",
         "//proto:config_cc_proto",
         "//util:status",
         "@com_google_absl//absl/base:core_headers",

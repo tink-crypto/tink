@@ -111,7 +111,7 @@ SUPPORTED_LANGUAGES = {
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
     'JwtHmacKey': ['cc', 'java', 'python'],
     'JwtEcdsaPrivateKey': ['cc', 'java'],
-    'JwtRsaSsaPkcs1PrivateKey': ['java'],
+    'JwtRsaSsaPkcs1PrivateKey': ['cc', 'java'],
     'JwtRsaSsaPssPrivateKey': ['java'],
 }
 

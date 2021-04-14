@@ -153,6 +153,8 @@ tink_cc_library(
   DEPS
     tink::jwt::internal::jwt_ecdsa_sign_key_manager
     tink::jwt::internal::jwt_ecdsa_verify_key_manager
+    tink::jwt::internal::jwt_rsa_ssa_pkcs1_sign_key_manager
+    tink::jwt::internal::jwt_rsa_ssa_pkcs1_verify_key_manager
     tink::jwt::internal::jwt_public_key_sign_wrapper
     tink::jwt::internal::jwt_public_key_verify_wrapper
     tink::config::config_util
@@ -174,6 +176,8 @@ tink_cc_library(
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_hmac_cc_proto
     tink::proto::tink_cc_proto
+    tink::subtle::subtle_util_boringssl
+    crypto
 )
 
 tink_cc_test(

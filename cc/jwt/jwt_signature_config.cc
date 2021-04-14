@@ -19,10 +19,12 @@
 #include "absl/memory/memory.h"
 #include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
-#include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
-#include "tink/jwt/internal/jwt_public_key_verify_wrapper.h"
 #include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
+#include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
+#include "tink/jwt/internal/jwt_public_key_verify_wrapper.h"
+#include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_sign_key_manager.h"
+#include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
@@ -46,6 +48,11 @@ util::Status JwtSignatureRegister() {
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<jwt_internal::JwtEcdsaSignKeyManager>(),
       absl::make_unique<jwt_internal::JwtEcdsaVerifyKeyManager>(), true);
+  if (!status.ok()) return status;
+  // RSA SSA PKCS1
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<jwt_internal::JwtRsaSsaPkcs1SignKeyManager>(),
+      absl::make_unique<jwt_internal::JwtRsaSsaPkcs1VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
   if (kUseOnlyFips) {
