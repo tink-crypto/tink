@@ -6,6 +6,7 @@ go_library(
     name = "go_default_library",
     srcs = ["kwp.go"],
     importpath = "github.com/google/tink/go/kwp/subtle",
+    visibility = ["//visibility:public"],
 )
 
 go_test(
