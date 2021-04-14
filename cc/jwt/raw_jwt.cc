@@ -19,13 +19,22 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
-#include "tink/jwt/jwt_names.h"
 #include "tink/jwt/internal/json_util.h"
 
 namespace crypto {
 namespace tink {
 
 namespace {
+
+// Registered claim names, as defined in
+// https://tools.ietf.org/html/rfc7519#section-4.1.
+constexpr absl::string_view kJwtClaimIssuer = "iss";
+constexpr absl::string_view kJwtClaimSubject = "sub";
+constexpr absl::string_view kJwtClaimAudience = "aud";
+constexpr absl::string_view kJwtClaimExpiration = "exp";
+constexpr absl::string_view kJwtClaimNotBefore = "nbf";
+constexpr absl::string_view kJwtClaimIssuedAt = "iat";
+constexpr absl::string_view kJwtClaimJwtId = "jti";
 
 bool IsRegisteredClaimName(absl::string_view name) {
   return name == kJwtClaimIssuer || name == kJwtClaimSubject ||

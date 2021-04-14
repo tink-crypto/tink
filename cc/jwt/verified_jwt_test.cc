@@ -20,7 +20,6 @@
 #include "absl/strings/escaping.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
 #include "tink/jwt/jwt_mac.h"
-#include "tink/jwt/jwt_names.h"
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/subtle/hmac_boringssl.h"

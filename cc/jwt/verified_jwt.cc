@@ -19,7 +19,6 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
-#include "tink/jwt/jwt_names.h"
 #include "tink/jwt/internal/json_util.h"
 
 namespace crypto {

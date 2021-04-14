@@ -3,25 +3,12 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
-    name = "jwt_names",
-    hdrs = ["jwt_names.h"],
-    include_prefix = "tink/jwt",
-    deps = [
-        "//util:status",
-        "//util:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
-    ],
-)
-
-cc_library(
     name = "raw_jwt",
     srcs = ["raw_jwt.cc"],
     hdrs = ["raw_jwt.h"],
     include_prefix = "tink/jwt",
     visibility = ["//visibility:public"],
     deps = [
-        ":jwt_names",
         "//jwt/internal:json_util",
         "//util:status",
         "//util:statusor",
@@ -39,7 +26,6 @@ cc_library(
     include_prefix = "tink/jwt",
     visibility = ["//visibility:public"],
     deps = [
-        ":jwt_names",
         ":raw_jwt",
         "//util:status",
         "//util:statusor",
@@ -168,7 +154,6 @@ cc_test(
     size = "small",
     srcs = ["raw_jwt_test.cc"],
     deps = [
-        ":jwt_names",
         ":raw_jwt",
         "//util:status",
         "//util:statusor",
@@ -187,7 +172,6 @@ cc_test(
     srcs = ["verified_jwt_test.cc"],
     deps = [
         ":jwt_mac",
-        ":jwt_names",
         ":jwt_validator",
         ":raw_jwt",
         ":verified_jwt",
