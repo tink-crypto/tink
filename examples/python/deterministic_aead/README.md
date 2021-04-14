@@ -9,7 +9,7 @@ obtaining a primitive, and using the primitive to do crypto.
 The key material was generated with Tinkey:
 
 ```shell
-tinkey create-keyset --key-template AES256_SIV --out-format JSON \
+$ tinkey create-keyset --key-template AES256_SIV --out-format JSON \
     --out deterministic_aead_test_keyset.json
 ```
 
@@ -18,23 +18,23 @@ tinkey create-keyset --key-template AES256_SIV --out-format JSON \
 ### Bazel
 
 ```shell
-git clone https://github.com/google/tink
-cd tink/examples/python
-bazel build ...
+$ git clone https://github.com/google/tink
+$ cd tink/examples/python
+$ bazel build ...
 ```
 
 You can then encrypt a file
 
 ```shell
-echo "some data" > testdata.txt
-./bazel-bin/determinsitic_aead/determinsitic_aead encrypt \
-    testdata.txt testdata.txt.encrypted
+$ echo "some data" > testdata.txt
+$ ./bazel-bin/determinsitic_aead/determinsitic_aead --mode encrypt \
+    --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
 
 or decrypt the file with
 
 ```shell
-./bazel-bin/determinsitic_aead/determinsitic_aead decrypt \
-    testdata.txt.encrypted testdata.txt.decrypted
+$ ./bazel-bin/determinsitic_aead/determinsitic_aead --mode decrypt \
+    --input_path testdata.txt.encrypted --output_path testdata.txt.decrypted
 $ diff testdata.txt testdata.txt.decrypted
 ```

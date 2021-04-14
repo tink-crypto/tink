@@ -15,13 +15,6 @@
 """A command-line utility for encrypting small files with Determinsitic AEAD.
 
 It loads cleartext keys from disk - this is not recommended!
-
-It requires 4 arguments:
-  mode: Can be "encrypt" or "decrypt" to encrypt/decrypt the input to the
-        output.
-  key-file: Read the key material from this file.
-  input-file: Read the input from this file.
-  output-file: Write the result to this file.
 """
 
 from __future__ import absolute_import
@@ -30,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
+from absl import flags
 from absl import logging
 
 import tink
@@ -37,18 +31,23 @@ from tink import cleartext_keyset_handle
 from tink import daead
 
 
-def main(argv):
-  if len(argv) != 5 and len(argv) != 6:
-    raise app.UsageError(
-        'Expected 4 or 5 arguments, got %d.\n'
-        'Usage: %s encrypt/decrypt key-file input-file output-file '
-        '[associated-data]' % (len(argv) - 1, argv[0]))
+FLAGS = flags.FLAGS
 
-  mode = argv[1]
-  key_file_path = argv[2]
-  input_file_path = argv[3]
-  output_file_path = argv[4]
-  associated_data = b'' if len(argv) == 5 else bytes(argv[5], 'utf-8')
+flags.DEFINE_enum('mode', None, ['encrypt', 'decrypt'],
+                  'The operation to perform.')
+flags.DEFINE_string('keyset_path', None,
+                    'Path to the keyset used for encryption.')
+flags.DEFINE_string('input_path', None, 'Path to the input file.')
+flags.DEFINE_string('output_path', None, 'Path to the output file.')
+flags.DEFINE_string('associated_data', None,
+                    'Optional associated data used for the encryption.')
+
+
+def main(argv):
+  del argv  # Unused.
+
+  associated_data = b'' if not FLAGS.associated_data else bytes(
+      FLAGS.associated_data, 'utf-8')
 
   # Initialise Tink
   try:
@@ -58,7 +57,7 @@ def main(argv):
     return 1
 
   # Read the keyset into a keyset_handle
-  with open(key_file_path, 'rt') as keyset_file:
+  with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
@@ -73,12 +72,12 @@ def main(argv):
     logging.error('Error creating primitive: %s', e)
     return 1
 
-  with open(input_file_path, 'rb') as input_file:
+  with open(FLAGS.input_path, 'rb') as input_file:
     input_data = input_file.read()
-    if mode == 'decrypt':
+    if FLAGS.mode == 'decrypt':
       output_data = cipher.decrypt_deterministically(
           input_data, associated_data)
-    elif mode == 'encrypt':
+    elif FLAGS.mode == 'encrypt':
       output_data = cipher.encrypt_deterministically(
           input_data, associated_data)
     else:
@@ -86,9 +85,12 @@ def main(argv):
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
       return 1
 
-    with open(output_file_path, 'wb') as output_file:
+    with open(FLAGS.output_path, 'wb') as output_file:
       output_file.write(output_data)
 
+
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'keyset_path', 'input_path', 'output_path'])
   app.run(main)
 # [END deterministic-aead-example]
