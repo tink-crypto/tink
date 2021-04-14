@@ -474,18 +474,12 @@ cc_library(
     deps = [
         ":jwt_public_key_sign_impl",
         ":raw_jwt_ecdsa_sign_key_manager",
-        "//:core/key_type_manager",
+        "//:core/private_key_type_manager",
         "//jwt:jwt_public_key_sign",
         "//proto:jwt_ecdsa_cc_proto",
-        "//util:constants",
-        "//util:enums",
-        "//util:errors",
-        "//util:protobuf_helper",
-        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -500,15 +494,9 @@ cc_library(
         "//:core/key_type_manager",
         "//jwt:jwt_public_key_verify",
         "//proto:jwt_ecdsa_cc_proto",
-        "//util:constants",
-        "//util:enums",
-        "//util:errors",
-        "//util:protobuf_helper",
-        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -522,8 +510,6 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
     ],
 )

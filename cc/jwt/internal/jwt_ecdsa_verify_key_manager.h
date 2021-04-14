@@ -19,16 +19,10 @@
 #include <string>
 
 #include "absl/memory/memory.h"
-#include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/jwt/jwt_public_key_verify.h"
-#include "tink/util/constants.h"
-#include "tink/util/enums.h"
-#include "tink/util/errors.h"
-#include "tink/util/protobuf_helper.h"
-#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/jwt_ecdsa.pb.h"

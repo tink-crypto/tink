@@ -433,18 +433,12 @@ tink_cc_library(
   DEPS
     tink::jwt::internal::jwt_public_key_sign_impl
     tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
-    tink::core::key_type_manager
+    tink::core::private_key_type_manager
     tink::jwt::jwt_public_key_sign
-    tink::util::constants
-    tink::util::enums
-    tink::util::errors
-    tink::util::protobuf_helper
-    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::jwt_ecdsa_cc_proto
     absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -457,16 +451,10 @@ tink_cc_library(
     tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
     tink::core::key_type_manager
     tink::jwt::jwt_public_key_verify
-    tink::util::constants
-    tink::util::enums
-    tink::util::errors
-    tink::util::protobuf_helper
-    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::proto::jwt_ecdsa_cc_proto
     absl::memory
-    absl::strings
 )
 
 tink_cc_test(
@@ -477,9 +465,7 @@ tink_cc_test(
     tink::jwt::internal::jwt_ecdsa_verify_key_manager
     tink::util::status
     tink::util::statusor
-    tink::util::test_util
     tink::util::test_matchers
-    absl::strings
     gmock
 )
 
