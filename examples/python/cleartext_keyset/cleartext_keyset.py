@@ -15,12 +15,6 @@
 """A command-line utility for generating, storing and using cleartext AES128_GCM keysets.
 
 It loads cleartext keys from disk - this is not recommended!
-
-It requires the following arguments:
-  mode: Can be "generate", "encrypt" or "decrypt".
-  key-file: Read/write the key material from this file.
-  input-file: If mode is "encrypt" or "decrypt", read the input from this file.
-  output-file: If mode is "encrypt" or "decrypt", write the result to this file.
 """
 
 from __future__ import absolute_import
@@ -29,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
+from absl import flags
 from absl import logging
 
 import tink
@@ -36,23 +31,18 @@ from tink import aead
 from tink import cleartext_keyset_handle
 
 
+FLAGS = flags.FLAGS
+
+flags.DEFINE_enum('mode', None, ['generate', 'encrypt', 'decrypt'],
+                  'The operation to perform.')
+flags.DEFINE_string('keyset_path', None,
+                    'Path to the keyset used for encryption.')
+flags.DEFINE_string('input_path', None, 'Path to the input file.')
+flags.DEFINE_string('output_path', None, 'Path to the output file.')
+
+
 def main(argv):
-  if len(argv) != 3 and len(argv) != 5:
-    raise app.UsageError(
-        'Invalid arguments.\n'
-        'Usage: %s generate key-file.\n'
-        'Usage: %s encrypt/decrypt key-file '
-        'input-file output-file.' % (argv[0], argv[0])
-        )
-
-  mode = argv[1]
-  if mode not in ('encrypt', 'decrypt', 'generate'):
-    raise app.UsageError(
-        'The first argument should be either encrypt, decrypt or generate')
-
-  key_file_path = argv[2]
-  input_file_path = argv[3] if len(argv) == 5 else None
-  output_file_path = argv[4] if len(argv) == 5 else None
+  del argv  # Unused.
 
   # Initialise Tink
   try:
@@ -61,7 +51,7 @@ def main(argv):
     logging.error('Error initialising Tink: %s', e)
     return 1
 
-  if mode == 'generate':
+  if FLAGS.mode == 'generate':
     # [START generate-a-new-keyset]
     # Generate a new keyset
     try:
@@ -73,7 +63,7 @@ def main(argv):
     # [END generate-a-new-keyset]
 
     # [START store-a-cleartext-keyset]
-    with open(key_file_path, 'wt') as keyset_file:
+    with open(FLAGS.keyset_path, 'wt') as keyset_file:
       try:
         cleartext_keyset_handle.write(
             tink.JsonKeysetWriter(keyset_file), keyset_handle)
@@ -86,7 +76,7 @@ def main(argv):
   # Use the input keyset to encrypt/decrypt data
 
   # Read the keyset into a keyset_handle
-  with open(key_file_path, 'rt') as keyset_file:
+  with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
@@ -101,20 +91,21 @@ def main(argv):
     logging.error('Error creating primitive: %s', e)
     return 1
 
-  with open(input_file_path, 'rb') as input_file:
+  with open(FLAGS.input_path, 'rb') as input_file:
     input_data = input_file.read()
-    if mode == 'decrypt':
+    if FLAGS.mode == 'decrypt':
       output_data = cipher.decrypt(input_data, b'envelope_example')
-    elif mode == 'encrypt':
+    elif FLAGS.mode == 'encrypt':
       output_data = cipher.encrypt(input_data, b'envelope_example')
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
       return 1
 
-    with open(output_file_path, 'wb') as output_file:
+    with open(FLAGS.output_path, 'wb') as output_file:
       output_file.write(output_data)
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required(['mode', 'keyset_path'])
   app.run(main)
 # [END cleartext-keyset-example]
