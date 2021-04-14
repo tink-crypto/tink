@@ -412,6 +412,101 @@ cc_test(
 )
 
 cc_library(
+    name = "raw_jwt_rsa_ssa_pss_sign_key_manager",
+    srcs = ["raw_jwt_rsa_ssa_pss_sign_key_manager.cc"],
+    hdrs = ["raw_jwt_rsa_ssa_pss_sign_key_manager.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        ":raw_jwt_rsa_ssa_pss_verify_key_manager",
+        "//:core/key_type_manager",
+        "//:core/private_key_type_manager",
+        "//:public_key_sign",
+        "//proto:jwt_rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "//signature:sig_util",
+        "//subtle:rsa_ssa_pss_sign_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "raw_jwt_rsa_ssa_pss_sign_key_manager_test",
+    srcs = ["raw_jwt_rsa_ssa_pss_sign_key_manager_test.cc"],
+    deps = [
+        ":raw_jwt_rsa_ssa_pss_sign_key_manager",
+        "//:public_key_sign",
+        "//proto:jwt_rsa_ssa_pss_cc_proto",
+        "//subtle:rsa_ssa_pss_verify_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "raw_jwt_rsa_ssa_pss_verify_key_manager",
+    srcs = ["raw_jwt_rsa_ssa_pss_verify_key_manager.cc"],
+    hdrs = ["raw_jwt_rsa_ssa_pss_verify_key_manager.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//:core/key_type_manager",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//proto:common_cc_proto",
+        "//proto:jwt_rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "//subtle:rsa_ssa_pss_verify_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "raw_jwt_rsa_ssa_pss_verify_key_manager_test",
+    srcs = ["raw_jwt_rsa_ssa_pss_verify_key_manager_test.cc"],
+    deps = [
+        ":raw_jwt_rsa_ssa_pss_sign_key_manager",
+        ":raw_jwt_rsa_ssa_pss_verify_key_manager",
+        "//:public_key_sign",
+        "//:public_key_verify",
+        "//proto:jwt_rsa_ssa_pss_cc_proto",
+        "//subtle:rsa_ssa_pss_sign_boringssl",
+        "//subtle:subtle_util_boringssl",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "jwt_public_key_sign_impl",
     srcs = ["jwt_public_key_sign_impl.cc"],
     hdrs = ["jwt_public_key_sign_impl.h"],
