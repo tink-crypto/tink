@@ -22,9 +22,9 @@ py_library(
     srcs = ["_encrypting_stream.py"],
     srcs_version = "PY3",
     deps = [
+        ":_file_object_adapter",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
-        "//tink/util:file_object_adapter",
     ],
 )
 
@@ -46,9 +46,9 @@ py_library(
     srcs = ["_decrypting_stream.py"],
     srcs_version = "PY3",
     deps = [
+        ":_file_object_adapter",
         "//tink/cc/pybind:tink_bindings",
         "//tink/core",
-        "//tink/util:file_object_adapter",
     ],
 )
 
@@ -198,5 +198,25 @@ py_test(
         requirement("absl-py"),
         requirement("six"),
         "//tink/testing:bytes_io",
+    ],
+)
+
+py_library(
+    name = "_file_object_adapter",
+    srcs = ["_file_object_adapter.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/cc/pybind:tink_bindings",
+    ],
+)
+
+py_test(
+    name = "_file_object_adapter_test",
+    srcs = ["_file_object_adapter_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_file_object_adapter",
+        requirement("absl-py"),
+        requirement("six"),
     ],
 )

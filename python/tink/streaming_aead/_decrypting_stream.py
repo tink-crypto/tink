@@ -26,7 +26,7 @@ from typing import BinaryIO
 
 from tink import core
 from tink.cc.pybind import tink_bindings
-from tink.util import file_object_adapter
+from tink.streaming_aead import _file_object_adapter
 
 
 class RawDecryptingStream(io.RawIOBase):
@@ -54,7 +54,7 @@ class RawDecryptingStream(io.RawIOBase):
     self._close_ciphertext_source = close_ciphertext_source
     if not ciphertext_source.readable():
       raise ValueError('ciphertext_source must be readable')
-    cc_ciphertext_source = file_object_adapter.FileObjectAdapter(
+    cc_ciphertext_source = _file_object_adapter.FileObjectAdapter(
         ciphertext_source)
     self._input_stream_adapter = self._get_input_stream_adapter(
         stream_aead, associated_data, cc_ciphertext_source)

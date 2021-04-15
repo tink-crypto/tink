@@ -1,5 +1,3 @@
-# Copyright 2020 Google LLC
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +9,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.util.file_object_adapter."""
+"""Tests for tink.python.tink.util._file_object_adapter."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,14 +20,14 @@ import io
 from absl.testing import absltest
 from absl.testing.absltest import mock
 
-from tink.util import file_object_adapter
+from tink.streaming_aead import _file_object_adapter
 
 
 class FileObjectAdapterTest(absltest.TestCase):
 
   def test_basic_write(self):
     file_object = io.BytesIO()
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(9, adapter.write(b'something'))
     self.assertEqual(b'something', file_object.getvalue())
@@ -37,7 +35,7 @@ class FileObjectAdapterTest(absltest.TestCase):
 
   def test_multiple_write(self):
     file_object = io.BytesIO()
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(9, adapter.write(b'something'))
     self.assertEqual(3, adapter.write(b'123'))
@@ -46,7 +44,7 @@ class FileObjectAdapterTest(absltest.TestCase):
 
   def test_write_after_close(self):
     file_object = io.BytesIO()
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     adapter.close()
     with self.assertRaises(ValueError):
@@ -55,33 +53,33 @@ class FileObjectAdapterTest(absltest.TestCase):
   def test_write_returns_none(self):
     file_object = mock.Mock()
     file_object.write = mock.Mock(return_value=None)
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(0, adapter.write(b'something'))
 
   def test_write_raises_blocking_error(self):
     file_object = mock.Mock()
     file_object.write = mock.Mock(side_effect=io.BlockingIOError(None, None, 5))
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(5, adapter.write(b'something'))
 
   def test_partial_write(self):
     file_object = mock.Mock()
     file_object.write = mock.Mock(wraps=lambda data: len(data) - 1)
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(8, adapter.write(b'something'))
 
   def test_basic_read(self):
     file_object = io.BytesIO(b'something')
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(adapter.read(9), b'something')
 
   def test_multiple_read(self):
     file_object = io.BytesIO(b'something')
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(adapter.read(3), b'som')
     self.assertEqual(adapter.read(3), b'eth')
@@ -90,34 +88,34 @@ class FileObjectAdapterTest(absltest.TestCase):
   def test_read_returns_none(self):
     file_object = mock.Mock()
     file_object.read = mock.Mock(return_value=None)
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(adapter.read(10), b'')
 
   def test_read_eof(self):
     file_object = mock.Mock()
     file_object.read = mock.Mock(return_value=b'')
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     with self.assertRaises(EOFError):
       adapter.read(10)
 
   def test_read_size_0(self):
     file_object = io.BytesIO(b'something')
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(adapter.read(0), b'')
 
   def test_read_negative_size_fails(self):
     file_object = io.BytesIO(b'something')
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
     with self.assertRaises(ValueError):
       adapter.read(-1)
 
   def test_read_raises_blocking_error(self):
     file_object = mock.Mock()
     file_object.read = mock.Mock(side_effect=io.BlockingIOError(None, None))
-    adapter = file_object_adapter.FileObjectAdapter(file_object)
+    adapter = _file_object_adapter.FileObjectAdapter(file_object)
 
     self.assertEqual(adapter.read(10), b'')
 

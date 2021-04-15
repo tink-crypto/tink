@@ -27,7 +27,7 @@ from typing import BinaryIO, Optional
 
 from tink import core
 from tink.cc.pybind import tink_bindings
-from tink.util import file_object_adapter
+from tink.streaming_aead import _file_object_adapter
 
 
 @core.use_tink_errors
@@ -62,7 +62,7 @@ class RawEncryptingStream(io.RawIOBase):
     super(RawEncryptingStream, self).__init__()
     if not ciphertext_destination.writable():
       raise ValueError('ciphertext_destination must be writable')
-    cc_ciphertext_destination = file_object_adapter.FileObjectAdapter(
+    cc_ciphertext_destination = _file_object_adapter.FileObjectAdapter(
         ciphertext_destination)
     self._cc_encrypting_stream = _new_cc_encrypting_stream(
         stream_aead, associated_data, cc_ciphertext_destination)
