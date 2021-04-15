@@ -28,52 +28,54 @@ This envelope encryption example uses a Cloud KMS key as a key-encryption key
     format:
     `projects/<my-project>/locations/global/keyRings/<my-key-ring>/cryptoKeys/<my-key>`.
 
-*   Create and download a service account that is allowed to encrypt and decrypt
-    with the above key.
+*   Create a service account that is allowed to encrypt and decrypt with the
+    above key and download a JSON credentials file.
 
 ### Bazel
 
 ```shell
-git clone https://github.com/google/tink
-cd tink/examples/python
-bazel build ...
+$ git clone https://github.com/google/tink
+$ cd tink/examples/python
+$ bazel build ...
 ```
 
 You can then encrypt a file:
 
 ```shell
-echo "some data" > testdata.txt
+$ echo "some data" > testdata.txt
+
 # Replace `<my-key-uri>` in `gcp-kms://<my-key-uri>` with your key URI, and
 # my-service-account.json with your service account's credential JSON file.
-./bazel-bin/envelope/envelope encrypt \
-    my-service-account.json \
-    gcp-kms://<my-key-uri> \
-    testdata.txt testdata.txt.encrypted
+
+$ ./bazel-bin/envelope/envelope --mode encrypt \
+    --gcp_credential_path my-service-account.json \
+    --kek_uri gcp-kms://<my-key-uri> \
+    --input_path testdata.txt --output_path testdata.txt.encrypted
 ```
 
-or decrypt the file with:
+Or decrypt the file with:
 
 ```shell
-./bazel-bin/envelope/envelope decrypt \
-    my-service-account.json \
-    gcp-kms://<my-key-uri> \
-    testdata.txt.encrypted testdata.txt
+$ ./bazel-bin/envelope/envelope --mode decrypt \
+     --gcp_credential_path my-service-account.json \
+     --kek_uri gcp-kms://<my-key-uri> \
+     --input_path testdata.txt.encrypted --output_path testdata.txt
 ```
 
 ### Pip package
 
 ```shell
-git clone https://github.com/google/tink
-cd tink/python
-pip3 install .
+$ git clone https://github.com/google/tink
+$ cd tink/python
+$ pip3 install .
 ```
 
 You can then encrypt the file:
 
 ```shell
-echo "some data" > testdata.txt
-python3 envelope.py encrypt \
-    my-service-account.json \
-    gcp-kms://<my-key-uri> \
-    testdata.txt testdata.txt.encrypted
+$ echo "some data" > testdata.txt
+$ python3 envelope.py --mode encrypt \
+    --gcp_credential_path my-service-account.json \
+    --kek_uri gcp-kms://<my-key-uri> \
+    --input_path testdata.txt --output_path testdata.txt.encrypted
 ```

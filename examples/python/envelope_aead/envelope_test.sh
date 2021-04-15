@@ -17,7 +17,8 @@
 set -euo pipefail
 
 #############################################################################
-##### Tests for envelope encryption AEAD example.
+# Tests for envelope encryption AEAD example.
+#############################################################################
 
 CLI="$1"
 KEY_URI="$2"
@@ -30,7 +31,7 @@ export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${TEST_SRCDIR}/google_root_pem/file/dow
 
 DATA_FILE="$TEST_TMPDIR/example_data.txt"
 
-echo "This is some plaintext to be encrypted." > ${DATA_FILE}
+echo "This is some plaintext to be encrypted." > "${DATA_FILE}"
 
 #############################################################################
 
@@ -46,15 +47,20 @@ test_command() {
   set -e
 }
 
+print_test() {
+  echo "+++ Starting test $1..."
+}
+
 #############################################################################
-#### Test initialization and encryption
-test_name="encrypt"
-echo "+++ Starting test $test_name..."
 
-# ##### Run encryption
-test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted"
+print_test "encrypt"
 
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run encryption
+test_command ${CLI} --mode encrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}" --output_path  "${DATA_FILE}.encrypted"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Success: file was encrypted."
 else
   echo "--- Failure: could not encrypt file."
@@ -62,21 +68,22 @@ else
 fi
 
 #############################################################################
-#### Test if decryption succeeds and returns original file
-test_name="decrypt"
-echo "+++ Starting test $test_name..."
 
-##### Run decryption
-test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted"
+print_test "decrypt"
 
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run decryption
+test_command ${CLI} --mode decrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}.encrypted" --output_path "${DATA_FILE}.decrypted"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Success: file was successfully decrypted."
 else
   echo "--- Failure: could not decrypt file."
   exit 1
 fi
 
-if cmp -s ${DATA_FILE} "${DATA_FILE}.decrypted"; then
+if cmp -s "${DATA_FILE}" "${DATA_FILE}.decrypted"; then
   echo "+++ Success: file content is the same after decryption."
 else
   echo "--- Failure: file content is not the same after decryption."
@@ -84,50 +91,64 @@ else
 fi
 
 #############################################################################
-#### Test correct encryption and decryption with associated data
-test_name="test_encrypt_decrypt_succeeds_with_associated_data"
-echo "+++ Starting test ${test_name}..."
 
-##### Run encryption
+print_test "test_encrypt_decrypt_succeeds_with_associated_data"
+
+# Run encryption
 ASSOCIATED_DATA="header information"
-test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted" "${ASSOCIATED_DATA}"
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+test_command ${CLI} --mode encrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}" --output_path  "${DATA_FILE}.encrypted" \
+  --associated_data "${ASSOCIATED_DATA}"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
   exit 1
 fi
 
-##### Run decryption
-test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted" "${ASSOCIATED_DATA}"
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run decryption
+test_command ${CLI} --mode decrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}.encrypted" --output_path "${DATA_FILE}.decrypted" \
+  --associated_data "${ASSOCIATED_DATA}"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Decryption successful."
 else
   echo "--- Decryption failed."
   exit 1
 fi
 
-cmp --silent ${DATA_FILE} ${DATA_FILE}.decrypted
+cmp --silent "${DATA_FILE}" "${DATA_FILE}.decrypted"
 
 #############################################################################
-#### Test decryption fails with modified associated data
-test_name="test_encrypt_decrypt_fails_with_modified_associated_data"
-echo "+++ Starting test ${test_name}..."
 
-##### Run encryption
+print_test "test_encrypt_decrypt_fails_with_modified_associated_data"
+
+# Run encryption
 ASSOCIATED_DATA="header information"
-test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${DATA_FILE} "${DATA_FILE}.encrypted" "${ASSOCIATED_DATA}"
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+test_command ${CLI} --mode encrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}" --output_path "${DATA_FILE}.encrypted" \
+  --associated_data "${ASSOCIATED_DATA}"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
   exit 1
 fi
 
-##### Run decryption
+# Run decryption
 MODIFIED_ASSOCIATED_DATA="modified header information"
-test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} "${DATA_FILE}.encrypted" "${DATA_FILE}.decrypted" "${MODIFIED_ASSOCIATED_DATA}"
-if [[ ${TEST_STATUS} -eq 1 ]]; then
+test_command ${CLI} --mode decrypt --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --input_path "${DATA_FILE}.encrypted" --output_path "${DATA_FILE}.decrypted" \
+  --associated_data "${MODIFIED_ASSOCIATED_DATA}"
+
+if (( TEST_STATUS == 1 )); then
   echo "+++ Decryption failed as expected."
 else
   echo "--- Decryption succeeded but expected to fail."

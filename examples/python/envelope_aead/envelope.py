@@ -12,19 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # [START envelope-example]
-"""A command-line utility for encrypting small files using envelope encryption with GCP.
-
-It requires five arguments:
-  mode: Can be "encrypt" or "decrypt" to encrypt/decrypt the input to the
-        output.
-  kek-uri: Use this Cloud KMS' key as the key-encrypting-key for envelope
-        encryption.
-  gcp-credential-file: Use this JSON credential file to connect to Cloud KMS.
-  input-file: Read the input from this file.
-  output-file: Write the result to this file.
-  [optional] associated-data: Associated data used for the encryption or
-        decryption.
-"""
+"""A command-line utility for encrypting small files using envelope encryption with GCP."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -32,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
+from absl import flags
 from absl import logging
 
 import tink
@@ -39,19 +28,25 @@ from tink import aead
 from tink.integration import gcpkms
 
 
-def main(argv):
-  if len(argv) != 6 and len(argv) != 7:
-    raise app.UsageError(
-        'Expected 5 arguments, got %d.\n'
-        'Usage: %s encrypt/decrypt kek-uri gcp-credential-file '
-        'input-file output-file [associated-data]' % (len(argv) - 1, argv[0]))
+FLAGS = flags.FLAGS
 
-  mode = argv[1]
-  kek_uri = argv[2]
-  gcp_credential_file = argv[3]
-  input_file_path = argv[4]
-  output_file_path = argv[5]
-  associated_data = b'' if len(argv) == 6 else argv[6].encode('utf-8')
+flags.DEFINE_enum('mode', None, ['encrypt', 'decrypt'],
+                  'The operation to perform.')
+flags.DEFINE_string('kek_uri', None,
+                    'The Cloud KMS URI of the key encryption key.')
+flags.DEFINE_string('gcp_credential_path', None,
+                    'Path to the GCP credentials JSON file.')
+flags.DEFINE_string('input_path', None, 'Path to the input file.')
+flags.DEFINE_string('output_path', None, 'Path to the output file.')
+flags.DEFINE_string('associated_data', None,
+                    'Optional associated data used for the encryption.')
+
+
+def main(argv):
+  del argv  # Unused.
+
+  associated_data = b'' if not FLAGS.associated_data else bytes(
+      FLAGS.associated_data, 'utf-8')
 
   # Initialise Tink
   try:
@@ -62,7 +57,8 @@ def main(argv):
 
   # Read the GCP credentials and setup client
   try:
-    gcpkms.GcpKmsClient.register_client(kek_uri, gcp_credential_file)
+    gcpkms.GcpKmsClient.register_client(
+        FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
     logging.error('Error initializing GCP client: %s', e)
     return 1
@@ -70,7 +66,7 @@ def main(argv):
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
-        kek_uri=kek_uri,
+        kek_uri=FLAGS.kek_uri,
         dek_template=aead.aead_key_templates.AES256_GCM)
     handle = tink.KeysetHandle.generate_new(template)
     env_aead = handle.primitive(aead.Aead)
@@ -78,20 +74,22 @@ def main(argv):
     logging.error('Error creating primitive: %s', e)
     return 1
 
-  with open(input_file_path, 'rb') as input_file:
+  with open(FLAGS.input_path, 'rb') as input_file:
     input_data = input_file.read()
-    if mode == 'decrypt':
+    if FLAGS.mode == 'decrypt':
       output_data = env_aead.decrypt(input_data, associated_data)
-    elif mode == 'encrypt':
+    elif FLAGS.mode == 'encrypt':
       output_data = env_aead.encrypt(input_data, associated_data)
     else:
       logging.error(
           'Error mode not supported. Please choose "encrypt" or "decrypt".')
       return 1
 
-    with open(output_file_path, 'wb') as output_file:
+    with open(FLAGS.output_path, 'wb') as output_file:
       output_file.write(output_data)
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'kek_uri', 'gcp_credential_path', 'input_path', 'output_path'])
   app.run(main)
 # [END envelope-example]
