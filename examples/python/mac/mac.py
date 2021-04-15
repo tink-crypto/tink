@@ -15,12 +15,6 @@
 """A command-line utility for checking file integrity with a Message Authentication Code (MAC).
 
 It loads cleartext keys from disk - this is not recommended!
-
-It requires the following arguments:
-  mode: either 'compute' or 'verify'
-  keyset-file: name of the file with the keyset to be used for the MAC
-  data-file:  name of the file with the input data to be checked
-  mac-file:  name of the file containing a hexadecimal MAC of the data
 """
 
 from __future__ import absolute_import
@@ -40,21 +34,19 @@ from tink import mac
 
 FLAGS = flags.FLAGS
 
+flags.DEFINE_enum('mode', None, ['compute', 'verify'],
+                  'The operation to perform.')
+flags.DEFINE_string('keyset_path', None,
+                    'Path to the keyset used for the MAC operation.')
+flags.DEFINE_string('data_path', None,
+                    'Path to the file with the input data to be checked.')
+flags.DEFINE_string('mac_path', None,
+                    'Path to the file containing a hexadecimal MAC of the'
+                    ' data.')
+
 
 def main(argv):
-  if len(argv) != 5:
-    raise app.UsageError(
-        'Expected 4 arguments, got %d.\n'
-        'Usage: %s compute/verify keyset-file data-file mac-file' %
-        (len(argv) - 1, argv[0]))
-
-  mode = argv[1]
-  if mode not in ('compute', 'verify'):
-    raise app.UsageError('Incorrect mode. Please select compute or verify.')
-
-  keyset_filename = argv[2]
-  data_filename = argv[3]
-  mac_filename = argv[4]
+  del argv  # Unused.
 
   # Initialise Tink.
   try:
@@ -64,7 +56,7 @@ def main(argv):
     return 1
 
   # Read the keyset into a keyset_handle.
-  with open(keyset_filename, 'rt') as keyset_file:
+  with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
@@ -79,17 +71,17 @@ def main(argv):
     logging.error('Error creating primitive: %s', e)
     return 1
 
-  with open(data_filename, 'rb') as data_file:
+  with open(FLAGS.data_path, 'rb') as data_file:
     data = data_file.read()
 
-  if mode == 'compute':
+  if FLAGS.mode == 'compute':
     # Compute the MAC.
     code = cipher.compute_mac(data)
-    with open(mac_filename, 'wb') as mac_file:
+    with open(FLAGS.mac_path, 'wb') as mac_file:
       mac_file.write(binascii.hexlify(code))
     return 0
 
-  with open(mac_filename, 'rb') as mac_file:
+  with open(FLAGS.mac_path, 'rb') as mac_file:
     try:
       expected_mac = binascii.unhexlify(mac_file.read().strip())
     except binascii.Error as e:
@@ -106,5 +98,7 @@ def main(argv):
 
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'keyset_path', 'data_path', 'mac_path'])
   app.run(main)
 # [END mac-example]

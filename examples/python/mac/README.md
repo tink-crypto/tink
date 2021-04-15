@@ -9,28 +9,36 @@ obtaining a primitive, and using the primitive to do crypto.
 The key material was generated with:
 
 ```shell
-tinkey create-keyset --key-template HMAC_SHA256_256BITTAG --out-format JSON \
---out mac_test_keyset.json
+$ tinkey create-keyset --key-template HMAC_SHA256_256BITTAG --out-format JSON \
+    --out mac_test_keyset.json
 ```
 
 ## Build and Run
 
 ### Bazel
 
+Build the examples:
+
 ```shell
-git clone https://github.com/google/tink
-cd tink/examples/python
-bazel build ...
-echo "some data" > data.txt
+$ git clone https://github.com/google/tink
+$ cd tink/examples/python
+$ bazel build ...
+```
 
-git clone https://github.com/google/tink
-cd tink/examples/python
-bazel build ...
-echo "some data" > data.txt
-touch mac_file.txt
+Compute a MAC:
 
-./bazel-bin/mac/mac compute \
-    ./mac/mac_test_keyset.json data.txt mac_file.txt
-./bazel-bin/mac/mac verify \
-    ./mac/mac_test_keyset.json data.txt mac_file.txt
+```shell
+$ echo "some data" > data.txt
+$ touch mac_file.txt
+$ ./bazel-bin/mac/mac --mode compute \
+    --keyset_path ./mac/mac_test_keyset.json \
+    --data_path data.txt --mac_path mac_file.txt
+```
+
+Verify a MAC:
+
+```shell
+$ ./bazel-bin/mac/mac --mode verify \
+    --keyset_path ./mac/mac_test_keyset.json \
+    --data_path data.txt --mac_path mac_file.txt
 ```
