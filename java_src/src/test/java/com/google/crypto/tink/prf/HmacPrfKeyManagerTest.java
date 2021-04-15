@@ -256,4 +256,10 @@ public class HmacPrfKeyManagerTest {
     testKeyTemplateCompatible(manager, HmacPrfKeyManager.hmacSha256Template());
     testKeyTemplateCompatible(manager, HmacPrfKeyManager.hmacSha512Template());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_PRF").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_PRF").keyFormat);
+  }
 }

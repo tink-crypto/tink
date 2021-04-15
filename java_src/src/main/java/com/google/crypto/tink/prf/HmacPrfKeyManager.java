@@ -33,6 +33,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -153,6 +156,29 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
         } catch (IOException e) {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<HmacPrfKeyFormat>> result = new HashMap<>();
+        result.put(
+            "HMAC_SHA256_PRF",
+            new KeyFactory.KeyFormat<>(
+                HmacPrfKeyFormat.newBuilder()
+                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA256).build())
+                    .setKeySize(32)
+                    .build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "HMAC_SHA512_PRF",
+            new KeyFactory.KeyFormat<>(
+                HmacPrfKeyFormat.newBuilder()
+                    .setParams(HmacPrfParams.newBuilder().setHash(HashType.SHA512).build())
+                    .setKeySize(64)
+                    .build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
