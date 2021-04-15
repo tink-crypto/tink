@@ -14,17 +14,9 @@
 
 # [START digital-signature-example]
 
-"""A command-line utility for using digital signature for a file.
+"""A utility for signing and verifying files using digital signatures.
 
 It loads cleartext keys from disk - this is not recommended!
-
-It requires the following arguments:
-  mode: either 'sign' or 'verify'
-  keyset-file: name of the file with the keyset to be used for the digital
-    signature
-  data-file:  name of the file with the input data to be signed / verified
-  signature-file:  name of the file containing a hexadecimal
-  signature of the input file
 """
 
 from __future__ import absolute_import
@@ -42,45 +34,42 @@ import tink
 from tink import cleartext_keyset_handle
 from tink import signature
 
+
 FLAGS = flags.FLAGS
+
+flags.DEFINE_enum('mode', None, ['sign', 'verify'],
+                  'The operation to perform.')
+flags.DEFINE_string('keyset_path', None,
+                    'Path to the keyset used for the signature operation.')
+flags.DEFINE_string('data_path', None,
+                    'Path to the file with the input data.')
+flags.DEFINE_string('signature_path', None,
+                    'Path to the signature file.')
 
 
 def main(argv):
-  if len(argv) != 5:
-    raise app.UsageError(
-        'Expected 4 arguments, got %d.\n'
-        'Usage: %s sign/verify keyset-file data-file signature-file' %
-        (len(argv) - 1, argv[0]))
-
-  mode = argv[1]
-  keyset_filename = argv[2]
-  data_filename = argv[3]
-  signature_filename = argv[4]
-
-  if mode not in ['sign', 'verify']:
-    logging.error('Incorrect mode. Please select "sign" or "verify".')
-    return 1
+  del argv  # Unused.
 
   # Initialise Tink
   try:
     signature.register()
   except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
+    logging.exception('Error initialising Tink: %s', e)
     return 1
 
   # Read the keyset into a keyset_handle
-  with open(keyset_filename, 'rt') as keyset_file:
+  with open(FLAGS.keyset_path, 'rt') as keyset_file:
     try:
       text = keyset_file.read()
       keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
     except tink.TinkError as e:
-      logging.error('Error reading key: %s', e)
+      logging.exception('Error reading key: %s', e)
       return 1
 
-  with open(data_filename, 'rb') as data_file:
+  with open(FLAGS.data_path, 'rb') as data_file:
     data = data_file.read()
 
-  if mode == 'sign':
+  if FLAGS.mode == 'sign':
     # Get the primitive
     try:
       cipher = keyset_handle.primitive(signature.PublicKeySign)
@@ -90,7 +79,7 @@ def main(argv):
 
     # Sign data
     sig = cipher.sign(data)
-    with open(signature_filename, 'wb') as signature_file:
+    with open(FLAGS.signature_path, 'wb') as signature_file:
       signature_file.write(binascii.hexlify(sig))
     return 0
 
@@ -102,7 +91,7 @@ def main(argv):
     return 1
 
   # Verify data
-  with open(signature_filename, 'rb') as signature_file:
+  with open(FLAGS.signature_path, 'rb') as signature_file:
     try:
       expected_signature = binascii.unhexlify(signature_file.read().strip())
     except binascii.Error as e:
@@ -120,6 +109,8 @@ def main(argv):
 
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'keyset_path', 'data_path', 'signature_path'])
   app.run(main)
 
 # [END digital-signature-example]

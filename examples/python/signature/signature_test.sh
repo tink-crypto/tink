@@ -19,14 +19,14 @@ set -euo pipefail
 #############################################################################
 ##### Tests for digital signature example.
 
-FILE_SIGN_CLI="$1"
+CLI="$1"
 KEYSET_FILE_PRIVATE="$2"
 KEYSET_FILE_PUBLIC="$3"
 
-DATA_FILE="$TEST_TMPDIR/example_data.txt"
-SIGNATURE_FILE="$TEST_TMPDIR/expected_signature.txt"
+DATA_FILE="${TEST_TMPDIR}/example_data.txt"
+SIGNATURE_FILE="${TEST_TMPDIR}/expected_signature.txt"
 
-echo "This is some message to be verified." > $DATA_FILE
+echo "This is some message to be verified." > "${DATA_FILE}"
 
 #############################################################################
 
@@ -42,36 +42,46 @@ test_command() {
   set -e
 }
 
+print_test() {
+  echo "+++ Starting test $1..."
+}
+
+
 #############################################################################
-#### Test basic signature signing and verification.
-test_name="normal_signing_and_verification"
-echo "+++ Starting test $test_name..."
 
-##### Run signing
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE $DATA_FILE $SIGNATURE_FILE
+print_test "normal_signing_and_verification"
 
-##### Run verification
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC $DATA_FILE $SIGNATURE_FILE
+# Run signing
+test_command ${CLI} --mode sign \
+  --keyset_path "${KEYSET_FILE_PRIVATE}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
 
-if [[ $TEST_STATUS -eq 0 ]]; then
+# Run verification
+test_command ${CLI} --mode verify \
+  --keyset_path "${KEYSET_FILE_PUBLIC}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Success: Signature is valid."
 else
   echo "--- Failure: the Signature is invalid."
   exit 1
 fi
 
-#############################################################################
-#### Test verification fails with incorrect signature.
-test_name="signature_verification_fails_with_incorrect_signature"
-echo "+++ Starting test $test_name..."
 
-##### Create a wrong signature.
+#############################################################################
+
+print_test "signature_verification_fails_with_incorrect_signature"
+
+# Create a wrong signature.
 echo "ABCABCABCD" > $SIGNATURE_FILE
 
-##### Run verification.
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC $DATA_FILE $SIGNATURE_FILE
+# Run verification.
+test_command ${CLI} --mode verify \
+  --keyset_path "${KEYSET_FILE_PUBLIC}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
 
-if [[ $TEST_STATUS -ne 0 ]]; then
+if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature verification failed for invalid signature."
 else
   echo "--- Failure: Signature passed for an invalid signature."
@@ -80,20 +90,23 @@ fi
 
 
 #############################################################################
-#### Test verification fails with an incorrect data.
-test_name="signature_verification_fails_with_incorrect_data"
-echo "+++ Starting test $test_name..."
 
-##### Run signing
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE $DATA_FILE $SIGNATURE_FILE
+print_test "signature_verification_fails_with_incorrect_data"
 
-##### Modify the data.
+# Run signing
+test_command ${CLI} --mode sign \
+  --keyset_path "${KEYSET_FILE_PRIVATE}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
+
+# Modify the data.
 echo "ABCABCABCD" >> $DATA_FILE
 
-##### Run verification.
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC $DATA_FILE $SIGNATURE_FILE
+# Run verification.
+test_command ${CLI} --mode verify \
+  --keyset_path "${KEYSET_FILE_PUBLIC}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
 
-if [[ $TEST_STATUS -ne 0 ]]; then
+if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature verification failed for invalid signature."
 else
   echo "--- Failure: Signature passed for an invalid signature."
@@ -102,14 +115,15 @@ fi
 
 
 #############################################################################
-#### Test signing fails with a wrong keyset.
-test_name="singing_fails_with_a_wrong_keyset"
-echo "+++ Starting test $test_name..."
 
-##### Run computation.
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PUBLIC $DATA_FILE $SIGNATURE_FILE
+print_test "singing_fails_with_a_wrong_keyset"
 
-if [[ $TEST_STATUS -ne 0 ]]; then
+# Run computation.
+test_command ${CLI} --mode verify \
+  --keyset_path "${KEYSET_FILE_PRIVATE}" \
+  --data_path "${DATA_FILE}" --signature_path "${SIGNATURE_FILE}"
+
+if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature computation failed with public keyset."
 else
   echo "--- Failure: Signature computation did not fail with public keyset."
