@@ -46,6 +46,11 @@ const google::crypto::tink::KeyTemplate& JwtRs256_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtRs384_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtRs512_4096_F4_Template();
 
+const google::crypto::tink::KeyTemplate& JwtPs256_2048_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtPs256_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtPs384_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& JwtPs512_4096_F4_Template();
+
 }  // namespace tink
 }  // namespace crypto
 

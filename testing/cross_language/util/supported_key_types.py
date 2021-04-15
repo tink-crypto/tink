@@ -112,7 +112,7 @@ SUPPORTED_LANGUAGES = {
     'JwtHmacKey': ['cc', 'java', 'python'],
     'JwtEcdsaPrivateKey': ['cc', 'java'],
     'JwtRsaSsaPkcs1PrivateKey': ['cc', 'java'],
-    'JwtRsaSsaPssPrivateKey': ['java'],
+    'JwtRsaSsaPssPrivateKey': ['cc', 'java'],
 }
 
 KEY_TYPE_FROM_URL = {

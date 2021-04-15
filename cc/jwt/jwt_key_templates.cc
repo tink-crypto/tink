@@ -23,6 +23,7 @@
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/jwt_hmac.pb.h"
 #include "proto/jwt_rsa_ssa_pkcs1.pb.h"
+#include "proto/jwt_rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
 
 using ::google::crypto::tink::HashType;
@@ -31,6 +32,8 @@ using ::google::crypto::tink::JwtEcdsaKeyFormat;
 using ::google::crypto::tink::JwtHmacKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPkcs1Algorithm;
 using ::google::crypto::tink::JwtRsaSsaPkcs1KeyFormat;
+using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
+using ::google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 
@@ -70,6 +73,25 @@ KeyTemplate* NewJwtRsaSsaPkcs1KeyTemplate(JwtRsaSsaPkcs1Algorithm algorithm,
       "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey");
   key_template->set_output_prefix_type(OutputPrefixType::RAW);
   JwtRsaSsaPkcs1KeyFormat key_format;
+  key_format.set_algorithm(algorithm);
+  key_format.set_modulus_size_in_bits(modulus_size_in_bits);
+  bssl::UniquePtr<BIGNUM> e(BN_new());
+  BN_set_word(e.get(), public_exponent);
+  key_format.set_public_exponent(
+      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
+          .ValueOrDie());
+  key_format.SerializeToString(key_template->mutable_value());
+  return key_template;
+}
+
+KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
+                                          int modulus_size_in_bits,
+                                          int public_exponent) {
+  KeyTemplate* key_template = new KeyTemplate;
+  key_template->set_type_url(
+      "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey");
+  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  JwtRsaSsaPssKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
   bssl::UniquePtr<BIGNUM> e(BN_new());
@@ -140,6 +162,30 @@ const KeyTemplate& JwtRs384_3072_F4_Template() {
 const KeyTemplate& JwtRs512_4096_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
       JwtRsaSsaPkcs1Algorithm::RS512, 4096, RSA_F4);
+  return *key_template;
+}
+
+const KeyTemplate& JwtPs256_2048_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
+  return *key_template;
+}
+
+const KeyTemplate& JwtPs256_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4);
+  return *key_template;
+}
+
+const KeyTemplate& JwtPs384_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS384, 3072, RSA_F4);
+  return *key_template;
+}
+
+const KeyTemplate& JwtPs512_4096_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS512, 4096, RSA_F4);
   return *key_template;
 }
 
