@@ -524,6 +524,7 @@ tink_cc_library(
     jwt_ecdsa_sign_key_manager.cc
     jwt_ecdsa_sign_key_manager.h
   DEPS
+    tink::jwt::internal::jwt_ecdsa_verify_key_manager
     tink::jwt::internal::jwt_public_key_sign_impl
     tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
     tink::core::private_key_type_manager

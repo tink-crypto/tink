@@ -567,6 +567,7 @@ cc_library(
     hdrs = ["jwt_ecdsa_sign_key_manager.h"],
     include_prefix = "tink/jwt/internal",
     deps = [
+        ":jwt_ecdsa_verify_key_manager",
         ":jwt_public_key_sign_impl",
         ":raw_jwt_ecdsa_sign_key_manager",
         "//:core/private_key_type_manager",

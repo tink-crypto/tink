@@ -58,7 +58,10 @@ class JwtEcdsaVerifyKeyManager
       const google::crypto::tink::JwtEcdsaPublicKey& key) const override;
 
  private:
+  static crypto::tink::util::StatusOr<std::string> AlgorithmName(
+      const google::crypto::tink::JwtEcdsaAlgorithm& algorithm);
   const RawJwtEcdsaVerifyKeyManager raw_key_manager_;
+  friend class JwtEcdsaSignKeyManager;
 };
 
 }  // namespace jwt_internal

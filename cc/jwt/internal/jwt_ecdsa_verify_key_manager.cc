@@ -23,24 +23,16 @@ namespace jwt_internal {
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::JwtEcdsaPublicKey;
+using google::crypto::tink::JwtEcdsaAlgorithm;
 
 
 StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
 JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
-  std::string algorithm;
-  switch (jwt_ecdsa_public_key.algorithm()) {
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES256:
-      algorithm = "ES256";
-      break;
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES384:
-      algorithm = "ES384";
-      break;
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES512:
-      algorithm = "ES512";
-      break;
-    default:
-      return util::Status(util::error::INVALID_ARGUMENT, "Unknown algorithm");
+  StatusOr<std::string> name_or =
+      AlgorithmName(jwt_ecdsa_public_key.algorithm());
+  if (!name_or.ok()) {
+    return name_or.status();
   }
   auto result =
       raw_key_manager_.GetPrimitive<PublicKeyVerify>(jwt_ecdsa_public_key);
@@ -49,7 +41,7 @@ JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
   }
   std::unique_ptr<JwtPublicKeyVerify> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
-          std::move(result.ValueOrDie()), algorithm);
+          std::move(result.ValueOrDie()), name_or.ValueOrDie());
   return jwt_public_key_verify;
 }
 
@@ -69,6 +61,20 @@ const std::string& JwtEcdsaVerifyKeyManager::get_key_type() const {
 Status JwtEcdsaVerifyKeyManager::ValidateKey(
     const JwtEcdsaPublicKey& key) const {
   return raw_key_manager_.ValidateKey(key);
+}
+
+StatusOr<std::string> JwtEcdsaVerifyKeyManager::AlgorithmName(
+    const JwtEcdsaAlgorithm& algorithm) {
+  switch (algorithm) {
+    case JwtEcdsaAlgorithm::ES256:
+      return std::string("ES256");
+    case JwtEcdsaAlgorithm::ES384:
+      return std::string("ES384");
+    case JwtEcdsaAlgorithm::ES512:
+      return std::string("ES512");
+    default:
+      return Status(util::error::INVALID_ARGUMENT, "Unknown algorithm");
+  }
 }
 
 }  // namespace jwt_internal

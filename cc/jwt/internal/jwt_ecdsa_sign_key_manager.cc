@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
 
+#include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
+
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
@@ -28,19 +30,10 @@ using google::crypto::tink::JwtEcdsaPublicKey;
 StatusOr<std::unique_ptr<JwtPublicKeySign>>
 JwtEcdsaSignKeyManager::PublicKeySignFactory::Create(
     const JwtEcdsaPrivateKey& jwt_ecdsa_private_key) const {
-  std::string algorithm;
-  switch (jwt_ecdsa_private_key.public_key().algorithm()) {
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES256:
-      algorithm = "ES256";
-      break;
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES384:
-      algorithm = "ES384";
-      break;
-    case google::crypto::tink::JwtEcdsaAlgorithm::ES512:
-      algorithm = "ES512";
-      break;
-    default:
-      return util::Status(util::error::INVALID_ARGUMENT, "Unknown algorithm");
+  StatusOr<std::string> name_or = JwtEcdsaVerifyKeyManager::AlgorithmName(
+      jwt_ecdsa_private_key.public_key().algorithm());
+  if (!name_or.ok()) {
+    return name_or.status();
   }
   auto result =
       raw_key_manager_.GetPrimitive<PublicKeySign>(jwt_ecdsa_private_key);
@@ -49,7 +42,7 @@ JwtEcdsaSignKeyManager::PublicKeySignFactory::Create(
   }
   std::unique_ptr<JwtPublicKeySign> jwt_public_key_sign =
       absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
-          std::move(result.ValueOrDie()), algorithm);
+          std::move(result.ValueOrDie()), name_or.ValueOrDie());
   return jwt_public_key_sign;
 }
 
