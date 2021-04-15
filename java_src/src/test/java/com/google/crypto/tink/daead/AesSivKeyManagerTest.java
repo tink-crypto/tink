@@ -40,6 +40,10 @@ import org.junit.runners.JUnit4;
 /** Test for AesSivKeyManager. */
 @RunWith(JUnit4.class)
 public class AesSivKeyManagerTest {
+  private final AesSivKeyManager manager = new AesSivKeyManager();
+  private final KeyTypeManager.KeyFactory<AesSivKeyFormat, AesSivKey> factory =
+      manager.keyFactory();
+
   @Test
   public void basics() throws Exception {
     assertThat(new AesSivKeyManager().getKeyType())
@@ -220,5 +224,11 @@ public class AesSivKeyManagerTest {
         AesSivKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
 
     assertThat(format.getKeySize()).isEqualTo(format.getKeySize());
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_SIV").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_SIV_RAW").keyFormat);
   }
 }

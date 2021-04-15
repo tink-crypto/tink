@@ -34,6 +34,9 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesSivKey} keys and produces new instances of {@code
@@ -133,6 +136,23 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
         } catch (IOException e) {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<AesSivKeyFormat>> result = new HashMap<>();
+        result.put(
+            "AES256_SIV",
+            new KeyFactory.KeyFormat<>(
+                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "AES256_SIV_RAW",
+            new KeyFactory.KeyFormat<>(
+                AesSivKeyFormat.newBuilder().setKeySize(KEY_SIZE_IN_BYTES).build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
