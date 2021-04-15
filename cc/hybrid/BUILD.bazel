@@ -29,6 +29,7 @@ cc_library(
     srcs = ["hybrid_decrypt_wrapper.cc"],
     hdrs = ["hybrid_decrypt_wrapper.h"],
     include_prefix = "tink/hybrid",
+    visibility = ["//visibility:public"],
     deps = [
         "//:crypto_format",
         "//:hybrid_decrypt",
@@ -47,6 +48,7 @@ cc_library(
     srcs = ["hybrid_encrypt_wrapper.cc"],
     hdrs = ["hybrid_encrypt_wrapper.h"],
     include_prefix = "tink/hybrid",
+    visibility = ["//visibility:public"],
     deps = [
         "//:crypto_format",
         "//:hybrid_encrypt",
