@@ -652,3 +652,50 @@ tink_cc_test(
     crypto
     gmock
 )
+
+tink_cc_library(
+  NAME jwt_rsa_ssa_pss_sign_key_manager
+  SRCS
+    jwt_rsa_ssa_pss_sign_key_manager.cc
+    jwt_rsa_ssa_pss_sign_key_manager.h
+  DEPS
+    tink::jwt::internal::jwt_public_key_sign_impl
+    tink::jwt::internal::jwt_rsa_ssa_pss_verify_key_manager
+    tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
+    tink::core::private_key_type_manager
+    tink::jwt::jwt_public_key_sign
+    tink::util::status
+    tink::util::statusor
+    tink::proto::jwt_rsa_ssa_pss_cc_proto
+    absl::memory
+)
+
+tink_cc_library(
+  NAME jwt_rsa_ssa_pss_verify_key_manager
+  SRCS
+    jwt_rsa_ssa_pss_verify_key_manager.cc
+    jwt_rsa_ssa_pss_verify_key_manager.h
+  DEPS
+    tink::jwt::internal::jwt_public_key_verify_impl
+    tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
+    tink::core::key_type_manager
+    tink::jwt::jwt_public_key_verify
+    tink::util::status
+    tink::util::statusor
+    tink::proto::jwt_rsa_ssa_pss_cc_proto
+    absl::memory
+)
+
+tink_cc_test(
+  NAME jwt_rsa_ssa_pss_sign_verify_key_manager_test
+  SRCS jwt_rsa_ssa_pss_sign_verify_key_manager_test.cc
+  DEPS
+    tink::jwt::internal::jwt_rsa_ssa_pss_sign_key_manager
+    tink::jwt::internal::jwt_rsa_ssa_pss_verify_key_manager
+    tink::subtle::subtle_util_boringssl
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_matchers
+    crypto
+    gmock
+)
