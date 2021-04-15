@@ -129,7 +129,8 @@ public class XChaCha20Poly1305KeyManager extends KeyTypeManager<XChaCha20Poly130
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<XChaCha20Poly1305KeyFormat>> keyFormats() {
+      public Map<String, KeyFactory.KeyFormat<XChaCha20Poly1305KeyFormat>> keyFormats()
+          throws GeneralSecurityException {
         Map<String, KeyFactory.KeyFormat<XChaCha20Poly1305KeyFormat>> result = new HashMap<>();
         result.put(
             "XCHACHA20_POLY1305",

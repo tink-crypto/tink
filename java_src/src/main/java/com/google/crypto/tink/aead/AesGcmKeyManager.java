@@ -121,7 +121,8 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats() {
+      public Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
         Map<String, KeyFactory.KeyFormat<AesGcmKeyFormat>> result = new HashMap<>();
         result.put("AES128_GCM", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
         result.put("AES128_GCM_RAW", createKeyFormat(16, KeyTemplate.OutputPrefixType.RAW));

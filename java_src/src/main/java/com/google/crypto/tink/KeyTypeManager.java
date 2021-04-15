@@ -240,8 +240,13 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
       throw new GeneralSecurityException("deriveKey not implemented for key of type " + clazz);
     }
 
-    /** Returns supported key formats and their names. */
-    public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() {
+    /**
+     * Returns supported key formats and their names.
+     *
+     * @throws GeneralSecurityException Key type managers can throw GeneralSecurityException when
+     *     their key formats depend on other key formats that were not registered.
+     */
+    public Map<String, KeyFormat<KeyFormatProtoT>> keyFormats() throws GeneralSecurityException {
       return Collections.emptyMap();
     }
   }

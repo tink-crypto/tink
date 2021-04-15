@@ -109,7 +109,8 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> keyFormats() {
+      public Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
         Map<String, KeyFactory.KeyFormat<AesEaxKeyFormat>> result = new HashMap<>();
         result.put("AES128_EAX", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.TINK));
         result.put("AES128_EAX_RAW", createKeyFormat(16, 16, KeyTemplate.OutputPrefixType.RAW));

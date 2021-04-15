@@ -124,7 +124,8 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> keyFormats() {
+      public Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
         Map<String, KeyFactory.KeyFormat<AesCtrHmacAeadKeyFormat>> result = new HashMap<>();
 
         result.put(

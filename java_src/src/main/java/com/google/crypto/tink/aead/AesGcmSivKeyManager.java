@@ -124,7 +124,8 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
       }
 
       @Override
-      public Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> keyFormats() {
+      public Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
         Map<String, KeyFactory.KeyFormat<AesGcmSivKeyFormat>> result = new HashMap<>();
 
         result.put("AES128_GCM_SIV", createKeyFormat(16, KeyTemplate.OutputPrefixType.TINK));
