@@ -347,8 +347,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockListLast">
 <li class="blockList">
 <h4>keyFormats</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a>&lt;<a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&gt;&gt;&nbsp;keyFormats()</pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a>&lt;<a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="type parameter in KeyTypeManager.KeyFactory">KeyFormatProtoT</a>&gt;&gt;&nbsp;keyFormats()
+                                                                            throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Returns supported key formats and their names.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - Key type managers can throw GeneralSecurityException when
+     their key formats depend on other key formats that were not registered.</dd>
+</dl>
 </li>
 </ul>
 </li>
