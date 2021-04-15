@@ -6,6 +6,9 @@ java_binary(
     name = "encrypted_keyset_example",
     srcs = ["EncryptedKeysetExample.java"],
     main_class = "encryptedkeyset.EncryptedKeysetExample",
+    runtime_deps = [
+        "@maven//:com_fasterxml_jackson_core_jackson_core",
+    ],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",

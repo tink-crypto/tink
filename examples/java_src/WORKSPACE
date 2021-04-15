@@ -50,3 +50,6 @@ tink_java_deps()
 
 load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
 tink_java_deps_init()
+
+load("@examples_java//:examples_java_deps_init.bzl", "examples_java_deps_init")
+examples_java_deps_init()
