@@ -6,7 +6,7 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 exports_files([
-    "aes256ctrhmac_keyset.json",
+    "streaming_aead_keyset.json",
 ])
 
 py_binary(
@@ -27,11 +27,11 @@ sh_test(
     srcs = ["streaming_aead_test.sh"],
     args = [
         "$(rootpath :streaming_aead)",
-        "$(rootpath :aes256ctrhmac_keyset.json)",
+        "$(rootpath :streaming_aead_keyset.json)",
     ],
     data = [
-        ":aes256ctrhmac_keyset.json",
         ":streaming_aead",
+        ":streaming_aead_keyset.json",
     ],
 )
 
@@ -43,11 +43,11 @@ sh_test(
     srcs = ["streaming_aead_test.sh"],
     args = [
         "'python3 $(rootpath :streaming_aead.py)'",
-        "$(rootpath :aes256ctrhmac_keyset.json)",
+        "$(rootpath :streaming_aead_keyset.json)",
     ],
     data = [
-        ":streaming_aead.py",
-        ":aes256ctrhmac_keyset.json",
         ":streaming_aead",
+        ":streaming_aead.py",
+        ":streaming_aead_keyset.json",
     ],
 )
