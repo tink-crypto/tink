@@ -114,7 +114,9 @@ py_library(
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
+        "//tink/prf",
         "//tink/signature",
+        "//tink/streaming_aead",
     ],
 )
 
@@ -125,13 +127,14 @@ py_test(
     deps = [
         ":tink_config",
         requirement("absl-py"),
+        "//tink:tink_python",
         "//tink/aead",
-        "//tink/core",
         "//tink/daead",
         "//tink/hybrid",
         "//tink/mac",
-        "//tink/proto:tink_py_pb2",
+        "//tink/prf",
         "//tink/signature",
+        "//tink/streaming_aead",
     ],
 )
 
