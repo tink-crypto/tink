@@ -17,7 +17,8 @@
 set -euo pipefail
 
 #############################################################################
-##### Tests for hybrid encryption example.
+# Tests for hybrid encryption example.
+#############################################################################
 
 CLI="$1"
 PUBLIC_KEYSET_FILE="$2"
@@ -25,7 +26,7 @@ PRIVATE_KEYSET_FILE="$3"
 
 INPUT_FILE="${TEST_TMPDIR}/example_data.txt"
 
-echo "This is some message to be encrypted." > ${INPUT_FILE}
+echo "This is some message to be encrypted." > "${INPUT_FILE}"
 
 #############################################################################
 
@@ -41,85 +42,94 @@ test_command() {
   set -e
 }
 
-#############################################################################
-#### Test correct encryption and decryption.
-test_name="test_encrypt_decrypt_succeeds"
-echo "+++ Starting test ${test_name}..."
+print_test() {
+  echo "+++ Starting test $1..."
+}
 
-##### Run encryption
-test_command ${CLI} --mode=encrypt --keyset_path=${PUBLIC_KEYSET_FILE} \
-    --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+#############################################################################
+
+print_test "test_encrypt_decrypt_succeeds"
+
+# Run encryption
+test_command ${CLI} --mode=encrypt --keyset_path="${PUBLIC_KEYSET_FILE}" \
+    --input_path="${INPUT_FILE}" --output_path="${INPUT_FILE}.ciphertext"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
   exit 1
 fi
 
-##### Run decryption
-test_command ${CLI} --mode=decrypt --keyset_path=${PRIVATE_KEYSET_FILE} \
-    --input_path=${INPUT_FILE}.ciphertext --output_path=${INPUT_FILE}.plaintext
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run decryption
+test_command ${CLI} --mode=decrypt --keyset_path="${PRIVATE_KEYSET_FILE}" \
+    --input_path="${INPUT_FILE}.ciphertext" --output_path="${INPUT_FILE}.plaintext"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Decryption successful."
 else
   echo "--- Decryption failed."
   exit 1
 fi
 
-cmp --silent ${INPUT_FILE} ${INPUT_FILE}.plaintext
+cat "${INPUT_FILE}"
+cat "${INPUT_FILE}.plaintext"
+cmp --silent "${INPUT_FILE}" "${INPUT_FILE}.plaintext"
 
 
 #############################################################################
-#### Test correct encryption and decryption with context
-test_name="test_encrypt_decrypt_succeeds_with_context"
-echo "+++ Starting test ${test_name}..."
 
-##### Run encryption
+print_test "test_encrypt_decrypt_succeeds_with_context"
+
+# Run encryption
 CONTEXT_INFORMATION="context information"
-test_command ${CLI} --mode=encrypt --context_info=${CONTEXT_INFORMATION} \
-    --keyset_path=${PUBLIC_KEYSET_FILE} --input_path=${INPUT_FILE} \
-    --output_path=${INPUT_FILE}.ciphertext
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+test_command ${CLI} --mode=encrypt --context_info="${CONTEXT_INFORMATION}" \
+    --keyset_path="${PUBLIC_KEYSET_FILE}" --input_path="${INPUT_FILE}" \
+    --output_path="${INPUT_FILE}.ciphertext"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
   exit 1
 fi
 
-##### Run decryption
-test_command ${CLI} --mode=decrypt --context_info=${CONTEXT_INFORMATION} \
-    --keyset_path=${PRIVATE_KEYSET_FILE} --input_path=${INPUT_FILE}.ciphertext \
-    --output_path=${INPUT_FILE}.plaintext
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run decryption
+test_command ${CLI} --mode=decrypt --context_info="${CONTEXT_INFORMATION}" \
+    --keyset_path="${PRIVATE_KEYSET_FILE}" --input_path="${INPUT_FILE}.ciphertext" \
+    --output_path="${INPUT_FILE}.plaintext"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Decryption successful."
 else
   echo "--- Decryption failed."
   exit 1
 fi
 
-cmp --silent ${INPUT_FILE} ${INPUT_FILE}.plaintext
+cmp --silent "${INPUT_FILE}" "${INPUT_FILE}.plaintext"
 
 #############################################################################
-#### Test decryption fails with missing context
-test_name="test_encrypt_decrypt_fails_with_context"
-echo "+++ Starting test ${test_name}..."
 
-##### Run encryption
+print_test "test_encrypt_decrypt_fails_with_context"
+
+# Run encryption
 CONTEXT_INFORMATION="context information"
-test_command ${CLI} --mode=encrypt --context_info=${CONTEXT_INFORMATION} \
-    --keyset_path=${PUBLIC_KEYSET_FILE} --input_path=${INPUT_FILE} \
-    --output_path=${INPUT_FILE}.ciphertext
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+test_command ${CLI} --mode=encrypt --context_info="${CONTEXT_INFORMATION}" \
+    --keyset_path="${PUBLIC_KEYSET_FILE}" --input_path="${INPUT_FILE}" \
+    --output_path="${INPUT_FILE}.ciphertext"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Encryption successful."
 else
   echo "--- Encryption failed."
   exit 1
 fi
 
-##### Run decryption
-test_command ${CLI} --mode=decrypt --keyset_path=${PRIVATE_KEYSET_FILE} \
-    --input_path=${INPUT_FILE}.ciphertext --output_path=${INPUT_FILE}.plaintext
-if [[ ${TEST_STATUS} -eq 1 ]]; then
+# Run decryption
+test_command ${CLI} --mode=decrypt --keyset_path="${PRIVATE_KEYSET_FILE}" \
+    --input_path="${INPUT_FILE}.ciphertext" --output_path="${INPUT_FILE}.plaintext"
+
+if (( TEST_STATUS == 1 )); then
   echo "+++ Decryption failed as expected."
 else
   echo "--- Decryption succeeded but expected to fail."
@@ -127,14 +137,14 @@ else
 fi
 
 #############################################################################
-#### Test enryption fails with wrong keyset
-test_name="test_encrypt_fails_with_wrong_keyset"
-echo "+++ Starting test ${test_name}..."
 
-##### Run encryption
-test_command ${CLI} --mode=encrypt --keyset_path=${PRIVATE_KEYSET_FILE} \
-    --input_path=${INPUT_FILE} --output_path=${INPUT_FILE}.ciphertext
-if [[ ${TEST_STATUS} -eq 1 ]]; then
+print_test "test_encrypt_fails_with_wrong_keyset"
+
+# Run encryption
+test_command ${CLI} --mode=encrypt --keyset_path="${PRIVATE_KEYSET_FILE}" \
+    --input_path="${INPUT_FILE}" --output_path="${INPUT_FILE}.ciphertext"
+
+if (( TEST_STATUS == 1 )); then
   echo "+++ Encryption failed as expected."
 else
   echo "--- Encryption succeeded but expected to fail."
