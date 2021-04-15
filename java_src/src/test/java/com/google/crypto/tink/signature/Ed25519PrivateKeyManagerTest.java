@@ -211,4 +211,11 @@ public class Ed25519PrivateKeyManagerTest {
           Ed25519KeyFormat.newBuilder().setVersion(1).build(),
           new ByteArrayInputStream(keyMaterial)));
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("ED25519").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ED25519_RAW").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ED25519WithRawOutput").keyFormat);
+  }
 }

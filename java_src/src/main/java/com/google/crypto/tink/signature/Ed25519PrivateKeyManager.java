@@ -33,6 +33,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This instance of {@code KeyManager} generates new {@code Ed25519PrivateKey} keys and produces new
@@ -139,6 +142,28 @@ public final class Ed25519PrivateKeyManager
         } catch (IOException e) {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> result = new HashMap<>();
+        result.put(
+            "ED25519",
+            new KeyFormat<>(
+                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ED25519_RAW",
+            new KeyFormat<>(
+                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+        // This is identical to ED25519_RAW.
+        // It is needed to maintain backward compatibility with SignatureKeyTemplates.
+        // TODO(b/185475349): remove this in 2.0.0.
+        result.put(
+            "ED25519WithRawOutput",
+            new KeyFormat<>(
+                Ed25519KeyFormat.getDefaultInstance(), KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
