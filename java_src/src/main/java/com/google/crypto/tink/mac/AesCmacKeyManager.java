@@ -32,6 +32,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesCmacKey} keys and produces new instances of {@code
@@ -119,6 +122,37 @@ public final class AesCmacKeyManager extends KeyTypeManager<AesCmacKey> {
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .setParams(format.getParams())
             .build();
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<AesCmacKeyFormat>> result = new HashMap<>();
+        result.put(
+            "AES_CMAC", // backward compatibility with MacKeyTemplates
+            new KeyFactory.KeyFormat<>(
+                AesCmacKeyFormat.newBuilder()
+                    .setKeySize(32)
+                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+                    .build(),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "AES256_CMAC",
+            new KeyFactory.KeyFormat<>(
+                AesCmacKeyFormat.newBuilder()
+                    .setKeySize(32)
+                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+                    .build(),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "AES256_CMAC_RAW",
+            new KeyFactory.KeyFormat<>(
+                AesCmacKeyFormat.newBuilder()
+                    .setKeySize(32)
+                    .setParams(AesCmacParams.newBuilder().setTagSize(16).build())
+                    .build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }

@@ -113,6 +113,7 @@ java_test(
     deps = [
         "//proto:aes_cmac_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink/mac:aes_cmac_key_manager",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
