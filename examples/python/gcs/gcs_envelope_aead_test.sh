@@ -19,7 +19,8 @@ set -euo pipefail
 set -x
 
 #############################################################################
-##### Tests for envelope encryption AEAD example.
+# Tests for envelope encryption AEAD example.
+#############################################################################
 
 CLI="$1"
 KEY_URI="$2"
@@ -32,9 +33,9 @@ GCS_BUCKET="$5"
 #   https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
 export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${TEST_SRCDIR}/google_root_pem/file/downloaded"
 
-DATA_FILE="$TEST_TMPDIR/example_data.txt"
+DATA_FILE="${TEST_TMPDIR}/example_data.txt"
 
-echo "This is some plaintext to be encrypted." > ${DATA_FILE}
+echo "This is some plaintext to be encrypted." > "${DATA_FILE}"
 
 #############################################################################
 
@@ -50,16 +51,23 @@ test_command() {
   set -e
 }
 
+print_test() {
+  echo "+++ Starting test $1..."
+}
+
 #############################################################################
-#### Test initialization and encryption
-test_name="encrypt"
-echo "+++ Starting test $test_name..."
 
-# ##### Run encryption
-test_command ${CLI} encrypt ${KEY_URI} ${CRED_FILE} ${PROJECT_ID} \
-    ${DATA_FILE} "${GCS_BUCKET}/example_data.txt.encrypted"
+print_test "encrypt"
 
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run encryption
+test_command ${CLI} --mode encrypt \
+  --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --gcp_project_id "${PROJECT_ID}" \
+  --local_path "${DATA_FILE}" \
+  --gcs_blob_path "${GCS_BUCKET}/example_data.txt.encrypted"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Success: file was encrypted."
 else
   echo "--- Failure: could not encrypt file."
@@ -67,22 +75,25 @@ else
 fi
 
 #############################################################################
-#### Test if decryption succeeds and returns original file
-test_name="decrypt"
-echo "+++ Starting test $test_name..."
 
-##### Run decryption
-test_command ${CLI} decrypt ${KEY_URI} ${CRED_FILE} ${PROJECT_ID} \
-    "${GCS_BUCKET}/example_data.txt.encrypted" "${DATA_FILE}.decrypted"
+print_test "decrypt"
 
-if [[ ${TEST_STATUS} -eq 0 ]]; then
+# Run decryption
+test_command ${CLI} --mode decrypt \
+  --kek_uri "${KEY_URI}" \
+  --gcp_credential_path "${CRED_FILE}" \
+  --gcp_project_id "${PROJECT_ID}" \
+  --gcs_blob_path "${GCS_BUCKET}/example_data.txt.encrypted" \
+  --local_path "${DATA_FILE}.decrypted"
+
+if (( TEST_STATUS == 0 )); then
   echo "+++ Success: file was successfully decrypted."
 else
   echo "--- Failure: could not decrypt file."
   exit 1
 fi
 
-if cmp -s ${DATA_FILE} "${DATA_FILE}.decrypted"; then
+if cmp -s "${DATA_FILE}" "${DATA_FILE}.decrypted"; then
   echo "+++ Success: file content is the same after decryption."
 else
   echo "--- Failure: file content is not the same after decryption."

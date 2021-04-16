@@ -1,4 +1,5 @@
 # Copyright 2021 Google LLC
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # [START gcs-envelope-aead-example]
-"""A command-line utility for encrypting small files with envelope encryption and uploading the results to GCS.
+"""A command-line utility for performing file encryption using GCS.
 
-It requires the following arguments:
-  mode: "encrypt" or "decrypt" to indicate if you want to encrypt or decrypt.
-  kek-uri: Use this Cloud KMS' key as the key-encryption key for envelope
-        encryption.
-  gcp-credential-file: Use this JSON credential file to connect to
-        Cloud KMS and GCS.
-  gcp-project-id: The ID of the GCP project hosting the GCS blobs that you want
-        to encrypt or decrypt.
-
-When mode is "encrypt", it takes the following additional arguments:
-  local-input-file: Read the plaintext from this local file.
-  gcs-output-blob: Write the encryption result to this blob in GCS. The
-         encryption result is bound to the location of this blob. That is, if
-         you rename or move it to a different bucket, decryption will fail.
-
-When mode is "decrypt", it takes the following additional arguments:
-  gcs-input-blob: Read the ciphertext from this blob in GCS.
-  local-output-file: Write the decryption result to this local file.
+It is inteded for use with small files, utilizes envelope encryption and
+facilitates ciphertexts stored in GCS.
 """
 
 from __future__ import absolute_import
@@ -39,6 +24,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
+from absl import flags
 from absl import logging
 from google.cloud import storage
 
@@ -47,68 +33,72 @@ from tink import aead
 from tink.integration import gcpkms
 
 
+FLAGS = flags.FLAGS
+
+flags.DEFINE_enum('mode', None, ['encrypt', 'decrypt'],
+                  'The operation to perform.')
+flags.DEFINE_string('kek_uri', None,
+                    'The Cloud KMS URI of the key encryption key.')
+flags.DEFINE_string('gcp_credential_path', None,
+                    'Path to the GCP credentials JSON file.')
+flags.DEFINE_string('gcp_project_id', None,
+                    'The ID of the GCP project hosting the GCS blobs.')
+flags.DEFINE_string('local_path', None, 'Path to the local file.')
+flags.DEFINE_string('gcs_blob_path', None, 'Path to the GCS blob.')
+
+
 _GCS_PATH_PREFIX = 'gs://'
 
 
 def main(argv):
-  if len(argv) != 7:
-    raise app.UsageError(
-        'Expected 6 arguments, got %d.\n'
-        'Usage: %s encrypt/decrypt kek-uri gcp-credential-file gcp-project-id'
-        'input-file output-file' % (len(argv) - 1, argv[0]))
-
-  mode = argv[1]
-  kek_uri = argv[2]
-  gcp_credential_file = argv[3]
+  del argv  # Unused.
 
   # Initialise Tink
   try:
     aead.register()
   except tink.TinkError as e:
-    logging.error('Error initialising Tink: %s', e)
+    logging.exception('Error initialising Tink: %s', e)
     return 1
 
   # Read the GCP credentials and setup client
   try:
-    gcpkms.GcpKmsClient.register_client(kek_uri, gcp_credential_file)
+    gcpkms.GcpKmsClient.register_client(
+        FLAGS.kek_uri, FLAGS.gcp_credential_path)
   except tink.TinkError as e:
-    logging.error('Error initializing GCP client: %s', e)
+    logging.exception('Error initializing GCP client: %s', e)
     return 1
 
   # Create envelope AEAD primitive using AES256 GCM for encrypting the data
   try:
     template = aead.aead_key_templates.create_kms_envelope_aead_key_template(
-        kek_uri=kek_uri,
+        kek_uri=FLAGS.kek_uri,
         dek_template=aead.aead_key_templates.AES256_GCM)
     handle = tink.KeysetHandle.generate_new(template)
     env_aead = handle.primitive(aead.Aead)
   except tink.TinkError as e:
-    logging.error('Error creating primitive: %s', e)
+    logging.exception('Error creating primitive: %s', e)
     return 1
 
-  storage_client = storage.Client.from_service_account_json(gcp_credential_file)
+  storage_client = storage.Client.from_service_account_json(
+      FLAGS.gcp_credential_path)
 
-  if mode == 'encrypt':
-    input_file_path = argv[5]
-    gcs_blob_path = argv[6]
-    associated_data = gcs_blob_path.encode('utf-8')
-    with open(input_file_path, 'rb') as input_file:
+  try:
+    bucket_name, object_name = _get_bucket_and_object(FLAGS.gcs_blob_path)
+  except ValueError as e:
+    logging.exception('Error parsing GCS blob path: %s', e)
+    return 1
+  bucket = storage_client.bucket(bucket_name)
+  blob = bucket.blob(object_name)
+  associated_data = FLAGS.gcs_blob_path.encode('utf-8')
+
+  if FLAGS.mode == 'encrypt':
+    with open(FLAGS.local_path, 'rb') as input_file:
       output_data = env_aead.encrypt(input_file.read(), associated_data)
-
-    bucket_name, object_name = _get_bucket_and_object(gcs_blob_path)
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(object_name)
     blob.upload_from_string(output_data)
 
-  elif mode == 'decrypt':
-    gcs_blob_path = argv[5]
-    ouput_file_path = argv[6]
-    bucket_name, object_name = _get_bucket_and_object(gcs_blob_path)
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.get_blob(object_name)
+  elif FLAGS.mode == 'decrypt':
     ciphertext = blob.download_as_string()
-    associated_data = gcs_blob_path.encode('utf-8')
-    with open(ouput_file_path, 'wb') as output_file:
+    with open(FLAGS.local_path, 'wb') as output_file:
       output_file.write(env_aead.decrypt(ciphertext, associated_data))
 
   else:
@@ -125,19 +115,24 @@ def _get_bucket_and_object(gcs_blob_path):
 
   Returns:
     The bucket and object name of the GCS blob
+
+  Raises:
+    ValueError: If gcs_blob_path parsing fails.
   """
   if not gcs_blob_path.startswith(_GCS_PATH_PREFIX):
-    logging.error('GCS blob paths must start with gs://, got %s', gcs_blob_path)
-    return 1
+    raise ValueError(
+        f'GCS blob paths must start with gs://, got {gcs_blob_path}')
   path = gcs_blob_path[len(_GCS_PATH_PREFIX):]
   parts = path.split('/', 1)
   if len(parts) < 2:
-    logging.error(
-        'GCS blob paths must be in format gs://bucket-name/object-name, got %s',
-        gcs_blob_path)
-    return 1
+    raise ValueError(
+        'GCS blob paths must be in format gs://bucket-name/object-name, '
+        f'got {gcs_blob_path}')
   return parts[0], parts[1]
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required([
+      'mode', 'kek_uri', 'gcp_credential_path', 'gcp_project_id', 'local_path',
+      'gcs_blob_path'])
   app.run(main)
 # [END gcs-envelope-aead-example]
