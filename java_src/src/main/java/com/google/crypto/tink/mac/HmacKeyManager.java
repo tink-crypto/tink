@@ -35,6 +35,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -177,13 +180,50 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
             throw new GeneralSecurityException("Not enough pseudorandomness given");
           }
           return HmacKey.newBuilder()
-            .setVersion(getVersion())
-            .setParams(format.getParams())
-            .setKeyValue(ByteString.copyFrom(pseudorandomness))
-            .build();
+              .setVersion(getVersion())
+              .setParams(format.getParams())
+              .setKeyValue(ByteString.copyFrom(pseudorandomness))
+              .build();
         } catch (IOException e) {
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<HmacKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<HmacKeyFormat>> result = new HashMap<>();
+        result.put(
+            "HMAC_SHA256_128BITTAG",
+            createKeyFormat(32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "HMAC_SHA256_128BITTAG_RAW",
+            createKeyFormat(32, 16, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "HMAC_SHA256_256BITTAG",
+            createKeyFormat(32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "HMAC_SHA256_256BITTAG_RAW",
+            createKeyFormat(32, 32, HashType.SHA256, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "HMAC_SHA512_128BITTAG",
+            createKeyFormat(64, 16, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "HMAC_SHA512_128BITTAG_RAW",
+            createKeyFormat(64, 16, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "HMAC_SHA512_256BITTAG",
+            createKeyFormat(64, 32, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "HMAC_SHA512_256BITTAG_RAW",
+            createKeyFormat(64, 32, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "HMAC_SHA512_512BITTAG",
+            createKeyFormat(64, 64, HashType.SHA512, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "HMAC_SHA512_512BITTAG_RAW",
+            createKeyFormat(64, 64, HashType.SHA512, KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
@@ -257,5 +297,15 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
     HmacKeyFormat format = HmacKeyFormat.newBuilder().setParams(params).setKeySize(keySize).build();
     return KeyTemplate.create(
         new HmacKeyManager().getKeyType(), format.toByteArray(), KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  private static KeyFactory.KeyFormat<HmacKeyFormat> createKeyFormat(
+      int keySize, int tagSize, HashType hashType, KeyTemplate.OutputPrefixType prefixType) {
+    return new KeyFactory.KeyFormat<>(
+        HmacKeyFormat.newBuilder()
+            .setParams(HmacParams.newBuilder().setHash(hashType).setTagSize(tagSize).build())
+            .setKeySize(keySize)
+            .build(),
+        prefixType);
   }
 }

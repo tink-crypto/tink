@@ -366,4 +366,22 @@ public class HmacKeyManagerTest {
     testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512Template());
     testKeyTemplateCompatible(manager, HmacKeyManager.hmacSha512HalfDigestTemplate());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_128BITTAG").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_128BITTAG_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_256BITTAG").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA256_256BITTAG_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_128BITTAG").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_128BITTAG_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_256BITTAG").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_256BITTAG_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_512BITTAG").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("HMAC_SHA512_512BITTAG_RAW").keyFormat);
+  }
 }
