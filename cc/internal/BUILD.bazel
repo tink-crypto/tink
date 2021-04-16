@@ -69,11 +69,21 @@ cc_library(
     ],
 )
 
+config_setting(
+    name = "fips_enabled",
+    flag_values = {"//config:use_only_fips": "True"},
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "fips_utils",
     srcs = ["fips_utils.cc"],
     hdrs = ["fips_utils.h"],
     include_prefix = "tink/internal",
+    defines = select({
+        "fips_enabled": ["TINK_USE_ONLY_FIPS"],
+        "//conditions:default": [],
+    }),
     deps = [
         "//util:status",
         "@com_google_absl//absl/base:core_headers",

@@ -39,21 +39,11 @@ bool_flag(
     build_setting_default = False,
 )
 
-config_setting(
-    name = "fips_enabled",
-    flag_values = {":use_only_fips": "True"},
-    visibility = ["//visibility:public"],
-)
-
 cc_library(
     name = "tink_fips",
     srcs = ["tink_fips.cc"],
     hdrs = ["tink_fips.h"],
     include_prefix = "tink/config",
-    defines = select({
-        "fips_enabled": ["TINK_USE_ONLY_FIPS"],
-        "//conditions:default": [],
-    }),
     visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/base:core_headers",
