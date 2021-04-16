@@ -359,4 +359,17 @@ public class RsaSsaPkcs1SignKeyManagerTest {
         GeneralSecurityException.class,
         () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX").keyFormat);
+  }
 }

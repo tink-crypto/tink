@@ -43,6 +43,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code RsaSsaPkcs1PrivateKey} keys and produces new instances of
@@ -50,7 +53,6 @@ import java.security.spec.RSAPublicKeySpec;
  */
 public final class RsaSsaPkcs1SignKeyManager
     extends PrivateKeyTypeManager<RsaSsaPkcs1PrivateKey, RsaSsaPkcs1PublicKey> {
- 
   RsaSsaPkcs1SignKeyManager() {
     super(
         RsaSsaPkcs1PrivateKey.class,
@@ -178,6 +180,41 @@ public final class RsaSsaPkcs1SignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<RsaSsaPkcs1KeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<RsaSsaPkcs1KeyFormat>> result = new HashMap<>();
+        result.put(
+            "RSA_SSA_PKCS1_3072_SHA256_F4",
+            new KeyFormat<>(
+                createKeyFormat(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "RSA_SSA_PKCS1_3072_SHA256_F4_RAW",
+            new KeyFormat<>(
+                createKeyFormat(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.RAW));
+        // This is identical to RSA_SSA_PKCS1_3072_SHA256_F4_RAW. It is needed to maintain backward
+        // compatibility with SignatureKeyTemplates.
+        // TODO(b/185475349): remove this in Tink 2.0.0.
+        result.put(
+            "RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX",
+            new KeyFormat<>(
+                createKeyFormat(HashType.SHA256, 3072, RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "RSA_SSA_PKCS1_4096_SHA512_F4",
+            new KeyFormat<>(
+                createKeyFormat(HashType.SHA512, 4096, RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "RSA_SSA_PKCS1_4096_SHA512_F4_RAW",
+            new KeyFormat<>(
+                createKeyFormat(HashType.SHA512, 4096, RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -271,14 +308,18 @@ public final class RsaSsaPkcs1SignKeyManager
       int modulusSize,
       BigInteger publicExponent,
       KeyTemplate.OutputPrefixType prefixType) {
-    RsaSsaPkcs1Params params = RsaSsaPkcs1Params.newBuilder().setHashType(hashType).build();
-    RsaSsaPkcs1KeyFormat format =
-        RsaSsaPkcs1KeyFormat.newBuilder()
-            .setParams(params)
-            .setModulusSizeInBits(modulusSize)
-            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-            .build();
+    RsaSsaPkcs1KeyFormat format = createKeyFormat(hashType, modulusSize, publicExponent);
     return KeyTemplate.create(
         new RsaSsaPkcs1SignKeyManager().getKeyType(), format.toByteArray(), prefixType);
+  }
+
+  private static RsaSsaPkcs1KeyFormat createKeyFormat(
+      HashType hashType, int modulusSize, BigInteger publicExponent) {
+    RsaSsaPkcs1Params params = RsaSsaPkcs1Params.newBuilder().setHashType(hashType).build();
+    return RsaSsaPkcs1KeyFormat.newBuilder()
+        .setParams(params)
+        .setModulusSizeInBits(modulusSize)
+        .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+        .build();
   }
 }

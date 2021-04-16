@@ -396,4 +396,17 @@ public class RsaSsaPssSignKeyManagerTest {
             ExtensionRegistryLite.getEmptyRegistry());
     new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_F4").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_SHA256_32_F4").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_F4").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_SHA512_64_F4").keyFormat);
+  }
 }
