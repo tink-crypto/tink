@@ -21,6 +21,7 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCmacPrfKey;
 import com.google.crypto.tink.proto.AesCmacPrfKeyFormat;
 import com.google.crypto.tink.subtle.PrfAesCmac;
@@ -35,6 +36,10 @@ import org.junit.runners.JUnit4;
 /** Test for AesCmacPrfKeyManager. */
 @RunWith(JUnit4.class)
 public class AesCmacPrfKeyManagerTest {
+  private final AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
+  private final KeyTypeManager.KeyFactory<AesCmacPrfKeyFormat, AesCmacPrfKey> factory =
+      manager.keyFactory();
+
   @Test
   public void validateKeyFormat_empty() throws Exception {
     assertThrows(
@@ -149,5 +154,11 @@ public class AesCmacPrfKeyManagerTest {
     AesCmacPrfKeyManager manager = new AesCmacPrfKeyManager();
 
     testKeyTemplateCompatible(manager, AesCmacPrfKeyManager.aes256CmacTemplate());
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_CMAC_PRF").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES_CMAC_PRF").keyFormat);
   }
 }

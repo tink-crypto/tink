@@ -29,6 +29,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesCmacKeyPrf} keys and produces new instances of {@code
@@ -101,6 +104,25 @@ public final class AesCmacPrfKeyManager extends KeyTypeManager<AesCmacPrfKey> {
             .setVersion(VERSION)
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesCmacPrfKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<AesCmacPrfKeyFormat>> result = new HashMap<>();
+        result.put(
+            "AES256_CMAC_PRF",
+            new KeyFactory.KeyFormat<>(
+                AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        // Identical to AES256_CMAC_PRF, needed for backward compatibility with PrfKeyTemplates.
+        // TODO(b/185475349): remove this.
+        result.put(
+            "AES_CMAC_PRF",
+            new KeyFactory.KeyFormat<>(
+                AesCmacPrfKeyFormat.newBuilder().setKeySize(32).build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }

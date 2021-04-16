@@ -40,6 +40,7 @@ java_test(
     deps = [
         "//proto:aes_cmac_prf_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink/prf:aes_cmac_prf_key_manager",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:prf_aes_cmac",
