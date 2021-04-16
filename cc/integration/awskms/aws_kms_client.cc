@@ -200,11 +200,13 @@ AwsKmsClient::New(absl::string_view key_uri,
     }
     auto config_result = GetAwsClientConfig(client->key_arn_);
     if (!config_result.ok()) return config_result.status();
+    client->config_ = config_result.ValueOrDie();
+
     // Create AWS KMSClient.
     client->aws_client_ = Aws::MakeShared<Aws::KMS::KMSClient>(
         kAwsCryptoAllocationTag,
         client->credentials_,
-        config_result.ValueOrDie());
+        client->config_);
   }
   return std::move(client);
 }
@@ -214,6 +216,10 @@ bool AwsKmsClient::DoesSupport(absl::string_view key_uri) const {
     return key_arn_ == GetKeyArn(key_uri);
   }
   return !GetKeyArn(key_uri).empty();
+}
+
+Aws::Client::ClientConfiguration AwsKmsClient::GetConfig() const {
+  return config_;
 }
 
 StatusOr<std::unique_ptr<Aead>>

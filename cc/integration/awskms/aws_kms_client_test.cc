@@ -86,6 +86,21 @@ TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
   EXPECT_THAT(client_result, StatusIs(util::error::INVALID_ARGUMENT));
 }
 
+TEST(AwsKmsClientTest, ConfigCreation) {
+  std::string aws_key = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+  std::string creds_file = absl::StrCat(
+      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+
+  auto client_result = AwsKmsClient::New(aws_key, creds_file);
+  EXPECT_THAT(client_result.status(), IsOk());
+
+  auto config = client_result.ValueOrDie()->GetConfig();
+  EXPECT_EQ("us-east-1", config.region);
+  EXPECT_EQ(Aws::Http::Scheme::HTTPS, config.scheme);
+  EXPECT_EQ(30000, config.connectTimeoutMs);
+  EXPECT_EQ(60000, config.requestTimeoutMs);
+}
+
 }  // namespace
 }  // namespace awskms
 }  // namespace integration
