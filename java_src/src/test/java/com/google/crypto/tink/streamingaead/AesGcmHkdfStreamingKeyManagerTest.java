@@ -254,4 +254,13 @@ public class AesGcmHkdfStreamingKeyManagerTest {
     assertThat(format.getParams().getHkdfHashType()).isEqualTo(HashType.SHA256);
     assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_HKDF_4KB").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_GCM_HKDF_1MB").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_HKDF_4KB").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_GCM_HKDF_1MB").keyFormat);
+  }
 }
