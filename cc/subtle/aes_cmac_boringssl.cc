@@ -32,7 +32,7 @@ namespace subtle {
 // static
 util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
                                                            uint32_t tag_size) {
-  auto status = CheckFipsCompatibility<AesCmacBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<AesCmacBoringSsl>();
   if (!status.ok()) return status;
 
   if (key.size() != kSmallKeySize && key.size() != kBigKeySize) {

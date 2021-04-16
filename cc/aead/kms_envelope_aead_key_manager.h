@@ -81,8 +81,8 @@ class KmsEnvelopeAeadKeyManager
     return key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kNotFips;
   }
 
  private:

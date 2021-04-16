@@ -41,7 +41,7 @@ util::Status JwtMacRegister() {
       absl::make_unique<jwt_internal::JwtHmacKeyManager>(), true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

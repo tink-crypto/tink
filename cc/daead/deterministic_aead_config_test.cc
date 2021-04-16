@@ -46,7 +46,7 @@ class DeterministicAeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(DeterministicAeadConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -64,7 +64,7 @@ TEST_F(DeterministicAeadConfigTest, Basic) {
 // Tests that the DeterministicAeadWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -102,7 +102,7 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
 }
 
 TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

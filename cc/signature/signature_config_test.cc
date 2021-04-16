@@ -51,7 +51,7 @@ class SignatureConfigTest : public ::testing::Test {
 };
 
 TEST_F(SignatureConfigTest, testBasic) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -78,7 +78,7 @@ TEST_F(SignatureConfigTest, testBasic) {
 // Tests that the PublicKeySignWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -115,7 +115,7 @@ TEST_F(SignatureConfigTest, PublicKeySignWrapperRegistered) {
 // Tests that the PublicKeyVerifyWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used and BoringCrypto is "
                     "not available";
   }
@@ -148,7 +148,7 @@ TEST_F(SignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -173,7 +173,7 @@ TEST_F(SignatureConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 

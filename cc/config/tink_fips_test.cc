@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,38 +13,39 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#include "tink/config/tink_fips.h"
+
+#include "tink/internal/fips_utils.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/config/tink_fips.h"
-#include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
+
 namespace {
 
-using ::crypto::tink::test::IsOk;
 using testing::Eq;
 
-TEST(TinkFipsTest, FlagCorrectlySet) { EXPECT_THAT(kUseOnlyFips, Eq(false)); }
+// All tests in this file assume that Tink is not build in FIPS mode.
+TEST(TinkFipsTest, FipsEnabledWhenBuiltInFipsMode) {
+  // Check if the built flag is set.
+  if (!internal::kUseOnlyFips) {
+    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  }
 
-class FipsIncompatible {
- public:
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
-};
+  EXPECT_THAT(IsFipsModeEnabled(), Eq(true));
+}
 
-class FipsCompatibleWithBoringCrypto {
- public:
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
-};
+TEST(TinkFipsTest, FipsDisabledWhenNotBuildInFipsMode) {
+  // Check if the built flag is set.
+  if (internal::kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
 
-TEST(TinkFipsTest, Compatibility) {
-  // With FIPS only mode disabled no restrictions should apply.
-  EXPECT_THAT(CheckFipsCompatibility<FipsIncompatible>(), IsOk());
-  EXPECT_THAT(CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(), IsOk());
+  EXPECT_THAT(IsFipsModeEnabled(), Eq(false));
 }
 
 }  // namespace
+
 }  // namespace tink
 }  // namespace crypto

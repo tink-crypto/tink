@@ -587,6 +587,7 @@ cc_library(
     deps = [
         ":core/template_util",
         ":input_stream",
+        "//internal:fips_utils",
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",

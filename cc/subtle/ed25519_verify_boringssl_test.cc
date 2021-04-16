@@ -23,6 +23,7 @@
 #include "openssl/curve25519.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/ed25519_sign_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -42,7 +43,7 @@ using ::crypto::tink::test::StatusIs;
 class Ed25519VerifyBoringSslTest : public ::testing::Test {};
 
 TEST_F(Ed25519VerifyBoringSslTest, testBasicSign) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips is false.";
   }
@@ -84,7 +85,7 @@ TEST_F(Ed25519VerifyBoringSslTest, testBasicSign) {
 }
 
 TEST_F(Ed25519VerifyBoringSslTest, testInvalidPublicKeys) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips is false.";
   }
@@ -104,7 +105,7 @@ TEST_F(Ed25519VerifyBoringSslTest, testInvalidPublicKeys) {
 }
 
 TEST_F(Ed25519VerifyBoringSslTest, testMessageEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips is false.";
   }
@@ -233,7 +234,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
 }
 
 TEST_F(Ed25519VerifyBoringSslTest, WycheproofCurve25519) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips is false.";
   }
@@ -242,7 +243,7 @@ TEST_F(Ed25519VerifyBoringSslTest, WycheproofCurve25519) {
 }
 
 TEST_F(Ed25519VerifyBoringSslTest, testFipsMode) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips.";
   }

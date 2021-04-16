@@ -55,7 +55,7 @@ class HmacBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(HmacBoringSslTest, testBasic) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -91,7 +91,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
 }
 
 TEST_F(HmacBoringSslTest, testModification) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -116,7 +116,7 @@ TEST_F(HmacBoringSslTest, testModification) {
 }
 
 TEST_F(HmacBoringSslTest, testTruncation) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -139,7 +139,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
 }
 
 TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -158,7 +158,7 @@ TEST_F(HmacBoringSslTest, testInvalidKeySizes) {
 }
 
 TEST_F(HmacBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

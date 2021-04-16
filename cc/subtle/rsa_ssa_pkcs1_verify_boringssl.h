@@ -24,7 +24,7 @@
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/public_key_verify.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -50,8 +50,8 @@ class RsaSsaPkcs1VerifyBoringSsl : public PublicKeyVerify {
 
   ~RsaSsaPkcs1VerifyBoringSsl() override = default;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   // To reach 128-bit security strength, RSA's modulus must be at least 3072-bit

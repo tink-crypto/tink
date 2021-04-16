@@ -21,6 +21,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "openssl/sha.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
@@ -45,7 +46,7 @@ namespace {
 // with an unknown curve type parameter. It should fail with an
 // util::error::UNIMPLEMENTED error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -70,7 +71,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
 // This test evaluates the case where an unsupported curve (NIST_P256) is
 // specified. This test should fail with an util::error::UNIMPLEMENTED error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -94,7 +95,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
 // This test checks that an error is triggered if an output key lenth smaller
 // than 32 bytes is specified.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -130,7 +131,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
 
 // This test evaluates if a Sender can successfully generate a symmetric key.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -168,7 +169,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
 // should successfully generate an encapsulated shared secret that matches with
 // a decapsulated shared secret.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -223,7 +224,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
 // difference that we alter bytes of the kem_bytes thus preventing the two
 // shared secrets to match.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 

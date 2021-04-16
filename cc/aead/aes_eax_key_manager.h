@@ -88,10 +88,6 @@ class AesEaxKeyManager
     return aes_eax_key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
-
  private:
   crypto::tink::util::Status ValidateKeySize(uint32_t key_size) const {
     if (key_size != 16 && key_size != 32) {

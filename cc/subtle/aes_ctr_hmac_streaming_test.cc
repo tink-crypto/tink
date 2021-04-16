@@ -23,6 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/stream_segment_decrypter.h"
@@ -55,7 +56,7 @@ AesCtrHmacStreaming::Params ValidParams() {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -126,7 +127,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -145,7 +146,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -163,7 +164,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -246,7 +247,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -267,7 +268,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -288,7 +289,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -309,7 +310,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -332,7 +333,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -356,7 +357,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -379,7 +380,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
 }
 
 TEST(AesCtrHmacStreamingTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -431,7 +432,7 @@ TEST(AesCtrHmacStreamingTest, Basic) {
 }
 
 TEST(ValidateTest, ValidParams) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -439,7 +440,7 @@ TEST(ValidateTest, ValidParams) {
 }
 
 TEST(ValidateTest, WrongIkm) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -450,7 +451,7 @@ TEST(ValidateTest, WrongIkm) {
 }
 
 TEST(ValidateTest, WrongHkdfAlgo) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -461,7 +462,7 @@ TEST(ValidateTest, WrongHkdfAlgo) {
 }
 
 TEST(ValidateTest, WrongKeySize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -473,7 +474,7 @@ TEST(ValidateTest, WrongKeySize) {
 }
 
 TEST(ValidateTest, WrongCtSegmentSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -489,7 +490,7 @@ TEST(ValidateTest, WrongCtSegmentSize) {
 }
 
 TEST(ValidateTest, WrongCtOffset) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -500,7 +501,7 @@ TEST(ValidateTest, WrongCtOffset) {
 }
 
 TEST(ValidateTest, WrongTagSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -529,7 +530,7 @@ TEST(ValidateTest, WrongTagSize) {
 }
 
 TEST(ValidateTest, WrongTagAlgo) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -541,7 +542,7 @@ TEST(ValidateTest, WrongTagAlgo) {
 
 // FIPS only mode tests
 TEST(AesCtrHmacStreamingTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();

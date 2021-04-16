@@ -402,6 +402,7 @@ tink_cc_library(
   NAME registry
   SRCS registry.h
   DEPS
+    tink::config::tink_fips
     tink::internal::registry_impl
     tink::util::status
     tink::util::statusor
@@ -527,6 +528,7 @@ tink_cc_library(
   DEPS
     absl::strings
     tink::core::input_stream
+    tink::internal::fips_utils
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor

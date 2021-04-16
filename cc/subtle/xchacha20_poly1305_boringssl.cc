@@ -23,7 +23,6 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
-#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -43,7 +42,7 @@ const bool IsValidKeySize(uint32_t size_in_bytes) {
 
 util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
     util::SecretData key) {
-  auto status = CheckFipsCompatibility<XChacha20Poly1305BoringSsl>();
+  auto status = internal::CheckFipsCompatibility<XChacha20Poly1305BoringSsl>();
   if (!status.ok()) return status;
 
   if (!IsValidKeySize(key.size())) {

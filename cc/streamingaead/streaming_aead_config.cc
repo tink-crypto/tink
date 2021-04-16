@@ -44,7 +44,7 @@ util::Status StreamingAeadConfig::Register() {
 
   // Currently there are no streaming encryption key managers which only use
   // FIPS-validated implementations, therefore none will be registered in
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
+#include "tink/config/tink_fips.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -42,7 +43,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
 TEST(AesGcmHkdfStreamingTest, testBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (HashType hkdf_hash : {SHA1, SHA256, SHA512}) {
@@ -95,7 +96,7 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -113,7 +114,7 @@ TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testIkmSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {5, 10, 15}) {
@@ -133,7 +134,7 @@ TEST(AesGcmHkdfStreamingTest, testIkmSize) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -152,7 +153,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -171,7 +172,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -190,7 +191,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -211,7 +212,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
 
 // FIPS only mode tests
 TEST(AesGcmHkdfStreamingTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;

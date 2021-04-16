@@ -175,7 +175,7 @@ std::unique_ptr<InputStream> HkdfStreamingPrf::ComputePrf(
 crypto::tink::util::StatusOr<std::unique_ptr<StreamingPrf>>
 HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
                       absl::string_view salt) {
-  auto status = CheckFipsCompatibility<HkdfStreamingPrf>();
+  auto status = internal::CheckFipsCompatibility<HkdfStreamingPrf>();
   if (!status.ok()) return status;
 
   if (hash != SHA256 && hash != SHA512 && hash != SHA1) {

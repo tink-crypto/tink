@@ -52,8 +52,8 @@ EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
                                               util::SecretData priv_key) {
-  auto status =
-      CheckFipsCompatibility<EciesHkdfNistPCurveRecipientKemBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<
+      EciesHkdfNistPCurveRecipientKemBoringSsl>();
   if (!status.ok()) return status;
 
   if (priv_key.empty()) {
@@ -108,7 +108,8 @@ EciesHkdfX25519RecipientKemBoringSsl::EciesHkdfX25519RecipientKemBoringSsl(
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
 EciesHkdfX25519RecipientKemBoringSsl::New(EllipticCurveType curve,
                                           util::SecretData priv_key) {
-  auto status = CheckFipsCompatibility<EciesHkdfX25519RecipientKemBoringSsl>();
+  auto status =
+      internal::CheckFipsCompatibility<EciesHkdfX25519RecipientKemBoringSsl>();
   if (!status.ok()) return status;
 
   if (curve != CURVE25519) {

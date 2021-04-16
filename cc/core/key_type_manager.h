@@ -20,9 +20,9 @@
 #include <tuple>
 
 #include "absl/strings/str_cat.h"
-#include "tink/config/tink_fips.h"
 #include "tink/core/template_util.h"
 #include "tink/input_stream.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -142,8 +142,8 @@ class KeyTypeManager<KeyProtoParam, KeyFormatProtoParam, List<Primitives...>>
   }
 
   // Returns the FIPS compatibility of this KeyTypeManager.
-  virtual FipsCompatibility FipsStatus() const {
-    return FipsCompatibility::kNotFips;
+  virtual internal::FipsCompatibility FipsStatus() const {
+    return internal::FipsCompatibility::kNotFips;
   }
 
  private:

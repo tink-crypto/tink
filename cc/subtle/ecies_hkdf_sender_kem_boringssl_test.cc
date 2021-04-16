@@ -19,6 +19,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -75,7 +76,7 @@ static const std::vector<TestVector> test_vector(
      }});
 
 TEST_F(EciesHkdfSenderKemBoringSslTest, TestSenderRecipientBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (const TestVector& test : test_vector) {
@@ -108,7 +109,7 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestSenderRecipientBasic) {
 }
 
 TEST_F(EciesHkdfSenderKemBoringSslTest, TestNewUnknownCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
@@ -120,7 +121,7 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestNewUnknownCurve) {
 class EciesHkdfNistPCurveSendKemBoringSslTest : public ::testing::Test {};
 
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNew) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
@@ -133,7 +134,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNew) {
 }
 
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNewInvalidCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
@@ -147,7 +148,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNewInvalidCurve) {
 }
 
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestGenerateKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
@@ -172,7 +173,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestGenerateKey) {
 class EciesHkdfX25519SendKemBoringSslTest : public ::testing::Test {};
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNew) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -185,7 +186,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNew) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewInvalidCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -199,7 +200,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewInvalidCurve) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -214,7 +215,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -229,7 +230,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -252,7 +253,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKeyUncompressed) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
@@ -273,7 +274,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKeyUncompressed) {
 
 // Tests for FIPS only mode
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
@@ -287,7 +288,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestFipsOnly) {
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;

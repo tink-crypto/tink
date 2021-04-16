@@ -31,7 +31,7 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
 #include "tink/catalogue.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"
@@ -508,8 +508,8 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
   absl::MutexLock lock(&maps_mutex_);
 
   // Check FIPS status
-  FipsCompatibility fips_compatible = owned_manager->FipsStatus();
-  auto fips_status = ChecksFipsCompatibility(fips_compatible);
+  internal::FipsCompatibility fips_compatible = owned_manager->FipsStatus();
+  auto fips_status = internal::ChecksFipsCompatibility(fips_compatible);
   if (!fips_status.ok()) {
     return crypto::tink::util::Status(
         crypto::tink::util::error::INTERNAL,
@@ -560,7 +560,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   // Check FIPS status
   auto private_fips_status =
-      ChecksFipsCompatibility(private_key_manager->FipsStatus());
+      internal::ChecksFipsCompatibility(private_key_manager->FipsStatus());
 
   if (!private_fips_status.ok()) {
     return crypto::tink::util::Status(
@@ -571,7 +571,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
   }
 
   auto public_fips_status =
-      ChecksFipsCompatibility(public_key_manager->FipsStatus());
+      internal::ChecksFipsCompatibility(public_key_manager->FipsStatus());
 
   if (!public_fips_status.ok()) {
     return crypto::tink::util::Status(

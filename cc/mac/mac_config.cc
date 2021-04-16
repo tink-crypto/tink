@@ -50,7 +50,7 @@ util::Status MacConfig::Register() {
                                             true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

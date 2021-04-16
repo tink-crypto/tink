@@ -37,7 +37,7 @@ crypto::tink::util::Status PrfConfig::Register() {
   if (!status.ok()) return status;
 
   // When using FIPS only mode do not register other key managers.
-  if (kUseOnlyFips) return util::OkStatus();
+  if (IsFipsModeEnabled()) return util::OkStatus();
 
   status = Registry::RegisterKeyTypeManager(
       absl::make_unique<HkdfPrfKeyManager>(), true);

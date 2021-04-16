@@ -70,7 +70,7 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
 util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
     const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
-  auto status = CheckFipsCompatibility<EcdsaSignBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<EcdsaSignBoringSsl>();
   if (!status.ok()) return status;
 
   // Check hash.

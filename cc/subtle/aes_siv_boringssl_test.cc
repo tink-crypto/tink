@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -35,7 +36,7 @@ namespace {
 using ::crypto::tink::test::StatusIs;
 
 TEST(AesSivBoringSslTest, testCarryComputation) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   uint8_t value = 0;
@@ -51,7 +52,7 @@ TEST(AesSivBoringSslTest, testCarryComputation) {
 }
 
 TEST(AesSivBoringSslTest, testEncryptDecrypt) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -70,7 +71,7 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
 }
 
 TEST(AesSivBoringSslTest, testNullPtrStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -103,7 +104,7 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
 
 // Only 64 byte key sizes are supported.
 TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData keymaterial =
@@ -126,7 +127,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
 
 // Checks a range of message sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -156,7 +157,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
 
 // Checks a range of aad sizes.
 TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -177,7 +178,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
 }
 
 TEST(AesSivBoringSslTest, testDecryptModification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
@@ -258,7 +259,7 @@ void WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesSivBoringSslTest, TestVectors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   std::unique_ptr<rapidjson::Document> root =
@@ -267,7 +268,7 @@ TEST(AesSivBoringSslTest, TestVectors) {
 }
 
 TEST(AesEaxBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

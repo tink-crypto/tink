@@ -48,7 +48,7 @@ class StreamingAeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(StreamingAeadConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -74,7 +74,7 @@ TEST_F(StreamingAeadConfigTest, Basic) {
 // Tests that the StreamingAeadWrapper has been properly registered
 // and we can wrap primitives.
 TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -99,7 +99,7 @@ TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

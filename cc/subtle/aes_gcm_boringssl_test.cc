@@ -42,7 +42,7 @@ using ::crypto::tink::test::StatusIs;
 using ::testing::Eq;
 
 TEST(AesGcmBoringSslTest, testBasic) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -63,7 +63,7 @@ TEST(AesGcmBoringSslTest, testBasic) {
 }
 
 TEST(AesGcmBoringSslTest, testModification) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -97,7 +97,7 @@ TEST(AesGcmBoringSslTest, testModification) {
 
 void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -124,7 +124,7 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
 }
 
 TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -157,7 +157,7 @@ TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -198,7 +198,7 @@ TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -241,7 +241,7 @@ TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
 }
 
 TEST(AesGcmBoringSslTest, testInvalidKeySizes) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -319,7 +319,7 @@ bool WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesGcmBoringSslTest, TestVectors) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -330,7 +330,7 @@ TEST(AesGcmBoringSslTest, TestVectors) {
 }
 
 TEST(AesGcmBoringSslTest, TestFipsOnly) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
@@ -345,7 +345,7 @@ TEST(AesGcmBoringSslTest, TestFipsOnly) {
 }
 
 TEST(AesGcmBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

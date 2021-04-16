@@ -55,7 +55,7 @@ class RsaPkcs1SignBoringsslTest : public ::testing::Test {
 };
 
 TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -76,7 +76,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1WithSeparateHashes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -97,7 +97,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, EncodesPkcs1WithSeparateHashes) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, RejectsUnsafeHash) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -107,7 +107,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsUnsafeHash) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -139,7 +139,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
 
 // FIPS-only mode test
 TEST_F(RsaPkcs1SignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -150,7 +150,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
@@ -167,7 +167,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestAllowedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 

@@ -48,7 +48,7 @@ class HybridConfigTest : public ::testing::Test {
 };
 
 TEST_F(HybridConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -74,7 +74,7 @@ TEST_F(HybridConfigTest, Basic) {
 // Tests that the HybridEncryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -110,7 +110,7 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
 // Tests that the HybridDecryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -145,7 +145,7 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

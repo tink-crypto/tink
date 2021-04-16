@@ -83,10 +83,6 @@ class KmsAeadKeyManager
     return kms_aead_key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
-
  private:
   const std::string key_type_ = absl::StrCat(
       kTypeGoogleapisCom, google::crypto::tink::KmsAeadKey().GetTypeName());

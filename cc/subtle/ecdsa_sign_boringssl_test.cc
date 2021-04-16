@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
@@ -41,7 +42,7 @@ class EcdsaSignBoringSslTest : public ::testing::Test {
 };
 
 TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -82,7 +83,7 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -113,7 +114,7 @@ TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -145,7 +146,7 @@ TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -160,7 +161,7 @@ TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
 
 // FIPS-only mode test
 TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }

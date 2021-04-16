@@ -74,8 +74,8 @@ class HmacKeyManager
       const google::crypto::tink::HmacKeyFormat& key_format,
       InputStream* input_stream) const override;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

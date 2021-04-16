@@ -35,6 +35,7 @@ tink_cc_library(
   DEPS
     absl::base
     crypto
+    tink::core::registry
     tink::util::status
 )
 

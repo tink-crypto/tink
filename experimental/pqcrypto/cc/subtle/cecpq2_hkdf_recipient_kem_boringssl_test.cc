@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -119,7 +120,7 @@ const char kInfoHex[] = "0b0b0b0b0b0b0b0b";
 // instance with an unknown curve type. It should fail with an util::error::
 // UNIMPLEMENTED error.
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -141,7 +142,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnknownCurve) {
 // This test evaluates the case where a unsupported curve (NIST_P256) is
 // specified. This test should fail with an util::error::UNIMPLEMENTED error.
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -163,7 +164,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestUnsupportedCurve) {
 // This test checks that an error is triggered if an output key lenth smaller
 // than 32 bytes is specified.
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -192,7 +193,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
 }
 
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   int out_len = 32;
@@ -222,7 +223,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
 }
 
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   int out_len = 32;

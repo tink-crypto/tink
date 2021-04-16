@@ -132,10 +132,6 @@ class HkdfPrfKeyManager
     return key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
-
  private:
   crypto::tink::util::Status ValidateKeySize(int key_size) const {
     if (key_size < kMinKeySizeBytes) {

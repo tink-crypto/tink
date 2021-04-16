@@ -66,6 +66,7 @@ cc_test(
     srcs = ["hkdf_streaming_prf_test.cc"],
     deps = [
         ":hkdf_streaming_prf",
+        "//config:tink_fips",
         "//subtle",
         "//util:input_stream_util",
         "//util:secret_data",

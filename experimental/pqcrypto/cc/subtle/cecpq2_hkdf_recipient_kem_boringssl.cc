@@ -55,7 +55,8 @@ util::StatusOr<std::unique_ptr<Cecpq2HkdfRecipientKemBoringSsl>>
 Cecpq2HkdfX25519RecipientKemBoringSsl::New(
     EllipticCurveType curve, util::SecretData ec_private_key,
     util::SecretData hrss_private_key_seed) {
-  auto status = CheckFipsCompatibility<Cecpq2HkdfX25519RecipientKemBoringSsl>();
+  auto status =
+      internal::CheckFipsCompatibility<Cecpq2HkdfX25519RecipientKemBoringSsl>();
   if (!status.ok()) return status;
 
   // Basic input checking

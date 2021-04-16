@@ -537,7 +537,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
   // only size which is covered by the FIPS validation and supported by Tink.
   // See
   // https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3318
-  if (kUseOnlyFips && (modulus_size != 3072)) {
+  if (IsFipsModeEnabled() && (modulus_size != 3072)) {
     return util::Status(util::error::INTERNAL,
                         absl::StrCat("Modulus size is ", modulus_size,
                                      " only modulus size 3072 is supported "));

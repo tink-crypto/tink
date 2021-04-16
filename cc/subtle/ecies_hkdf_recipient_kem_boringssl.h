@@ -20,7 +20,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -68,8 +68,8 @@ class EciesHkdfNistPCurveRecipientKemBoringSsl
       absl::string_view hkdf_info, uint32_t key_size_in_bytes,
       EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
   EciesHkdfNistPCurveRecipientKemBoringSsl(EllipticCurveType curve,
@@ -99,8 +99,8 @@ class EciesHkdfX25519RecipientKemBoringSsl
       absl::string_view hkdf_info, uint32_t key_size_in_bytes,
       EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
   explicit EciesHkdfX25519RecipientKemBoringSsl(util::SecretData private_key);

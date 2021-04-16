@@ -23,7 +23,7 @@
 #include "absl/types/span.h"
 #include "openssl/aes.h"
 #include "tink/deterministic_aead.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -71,8 +71,8 @@ class AesSivBoringSsl : public DeterministicAead {
     return size == 64;
   }
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
   static constexpr size_t kBlockSize = 16;

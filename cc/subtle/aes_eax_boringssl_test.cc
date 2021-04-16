@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -37,7 +38,7 @@ namespace {
 using ::crypto::tink::test::StatusIs;
 
 TEST(AesEaxBoringSslTest, TestBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -58,7 +59,7 @@ TEST(AesEaxBoringSslTest, TestBasic) {
 }
 
 TEST(AesEaxBoringSslTest, TestMessageSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -81,7 +82,7 @@ TEST(AesEaxBoringSslTest, TestMessageSize) {
 }
 
 TEST(AesEaxBoringSslTest, TestAadSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -104,7 +105,7 @@ TEST(AesEaxBoringSslTest, TestAadSize) {
 }
 
 TEST(AesEaxBoringSslTest, TestLongNonce) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -125,7 +126,7 @@ TEST(AesEaxBoringSslTest, TestLongNonce) {
 }
 
 TEST(AesEaxBoringSslTest, TestModification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -158,7 +159,7 @@ TEST(AesEaxBoringSslTest, TestModification) {
 }
 
 TEST(AesEaxBoringSslTest, TestInvalidKeySizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -174,7 +175,7 @@ TEST(AesEaxBoringSslTest, TestInvalidKeySizes) {
 }
 
 TEST(AesEaxBoringSslTest, TestEmpty) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -310,7 +311,7 @@ bool WycheproofTest(const rapidjson::Document &root) {
 }
 
 TEST(AesEaxBoringSslTest, TestVectors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -320,7 +321,7 @@ TEST(AesEaxBoringSslTest, TestVectors) {
 }
 
 TEST(AesEaxBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

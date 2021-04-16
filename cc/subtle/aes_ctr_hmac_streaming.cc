@@ -115,7 +115,7 @@ static util::Status Validate(const AesCtrHmacStreaming::Params& params) {
 // static
 util::StatusOr<std::unique_ptr<AesCtrHmacStreaming>> AesCtrHmacStreaming::New(
     Params params) {
-  auto status = CheckFipsCompatibility<AesCtrHmacStreaming>();
+  auto status = internal::CheckFipsCompatibility<AesCtrHmacStreaming>();
   if (!status.ok()) return status;
 
   status = Validate(params);

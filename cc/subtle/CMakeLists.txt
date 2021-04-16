@@ -58,7 +58,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -77,7 +77,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -108,7 +108,7 @@ tink_cc_library(
     ed25519_sign_boringssl.h
   DEPS
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
     tink::util::secret_data
@@ -126,7 +126,7 @@ tink_cc_library(
     ed25519_verify_boringssl.h
   DEPS
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_verify
     tink::util::errors
     tink::util::statusor
@@ -160,7 +160,7 @@ tink_cc_library(
   DEPS
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::mac
     tink::util::secret_data
     tink::util::status
@@ -177,7 +177,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::mac
     tink::util::errors
     tink::util::secret_data
@@ -196,7 +196,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -213,7 +213,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -230,7 +230,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -247,7 +247,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -265,7 +265,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_verify
     tink::util::errors
     tink::util::status
@@ -282,7 +282,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
     tink::util::status
@@ -298,7 +298,7 @@ tink_cc_library(
     aes_gcm_boringssl.cc
     aes_gcm_boringssl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
@@ -369,7 +369,7 @@ tink_cc_library(
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::input_stream
     tink::core::output_stream
     tink::util::errors
@@ -396,7 +396,7 @@ tink_cc_library(
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::mac
     tink::util::errors
     tink::util::secret_data
@@ -413,7 +413,7 @@ tink_cc_library(
     aes_eax_boringssl.cc
     aes_eax_boringssl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
@@ -454,7 +454,7 @@ tink_cc_library(
     aes_ctr_boringssl.cc
     aes_ctr_boringssl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::subtle::ind_cpa_cipher
     tink::subtle::random
     tink::subtle::subtle_util
@@ -482,7 +482,7 @@ tink_cc_library(
     xchacha20_poly1305_boringssl.cc
     xchacha20_poly1305_boringssl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::subtle::common_enums
     tink::subtle::random
     tink::subtle::subtle_util
@@ -504,7 +504,7 @@ tink_cc_library(
   DEPS
     tink::subtle::random
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::deterministic_aead
     tink::util::errors
     tink::util::secret_data
@@ -522,7 +522,7 @@ tink_cc_library(
     aes_gcm_siv_boringssl.cc
     aes_gcm_siv_boringssl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::subtle::random
     tink::subtle::subtle_util
     tink::core::aead
@@ -556,9 +556,9 @@ tink_cc_library(
     subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
-    tink::config::tink_fips
     tink::subtle::common_enums
     tink::subtle::random
+    tink::config::tink_fips
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -782,6 +782,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
+    tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -797,6 +798,7 @@ tink_cc_test(
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::subtle::ecies_hkdf_sender_kem_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -832,7 +834,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::aes_cmac_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::mac
     tink::util::secret_data
     tink::util::status
@@ -847,7 +849,7 @@ tink_cc_test(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hmac_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::mac
     tink::util::secret_data
     tink::util::status
@@ -863,7 +865,7 @@ tink_cc_test(
   DEPS
     tink::subtle::aes_gcm_boringssl
     tink::subtle::wycheproof_util
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::aead
     tink::util::secret_data
     tink::util::status
@@ -917,6 +919,7 @@ tink_cc_test(
     tink::subtle::random
     tink::subtle::streaming_aead_test_util
     tink::subtle::test_util
+    tink::config::tink_fips
     tink::core::output_stream
     tink::util::ostream_output_stream
     tink::util::istream_input_stream
@@ -937,6 +940,7 @@ tink_cc_test(
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::streaming_aead_test_util
+    tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -954,6 +958,7 @@ tink_cc_test(
     tink::subtle::aes_eax_boringssl
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::aead
     tink::util::secret_data
     tink::util::status
@@ -988,6 +993,7 @@ tink_cc_test(
   DEPS
     tink::subtle::aes_ctr_boringssl
     tink::subtle::random
+    tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -1003,6 +1009,7 @@ tink_cc_test(
     tink::subtle::aes_siv_boringssl
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::deterministic_aead
     tink::util::secret_data
     tink::util::status
@@ -1021,6 +1028,7 @@ tink_cc_test(
     tink::subtle::ec_util
     tink::subtle::ecdsa_sign_boringssl
     tink::subtle::ecdsa_verify_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
@@ -1038,6 +1046,7 @@ tink_cc_test(
     tink::subtle::ecdsa_sign_boringssl
     tink::subtle::ecdsa_verify_boringssl
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
@@ -1056,6 +1065,7 @@ tink_cc_test(
     tink::subtle::ed25519_verify_boringssl
     tink::subtle::random
     tink::subtle::subtle_util_boringssl
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::secret_data
@@ -1076,6 +1086,7 @@ tink_cc_test(
     tink::subtle::ed25519_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::secret_data
@@ -1128,7 +1139,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::wycheproof_util
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::util::status
@@ -1147,7 +1158,7 @@ tink_cc_test(
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::util::test_matchers
     absl::strings
     crypto
@@ -1161,6 +1172,7 @@ tink_cc_test(
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::common_enums
     tink::subtle::wycheproof_util
+    tink::config::tink_fips
     tink::core::aead
     tink::util::secret_data
     tink::util::status
@@ -1219,6 +1231,7 @@ tink_cc_test(
   SRCS xchacha20_poly1305_boringssl_test.cc
   DEPS
     tink::subtle::xchacha20_poly1305_boringssl
+    tink::config::tink_fips
     tink::core::aead
     tink::util::secret_data
     tink::util::status

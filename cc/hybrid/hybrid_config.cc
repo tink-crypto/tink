@@ -54,7 +54,7 @@ util::Status HybridConfig::Register() {
   // Currently there are no hybrid encryption key managers which only use
   // FIPS-validated implementations, therefore none will be registered in
   // FIPS only mode.
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

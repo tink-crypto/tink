@@ -62,6 +62,7 @@ tink_cc_test(
     tink::subtle::prf::hkdf_streaming_prf
     tink::subtle::prf::streaming_prf
     tink::subtle::subtle
+    tink::config::tink_fips
     tink::util::input_stream_util
     tink::util::secret_data
     tink::util::test_matchers

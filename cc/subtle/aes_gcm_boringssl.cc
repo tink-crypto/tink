@@ -20,7 +20,6 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/aead.h"
-#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -32,7 +31,7 @@ namespace subtle {
 
 util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
     const util::SecretData& key) {
-  auto status = CheckFipsCompatibility<AesGcmBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<AesGcmBoringSsl>();
   if (!status.ok()) return status;
 
   const EVP_AEAD* aead =

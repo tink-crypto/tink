@@ -33,7 +33,7 @@ namespace subtle {
 util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
     const SubtleUtilBoringSSL::RsaPrivateKey& private_key,
     const SubtleUtilBoringSSL::RsaSsaPssParams& params) {
-  auto status = CheckFipsCompatibility<RsaSsaPssSignBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<RsaSsaPssSignBoringSsl>();
   if (!status.ok()) return status;
 
   // Check hash.

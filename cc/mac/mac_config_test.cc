@@ -46,7 +46,7 @@ class MacConfigTest : public ::testing::Test {
 };
 
 TEST_F(MacConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -62,7 +62,7 @@ TEST_F(MacConfigTest, Basic) {
 // Tests that the MacWrapper has been properly registered and we can wrap
 // primitives.
 TEST_F(MacConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -97,7 +97,7 @@ TEST_F(MacConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -113,7 +113,7 @@ TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(MacConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

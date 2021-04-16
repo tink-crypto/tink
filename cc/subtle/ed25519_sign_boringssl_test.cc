@@ -23,6 +23,7 @@
 #include "openssl/curve25519.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -42,7 +43,7 @@ using ::crypto::tink::test::StatusIs;
 class Ed25519SignBoringSslTest : public ::testing::Test {};
 
 TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
@@ -96,7 +97,7 @@ TEST_F(Ed25519SignBoringSslTest, testBasicSign) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testInvalidPrivateKeys) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
@@ -111,7 +112,7 @@ TEST_F(Ed25519SignBoringSslTest, testInvalidPrivateKeys) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testMessageEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
@@ -168,7 +169,7 @@ struct TestVector {
 };
 
 TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
@@ -326,7 +327,7 @@ TEST_F(Ed25519SignBoringSslTest, testWithTestVectors) {
 }
 
 TEST_F(Ed25519SignBoringSslTest, testFipsMode) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips.";
   }
 

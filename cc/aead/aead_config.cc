@@ -61,7 +61,7 @@ util::Status AeadConfig::Register() {
       absl::make_unique<AesGcmKeyManager>(), true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

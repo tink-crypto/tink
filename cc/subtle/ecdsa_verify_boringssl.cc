@@ -58,7 +58,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
 util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
     bssl::UniquePtr<EC_KEY> ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
-  auto status = CheckFipsCompatibility<EcdsaVerifyBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<EcdsaVerifyBoringSsl>();
   if (!status.ok()) return status;
 
   // Check hash.

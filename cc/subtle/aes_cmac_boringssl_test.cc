@@ -39,7 +39,7 @@ constexpr uint32_t kTagSize = 16;
 constexpr uint32_t kSmallTagSize = 10;
 
 TEST(AesCmacBoringSslTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -71,7 +71,7 @@ TEST(AesCmacBoringSslTest, Basic) {
 }
 
 TEST(AesCmacBoringSslTest, Modification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -95,7 +95,7 @@ TEST(AesCmacBoringSslTest, Modification) {
 }
 
 TEST(AesCmacBoringSslTest, Truncation) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -117,7 +117,7 @@ TEST(AesCmacBoringSslTest, Truncation) {
 }
 
 TEST(AesCmacBoringSslTest, BasicSmallTag) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -149,7 +149,7 @@ TEST(AesCmacBoringSslTest, BasicSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, ModificationSmallTag) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -173,7 +173,7 @@ TEST(AesCmacBoringSslTest, ModificationSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -201,7 +201,7 @@ TEST(AesCmacBoringSslTest, TruncationOrAdditionSmallTag) {
 }
 
 TEST(AesCmacBoringSslTest, InvalidKeySizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -217,7 +217,7 @@ TEST(AesCmacBoringSslTest, InvalidKeySizes) {
 }
 
 TEST(AesCmacBoringSslTest, InvalidTagSizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -252,7 +252,7 @@ class AesCmacBoringSslTestVectorTest
 };
 
 TEST_P(AesCmacBoringSslTestVectorTest, RfcTestVectors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -273,7 +273,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_pair(64, "51f0bebf7e3b9d92fc49741779363cfe")));
 
 TEST(AesCmacBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

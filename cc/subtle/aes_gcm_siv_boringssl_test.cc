@@ -23,6 +23,7 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -38,7 +39,7 @@ namespace {
 using ::crypto::tink::test::StatusIs;
 
 TEST(AesGcmSivBoringSslTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -62,7 +63,7 @@ TEST(AesGcmSivBoringSslTest, Basic) {
 }
 
 TEST(AesGcmSivBoringSslTest, Sizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -95,7 +96,7 @@ TEST(AesGcmSivBoringSslTest, Sizes) {
 }
 
 TEST(AesGcmSivBoringSslTest, Modification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -129,7 +130,7 @@ TEST(AesGcmSivBoringSslTest, Modification) {
 }
 
 TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -188,7 +189,7 @@ TEST(AesGcmSivBoringSslTest, AadEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -228,7 +229,7 @@ TEST(AesGcmSivBoringSslTest, MessageEmptyVersusNullStringView) {
 }
 
 TEST(AesGcmSivBoringSslTest, InvalidKeySizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -295,7 +296,7 @@ bool WycheproofTest(const rapidjson::Document& root) {
 }
 
 TEST(AesGcmSivBoringSslTest, TestVectors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -305,7 +306,7 @@ TEST(AesGcmSivBoringSslTest, TestVectors) {
 }
 
 TEST(AesGcmSivBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

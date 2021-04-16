@@ -15,40 +15,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/config/tink_fips.h"
 
+#include "tink/internal/fips_utils.h"
+#include "tink/internal/registry_impl.h"
+#include "tink/util/status.h"
+
+
 namespace crypto {
 namespace tink {
 
-#ifdef TINK_USE_ONLY_FIPS
-const bool kUseOnlyFips = true;
-#else
-const bool kUseOnlyFips = false;
-#endif
-
-crypto::tink::util::Status ChecksFipsCompatibility(
-    FipsCompatibility fips_status) {
-  switch (fips_status) {
-    case FipsCompatibility::kNotFips:
-      if (kUseOnlyFips) {
-        return util::Status(util::error::INTERNAL,
-                            "Primitive not available in FIPS only mode.");
-      } else {
-        return util::OkStatus();
-      }
-    case FipsCompatibility::kRequiresBoringCrypto:
-      if (kUseOnlyFips && !FIPS_mode()) {
-        return util::Status(
-            util::error::INTERNAL,
-            "BoringSSL not built with the BoringCrypto module. If you want to "
-            "use "
-            "FIPS only mode you have to build BoringSSL in FIPS Mode.");
-
-      } else {
-        return util::OkStatus();
-      }
-    default:
-      return util::Status(util::error::INTERNAL,
-                          "Could not determine FIPS status.");
-  }
+bool IsFipsModeEnabled() {
+  return internal::IsFipsModeEnabled();
 }
 
 }  // namespace tink

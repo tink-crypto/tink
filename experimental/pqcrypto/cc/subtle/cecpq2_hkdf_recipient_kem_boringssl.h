@@ -21,7 +21,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/hrss.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -87,8 +87,8 @@ class Cecpq2HkdfRecipientKemBoringSsl {
 class Cecpq2HkdfX25519RecipientKemBoringSsl
     : public Cecpq2HkdfRecipientKemBoringSsl {
  public:
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
   // Constructs a recipient CECPQ2 KEM for recipient's X25519 private key,
   // which must be a big-endian byte array, and recipient's HRSS private key.

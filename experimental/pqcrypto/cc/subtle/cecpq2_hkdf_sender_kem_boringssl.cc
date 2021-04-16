@@ -64,7 +64,8 @@ util::StatusOr<std::unique_ptr<const Cecpq2HkdfSenderKemBoringSsl>>
 Cecpq2HkdfX25519SenderKemBoringSsl::New(
     subtle::EllipticCurveType curve, const absl::string_view pubx,
     const absl::string_view puby, const absl::string_view marshalled_hrss_pub) {
-  auto status = CheckFipsCompatibility<Cecpq2HkdfX25519SenderKemBoringSsl>();
+  auto status =
+      internal::CheckFipsCompatibility<Cecpq2HkdfX25519SenderKemBoringSsl>();
   if (!status.ok()) return status;
 
   // Basic input checking

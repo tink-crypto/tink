@@ -17,6 +17,7 @@
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
 #include "gtest/gtest.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -72,7 +73,7 @@ static const std::vector<TestVector> test_vector(
       kSaltHex, kInfoHex, 32, kX25519SharedKeyHex}});
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, TestBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (const TestVector& test : test_vector) {
@@ -93,7 +94,7 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestBasic) {
 }
 
 TEST_F(EciesHkdfRecipientKemBoringSslTest, TestNewUnimplementedCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem =
@@ -105,7 +106,7 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestNewUnimplementedCurve) {
 class EciesHkdfNistPCurveRecipientKemBoringSslTest : public ::testing::Test {};
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNew) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
@@ -116,7 +117,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNew) {
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewInvalidCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
@@ -128,7 +129,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewInvalidCurve) {
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewEmptyPrivateKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
@@ -138,7 +139,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewEmptyPrivateKey) {
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
@@ -162,7 +163,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
 class EciesHkdfX25519RecipientKemBoringSslTest : public ::testing::Test {};
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNew) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
@@ -173,7 +174,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNew) {
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewInvalidCurve) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
@@ -185,7 +186,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewInvalidCurve) {
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewShortKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(
@@ -199,7 +200,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewShortKey) {
 
 // Tests for FIPS only mode
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(
@@ -211,7 +212,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestFipsOnly) {
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(

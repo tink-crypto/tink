@@ -32,7 +32,7 @@ util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>>
 RsaSsaPssVerifyBoringSsl::New(
     const SubtleUtilBoringSSL::RsaPublicKey& pub_key,
     const SubtleUtilBoringSSL::RsaSsaPssParams& params) {
-  auto status = CheckFipsCompatibility<RsaSsaPssVerifyBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<RsaSsaPssVerifyBoringSsl>();
   if (!status.ok()) return status;
 
   // Check hash.

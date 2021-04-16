@@ -21,7 +21,6 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/aead.h"
-#include "tink/config/tink_fips.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -45,7 +44,7 @@ const EVP_AEAD* GetCipherForKeySize(int size_in_bytes) {
 
 util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
     const util::SecretData& key) {
-  auto status = CheckFipsCompatibility<AesGcmSivBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<AesGcmSivBoringSsl>();
   if (!status.ok()) return status;
 
   const EVP_AEAD* aead = GetCipherForKeySize(key.size());

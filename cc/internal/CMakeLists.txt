@@ -38,7 +38,7 @@ tink_cc_library(
     registry_impl.cc
     registry_impl.h
   DEPS
-    tink::config::tink_fips
+    tink::internal::fips_utils
     tink::core::catalogue
     tink::core::key_manager
     tink::core::key_type_manager
@@ -62,6 +62,18 @@ tink_cc_library(
     absl::strings
     absl::synchronization
 )
+
+tink_cc_library(
+  NAME fips_utils
+  SRCS
+    fips_utils.cc
+    fips_utils.h
+  DEPS
+    absl::base
+    crypto
+    tink::util::status
+)
+
 
 tink_cc_test(
   NAME keyset_wrapper_impl_test
@@ -119,4 +131,3 @@ tink_cc_test(
     absl::memory
     gmock
 )
-

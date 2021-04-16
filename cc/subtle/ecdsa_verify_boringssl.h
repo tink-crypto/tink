@@ -20,7 +20,7 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/public_key_verify.h"
@@ -48,8 +48,8 @@ class EcdsaVerifyBoringSsl : public PublicKeyVerify {
       absl::string_view signature,
       absl::string_view data) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   EcdsaVerifyBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,

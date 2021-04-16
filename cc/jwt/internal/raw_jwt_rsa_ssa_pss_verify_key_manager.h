@@ -59,8 +59,8 @@ class RawJwtRsaSsaPssVerifyKeyManager
   crypto::tink::util::Status ValidateKey(
       const google::crypto::tink::JwtRsaSsaPssPublicKey& key) const override;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

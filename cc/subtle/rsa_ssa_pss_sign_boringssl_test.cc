@@ -22,6 +22,7 @@
 #include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/test_matchers.h"
@@ -52,7 +53,7 @@ class RsaPssSignBoringsslTest : public ::testing::Test {
 };
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -75,7 +76,7 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPss) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -98,7 +99,7 @@ TEST_F(RsaPssSignBoringsslTest, EncodesPssWithSeparateHashes) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -110,7 +111,7 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -122,7 +123,7 @@ TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
@@ -156,7 +157,7 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidCrtParams) {
 
 // FIPS-only mode test
 TEST_F(RsaPssSignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -169,7 +170,7 @@ TEST_F(RsaPssSignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, TestRestrictedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
   SubtleUtilBoringSSL::RsaPrivateKey private_key;
@@ -187,7 +188,7 @@ TEST_F(RsaPssSignBoringsslTest, TestRestrictedFipsModuli) {
 }
 
 TEST_F(RsaPssSignBoringsslTest, TestAllowedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
   SubtleUtilBoringSSL::RsaPrivateKey private_key;

@@ -97,10 +97,6 @@ class AesCmacKeyManager
     return key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
-
  private:
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::AesCmacParams& params) const {

@@ -21,7 +21,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "openssl/hrss.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -124,8 +124,8 @@ class Cecpq2HkdfX25519SenderKemBoringSsl : public Cecpq2HkdfSenderKemBoringSsl {
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
   // Flag to indicate CECPQ2 is not FIPS compliant
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
   // The private constructor only takes the X25519 and HRSS public keys. The

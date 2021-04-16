@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
+#include "tink/config/tink_fips.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -35,7 +36,7 @@ namespace {
 using ::crypto::tink::test::StatusIs;
 
 TEST(XChacha20Poly1305BoringSslTest, TestBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -56,7 +57,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestBasic) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestModification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -89,7 +90,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestModification) {
 
 void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -115,7 +116,7 @@ void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestAadEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -148,7 +149,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestAadEmptyVersusNullStringView) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestMessageEmptyVersusNullStringView) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -189,7 +190,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestMessageEmptyVersusNullStringView) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestBothMessageAndAadEmpty) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -232,7 +233,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestBothMessageAndAadEmpty) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestInvalidKeySizes) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -247,7 +248,7 @@ TEST(XChacha20Poly1305BoringSslTest, TestInvalidKeySizes) {
 }
 
 TEST(XChacha20Poly1305BoringSslTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

@@ -43,7 +43,7 @@ class PrfConfigTest : public ::testing::Test {
 };
 
 TEST_F(PrfConfigTest, RegisterWorks) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -58,7 +58,7 @@ TEST_F(PrfConfigTest, RegisterWorks) {
 
 // FIPS-only mode tests
 TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -76,7 +76,7 @@ TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

@@ -47,7 +47,7 @@ class AeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(AeadConfigTest, RegisterWorks) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
@@ -62,7 +62,7 @@ TEST_F(AeadConfigTest, RegisterWorks) {
 // Tests that the AeadWrapper has been properly registered and we can wrap
 // primitives.
 TEST_F(AeadConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -98,7 +98,7 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -119,7 +119,7 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
 }
 
 TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
@@ -138,7 +138,7 @@ TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
 }
 
 TEST_F(AeadConfigTest, RegisterFailsIfBoringCryptoNotAvailable) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Only supported in FIPS-only mode with BoringCrypto not available.";
   }
