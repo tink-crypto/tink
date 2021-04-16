@@ -42,17 +42,14 @@ public class JwtPublicKeySignVerifyWrappersTest {
       JwtEcdsaSignKeyManager.jwtES256Template(),
       JwtEcdsaSignKeyManager.jwtES384Template(),
       JwtEcdsaSignKeyManager.jwtES512Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa2048AlgoRS256F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa4096AlgoRS512F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS384F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS256F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template()
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
     };
   }
 

@@ -231,7 +231,7 @@ public final class JwtRsaSsaPssSignKeyManager
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
    * </ul>
    */
-  public static final KeyTemplate jwtRsa2048AlgoPS256F4Template() {
+  public static final KeyTemplate jwtPs256_2048_F4_Template() {
     return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 2048, RSAKeyGenParameterSpec.F4);
   }
 
@@ -245,7 +245,7 @@ public final class JwtRsaSsaPssSignKeyManager
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
    * </ul>
    */
-  public static final KeyTemplate jwtRsa3072AlgoPS256F4Template() {
+  public static final KeyTemplate jwtPs256_3072_F4_Template() {
     return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 3072, RSAKeyGenParameterSpec.F4);
   }
   /**
@@ -258,7 +258,7 @@ public final class JwtRsaSsaPssSignKeyManager
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
    * </ul>
    */
-  public static final KeyTemplate jwtRsa3072AlgoPS384F4Template() {
+  public static final KeyTemplate jwtPs384_3072_F4_Template() {
     return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS384, 3072, RSAKeyGenParameterSpec.F4);
   }
   /**
@@ -271,7 +271,7 @@ public final class JwtRsaSsaPssSignKeyManager
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
    * </ul>
    */
-  public static final KeyTemplate jwtRsa4096AlgoPS512F4Template() {
+  public static final KeyTemplate jwtPs512_4096_F4_Template() {
     return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS512, 4096, RSAKeyGenParameterSpec.F4);
   }
   /**

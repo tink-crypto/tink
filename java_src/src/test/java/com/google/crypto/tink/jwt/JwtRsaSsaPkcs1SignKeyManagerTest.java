@@ -105,10 +105,10 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   private static Object[] templates() {
     return new Object[] {
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa2048AlgoRS256F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS256F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS384F4Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRsa4096AlgoRS512F4Template()
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template()
     };
   }
 
@@ -293,25 +293,25 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
   @Test
   public void testJwtRsa2048AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRsa2048AlgoRS256F4Template();
+    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template();
     checkTemplate(template, JwtRsaSsaPkcs1Algorithm.RS256, 2048, 65537);
   }
 
   @Test
   public void testJwtRsa4096AlgoRS512F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRsa4096AlgoRS512F4Template();
+    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template();
     checkTemplate(template, JwtRsaSsaPkcs1Algorithm.RS512, 4096, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS384F4Template();
+    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template();
     checkTemplate(template, JwtRsaSsaPkcs1Algorithm.RS384, 3072, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS256F4Template();
+    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template();
     checkTemplate(template, JwtRsaSsaPkcs1Algorithm.RS256, 3072, 65537);
   }
 
@@ -319,7 +319,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public void testJwtRsa4096AlgoRS512F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPkcs1KeyFormat format =
         JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            JwtRsaSsaPkcs1SignKeyManager.jwtRsa4096AlgoRS512F4Template().getValue(),
+            JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -328,7 +328,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public void testJwtRsa3072AlgoRS384F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPkcs1KeyFormat format =
         JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS384F4Template().getValue(),
+            JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -337,7 +337,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public void testJwtRsa3072AlgoRS256F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPkcs1KeyFormat format =
         JwtRsaSsaPkcs1KeyFormat.parseFrom(
-            JwtRsaSsaPkcs1SignKeyManager.jwtRsa3072AlgoRS256F4Template().getValue(),
+            JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -464,7 +464,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
       // KeysetHandle.generateNew is too slow in Tsan.
       return;
     }
-    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRsa2048AlgoRS256F4Template();
+    KeyTemplate template = JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template();
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtRsaSsaPkcs1PrivateKey keyProto =

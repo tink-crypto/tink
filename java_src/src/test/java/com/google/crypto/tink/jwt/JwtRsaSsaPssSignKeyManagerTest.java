@@ -106,10 +106,10 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   private static Object[] templates() {
     return new Object[] {
-      JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template(),
-      JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template()
+      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template()
     };
   }
 
@@ -286,25 +286,25 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testJwtRsa2048AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template();
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
     checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
   }
 
   @Test
   public void testJwtRsa4096AlgoRS512F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template();
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template();
     checkTemplate(template, JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template();
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template();
     checkTemplate(template, JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template();
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template();
     checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
   }
 
@@ -312,7 +312,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   public void testJwtRsa4096AlgoPS512F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtRsa4096AlgoPS512F4Template().getValue(),
+            JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -321,7 +321,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   public void testJwtRsa3072AlgoPS384F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS384F4Template().getValue(),
+            JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -330,7 +330,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   public void testJwtRsa3072AlgoPS256F4TemplateWithManager_ok() throws Exception {
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtRsa3072AlgoPS256F4Template().getValue(),
+            JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
@@ -442,7 +442,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   @Test
   public void createSignVerify_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtRsa2048AlgoPS256F4Template();
+    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtRsaSsaPssPrivateKey keyProto =
