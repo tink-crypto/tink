@@ -33,6 +33,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesCtrHmacStreamingKey} keys and produces new instances of
@@ -125,6 +128,33 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
             .setParams(format.getParams())
             .setVersion(getVersion())
             .build();
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesCtrHmacStreamingKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<AesCtrHmacStreamingKeyFormat>> result = new HashMap<>();
+        result.put(
+            "AES128_CTR_HMAC_SHA256_4KB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES128_CTR_HMAC_SHA256_1MB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(16, HashType.SHA256, 16, HashType.SHA256, 32, 1 << 20),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES256_CTR_HMAC_SHA256_4KB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(32, HashType.SHA256, 32, HashType.SHA256, 32, 4096),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES256_CTR_HMAC_SHA256_1MB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(32, HashType.SHA256, 32, HashType.SHA256, 32, 1 << 20),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
@@ -255,6 +285,22 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
       HashType macHashType,
       int tagSize,
       int ciphertextSegmentSize) {
+    AesCtrHmacStreamingKeyFormat format =
+        createKeyFormat(
+            mainKeySize, hkdfHashType, derivedKeySize, macHashType, tagSize, ciphertextSegmentSize);
+    return KeyTemplate.create(
+        new AesCtrHmacStreamingKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static AesCtrHmacStreamingKeyFormat createKeyFormat(
+      int mainKeySize,
+      HashType hkdfHashType,
+      int derivedKeySize,
+      HashType macHashType,
+      int tagSize,
+      int ciphertextSegmentSize) {
     HmacParams hmacParams =
         HmacParams.newBuilder().setHash(macHashType).setTagSize(tagSize).build();
     AesCtrHmacStreamingParams params =
@@ -264,11 +310,9 @@ public final class AesCtrHmacStreamingKeyManager extends KeyTypeManager<AesCtrHm
             .setHkdfHashType(hkdfHashType)
             .setHmacParams(hmacParams)
             .build();
-    AesCtrHmacStreamingKeyFormat format =
-        AesCtrHmacStreamingKeyFormat.newBuilder().setParams(params).setKeySize(mainKeySize).build();
-    return KeyTemplate.create(
-        new AesCtrHmacStreamingKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return AesCtrHmacStreamingKeyFormat.newBuilder()
+        .setParams(params)
+        .setKeySize(mainKeySize)
+        .build();
   }
 }

@@ -268,4 +268,13 @@ public class AesCtrHmacStreamingKeyManagerTest {
     assertThat(format.getParams().getHmacParams().getTagSize()).isEqualTo(32);
     assertThat(format.getParams().getCiphertextSegmentSize()).isEqualTo(1 << 20);
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_CTR_HMAC_SHA256_4KB").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES128_CTR_HMAC_SHA256_1MB").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_CTR_HMAC_SHA256_4KB").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("AES256_CTR_HMAC_SHA256_1MB").keyFormat);
+  }
 }
