@@ -53,8 +53,9 @@ TEST(FipsUtilsTest, CompatibilityInNonFipsMode) {
 }
 
 TEST(FipsUtilsTest, CompatibilityInFipsMode) {
-  if (!internal::kUseOnlyFips) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+  if (!internal::kUseOnlyFips || !FIPS_mode()) {
+    GTEST_SKIP()
+        << "Test should only run in FIPS mode with Boringcrypto available.";
   }
 
   EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
