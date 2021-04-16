@@ -1970,6 +1970,29 @@ TEST(RegistryImplTest, CanDelegateGetPublicKey) {
                        HasSubstr("GetPublicKey worked")));
 }
 
+TEST(RegistryImplTest, FipsSucceedsOnEmptyRegistry) {
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+}
+
+TEST(RegistryImplTest, FipsFailsIfNotEmpty) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Not supported when BoringSSL is not built in FIPS-mode.";
+  }
+
+  auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
+  ON_CALL(*fips_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+
+  RegistryImpl registry_impl;
+  auto status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  std::move(fips_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(),
+              StatusIs(util::error::INTERNAL));
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace tink

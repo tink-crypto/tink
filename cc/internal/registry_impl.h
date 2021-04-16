@@ -31,11 +31,11 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
 #include "tink/catalogue.h"
-#include "tink/internal/fips_utils.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/core/private_key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
@@ -139,6 +139,9 @@ class RegistryImpl {
       InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
   void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  crypto::tink::util::Status RestrictToFipsIfEmpty() const
+      ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
  private:
   // All information for a given type url.
@@ -777,6 +780,16 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
   crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
       wrapper_result.ValueOrDie()->Wrap(keyset);
   return std::move(primitive_result);
+}
+
+inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
+  absl::MutexLock lock(&maps_mutex_);
+  if (type_url_to_info_.empty()) {
+    SetFipsRestricted();
+    return util::OkStatus();
+  }
+  return util::Status(util::error::INTERNAL,
+                      "Could not set FIPS only mode. Registry is not empty.");
 }
 
 }  // namespace internal

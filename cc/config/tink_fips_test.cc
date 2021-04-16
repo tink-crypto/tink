@@ -15,9 +15,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/config/tink_fips.h"
 
-#include "tink/internal/fips_utils.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "openssl/crypto.h"
+#include "tink/aead/aead_config.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/registry.h"
+#include "tink/util/status.h"
+#include "tink/util/test_matchers.h"
 
 namespace crypto {
 namespace tink {
@@ -25,8 +30,21 @@ namespace tink {
 namespace {
 
 using testing::Eq;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
 
-// All tests in this file assume that Tink is not build in FIPS mode.
+class FipsIncompatible {
+ public:
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
+};
+
+class FipsCompatibleWithBoringCrypto {
+ public:
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
+};
+
 TEST(TinkFipsTest, FipsEnabledWhenBuiltInFipsMode) {
   // Check if the built flag is set.
   if (!internal::kUseOnlyFips) {
@@ -43,6 +61,57 @@ TEST(TinkFipsTest, FipsDisabledWhenNotBuildInFipsMode) {
   }
 
   EXPECT_THAT(IsFipsModeEnabled(), Eq(false));
+}
+
+TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
+  }
+
+  // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
+  EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
+
+  // In FIPS only mode compatibility checks should disallow algorithms
+  // with the FipsCompatibility::kNone flag.
+  EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
+              StatusIs(util::error::INTERNAL));
+
+  // FIPS validated implementations should still be allowed.
+  EXPECT_THAT(
+      internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
+      IsOk());
+}
+
+TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
+  if (FIPS_mode()) {
+    GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
+  }
+
+  // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
+  EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
+
+  // In FIPS only mode compatibility checks should disallow algorithms
+  // with the FipsCompatibility::kNone flag.
+  EXPECT_THAT(internal::CheckFipsCompatibility<FipsIncompatible>(),
+              StatusIs(util::error::INTERNAL));
+
+  // FIPS validated implementations are not allowed if BoringCrypto is not
+  // available.
+  EXPECT_THAT(
+      internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
+      StatusIs(util::error::INTERNAL));
+}
+
+TEST(TinkFipsTest, FailIfRegistryNotEmpty) {
+  if (internal::kUseOnlyFips) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  Registry::Reset();
+  internal::UnSetFipsRestricted();
+
+  EXPECT_THAT(AeadConfig::Register(), IsOk());
+  EXPECT_THAT(crypto::tink::RestrictToFips(), StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

@@ -30,6 +30,12 @@ const bool kUseOnlyFips = true;
 const bool kUseOnlyFips = false;
 #endif
 
+static std::atomic<bool> is_fips_restricted(false);
+
+void SetFipsRestricted() { is_fips_restricted = true; }
+
+void UnSetFipsRestricted() { is_fips_restricted = false; }
+
 crypto::tink::util::Status ChecksFipsCompatibility(
     FipsCompatibility fips_status) {
   switch (fips_status) {
@@ -56,7 +62,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
   }
 }
 
-bool IsFipsModeEnabled() { return kUseOnlyFips; }
+bool IsFipsModeEnabled() { return kUseOnlyFips || is_fips_restricted; }
 
 }  // namespace internal
 }  // namespace tink

@@ -27,5 +27,9 @@ bool IsFipsModeEnabled() {
   return internal::IsFipsModeEnabled();
 }
 
+crypto::tink::util::Status RestrictToFips() {
+  return internal::RegistryImpl::GlobalInstance().RestrictToFipsIfEmpty();
+}
+
 }  // namespace tink
 }  // namespace crypto

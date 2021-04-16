@@ -81,5 +81,15 @@ bazel build ... --//third_party/tink/cc/config:use_only_fips=True
 ```
 
 If you want to check at runtime whether Tink has been build in FIPS only mode,
-you can include the header `config/tink_fips.h` which provides the constant
+you can include the header `internal/fips_utils.h` which provides the constant
 `kUseOnlyFips`.
+
+Alternatively to building Tink in FIPS mode, you can call
+`crypto::tink::RestrictToFips()` from `config/tink_fips.h` which will set a flag
+at runtime to enable the restrictions to FIPS primitives.
+
+WARNING: If you use the runtime option, then `crypto::tink::RestrictToFips()`
+must be called before handling any key material, registering key manager or
+other Tink functionalities. You further have to ensure that BoringSSL has been
+built with the BoringCrypto module, as otherwise Tink will not allow you to
+process any data.

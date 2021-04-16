@@ -107,7 +107,12 @@ cc_test(
     deps = [
         ":tink_config",
         ":tink_fips",
+        "//:registry",
+        "//aead:aead_config",
         "//internal:fips_utils",
+        "//util:status",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
         "@com_google_googletest//:gtest_main",
     ],
 )

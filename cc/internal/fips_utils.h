@@ -34,6 +34,15 @@ ABSL_CONST_INIT extern const bool kUseOnlyFips;
 // the FIPS restrictions have been enabled at runtime.
 bool IsFipsModeEnabled();
 
+// Enable FIPS restrictions. If Tink has been built in FIPS mode this is
+// redundant.
+void SetFipsRestricted();
+
+// Disable FIPS restrictions. Note that if Tink has been built in FIPS mode this
+// will have no effect.
+void UnSetFipsRestricted();
+
+// Should be used to indicate whether an algorithm can be used in FIPS only
 // mode or not.
 enum class FipsCompatibility {
   kNotFips = 0,  // The algorithm can not use a FIPS validated implementation.
