@@ -349,20 +349,3 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
-
-java_test(
-    name = "KeyTemplatesTest",
-    size = "small",
-    srcs = ["KeyTemplatesTest.java"],
-    deps = [
-        "//proto:empty_java_proto",
-        "//proto:tink_java_proto",
-        "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
-        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink:key_type_manager",
-        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
-    ],
-)

@@ -666,8 +666,18 @@ public class RegistryTest {
     Registry.registerKeyManager(new TestKeyTypeManager(), true);
 
     assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
+
+    assertThat(Registry.keyTemplates()).containsKey("TINK");
+    assertThat(Registry.keyTemplates().get("TINK").getTypeUrl())
+        .isEqualTo(new TestKeyTypeManager().getKeyType());
+    assertThat(Registry.keyTemplates().get("TINK").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+
+    assertThat(Registry.keyTemplates()).containsKey("RAW");
+    assertThat(Registry.keyTemplates().get("RAW").getTypeUrl())
+        .isEqualTo(new TestKeyTypeManager().getKeyType());
+    assertThat(Registry.keyTemplates().get("RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 
   @Test
@@ -1079,8 +1089,18 @@ public class RegistryTest {
     Registry.registerKeyManager(new TestPrivateKeyTypeManagerWithKeyFactory(), true);
 
     assertThat(Registry.keyTemplates()).hasSize(2);
-    assertThat(Registry.keyTemplates()).contains("TINK");
-    assertThat(Registry.keyTemplates()).contains("RAW");
+
+    assertThat(Registry.keyTemplates()).containsKey("TINK");
+    assertThat(Registry.keyTemplates().get("TINK").getTypeUrl())
+        .isEqualTo(new TestPrivateKeyTypeManagerWithKeyFactory().getKeyType());
+    assertThat(Registry.keyTemplates().get("TINK").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+
+    assertThat(Registry.keyTemplates()).containsKey("RAW");
+    assertThat(Registry.keyTemplates().get("RAW").getTypeUrl())
+        .isEqualTo(new TestPrivateKeyTypeManagerWithKeyFactory().getKeyType());
+    assertThat(Registry.keyTemplates().get("RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 
   @Test

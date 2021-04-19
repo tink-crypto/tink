@@ -286,24 +286,6 @@ android_library(
 )
 
 java_library(
-    name = "key_templates",
-    srcs = ["KeyTemplates.java"],
-    deps = [
-        ":key_template",
-        ":registry_cluster",
-    ],
-)
-
-android_library(
-    name = "key_templates-android",
-    srcs = ["KeyTemplates.java"],
-    deps = [
-        ":key_template-android",
-        ":registry_cluster-android",
-    ],
-)
-
-java_library(
     name = "config",
     srcs = ["Config.java"],
     deps = [
