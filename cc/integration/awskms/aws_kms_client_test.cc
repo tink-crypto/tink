@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include "aws/core/Aws.h"
 #include "aws/kms/KMSClient.h"
@@ -100,6 +101,65 @@ TEST(AwsKmsClientTest, ConfigCreation) {
   EXPECT_EQ(30000, config.connectTimeoutMs);
   EXPECT_EQ(60000, config.requestTimeoutMs);
 }
+
+TEST(AwsKmsClientTest, ConfigCreationWithHttpsProxyWithBasicAuth) {
+  setenv("HTTPS_PROXY", "https://username:password@someproxy.host:1234", 1);
+
+  std::string aws_key = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+  std::string creds_file = absl::StrCat(
+      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+
+  auto client_result = AwsKmsClient::New(aws_key, creds_file);
+  EXPECT_THAT(client_result.status(), IsOk());
+
+  auto config = client_result.ValueOrDie()->GetConfig();
+
+  EXPECT_EQ(Aws::Http::Scheme::HTTPS, config.proxyScheme);
+  EXPECT_EQ("username", config.proxyUserName);
+  EXPECT_EQ("password", config.proxyPassword);
+  EXPECT_EQ("someproxy.host", config.proxyHost);
+  EXPECT_EQ(1234, config.proxyPort);
+}
+
+TEST(AwsKmsClientTest, ConfigCreationWithHttpsProxyWithoutBasicAuth) {
+  setenv("HTTPS_PROXY", "https://someproxy.host:1234", 1);
+
+  std::string aws_key = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+  std::string creds_file = absl::StrCat(
+      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+
+  auto client_result = AwsKmsClient::New(aws_key, creds_file);
+  EXPECT_THAT(client_result.status(), IsOk());
+
+  auto config = client_result.ValueOrDie()->GetConfig();
+
+  EXPECT_EQ(Aws::Http::Scheme::HTTPS, config.proxyScheme);
+  EXPECT_EQ(Aws::String(), config.proxyUserName);
+  EXPECT_EQ(Aws::String(), config.proxyPassword);
+  EXPECT_EQ("someproxy.host", config.proxyHost);
+  EXPECT_EQ(1234, config.proxyPort);
+}
+
+TEST(AwsKmsClientTest, ConfigCreationWithHttpsProxyWithHttpScheme) {
+  setenv("HTTPS_PROXY", "http://username:password@someproxy.host:1234", 1);
+
+  std::string aws_key = "aws-kms://arn:aws:kms:us-east-1:acc:some/key1";
+  std::string creds_file = absl::StrCat(
+      getenv("TEST_SRCDIR"), "/tink_base/testdata/aws_credentials_cc.txt");
+
+  auto client_result = AwsKmsClient::New(aws_key, creds_file);
+  EXPECT_THAT(client_result.status(), IsOk());
+
+  auto config = client_result.ValueOrDie()->GetConfig();
+
+  EXPECT_EQ(Aws::Http::Scheme::HTTP, config.proxyScheme);
+  EXPECT_EQ("username", config.proxyUserName);
+  EXPECT_EQ("password", config.proxyPassword);
+  EXPECT_EQ("someproxy.host", config.proxyHost);
+  EXPECT_EQ(1234, config.proxyPort);
+}
+
+
 
 }  // namespace
 }  // namespace awskms

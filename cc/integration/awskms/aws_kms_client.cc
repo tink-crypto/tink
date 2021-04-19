@@ -16,6 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <regex>
 
 #include "absl/strings/match.h"
 #include "absl/strings/ascii.h"
@@ -26,6 +27,7 @@
 #include "aws/core/auth/AWSCredentialsProvider.h"
 #include "aws/core/auth/AWSCredentialsProviderChain.h"
 #include "aws/core/client/ClientConfiguration.h"
+#include "aws/core/http/URI.h"
 #include "aws/core/utils/crypto/Factories.h"
 #include "aws/core/utils/memory/AWSMemory.h"
 #include "aws/kms/KMSClient.h"
@@ -70,6 +72,28 @@ StatusOr<Aws::Client::ClientConfiguration>
   config.scheme = Aws::Http::Scheme::HTTPS;
   config.connectTimeoutMs = 30000;
   config.requestTimeoutMs = 60000;
+
+  auto proxyEnv = std::getenv("HTTPS_PROXY");
+  if (proxyEnv != NULL) {
+    auto proxyUrl = std::string(proxyEnv);
+
+    // handle basic auth in the url since Aws::Http:URI understandably doesn't
+    if (proxyUrl.find("@") != std::string::npos) {
+      std::smatch sm;
+      std::regex_match(proxyUrl, sm, std::regex("https?://(.+):(.+)@.+"));
+      config.proxyUserName = sm[1].str();
+      config.proxyPassword = sm[2].str();
+      
+      std::regex_match(proxyUrl, sm, std::regex("(.+://).+@(.+)"));
+      proxyUrl = sm[1].str() + sm[2].str();
+    }
+
+    auto proxyURI = Aws::Http::URI(proxyUrl.c_str());
+    config.proxyHost = proxyURI.GetAuthority();
+    config.proxyPort = proxyURI.GetPort();
+    config.proxyScheme = proxyURI.GetScheme();
+  }
+
   return config;
 }
 
