@@ -22,8 +22,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
@@ -100,8 +100,7 @@ public final class GcsEnvelopeAeadExample {
     try {
       KeysetHandle handle =
           KeysetHandle.generateNew(
-              KmsEnvelopeAeadKeyManager.createKeyTemplate(
-                  kekUri, Registry.keyTemplates().get("AES256_GCM")));
+              KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get("AES256_GCM")));
       aead = handle.getPrimitive(Aead.class);
     } catch (GeneralSecurityException ex) {
       System.err.println("Error creating primitive: %s " + ex);

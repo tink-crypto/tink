@@ -23,12 +23,14 @@ import com.google.protobuf.MessageLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * A global container of key managers and catalogues.
@@ -1062,13 +1064,20 @@ public final class Registry {
   }
 
   /**
-   * Returns an immutable map of key templates and their names supported by registered key managers
-   * that are allowed to generate new keys.
+   * Returns an immutable list of key template names supported by registered key managers that are
+   * allowed to generate new keys.
+   *
+   * @since 1.6.0
    */
-  public static synchronized Map<String, KeyTemplate> keyTemplates() {
-    return Collections.unmodifiableMap(keyTemplateMap);
+  public static synchronized List<String> keyTemplates() {
+    return Collections.unmodifiableList(
+        keyTemplateMap.keySet().stream().collect(Collectors.toList()));
   }
 
+  /** Internal API that returns an unmodifiable map of registered key templates and their names. */
+  static synchronized Map<String, KeyTemplate> keyTemplateMap() {
+    return Collections.unmodifiableMap(keyTemplateMap);
+  }
   /**
    * Returns the input primitive required when creating a {@code wrappedPrimitive}.
    *
