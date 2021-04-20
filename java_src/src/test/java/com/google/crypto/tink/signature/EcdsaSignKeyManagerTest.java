@@ -339,4 +339,19 @@ public class EcdsaSignKeyManagerTest {
     testKeyTemplateCompatible(manager, EcdsaSignKeyManager.ecdsaP256Template());
     testKeyTemplateCompatible(manager, EcdsaSignKeyManager.rawEcdsaP256Template());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_IEEE_P1363").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_IEEE_P1363").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521_IEEE_P1363").keyFormat);
+  }
 }
