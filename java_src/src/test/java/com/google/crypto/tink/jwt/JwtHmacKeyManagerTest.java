@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
@@ -364,7 +364,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
   }
 
   @Test
@@ -384,7 +384,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(SECONDS));
+    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
   }
 
   @Test
@@ -423,7 +423,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().setClock(clock2).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
   }
 
   @Test
@@ -443,7 +443,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(SECONDS));
+    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
   }
 
   @Test

@@ -50,9 +50,9 @@ public final class RawJwt {
     validateStringClaim(JwtNames.CLAIM_ISSUER);
     validateStringClaim(JwtNames.CLAIM_SUBJECT);
     validateStringClaim(JwtNames.CLAIM_JWT_ID);
-    validateNumberClaim(JwtNames.CLAIM_EXPIRATION);
-    validateNumberClaim(JwtNames.CLAIM_NOT_BEFORE);
-    validateNumberClaim(JwtNames.CLAIM_ISSUED_AT);
+    validateTimestampClaim(JwtNames.CLAIM_EXPIRATION);
+    validateTimestampClaim(JwtNames.CLAIM_NOT_BEFORE);
+    validateTimestampClaim(JwtNames.CLAIM_ISSUED_AT);
     validateAudienceClaim();
   }
 
@@ -66,7 +66,7 @@ public final class RawJwt {
     }
   }
 
-  private void validateNumberClaim(String name) throws JwtInvalidException {
+  private void validateTimestampClaim(String name) throws JwtInvalidException {
     if (!this.payload.has(name)) {
       return;
     }
@@ -74,6 +74,10 @@ public final class RawJwt {
         || !this.payload.get(name).getAsJsonPrimitive().isNumber()) {
       throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a number.");
     }
+    if (this.payload.get(name).getAsJsonPrimitive().getAsDouble() * 1000 > Long.MAX_VALUE) {
+      throw new JwtInvalidException(
+          "invalid JWT payload: claim " + name + " timestamp is too large.");
+   }
   }
 
   private void validateAudienceClaim() throws JwtInvalidException {
@@ -169,7 +173,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.4
      */
     public Builder setExpiration(Instant value) {
-      payload.add(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(value.getEpochSecond()));
+      double millis = value.toEpochMilli();
+      payload.add(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(millis / 1000));
       return this;
     }
 
@@ -184,7 +189,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.5
      */
     public Builder setNotBefore(Instant value) {
-      payload.add(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(value.getEpochSecond()));
+      double millis = value.toEpochMilli();
+      payload.add(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(millis / 1000));
       return this;
     }
 
@@ -198,7 +204,9 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.6
      */
     public Builder setIssuedAt(Instant value) {
-      payload.add(JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(value.getEpochSecond()));
+      double millis = value.toEpochMilli();
+      payload.add(
+          JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(millis / 1000));
       return this;
     }
 
@@ -426,7 +434,8 @@ public final class RawJwt {
       throw new JwtInvalidException("claim " + name + " is not a timestamp");
     }
     try {
-      return Instant.ofEpochSecond(payload.get(name).getAsJsonPrimitive().getAsLong());
+      double millis = payload.get(name).getAsJsonPrimitive().getAsDouble() * 1000;
+      return Instant.ofEpochMilli((long) millis);
     } catch (NumberFormatException ex) {
       throw new JwtInvalidException("claim " + name + " is not a timestamp: " + ex);
     }

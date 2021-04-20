@@ -17,7 +17,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.gson.JsonObject;
@@ -294,30 +293,50 @@ public final class RawJwtTest {
 
   @Test
   public void setExpiration_success() throws Exception {
-    Instant instant = Instant.now();
+    Instant instant = Instant.ofEpochMilli(1234567890);
     RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
 
     assertThat(token.hasExpiration()).isTrue();
-    assertThat(token.getExpiration()).isEqualTo(instant.truncatedTo(SECONDS));
+    assertThat(token.getExpiration()).isEqualTo(instant);
   }
 
   @Test
   public void setNotBefore_success() throws Exception {
-    Instant instant = Instant.now();
+    Instant instant = Instant.ofEpochMilli(1234567890);
     RawJwt token = new RawJwt.Builder().setNotBefore(instant).build();
 
     assertThat(token.hasNotBefore()).isTrue();
-    assertThat(token.getNotBefore()).isEqualTo(instant.truncatedTo(SECONDS));
+    assertThat(token.getNotBefore()).isEqualTo(instant);
   }
 
 
   @Test
   public void setIssuedAt_success() throws Exception {
-    Instant instant = Instant.now();
+    Instant instant = Instant.ofEpochMilli(1234567890);
     RawJwt token = new RawJwt.Builder().setIssuedAt(instant).build();
 
     assertThat(token.hasIssuedAt()).isTrue();
-    assertThat(token.getIssuedAt()).isEqualTo(instant.truncatedTo(SECONDS));
+    assertThat(token.getIssuedAt()).isEqualTo(instant);
+  }
+
+  @Test
+  public void largeExpirationWorks() throws Exception {
+    Instant instant = Instant.ofEpochMilli(4102444861001L);  // year 2100
+    RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
+
+    assertThat(token.hasExpiration()).isTrue();
+    assertThat(token.getExpiration()).isEqualTo(instant);
+  }
+
+  @Test
+  public void veryLargeExpirationWorks() throws Exception {
+    Instant instant = Instant.ofEpochMilli(Long.MAX_VALUE - 1);
+    RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
+
+    assertThat(token.hasExpiration()).isTrue();
+    // Due to conversion to double and back, it lost some precision.
+    assertThat(token.getExpiration()).isGreaterThan(instant.minusSeconds(1));
+    assertThat(token.getExpiration()).isLessThan(instant.plusSeconds(1));
   }
 
   @Test
@@ -352,7 +371,23 @@ public final class RawJwtTest {
   @Test
   public void fromJsonPayloadWithFloatIssuedAt_success() throws Exception {
     RawJwt token = RawJwt.fromJsonPayload("{\"iat\": 123.456}");
-    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
+    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochMilli(123456));
+  }
+
+  @Test
+  public void fromJsonPayloadWithExpFloatIssuedAt_success() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload("{\"iat\":1e10}");
+    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochMilli(10000000000000L));
+  }
+
+  @Test
+  public void fromJsonPayloadWithTooLargeIssuedAt_throws() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iat\":1e30}"));
+  }
+
+  @Test
+  public void fromJsonPayloadWithInfinityIssuedAt_throws() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iat\":Infinity}"));
   }
 
   @Test
