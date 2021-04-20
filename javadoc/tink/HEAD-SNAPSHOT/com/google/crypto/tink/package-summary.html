@@ -259,77 +259,83 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyTemplates.html" title="class in com.google.crypto.tink">KeyTemplates</a></td>
+<td class="colLast">
+<div class="block">This class consists exclusively of static methods that load <a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> objects.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
 <td class="colLast">
 <div class="block">An object which collects all the operations which one can do on for a single key type, identified
  by a single KeyProto.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyT&gt;</td>
 <td class="colLast">
 <div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a>&lt;KeyFormatProtoT&gt;</td>
 <td class="colLast">
 <div class="block">A container that contains key format and other information that form key templates supported
  by this factory.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.PrimitiveFactory</a>&lt;PrimitiveT,KeyT&gt;</td>
 <td class="colLast">
 <div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/KmsClients.html" title="class in com.google.crypto.tink">KmsClients</a></td>
 <td class="colLast">
 <div class="block">A container for <a href="../../../../com/google/crypto/tink/KmsClient.html" title="interface in com.google.crypto.tink"><code>KmsClient</code></a>-objects that are needed by <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a>-objects for
  primitives that use KMS-managed keys.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">NoSecretKeysetHandle</a></td>
 <td class="colLast">Deprecated
 <div class="block"><span class="deprecationComment">use <a href="../../../../com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-"><code>KeysetHandle.readNoSecret(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrimitiveSet.html" title="class in com.google.crypto.tink">PrimitiveSet</a>&lt;P&gt;</td>
 <td class="colLast">
 <div class="block">A container class for a set of primitives -- implementations of cryptographic primitives offered
  by Tink.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a>&lt;P&gt;</td>
 <td class="colLast">
 <div class="block">A single entry in the set.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink">PrivateKeyManagerImpl</a>&lt;PrimitiveT,KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
 <td class="colLast">
 <div class="block">Implementation of the <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
 <td class="colLast">
 <div class="block">A PrivateKeyManager is like an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
  public key.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></td>
 <td class="colLast">
 <div class="block">A global container of key managers and catalogues.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/crypto/tink/Version.html" title="class in com.google.crypto.tink">Version</a></td>
 <td class="colLast">
 <div class="block">Version of the Tink library.</div>
