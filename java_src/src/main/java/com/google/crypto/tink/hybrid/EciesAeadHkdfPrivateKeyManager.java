@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
 import com.google.crypto.tink.Registry;
@@ -33,6 +34,7 @@ import com.google.crypto.tink.proto.EciesHkdfKemParams;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.EciesAeadHkdfDemHelper;
 import com.google.crypto.tink.subtle.EciesAeadHkdfHybridDecrypt;
 import com.google.crypto.tink.subtle.EllipticCurves;
@@ -45,6 +47,9 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code EciesAeadHkdfPrivateKey} keys and produces new instances of
@@ -158,6 +163,95 @@ public final class EciesAeadHkdfPrivateKeyManager
             .setPublicKey(eciesPublicKey)
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
+      }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<EciesAeadHkdfKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<EciesAeadHkdfKeyFormat>> result = new HashMap<>();
+        result.put(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.UNCOMPRESSED,
+                KeyTemplates.get("AES128_GCM"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.UNCOMPRESSED,
+                KeyTemplates.get("AES128_GCM"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.COMPRESSED,
+                KeyTemplates.get("AES128_GCM"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.COMPRESSED,
+                KeyTemplates.get("AES128_GCM"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.RAW));
+        // backward compatibility with HybridKeyTemplates
+        result.put(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.COMPRESSED,
+                KeyTemplates.get("AES128_GCM"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.UNCOMPRESSED,
+                KeyTemplates.get("AES128_CTR_HMAC_SHA256"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.UNCOMPRESSED,
+                KeyTemplates.get("AES128_CTR_HMAC_SHA256"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.COMPRESSED,
+                KeyTemplates.get("AES128_CTR_HMAC_SHA256"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW",
+            createKeyFormat(
+                EllipticCurveType.NIST_P256,
+                HashType.SHA256,
+                EcPointFormat.COMPRESSED,
+                KeyTemplates.get("AES128_CTR_HMAC_SHA256"),
+                EMPTY_SALT,
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
       }
     };
   }
@@ -293,6 +387,20 @@ public final class EciesAeadHkdfPrivateKeyManager
         new EciesAeadHkdfPrivateKeyManager().getKeyType(), format.toByteArray(), outputPrefixType);
   }
 
+  private static KeyFactory.KeyFormat<EciesAeadHkdfKeyFormat> createKeyFormat(
+      EllipticCurveType curve,
+      HashType hashType,
+      EcPointFormat ecPointFormat,
+      KeyTemplate demKeyTemplate,
+      byte[] salt,
+      KeyTemplate.OutputPrefixType prefixType) {
+    return new KeyFactory.KeyFormat<>(
+        EciesAeadHkdfKeyFormat.newBuilder()
+            .setParams(createParams(curve, hashType, ecPointFormat, demKeyTemplate, salt))
+            .build(),
+        prefixType);
+  }
+
   /** @return a {@link EciesAeadHkdfParams} with the specified parameters. */
   static EciesAeadHkdfParams createParams(
       EllipticCurveType curve,
@@ -320,17 +428,16 @@ public final class EciesAeadHkdfPrivateKeyManager
         .build();
   }
 
-  private static com.google.crypto.tink.proto.OutputPrefixType toProto(
-      KeyTemplate.OutputPrefixType outputPrefixType) {
+  private static OutputPrefixType toProto(KeyTemplate.OutputPrefixType outputPrefixType) {
     switch (outputPrefixType) {
       case TINK:
-        return com.google.crypto.tink.proto.OutputPrefixType.TINK;
+        return OutputPrefixType.TINK;
       case LEGACY:
-        return com.google.crypto.tink.proto.OutputPrefixType.LEGACY;
+        return OutputPrefixType.LEGACY;
       case RAW:
-        return com.google.crypto.tink.proto.OutputPrefixType.RAW;
+        return OutputPrefixType.RAW;
       case CRUNCHY:
-        return com.google.crypto.tink.proto.OutputPrefixType.CRUNCHY;
+        return OutputPrefixType.CRUNCHY;
     }
     throw new IllegalArgumentException("Unknown output prefix type");
   }
