@@ -282,10 +282,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#getUntypedKeyManager-java.lang.String-">getUntypedKeyManager</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;typeUrl)</code>&nbsp;</td>
 </tr>
 <tr id="i15" class="rowColor">
-<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&gt;</code></td>
+<td class="colFirst"><code>static <a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/Registry.html#keyTemplates--">keyTemplates</a></span>()</code>
-<div class="block">Returns an immutable map of key templates and their names supported by registered key managers
- that are allowed to generate new keys.</div>
+<div class="block">Returns an immutable list of key template names supported by registered key managers that are
+ allowed to generate new keys.</div>
 </td>
 </tr>
 <tr id="i16" class="altColor">
@@ -972,9 +972,13 @@ public static&nbsp;&lt;P&gt;&nbsp;P&nbsp;getPrimitive(com.google.crypto.tink.pro
 <ul class="blockList">
 <li class="blockList">
 <h4>keyTemplates</h4>
-<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&gt;&nbsp;keyTemplates()</pre>
-<div class="block">Returns an immutable map of key templates and their names supported by registered key managers
- that are allowed to generate new keys.</div>
+<pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;keyTemplates()</pre>
+<div class="block">Returns an immutable list of key template names supported by registered key managers that are
+ allowed to generate new keys.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>1.6.0</dd>
+</dl>
 </li>
 </ul>
 <a name="getInputPrimitive-java.lang.Class-">
