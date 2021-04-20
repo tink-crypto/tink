@@ -17,9 +17,9 @@ package encryptedkeyset;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import java.io.File;
@@ -92,7 +92,7 @@ public final class EncryptedKeysetExample {
 
     if (MODE_GENERATE.equals(mode)) {
       // [START generate-a-new-keyset]
-      KeysetHandle handle = KeysetHandle.generateNew(AesGcmKeyManager.aes128GcmTemplate());
+      KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
       // [END generate-a-new-keyset]
 
       // [START encrypt-a-keyset]

@@ -11,9 +11,9 @@ java_binary(
     ],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
         "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
