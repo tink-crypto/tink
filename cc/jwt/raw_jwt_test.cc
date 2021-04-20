@@ -278,14 +278,37 @@ TEST(RawJwt, BuildCanBeCalledTwice) {
 }
 
 TEST(RawJwt, FromString) {
-  auto jwt_or =
-      RawJwt::FromString(R"({"iss":"issuer", "sub":"subject", "exp":123})");
+  auto jwt_or = RawJwt::FromString(
+      R"({"iss":"issuer", "sub":"subject", "exp":123, "aud":["a1", "a2"]})");
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  ASSERT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-  ASSERT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
-  ASSERT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
+  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
+  EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
+  std::vector<std::string> expected_audiences = {"a1", "a2"};
+  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
+}
+
+TEST(RawJwt, FromStringConvertsStringAudIntoListOfStrings) {
+  auto jwt_or = RawJwt::FromString(R"({"aud":"audience"})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  std::vector<std::string> expected = {"audience"};
+  EXPECT_TRUE(jwt.HasAudiences());
+  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
+}
+
+TEST(RawJwt, FromStringWithBadRegisteredTypes) {
+  EXPECT_FALSE(RawJwt::FromString(R"({"iss":123})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"sub":123})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"aud":123})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"aud":[]})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"aud":["abc",123]})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"exp":"abc"})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"nbf":"abc"})").ok());
+  EXPECT_FALSE(RawJwt::FromString(R"({"iat":"abc"})").ok());
 }
 
 TEST(RawJwt, ToString) {

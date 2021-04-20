@@ -53,7 +53,7 @@ util::Status ValidatePayloadName(absl::string_view name) {
   return util::OkStatus();
 }
 
-bool hasClaimOfKind(const google::protobuf::Struct& json_proto,
+bool HasClaimOfKind(const google::protobuf::Struct& json_proto,
                     absl::string_view name,
                     google::protobuf::Value::KindCase kind) {
   if (IsRegisteredClaimName(name)) {
@@ -68,6 +68,49 @@ bool hasClaimOfKind(const google::protobuf::Struct& json_proto,
   return value.kind_case() == kind;
 }
 
+// Returns true if the claim is present but not of the expected kind.
+bool ClaimIsNotOfKind(const google::protobuf::Struct& json_proto,
+                           absl::string_view name,
+                           google::protobuf::Value::KindCase expectedKind) {
+  auto fields = json_proto.fields();
+  auto it = fields.find(std::string(name));
+  if (it == fields.end()) {
+    return false;
+  }
+  const auto& value = it->second;
+  return value.kind_case() != expectedKind;
+}
+
+util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
+  auto fields = json_proto->mutable_fields();
+  auto it = fields->find(std::string(kJwtClaimAudience));
+  if (it == fields->end()) {
+    return util::OkStatus();
+  }
+  auto& value = it->second;
+  if (value.kind_case() == google::protobuf::Value::kStringValue) {
+    std::string aud = value.string_value();
+    value.mutable_list_value()->add_values()->set_string_value(aud);
+    return util::OkStatus();
+  }
+  if (value.kind_case() != google::protobuf::Value::kListValue) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "aud claim is not a list");
+  }
+  if (value.list_value().values_size() < 1) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "aud claim is present but empty");
+  }
+  for (const auto& v : value.list_value().values()) {
+    if (v.kind_case() != google::protobuf::Value::kStringValue) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "aud claim is not a list of strings");
+    }
+  }
+  return util::OkStatus();
+}
+
 }  // namespace
 
 util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
@@ -75,7 +118,25 @@ util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
   if (!proto_or.ok()) {
     return proto_or.status();
   }
-  RawJwt token(proto_or.ValueOrDie());
+  auto& proto = proto_or.ValueOrDie();
+  if (ClaimIsNotOfKind(proto, kJwtClaimIssuer,
+                       google::protobuf::Value::kStringValue) ||
+      ClaimIsNotOfKind(proto, kJwtClaimSubject,
+                       google::protobuf::Value::kStringValue) ||
+      ClaimIsNotOfKind(proto, kJwtClaimExpiration,
+                       google::protobuf::Value::kNumberValue) ||
+      ClaimIsNotOfKind(proto, kJwtClaimNotBefore,
+                       google::protobuf::Value::kNumberValue) ||
+      ClaimIsNotOfKind(proto, kJwtClaimIssuedAt,
+                       google::protobuf::Value::kNumberValue)) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "contains registered claim with wrong type");
+  }
+  auto audStatus = ValidateAndFixAudienceClaim(&proto);
+  if (!audStatus.ok()) {
+    return audStatus;
+  }
+  RawJwt token(proto);
   return token;
 }
 
@@ -228,11 +289,11 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
 }
 
 bool RawJwt::IsNullClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name, google::protobuf::Value::kNullValue);
+  return HasClaimOfKind(json_proto_, name, google::protobuf::Value::kNullValue);
 }
 
 bool RawJwt::HasBooleanClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name, google::protobuf::Value::kBoolValue);
+  return HasClaimOfKind(json_proto_, name, google::protobuf::Value::kBoolValue);
 }
 
 util::StatusOr<bool> RawJwt::GetBooleanClaim(
@@ -256,7 +317,7 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
 }
 
 bool RawJwt::HasStringClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name,
+  return HasClaimOfKind(json_proto_, name,
                         google::protobuf::Value::kStringValue);
 }
 
@@ -281,7 +342,7 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
 }
 
 bool RawJwt::HasNumberClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name,
+  return HasClaimOfKind(json_proto_, name,
                         google::protobuf::Value::kNumberValue);
 }
 
@@ -305,7 +366,7 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
 }
 
 bool RawJwt::HasJsonObjectClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name,
+  return HasClaimOfKind(json_proto_, name,
                         google::protobuf::Value::kStructValue);
 }
 
@@ -331,7 +392,7 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
 }
 
 bool RawJwt::HasJsonArrayClaim(absl::string_view name) const {
-  return hasClaimOfKind(json_proto_, name,
+  return HasClaimOfKind(json_proto_, name,
                         google::protobuf::Value::kListValue);
 }
 
