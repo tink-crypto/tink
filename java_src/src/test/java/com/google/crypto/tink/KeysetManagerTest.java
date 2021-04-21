@@ -483,8 +483,10 @@ public class KeysetManagerTest {
   @Test
   public void testRotate_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-    Keyset keyset = KeysetManager.withEmptyKeyset().rotate(template).getKeysetHandle().getKeyset();
+    KeyTemplate template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
+    @SuppressWarnings("deprecation") // Need to test the deprecated function
+    Keyset keyset =
+        KeysetManager.withEmptyKeyset().rotate(template.getProto()).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(0).getKeyId());
@@ -504,25 +506,27 @@ public class KeysetManagerTest {
 
   @Test
   public void testRotate_existingKeyset_shouldAddNewKeyAndSetPrimaryKeyId() throws Exception {
+    @SuppressWarnings("deprecation") // Need to test the deprecated function
     KeysetHandle existing =
         KeysetManager.withEmptyKeyset()
-            .rotate(MacKeyTemplates.HMAC_SHA256_128BITTAG)
+            .rotate(KeyTemplates.get("HMAC_SHA256_128BITTAG").getProto())
             .getKeysetHandle();
+    @SuppressWarnings("deprecation") // Need to test the deprecated function
     Keyset keyset =
         KeysetManager.withKeysetHandle(existing)
-            .rotate(MacKeyTemplates.HMAC_SHA256_256BITTAG)
+            .rotate(KeyTemplates.get("HMAC_SHA256_256BITTAG").getProto())
             .getKeysetHandle()
             .getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(1).getKeyId());
-    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
-    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
+    TestUtil.assertHmacKey(KeyTemplates.get("HMAC_SHA256_128BITTAG"), keyset.getKey(0));
+    TestUtil.assertHmacKey(KeyTemplates.get("HMAC_SHA256_256BITTAG"), keyset.getKey(1));
   }
 
   @Test
   public void testAdd_shouldAddNewKey() throws Exception {
-    KeyTemplate kt = AesGcmKeyManager.aes128GcmTemplate();
+    KeyTemplate kt = KeyTemplates.get("AES128_GCM");
     Keyset keyset = KeysetManager.withEmptyKeyset().add(kt).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -545,7 +549,7 @@ public class KeysetManagerTest {
   @Test
   public void testAdd_shouldAddNewKey_proto() throws Exception {
     // Create a keyset that contains a single HmacKey.
-    com.google.crypto.tink.proto.KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+    KeyTemplate template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
     Keyset keyset = KeysetManager.withEmptyKeyset().add(template).getKeysetHandle().getKeyset();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
@@ -637,8 +641,8 @@ public class KeysetManagerTest {
 
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(existingPrimaryKeyId);
-    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
-    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_256BITTAG, keyset.getKey(1));
+    TestUtil.assertHmacKey(KeyTemplates.get("HMAC_SHA256_128BITTAG"), keyset.getKey(0));
+    TestUtil.assertHmacKey(KeyTemplates.get("HMAC_SHA256_256BITTAG"), keyset.getKey(1));
   }
 
   @Test
@@ -730,7 +734,7 @@ public class KeysetManagerTest {
     Keyset keyset = keysetManager.getKeysetHandle().getKeyset();
     assertThat(keyset.getKeyCount()).isEqualTo(1);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyId);
-    TestUtil.assertHmacKey(MacKeyTemplates.HMAC_SHA256_128BITTAG, keyset.getKey(0));
+    TestUtil.assertHmacKey(KeyTemplates.get("HMAC_SHA256_128BITTAG"), keyset.getKey(0));
   }
 
   @Test

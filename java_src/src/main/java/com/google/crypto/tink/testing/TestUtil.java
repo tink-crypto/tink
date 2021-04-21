@@ -632,7 +632,8 @@ public class TestUtil {
   }
 
   /** Asserts that {@code key} is generated from {@code keyTemplate}. */
-  public static void assertHmacKey(KeyTemplate keyTemplate, Keyset.Key key) throws Exception {
+  public static void assertHmacKey(com.google.crypto.tink.KeyTemplate keyTemplate, Keyset.Key key)
+      throws Exception {
     assertThat(key.getKeyId()).isGreaterThan(0);
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
@@ -648,8 +649,8 @@ public class TestUtil {
   }
 
   /** Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}. */
-  public static void assertKeyInfo(KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo)
-      throws Exception {
+  public static void assertKeyInfo(
+      com.google.crypto.tink.KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo) throws Exception {
     assertThat(keyInfo.getKeyId()).isGreaterThan(0);
     assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);

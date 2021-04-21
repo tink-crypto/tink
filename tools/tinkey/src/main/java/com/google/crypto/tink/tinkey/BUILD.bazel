@@ -72,9 +72,9 @@ java_library(
     name = "key_template_handler",
     srcs = ["KeyTemplateHandler.java"],
     deps = [
-        ":tinkey_util",
         "@maven//:args4j_args4j",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
     ],
 )
 
@@ -96,7 +96,7 @@ java_library(
         ":add_rotate_options",
         ":command",
         ":tinkey_util",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
     ],
 )
 
@@ -109,6 +109,7 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
     deps = [
+        "@com_google_protobuf//:protobuf_javalite",
         "@tink_java//proto:tink_java_proto",
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:binary_keyset_reader",
@@ -116,17 +117,11 @@ java_library(
         "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:keyset_writer",
         "@tink_java//src/main/java/com/google/crypto/tink:kms_clients",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
-        "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_key_templates",
     ],
 )
 
@@ -181,7 +176,7 @@ java_library(
         ":add_rotate_options",
         ":command",
         ":tinkey_util",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
     ],
 )
 
@@ -238,7 +233,7 @@ java_library(
         ":command",
         ":create_keyset_options",
         ":tinkey_util",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
     ],
 )
 
@@ -259,7 +254,7 @@ java_library(
         ":key_template_handler",
         ":out_options",
         "@maven//:args4j_args4j",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
     ],
 )
 
@@ -277,7 +272,7 @@ java_library(
     srcs = ["ListKeyTemplatesCommand.java"],
     deps = [
         ":command",
-        ":tinkey_util",
+        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
 
@@ -288,6 +283,6 @@ java_library(
         ":key_template_handler",
         ":out_options",
         "@maven//:args4j_args4j",
-        "@tink_java//proto:tink_java_proto",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
     ],
 )

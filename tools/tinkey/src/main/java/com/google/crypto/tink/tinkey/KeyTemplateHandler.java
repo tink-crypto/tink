@@ -16,7 +16,9 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import java.security.GeneralSecurityException;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionDef;
@@ -38,13 +40,14 @@ public class KeyTemplateHandler extends OptionHandler<KeyTemplate> {
   @Override
   public final int parseArguments(final Parameters params) throws CmdLineException {
     String templateName = params.getParameter(0);
+
     try {
-      setter.addValue(TinkeyUtil.findKeyTemplate(templateName));
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new CmdLineException(owner, e.getMessage(), e);
+      setter.addValue(KeyTemplates.get(templateName));
+      return 1;
+    } catch (GeneralSecurityException ex) {
+      throw new CmdLineException(owner, ex.getMessage(), ex);
+
     }
-    return 1;
   }
 
   @Override

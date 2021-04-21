@@ -20,19 +20,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.Config;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
+import com.google.crypto.tink.hybrid.HybridConfig;
 import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
-import com.google.crypto.tink.signature.SignatureKeyTemplates;
+import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayInputStream;
@@ -60,14 +59,15 @@ public class CreatePublicKeysetCommandTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(TinkConfig.TINK_1_0_0);
+    HybridConfig.register();
+    SignatureConfig.register();
   }
 
   @Test
   public void testCreate_hybrid_cleartextPrivate_shouldCreateCleartextPublic()
       throws Exception {
     testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, KeyType.HYBRID);
+        KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM"), KeyType.HYBRID);
   }
 
   // TODO(b/154273145): re-enable this.
@@ -75,16 +75,16 @@ public class CreatePublicKeysetCommandTest {
   @Test
   public void testCreate_hybrid_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM, KeyType.HYBRID);
+        KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM"), KeyType.HYBRID);
   }
 
   @Test
   public void testCreate_signature_cleartextPrivate_shouldCreateCleartextPublic()
       throws Exception {
     testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        SignatureKeyTemplates.ECDSA_P256, KeyType.SIGNATURE);
+        KeyTemplates.get("ECDSA_P256"), KeyType.SIGNATURE);
     testCreate_cleartextPrivate_shouldCreateCleartextPublic(
-        SignatureKeyTemplates.ED25519, KeyType.SIGNATURE);
+        KeyTemplates.get("ED25519"), KeyType.SIGNATURE);
   }
 
   // TODO(b/154273145): re-enable this.
@@ -92,9 +92,9 @@ public class CreatePublicKeysetCommandTest {
   @Test
   public void testCreate_signature_encryptedPrivate_shouldCreateCleartextPublic() throws Exception {
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        SignatureKeyTemplates.ECDSA_P256, KeyType.SIGNATURE);
+        KeyTemplates.get("ECDSA_P256"), KeyType.SIGNATURE);
     testCreate_encryptedPrivate_shouldCreateCleartextPublic(
-        SignatureKeyTemplates.ED25519, KeyType.SIGNATURE);
+        KeyTemplates.get("ED25519"), KeyType.SIGNATURE);
   }
 
   private void testCreate_cleartextPrivate_shouldCreateCleartextPublic(

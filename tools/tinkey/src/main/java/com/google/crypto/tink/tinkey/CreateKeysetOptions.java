@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -32,8 +32,4 @@ class CreateKeysetOptions extends OutOptions {
   )
   KeyTemplate keyTemplate;
 
-  @Override
-  void validate() {
-    super.validate();
-  }
 }
