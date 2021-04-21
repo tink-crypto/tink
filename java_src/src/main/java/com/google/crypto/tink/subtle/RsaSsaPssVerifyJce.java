@@ -17,6 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.errorprone.annotations.Immutable;
 import java.math.BigInteger;
@@ -30,6 +31,9 @@ import java.util.Arrays;
  */
 @Immutable
 public final class RsaSsaPssVerifyJce implements PublicKeyVerify {
+  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
+      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+
   @SuppressWarnings("Immutable")
   private final RSAPublicKey publicKey;
 
@@ -40,6 +44,11 @@ public final class RsaSsaPssVerifyJce implements PublicKeyVerify {
   public RsaSsaPssVerifyJce(
       final RSAPublicKey pubKey, HashType sigHash, HashType mgf1Hash, int saltLength)
       throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException(
+          "Can not use RSA PSS in FIPS-mode, as BoringCrypto module is not available.");
+    }
+
     Validators.validateSignatureHash(sigHash);
     Validators.validateRsaModulusSize(pubKey.getModulus().bitLength());
     Validators.validateRsaPublicExponent(pubKey.getPublicExponent());
