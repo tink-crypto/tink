@@ -105,6 +105,32 @@ class RawJwtTest(absltest.TestCase):
     self.assertTrue(token.has_expiration())
     self.assertEqual(token.expiration(), EXPIRATION)
 
+  def test_large_timestamps_success(self):
+    # year 9999
+    large = datetime.datetime.fromtimestamp(253402300799,
+                                            datetime.timezone.utc)
+    token = jwt.new_raw_jwt(
+        expiration=large, issued_at=large, not_before=large)
+    self.assertTrue(token.has_expiration())
+    self.assertTrue(token.has_issued_at())
+    self.assertTrue(token.has_not_before())
+    self.assertEqual(token.expiration(), large)
+    self.assertEqual(token.issued_at(), large)
+    self.assertEqual(token.not_before(), large)
+
+  def test_too_large_timestamps_fail(self):
+    with self.assertRaises(ValueError):
+      datetime.datetime.fromtimestamp(253402300800, datetime.timezone.utc)
+
+  def test_negative_expiration_fails(self):
+    neg = datetime.datetime.fromtimestamp(-1.0, datetime.timezone.utc)
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.new_raw_jwt(expiration=neg)
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.new_raw_jwt(issued_at=neg)
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.new_raw_jwt(not_before=neg)
+
   def test_issued_at(self):
     token = jwt.new_raw_jwt(issued_at=ISSUED_AT)
     self.assertTrue(token.has_issued_at())
@@ -227,29 +253,47 @@ class RawJwtTest(absltest.TestCase):
     }
     self.assertEqual(json.loads(token.json_payload()), expected)
 
-  def test_from_to_payload_with_wrong_issuer_fails(self):
+  def test_from_payload_with_wrong_issuer_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"iss":123}')
 
-  def test_from_to_payload_with_wrong_subject_fails(self):
+  def test_from_payload_with_wrong_subject_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"sub":123}')
 
-  def test_from_to_payload_with_wrong_jwt_id_fails(self):
+  def test_from_payload_with_wrong_jwt_id_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"jti":123}')
 
-  def test_from_to_payload_with_wrong_expiration_fails(self):
+  def test_from_payload_with_wrong_expiration_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"exp":"123"}')
 
-  def test_from_to_payload_with_wrong_issued_at_fails(self):
+  def test_from_payload_with_wrong_issued_at_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"iat":"123"}')
 
-  def test_from_to_payload_with_wrong_not_before_fails(self):
+  def test_from_payload_with_wrong_not_before_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.raw_jwt_from_json_payload('{"nbf":"123"}')
+
+  def test_from_payload_with_exp_expiration_success(self):
+    token = jwt.raw_jwt_from_json_payload('{"exp":1e10}')
+    self.assertEqual(
+        token.expiration(),
+        datetime.datetime.fromtimestamp(10000000000, datetime.timezone.utc))
+
+  def test_from_payload_with_large_expiration_fails(self):
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload('{"exp":1e30}')
+
+  def test_from_payload_with_negative_expiration_fails(self):
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload('{"exp":-1}')
+
+  def test_from_payload_with_infinity_expiration_fails(self):
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload('{"exp":Infinity}')
 
   def test_modification(self):
     audiences = ['alice', 'bob']

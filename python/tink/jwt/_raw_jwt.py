@@ -24,17 +24,18 @@ from tink.jwt import _jwt_format
 
 _REGISTERED_NAMES = frozenset({'iss', 'sub', 'jti', 'aud', 'exp', 'nbf', 'iat'})
 
+_MAX_TIMESTAMP_VALUE = 253402300799  # 31 Dec 9999, 23:59:59 GMT
 
 Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
 
 
-def _from_datetime(t: datetime.datetime) -> int:
+def _from_datetime(t: datetime.datetime) -> float:
   if not t.tzinfo:
     raise _jwt_error.JwtInvalidError('datetime must have tzinfo')
-  return int(t.timestamp())
+  return t.timestamp()
 
 
-def _to_datetime(timestamp: int) -> datetime.datetime:
+def _to_datetime(timestamp: float) -> datetime.datetime:
   return datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
 
 
@@ -63,9 +64,9 @@ class RawJwt(object):
     self._validate_string_claim('iss')
     self._validate_string_claim('sub')
     self._validate_string_claim('jti')
-    self._validate_number_claim('exp')
-    self._validate_number_claim('nbf')
-    self._validate_number_claim('iat')
+    self._validate_timestamp_claim('exp')
+    self._validate_timestamp_claim('nbf')
+    self._validate_timestamp_claim('iat')
     self._validate_audience_claim()
 
   def _validate_string_claim(self, name: Text):
@@ -73,10 +74,14 @@ class RawJwt(object):
       if not isinstance(self._payload[name], Text):
         raise _jwt_error.JwtInvalidError('claim %s must be a String' % name)
 
-  def _validate_number_claim(self, name: Text):
+  def _validate_timestamp_claim(self, name: Text):
     if name in self._payload:
-      if not isinstance(self._payload[name], (int, float)):
+      timestamp = self._payload[name]
+      if not isinstance(timestamp, (int, float)):
         raise _jwt_error.JwtInvalidError('claim %s must be a Number' % name)
+      if timestamp > _MAX_TIMESTAMP_VALUE or timestamp < 0:
+        raise _jwt_error.JwtInvalidError(
+            'timestamp of claim %s is out of range' % name)
 
   def _validate_audience_claim(self):
     if 'aud' in self._payload:
