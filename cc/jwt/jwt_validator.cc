@@ -55,7 +55,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (!expiration_or.ok()) {
       return expiration_or.status();
     }
-    if (expiration_or.ValueOrDie() < now - clock_skew_) {
+    if (expiration_or.ValueOrDie() <= now - clock_skew_) {
       return util::Status(util::error::INVALID_ARGUMENT, "token has expired");
     }
   }

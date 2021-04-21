@@ -100,7 +100,7 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
   else:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
   if (raw_jwt.has_expiration() and
-      raw_jwt.expiration() < now - validator.clock_skew()):
+      raw_jwt.expiration() <= now - validator.clock_skew()):
     raise _jwt_error.JwtInvalidError('token has expired since %s' %
                                      raw_jwt.expiration())
   if (raw_jwt.has_not_before() and

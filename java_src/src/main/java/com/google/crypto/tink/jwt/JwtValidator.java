@@ -168,10 +168,12 @@ public final class JwtValidator {
   private void validateTimestampClaims(RawJwt target) throws JwtInvalidException {
     Instant now = this.clock.instant();
 
-    if (target.hasExpiration() && target.getExpiration().isBefore(now.minus(this.clockSkew))) {
+    // If expiration = now.minus(clockSkew), then the token is expired.
+    if (target.hasExpiration() && !target.getExpiration().isAfter(now.minus(this.clockSkew))) {
       throw new JwtInvalidException("token has expired since " + target.getExpiration());
     }
 
+    // If not_before = now.plus(clockSkew), then the token is fine.
     if (target.hasNotBefore() && target.getNotBefore().isAfter(now.plus(this.clockSkew))) {
       throw new JwtInvalidException("token cannot be used before " + target.getNotBefore());
     }

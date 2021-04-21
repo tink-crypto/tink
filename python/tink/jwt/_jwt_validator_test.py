@@ -67,6 +67,13 @@ class JwtValidatorTest(absltest.TestCase):
     validator = jwt.new_validator()
     _jwt_validator.validate(validator, token)
 
+  def test_validate_token_that_expires_now_fails(self):
+    now = datetime.datetime.fromtimestamp(1234.0, tz=datetime.timezone.utc)
+    token = jwt.new_raw_jwt(expiration=now)
+    validator = jwt.new_validator()
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(validator, token)
+
   def test_validate_recently_expired_with_clock_skew_success(self):
     recently_expired = (datetime.datetime.now(tz=datetime.timezone.utc)
                         - datetime.timedelta(minutes=1))
@@ -87,6 +94,12 @@ class JwtValidatorTest(absltest.TestCase):
     in_the_past = (datetime.datetime.now(tz=datetime.timezone.utc)
                    - datetime.timedelta(minutes=1))
     token = jwt.new_raw_jwt(not_before=in_the_past)
+    validator = jwt.new_validator()
+    _jwt_validator.validate(validator, token)
+
+  def test_validate_not_before_is_now_success(self):
+    now = datetime.datetime.fromtimestamp(12345, datetime.timezone.utc)
+    token = jwt.new_raw_jwt(not_before=now)
     validator = jwt.new_validator()
     _jwt_validator.validate(validator, token)
 

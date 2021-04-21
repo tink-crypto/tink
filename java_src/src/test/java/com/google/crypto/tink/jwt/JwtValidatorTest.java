@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -84,6 +85,17 @@ public final class JwtValidatorTest {
   }
 
   @Test
+  public void validate_tokenThatExpiresNow_shouldThrow() throws Exception {
+    Instant expiration = Instant.ofEpochSecond(1234);
+    Clock clock = Clock.fixed(expiration, ZoneOffset.UTC);
+    RawJwt rawJwt =
+        new RawJwt.Builder().setExpiration(expiration).build();
+    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+
+    assertThrows(JwtInvalidException.class, () -> validator.validate(rawJwt));
+  }
+
+  @Test
   public void validate_before_shouldThrow() throws Exception {
     Clock clock = Clock.systemUTC();
     // This token cannot be used until 1 minute in the future.
@@ -108,6 +120,17 @@ public final class JwtValidatorTest {
     VerifiedJwt token = validator.validate(unverified);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+  }
+
+  @Test
+  public void validate_tokenWithNotBeforeIsNow_success() throws Exception {
+    Instant notBefore = Instant.ofEpochSecond(1234);
+    Clock clock = Clock.fixed(notBefore, ZoneOffset.UTC);
+    RawJwt rawJwt =
+        new RawJwt.Builder().setNotBefore(notBefore).build();
+    JwtValidator validator = new JwtValidator.Builder().setClock(clock).build();
+    VerifiedJwt token = validator.validate(rawJwt);
+    assertThat(token.getNotBefore()).isEqualTo(notBefore);
   }
 
   @Test
