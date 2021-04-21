@@ -19,6 +19,7 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
+#include "absl/time/time.h"
 #include "tink/jwt/internal/json_util.h"
 
 namespace crypto {
@@ -35,6 +36,8 @@ constexpr absl::string_view kJwtClaimExpiration = "exp";
 constexpr absl::string_view kJwtClaimNotBefore = "nbf";
 constexpr absl::string_view kJwtClaimIssuedAt = "iat";
 constexpr absl::string_view kJwtClaimJwtId = "jti";
+
+constexpr int64_t kJwtTimestampMax = 253402300799;  // 31 Dec 9999, 23:59:59 GMT
 
 bool IsRegisteredClaimName(absl::string_view name) {
   return name == kJwtClaimIssuer || name == kJwtClaimSubject ||
@@ -68,17 +71,49 @@ bool HasClaimOfKind(const google::protobuf::Struct& json_proto,
   return value.kind_case() == kind;
 }
 
-// Returns true if the claim is present but not of the expected kind.
-bool ClaimIsNotOfKind(const google::protobuf::Struct& json_proto,
-                           absl::string_view name,
-                           google::protobuf::Value::KindCase expectedKind) {
+// Returns true if the claim is present but not a string.
+bool ClaimIsNotAString(const google::protobuf::Struct& json_proto,
+                       absl::string_view name) {
   auto fields = json_proto.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return false;
   }
   const auto& value = it->second;
-  return value.kind_case() != expectedKind;
+  return value.kind_case() != google::protobuf::Value::kStringValue;
+}
+
+// Returns true if the claim is present but not a timestamp.
+bool ClaimIsNotATimestamp(const google::protobuf::Struct& json_proto,
+                          absl::string_view name) {
+  auto fields = json_proto.fields();
+  auto it = fields.find(std::string(name));
+  if (it == fields.end()) {
+    return false;
+  }
+  const auto& value = it->second;
+  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+    return true;
+  }
+  double timestamp = value.number_value();
+  return (timestamp > kJwtTimestampMax) || (timestamp < 0);
+}
+
+util::StatusOr<double> TimeToTimestamp(absl::Time time) {
+  double millis = absl::ToUnixMillis(time);
+  double timestamp = millis / 1000;
+  if ((timestamp > kJwtTimestampMax) || (timestamp < 0)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
+  }
+  return timestamp;
+}
+
+absl::Time TimestampToTime(double timestamp) {
+  if (timestamp > kJwtTimestampMax) {
+    return absl::FromUnixMillis(kJwtTimestampMax * 1000);
+  }
+  int64_t millis = timestamp * 1000;
+  return absl::FromUnixMillis(millis);
 }
 
 util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
@@ -119,18 +154,13 @@ util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
     return proto_or.status();
   }
   auto& proto = proto_or.ValueOrDie();
-  if (ClaimIsNotOfKind(proto, kJwtClaimIssuer,
-                       google::protobuf::Value::kStringValue) ||
-      ClaimIsNotOfKind(proto, kJwtClaimSubject,
-                       google::protobuf::Value::kStringValue) ||
-      ClaimIsNotOfKind(proto, kJwtClaimExpiration,
-                       google::protobuf::Value::kNumberValue) ||
-      ClaimIsNotOfKind(proto, kJwtClaimNotBefore,
-                       google::protobuf::Value::kNumberValue) ||
-      ClaimIsNotOfKind(proto, kJwtClaimIssuedAt,
-                       google::protobuf::Value::kNumberValue)) {
+  if (ClaimIsNotAString(proto, kJwtClaimIssuer) ||
+      ClaimIsNotAString(proto, kJwtClaimSubject) ||
+      ClaimIsNotATimestamp(proto, kJwtClaimExpiration) ||
+      ClaimIsNotATimestamp(proto, kJwtClaimNotBefore) ||
+      ClaimIsNotATimestamp(proto, kJwtClaimIssuedAt)) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        "contains registered claim with wrong type");
+                        "contains an invalid registered claim");
   }
   auto audStatus = ValidateAndFixAudienceClaim(&proto);
   if (!audStatus.ok()) {
@@ -246,8 +276,7 @@ util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Expiration is not a number");
   }
-  double sec = value.number_value();
-  return absl::FromUnixSeconds(sec);
+  return TimestampToTime(value.number_value());
 }
 
 bool RawJwt::HasNotBefore() const {
@@ -265,8 +294,7 @@ util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "NotBefore is not a number");
   }
-  double sec = value.number_value();
-  return absl::FromUnixSeconds(sec);
+  return TimestampToTime(value.number_value());
 }
 
 bool RawJwt::HasIssuedAt() const {
@@ -284,8 +312,7 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "IssuedAt is not a number");
   }
-  double sec = value.number_value();
-  return absl::FromUnixSeconds(sec);
+  return TimestampToTime(value.number_value());
 }
 
 bool RawJwt::IsNullClaim(absl::string_view name) const {
@@ -463,28 +490,40 @@ RawJwtBuilder& RawJwtBuilder::SetJwtId(absl::string_view jwid) {
   return *this;
 }
 
-RawJwtBuilder& RawJwtBuilder::SetExpiration(absl::Time expiration) {
+util::Status RawJwtBuilder::SetExpiration(absl::Time expiration) {
+  util::StatusOr<double> timestamp_or = TimeToTimestamp(expiration);
+  if (!timestamp_or.ok()) {
+    return timestamp_or.status();
+  }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(static_cast<int>(absl::ToUnixSeconds(expiration)));
+  value.set_number_value(timestamp_or.ValueOrDie());
   (*fields)[std::string(kJwtClaimExpiration)] = value;
-  return *this;
+  return util::OkStatus();
 }
 
-RawJwtBuilder& RawJwtBuilder::SetNotBefore(absl::Time notBefore) {
+util::Status RawJwtBuilder::SetNotBefore(absl::Time notBefore) {
+  util::StatusOr<double> timestamp_or = TimeToTimestamp(notBefore);
+  if (!timestamp_or.ok()) {
+    return timestamp_or.status();
+  }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(static_cast<int>(absl::ToUnixSeconds(notBefore)));
+  value.set_number_value(timestamp_or.ValueOrDie());
   (*fields)[std::string(kJwtClaimNotBefore)] = value;
-  return *this;
+  return util::OkStatus();
 }
 
-RawJwtBuilder& RawJwtBuilder::SetIssuedAt(absl::Time issuedAt) {
+util::Status RawJwtBuilder::SetIssuedAt(absl::Time issuedAt) {
+  util::StatusOr<double> timestamp_or = TimeToTimestamp(issuedAt);
+  if (!timestamp_or.ok()) {
+    return timestamp_or.status();
+  }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(static_cast<int>(absl::ToUnixSeconds(issuedAt)));
+  value.set_number_value(timestamp_or.ValueOrDie());
   (*fields)[std::string(kJwtClaimIssuedAt)] = value;
-  return *this;
+  return util::OkStatus();
 }
 
 util::Status RawJwtBuilder::AddNullClaim(absl::string_view name) {

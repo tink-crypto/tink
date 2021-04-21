@@ -18,13 +18,15 @@
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "absl/time/time.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
-using ::testing::UnorderedElementsAreArray;
+using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::UnorderedElementsAreArray;
 
 namespace crypto {
 namespace tink {
@@ -47,35 +49,65 @@ TEST(RawJwt, GetIssuerSubjectJwtIdOK) {
 }
 
 TEST(RawJwt, TimestampsOK) {
-  absl::Time now = absl::Now();
-  auto jwt_or = RawJwtBuilder()
-                    .SetNotBefore(now - absl::Seconds(300))
-                    .SetIssuedAt(now)
-                    .SetExpiration(now + absl::Seconds(300))
-                    .Build();
+  absl::Time nbf = absl::FromUnixMillis(1234567890123);
+  absl::Time iat = absl::FromUnixMillis(1234567891123);
+  absl::Time exp = absl::FromUnixMillis(1234567892123);
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetNotBefore(nbf), IsOk());
+  ASSERT_THAT(builder.SetIssuedAt(iat), IsOk());
+  ASSERT_THAT(builder.SetExpiration(exp), IsOk());
+  auto jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
   EXPECT_TRUE(jwt.HasNotBefore());
   auto nbf_or = jwt.GetNotBefore();
   ASSERT_THAT(nbf_or.status(), IsOk());
-  auto nbf = nbf_or.ValueOrDie();
-  EXPECT_LT(nbf, now - absl::Seconds(299));
-  EXPECT_GT(nbf, now - absl::Seconds(301));
+  EXPECT_THAT(nbf_or.ValueOrDie(), Eq(nbf));
 
   EXPECT_TRUE(jwt.HasIssuedAt());
   auto iat_or = jwt.GetIssuedAt();
   ASSERT_THAT(iat_or.status(), IsOk());
-  auto iat = iat_or.ValueOrDie();
-  EXPECT_LT(iat, now + absl::Seconds(1));
-  EXPECT_GT(iat, now - absl::Seconds(1));
+  EXPECT_THAT(iat_or.ValueOrDie(), Eq(iat));
 
   EXPECT_TRUE(jwt.HasExpiration());
   auto exp_or = jwt.GetExpiration();
   ASSERT_THAT(exp_or.status(), IsOk());
-  auto exp = exp_or.ValueOrDie();
-  EXPECT_LT(exp, now + absl::Seconds(301));
-  EXPECT_GT(exp, now + absl::Seconds(299));
+  EXPECT_THAT(exp_or.ValueOrDie(), Eq(exp));
+}
+
+TEST(RawJwt, LargeExpirationWorks) {
+  absl::Time large = absl::FromUnixSeconds(253402300799);  // year 9999
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetExpiration(large), IsOk());
+  ASSERT_THAT(builder.SetIssuedAt(large), IsOk());
+  ASSERT_THAT(builder.SetNotBefore(large), IsOk());
+  auto jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasExpiration());
+  EXPECT_TRUE(jwt.HasIssuedAt());
+  EXPECT_TRUE(jwt.HasNotBefore());
+  EXPECT_THAT(jwt.GetExpiration().ValueOrDie(), Eq(large));
+  EXPECT_THAT(jwt.GetIssuedAt().ValueOrDie(), Eq(large));
+  EXPECT_THAT(jwt.GetNotBefore().ValueOrDie(), Eq(large));
+}
+
+TEST(RawJwt, TooLargeTimestampsFail) {
+  absl::Time too_large = absl::FromUnixSeconds(253402300800);  // year 10000
+  auto builder = RawJwtBuilder();
+  EXPECT_FALSE(builder.SetExpiration(too_large).ok());
+  EXPECT_FALSE(builder.SetIssuedAt(too_large).ok());
+  EXPECT_FALSE(builder.SetNotBefore(too_large).ok());
+}
+
+TEST(RawJwt, NegativeTimestampsFail) {
+  absl::Time neg = absl::FromUnixMillis(-1);
+  auto builder = RawJwtBuilder();
+  EXPECT_FALSE(builder.SetExpiration(neg).ok());
+  EXPECT_FALSE(builder.SetIssuedAt(neg).ok());
+  EXPECT_FALSE(builder.SetNotBefore(neg).ok());
 }
 
 TEST(RawJwt, AddGetAudiencesOK) {
@@ -148,14 +180,13 @@ TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
 
 TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   absl::Time now = absl::Now();
-  auto jwt_or = RawJwtBuilder()
-                    .SetIssuer("issuer")
-                    .SetSubject("subject")
-                    .SetJwtId("jwt_id")
-                    .SetNotBefore(now - absl::Seconds(300))
-                    .SetIssuedAt(now)
-                    .SetExpiration(now + absl::Seconds(300))
-                    .Build();
+  auto builder =
+      RawJwtBuilder().SetIssuer("issuer").SetSubject("subject").SetJwtId(
+          "jwt_id");
+  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
+  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
+  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
+  auto jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -171,14 +202,13 @@ TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
 
 TEST(RawJwt, GetRegisteredCustomClaimNotOK) {
   absl::Time now = absl::Now();
-  auto jwt_or = RawJwtBuilder()
-                    .SetIssuer("issuer")
-                    .SetSubject("subject")
-                    .SetJwtId("jwt_id")
-                    .SetNotBefore(now - absl::Seconds(300))
-                    .SetIssuedAt(now)
-                    .SetExpiration(now + absl::Seconds(300))
-                    .Build();
+  auto builder =
+      RawJwtBuilder().SetIssuer("issuer").SetSubject("subject").SetJwtId(
+          "jwt_id");
+  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
+  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
+  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
+  auto jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -288,6 +318,25 @@ TEST(RawJwt, FromString) {
   EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
   std::vector<std::string> expected_audiences = {"a1", "a2"};
   EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
+}
+
+TEST(RawJwt, FromStringExpExpiration) {
+  auto jwt_or = RawJwt::FromString(R"({"exp":1e10})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetExpiration(),
+              IsOkAndHolds(absl::FromUnixSeconds(10000000000)));
+}
+
+TEST(RawJwt, FromStringExpirationTooLarge) {
+  auto jwt_or = RawJwt::FromString(R"({"exp":1e30})");
+  EXPECT_FALSE(jwt_or.ok());
+}
+
+TEST(RawJwt, FromStringNegativeExpirationAreInvalid) {
+  auto jwt_or = RawJwt::FromString(R"({"exp":-1})");
+  EXPECT_FALSE(jwt_or.ok());
 }
 
 TEST(RawJwt, FromStringConvertsStringAudIntoListOfStrings) {

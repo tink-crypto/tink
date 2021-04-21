@@ -59,16 +59,25 @@ crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
     builder.SetJwtId(raw_jwt_proto.jwt_id().value());
   }
   if (raw_jwt_proto.has_expiration()) {
-    builder.SetExpiration(
+    auto status = builder.SetExpiration(
         absl::FromUnixSeconds(raw_jwt_proto.expiration().seconds()));
+    if (!status.ok()) {
+      return status;
+    }
   }
   if (raw_jwt_proto.has_issued_at()) {
-    builder.SetIssuedAt(
+    auto status = builder.SetIssuedAt(
         absl::FromUnixSeconds(raw_jwt_proto.issued_at().seconds()));
+    if (!status.ok()) {
+      return status;
+    }
   }
   if (raw_jwt_proto.has_not_before()) {
-    builder.SetNotBefore(
+    auto status = builder.SetNotBefore(
         absl::FromUnixSeconds(raw_jwt_proto.not_before().seconds()));
+    if (!status.ok()) {
+      return status;
+    }
   }
   auto claims = raw_jwt_proto.custom_claims();
   for (auto it = claims.begin(); it != claims.end(); it++) {

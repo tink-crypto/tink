@@ -56,6 +56,7 @@ tink_cc_test(
     tink::util::test_util
     protobuf::libprotobuf
     absl::strings
+    absl::time
     gmock
 )
 

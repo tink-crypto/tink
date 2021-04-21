@@ -86,9 +86,9 @@ class RawJwtBuilder {
   RawJwtBuilder& SetSubject(absl::string_view subject);
   RawJwtBuilder& AddAudience(absl::string_view audience);
   RawJwtBuilder& SetJwtId(absl::string_view jwid);
-  RawJwtBuilder& SetExpiration(absl::Time expiration);
-  RawJwtBuilder& SetNotBefore(absl::Time notBefore);
-  RawJwtBuilder& SetIssuedAt(absl::Time issuedAt);
+  util::Status SetExpiration(absl::Time expiration);
+  util::Status SetNotBefore(absl::Time notBefore);
+  util::Status SetIssuedAt(absl::Time issuedAt);
   util::Status AddNullClaim(absl::string_view name);
   util::Status AddBooleanClaim(absl::string_view name, bool bool_value);
   util::Status AddStringClaim(absl::string_view name, std::string string_value);
