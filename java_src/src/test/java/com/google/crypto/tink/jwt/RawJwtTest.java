@@ -320,23 +320,33 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void largeExpirationWorks() throws Exception {
-    Instant instant = Instant.ofEpochMilli(4102444861001L);  // year 2100
-    RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
+  public void largeTimestamp_success() throws Exception {
+    Instant instant = Instant.ofEpochMilli(253402300799000L);
+    RawJwt token = new RawJwt.Builder()
+        .setExpiration(instant).setIssuedAt(instant).setNotBefore(instant).build();
 
     assertThat(token.hasExpiration()).isTrue();
     assertThat(token.getExpiration()).isEqualTo(instant);
+    assertThat(token.hasIssuedAt()).isTrue();
+    assertThat(token.getIssuedAt()).isEqualTo(instant);
+    assertThat(token.hasNotBefore()).isTrue();
+    assertThat(token.getNotBefore()).isEqualTo(instant);
   }
 
   @Test
-  public void veryLargeExpirationWorks() throws Exception {
-    Instant instant = Instant.ofEpochMilli(Long.MAX_VALUE - 1);
-    RawJwt token = new RawJwt.Builder().setExpiration(instant).build();
+  public void tooLargeTimestamp_throws() throws Exception {
+    Instant instant = Instant.ofEpochMilli(253402300800000L);
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setExpiration(instant));
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setIssuedAt(instant));
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setNotBefore(instant));
+  }
 
-    assertThat(token.hasExpiration()).isTrue();
-    // Due to conversion to double and back, it lost some precision.
-    assertThat(token.getExpiration()).isGreaterThan(instant.minusSeconds(1));
-    assertThat(token.getExpiration()).isLessThan(instant.plusSeconds(1));
+  @Test
+  public void negativeTimestamp_throws() throws Exception {
+    Instant instant = Instant.ofEpochMilli(-1);
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setExpiration(instant));
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setIssuedAt(instant));
+    assertThrows(IllegalArgumentException.class, () -> new RawJwt.Builder().setNotBefore(instant));
   }
 
   @Test

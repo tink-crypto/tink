@@ -38,6 +38,8 @@ import java.util.Set;
 @Immutable
 public final class RawJwt {
 
+  private static final long MAX_TIMESTAMP_VALUE = 253402300799L;  // 31 Dec 9999, 23:59:59 GMT
+
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JsonObject payload;
 
@@ -74,10 +76,11 @@ public final class RawJwt {
         || !this.payload.get(name).getAsJsonPrimitive().isNumber()) {
       throw new JwtInvalidException("invalid JWT payload: claim " + name + " is not a number.");
     }
-    if (this.payload.get(name).getAsJsonPrimitive().getAsDouble() * 1000 > Long.MAX_VALUE) {
+    double timestamp = this.payload.get(name).getAsJsonPrimitive().getAsDouble();
+    if ((timestamp > MAX_TIMESTAMP_VALUE) || (timestamp < 0)) {
       throw new JwtInvalidException(
-          "invalid JWT payload: claim " + name + " timestamp is too large.");
-   }
+          "invalid JWT payload: claim " + name + " has an invalid timestamp");
+    }
   }
 
   private void validateAudienceClaim() throws JwtInvalidException {
@@ -162,6 +165,16 @@ public final class RawJwt {
       return this;
     }
 
+    private void setTimestampClaim(String name, Instant value) {
+      long millis = value.toEpochMilli();
+      if ((millis > MAX_TIMESTAMP_VALUE * 1000) || (millis < 0)) {
+        throw new IllegalArgumentException(
+            "timestamp of claim " + name + " is out of range");
+      }
+      double doubleMillis = millis;
+      payload.add(name, new JsonPrimitive(doubleMillis / 1000));
+    }
+
     /**
      * Sets the {@code exp} claim that identifies the instant on or after which the token MUST NOT
      * be accepted for processing.
@@ -173,8 +186,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.4
      */
     public Builder setExpiration(Instant value) {
-      double millis = value.toEpochMilli();
-      payload.add(JwtNames.CLAIM_EXPIRATION, new JsonPrimitive(millis / 1000));
+      setTimestampClaim(JwtNames.CLAIM_EXPIRATION, value);
       return this;
     }
 
@@ -189,8 +201,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.5
      */
     public Builder setNotBefore(Instant value) {
-      double millis = value.toEpochMilli();
-      payload.add(JwtNames.CLAIM_NOT_BEFORE, new JsonPrimitive(millis / 1000));
+      setTimestampClaim(JwtNames.CLAIM_NOT_BEFORE, value);
       return this;
     }
 
@@ -204,9 +215,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.6
      */
     public Builder setIssuedAt(Instant value) {
-      double millis = value.toEpochMilli();
-      payload.add(
-          JwtNames.CLAIM_ISSUED_AT, new JsonPrimitive(millis / 1000));
+      setTimestampClaim(JwtNames.CLAIM_ISSUED_AT, value);
       return this;
     }
 
