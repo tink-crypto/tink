@@ -6,8 +6,6 @@ java_binary(
     name = "gcs_envelope_aead_example",
     srcs = ["GcsEnvelopeAeadExample.java"],
     main_class = "gcs.GcsEnvelopeAeadExample",
-    runtime_deps = [
-    ],
     deps = [
         "@examples_maven//:com_google_auth_google_auth_library_oauth2_http",
         "@examples_maven//:com_google_cloud_google_cloud_storage",
@@ -40,5 +38,9 @@ sh_test(
         ":gcs_envelope_aead_example",
         # Change this to your credential
         "@tink_base//testdata:credential.json",
+    ],
+    tags = [
+        "notap",
+        "tink_guitar",
     ],
 )

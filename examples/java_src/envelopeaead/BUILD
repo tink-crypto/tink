@@ -6,9 +6,6 @@ java_binary(
     name = "envelope_aead_example",
     srcs = ["EnvelopeAeadExample.java"],
     main_class = "envelopeaead.EnvelopeAeadExample",
-    runtime_deps = [
-        "@maven//:com_fasterxml_jackson_core_jackson_core",
-    ],
     deps = [
         "@tink_java//src/main/java/com/google/crypto/tink:aead",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
@@ -19,21 +16,21 @@ java_binary(
     ],
 )
 
-# In order to run this test, use your own Cloud KMS key and credential:
+# In order to run this test, use your own Cloud KMS key and credential
 sh_test(
     name = "envelope_aead_example_test",
     size = "small",
     srcs = ["envelope_aead_example_test.sh"],
     args = [
         "$(rootpath :envelope_aead_example)",
-        # Change this to your key.
+        # Change this to your key
         "gcp-kms://projects/tink-test-infrastructure/locations/global/keyRings/unit-and-integration-testing/cryptoKeys/aead-key",
-        # Change this to your credential.
+        # Change this to your credential
         "$(rootpath @tink_base//testdata:credential.json)",
     ],
     data = [
         ":envelope_aead_example",
-        # Change this to your credential.
+        # Change this to your credential
         "@tink_base//testdata:credential.json",
     ],
 )
