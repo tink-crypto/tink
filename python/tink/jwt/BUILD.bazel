@@ -127,6 +127,7 @@ py_library(
     name = "_jwt_format",
     srcs = ["_jwt_format.py"],
     srcs_version = "PY3",
+    visibility = ["//visibility:public"],
     deps = [":_jwt_error"],
 )
 

@@ -13,6 +13,8 @@
 # limitations under the License.
 """Tests for tink.testing.python.jwt_service."""
 
+import datetime
+
 from absl.testing import absltest
 import grpc
 
@@ -94,10 +96,13 @@ class JwtServiceTest(absltest.TestCase):
     gen_response = keyset_servicer.Generate(gen_request, self._ctx)
     self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
     keyset = gen_response.keyset
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    expiration = now + datetime.timedelta(seconds=100)
     comp_request = testing_api_pb2.JwtSignRequest(keyset=keyset)
     comp_request.raw_jwt.issuer.value = 'issuer'
     comp_request.raw_jwt.subject.value = 'subject'
     comp_request.raw_jwt.custom_claims['myclaim'].bool_value = True
+    comp_request.raw_jwt.expiration.seconds = int(expiration.timestamp())
 
     comp_response = jwt_servicer.ComputeMacAndEncode(comp_request, self._ctx)
     self.assertEqual(comp_response.WhichOneof('result'), 'signed_compact_jwt')

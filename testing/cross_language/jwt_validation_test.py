@@ -30,14 +30,14 @@ from absl.testing import parameterized
 
 import tink
 from tink import cleartext_keyset_handle
+from tink import mac
 
 from tink.proto import common_pb2
 from tink.proto import hmac_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import jwt
-from google3.third_party.tink.python.tink import mac
-from google3.third_party.tink.python.tink.jwt import _jwt_format
+from tink.jwt import _jwt_format
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']
