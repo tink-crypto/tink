@@ -17,15 +17,19 @@
 package com.google.crypto.tink.subtle;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.crypto.tink.config.TinkFips;
 import com.google.crypto.tink.testing.StreamingTestUtil;
 import com.google.crypto.tink.testing.StreamingTestUtil.SeekableByteBufferChannel;
 import com.google.crypto.tink.testing.TestUtil;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashSet;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -85,6 +89,8 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext is smaller than 1 segment */
   @Test
   public void testEncryptDecryptSmall() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 20, 64);
     testEncryptDecrypt(16, 12, 512, 0, 400, 64);
   }
@@ -92,6 +98,8 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext has a non-zero offset */
   @Test
   public void testEncryptDecryptSmallWithOffset() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 8, 20, 64);
     testEncryptDecrypt(16, 12, 512, 8, 400, 64);
   }
@@ -99,6 +107,8 @@ public class AesCtrHmacStreamingTest {
   /* Empty plaintext */
   @Test
   public void testEncryptDecryptEmpty() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 0, 128);
     testEncryptDecrypt(16, 12, 256, 8, 0, 128);
   }
@@ -106,6 +116,8 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext contains more than 1 segment. */
   @Test
   public void testEncryptDecryptMedium() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 1024, 128);
     testEncryptDecrypt(16, 12, 512, 0, 3086, 128);
     testEncryptDecrypt(32, 12, 1024, 0, 12345, 128);
@@ -114,6 +126,8 @@ public class AesCtrHmacStreamingTest {
   /* Test with different tag sizes */
   @Test
   public void testEncryptDecryptTagSize() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 512, 0, 5000, 128);
     testEncryptDecrypt(16, 16, 512, 0, 5000, 128);
     testEncryptDecrypt(16, 20, 512, 0, 5000, 128);
@@ -123,6 +137,8 @@ public class AesCtrHmacStreamingTest {
   /* During decryption large plaintext chunks are requested */
   @Test
   public void testEncryptDecryptLargeChunks() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 1024, 4096);
     testEncryptDecrypt(16, 12, 512, 0, 5086, 4096);
     testEncryptDecrypt(32, 16, 1024, 0, 12345, 5000);
@@ -130,6 +146,8 @@ public class AesCtrHmacStreamingTest {
 
   @Test
   public void testEncryptDecryptMediumWithOffset() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 8, 1024, 64);
     testEncryptDecrypt(16, 12, 512, 20, 3086, 256);
     testEncryptDecrypt(32, 16, 1024, 10, 12345, 5000);
@@ -138,6 +156,8 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext ends at a segment boundary. */
   @Test
   public void testEncryptDecryptLastSegmentFull() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 216, 64);
     testEncryptDecrypt(16, 12, 256, 16, 200, 256);
     testEncryptDecrypt(16, 12, 256, 16, 440, 1024);
@@ -146,6 +166,8 @@ public class AesCtrHmacStreamingTest {
   /* During decryption single bytes are requested */
   @Test
   public void testEncryptDecryptSingleBytes() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecrypt(16, 12, 256, 0, 1024, 1);
     testEncryptDecrypt(32, 12, 512, 0, 5086, 1);
   }
@@ -172,12 +194,16 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext is smaller than 1 segment. */
   @Test
   public void testEncryptDecryptRandomAccessSmall() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 100);
     testEncryptDecryptRandomAccess(16, 12, 512, 0, 400);
   }
 
   @Test
   public void testEncryptDecryptRandomAccessSmallWithOffset() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 8, 20);
     testEncryptDecryptRandomAccess(16, 12, 256, 8, 100);
     testEncryptDecryptRandomAccess(16, 12, 512, 8, 400);
@@ -186,12 +212,16 @@ public class AesCtrHmacStreamingTest {
   /* Empty plaintext */
   @Test
   public void testEncryptDecryptRandomAccessEmpty() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 0);
     testEncryptDecryptRandomAccess(16, 12, 256, 8, 0);
   }
 
   @Test
   public void testEncryptDecryptRandomAccessMedium() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 2048);
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 4096);
     testEncryptDecryptRandomAccess(32, 16, 1024, 0, 12345);
@@ -199,6 +229,8 @@ public class AesCtrHmacStreamingTest {
 
   @Test
   public void testEncryptDecryptRandomAccessMediumWithOffset() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 8, 2048);
     testEncryptDecryptRandomAccess(16, 12, 256, 10, 4096);
     testEncryptDecryptRandomAccess(32, 16, 1024, 20, 12345);
@@ -208,6 +240,8 @@ public class AesCtrHmacStreamingTest {
   /* Test with different tag sizes */
   @Test
   public void testEncryptDecryptRandomAccessTagSize() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 512, 0, 12345);
     testEncryptDecryptRandomAccess(16, 16, 512, 0, 5000);
     testEncryptDecryptRandomAccess(16, 20, 512, 0, 4096);
@@ -218,6 +252,8 @@ public class AesCtrHmacStreamingTest {
   /* The ciphertext ends at a segment boundary. */
   @Test
   public void testEncryptDecryptRandomAccessLastSegmentFull() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptDecryptRandomAccess(16, 12, 256, 0, 216);
     testEncryptDecryptRandomAccess(16, 12, 256, 16, 200);
     testEncryptDecryptRandomAccess(16, 12, 256, 16, 440);
@@ -246,6 +282,8 @@ public class AesCtrHmacStreamingTest {
   /* Encryption is done byte by byte. */
   @Test
   public void testEncryptWithStream() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     testEncryptSingleBytes(16, 1024);
     testEncryptSingleBytes(16, 12345);
     testEncryptSingleBytes(16, 111111);
@@ -256,12 +294,16 @@ public class AesCtrHmacStreamingTest {
    */
   @Test
   public void testEncryptDecryptString() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     StreamingTestUtil.testEncryptDecryptString(createAesCtrHmacStreaming());
   }
 
   /** Test encryption with a simulated ciphertext channel, which has only a limited capacity. */
   @Test
   public void testEncryptLimitedCiphertextChannel() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     int segmentSize = 512;
     int firstSegmentOffset = 0;
     int keySizeInBytes = 16;
@@ -305,6 +347,8 @@ public class AesCtrHmacStreamingTest {
   // (6) modify aad
   @Test
   public void testModifiedCiphertext() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
@@ -317,6 +361,8 @@ public class AesCtrHmacStreamingTest {
 
   @Test
   public void testSkipWithStream() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
@@ -338,6 +384,8 @@ public class AesCtrHmacStreamingTest {
 
   @Test
   public void testModifiedCiphertextWithSeekableByteChannel() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     int keySize = 16;
     int tagSize = 12;
@@ -355,6 +403,8 @@ public class AesCtrHmacStreamingTest {
    * false positives is smaller than 2^{-100}.
    */
   public void testKeyStream() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     HashSet<String> ciphertextBlocks = new HashSet<String>();
     byte[] ikm = TestUtil.hexDecode("000102030405060708090a0b0c0d0e0f");
     byte[] aad = TestUtil.hexDecode("aabbccddeeff");
@@ -383,6 +433,8 @@ public class AesCtrHmacStreamingTest {
   /** Encrypt and decrypt a long ciphertext. */
   @Test
   public void testEncryptDecryptLong() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     long plaintextSize = (1L << 26) + 1234567;
     StreamingTestUtil.testEncryptDecryptLong(createAesCtrHmacStreaming(), plaintextSize);
   }
@@ -390,8 +442,17 @@ public class AesCtrHmacStreamingTest {
   /** Encrypt some plaintext to a file, then decrypt from the file */
   @Test
   public void testFileEncryption() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     int plaintextSize = 1 << 20;
     StreamingTestUtil.testFileEncryption(
         createAesCtrHmacStreaming(), tmpFolder.newFile(), plaintextSize);
+  }
+
+  @Test
+  public void testFailIfFipsModeUsed() throws Exception {
+    Assume.assumeTrue(TinkFips.useOnlyFips());
+
+    assertThrows(GeneralSecurityException.class, () -> testEncryptDecrypt(16, 12, 256, 0, 20, 64));
   }
 }

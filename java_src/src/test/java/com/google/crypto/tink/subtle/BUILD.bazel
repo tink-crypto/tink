@@ -590,6 +590,7 @@ java_test(
     srcs = ["AesCtrHmacStreamingTest.java"],
     tags = ["notsan"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_hmac_streaming",
         "//src/main/java/com/google/crypto/tink/testing:streaming_test_util",
         "//src/main/java/com/google/crypto/tink/testing:test_util",
