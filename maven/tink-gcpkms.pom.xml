@@ -63,9 +63,9 @@
   <properties>
     <java.version>1.8</java.version>
 
-    <google-api-client.version>1.29.0</google-api-client.version>
-    <google-api-services-cloudkms.version>v1-rev88-1.25.0</google-api-services-cloudkms.version>
-    <google-auto-service.version>1.0-rc5</google-auto-service.version>
+    <google-api-client.version>1.31.3</google-api-client.version>
+    <google-api-services-cloudkms.version>v1-rev108-1.25.0</google-api-services-cloudkms.version>
+    <google-auto-service.version>1.0-rc7</google-auto-service.version>
     <google-guava.version>27.1-jre</google-guava.version>
     <httpclient.version>4.5.8</httpclient.version>
     <jackson.version>2.12.1</jackson.version>

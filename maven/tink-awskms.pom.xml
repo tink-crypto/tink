@@ -63,10 +63,10 @@
   <properties>
     <java.version>1.8</java.version>
 
-    <aws-java-sdk-core.version>1.11.877</aws-java-sdk-core.version>
-    <aws-java-sdk-kms.version>1.11.877</aws-java-sdk-kms.version>
+    <aws-java-sdk-core.version>1.11.976</aws-java-sdk-core.version>
+    <aws-java-sdk-kms.version>1.11.976</aws-java-sdk-kms.version>
     <commons-logging.version>1.2</commons-logging.version>
-    <google-auto-service.version>1.0-rc5</google-auto-service.version>
+    <google-auto-service.version>1.0-rc7</google-auto-service.version>
     <google-guava.version>27.1-jre</google-guava.version>
     <httpclient.version>4.5.8</httpclient.version>
     <jackson.version>2.12.1</jackson.version>
