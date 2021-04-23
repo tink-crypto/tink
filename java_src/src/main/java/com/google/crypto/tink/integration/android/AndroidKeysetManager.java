@@ -164,6 +164,20 @@ public final class AndroidKeysetManager {
       return this;
     }
 
+    /** Reads and writes the keyset from the given shared preferences. */
+    public Builder withSharedPref(String keysetName, SharedPreferences sharedPreferences)
+            throws IOException {
+      if (sharedPreferences == null) {
+        throw new IllegalArgumentException("need the Android sharedPreferences");
+      }
+      if (keysetName == null) {
+        throw new IllegalArgumentException("need a keyset name");
+      }
+      reader = new SharedPrefKeysetReader(keysetName, sharedPreferences);
+      writer = new SharedPrefKeysetWriter(keysetName, sharedPreferences);
+      return this;
+    }
+
     /**
      * Sets the master key URI.
      *

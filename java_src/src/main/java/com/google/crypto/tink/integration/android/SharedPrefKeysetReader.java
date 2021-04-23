@@ -62,6 +62,25 @@ public final class SharedPrefKeysetReader implements KeysetReader {
     }
   }
 
+  /**
+   * Creates a {@link KeysetReader} that reads and hex-decodes keysets from the preference
+   * name {@code keysetName} in given shared preferences object.
+   *
+   * @throws IOException if cannot read the keyset
+   * @throws IllegalArgumentException if {@code keysetName} or {@code sharedPreferences} is null
+   */
+  public SharedPrefKeysetReader(String keysetName, SharedPreferences sharedPreferences)
+          throws IOException {
+    if (keysetName == null) {
+      throw new IllegalArgumentException("keysetName cannot be null");
+    }
+    if (sharedPreferences == null) {
+      throw new IllegalArgumentException("sharedPreferences cannot be null");
+    }
+    this.keysetName = keysetName;
+    this.sharedPreferences = sharedPreferences;
+  }
+
   @SuppressWarnings("UnusedException")
   private byte[] readPref() throws IOException {
     try {

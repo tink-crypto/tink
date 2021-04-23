@@ -57,6 +57,25 @@ public final class SharedPrefKeysetWriter implements KeysetWriter {
     }
   }
 
+  /**
+   * Creates a {@link KeysetReader} that hex-encodes and writes keysets to the preference
+   * name {@code keysetName} in the given shared preferences object.
+   *
+   * @throws IOException if cannot write the keyset
+   * @throws IllegalArgumentException if {@code keysetName} or {@code sharedPreferences} is null
+   */
+  public SharedPrefKeysetWriter(String keysetName, SharedPreferences sharedPreferences) {
+    if (keysetName == null) {
+      throw new IllegalArgumentException("keysetName cannot be null");
+    }
+    if (sharedPreferences == null) {
+      throw new IllegalArgumentException("sharedPreferences cannot be null");
+    }
+    this.keysetName = keysetName;
+
+    editor = sharedPreferences.edit();
+  }
+
   @Override
   public void write(Keyset keyset) throws IOException {
     boolean success = editor.putString(keysetName, Hex.encode(keyset.toByteArray())).commit();
