@@ -21,7 +21,7 @@ from __future__ import print_function
 import datetime
 import io
 import json
-from typing import BinaryIO, Mapping, Text
+from typing import BinaryIO, Mapping, Text, Tuple
 
 import tink
 from tink import aead
@@ -333,6 +333,18 @@ class PrfSet(prf.PrfSet):
     return self._prfs[self._primary_key_id]
 
 
+def split_datetime(dt: datetime.datetime) -> Tuple[int, int]:
+  t = dt.timestamp()
+  seconds = int(t)
+  nanos = int((t - seconds) * 1e9)
+  return (seconds, nanos)
+
+
+def to_datetime(seconds: int, nanos: int) -> datetime.datetime:
+  t = seconds + (nanos / 1e9)
+  return datetime.datetime.fromtimestamp(t, datetime.timezone.utc)
+
+
 def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
   """Converts a jwt.RawJwt into a proto."""
   raw_token = testing_api_pb2.JwtToken()
@@ -345,11 +357,17 @@ def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
   if raw_jwt.has_jwt_id():
     raw_token.jwt_id.value = raw_jwt.jwt_id()
   if raw_jwt.has_expiration():
-    raw_token.expiration.seconds = int(raw_jwt.expiration().timestamp())
+    seconds, nanos = split_datetime(raw_jwt.expiration())
+    raw_token.expiration.seconds = seconds
+    raw_token.expiration.nanos = nanos
   if raw_jwt.has_not_before():
-    raw_token.not_before.seconds = int(raw_jwt.not_before().timestamp())
+    seconds, nanos = split_datetime(raw_jwt.not_before())
+    raw_token.not_before.seconds = seconds
+    raw_token.not_before.nanos = nanos
   if raw_jwt.has_issued_at():
-    raw_token.issued_at.seconds = int(raw_jwt.issued_at().timestamp())
+    seconds, nanos = split_datetime(raw_jwt.issued_at())
+    raw_token.issued_at.seconds = seconds
+    raw_token.issued_at.nanos = nanos
   for name in raw_jwt.custom_claim_names():
     value = raw_jwt.custom_claim(name)
     if value is None:
@@ -384,16 +402,13 @@ def proto_to_verified_jwt(
     audiences = list(token.audiences)
   expiration = None
   if token.HasField('expiration'):
-    expiration = datetime.datetime.fromtimestamp(token.expiration.seconds,
-                                                 datetime.timezone.utc)
+    expiration = to_datetime(token.expiration.seconds, token.expiration.nanos)
   not_before = None
   if token.HasField('not_before'):
-    not_before = datetime.datetime.fromtimestamp(token.not_before.seconds,
-                                                 datetime.timezone.utc)
+    not_before = to_datetime(token.not_before.seconds, token.not_before.nanos)
   issued_at = None
   if token.HasField('issued_at'):
-    issued_at = datetime.datetime.fromtimestamp(token.issued_at.seconds,
-                                                datetime.timezone.utc)
+    issued_at = to_datetime(token.issued_at.seconds, token.issued_at.nanos)
   custom_claims = {}
   for name in token.custom_claims:
     value = token.custom_claims[name]
@@ -426,7 +441,9 @@ def jwt_validator_to_proto(
     proto_validator.audience.value = validator.audience()
   proto_validator.clock_skew.seconds = validator.clock_skew().seconds
   if validator.has_fixed_now():
-    proto_validator.now.seconds = int(validator.fixed_now().timestamp())
+    seconds, nanos = split_datetime(validator.fixed_now())
+    proto_validator.now.seconds = seconds
+    proto_validator.now.nanos = nanos
   return proto_validator
 
 

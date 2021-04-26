@@ -43,6 +43,20 @@ using ::crypto::tink::KeysetReader;
 
 using ::grpc::ServerContext;
 
+absl::Time TimestampToTime(tink_testing_api::Timestamp t) {
+    return absl::FromUnixMillis(t.seconds() * 1000 + t.nanos() / 1000000);
+}
+
+Timestamp TimeToTimestamp(absl::Time time) {
+  int64_t millis = absl::ToUnixMillis(time);
+  int64_t seconds = millis / 1000;
+  int32_t nanos = (millis - seconds * 1000) * 1000000;
+  Timestamp timestamp;
+  timestamp.set_seconds(seconds);
+  timestamp.set_nanos(nanos);
+  return timestamp;
+}
+
 crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
     const JwtToken& raw_jwt_proto) {
   auto builder = crypto::tink::RawJwtBuilder();
@@ -60,21 +74,21 @@ crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
   }
   if (raw_jwt_proto.has_expiration()) {
     auto status = builder.SetExpiration(
-        absl::FromUnixSeconds(raw_jwt_proto.expiration().seconds()));
+        TimestampToTime(raw_jwt_proto.expiration()));
     if (!status.ok()) {
       return status;
     }
   }
   if (raw_jwt_proto.has_issued_at()) {
     auto status = builder.SetIssuedAt(
-        absl::FromUnixSeconds(raw_jwt_proto.issued_at().seconds()));
+        TimestampToTime(raw_jwt_proto.issued_at()));
     if (!status.ok()) {
       return status;
     }
   }
   if (raw_jwt_proto.has_not_before()) {
     auto status = builder.SetNotBefore(
-        absl::FromUnixSeconds(raw_jwt_proto.not_before().seconds()));
+        TimestampToTime(raw_jwt_proto.not_before()));
     if (!status.ok()) {
       return status;
     }
@@ -137,19 +151,16 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
     token.mutable_jwt_id()->set_value(verified_jwt.GetJwtId().ValueOrDie());
   }
   if (verified_jwt.HasExpiration()) {
-    token.mutable_expiration()
-        ->set_seconds(
-            absl::ToUnixSeconds(verified_jwt.GetExpiration().ValueOrDie()));
+    *token.mutable_expiration() =
+        TimeToTimestamp(verified_jwt.GetExpiration().ValueOrDie());
   }
   if (verified_jwt.HasIssuedAt()) {
-    token.mutable_issued_at()
-        ->set_seconds(
-            absl::ToUnixSeconds(verified_jwt.GetIssuedAt().ValueOrDie()));
+    *token.mutable_issued_at() =
+        TimeToTimestamp(verified_jwt.GetIssuedAt().ValueOrDie());
   }
   if (verified_jwt.HasNotBefore()) {
-    token.mutable_not_before()
-        ->set_seconds(
-            absl::ToUnixSeconds(verified_jwt.GetNotBefore().ValueOrDie()));
+    *token.mutable_not_before() =
+        TimeToTimestamp(verified_jwt.GetNotBefore().ValueOrDie());
   }
   std::vector<std::string> names = verified_jwt.CustomClaimNames();
   for (const std::string& name : names) {
@@ -189,7 +200,7 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
     builder.SetAudience(validator_proto.audience().value());
   }
   if (validator_proto.has_now()) {
-    builder.SetFixedNow(absl::FromUnixSeconds(validator_proto.now().seconds()));
+    builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }
   if (validator_proto.has_clock_skew()) {
     auto skew_status = builder.SetClockSkew(

@@ -46,7 +46,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import java.time.Instant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,7 +102,7 @@ public final class JwtServiceImplTest {
     return keysetStub.public_(request);
   }
 
-  private JwtToken generateToken(String audience, Instant expiration) {
+  private JwtToken generateToken(String audience, long expSeconds, int expNanos) {
     return JwtToken.newBuilder()
         .setIssuer(StringValue.newBuilder().setValue("issuer"))
         .addAudiences(audience)
@@ -122,7 +121,7 @@ public final class JwtServiceImplTest {
         .putCustomClaims(
             "json_object",
             JwtClaimValue.newBuilder().setJsonObjectValue("{\"a\":[null,{\"b\":42}]}").build())
-        .setExpiration(Timestamp.newBuilder().setSeconds(expiration.getEpochSecond()))
+        .setExpiration(Timestamp.newBuilder().setSeconds(expSeconds).setNanos(expNanos))
         .build();
   }
 
@@ -133,7 +132,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -143,7 +142,7 @@ public final class JwtServiceImplTest {
     JwtValidator validator =
         JwtValidator.newBuilder()
             .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -196,7 +195,7 @@ public final class JwtServiceImplTest {
     assertThat(pubResponse.getErr()).isEmpty();
     byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -209,7 +208,7 @@ public final class JwtServiceImplTest {
     JwtValidator validator =
         JwtValidator.newBuilder()
             .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -227,7 +226,7 @@ public final class JwtServiceImplTest {
   public void signFailsOnBadKeyset() throws Exception {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234, 0);
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(badKeyset))
@@ -244,7 +243,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(-10));
+    JwtToken token = generateToken("audience", 1234 - 10, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -254,7 +253,7 @@ public final class JwtServiceImplTest {
     JwtValidator validator =
         JwtValidator.newBuilder()
             .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -274,7 +273,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("wrong_audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("wrong_audience", 1234 + 100, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -287,7 +286,7 @@ public final class JwtServiceImplTest {
     JwtValidator validator =
         JwtValidator.newBuilder()
             .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -308,7 +307,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234 + 100, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -325,6 +324,7 @@ public final class JwtServiceImplTest {
     JwtValidator validator =
         JwtValidator.newBuilder()
             .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()

@@ -180,12 +180,17 @@ class JwtTest(parameterized.TestCase):
 
     # same time is expired.
     val1 = jwt.new_validator(
-        fixed_now=datetime.datetime.fromtimestamp(1235,
+        fixed_now=datetime.datetime.fromtimestamp(1234.5,
                                                   datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val1)
 
-    # TODO(juerg): add test for 1234.5 and 1234.75
+    # a fraction of a second after is expired.
+    val1 = jwt.new_validator(
+        fixed_now=datetime.datetime.fromtimestamp(1234.75,
+                                                  datetime.timezone.utc))
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, val1)
 
     # a fraction of a second before is fine
     val2 = jwt.new_validator(

@@ -57,6 +57,17 @@ public final class JwtServiceImpl extends JwtImplBase {
     JwtSignatureConfig.register();
   }
 
+  private Instant timestampToInstant(Timestamp t) {
+    return Instant.ofEpochMilli(t.getSeconds() * 1000 + t.getNanos() / 1000000);
+  }
+
+  private Timestamp instantToTimestamp(Instant i) {
+    long millis = i.toEpochMilli();
+    long seconds = millis / 1000;
+    int nanos = (int) ((millis - seconds * 1000) * 1000000);
+    return Timestamp.newBuilder().setSeconds(seconds).setNanos(nanos).build();
+  }
+
   private RawJwt convertJwtTokenToRawJwt(JwtToken token) throws JwtInvalidException {
     RawJwt.Builder rawJwtBuilder = new RawJwt.Builder();
     if (token.hasIssuer()) {
@@ -72,16 +83,13 @@ public final class JwtServiceImpl extends JwtImplBase {
       rawJwtBuilder.setJwtId(token.getJwtId().getValue());
     }
     if (token.hasExpiration()) {
-      rawJwtBuilder.setExpiration(
-        Instant.ofEpochSecond(token.getExpiration().getSeconds()));
+      rawJwtBuilder.setExpiration(timestampToInstant(token.getExpiration()));
     }
     if (token.hasNotBefore()) {
-      rawJwtBuilder.setNotBefore(
-        Instant.ofEpochSecond(token.getNotBefore().getSeconds()));
+      rawJwtBuilder.setNotBefore(timestampToInstant(token.getNotBefore()));
     }
     if (token.hasIssuedAt()) {
-      rawJwtBuilder.setIssuedAt(
-        Instant.ofEpochSecond(token.getIssuedAt().getSeconds()));
+      rawJwtBuilder.setIssuedAt(timestampToInstant(token.getIssuedAt()));
     }
     for (Map.Entry<String, JwtClaimValue> entry : token.getCustomClaimsMap().entrySet()) {
       String name = entry.getKey();
@@ -212,16 +220,13 @@ public final class JwtServiceImpl extends JwtImplBase {
         builder.setJwtId(StringValue.newBuilder().setValue(verifiedJwt.getJwtId()));
     }
     if (verifiedJwt.hasExpiration()) {
-      builder.setExpiration(
-          Timestamp.newBuilder().setSeconds(verifiedJwt.getExpiration().getEpochSecond()));
+      builder.setExpiration(instantToTimestamp(verifiedJwt.getExpiration()));
     }
     if (verifiedJwt.hasNotBefore()) {
-      builder.setNotBefore(
-          Timestamp.newBuilder().setSeconds(verifiedJwt.getNotBefore().getEpochSecond()));
+      builder.setNotBefore(instantToTimestamp(verifiedJwt.getNotBefore()));
     }
     if (verifiedJwt.hasIssuedAt()) {
-      builder.setIssuedAt(
-          Timestamp.newBuilder().setSeconds(verifiedJwt.getIssuedAt().getEpochSecond()));
+      builder.setIssuedAt(instantToTimestamp(verifiedJwt.getIssuedAt()));
     }
     for (String claimName : verifiedJwt.customClaimNames()) {
       addCustomClaimToBuilder(verifiedJwt, claimName, builder);
@@ -242,9 +247,8 @@ public final class JwtServiceImpl extends JwtImplBase {
       validatorBuilder.setAudience(validator.getAudience().getValue());
     }
     if (validator.hasNow()) {
-      Instant time =
-          Instant.ofEpochSecond(validator.getNow().getSeconds());
-      validatorBuilder.setClock(Clock.fixed(time, ZoneOffset.UTC));
+      Instant now = timestampToInstant(validator.getNow());
+      validatorBuilder.setClock(Clock.fixed(now, ZoneOffset.UTC));
     }
     if (validator.hasClockSkew()) {
       validatorBuilder.setClockSkew(Duration.ofSeconds(validator.getClockSkew().getSeconds()));

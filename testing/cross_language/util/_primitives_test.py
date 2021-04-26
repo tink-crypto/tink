@@ -23,9 +23,16 @@ from util import _primitives
 
 class PrimitivesTest(absltest.TestCase):
 
+  def test_split_merge_timestamp(self):
+    dt = datetime.datetime.fromtimestamp(1234.5678, datetime.timezone.utc)
+    seconds, nanos = _primitives.split_datetime(dt)
+    self.assertEqual(seconds, 1234)
+    self.assertEqual(nanos, 567800000)
+    self.assertEqual(_primitives.to_datetime(seconds, nanos), dt)
+
   def test_raw_jwt_to_proto_to_verified_jwt(self):
-    nbf = datetime.datetime.fromtimestamp(1234567, datetime.timezone.utc)
-    iat = datetime.datetime.fromtimestamp(2345678, datetime.timezone.utc)
+    nbf = datetime.datetime.fromtimestamp(1234567.89, datetime.timezone.utc)
+    iat = datetime.datetime.fromtimestamp(2345678.9, datetime.timezone.utc)
     exp = datetime.datetime.fromtimestamp(3456789, datetime.timezone.utc)
     raw = jwt.new_raw_jwt(
         issuer='issuer',
@@ -81,7 +88,7 @@ class PrimitivesTest(absltest.TestCase):
     self.assertEmpty(verified.custom_claim_names())
 
   def test_jwt_validator_to_proto(self):
-    now = datetime.datetime.fromtimestamp(1234567, datetime.timezone.utc)
+    now = datetime.datetime.fromtimestamp(1234567.125, datetime.timezone.utc)
     validator = jwt.new_validator(
         issuer='issuer',
         subject='subject',
@@ -95,6 +102,7 @@ class PrimitivesTest(absltest.TestCase):
     expected.audience.value = 'audience'
     expected.clock_skew.seconds = 123
     expected.now.seconds = 1234567
+    expected.now.nanos = 125000000
     self.assertEqual(proto, expected)
 
   def test_empty_jwt_validator_to_proto(self):

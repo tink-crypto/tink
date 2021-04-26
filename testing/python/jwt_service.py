@@ -21,7 +21,7 @@ from __future__ import print_function
 import datetime
 import json
 
-from typing import Text
+from typing import Text, Tuple
 
 import grpc
 import tink
@@ -33,16 +33,18 @@ from proto.testing import testing_api_pb2_grpc
 from tink import jwt
 
 
-def _to_timestamp(t: datetime.datetime) -> int:
+def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:
   if not t.tzinfo:
     raise ValueError('datetime must have tzinfo')
-  return int(t.timestamp())
+  seconds = int(t.timestamp())
+  nanos = int((t.timestamp() - seconds) * 1e9)
+  return (seconds, nanos)
 
 
 def _from_timestamp_proto(
     timestamp: testing_api_pb2.Timestamp) -> datetime.datetime:
-  return datetime.datetime.fromtimestamp(timestamp.seconds,
-                                         datetime.timezone.utc)
+  t = timestamp.seconds + (timestamp.nanos / 1e9)
+  return datetime.datetime.fromtimestamp(t, datetime.timezone.utc)
 
 
 def _from_duration_proto(
@@ -104,11 +106,17 @@ def verifiedjwt_to_proto(
   if verified_jwt.has_jwt_id():
     token.jwt_id.value = verified_jwt.jwt_id()
   if verified_jwt.has_expiration():
-    token.expiration.seconds = _to_timestamp(verified_jwt.expiration())
+    seconds, nanos = _to_timestamp_tuple(verified_jwt.expiration())
+    token.expiration.seconds = seconds
+    token.expiration.nanos = nanos
   if verified_jwt.has_not_before():
-    token.not_before.seconds = _to_timestamp(verified_jwt.not_before())
+    seconds, nanos = _to_timestamp_tuple(verified_jwt.not_before())
+    token.not_before.seconds = seconds
+    token.not_before.nanos = nanos
   if verified_jwt.has_issued_at():
-    token.issued_at.seconds = _to_timestamp(verified_jwt.issued_at())
+    seconds, nanos = _to_timestamp_tuple(verified_jwt.issued_at())
+    token.issued_at.seconds = seconds
+    token.issued_at.nanos = nanos
   for name in verified_jwt.custom_claim_names():
     value = verified_jwt.custom_claim(name)
     if value is None:

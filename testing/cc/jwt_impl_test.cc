@@ -75,6 +75,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   raw_jwt->mutable_audiences()->Add("audience2");
   raw_jwt->mutable_jwt_id()->set_value("jwt_id");
   raw_jwt->mutable_not_before()->set_seconds(12345);
+  raw_jwt->mutable_not_before()->set_nanos(123000000);
   raw_jwt->mutable_issued_at()->set_seconds(23456);
   raw_jwt->mutable_expiration()->set_seconds(34567);
   auto custom_claims = raw_jwt->mutable_custom_claims();
@@ -108,8 +109,11 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   EXPECT_THAT(verified_jwt.audiences(1), Eq("audience2"));
   EXPECT_THAT(verified_jwt.jwt_id().value(), Eq("jwt_id"));
   EXPECT_THAT(verified_jwt.not_before().seconds(), Eq(12345));
+  EXPECT_THAT(verified_jwt.not_before().nanos(), Eq(123000000));
   EXPECT_THAT(verified_jwt.issued_at().seconds(), Eq(23456));
+  EXPECT_THAT(verified_jwt.issued_at().nanos(), Eq(0));
   EXPECT_THAT(verified_jwt.expiration().seconds(), Eq(34567));
+  EXPECT_THAT(verified_jwt.expiration().nanos(), Eq(0));
   auto verified_custom_claims = verified_jwt.custom_claims();
   EXPECT_THAT(verified_custom_claims["null_claim"].null_value(),
               Eq(tink_testing_api::NullValue::NULL_VALUE));
