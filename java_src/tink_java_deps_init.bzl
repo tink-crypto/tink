@@ -19,7 +19,7 @@ def tink_java_deps_init():
             "com.google.auto:auto-common:0.10",
             "com.google.auto.service:auto-service:1.0-rc7",
             "com.google.auto.service:auto-service-annotations:1.0-rc7",
-            "com.google.api-client:google-api-client:1.31.3",
+            "com.google.api-client:google-api-client:1.31.4",
             "com.google.apis:google-api-services-cloudkms:v1-rev108-1.25.0",
             "com.google.code.findbugs:jsr305:3.0.1",
             "com.google.code.gson:gson:2.8.6",
