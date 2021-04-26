@@ -42,11 +42,15 @@ public class KeyTemplateHandler extends OptionHandler<KeyTemplate> {
     String templateName = params.getParameter(0);
 
     try {
-      setter.addValue(KeyTemplates.get(templateName));
+      KeyTemplate template = TinkeyKeyTemplates.get().get(templateName);
+      // If cannot find the template in Tinkey, look it up in the main registry
+      if (template == null) {
+        template = KeyTemplates.get(templateName);
+      }
+      setter.addValue(template);
       return 1;
     } catch (GeneralSecurityException ex) {
       throw new CmdLineException(owner, ex.getMessage(), ex);
-
     }
   }
 

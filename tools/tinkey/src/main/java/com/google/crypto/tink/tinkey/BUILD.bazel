@@ -72,6 +72,7 @@ java_library(
     name = "key_template_handler",
     srcs = ["KeyTemplateHandler.java"],
     deps = [
+        ":tinkey_key_templates",
         "@maven//:args4j_args4j",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
         "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
@@ -272,6 +273,7 @@ java_library(
     srcs = ["ListKeyTemplatesCommand.java"],
     deps = [
         ":command",
+        ":tinkey_key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -284,5 +286,14 @@ java_library(
         ":out_options",
         "@maven//:args4j_args4j",
         "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+    ],
+)
+
+java_library(
+    name = "tinkey_key_templates",
+    srcs = ["TinkeyKeyTemplates.java"],
+    deps = [
+        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
     ],
 )

@@ -27,5 +27,8 @@ public class ListKeyTemplatesCommand implements Command {
     for (String name : Registry.keyTemplates()) {
       System.out.println(name);
     }
+    for (String name : TinkeyKeyTemplates.get().keySet()) {
+      System.out.println(name);
+    }
   }
 }
