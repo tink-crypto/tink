@@ -78,19 +78,6 @@ util::Status ValidateHeader(absl::string_view encoded_header,
   if (alg.string_value() != algorithm) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid alg");
   }
-  auto it2 = fields.find("typ");
-  if (it2 == fields.end()) {
-    return util::OkStatus();
-  }
-  const auto& typ_value = it2->second;
-  if (typ_value.kind_case() != google::protobuf::Value::kStringValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "typ is not a string");
-  }
-  std::string typ = std::string(typ_value.string_value());
-  std::transform(typ.begin(), typ.end(), typ.begin(), ::toupper);
-  if (typ != "JWT") {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid typ");
-  }
   return util::OkStatus();
 }
 

@@ -137,11 +137,10 @@ class JwtTest(parameterized.TestCase):
     self.assertEqual(verified_jwt.issuer(), 'joe')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_verify_bad_typ_header_invalid(self, lang):
-    token = generate_token('{"typ":"IWT", "alg":"HS256"}', '{"iss":"joe"}')
+  def test_verify_ignores_typ_header(self, lang):
+    token = generate_token('{"typ":"unknown", "alg":"HS256"}', '{"iss":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+    jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_expiration(self, lang):

@@ -128,15 +128,8 @@ public final class JwtFormatTest {
   }
 
   @Test
-  public void validateHeaderWithValidLowercaseTyp_success() throws Exception {
-    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"jwt\"}");
-  }
-
-  @Test
-  public void validateHeaderWithBadTyp_fails() throws Exception {
-    assertThrows(
-        JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"IWT\"}"));
+  public void validateHeaderIgnoresTyp() throws Exception {
+    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"unknown\"}");
   }
 
   @Test

@@ -433,13 +433,11 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
 
-    // invalid token with an unknown "typ" in the header
-    JsonObject badTypeHheader = new JsonObject();
-    badTypeHheader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
-    badTypeHheader.addProperty("typ", "IWT");
-    String badTypeSignedCompact = generateSignedCompact(rawSigner, badTypeHheader, payload);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> verifier.verifyAndDecode(badTypeSignedCompact, validator));
+    // token with an unknown "typ" in the header is valid
+    JsonObject unknownTypeHeader = new JsonObject();
+    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    unknownTypeHeader.addProperty("typ", "unknown");
+    String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
+    verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
   }
 }

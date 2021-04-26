@@ -25,7 +25,6 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.Locale;
 
 final class JwtFormat {
 
@@ -118,14 +117,6 @@ final class JwtFormat {
           throw new InvalidAlgorithmParameterException(
               String.format(
                   "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
-        }
-      } else if (name.equals(JwtNames.HEADER_TYPE)) {
-        String headerType = getStringHeader(parsedHeader, JwtNames.HEADER_TYPE);
-        if (!headerType.toUpperCase(Locale.ROOT).equals(JwtNames.HEADER_TYPE_VALUE)) {
-          throw new JwtInvalidException(
-              String.format(
-                  "invalid header type; expected %s, got %s",
-                  JwtNames.HEADER_TYPE_VALUE, headerType));
         }
       }
       // Ignore all other headers

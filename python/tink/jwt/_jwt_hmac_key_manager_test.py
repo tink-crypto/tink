@@ -77,14 +77,18 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
         signed_compact, jwt.new_validator(fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.issuer(), 'issuer')
 
-  def test_fixed_signed_compact(self):
+  @parameterized.named_parameters([
+      ('normal',
+       'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
+       'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+       'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'),
+      ('unknown_header_typ',
+       'eyJ0eXAiOiJKV0QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA'
+       '4MTkzODEsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.m6sYAmMakslu'
+       'W4deYZS0HaBKbMrfa6kBy6IRr1Vy5Gg')
+  ])
+  def test_fixed_signed_compact(self, signed_compact):
     jwt_hmac = create_fixed_jwt_hmac()
-
-    signed_compact = (
-        'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
-        'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-        'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
-
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact,
         jwt.new_validator(issuer='joe', fixed_now=DATETIME_1970))
@@ -106,10 +110,6 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
           jwt.new_validator(issuer='jane', fixed_now=DATETIME_1970))
 
   @parameterized.named_parameters([
-      ('invalid_header_typ',
-       'eyJ0eXAiOiJKV0QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA'
-       '4MTkzODEsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.m6sYAmMakslu'
-       'W4deYZS0HaBKbMrfa6kBy6IRr1Vy5Gg'),
       ('modified_signature',
        'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
        'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'

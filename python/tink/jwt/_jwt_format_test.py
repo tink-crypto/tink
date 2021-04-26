@@ -132,9 +132,8 @@ class JwtFormatTest(parameterized.TestCase):
   def test_validate_header_with_unknown_entry_success(self):
     _jwt_format.validate_header('{"alg":"HS256","unknown":"header"}', 'HS256')
 
-  def test_validate_header_with_bad_typ_fails(self):
-    with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header('{"alg":"HS256","typ":"IWT"}', 'HS256')
+  def test_validate_header_ignores_typ(self):
+    _jwt_format.validate_header('{"alg":"HS256","typ":"unknown"}', 'HS256')
 
   def test_json_decode_encode_payload_fixed_data(self):
     # Example from https://tools.ietf.org/html/rfc7519#section-3.1

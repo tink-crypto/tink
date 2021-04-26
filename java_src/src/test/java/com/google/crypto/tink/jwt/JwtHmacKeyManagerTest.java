@@ -577,14 +577,13 @@ public class JwtHmacKeyManagerTest {
         GeneralSecurityException.class,
         () -> primitive.verifyMacAndDecode(badAlgoSignedCompact, validator));
 
-    // invalid token with an unknown "typ" in the header
-    JsonObject badTypeHheader = new JsonObject();
-    badTypeHheader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    badTypeHheader.addProperty("typ", "IWT");
-    String badTypeSignedCompact = generateSignedCompact(rawPrimitive, badTypeHheader, payload);
-    assertThrows(
-        GeneralSecurityException.class,
-        () -> primitive.verifyMacAndDecode(badTypeSignedCompact, validator));
+    // token with an unknown "typ" in the header is valid
+    JsonObject unknownTypeHeader = new JsonObject();
+    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    unknownTypeHeader.addProperty("typ", "unknown");
+    String unknownTypeSignedCompact = generateSignedCompact(
+        rawPrimitive, unknownTypeHeader, payload);
+    primitive.verifyMacAndDecode(unknownTypeSignedCompact, validator);
   }
 
   private static KeysetHandle getRfc7515ExampleKeysetHandle() throws Exception {

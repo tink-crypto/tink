@@ -148,11 +148,6 @@ def validate_header(json_header: Text, algorithm: Text) -> None:
   if hdr_algorithm.upper() != algorithm:
     raise _jwt_error.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
                                      (algorithm, hdr_algorithm))
-  header_type = decoded_header.get('typ', None)
-  if 'typ' in decoded_header:
-    if decoded_header['typ'].upper() != 'JWT':
-      raise _jwt_error.JwtInvalidError(
-          'Invalid header type; expected JWT, got %s' % decoded_header['typ'])
 
 
 def create_unsigned_compact(algorithm: Text, json_payload: Text) -> bytes:
