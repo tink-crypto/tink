@@ -6,7 +6,7 @@ Push](https://tools.ietf.org/html/rfc8291).
 The most recent release is
 [1.5.0](https://github.com/google/tink/releases/tag/v1.5.0), released
 2020-10-13. API docs can be found
-[here](https://google.github.com/tink/javadoc/apps-webpush/1.5.0).
+[here](https://google.github.io/tink/javadoc/apps-webpush/1.5.0).
 
 ## Installation
 

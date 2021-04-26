@@ -125,11 +125,11 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.5.0](https://google.github.com/tink/javadoc/tink/1.5.0)
-    *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
+    *   [1.5.0](https://google.github.io/tink/javadoc/tink/1.5.0)
+    *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.5.0](https://google.github.com/tink/javadoc/tink-android/1.5.0)
-    *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
+    *   [1.5.0](https://google.github.io/tink/javadoc/tink-android/1.5.0)
+    *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
 
