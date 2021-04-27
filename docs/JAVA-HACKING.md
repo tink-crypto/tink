@@ -35,9 +35,12 @@ bazel test ...
         *   com.google.protobuf.ByteString
         *   com.google.protobuf.MessageLite
         *   javax.annotation.concurrent.GuardedBy
-        *   org.json.JSONArray
-        *   org.json.JSONException
-        *   org.json.JSONObject
+        *   com.google.gson.JsonArray;
+        *   com.google.gson.JsonObject;
+        *   com.google.gson.JsonParseException;
+        *   com.google.gson.JsonParser;
+        *   com.google.gson.internal.Streams;
+        *   com.google.gson.stream.JsonReader;
     *   API backward-compatibility guarantee: yes
 
 *   **com.google.crypto.tink.aead|daead|mac|signature|hybrid|streamingaead**
