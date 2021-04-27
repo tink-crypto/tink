@@ -66,6 +66,12 @@ class JwtFormatTest(parameterized.TestCase):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format._base64_decode(b'{')
 
+  def test_json_loads_recursion(self):
+    num_recursions = 1000
+    recursive_json = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.json_loads(recursive_json)
+
   def test_decode_encode_header_hs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
     encoded_header = b'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'

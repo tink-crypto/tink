@@ -417,6 +417,17 @@ class JwtTest(parameterized.TestCase):
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_token_with_too_many_recursions_fails(self, lang):
+    # num_recursions has been chosen such that parsing of this token fails
+    # in all languages. We want to make sure that the algorithm does not
+    # hang or crash in this case, but only returns a parsing error.
+    num_recursions = 10000
+    payload = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    token = generate_token('{"alg":"HS256"}', payload)
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
 if __name__ == '__main__':
   absltest.main()

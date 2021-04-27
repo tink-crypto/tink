@@ -76,6 +76,19 @@ TEST(JsonUtil, ParseInvalidListTokenNotOk) {
   ASSERT_FALSE(proto_or.ok());
 }
 
+TEST(JsonUtil, parseRecursiveJsonStringFails) {
+  std::string recursive_json;
+  for (int i = 0; i < 10000; i++) {
+    recursive_json.append("{\"a\":");
+  }
+  recursive_json.append("1");
+  for (int i = 0; i < 10000; i++) {
+    recursive_json.append("}");
+  }
+  auto proto_or = JsonStringToProtoStruct(recursive_json);
+  EXPECT_FALSE(proto_or.ok());
+}
+
 TEST(JsonUtil, ParseStructWithoutQuotesOk) {
   // TODO(b/360366279) Make parsing stricter that this is not allowed.
   auto proto_or = JsonStringToProtoStruct(R"({some_key:false})");

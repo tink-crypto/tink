@@ -70,6 +70,9 @@ def json_loads(json_text: Text) -> Any:
     return json.loads(json_text)
   except json.decoder.JSONDecodeError:
     raise _jwt_error.JwtInvalidError('Failed to parse JSON string')
+  except RecursionError:
+    raise _jwt_error.JwtInvalidError(
+        'Failed to parse JSON string, too many recursions')
 
 
 def _validate_algorithm(algorithm: Text) -> None:
