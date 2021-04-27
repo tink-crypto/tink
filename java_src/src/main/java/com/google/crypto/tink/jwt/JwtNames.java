@@ -37,8 +37,8 @@ final class JwtNames {
 
   static final String HEADER_KEY_ID = "kid";
   static final String HEADER_TYPE = "typ";
-  static final String HEADER_TYPE_VALUE = "JWT";
-  static final String HEADER_CONTENT_TYPE = "cty";
+  static final String HEADER_CRITICAL = "crit";
+
 
   static String validate(String name) {
     if (isRegisteredName(name)) {

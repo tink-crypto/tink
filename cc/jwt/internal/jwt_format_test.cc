@@ -125,6 +125,13 @@ TEST(JwtFormat, ValidateHeaderIgnoresTyp) {
   EXPECT_THAT(ValidateHeader(EncodeHeader(header), "HS256"), IsOk());
 }
 
+TEST(JwtFormat, ValidateHeaderRejectsCrit) {
+  std::string header =
+      R"({"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],)"
+      R"("http://example.invalid/UNDEFINED":true})";
+  EXPECT_FALSE(ValidateHeader(EncodeHeader(header), "HS256").ok());
+}
+
 TEST(JwtFormat, ValidateHeaderWithUnknownEntry) {
   std::string header = R"({"alg":"HS256","unknown":"header"})";
   EXPECT_THAT(ValidateHeader(EncodeHeader(header), "HS256"), IsOk());

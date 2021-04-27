@@ -133,6 +133,17 @@ public final class JwtFormatTest {
   }
 
   @Test
+  public void validateHeaderRejectsCrit() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                "{\"alg\": \"HS256\", \"crit\":[\"http://example.invalid/UNDEFINED\"], "
+                    + "\"http://example.invalid/UNDEFINED\":true}"));
+  }
+
+  @Test
   public void validateHeaderWithUnknownEntry_success() throws Exception {
     JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"unknown\": \"header\"}");
   }

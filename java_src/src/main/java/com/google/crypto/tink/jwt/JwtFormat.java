@@ -118,6 +118,9 @@ final class JwtFormat {
               String.format(
                   "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
         }
+      } else  if (name.equals(JwtNames.HEADER_CRITICAL)) {
+        throw new JwtInvalidException(
+            "all tokens with crit headers are rejected");
       }
       // Ignore all other headers
     }

@@ -148,6 +148,9 @@ def validate_header(json_header: Text, algorithm: Text) -> None:
   if hdr_algorithm.upper() != algorithm:
     raise _jwt_error.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
                                      (algorithm, hdr_algorithm))
+  if 'crit' in decoded_header:
+    raise _jwt_error.JwtInvalidError(
+        'all tokens with crit headers are rejected')
 
 
 def create_unsigned_compact(algorithm: Text, json_payload: Text) -> bytes:

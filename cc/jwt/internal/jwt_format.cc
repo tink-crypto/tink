@@ -78,6 +78,10 @@ util::Status ValidateHeader(absl::string_view encoded_header,
   if (alg.string_value() != algorithm) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid alg");
   }
+  if (fields.find("crit") != fields.end()) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "all tokens with crit headers are rejected");
+  }
   return util::OkStatus();
 }
 

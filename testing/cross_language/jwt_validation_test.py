@@ -137,6 +137,24 @@ class JwtTest(parameterized.TestCase):
     self.assertEqual(verified_jwt.issuer(), 'joe')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_empty_crit_header_invalid(self, lang):
+    # See https://tools.ietf.org/html/rfc7515#section-4.1.11
+    token = generate_token('{"alg":"HS256", "crit":[]}', '{"iss":"joe"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_nonempty_crit_header_invalid(self, lang):
+    # See https://tools.ietf.org/html/rfc7515#section-4.1.11
+    token = generate_token(
+        '{"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],'
+        '"http://example.invalid/UNDEFINED":true}', '{"iss":"joe"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_ignores_typ_header(self, lang):
     token = generate_token('{"typ":"unknown", "alg":"HS256"}', '{"iss":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
