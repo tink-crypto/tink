@@ -51,7 +51,7 @@ final class JwtFormat {
       JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
       jsonReader.setLenient(false);
       return Streams.parse(jsonReader).getAsJsonObject();
-    } catch (IllegalStateException | JsonParseException ex) {
+    } catch (IllegalStateException | JsonParseException | StackOverflowError ex) {
       throw new JwtInvalidException("invalid JSON: " + ex);
     }
   }

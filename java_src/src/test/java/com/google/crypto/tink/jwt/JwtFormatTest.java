@@ -39,6 +39,23 @@ public final class JwtFormatTest {
   }
 
   @Test
+  public void parseRecursiveJsonString_success() throws Exception {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 10000; i++) {
+      sb.append("{\"a\":");
+    }
+    sb.append("1");
+    for (int i = 0; i < 10000; i++) {
+      sb.append("}");
+    }
+    try {
+      JwtFormat.parseJson(sb.toString());
+    } catch (JwtInvalidException ex) {
+      // JwtInvalidException is fine, no exception as well.
+    }
+  }
+
+  @Test
   public void parseJsonWithoutQuotes_fail() throws Exception {
     assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
   }
