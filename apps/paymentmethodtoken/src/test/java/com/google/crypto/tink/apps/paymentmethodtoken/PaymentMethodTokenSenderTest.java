@@ -73,8 +73,8 @@ public class PaymentMethodTokenSenderTest {
           + Instant.now().plus(Duration.standardDays(1)).getMillis()
           + "\",\n"
           + "      \"protocolVersion\": \"ECv2SigningOnly\"\n"
-          + "    },\n"
-          + "  ],\n"
+          + "    }\n"
+          + "  ]\n"
           + "}";
 
   /**
