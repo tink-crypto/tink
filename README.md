@@ -2,9 +2,12 @@
 
 *A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.*
 
-**`Ubuntu`**                                                                                   | **`macOS`**
----------------------------------------------------------------------------------------------- | -----------
-[![Kokoro Ubuntu](https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png)](#) | [![Kokoro macOS](https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png)](#)
+**`Ubuntu`**                        | **`macOS`**
+----------------------------------- | ---------------------------------
+[![Kokoro Ubuntu][ubuntu_badge]](#) | [![Kokoro macOS][macos_badge]](#)
+
+[ubuntu_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-ubuntu.png
+[macos_badge]: https://storage.googleapis.com/tink-kokoro-build-badges/tink-macos.png
 
 ## Index
 
@@ -17,14 +20,12 @@
 
 ## Introduction
 
-Using crypto in your application [shouldn't have
-to](https://www.usenix.org/sites/default/files/conference/protected-files/hotsec15_slides_green.pdf)
+Using crypto in your application [shouldn't have to][devs_are_users_too_slides]
 feel like juggling chainsaws in the dark. Tink is a crypto library written by a
-group of cryptographers and security engineers at Google. It was born out of
-our extensive experience working with Google's product teams, [fixing
-weaknesses in implementations](https://github.com/google/wycheproof), and
-providing simple APIs that can be used safely without needing a crypto
-background.
+group of cryptographers and security engineers at Google. It was born out of our
+extensive experience working with Google's product teams, [fixing weaknesses in
+implementations](https://github.com/google/wycheproof), and providing simple
+APIs that can be used safely without needing a crypto background.
 
 Tink provides secure APIs that are easy to use correctly and hard(er) to misuse.
 It reduces common crypto pitfalls with user-centered design, careful
@@ -33,9 +34,12 @@ of the standard crypto libraries, and has been deployed in hundreds of products
 and systems.
 
 To get a quick overview of Tink design please take a look at
-[slides](docs/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf) from [a
-talk about Tink](https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665) presented
-at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
+[slides][tink_talk_slides] from [a talk about Tink][tink_talk_recording]
+presented at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
+
+[devs_are_users_too_slides]: https://www.usenix.org/sites/default/files/conference/protected-files/hotsec15_slides_green.pdf
+[tink_talk_slides]: g3doc/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf
+[tink_talk_recording]: https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665
 
 ## Current status
 
@@ -49,9 +53,10 @@ Javascript/Typescript is in an alpha state and should only be used for testing.
 
 ## Getting started
 
-As a starting point, the
-[`examples`](https://github.com/google/tink/tree/master/examples) demonstrate
-performing simple tasks using Tink in a variety of languages.
+As a starting point, the [`examples`] demonstrate performing simple tasks using
+Tink in a variety of languages.
+
+[`examples`]: https://github.com/google/tink/tree/master/examples
 
 *   Python
 
@@ -142,7 +147,7 @@ Tink is maintained by (A-Z):
 -   Laurent Simon
 -   Jürg Wullschleger
 
-Alumni
+Alumni:
 
 -   Haris Andrianakis
 -   Tanuj Dhir
