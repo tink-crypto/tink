@@ -248,7 +248,10 @@ public final class EcdsaSignKeyManager
    *       <li>Signature encoding: DER (this is the encoding that Java uses).
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("ECDSA_P256")}
    */
+  @Deprecated
   public static final KeyTemplate ecdsaP256Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -268,7 +271,9 @@ public final class EcdsaSignKeyManager
    *     </ul>
    *     Keys generated from this template create raw signatures of exactly 64 bytes. It is
    *     compatible with JWS and most other libraries.
+   * @deprecated use {@code KeyTemplates.get("ECDSA_P256_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawEcdsaP256Template() {
     return createKeyTemplate(
         HashType.SHA256,
