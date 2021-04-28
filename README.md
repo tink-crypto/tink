@@ -2,6 +2,8 @@
 
 *A multi-language, cross-platform library that provides cryptographic APIs that are secure, easy to use correctly, and hard(er) to misuse.*
 
+https://developers.google.com/tink
+
 **`Ubuntu`**                        | **`macOS`**
 ----------------------------------- | ---------------------------------
 [![Kokoro Ubuntu][ubuntu_badge]](#) | [![Kokoro macOS][macos_badge]](#)
@@ -53,8 +55,12 @@ Javascript/Typescript is in an alpha state and should only be used for testing.
 
 ## Getting started
 
-As a starting point, the [`examples`] demonstrate performing simple tasks using
-Tink in a variety of languages.
+Documentation for the project is located at https://developers.google.com/tink.
+Currently, it details a verety of common usage scenorios and covers the Java and
+Python implementations. The site will be populated with more content over time.
+
+Alternatively, you can look at all of the [`examples`] which demonstrate
+performing simple tasks using Tink in a variety of languages.
 
 [`examples`]: https://github.com/google/tink/tree/master/examples
 
