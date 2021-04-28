@@ -18,9 +18,8 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,8 +63,7 @@ public final class Commands {
       // https://github.com/google/tink/blob/master/docs/JAVA-HOWTO.md#loading-existing-keysets.
       return CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyset));
     }
-    KeyTemplate keysetTemplate = AesGcmKeyManager.aes128GcmTemplate();
-    KeysetHandle handle = KeysetHandle.generateNew(keysetTemplate);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
     CleartextKeysetHandle.write(handle, JsonKeysetWriter.withFile(keyset));
     return handle;
   }

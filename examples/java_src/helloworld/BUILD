@@ -20,10 +20,9 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_reader",
         "@tink_java//src/main/java/com/google/crypto/tink:json_keyset_writer",
-        "@tink_java//src/main/java/com/google/crypto/tink:key_template",
+        "@tink_java//src/main/java/com/google/crypto/tink:key_templates",
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/aead:aead_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
     ],
 )
 
