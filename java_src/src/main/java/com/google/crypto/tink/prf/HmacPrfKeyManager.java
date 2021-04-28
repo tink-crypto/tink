@@ -197,7 +197,9 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    * </ul>
    *
+   * @deprecated use {@code KeyTemplates.get("HMAC_SHA256_PRF")}
    */
+  @Deprecated
   public static final KeyTemplate hmacSha256Template() {
     return createTemplate(32, HashType.SHA256);
   }
@@ -212,7 +214,9 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    * </ul>
    *
+   * @deprecated use {@code KeyTemplates.get("HMAC_SHA512_PRF")}
    */
+  @Deprecated
   public static final KeyTemplate hmacSha512Template() {
     return createTemplate(64, HashType.SHA512);
   }

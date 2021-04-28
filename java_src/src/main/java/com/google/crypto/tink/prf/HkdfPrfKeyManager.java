@@ -183,7 +183,10 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
    *   <li>HMAC key size: 32 bytes
    *   <li>Salt: empty
    * </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("HKDF_SHA256")}
    */
+  @Deprecated
   public static final KeyTemplate hkdfSha256Template() {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.newBuilder()

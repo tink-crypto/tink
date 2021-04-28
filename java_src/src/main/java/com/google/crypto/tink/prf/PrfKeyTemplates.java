@@ -28,8 +28,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
 /**
  * Key templates for PRF-Keys.
  *
- * @deprecated use the key template methods in the key managers, e.g.,
- *     HkdfPrfKeyManager.hkdfSha256Template().
+ * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
+ *     KeyTemplates.get("HKDF_SHA256")
  */
 @Deprecated
 public final class PrfKeyTemplates {
