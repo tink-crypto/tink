@@ -44,8 +44,8 @@ import com.google.protobuf.ByteString;
  * }</pre>
  *
  * @since 1.0.0
- * @deprecated use the key template methods in the key managers, e.g.,
- *     EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128Gcm().
+ * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
+ *     KeyTemplates.get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM")
  */
 @Deprecated
 public final class HybridKeyTemplates {
