@@ -65,14 +65,33 @@ def json_dumps(json_data: Any) -> Text:
   return json.dumps(json_data, separators=(',', ':'))
 
 
+def validate_all_strings(json_data: Any):
+  """Recursivly visits all strings and raises UnicodeEncodeError if invalid."""
+  if isinstance(json_data, str):
+    # We use encode('utf8') to validate that the string is valid.
+    json_data.encode('utf8')
+  if isinstance(json_data, list):
+    for item in json_data:
+      validate_all_strings(item)
+  if isinstance(json_data, dict):
+    for key, value in json_data.items():
+      key.encode('utf8')
+      validate_all_strings(value)
+
+
 def json_loads(json_text: Text) -> Any:
+  """Does the same as json.loads, but with some additinal validation."""
   try:
-    return json.loads(json_text)
+    json_data = json.loads(json_text)
+    validate_all_strings(json_data)
+    return json_data
   except json.decoder.JSONDecodeError:
     raise _jwt_error.JwtInvalidError('Failed to parse JSON string')
   except RecursionError:
     raise _jwt_error.JwtInvalidError(
         'Failed to parse JSON string, too many recursions')
+  except UnicodeEncodeError:
+    raise _jwt_error.JwtInvalidError('invalid character')
 
 
 def _validate_algorithm(algorithm: Text) -> None:

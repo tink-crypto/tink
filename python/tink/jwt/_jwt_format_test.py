@@ -72,6 +72,14 @@ class JwtFormatTest(parameterized.TestCase):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.json_loads(recursive_json)
 
+  def test_json_loads_with_invalid_utf16(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.json_loads(u'{"a":{"b":{"c":"\\uD834"}}}')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.json_loads(u'{"\\uD834":"b"}')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.json_loads(u'{"a":["a":{"b":["c","\\uD834"]}]}')
+
   def test_decode_encode_header_hs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
     encoded_header = b'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'

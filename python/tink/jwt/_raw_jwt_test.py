@@ -301,19 +301,15 @@ class RawJwtTest(absltest.TestCase):
     token = jwt.raw_jwt_from_json_payload(u'{"iss":"\\uD834\\uDD1E"}')
     self.assertEqual(token.issuer(), u'\U0001d11e')
 
-  def test_from_payload_with_invalid_utf16_surrogate(self):
+  def test_from_payload_with_invalid_utf16(self):
     # the json string contains "\uD834", which gets decoded by the json decoder
     # into an invalid UTF16 character.
-
-    # TODO(juerg): Add UTF16 validation in raw_jwt_from_json_payload.
-    # The invalid UTF16 character is ignored in Python.
-    token = jwt.raw_jwt_from_json_payload(u'{"iss":"\\uD834"}')
-    issuer = token.issuer()
-    self.assertEqual(issuer, u'\uD834')
-
-    # but when we convert the string into UTF8 bytes, it fails
-    with self.assertRaises(UnicodeEncodeError):
-      issuer.encode('utf8')
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload(u'{"iss":"\\uD834"}')
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload(u'{"\\uD834":"issuer"}')
+    with self.assertRaises(jwt.JwtInvalidError):
+      jwt.raw_jwt_from_json_payload(u'{"a":{"a":{"a":"\\uD834"}}}')
 
   def test_modification(self):
     audiences = ['alice', 'bob']
