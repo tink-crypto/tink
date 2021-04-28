@@ -102,14 +102,20 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def generate_token(header: Text, payload: Text) -> Text:
-  """Generates tokens with valid MACs."""
+def generate_token_from_bytes(header: bytes, payload: bytes) -> Text:
+  """Generates tokens from bytes with valid MACs."""
   unsigned_compact = (
-      _jwt_format.encode_header(header) + b'.' +
-      _jwt_format.encode_payload(payload))
+      _jwt_format._base64_encode(header) + b'.' +
+      _jwt_format._base64_encode(payload))
   mac_value = MAC.compute_mac(unsigned_compact)
   return (unsigned_compact + b'.' +
           _jwt_format.encode_signature(mac_value)).decode('utf8')
+
+
+def generate_token(header: Text, payload: Text) -> Text:
+  """Generates tokens with valid MACs."""
+  return generate_token_from_bytes(
+      header.encode('utf8'), payload.encode('utf8'))
 
 
 class JwtTest(parameterized.TestCase):
@@ -322,6 +328,51 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"iss":123}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_invalid_utf8_in_header(self, lang):
+    token = generate_token_from_bytes(b'{"alg":"HS256", "a":"\xc2"}',
+                                      b'{"iss":"joe"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_invalid_utf8_in_payload(self, lang):
+    token = generate_token_from_bytes(b'{"alg":"HS256"}', b'{"iss":"joe\xc2"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_with_utf16_surrogate_in_payload(self, lang):
+    # The JSON string contains the G clef character (U+1D11E) in UTF8.
+    token = generate_token_from_bytes(b'{"alg":"HS256"}',
+                                      b'{"iss":"\xF0\x9D\x84\x9E"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    token = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+    self.assertEqual(token.issuer(), u'\U0001d11e')
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_with_json_escaped_utf16_surrogate_in_payload(self, lang):
+    # The JSON string contains "\uD834\uDD1E", which should decode to
+    # the G clef character (U+1D11E).
+    token = generate_token('{"alg":"HS256"}', '{"iss":"\\uD834\\uDD1E"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+    token = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+    self.assertEqual(token.issuer(), u'\U0001d11e')
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_with_invalid_json_escaped_utf16_in_payload(self, lang):
+    if lang in ['java', 'python']:
+      # TODO(juerg): Add UTF16 validation in Python and Java.
+      return
+    # The JSON string contains "\uD834", which gets decoded into an invalid
+    # UTF16 character.
+    token = generate_token('{"alg":"HS256"}', '{"iss":"\\uD834"}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 

@@ -81,21 +81,33 @@ def _validate_algorithm(algorithm: Text) -> None:
 
 
 def encode_header(json_header: Text) -> bytes:
-  return _base64_encode(json_header.encode('utf8'))
+  try:
+    return _base64_encode(json_header.encode('utf8'))
+  except UnicodeEncodeError:
+    raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def decode_header(encoded_header: bytes) -> Text:
-  return _base64_decode(encoded_header).decode('utf8')
+  try:
+    return _base64_decode(encoded_header).decode('utf8')
+  except UnicodeDecodeError:
+    raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def encode_payload(json_payload: Text) -> bytes:
   """Encodes the payload into compact form."""
-  return _base64_encode(json_payload.encode('utf8'))
+  try:
+    return _base64_encode(json_payload.encode('utf8'))
+  except UnicodeEncodeError:
+    raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def decode_payload(encoded_payload: bytes) -> Text:
   """Decodes the payload from compact form."""
-  return _base64_decode(encoded_payload).decode('utf8')
+  try:
+    return _base64_decode(encoded_payload).decode('utf8')
+  except UnicodeDecodeError:
+    raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def encode_signature(signature: bytes) -> bytes:

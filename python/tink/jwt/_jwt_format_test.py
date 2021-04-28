@@ -98,6 +98,21 @@ class JwtFormatTest(parameterized.TestCase):
     json_header = _jwt_format.decode_header(encoded_header)
     self.assertEqual(json_header, '{ "alg": "RS256"} ')
 
+  def test_decode_header_with_invalid_utf8(self):
+    encoded_header = _jwt_format._base64_encode(
+        b'{"alg":"RS256", "bad":"\xc2"}')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.decode_header(encoded_header)
+
+  def test_encode_header_with_utf16_surrogate(self):
+    self.assertEqual(
+        _jwt_format.encode_header('{"alg": "RS256", "a":"\U0001d11e"}'),
+        b'eyJhbGciOiAiUlMyNTYiLCAiYSI6IvCdhJ4ifQ')
+
+  def test_encode_header_with_invalid_utf16_character(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.encode_header('{"alg": "RS256", "a":"\uD834"}')
+
   @parameterized.parameters([
       'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
       'RS384', 'RS512', 'PS256', 'PS384', 'PS512'
@@ -173,6 +188,15 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(
         _jwt_format.decode_payload(_jwt_format.encode_payload(json_payload)),
         json_payload)
+
+  def test_encode_payload_with_utf16_surrogate(self):
+    self.assertEqual(
+        _jwt_format.encode_payload('{"iss":"\U0001d11e"}'),
+        b'eyJpc3MiOiLwnYSeIn0')
+
+  def test_encode_payload_with_invalid_utf16(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.encode_payload('{"iss":"\uD834"}')
 
   def test_create_unsigned_compact_success(self):
     self.assertEqual(
@@ -259,6 +283,14 @@ class JwtFormatTest(parameterized.TestCase):
       _jwt_format.split_signed_compact('e30.e30.YWJj$')
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.split_signed_compact('e30.e30.YWJj\ud83c')
+
+  def test_split_signed_compact_with_invalid_utf8_in_header(self):
+    encoded_header = _jwt_format._base64_encode(
+        b'{"alg":"RS256", "bad":"\xc2"}')
+    token = (encoded_header + b'.e30.YWJj').decode('utf8')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.split_signed_compact(token)
+
 
 if __name__ == '__main__':
   absltest.main()

@@ -17,6 +17,7 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.gson.JsonObject;
@@ -428,6 +429,29 @@ public final class RawJwtTest {
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": [null]}"));
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"jti\": []}"));
     assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"exp\": \"123\"}"));
+  }
+
+  @Test
+  public void fromJsonPayloadWithValidJsonEscapedCharacter_shouldThrow() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload("{\"iss\":\"\\uD834\\uDD1E\"}");
+    assertThat(token.hasIssuer()).isTrue();
+    assertThat(token.getIssuer()).isEqualTo("\uD834\uDD1E");
+  }
+
+  @Test
+  public void fromJsonPayloadWithInvalidJsonEscapedCharacter_shouldThrow() throws Exception {
+    // the json string contains "\uD834", which gets decoded by the json decoder
+    // into an invalid UTF16 character.
+
+    // TODO(juerg): Add UTF16 validation in raw_jwt_from_json_payload.
+    // This invalid character is ignored in Java.
+    RawJwt token = RawJwt.fromJsonPayload("{\"iss\":\"\\uD834\"}");
+    assertThat(token.hasIssuer()).isTrue();
+    String issuer = token.getIssuer();
+    assertThat(issuer).isEqualTo("\uD834");
+
+    // Even converting to UTF8 does not cause an error, it outputs a "?".
+    assertThat(issuer.getBytes(UTF_8)).isEqualTo("?".getBytes(UTF_8));
   }
 
   @Test

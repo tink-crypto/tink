@@ -73,6 +73,13 @@ public final class JwtFormatTest {
   }
 
   @Test
+  public void createDecodeHeaderWithInvalidUtf8_fails() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.decodeHeader("eyJhbGciOiJIUzI1NiIsICJhIjoiwiJ9"));
+  }
+
+  @Test
   public void createHeaderWithUnknownAlgorithm_fails() throws Exception {
     assertThrows(
         InvalidAlgorithmParameterException.class,
@@ -201,6 +208,11 @@ public final class JwtFormatTest {
   @Test
   public void decodeInvalidPayload_fails() throws Exception {
     assertThrows(JwtInvalidException.class, () -> JwtFormat.decodePayload("?="));
+  }
+
+  @Test
+  public void createDecodePayloadWithInvalidUtf8_fails() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodePayload("eyJpc3MiOiJqb2XCIn0"));
   }
 
   @Test

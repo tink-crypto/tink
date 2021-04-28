@@ -24,6 +24,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
 import java.security.InvalidAlgorithmParameterException;
 
 final class JwtFormat {
@@ -61,6 +64,16 @@ final class JwtFormat {
         || ((c >= 'A') && (c <= 'Z'))
         || ((c >= '0') && (c <= '9'))
         || ((c == '-') || (c == '_')));
+  }
+
+  // We need this validation, since String(data, UTF_8) ignores invalid characters.
+  static void validateUtf8(byte[] data) throws JwtInvalidException {
+    CharsetDecoder decoder = UTF_8.newDecoder();
+    try {
+      decoder.decode(ByteBuffer.wrap(data));
+    } catch (CharacterCodingException ex) {
+      throw new JwtInvalidException(ex.getMessage());
+    }
   }
 
   static byte[] strictUrlSafeDecode(String encodedData) throws JwtInvalidException {
@@ -118,7 +131,7 @@ final class JwtFormat {
               String.format(
                   "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
         }
-      } else  if (name.equals(JwtNames.HEADER_CRITICAL)) {
+      } else if (name.equals(JwtNames.HEADER_CRITICAL)) {
         throw new JwtInvalidException(
             "all tokens with crit headers are rejected");
       }
@@ -137,8 +150,9 @@ final class JwtFormat {
   }
 
   static String decodeHeader(String headerStr) throws JwtInvalidException {
-    return new String(strictUrlSafeDecode(headerStr), UTF_8);
-
+    byte[] data = strictUrlSafeDecode(headerStr);
+    validateUtf8(data);
+    return new String(data, UTF_8);
   }
 
   static String encodePayload(String jsonPayload) {
@@ -146,7 +160,9 @@ final class JwtFormat {
   }
 
   static String decodePayload(String payloadStr) throws JwtInvalidException {
-    return new String(strictUrlSafeDecode(payloadStr), UTF_8);
+    byte[] data = strictUrlSafeDecode(payloadStr);
+    validateUtf8(data);
+    return new String(data, UTF_8);
   }
 
   static String encodeSignature(byte[] signature) {
