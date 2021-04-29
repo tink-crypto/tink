@@ -366,9 +366,6 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_with_invalid_json_escaped_utf16_in_payload(self, lang):
-    if lang == 'java':
-      # TODO(juerg): Add UTF16 validation in Java.
-      return
     # The JSON string contains "\uD834", which gets decoded into an invalid
     # UTF16 character.
     token = generate_token('{"alg":"HS256"}', '{"iss":"\\uD834"}')

@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Base64;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,9 +34,38 @@ import org.junit.runners.JUnit4;
 public final class JwtFormatTest {
 
   @Test
+  public void validateValidString_success() throws Exception {
+    assertThat(JwtFormat.isValidString("")).isTrue();
+    assertThat(JwtFormat.isValidString("foo")).isTrue();
+    assertThat(JwtFormat.isValidString("*\uD834\uDD1E*")).isTrue();
+    assertThat(JwtFormat.isValidString("\uD834\uDD1E*")).isTrue();
+    assertThat(JwtFormat.isValidString("*\uD834\uDD1E")).isTrue();
+    assertThat(JwtFormat.isValidString("\uD834\uDD1E")).isTrue();
+  }
+
+  @Test
+  public void validateInvalidString_throws() throws Exception {
+    assertThat(JwtFormat.isValidString("*\uD834")).isFalse();
+    assertThat(JwtFormat.isValidString("\uD834*")).isFalse();
+    assertThat(JwtFormat.isValidString("\uD834")).isFalse();
+    assertThat(JwtFormat.isValidString("*\uD834*")).isFalse();
+    assertThat(JwtFormat.isValidString("\uDD1E")).isFalse();
+    assertThat(JwtFormat.isValidString("*\uDD1E")).isFalse();
+    assertThat(JwtFormat.isValidString("\uDD1E*")).isFalse();
+    assertThat(JwtFormat.isValidString("*\uDD1E*")).isFalse();
+  };
+
+  @Test
   public void parseJson_success() throws Exception {
     JsonObject header = JwtFormat.parseJson("{\"bool\":false}");
     assertThat(header.get("bool").getAsBoolean()).isFalse();
+  }
+
+  @Test
+  public void parseJsonArray_success() throws Exception {
+    JsonArray array = JwtFormat.parseJsonArray("[1, \"foo\"]");
+    assertThat(array.get(0).getAsInt()).isEqualTo(1);
+    assertThat(array.get(1).getAsString()).isEqualTo("foo");
   }
 
   @Test
@@ -58,6 +88,12 @@ public final class JwtFormatTest {
   @Test
   public void parseJsonWithoutQuotes_fail() throws Exception {
     assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
+  }
+
+  @Test
+  public void parseJsonArrayWithoutComments_fail() throws Exception {
+    assertThrows(
+        JwtInvalidException.class, () -> JwtFormat.parseJson("[1, \"foo\" /* comment */]"));
   }
 
   @Test

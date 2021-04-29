@@ -21,7 +21,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -123,6 +122,9 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
+      if (!JwtFormat.isValidString(value)) {
+        throw new IllegalArgumentException();
+      }
       payload.add(JwtNames.CLAIM_ISSUER, new JsonPrimitive(value));
       return this;
     }
@@ -133,6 +135,9 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
+      if (!JwtFormat.isValidString(value)) {
+        throw new IllegalArgumentException();
+      }
       payload.add(JwtNames.CLAIM_SUBJECT, new JsonPrimitive(value));
       return this;
     }
@@ -143,8 +148,8 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder addAudience(String value) {
-      if (value == null) {
-        throw new NullPointerException("claims with null value are not allowed.");
+      if (!JwtFormat.isValidString(value)) {
+        throw new IllegalArgumentException();
       }
       JsonArray audiences = new JsonArray();
       if (payload.has(JwtNames.CLAIM_AUDIENCE)) {
@@ -161,6 +166,9 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
     public Builder setJwtId(String value) {
+      if (!JwtFormat.isValidString(value)) {
+        throw new IllegalArgumentException();
+      }
       payload.add(JwtNames.CLAIM_JWT_ID, new JsonPrimitive(value));
       return this;
     }
@@ -235,6 +243,9 @@ public final class RawJwt {
 
     /** Adds a custom claim of type {@code String} to the JWT. */
     public Builder addStringClaim(String name, String value) {
+      if (!JwtFormat.isValidString(value)) {
+        throw new IllegalArgumentException();
+      }
       JwtNames.validate(name);
       payload.add(name, new JsonPrimitive(value));
       return this;
@@ -251,11 +262,7 @@ public final class RawJwt {
     public Builder addJsonObjectClaim(String name, String encodedJsonObject)
         throws JwtInvalidException {
       JwtNames.validate(name);
-      try {
-        payload.add(name, JsonParser.parseString(encodedJsonObject).getAsJsonObject());
-      } catch (JsonParseException | IllegalStateException ex) {
-        throw new JwtInvalidException("Invalid JSON Object: " + ex.getMessage());
-      }
+      payload.add(name, JwtFormat.parseJson(encodedJsonObject));
       return this;
     }
 
@@ -263,11 +270,7 @@ public final class RawJwt {
     public Builder addJsonArrayClaim(String name, String encodedJsonArray)
         throws JwtInvalidException {
       JwtNames.validate(name);
-      try {
-        payload.add(name, JsonParser.parseString(encodedJsonArray).getAsJsonArray());
-      } catch (JsonParseException | IllegalStateException ex) {
-        throw new JwtInvalidException("Invalid JSON Array: " + ex.getMessage());
-      }
+      payload.add(name, JwtFormat.parseJsonArray(encodedJsonArray));
       return this;
     }
 
