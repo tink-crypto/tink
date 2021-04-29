@@ -17,6 +17,7 @@ java_library(
         ":rsa_ssa_pkcs1_sign_key_manager",
         ":rsa_ssa_pkcs1_verify_key_manager",
         ":rsa_ssa_pss_sign_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
@@ -301,8 +302,9 @@ android_library(
         ":rsa_ssa_pkcs1_sign_key_manager-android",
         ":rsa_ssa_pkcs1_verify_key_manager-android",
         ":rsa_ssa_pss_sign_key_manager-android",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        ":rsa_ssa_pss_verify_key_manager-android",
         "//proto:config_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 
