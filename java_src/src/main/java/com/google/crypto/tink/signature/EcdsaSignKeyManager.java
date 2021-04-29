@@ -29,6 +29,7 @@ import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EcdsaSignJce;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.SelfKeyTestValidators;
@@ -104,8 +105,7 @@ public final class EcdsaSignKeyManager
   }
 
   @Override
-  public EcdsaPrivateKey parseKey(ByteString byteString)
-      throws InvalidProtocolBufferException {
+  public EcdsaPrivateKey parseKey(ByteString byteString) throws InvalidProtocolBufferException {
     return EcdsaPrivateKey.parseFrom(byteString, ExtensionRegistryLite.getEmptyRegistry());
   }
 

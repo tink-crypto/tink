@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
@@ -222,8 +223,9 @@ public class RsaSsaPkcs1SignKeyManagerTest {
     BigInteger exponent = new BigInteger(1, key.getPublicKey().getE().toByteArray());
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
-    PublicKeyVerify verifier = new RsaSsaPkcs1VerifyJce(
-        publicKey, SigUtil.toHashType(key.getPublicKey().getParams().getHashType()));
+    PublicKeyVerify verifier =
+        new RsaSsaPkcs1VerifyJce(
+            publicKey, SigUtil.toHashType(key.getPublicKey().getParams().getHashType()));
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);

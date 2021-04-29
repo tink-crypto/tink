@@ -1,0 +1,13 @@
+licenses(["notice"])
+
+java_test(
+    name = "SigUtilTest",
+    size = "small",
+    srcs = ["SigUtilTest.java"],
+    deps = [
+        "//proto:common_java_proto",
+        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "@maven//:junit_junit",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
+    ],
+)

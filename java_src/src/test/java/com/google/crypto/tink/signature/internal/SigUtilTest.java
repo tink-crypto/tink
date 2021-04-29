@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.signature;
+package com.google.crypto.tink.signature.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;

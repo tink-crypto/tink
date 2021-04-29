@@ -22,18 +22,6 @@ java_test(
 )
 
 java_test(
-    name = "SigUtilTest",
-    size = "small",
-    srcs = ["SigUtilTest.java"],
-    deps = [
-        "//proto:common_java_proto",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util",
-        "//src/main/java/com/google/crypto/tink/subtle:enums",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
     name = "RsaSsaPkcs1SignKeyManagerTest",
     size = "large",
     srcs = ["RsaSsaPkcs1SignKeyManagerTest.java"],
@@ -46,7 +34,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_sign_key_manager",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
@@ -91,7 +79,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink:public_key_sign",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
@@ -319,7 +307,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink:public_key_verify",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/signature:ecdsa_verify_key_manager",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",
@@ -327,6 +314,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
     ],
 )
 

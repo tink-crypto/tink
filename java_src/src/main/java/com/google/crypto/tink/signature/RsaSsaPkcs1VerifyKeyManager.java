@@ -20,6 +20,7 @@ import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.subtle.Validators;

@@ -27,6 +27,7 @@ import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.RsaSsaPssSignJce;
 import com.google.crypto.tink.subtle.SelfKeyTestValidators;
@@ -266,8 +267,8 @@ public final class RsaSsaPssSignKeyManager
   }
 
   /**
-   * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager}
-   * with the registry, so that the the RsaSsaPss-Keys can be used with Tink.
+   * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager} with
+   * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(

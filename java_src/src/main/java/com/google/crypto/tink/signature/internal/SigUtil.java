@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink.signature;
+package com.google.crypto.tink.signature.internal;
 
 import com.google.crypto.tink.proto.EcdsaParams;
 import com.google.crypto.tink.proto.EcdsaSignatureEncoding;
@@ -26,7 +26,8 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
 import java.security.GeneralSecurityException;
 
-final class SigUtil {
+/** Utility functions to convert to and from signature-related proto. */
+public final class SigUtil {
   static final String INVALID_PARAMS = "Invalid ECDSA parameters";
 
   /**
@@ -89,7 +90,7 @@ final class SigUtil {
    *   <li>The MGF1 hash function must be the same as the signature hash function.
    *   <li>The hash function used must be either SHA256, SHA384, or SHA512.
    *   <li>The salt length must be non-zero.
-   * <ul>
+   *       <ul>
    *
    * @param params the RsaSsaPssParams protocol buffer.
    * @throws GeneralSecurityException iff it's invalid.
@@ -154,4 +155,6 @@ final class SigUtil {
         throw new GeneralSecurityException("unknown ECDSA encoding: " + encoding.name());
     }
   }
+
+  private SigUtil() {}
 }

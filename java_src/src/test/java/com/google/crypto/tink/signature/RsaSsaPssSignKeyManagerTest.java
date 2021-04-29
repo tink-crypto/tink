@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
@@ -147,8 +148,8 @@ public class RsaSsaPssSignKeyManagerTest {
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
-  private static void checkConsistency(RsaSsaPssPrivateKey privateKey,
-      RsaSsaPssKeyFormat keyFormat) {
+  private static void checkConsistency(
+      RsaSsaPssPrivateKey privateKey, RsaSsaPssKeyFormat keyFormat) {
     assertThat(privateKey.getPublicKey().getParams()).isEqualTo(keyFormat.getParams());
     assertThat(privateKey.getPublicKey().getE()).isEqualTo(keyFormat.getPublicExponent());
     assertThat(privateKey.getPublicKey().getN().toByteArray().length)
@@ -251,11 +252,12 @@ public class RsaSsaPssSignKeyManagerTest {
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
     RsaSsaPssParams params = key.getPublicKey().getParams();
-    PublicKeyVerify verifier = new RsaSsaPssVerifyJce(
-        publicKey,
-        SigUtil.toHashType(params.getSigHash()),
-        SigUtil.toHashType(params.getMgf1Hash()),
-        params.getSaltLength());
+    PublicKeyVerify verifier =
+        new RsaSsaPssVerifyJce(
+            publicKey,
+            SigUtil.toHashType(params.getSigHash()),
+            SigUtil.toHashType(params.getMgf1Hash()),
+            params.getSaltLength());
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);

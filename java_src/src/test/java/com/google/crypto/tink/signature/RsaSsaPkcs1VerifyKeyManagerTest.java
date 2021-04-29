@@ -47,7 +47,6 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
 
   private final RsaSsaPkcs1VerifyKeyManager verifyManager = new RsaSsaPkcs1VerifyKeyManager();
 
-
   static class NistTestVector {
     byte[] msg;
     byte[] sig;
@@ -56,8 +55,9 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
     public NistTestVector(
         String modulus, String exponent, String msg, String sig, HashType hashType)
         throws Exception {
-      publicKeyProto = TestUtil.createRsaSsaPkcs1PubKey(TestUtil.hexDecode(modulus),
-          TestUtil.hexDecode(exponent), hashType);
+      publicKeyProto =
+          TestUtil.createRsaSsaPkcs1PubKey(
+              TestUtil.hexDecode(modulus), TestUtil.hexDecode(exponent), hashType);
       this.msg = TestUtil.hexDecode(msg);
       this.sig = TestUtil.hexDecode(sig);
     }
@@ -207,4 +207,3 @@ public final class RsaSsaPkcs1VerifyKeyManagerTest {
     }
   }
 }
-
