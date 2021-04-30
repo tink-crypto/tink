@@ -40,13 +40,19 @@ fail_with_debug_output() {
 
 run_linux_tests() {
   local workspace_dir="$1"
+  shift 1
+  local manual_targets=("$@")
 
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
   readonly TEST_FLAGS
   (
-    cd ${workspace_dir}
+    cd "${workspace_dir}"
     time bazel build -- ... || fail_with_debug_output
     time bazel test "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+    if (( ${#manual_targets[@]} > 0 )); then
+      time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \
+        || fail_with_debug_output
+    fi
   )
 }
 
@@ -65,14 +71,37 @@ run_all_linux_tests() {
   run_linux_tests "go"
   run_linux_tests "python"
   run_linux_tests "javascript"
-  run_linux_tests "examples/cc"
-  run_linux_tests "examples/java_src"
   run_linux_tests "tools"
   run_linux_tests "apps"
+  run_linux_tests "examples/cc"
+
+  local -a MANUAL_EXAMPLE_JAVA_TARGETS
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    MANUAL_EXAMPLE_JAVA_TARGETS=(
+      "//gcs:gcs_envelope_aead_example_test"
+      "//encryptedkeyset:encrypted_keyset_example_test"
+      "//envelopeaead:envelope_aead_example_test"
+    )
+  fi
+  readonly MANUAL_EXAMPLE_JAVA_TARGETS
+  run_linux_tests "examples/java_src" "${MANUAL_EXAMPLE_JAVA_TARGETS[@]}"
 
   ## Install Tink and its dependencies via pip for the examples/python tests.
   install_tink_via_pip
-  run_linux_tests "examples/python"
+
+  local -a MANUAL_EXAMPLE_PYTHON_TARGETS
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    MANUAL_EXAMPLE_PYTHON_TARGETS=(
+      "//gcs:gcs_envelope_aead_test_package"
+      "//gcs:gcs_envelope_aead_test"
+      "//envelope_aead:envelope_test_package"
+      "//envelope_aead:envelope_test"
+      "//encrypted_keyset:encrypted_keyset_test_package"
+      "//encrypted_keyset:encrypted_keyset_test"
+    )
+  fi
+  readonly MANUAL_EXAMPLE_PYTHON_TARGETS
+  run_linux_tests "examples/python" "${MANUAL_EXAMPLE_PYTHON_TARGETS[@]}"
 }
 
 run_macos_tests() {

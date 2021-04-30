@@ -40,6 +40,7 @@ sh_test(
         "@tink_base//testdata:credential.json",
     ],
     tags = [
+        "manual",
         "notap",
         "tink_guitar",
     ],

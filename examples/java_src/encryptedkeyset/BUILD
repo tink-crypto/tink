@@ -35,4 +35,9 @@ sh_test(
         # Change this to your credential
         "@tink_base//testdata:credential.json",
     ],
+    tags = [
+        "manual",
+        "notap",
+        "tink_guitar",
+    ],
 )

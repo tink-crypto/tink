@@ -35,6 +35,7 @@ sh_test(
         # Change this to your credential.
         "@tink_base//testdata:credential.json",
     ],
+    tags = ["manual"],
 )
 
 # This runs the previous test, assuming the Tink python package has been
@@ -56,4 +57,5 @@ sh_test(
         # Change this to your credential.
         "@tink_base//testdata:credential.json",
     ],
+    tags = ["manual"],
 )
