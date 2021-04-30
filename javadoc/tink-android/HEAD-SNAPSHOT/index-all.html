@@ -755,6 +755,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/signature/package-summary.html">com.google.crypto.tink.signature</a> - package com.google.crypto.tink.signature</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/signature/internal/package-summary.html">com.google.crypto.tink.signature.internal</a> - package com.google.crypto.tink.signature.internal</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/streamingaead/package-summary.html">com.google.crypto.tink.streamingaead</a> - package com.google.crypto.tink.streamingaead</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a> - package com.google.crypto.tink.subtle</dt>
@@ -3510,8 +3512,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html#registerPair-boolean-">registerPair(boolean)</a></span> - Static method in class com.google.crypto.tink.signature.<a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature">RsaSsaPssSignKeyManager</a></dt>
 <dd>
-<div class="block">Registers the <a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature"><code>RsaSsaPssSignKeyManager</code></a> and the <code>RsaSsaPssVerifyKeyManager</code>
- with the registry, so that the the RsaSsaPss-Keys can be used with Tink.</div>
+<div class="block">Registers the <a href="com/google/crypto/tink/signature/RsaSsaPssSignKeyManager.html" title="class in com.google.crypto.tink.signature"><code>RsaSsaPssSignKeyManager</code></a> and the <code>RsaSsaPssVerifyKeyManager</code> with
+ the registry, so that the the RsaSsaPss-Keys can be used with Tink.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#registerPrimitiveWrapper-com.google.crypto.tink.PrimitiveWrapper-">registerPrimitiveWrapper(PrimitiveWrapper&lt;B, P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
@@ -3774,6 +3776,10 @@
 <dd>
 <div class="block">Builder for SignaturePemKeysetReader</div>
 </dd>
+<dt><a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal"><span class="typeNameLink">SigUtil</span></a> - Class in <a href="com/google/crypto/tink/signature/internal/package-summary.html">com.google.crypto.tink.signature.internal</a></dt>
+<dd>
+<div class="block">Utility functions to convert to and from signature-related proto.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html#staticKeyType--">staticKeyType()</a></span> - Static method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/HkdfPrfKeyManager.html" title="class in com.google.crypto.tink.prf">HkdfPrfKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/StreamingAead.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">StreamingAead</span></a> - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
@@ -3941,6 +3947,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TMessageDigest.html#TMessageDigest--">TMessageDigest()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TMessageDigest.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TMessageDigest</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#toCurveType-com.google.crypto.tink.proto.EllipticCurveType-">toCurveType(EllipticCurveType)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Converts protobuf enum <code>EllipticCurveType</code> to raw Java enum {code CurveType}.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#toDigestAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toDigestAlgo(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
 <div class="block">Returns the digest algorithm name corresponding to a hash type.</div>
@@ -3948,6 +3958,15 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#toEcdsaAlgo-com.google.crypto.tink.subtle.Enums.HashType-">toEcdsaAlgo(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
 <div class="block">Returns the Ecdsa algorithm name corresponding to a hash type.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#toEcdsaEncoding-com.google.crypto.tink.proto.EcdsaSignatureEncoding-">toEcdsaEncoding(EcdsaSignatureEncoding)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Converts protobuf enum <code>EcdsaSignatureEncoding</code> to raw Java enum {code
+ EllipticCurves.EcdsaEncoding}.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#toHashType-com.google.crypto.tink.proto.HashType-">toHashType(HashType)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Converts protobuf enum <code>HashType</code> to raw Java enum <code>Enums.HashType</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#toProviderList-java.lang.String...-">toProviderList(String...)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>
@@ -4005,6 +4024,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html#validateEcdsa-java.security.interfaces.ECPrivateKey-java.security.interfaces.ECPublicKey-com.google.crypto.tink.subtle.Enums.HashType-com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding-">validateEcdsa(ECPrivateKey, ECPublicKey, Enums.HashType, EllipticCurves.EcdsaEncoding)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html" title="class in com.google.crypto.tink.subtle">SelfKeyTestValidators</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#validateEcdsaParams-com.google.crypto.tink.proto.EcdsaParams-">validateEcdsaParams(EcdsaParams)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Validates Ecdsa's parameters.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateExists-java.io.File-">validateExists(File)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html#validateKey-com.google.crypto.tink.proto.AesCtrHmacAeadKey-">validateKey(AesCtrHmacAeadKey)</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AesCtrHmacAeadKeyManager.html" title="class in com.google.crypto.tink.aead">AesCtrHmacAeadKeyManager</a></dt>
@@ -4080,8 +4103,16 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html#validateRsaSsaPkcs1-java.security.interfaces.RSAPrivateCrtKey-java.security.interfaces.RSAPublicKey-com.google.crypto.tink.subtle.Enums.HashType-">validateRsaSsaPkcs1(RSAPrivateCrtKey, RSAPublicKey, Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html" title="class in com.google.crypto.tink.subtle">SelfKeyTestValidators</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#validateRsaSsaPkcs1Params-com.google.crypto.tink.proto.RsaSsaPkcs1Params-">validateRsaSsaPkcs1Params(RsaSsaPkcs1Params)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Validates RsaSsaPkcs1's parameters.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html#validateRsaSsaPss-java.security.interfaces.RSAPrivateCrtKey-java.security.interfaces.RSAPublicKey-com.google.crypto.tink.subtle.Enums.HashType-com.google.crypto.tink.subtle.Enums.HashType-int-">validateRsaSsaPss(RSAPrivateCrtKey, RSAPublicKey, Enums.HashType, Enums.HashType, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html" title="class in com.google.crypto.tink.subtle">SelfKeyTestValidators</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#validateRsaSsaPssParams-com.google.crypto.tink.proto.RsaSsaPssParams-">validateRsaSsaPssParams(RsaSsaPssParams)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
+<dd>
+<div class="block">Validates RsaSsaPss's parameters.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Validators.html#validateSignatureHash-com.google.crypto.tink.subtle.Enums.HashType-">validateSignatureHash(Enums.HashType)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Validators.html" title="class in com.google.crypto.tink.subtle">Validators</a></dt>
 <dd>
 <div class="block">Validates whether <code>hash</code> is safe to use for digital signature.</div>
