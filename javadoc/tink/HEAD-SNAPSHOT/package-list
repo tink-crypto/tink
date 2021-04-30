@@ -9,6 +9,7 @@ com.google.crypto.tink.hybrid.subtle
 com.google.crypto.tink.mac
 com.google.crypto.tink.prf
 com.google.crypto.tink.signature
+com.google.crypto.tink.signature.internal
 com.google.crypto.tink.streamingaead
 com.google.crypto.tink.subtle
 com.google.crypto.tink.subtle.prf
