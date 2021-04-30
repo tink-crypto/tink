@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.6.0](https://github.com/google/tink/releases/tag/v1.6.0), released
-2021-04-29.
+[1.5.0](https://github.com/google/tink/releases/tag/v1.5.0), released
+2020-07-13.
 
 In addition to the versioned releases, snapshots of Tink are regularly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.6.0</version>
+    <version>1.5.0</version>
   </dependency>
 </dependencies>
 ```
