@@ -28,10 +28,6 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from tink.proto import common_pb2
-from tink.proto import jwt_ecdsa_pb2
-from tink.proto import jwt_hmac_pb2
-from tink.proto import tink_pb2
 from tink import jwt
 from util import testing_servers
 
@@ -179,13 +175,7 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_mac(self, lang):
-    key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
-        hash_type=common_pb2.SHA256, key_size=32)
-    key_template = tink_pb2.KeyTemplate(
-        type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
-        value=key_format.SerializeToString(),
-        output_prefix_type=tink_pb2.RAW)
-    keyset = testing_servers.new_keyset(lang, key_template)
+    keyset = testing_servers.new_keyset(lang, jwt.jwt_hs256_template())
 
     jwt_mac_primitive = testing_servers.jwt_mac(lang, keyset)
 
@@ -213,16 +203,10 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_public_key_sign_verify(self, lang):
-    if lang == 'cc' or lang == 'python':
+    if lang == 'python':
       # TODO(juerg): Remove this once this key type is supported.
       return
-    key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
-        algorithm=jwt_ecdsa_pb2.ES256)
-    key_template = tink_pb2.KeyTemplate(
-        type_url='type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey',
-        value=key_format.SerializeToString(),
-        output_prefix_type=tink_pb2.RAW)
-    private_keyset = testing_servers.new_keyset(lang, key_template)
+    private_keyset = testing_servers.new_keyset(lang, jwt.jwt_es256_template())
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
 
     signer = testing_servers.jwt_public_key_sign(lang, private_keyset)

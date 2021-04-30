@@ -31,9 +31,7 @@ enum JwtRsaSsaPkcs1Algorithm {
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey
 message JwtRsaSsaPkcs1PublicKey {
-  // Required.
   uint32 version = 1;
-  // Required.
   JwtRsaSsaPkcs1Algorithm algorithm = 2;
   // Modulus.
   // Unsigned big integer in bigendian representation.
@@ -45,43 +43,33 @@ message JwtRsaSsaPkcs1PublicKey {
 
 // key_type: type.googleapis.com/google.crypto.tink.RsaSsaPkcs1PrivateKey
 message JwtRsaSsaPkcs1PrivateKey {
-  // Required.
   uint32 version = 1;
-  // Required.
   JwtRsaSsaPkcs1PublicKey public_key = 2;
   // Private exponent.
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes d = 3;
 
   // The following parameters are used to optimize RSA signature computation.
   // The prime factor p of n.
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes p = 4;
   // The prime factor q of n.
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes q = 5;
   // d mod (p - 1).
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes dp = 6;
   // d mod (q - 1).
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes dq = 7;
   // Chinese Remainder Theorem coefficient q^(-1) mod p.
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes crt = 8;
 }
 
 message JwtRsaSsaPkcs1KeyFormat {
-  // Required.
-  JwtRsaSsaPkcs1Algorithm algorithm = 1;
-  // Required.
-  uint32 modulus_size_in_bits = 2;
-  // Required.
-  bytes public_exponent = 3;
+  uint32 version = 1;
+  JwtRsaSsaPkcs1Algorithm algorithm = 2;
+  uint32 modulus_size_in_bits = 3;
+  bytes public_exponent = 4;
 }

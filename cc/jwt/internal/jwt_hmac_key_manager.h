@@ -48,29 +48,30 @@ class JwtHmacKeyManager
         const google::crypto::tink::JwtHmacKey& jwt_hmac_key) const override {
       int tag_size;
       std::string algorithm;
-      switch (jwt_hmac_key.hash_type()) {
-        case google::crypto::tink::HashType::SHA256:
+      google::crypto::tink::HashType hash_type;
+      switch (jwt_hmac_key.algorithm()) {
+        case google::crypto::tink::JwtHmacAlgorithm::HS256:
+          hash_type = google::crypto::tink::HashType::SHA256;
           tag_size = 32;
           algorithm = "HS256";
           break;
-        case google::crypto::tink::HashType::SHA384:
+        case google::crypto::tink::JwtHmacAlgorithm::HS384:
+          hash_type = google::crypto::tink::HashType::SHA384;
           tag_size = 48;
           algorithm = "HS384";
           break;
-        case google::crypto::tink::HashType::SHA512:
+        case google::crypto::tink::JwtHmacAlgorithm::HS512:
+          hash_type = google::crypto::tink::HashType::SHA512;
           tag_size = 64;
           algorithm = "HS512";
           break;
         default:
-          return util::Status(
-              util::error::INVALID_ARGUMENT,
-              absl::StrFormat("HashType '%s' is not supported.",
-                              crypto::tink::util::Enums::HashName(
-                                  jwt_hmac_key.hash_type())));
+          return util::Status(util::error::INVALID_ARGUMENT,
+                              "Unknown algorithm.");
       }
       crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac_or =
           subtle::HmacBoringSsl::New(
-              util::Enums::ProtoToSubtle(jwt_hmac_key.hash_type()), tag_size,
+              util::Enums::ProtoToSubtle(hash_type), tag_size,
               util::SecretDataFromStringView(jwt_hmac_key.key_value()));
       if (!mac_or.ok()) {
         return mac_or.status();

@@ -26,7 +26,7 @@
 #include "proto/jwt_hmac.pb.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::HashType;
+using google::crypto::tink::JwtHmacAlgorithm;
 using google::crypto::tink::JwtHmacKeyFormat;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
@@ -45,7 +45,7 @@ KeyTemplate createTemplate(OutputPrefixType output_prefix) {
   key_template.set_output_prefix_type(output_prefix);
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_hash_type(HashType::SHA256);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.SerializeToString(key_template.mutable_value());
   return key_template;
 }

@@ -57,7 +57,7 @@ EMPTY_VALIDATOR = jwt.new_validator()
 def _keyset() -> bytes:
   jwt_hmac_key = jwt_hmac_pb2.JwtHmacKey(
       version=0,
-      hash_type=common_pb2.SHA256,
+      algorithm=jwt_hmac_pb2.HS256,
       key_value=base64.urlsafe_b64decode(KEY_VALUE))
   keyset = tink_pb2.Keyset()
   key = keyset.key.add()

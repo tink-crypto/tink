@@ -20,7 +20,6 @@ from __future__ import print_function
 
 from typing import Text, Type
 
-from tink.proto import common_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import core
@@ -34,10 +33,10 @@ from tink.jwt import _verified_jwt
 
 _JWT_HMAC_KEY_TYPE = 'type.googleapis.com/google.crypto.tink.JwtHmacKey'
 
-_HASH_TYPE_TO_ALGORITHM = {
-    common_pb2.SHA256: 'HS256',
-    common_pb2.SHA384: 'HS384',
-    common_pb2.SHA512: 'HS512'
+_ALGORITHM_STRING = {
+    jwt_hmac_pb2.HS256: 'HS256',
+    jwt_hmac_pb2.HS384: 'HS384',
+    jwt_hmac_pb2.HS512: 'HS512'
 }
 
 
@@ -91,7 +90,7 @@ class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMac]):
     if key_data.type_url != _JWT_HMAC_KEY_TYPE:
       raise _jwt_error.JwtInvalidError('Invalid key data key type')
     jwt_hmac_key = jwt_hmac_pb2.JwtHmacKey.FromString(key_data.value)
-    algorithm = _HASH_TYPE_TO_ALGORITHM[jwt_hmac_key.hash_type]
+    algorithm = _ALGORITHM_STRING[jwt_hmac_key.algorithm]
     cc_mac = self._cc_key_manager.primitive(key_data.SerializeToString())
     return _JwtHmac(cc_mac, algorithm)
 

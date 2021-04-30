@@ -26,9 +26,9 @@
 #include "proto/jwt_rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
 
-using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::JwtEcdsaAlgorithm;
 using ::google::crypto::tink::JwtEcdsaKeyFormat;
+using ::google::crypto::tink::JwtHmacAlgorithm;
 using ::google::crypto::tink::JwtHmacKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPkcs1Algorithm;
 using ::google::crypto::tink::JwtRsaSsaPkcs1KeyFormat;
@@ -42,14 +42,14 @@ namespace tink {
 
 namespace {
 
-KeyTemplate* NewJwtHmacKeyTemplate(HashType hash_type) {
+KeyTemplate* NewJwtHmacKeyTemplate(JwtHmacAlgorithm algorithm) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtHmacKey");
   key_template->set_output_prefix_type(OutputPrefixType::RAW);
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_hash_type(hash_type);
+  key_format.set_algorithm(algorithm);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -107,19 +107,19 @@ KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
 
 const KeyTemplate& JwtHs256Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(HashType::SHA256);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs384Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(HashType::SHA384);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs512Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(HashType::SHA512);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512);
   return *key_template;
 }
 

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 """Pre-generated JWT KeyTemplate."""
 
-from tink.proto import common_pb2
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
@@ -24,9 +23,8 @@ _F4 = 65537
 
 
 def _create_jwt_hmac_template(
-    hash_type: common_pb2.HashType) -> tink_pb2.KeyTemplate:
-  key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
-      hash_type=hash_type, key_size=32)
+    algorithm: jwt_hmac_pb2.JwtHmacAlgorithm) -> tink_pb2.KeyTemplate:
+  key_format = jwt_hmac_pb2.JwtHmacKeyFormat(algorithm=algorithm, key_size=32)
   return tink_pb2.KeyTemplate(
       type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
       value=key_format.SerializeToString(),
@@ -87,15 +85,15 @@ def _create_jwt_rsa_ssa_pss_template(
 
 # Hmac Templates
 def jwt_hs256_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(common_pb2.SHA256)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS256)
 
 
 def jwt_hs384_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(common_pb2.SHA384)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS384)
 
 
 def jwt_hs512_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(common_pb2.SHA512)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS512)
 
 
 # ECDSA Templates

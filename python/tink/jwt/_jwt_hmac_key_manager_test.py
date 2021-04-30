@@ -19,7 +19,6 @@ import datetime
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from tink.proto import common_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 import tink
@@ -43,7 +42,7 @@ def create_fixed_jwt_hmac() -> jwt.JwtMac:
   padded_key_encoded = key_encoded + b'=' * (-len(key_encoded) % 4)
   key_value = base64.urlsafe_b64decode(padded_key_encoded)
   jwt_hmac_key = jwt_hmac_pb2.JwtHmacKey(
-      version=0, hash_type=common_pb2.SHA256, key_value=key_value)
+      version=0, algorithm=jwt_hmac_pb2.HS256, key_value=key_value)
   key_data = tink_pb2.KeyData(
       type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
       key_material_type=tink_pb2.KeyData.SYMMETRIC,

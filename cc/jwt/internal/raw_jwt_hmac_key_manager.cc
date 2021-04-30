@@ -37,10 +37,9 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-using google::crypto::tink::HashType;
+using google::crypto::tink::JwtHmacAlgorithm;
 using google::crypto::tink::JwtHmacKey;
 using google::crypto::tink::JwtHmacKeyFormat;
 
@@ -48,12 +47,15 @@ namespace {
 
 constexpr int kMinKeySizeInBytes = 32;
 
-Status ValidateHashType(const ::google::crypto::tink::HashType hash_type) {
-  if ((hash_type != HashType::SHA256) && (hash_type != HashType::SHA384) &&
-      (hash_type != HashType::SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                  absl::StrCat("HashType ", Enums::HashName(hash_type),
-                               " is not supported"));
+Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
+  switch (algorithm) {
+    case JwtHmacAlgorithm::HS256:
+    case JwtHmacAlgorithm::HS384:
+    case JwtHmacAlgorithm::HS512:
+      return Status::OK;
+    default:
+      return Status(util::error::INVALID_ARGUMENT,
+                    "Unsupported algorithm.");
   }
   return Status::OK;
 }
@@ -64,7 +66,7 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::CreateKey(
     const JwtHmacKeyFormat& jwt_hmac_key_format) const {
   JwtHmacKey jwt_hmac_key;
   jwt_hmac_key.set_version(get_version());
-  jwt_hmac_key.set_hash_type(jwt_hmac_key_format.hash_type());
+  jwt_hmac_key.set_algorithm(jwt_hmac_key_format.algorithm());
   jwt_hmac_key.set_key_value(
       subtle::Random::GetRandomBytes(jwt_hmac_key_format.key_size()));
   return jwt_hmac_key;
@@ -84,7 +86,7 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid JwtHmacKey: key_value is too short.");
   }
-  return ValidateHashType(key.hash_type());
+  return ValidateHmacAlgorithm(key.algorithm());
 }
 
 // static
@@ -94,7 +96,7 @@ Status RawJwtHmacKeyManager::ValidateKeyFormat(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
-  return ValidateHashType(key_format.hash_type());
+  return ValidateHmacAlgorithm(key_format.algorithm());
 }
 
 }  // namespace jwt_internal

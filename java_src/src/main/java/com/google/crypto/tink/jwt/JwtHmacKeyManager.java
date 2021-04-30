@@ -21,7 +21,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
-import com.google.crypto.tink.proto.HashType;
+import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
 import com.google.crypto.tink.proto.JwtHmacKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -42,29 +42,31 @@ import javax.crypto.spec.SecretKeySpec;
  * JwtHmac}.
  */
 public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
-  private static final String getAlgorithm(HashType hash) throws GeneralSecurityException {
-    switch (hash) {
-      case SHA256:
+  private static final String getAlgorithmName(JwtHmacAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case HS256:
         return "HS256";
-      case SHA384:
+      case HS384:
         return "HS384";
-      case SHA512:
+      case HS512:
         return "HS512";
       default:
-        throw new GeneralSecurityException("unknown hash");
+        throw new GeneralSecurityException("unknown algorithm");
     }
   }
 
-  private static final String getHmacAlgorithm(HashType hash) throws GeneralSecurityException {
-    switch (hash) {
-      case SHA256:
+  private static final String getHmacAlgorithm(JwtHmacAlgorithm algorithm)
+      throws GeneralSecurityException {
+    switch (algorithm) {
+      case HS256:
         return "HMACSHA256";
-      case SHA384:
+      case HS384:
         return "HMACSHA384";
-      case SHA512:
+      case HS512:
         return "HMACSHA512";
       default:
-        throw new GeneralSecurityException("unknown hash");
+        throw new GeneralSecurityException("unknown algorithm");
     }
   }
 
@@ -103,12 +105,12 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         new PrimitiveFactory<JwtMac, JwtHmacKey>(JwtMac.class) {
           @Override
           public JwtMac getPrimitive(JwtHmacKey key) throws GeneralSecurityException {
-            HashType hash = key.getHashType();
+            JwtHmacAlgorithm algorithm = key.getAlgorithm();
             byte[] keyValue = key.getKeyValue().toByteArray();
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-            PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(hash), keySpec);
+            PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(algorithm), keySpec);
             final PrfMac prfMac = new PrfMac(prf, prf.getMaxOutputLength());
-            return new JwtHmac(getAlgorithm(hash), prfMac);
+            return new JwtHmac(getAlgorithmName(algorithm), prfMac);
           }
         });
   }
@@ -164,7 +166,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
       public JwtHmacKey createKey(JwtHmacKeyFormat format) {
         return JwtHmacKey.newBuilder()
             .setVersion(getVersion())
-            .setHashType(format.getHashType())
+            .setAlgorithm(format.getAlgorithm())
             .setKeyValue(ByteString.copyFrom(Random.randBytes(format.getKeySize())))
             .build();
       }
@@ -183,26 +185,26 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */
   public static final KeyTemplate hs256Template() {
-    return createTemplate(32, HashType.SHA256);
+    return createTemplate(32, JwtHmacAlgorithm.HS256);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS384 384-bit keys. */
   public static final KeyTemplate hs384Template() {
-    return createTemplate(48, HashType.SHA384);
+    return createTemplate(48, JwtHmacAlgorithm.HS384);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS512 384-bit keys. */
   public static final KeyTemplate hs512Template() {
-    return createTemplate(64, HashType.SHA512);
+    return createTemplate(64, JwtHmacAlgorithm.HS512);
   }
 
   /**
    * @return a {@link KeyTemplate} containing a {@link JwtHmacKeyFormat} with some specified
    *     parameters.
    */
-  private static KeyTemplate createTemplate(int keySize, HashType hashType) {
+  private static KeyTemplate createTemplate(int keySize, JwtHmacAlgorithm algorithm) {
     JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.newBuilder().setHashType(hashType).setKeySize(keySize).build();
+        JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
     return KeyTemplate.create(
         new JwtHmacKeyManager().getKeyType(),
         format.toByteArray(),
