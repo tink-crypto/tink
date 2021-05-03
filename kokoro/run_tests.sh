@@ -136,6 +136,9 @@ install_tink_via_pip() {
   fi
   readonly PIP_FLAGS
 
+  # Set path to Tink base folder
+  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${PWD}"
+
   # Check if we can build Tink python package.
   pip3 install "${PIP_FLAGS[@]}" --upgrade pip
   pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
