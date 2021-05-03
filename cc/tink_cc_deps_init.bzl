@@ -2,7 +2,7 @@
 Initialization of dependencies of C++ Tink.
 """
 
-load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
