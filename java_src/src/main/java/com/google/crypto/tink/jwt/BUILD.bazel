@@ -327,6 +327,22 @@ java_library(
 )
 
 java_library(
+    name = "jwk_set_converter",
+    srcs = ["JwkSetConverter.java"],
+    deps = [
+        "//proto:jwt_ecdsa_java_proto",
+        "//proto:jwt_rsa_ssa_pkcs1_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:keyset_writer",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:base64",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
+java_library(
     name = "jwt_signature_config",
     srcs = ["JwtSignatureConfig.java"],
     deps = [

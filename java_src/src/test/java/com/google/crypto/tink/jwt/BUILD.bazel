@@ -312,3 +312,17 @@ java_test(
         "@maven//:pl_pragmatists_JUnitParams",
     ],
 )
+
+java_test(
+    name = "JwkSetConverterTest",
+    srcs = ["JwkSetConverterTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:json_keyset_reader",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/jwt:jwk_set_converter",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
