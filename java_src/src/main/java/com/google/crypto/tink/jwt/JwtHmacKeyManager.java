@@ -30,11 +30,13 @@ import com.google.crypto.tink.subtle.PrfMac;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.Validators;
 import com.google.errorprone.annotations.Immutable;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -81,9 +83,11 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
 
     @Override
-    public String computeMacAndEncode(RawJwt token) throws GeneralSecurityException {
-      String unsignedCompact =
-          JwtFormat.createUnsignedCompact(algorithm, token.getJsonPayload());
+    public String computeMacAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+      String jsonPayload = rawJwt.getJsonPayload();
+      Optional<String> typeHeader =
+          rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
+      String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, typeHeader, jsonPayload);
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
@@ -93,8 +97,9 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
-      JwtFormat.validateHeader(algorithm, parts.header);
-      RawJwt token = RawJwt.fromJsonPayload(parts.payload);
+      JsonObject parsedHeader = JwtFormat.parseJson(parts.header);
+      JwtFormat.validateHeader(algorithm, parsedHeader);
+      RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }
   };

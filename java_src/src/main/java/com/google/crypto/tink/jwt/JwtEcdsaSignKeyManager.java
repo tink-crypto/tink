@@ -41,6 +41,7 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import java.util.Optional;
 
 /**
  * This key manager generates new {@code JwtEcdsaSignKey} keys and produces new instances of {@code
@@ -87,9 +88,12 @@ public final class JwtEcdsaSignKeyManager
 
       return new JwtPublicKeySign() {
         @Override
-        public String signAndEncode(RawJwt token) throws GeneralSecurityException {
+        public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+          String jsonPayload = rawJwt.getJsonPayload();
+          Optional<String> typeHeader =
+              rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
+              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, jsonPayload);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

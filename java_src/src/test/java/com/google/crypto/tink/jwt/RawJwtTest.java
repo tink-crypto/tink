@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -382,7 +383,7 @@ public final class RawJwtTest {
         "{\"jti\": \"abc123\", \"aud\": [\"me\", \"you\"], \"iat\": 123, "
             + "\"custom\": {\"int\": 123, \"string\": \"value\"}}";
 
-    RawJwt token = RawJwt.fromJsonPayload(input);
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
     assertThat(token.getJwtId()).isEqualTo("abc123");
     assertThat(token.getAudiences()).containsExactly("me", "you");
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
@@ -392,62 +393,88 @@ public final class RawJwtTest {
     assertThat(custom.get("int").getAsInt()).isEqualTo(123);
     assertThat(custom.get("string").getAsString()).isEqualTo("value");
   }
- 
+
+  @Test
+  public void fromJsonPayloadWithTypeHeader_success() throws Exception {
+    RawJwt token = RawJwt.fromJsonPayload(Optional.of("myType"), "{}");
+    assertThat(token.getTypeHeader()).isEqualTo("myType");
+  }
+
   @Test
   public void fromJsonPayloadWithFloatIssuedAt_success() throws Exception {
-    RawJwt token = RawJwt.fromJsonPayload("{\"iat\": 123.456}");
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{\"iat\": 123.456}");
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochMilli(123456));
   }
 
   @Test
   public void fromJsonPayloadWithExpFloatIssuedAt_success() throws Exception {
-    RawJwt token = RawJwt.fromJsonPayload("{\"iat\":1e10}");
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{\"iat\":1e10}");
     assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochMilli(10000000000000L));
   }
 
   @Test
   public void fromJsonPayloadWithTooLargeIssuedAt_throws() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iat\":1e30}"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(
+        Optional.empty(), "{\"iat\":1e30}"));
   }
 
   @Test
   public void fromJsonPayloadWithInfinityIssuedAt_throws() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iat\":Infinity}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"iat\":Infinity}"));
   }
 
   @Test
   public void fromEmptyJsonPayload_success() throws Exception {
-    RawJwt token = RawJwt.fromJsonPayload("{}");
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{}");
+    assertThat(token.hasTypeHeader()).isFalse();
     assertThat(token.hasIssuer()).isFalse();
   }
 
   @Test
   public void fromJsonPayloadWithNullClaim_success() throws Exception {
-    RawJwt token = RawJwt.fromJsonPayload("{\"null_claim\":null}");
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{\"null_claim\":null}");
     assertThat(token.isNullClaim("null_claim")).isTrue();
   }
 
   @Test
   public void fromNullJsonPayload_shouldThrow() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("null"));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), "null"));
   }
 
   @Test
   public void fromInvalidJsonPayload_shouldThrow() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("invalid!!!"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iss\": true}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iss\": null}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"sub\": 123}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": 123}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": [\"a\", 1]}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"aud\": [null]}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"jti\": []}"));
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"exp\": \"123\"}"));
+    assertThrows(
+        JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), "invalid!!!"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"iss\": true}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"iss\": null}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"sub\": 123}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"aud\": 123}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"aud\": [\"a\", 1]}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"aud\": [null]}"));
+    assertThrows(
+        JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"jti\": []}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"exp\": \"123\"}"));
   }
 
   @Test
   public void fromJsonPayloadWithValidJsonEscapedCharacter_shouldThrow() throws Exception {
-    RawJwt token = RawJwt.fromJsonPayload("{\"iss\":\"\\uD834\\uDD1E\"}");
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), "{\"iss\":\"\\uD834\\uDD1E\"}");
     assertThat(token.hasIssuer()).isTrue();
     assertThat(token.getIssuer()).isEqualTo("\uD834\uDD1E");
   }
@@ -456,14 +483,16 @@ public final class RawJwtTest {
   public void fromJsonPayloadWithInvalidJsonEscapedCharacter_shouldThrow() throws Exception {
     // the json string contains "\uD834", which gets decoded by the json decoder
     // into an invalid UTF16 character.
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload("{\"iss\":\"\\uD834\"}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () -> RawJwt.fromJsonPayload(Optional.empty(), "{\"iss\":\"\\uD834\"}"));
   }
 
   @Test
   public void fromJsonPayloadWithAudienceAsString_convertedToArray() throws Exception {
     // According to https://tools.ietf.org/html/rfc7519#section-4.1.3, this should be accepted.
     String input = "{\"aud\": \"me\"}";
-    RawJwt token = RawJwt.fromJsonPayload(input);
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
     assertThat(token.getAudiences()).containsExactly("me");
     assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":[\"me\"]}");
   }
@@ -474,26 +503,26 @@ public final class RawJwtTest {
     // An audience claim that is present but empty results in a token that must always be rejected
     // by the receiver, because the receiver is required to test that it is among the audiences.
     // See https://tools.ietf.org/html/rfc7519#section-4.1.3. It is better to consider it invalid.
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
   @Test
   public void fromJsonPayloadWithComments_shouldThrow () throws Exception {
     String input = "{\"sub\": \"subject\" /*, \"iss\": \"issuer\" */}";
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
   @Test
   public void fromJsonPayloadWithEscapedChars_success() throws Exception {
     String input = "{\"i\\u0073\\u0073\": \"\\u0061lice\"}";
-    RawJwt token = RawJwt.fromJsonPayload(input);
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
     assertThat(token.getIssuer()).isEqualTo("alice");
   }
 
   @Test
   public void fromJsonPayloadWithoutQuotes_shoudThrow() throws Exception {
     String input = "{iss: issuer}";
-    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(input));
+    assertThrows(JwtInvalidException.class, () -> RawJwt.fromJsonPayload(Optional.empty(), input));
   }
 
 

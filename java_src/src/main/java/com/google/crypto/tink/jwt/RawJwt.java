@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -42,11 +43,15 @@ public final class RawJwt {
   @SuppressWarnings("Immutable") // We do not mutate the payload.
   private final JsonObject payload;
 
+  private final Optional<String> typeHeader;
+
   private RawJwt(Builder builder) {
+    this.typeHeader = builder.typeHeader;
     this.payload = builder.payload.deepCopy();
   }
 
-  private RawJwt(String jsonPayload) throws JwtInvalidException {
+  private RawJwt(Optional<String> typeHeader, String jsonPayload) throws JwtInvalidException {
+    this.typeHeader = typeHeader;
     this.payload = JwtFormat.parseJson(jsonPayload);
     validateStringClaim(JwtNames.CLAIM_ISSUER);
     validateStringClaim(JwtNames.CLAIM_SUBJECT);
@@ -104,16 +109,31 @@ public final class RawJwt {
     }
   }
 
-  static RawJwt fromJsonPayload(String jsonPayload) throws JwtInvalidException {
-    return new RawJwt(jsonPayload);
+  static RawJwt fromJsonPayload(Optional<String> typeHeader, String jsonPayload)
+      throws JwtInvalidException {
+    return new RawJwt(typeHeader, jsonPayload);
   }
 
   /** Builder for RawJwt */
   public static final class Builder {
+    private Optional<String> typeHeader;
     private final JsonObject payload;
 
     public Builder() {
+      typeHeader = Optional.empty();
       payload = new JsonObject();
+    }
+
+    /**
+     * Sets the Type Header Parameter.
+     *
+     * <p>When set, this value should be set to a shortended IANA MediaType, see
+     * https://tools.ietf.org/html/rfc7519#section-5.1 and
+     * https://tools.ietf.org/html/rfc8725#section-3.11
+     */
+    public Builder setTypeHeader(String value) {
+      typeHeader = Optional.of(value);
+      return this;
     }
 
     /**
@@ -383,6 +403,17 @@ public final class RawJwt {
       throw new JwtInvalidException("claim " + name + " is not a JSON array");
     }
     return payload.get(name).getAsJsonArray().toString();
+  }
+
+  boolean hasTypeHeader() {
+    return typeHeader.isPresent();
+  }
+
+  String getTypeHeader() throws JwtInvalidException {
+    if (!typeHeader.isPresent()) {
+      throw new JwtInvalidException("type header is not set");
+    }
+    return typeHeader.get();
   }
 
   boolean hasIssuer() {

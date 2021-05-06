@@ -45,6 +45,7 @@ import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import junitparams.JUnitParamsRunner;
@@ -272,11 +273,18 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = new JwtValidator.Builder().build();
+
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
     String signedCompact = signer.signAndEncode(rawToken);
-    JwtValidator validator = new JwtValidator.Builder().build();
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+   assertThat(verifiedToken.hasTypeHeader()).isFalse();
+
+    RawJwt rawTokenWithType = new RawJwt.Builder().setTypeHeader("typeHeader").build();
+    String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
+    VerifiedJwt verifiedTokenWithType = verifier.verifyAndDecode(signedCompactWithType, validator);
+    assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
   @Test
@@ -405,7 +413,8 @@ public class JwtEcdsaSignKeyManagerTest {
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Normal, valid signed compact.
-    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm.name(), payload.toString());
+    String unsignedCompact =
+        JwtFormat.createUnsignedCompact(algorithm.name(), Optional.empty(), payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));

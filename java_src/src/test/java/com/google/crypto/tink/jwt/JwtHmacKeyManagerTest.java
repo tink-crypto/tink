@@ -48,6 +48,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
@@ -313,6 +314,7 @@ public class JwtHmacKeyManagerTest {
     double amount = 0.1;
     RawJwt unverified =
         new RawJwt.Builder()
+            .setTypeHeader("myType")
             .setIssuer(issuer)
             .addAudience(audience)
             .setJwtId(jwtId)
@@ -322,6 +324,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().setAudience(audience).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
+    assertThat(token.getTypeHeader()).isEqualTo("myType");
     assertThat(token.getNumberClaim("amount")).isEqualTo(amount);
     assertThat(token.getIssuer()).isEqualTo(issuer);
     assertThat(token.getAudiences()).containsExactly(audience);
@@ -549,7 +552,8 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().build();
 
     // Normal, valid signed compact.
-    String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, payload.toString());
+    String unsignedCompact =
+        JwtFormat.createUnsignedCompact(algorithm, Optional.empty(), payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawPrimitive.computeMac(unsignedCompact.getBytes(US_ASCII)));

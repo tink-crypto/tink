@@ -26,6 +26,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -96,8 +97,10 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
             throws GeneralSecurityException {
           JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
           verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
-          JwtFormat.validateHeader(algorithmName, parts.header);
-          RawJwt token = RawJwt.fromJsonPayload(parts.payload);
+          JsonObject parsedHeader = JwtFormat.parseJson(parts.header);
+          JwtFormat.validateHeader(algorithmName, parsedHeader);
+          RawJwt token =
+              RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
           return validator.validate(token);
         }
       };

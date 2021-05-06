@@ -44,6 +44,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Optional;
 
 /**
  * This key manager generates new {@code JwtRsaSsaPssPrivateKey} keys and produces new instances of
@@ -104,9 +105,12 @@ public final class JwtRsaSsaPssSignKeyManager
 
       return new JwtPublicKeySign() {
         @Override
-        public String signAndEncode(RawJwt token) throws GeneralSecurityException {
+        public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+          String jsonPayload = rawJwt.getJsonPayload();
+          Optional<String> typeHeader =
+              rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
+              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, jsonPayload);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

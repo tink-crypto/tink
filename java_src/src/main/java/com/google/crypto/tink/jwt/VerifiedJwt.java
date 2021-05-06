@@ -40,6 +40,20 @@ public final class VerifiedJwt {
   }
 
   /**
+   * Returns the {@code typ} header value. Throws a JwtInvalidException if header is not present.
+   */
+  public String getTypeHeader() throws JwtInvalidException {
+    return this.rawJwt.getTypeHeader();
+  }
+
+  /**
+   * Returns true iff the {@code typ} header is present.
+   */
+  public boolean hasTypeHeader() {
+    return this.rawJwt.hasTypeHeader();
+  }
+
+  /**
    * Returns the {@code iss} claim that identifies the principal that issued the JWT. Throws a
    * JwtInvalidException if no such claim is present.
    */

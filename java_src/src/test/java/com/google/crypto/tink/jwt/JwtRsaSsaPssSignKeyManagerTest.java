@@ -343,11 +343,18 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = new JwtValidator.Builder().build();
+
     RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
     String signedCompact = signer.signAndEncode(rawToken);
-    JwtValidator validator = new JwtValidator.Builder().build();
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+   assertThat(verifiedToken.hasTypeHeader()).isFalse();
+
+    RawJwt rawTokenWithType = new RawJwt.Builder().setTypeHeader("typeHeader").build();
+    String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
+    VerifiedJwt verifiedTokenWithType = verifier.verifyAndDecode(signedCompactWithType, validator);
+    assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
   @Test

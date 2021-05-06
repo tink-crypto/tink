@@ -31,6 +31,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.util.Map;
+import java.util.Optional;
 
 final class JwtFormat {
 
@@ -173,17 +174,20 @@ final class JwtFormat {
     }
   }
 
-  static String createHeader(String algorithm) throws InvalidAlgorithmParameterException {
+  static String createHeader(String algorithm, Optional<String> typeHeader)
+      throws InvalidAlgorithmParameterException {
     validateAlgorithm(algorithm);
     JsonObject header = new JsonObject();
     header.addProperty(JwtNames.HEADER_ALGORITHM, algorithm);
+    if (typeHeader.isPresent()) {
+      header.addProperty(JwtNames.HEADER_TYPE, typeHeader.get());
+    }
     return Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
   }
 
-  static void validateHeader(String expectedAlgorithm, String header)
+  static void validateHeader(String expectedAlgorithm, JsonObject parsedHeader)
       throws InvalidAlgorithmParameterException, JwtInvalidException {
     validateAlgorithm(expectedAlgorithm);
-    JsonObject parsedHeader = parseJson(header);
     if (!parsedHeader.has(JwtNames.HEADER_ALGORITHM)) {
       throw new JwtInvalidException("missing algorithm in header");
     }
@@ -201,6 +205,13 @@ final class JwtFormat {
       }
       // Ignore all other headers
     }
+  }
+
+  static Optional<String> getTypeHeader(JsonObject header) throws JwtInvalidException {
+    if (header.has(JwtNames.HEADER_TYPE)) {
+      return Optional.of(getStringHeader(header, JwtNames.HEADER_TYPE));
+    }
+    return Optional.empty();
   }
 
   private static String getStringHeader(JsonObject header, String name) throws JwtInvalidException {
@@ -263,9 +274,11 @@ final class JwtFormat {
       return new Parts(unsignedCompact, mac, header, payload);
   }
 
-  static String createUnsignedCompact(String algorithm, String jsonPayload)
+  // TODO(juerg): Refactor this to createUnsignedCompact(algorithm, rawJwt)
+  static String createUnsignedCompact(
+      String algorithm, Optional<String> typeHeader, String jsonPayload)
       throws InvalidAlgorithmParameterException {
-    return createHeader(algorithm) + "." + encodePayload(jsonPayload);
+    return createHeader(algorithm, typeHeader) + "." + encodePayload(jsonPayload);
   }
 
   static String createSignedCompact(String unsignedCompact, byte[] signature) {
