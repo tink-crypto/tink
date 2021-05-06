@@ -122,40 +122,41 @@ def tink_cc_deps():
         )
 
     if "upb" not in native.existing_rules():
+        # Commit from 2020-12-18; matches version embedded in com_github_grpc_grpc
         http_archive(
             name = "upb",
-            sha256 = "e9c136e56b98c8eb48ad1c9f8df4a6348e99f9f336ee6199c4259a312c2e3598",
-            strip_prefix = "upb-d8f3d6f9d415b31f3ce56d46791706c38fa311bc",
-            url = "https://github.com/protocolbuffers/upb/archive/d8f3d6f9d415b31f3ce56d46791706c38fa311bc.tar.gz",
+            sha256 = "c0b97bf91dfea7e8d7579c24e2ecdd02d10b00f3c5defc3dce23d95100d0e664",
+            strip_prefix = "upb-60607da72e89ba0c84c84054d2e562d8b6b61177",
+            url = "https://github.com/protocolbuffers/upb/archive/60607da72e89ba0c84c84054d2e562d8b6b61177.tar.gz",
         )
 
     if "envoy_api" not in native.existing_rules():
+        # Commit from 2021-05-05
         http_archive(
             name = "envoy_api",
-            sha256 = "9e8cf42abce32c9b0e9e271b0cb62803084cbe5e5b49f5d5c2aef0766f9d69ca",
-            strip_prefix = "data-plane-api-c83ed7ea9eb5fb3b93d1ad52b59750f1958b8bde",
-            url = "https://github.com/envoyproxy/data-plane-api/archive/c83ed7ea9eb5fb3b93d1ad52b59750f1958b8bde.tar.gz",
+            sha256 = "47429de51618f9b247c0ef44e23a06e8a9165efd1b1d6e35c86978b4f69adeba",
+            strip_prefix = "data-plane-api-1e94aaf06de0dbfee295f785bf49fcc61fb2fb14",
+            url = "https://github.com/envoyproxy/data-plane-api/archive/1e94aaf06de0dbfee295f785bf49fcc61fb2fb14.tar.gz",
         )
 
     # gRPC.
     if not native.existing_rule("com_github_grpc_grpc"):
-        # Release from 2019-12-05
-        # Using the pre-release version due to https://github.com/grpc/grpc/issues/20511
+        # Release from 2021-04-29
         http_archive(
             name = "com_github_grpc_grpc",
-            url = "https://github.com/grpc/grpc/archive/v1.26.0-pre1.tar.gz",
-            sha256 = "d6af0859d3ae4693b1955e972aa2e590d6f4d44baaa82651467c6beea453e30e",
-            strip_prefix = "grpc-1.26.0-pre1",
+            url = "https://github.com/grpc/grpc/archive/refs/tags/v1.37.1.zip",
+            sha256 = "2a0aef1d60660d4c4ff2bc7f43708e5df561e41c9f98d0351f9672f965a8461f",
+            strip_prefix = "grpc-1.37.1",
         )
 
     # Not used by Java Tink, but apparently needed for C++ gRPC library.
     if not native.existing_rule("io_grpc_grpc_java"):
-        # Commit from 2019-05-02
+        # Release from 2021-04-08
         http_archive(
             name = "io_grpc_grpc_java",
-            strip_prefix = "grpc-java-1.20.0",
-            url = "https://github.com/grpc/grpc-java/archive/v1.20.0.tar.gz",
-            sha256 = "553d1bdbde3ff4035747c184486bae2f084c75c3c4cdf5ef31a6aa48bdccaf9b",
+            strip_prefix = "grpc-java-1.37.0",
+            url = "https://github.com/grpc/grpc-java/archive/v1.37.0.tar.gz",
+            sha256 = "4796b6e434545ecc9e827f9ba52c0604a3c84e175c54f0882121965b1ee5c367",
         )
 
     if not native.existing_rule("curl"):

@@ -48,8 +48,14 @@ PROTOC_ZIP="protoc-${PROTOC_VERSION}-linux-x86_64.zip"
 curl -OL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}"
 unzip -o "${PROTOC_ZIP}" -d /usr/local bin/protoc
 
-# Setup required for Tink
+# Setup required for Tink.
 export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="/tmp/tink"
+
+# Workaround for grpc which expects a python2 installation, which is not present
+# in the manylinux2014 container. Cannot be an empty string, otherwise Bazel
+# will fail.
+export PYTHON2_BIN_PATH="non_existent_file"
+export PYTHON2_LIB_PATH="non_existent_file"
 
 # Required to fix https://github.com/pypa/manylinux/issues/357.
 export LD_LIBRARY_PATH="/usr/local/lib"
