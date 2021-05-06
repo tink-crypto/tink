@@ -56,8 +56,9 @@ Javascript/Typescript is in an alpha state and should only be used for testing.
 ## Getting started
 
 Documentation for the project is located at https://developers.google.com/tink.
-Currently, it details a variety of common usage scenarios and covers the Java and
-Python implementations. The site will be populated with more content over time.
+Currently, it details a variety of common usage scenarios and covers the Java
+and Python implementations. The site will be populated with more content over
+time.
 
 Alternatively, you can look at all of the [`examples`] which demonstrate
 performing simple tasks using Tink in a variety of languages.
