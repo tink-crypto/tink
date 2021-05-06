@@ -15,7 +15,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
-        "@googleapis//google/cloud/kms/v1:kms_cc_grpc",
+        "@com_google_googleapis//google/cloud/kms/v1:kms_cc_grpc",
     ],
 )
 
