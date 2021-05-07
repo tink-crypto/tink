@@ -25,13 +25,6 @@ set -x
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-# TODO(b/140615798): Remove once fixed.
-DISABLE_GRPC_ON_MAC_OS=""
-if [[ "${PLATFORM}" == 'darwin' ]]; then
-  DISABLE_GRPC_ON_MAC_OS="-//integration/gcpkms/..."
-fi
-readonly DISABLE_GRPC_ON_MAC_OS
-
 fail_with_debug_output() {
   ls -l
   df -h /
@@ -57,16 +50,7 @@ run_linux_tests() {
 }
 
 run_all_linux_tests() {
-  # TODO(b/140615798): Remove the customized test once the issue is fixed.
-  #run_linux_tests "cc"
-  local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
-  readonly TEST_FLAGS
-  (
-    cd cc
-    time bazel build -- ... || fail_with_debug_output
-    time bazel test "${TEST_FLAGS[@]}" -- ... ${DISABLE_GRPC_ON_MAC_OS} \
-        || fail_with_debug_output
-  )
+  run_linux_tests "cc"
   run_linux_tests "java_src"
   run_linux_tests "go"
   run_linux_tests "python"
