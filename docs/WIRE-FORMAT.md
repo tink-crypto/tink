@@ -122,7 +122,7 @@ IV || ciphertext.
 AES-GCM-HKDF uses a nonce prefix of 7 bytes to get 12 byte IVs for the segment
 encryption. The key derived is the same size as the input key material.
 
-#### Envelope Encryption
+### Envelope Encryption
 
 Envelope encryption encrypts the data with a data encryption key `DEK` using
 Tink's AEAD primitives. In addition the `DEK` is encrypted with an external
