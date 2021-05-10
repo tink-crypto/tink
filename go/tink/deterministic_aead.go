@@ -21,7 +21,7 @@ DeterministicAEAD is the interface for deterministic authenticated encryption wi
 
 Warning:
 Unlike AEAD, implementations of this interface are not semantically secure, because
-encrypting the same plaintex always yields the same ciphertext.
+encrypting the same plaintext always yields the same ciphertext.
 
 Security guarantees:
 Implementations of this interface provide 128-bit security level against multi-user attacks
