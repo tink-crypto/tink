@@ -21,17 +21,27 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.tinkkey.KeyAccess;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for JwkSetConverter*/
+/** Unit tests for JwkSetConverter */
 @RunWith(JUnit4.class)
 public final class JwkSetConverterTest {
+
+  @Before
+  public void setup() throws Exception {
+    JwtSignatureConfig.register();
+  }
 
   private static final String ES256_KEYSET =
       "{\"primaryKeyId\":282600252,\"key\":[{\"keyData\":{"
@@ -186,6 +196,37 @@ public final class JwkSetConverterTest {
           + "xlvs188\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
 
+
+  private static void assertEqualJwkSets(String jwkSet1, String jwkSet2) throws Exception {
+    // Consider these strings equal, if their equal after parsing them.
+    // The keys may have any order.
+    JsonObject parsedjwkSet1 = JsonParser.parseString(jwkSet1).getAsJsonObject();
+    JsonObject parsedjwkSet2 = JsonParser.parseString(jwkSet2).getAsJsonObject();
+    JsonArray keys1 = parsedjwkSet1.remove("keys").getAsJsonArray();
+    JsonArray keys2 = parsedjwkSet2.remove("keys").getAsJsonArray();
+    assertThat(keys1).containsExactlyElementsIn(keys2);
+    assertThat(parsedjwkSet1).isEqualTo(parsedjwkSet2);
+  }
+
+  @Test
+  public void assertEqualJwkSets_equal() throws Exception {
+    // Whitespace, order of object properties, and order of keys is ignored.
+    assertEqualJwkSets(
+        "{\"keys\":[{\"kty\": \"EC\"},     {\"e\":\"f\",\"kty\": \"RSA\"}]}",
+        "{\"keys\":[{\"kty\":\"RSA\",\"e\":\"f\"}, {\"kty\":\"EC\"}]}");
+  }
+
+  @Test
+  public void assertEqualJwkSets_notEequal() throws Exception {
+    // Order of arrays (except "keys" array) is not ignored.
+    assertThrows(
+        AssertionError.class,
+        () ->
+            assertEqualJwkSets(
+                "{\"keys\":[{\"kty\":\"EC\",\"key_ops\":[\"b\",\"c\"]}]}",
+                "{\"keys\":[{\"kty\":\"EC\",\"key_ops\":[\"c\",\"b\"]}]}"));
+  }
+
   private static String convertToJwkSet(String jsonKeyset) throws Exception {
     KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(jsonKeyset));
     return JwkSetConverter.fromKeysetHandle(handle, KeyAccess.publicAccess());
@@ -193,73 +234,539 @@ public final class JwkSetConverterTest {
 
   @Test
   public void convertEcdsaKeysets_success() throws Exception {
-    assertThat(convertToJwkSet(ES256_KEYSET)).isEqualTo(ES256_JWK_SET);
-    assertThat(convertToJwkSet(ES384_KEYSET)).isEqualTo(ES384_JWK_SET);
-    assertThat(convertToJwkSet(ES512_KEYSET)).isEqualTo(ES512_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(ES256_KEYSET), ES256_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(ES384_KEYSET), ES384_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(ES512_KEYSET), ES512_JWK_SET);
   }
 
   @Test
   public void convertRsaSsaPkcs1Keysets_success() throws Exception {
-    assertThat(convertToJwkSet(RS256_KEYSET)).isEqualTo(RS256_JWK_SET);
-    assertThat(convertToJwkSet(RS384_KEYSET)).isEqualTo(RS384_JWK_SET);
-    assertThat(convertToJwkSet(RS512_KEYSET)).isEqualTo(RS512_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(RS256_KEYSET), RS256_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(RS384_KEYSET), RS384_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(RS512_KEYSET), RS512_JWK_SET);
   }
 
   @Test
-  public void convertKeysetWithTwoKeys_success() throws Exception {
-    assertThat(convertToJwkSet(KEYSET_WITH_TWO_KEYS)).isEqualTo(JWK_SET_WITH_TWO_KEYS);
+  public void toKeysetHandleFromKeysetHandle_success() throws Exception {
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(ES256_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        ES256_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(ES384_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        ES384_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(ES512_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        ES512_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(RS256_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        RS256_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(RS384_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        RS384_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(RS512_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        RS512_JWK_SET);
   }
 
   @Test
-  public void primaryKeyIdMissing_success() throws Exception {
+  public void convertTinkToJwksTokenVerification_success() throws Exception {
+    // TODO(juerg): Use parametrized tests once b/26110951 is resolved.
+    KeyTemplate[] templates = new KeyTemplate[] {
+      JwtEcdsaSignKeyManager.jwtES256Template(),
+      JwtEcdsaSignKeyManager.jwtES384Template(),
+      JwtEcdsaSignKeyManager.jwtES512Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
+      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
+    };
+    for (KeyTemplate template : templates) {
+      KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+
+      String jwksString =
+          JwkSetConverter.fromKeysetHandle(
+              keysetHandle.getPublicKeysetHandle(), KeyAccess.publicAccess());
+
+      KeysetHandle publicKeysetHandle =
+          JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+
+      JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
+      JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
+
+      RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+      String signedCompact = signer.signAndEncode(rawToken);
+      JwtValidator validator = new JwtValidator.Builder().build();
+      VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
+      assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+    }
+  }
+
+  @Test
+  public void keysetWithTwoKeys_fromKeysetHandleSuccess() throws Exception {
+    assertEqualJwkSets(convertToJwkSet(KEYSET_WITH_TWO_KEYS), JWK_SET_WITH_TWO_KEYS);
+  }
+
+  @Test
+  public void primaryKeyIdMissing_fromKeysetHandleSuccess() throws Exception {
     String keyset = ES256_KEYSET.replace("\"primaryKeyId\":282600252,", "");
-    assertThat(convertToJwkSet(keyset)).isEqualTo(ES256_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(keyset), ES256_JWK_SET);
   }
 
   @Test
-  public void convertTinkEcdsaKeysets_throws() throws Exception {
+  public void tinkEcdsaKeysets_fromKeysetHandleFails() throws Exception {
     String keyset = ES256_KEYSET.replace("RAW", "TINK");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
-  public void convertLegacyEcdsaKeysets_throws() throws Exception {
+  public void legacyEcdsaKeysets_fromKeysetHandleFails() throws Exception {
     String keyset = ES256_KEYSET.replace("RAW", "LEGACY");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
-  public void convertCrunchyEcdsaKeysets_throws() throws Exception {
+  public void crunchyEcdsaKeysets_fromKeysetHandleFails() throws Exception {
     String keyset = ES256_KEYSET.replace("RAW", "CRUNCHY");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
-  public void convertDisabledKeysets_skipped() throws Exception {
+  public void disabledKeysets_fromKeysetHandleReturnsEmptySet() throws Exception {
     String keyset = ES256_KEYSET.replace("ENABLED", "DISABLED");
-    assertThat(convertToJwkSet(keyset)).isEqualTo("{\"keys\":[]}");
+    assertEqualJwkSets(convertToJwkSet(keyset), "{\"keys\":[]}");
   }
 
   @Test
-  public void convertPrivateKey_fails() throws Exception {
+  public void privateKey_fromKeysetHandleFails() throws Exception {
     assertThrows(GeneralSecurityException.class, () -> convertToJwkSet(PRIVATEKEY_KEYSET));
   }
 
   @Test
-  public void convertTinkRsaSsaPkcs1Keysets_throws() throws Exception {
+  public void tinkRsaSsaPkcs1Keysets_fromKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "TINK");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
-  public void convertLegacyRsaSsaPkcs1Keysets_throws() throws Exception {
+  public void legacyRsaSsaPkcs1Keysets_fromKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "LEGACY");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
   @Test
-  public void convertCrunchyRsaSsaPkcs1Keysets_throws() throws Exception {
+  public void crunchyRsaSsaPkcs1Keysets_fromKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "CRUNCHY");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+  }
+
+  @Test
+  public void ecdsaWithoutUseAndKeyOps_toKeysetHandleSuccess() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"alg\":\"ES256\""
+            + "}]}";
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+  }
+
+  @Test
+  public void ecdsaPrivateKey_fails() throws Exception {
+    // Example from https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.2
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4\","
+            + "\"y\":\"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM\","
+            + "\"d\":\"870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE\","
+            + "\"alg\":\"ES256\""
+            + "}]}";
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithUnknownField_toKeysetHandleSuccess() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"alg\":\"ES256\","
+            + "\"unknown\":1234,"
+            + "\"use\":\"sig\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+  }
+
+  @Test
+  public void ecdsaWithoutAlg_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithoutKty_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithoutCrv_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithSmallX_getPrimitiveFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"AAAwOQ\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    KeysetHandle handle = JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+    assertThrows(
+        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+  }
+
+  @Test
+  public void ecdsaWithSmallY_getPrimitiveFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"AAAwOQ\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    KeysetHandle handle = JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+    assertThrows(
+        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+  }
+
+  @Test
+  public void ecdsaWithInvalidKty_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"RSA\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithInvalidCrv_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-384\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithInvalidUse_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"invalid\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"verify\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithInvalidKeyOps_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":[\"invalid\"]"
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void ecdsaWithStringKeyOps_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{"
+            + "\"keys\":[{"
+            + "\"kty\":\"EC\","
+            + "\"crv\":\"P-256\","
+            + "\"x\":\"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY\","
+            + "\"y\":\"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI\","
+            + "\"use\":\"sig\","
+            + "\"alg\":\"ES256\","
+            + "\"key_ops\":\"verify\""
+            + "}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithoutUseAndKeyOps_toKeysetHandleSuccess() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"alg\":\"RS256\"}]}";
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+  }
+
+  @Test
+  public void rsaWithUnknownField_toKeysetHandleSuccess() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"unknown\":1234,"
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+  }
+
+  @Test
+  public void rsaPrivateKey_fails() throws Exception {
+    // Example from https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.2
+    String jwksString =
+        "{\"keys\":["
+            + "{\"kty\":\"RSA\","
+            + "\"n\":\"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4"
+            + "cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMst"
+            + "n64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2Q"
+            + "vzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbIS"
+            + "D08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw"
+            + "0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\","
+            + "\"e\":\"AQAB\","
+            + "\"d\":\"X4cTteJY_gn4FYPsXB8rdXix5vwsg1FLN5E3EaG6RJoVH-HLLKD9"
+            + "M7dx5oo7GURknchnrRweUkC7hT5fJLM0WbFAKNLWY2vv7B6NqXSzUvxT0_YSfqij"
+            + "wp3RTzlBaCxWp4doFk5N2o8Gy_nHNKroADIkJ46pRUohsXywbReAdYaMwFs9tv8d"
+            + "_cPVY3i07a3t8MN6TNwm0dSawm9v47UiCl3Sk5ZiG7xojPLu4sbg1U2jx4IBTNBz"
+            + "nbJSzFHK66jT8bgkuqsk0GjskDJk19Z4qwjwbsnn4j2WBii3RL-Us2lGVkY8fkFz"
+            + "me1z0HbIkfz0Y6mqnOYtqc0X4jfcKoAC8Q\","
+            + "\"p\":\"83i-7IvMGXoMXCskv73TKr8637FiO7Z27zv8oj6pbWUQyLPQBQxtPV"
+            + "nwD20R-60eTDmD2ujnMt5PoqMrm8RfmNhVWDtjjMmCMjOpSXicFHj7XOuVIYQyqV"
+            + "WlWEh6dN36GVZYk93N8Bc9vY41xy8B9RzzOGVQzXvNEvn7O0nVbfs\","
+            + "\"q\":\"3dfOR9cuYq-0S-mkFLzgItgMEfFzB2q3hWehMuG0oCuqnb3vobLyum"
+            + "qjVZQO1dIrdwgTnCdpYzBcOfW5r370AFXjiWft_NGEiovonizhKpo9VVS78TzFgx"
+            + "kIdrecRezsZ-1kYd_s1qDbxtkDEgfAITAG9LUnADun4vIcb6yelxk\","
+            + "\"dp\":\"G4sPXkc6Ya9y8oJW9_ILj4xuppu0lzi_H7VTkS8xj5SdX3coE0oim"
+            + "YwxIi2emTAue0UOa5dpgFGyBJ4c8tQ2VF402XRugKDTP8akYhFo5tAA77Qe_Nmtu"
+            + "YZc3C3m3I24G2GvR5sSDxUyAN2zq8Lfn9EUms6rY3Ob8YeiKkTiBj0\","
+            + "\"dq\":\"s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU"
+            + "vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9"
+            + "GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk\","
+            + "\"qi\":\"GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzg"
+            + "UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx"
+            + "yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU\","
+            + "\"alg\":\"RS256\","
+            + "\"kid\":\"2011-04-29\"}]}";
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithoutAlg_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"key_ops\":[\"verify\"]}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithoutKty_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{"
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithSmallN_getPrimitiveFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AAAwOQ\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
+    KeysetHandle handle = JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+    assertThrows(
+        GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+  }
+
+  @Test
+  public void rsaWithInvalidKty_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"EC\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithInvalidUse_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"invalid\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithInvalidKeyOps_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"invalid\"]}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+  }
+
+  @Test
+  public void rsaWithStringKeyOps_toKeysetHandleFails() throws Exception {
+    String jwksString =
+        "{\"keys\":[{\"kty\":\"RSA\","
+            + "\"n\":\"AM90NXQrAtt6KPSevzv9nbLJ2g_WPDH4zTwOo1slR8qC2chi6mH4TONOyAracdhQaoPwtMKge2ks"
+            + "dJi1GaYwl975uvZEd9J1G078tlGrKPpy5I_OHseYDoeP8EgXawNII5ayFo-Ch_ZTxyzOuWmeb3DJft177D7T"
+            + "Foz-zrMoTDGV4gwhBPeVfSk5DYvY06hF740KZq89nXBX_51KE5C-M9hBJMK9VA7BiGM8qjeu7l7ppXdzfvf6"
+            + "azfkIogKMV7Xk0aw6nCW6h49BYuIu3TVjiToLEu5kX0z501whcCI8SA1tlicl7CzOCvVF70vg03RAB5vZQWY"
+            + "2oFr3AwKBYDHvsc\","
+            + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":\"verify\"}]}";
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
   }
 }
