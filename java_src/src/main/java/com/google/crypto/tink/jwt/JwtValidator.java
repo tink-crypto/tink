@@ -20,15 +20,16 @@ import com.google.errorprone.annotations.Immutable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 /** A set of expected claims and headers to validate against another JWT. */
 @Immutable
 public final class JwtValidator {
   private static final Duration MAX_CLOCK_SKEW = Duration.ofMinutes(10);
 
-  private final String issuer;
-  private final String subject;
-  private final String audience;
+  private final Optional<String> issuer;
+  private final Optional<String> subject;
+  private final Optional<String> audience;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -45,13 +46,16 @@ public final class JwtValidator {
 
   /** Builder for JwtValidator */
   public static final class Builder {
-    private String issuer;
-    private String subject;
-    private String audience;
+    private Optional<String> issuer;
+    private Optional<String> subject;
+    private Optional<String> audience;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
     public Builder() {
+      this.issuer = Optional.empty();
+      this.subject = Optional.empty();
+      this.audience = Optional.empty();
     }
 
     /**
@@ -64,7 +68,7 @@ public final class JwtValidator {
       if (value == null) {
         throw new NullPointerException("issuer cannot be null");
       }
-      this.issuer = value;
+      this.issuer = Optional.of(value);
       return this;
     }
 
@@ -77,7 +81,7 @@ public final class JwtValidator {
       if (value == null) {
         throw new NullPointerException("subject cannot be null");
       }
-      this.subject = value;
+      this.subject = Optional.of(value);
       return this;
     }
 
@@ -92,7 +96,7 @@ public final class JwtValidator {
       if (value == null) {
         throw new NullPointerException("audience cannot be null");
       }
-      this.audience = value;
+      this.audience = Optional.of(value);
       return this;
     }
 
@@ -132,30 +136,32 @@ public final class JwtValidator {
   VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
 
-    if (this.issuer != null) {
+    if (this.issuer.isPresent()) {
       if (!target.hasIssuer()) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected issuer %s.", this.issuer));
+            String.format("invalid JWT; missing expected issuer %s.", this.issuer.get()));
       }
-      if (!target.getIssuer().equals(this.issuer)) {
+      if (!target.getIssuer().equals(this.issuer.get())) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; expected issuer %s, but got %s", this.issuer, issuer));
+            String.format(
+                "invalid JWT; expected issuer %s, but got %s", this.issuer.get(), issuer));
       }
     }
-    if (this.subject != null) {
+    if (this.subject.isPresent()) {
       if (!target.hasSubject()) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected subject %s.", this.subject));
+            String.format("invalid JWT; missing expected subject %s.", this.subject.get()));
       }
-      if (!target.getSubject().equals(this.subject)) {
+      if (!target.getSubject().equals(this.subject.get())) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; expected subject %s, but got %s", this.subject, subject));
+            String.format(
+                "invalid JWT; expected subject %s, but got %s", this.subject.get(), subject));
       }
     }
-    if (this.audience != null) {
-      if (!target.hasAudiences() || !target.getAudiences().contains(this.audience)) {
+    if (this.audience.isPresent()) {
+      if (!target.hasAudiences() || !target.getAudiences().contains(this.audience.get())) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected audience %s.", this.audience));
+            String.format("invalid JWT; missing expected audience %s.", this.audience.get()));
       }
     } else {
       if (target.hasAudiences()) {
