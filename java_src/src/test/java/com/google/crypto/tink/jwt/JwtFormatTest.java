@@ -21,7 +21,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.subtle.Base64;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,75 +32,6 @@ import org.junit.runners.JUnit4;
 /** Unit tests for JwtFormat */
 @RunWith(JUnit4.class)
 public final class JwtFormatTest {
-
-  @Test
-  public void validateValidString_success() throws Exception {
-    assertThat(JwtFormat.isValidString("")).isTrue();
-    assertThat(JwtFormat.isValidString("foo")).isTrue();
-    assertThat(JwtFormat.isValidString("*\uD834\uDD1E*")).isTrue();
-    assertThat(JwtFormat.isValidString("\uD834\uDD1E*")).isTrue();
-    assertThat(JwtFormat.isValidString("*\uD834\uDD1E")).isTrue();
-    assertThat(JwtFormat.isValidString("\uD834\uDD1E")).isTrue();
-  }
-
-  @Test
-  public void validateInvalidString_throws() throws Exception {
-    assertThat(JwtFormat.isValidString("*\uD834")).isFalse();
-    assertThat(JwtFormat.isValidString("\uD834*")).isFalse();
-    assertThat(JwtFormat.isValidString("\uD834")).isFalse();
-    assertThat(JwtFormat.isValidString("*\uD834*")).isFalse();
-    assertThat(JwtFormat.isValidString("\uDD1E")).isFalse();
-    assertThat(JwtFormat.isValidString("*\uDD1E")).isFalse();
-    assertThat(JwtFormat.isValidString("\uDD1E*")).isFalse();
-    assertThat(JwtFormat.isValidString("*\uDD1E*")).isFalse();
-  };
-
-  @Test
-  public void parseJson_success() throws Exception {
-    JsonObject header = JwtFormat.parseJson("{\"bool\":false}");
-    assertThat(header.get("bool").getAsBoolean()).isFalse();
-  }
-
-  @Test
-  public void parseJsonArray_success() throws Exception {
-    JsonArray array = JwtFormat.parseJsonArray("[1, \"foo\"]");
-    assertThat(array.get(0).getAsInt()).isEqualTo(1);
-    assertThat(array.get(1).getAsString()).isEqualTo("foo");
-  }
-
-  @Test
-  public void parseRecursiveJsonString_success() throws Exception {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < 10000; i++) {
-      sb.append("{\"a\":");
-    }
-    sb.append("1");
-    for (int i = 0; i < 10000; i++) {
-      sb.append("}");
-    }
-    try {
-      JwtFormat.parseJson(sb.toString());
-    } catch (JwtInvalidException ex) {
-      // JwtInvalidException is fine, no exception as well.
-    }
-  }
-
-  @Test
-  public void parseJsonWithoutQuotes_fail() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
-  }
-
-  @Test
-  public void parseJsonArrayWithoutComments_fail() throws Exception {
-    assertThrows(
-        JwtInvalidException.class, () -> JwtFormat.parseJson("[1, \"foo\" /* comment */]"));
-  }
-
-  @Test
-  public void parseJsonWithoutComments_fail() throws Exception {
-    assertThrows(
-        JwtInvalidException.class, () -> JwtFormat.parseJson("{\"bool\":false /* comment */}"));
-  }
 
   @Test
   public void createDecodeHeader_success() throws Exception {
@@ -168,23 +98,23 @@ public final class JwtFormatTest {
   public void createDecodeValidateHeader_success() throws Exception {
     JwtFormat.validateHeader(
         "HS256",
-        JwtFormat.parseJson(
+        JsonUtil.parseJson(
             JwtFormat.decodeHeader(JwtFormat.createHeader("HS256", Optional.empty()))));
     JwtFormat.validateHeader(
         "HS384",
-        JwtFormat.parseJson(
+        JsonUtil.parseJson(
             JwtFormat.decodeHeader(JwtFormat.createHeader("HS384", Optional.empty()))));
     JwtFormat.validateHeader(
         "HS512",
-        JwtFormat.parseJson(
+        JsonUtil.parseJson(
             JwtFormat.decodeHeader(JwtFormat.createHeader("HS512", Optional.empty()))));
     JwtFormat.validateHeader(
         "ES256",
-        JwtFormat.parseJson(
+        JsonUtil.parseJson(
             JwtFormat.decodeHeader(JwtFormat.createHeader("ES256", Optional.empty()))));
     JwtFormat.validateHeader(
         "RS256",
-        JwtFormat.parseJson(
+        JsonUtil.parseJson(
             JwtFormat.decodeHeader(JwtFormat.createHeader("RS256", Optional.empty()))));
   }
 
@@ -193,7 +123,7 @@ public final class JwtFormatTest {
     String header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256", Optional.empty()));
     assertThrows(
         InvalidAlgorithmParameterException.class,
-        () -> JwtFormat.validateHeader("HS384", JwtFormat.parseJson(header)));
+        () -> JwtFormat.validateHeader("HS384", JsonUtil.parseJson(header)));
   }
 
   @Test
@@ -202,13 +132,13 @@ public final class JwtFormatTest {
         InvalidAlgorithmParameterException.class,
         () ->
             JwtFormat.validateHeader(
-                "UnknownAlgorithm", JwtFormat.parseJson("{\"alg\": \"UnknownAlgorithm\"}")));
+                "UnknownAlgorithm", JsonUtil.parseJson("{\"alg\": \"UnknownAlgorithm\"}")));
   }
 
   @Test
   public void validateHeaderIgnoresTyp() throws Exception {
     JwtFormat.validateHeader(
-        "HS256", JwtFormat.parseJson("{\"alg\": \"HS256\", \"typ\": \"unknown\"}"));
+        "HS256", JsonUtil.parseJson("{\"alg\": \"HS256\", \"typ\": \"unknown\"}"));
   }
 
   @Test
@@ -218,7 +148,7 @@ public final class JwtFormatTest {
         () ->
             JwtFormat.validateHeader(
                 "HS256",
-                JwtFormat.parseJson(
+                JsonUtil.parseJson(
                     "{\"alg\": \"HS256\", \"crit\":[\"http://example.invalid/UNDEFINED\"], "
                         + "\"http://example.invalid/UNDEFINED\":true}")));
   }
@@ -226,14 +156,14 @@ public final class JwtFormatTest {
   @Test
   public void validateHeaderWithUnknownEntry_success() throws Exception {
     JwtFormat.validateHeader(
-        "HS256", JwtFormat.parseJson("{\"alg\": \"HS256\", \"unknown\": \"header\"}"));
+        "HS256", JsonUtil.parseJson("{\"alg\": \"HS256\", \"unknown\": \"header\"}"));
   }
 
   @Test
   public void validateEmptyHeader_fails() throws Exception {
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", JwtFormat.parseJson("{}")));
+        () -> JwtFormat.validateHeader("HS256", JsonUtil.parseJson("{}")));
   }
 
   @Test
@@ -281,7 +211,7 @@ public final class JwtFormatTest {
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
 
-    JwtFormat.validateHeader("RS256", JwtFormat.parseJson(parts.header));
+    JwtFormat.validateHeader("RS256", JsonUtil.parseJson(parts.header));
 
     assertThat(unsignedCompact).isEqualTo("eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
     assertThat(signedCompact).isEqualTo(
@@ -301,7 +231,7 @@ public final class JwtFormatTest {
     String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.of("JWT"), payload);
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
-    JsonObject parsedHeader = JwtFormat.parseJson(parts.header);
+    JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
     JwtFormat.validateHeader("RS256", parsedHeader);
     assertThat(parsedHeader.getAsJsonPrimitive("typ").getAsString()).isEqualTo("JWT");
 

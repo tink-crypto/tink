@@ -56,7 +56,7 @@ java_library(
     name = "raw_jwt",
     srcs = ["RawJwt.java"],
     deps = [
-        ":jwt_format",
+        ":json_util",
         ":jwt_invalid_exception",
         ":jwt_names",
         "@maven//:com_google_code_gson_gson",
@@ -84,7 +84,7 @@ java_library(
 java_library(
     name = "jwt_hmac_key_manager",
     srcs = ["JwtHmacKeyManager.java"],
-    deps = [
+    deps = [":json_util",
         ":jwt_format",
         ":jwt_invalid_exception",
         ":jwt_mac",
@@ -136,6 +136,7 @@ java_library(
     name = "jwt_rsa_ssa_pss_verify_key_manager",
     srcs = ["JwtRsaSsaPssVerifyKeyManager.java"],
     deps = [
+        ":json_util",
         ":jwt_format",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify",
@@ -184,6 +185,7 @@ java_library(
     name = "jwt_ecdsa_verify_key_manager",
     srcs = ["JwtEcdsaVerifyKeyManager.java"],
     deps = [
+        ":json_util",
         ":jwt_format",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify",
@@ -207,6 +209,7 @@ android_library(
     name = "jwt_ecdsa_verify_key_manager-android",
     srcs = ["JwtEcdsaVerifyKeyManager.java"],
     deps = [
+        ":json_util-android",
         ":jwt_format-android",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify-android",
@@ -279,6 +282,7 @@ java_library(
     name = "jwt_rsa_ssa_pkcs1_verify_key_manager",
     srcs = ["JwtRsaSsaPkcs1VerifyKeyManager.java"],
     deps = [
+        ":json_util",
         ":jwt_format",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify",
@@ -442,6 +446,24 @@ java_library(
     ],
 )
 
+java_library(
+    name = "json_util",
+    srcs = ["JsonUtil.java"],
+    deps = [
+        ":jwt_invalid_exception",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
+android_library(
+    name = "json_util-android",
+    srcs = ["JsonUtil.java"],
+    deps = [
+        ":jwt_invalid_exception",
+        "@maven//:com_google_code_gson_gson",
+    ],
+)
+
 android_library(
     name = "jwt_public_key_sign_wrapper-android",
     srcs = ["JwtPublicKeySignWrapper.java"],
@@ -480,7 +502,7 @@ android_library(
     name = "raw_jwt-android",
     srcs = ["RawJwt.java"],
     deps = [
-        ":jwt_format-android",
+        ":json_util-android",
         ":jwt_invalid_exception",
         ":jwt_names",
         "@maven//:com_google_code_gson_gson",
@@ -504,6 +526,7 @@ android_library(
     name = "jwt_hmac_key_manager-android",
     srcs = ["JwtHmacKeyManager.java"],
     deps = [
+        ":json_util-android",
         ":jwt_format-android",
         ":jwt_invalid_exception",
         ":jwt_mac-android",
@@ -597,6 +620,7 @@ android_library(
     name = "jwt_rsa_ssa_pkcs1_verify_key_manager-android",
     srcs = ["JwtRsaSsaPkcs1VerifyKeyManager.java"],
     deps = [
+        ":json_util-android",
         ":jwt_format-android",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify-android",
@@ -644,6 +668,7 @@ android_library(
     name = "jwt_rsa_ssa_pss_verify_key_manager-android",
     srcs = ["JwtRsaSsaPssVerifyKeyManager.java"],
     deps = [
+        ":json_util-android",
         ":jwt_format-android",
         ":jwt_invalid_exception",
         ":jwt_public_key_verify-android",

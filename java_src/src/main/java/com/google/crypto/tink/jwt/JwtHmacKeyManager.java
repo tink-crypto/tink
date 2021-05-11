@@ -97,7 +97,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
-      JsonObject parsedHeader = JwtFormat.parseJson(parts.header);
+      JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
       JwtFormat.validateHeader(algorithm, parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);

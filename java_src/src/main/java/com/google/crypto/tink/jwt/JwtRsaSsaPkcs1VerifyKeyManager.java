@@ -84,7 +84,7 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
                   throws GeneralSecurityException {
                 JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
                 verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
-                JsonObject parsedHeader = JwtFormat.parseJson(parts.header);
+                JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
                 JwtFormat.validateHeader(algorithmName, parsedHeader);
                 RawJwt token =
                     RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);

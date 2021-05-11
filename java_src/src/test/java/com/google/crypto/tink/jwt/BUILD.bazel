@@ -275,6 +275,7 @@ java_test(
     size = "small",
     srcs = ["JwtFormatTest.java"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:json_util",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_format",
         "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
@@ -331,6 +332,18 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "JsonUtilTest",
+    srcs = ["JsonUtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/jwt:json_util",
+        "//src/main/java/com/google/crypto/tink/jwt:jwt_invalid_exception",
         "@maven//:com_google_code_gson_gson",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

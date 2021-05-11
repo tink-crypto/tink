@@ -52,7 +52,7 @@ public final class RawJwt {
 
   private RawJwt(Optional<String> typeHeader, String jsonPayload) throws JwtInvalidException {
     this.typeHeader = typeHeader;
-    this.payload = JwtFormat.parseJson(jsonPayload);
+    this.payload = JsonUtil.parseJson(jsonPayload);
     validateStringClaim(JwtNames.CLAIM_ISSUER);
     validateStringClaim(JwtNames.CLAIM_SUBJECT);
     validateStringClaim(JwtNames.CLAIM_JWT_ID);
@@ -142,7 +142,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
     public Builder setIssuer(String value) {
-      if (!JwtFormat.isValidString(value)) {
+      if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
       }
       payload.add(JwtNames.CLAIM_ISSUER, new JsonPrimitive(value));
@@ -155,7 +155,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
     public Builder setSubject(String value) {
-      if (!JwtFormat.isValidString(value)) {
+      if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
       }
       payload.add(JwtNames.CLAIM_SUBJECT, new JsonPrimitive(value));
@@ -168,7 +168,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder addAudience(String value) {
-      if (!JwtFormat.isValidString(value)) {
+      if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
       }
       JsonArray audiences = new JsonArray();
@@ -186,7 +186,7 @@ public final class RawJwt {
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.7
      */
     public Builder setJwtId(String value) {
-      if (!JwtFormat.isValidString(value)) {
+      if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
       }
       payload.add(JwtNames.CLAIM_JWT_ID, new JsonPrimitive(value));
@@ -263,7 +263,7 @@ public final class RawJwt {
 
     /** Adds a custom claim of type {@code String} to the JWT. */
     public Builder addStringClaim(String name, String value) {
-      if (!JwtFormat.isValidString(value)) {
+      if (!JsonUtil.isValidString(value)) {
         throw new IllegalArgumentException();
       }
       JwtNames.validate(name);
@@ -282,7 +282,7 @@ public final class RawJwt {
     public Builder addJsonObjectClaim(String name, String encodedJsonObject)
         throws JwtInvalidException {
       JwtNames.validate(name);
-      payload.add(name, JwtFormat.parseJson(encodedJsonObject));
+      payload.add(name, JsonUtil.parseJson(encodedJsonObject));
       return this;
     }
 
@@ -290,7 +290,7 @@ public final class RawJwt {
     public Builder addJsonArrayClaim(String name, String encodedJsonArray)
         throws JwtInvalidException {
       JwtNames.validate(name);
-      payload.add(name, JwtFormat.parseJsonArray(encodedJsonArray));
+      payload.add(name, JsonUtil.parseJsonArray(encodedJsonArray));
       return this;
     }
 
