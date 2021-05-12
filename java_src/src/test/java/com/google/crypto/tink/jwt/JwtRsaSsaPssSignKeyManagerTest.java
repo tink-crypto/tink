@@ -90,20 +90,6 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     };
   }
 
-  private static final String algorithmToString(JwtRsaSsaPssAlgorithm algo)
-      throws GeneralSecurityException {
-    switch (algo) {
-      case PS256:
-        return "PS256";
-      case PS384:
-        return "PS384";
-      case PS512:
-        return "PS512";
-      default: // fall out
-    }
-    throw new GeneralSecurityException("unknown algorithm " + algo.name());
-  }
-
   private static Object[] templates() {
     return new Object[] {
       JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
@@ -136,17 +122,11 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     factory.validateKeyFormat(format);
   }
 
-  private static Object[] parametersAlgos() {
-    return new Object[] {
-      JwtRsaSsaPssAlgorithm.PS256, JwtRsaSsaPssAlgorithm.PS384, JwtRsaSsaPssAlgorithm.PS512
-    };
-  }
-
   @Test
-  @Parameters(method = "parametersAlgos")
-  public void invalidKeyFormat_smallKey_throw(JwtRsaSsaPssAlgorithm algorithm)
+  public void invalidKeyFormat_smallKey_throw()
       throws GeneralSecurityException {
-    JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, 2047, RSAKeyGenParameterSpec.F4);
+    JwtRsaSsaPssKeyFormat format =
+        createKeyFormat(JwtRsaSsaPssAlgorithm.PS256, 2047, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
@@ -306,33 +286,6 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
     KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template();
     checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
-  }
-
-  @Test
-  public void testJwtRsa4096AlgoPS512F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPssKeyFormat format =
-        JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testJwtRsa3072AlgoPS384F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPssKeyFormat format =
-        JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testJwtRsa3072AlgoPS256F4TemplateWithManager_ok() throws Exception {
-    JwtRsaSsaPssKeyFormat format =
-        JwtRsaSsaPssKeyFormat.parseFrom(
-            JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtRsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
   }
 
   @Test

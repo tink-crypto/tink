@@ -83,35 +83,6 @@ public class JwtEcdsaSignKeyManagerTest {
     };
   }
 
-  private static final String algorithmToString(JwtEcdsaAlgorithm algo)
-      throws GeneralSecurityException {
-    switch (algo) {
-      case ES256:
-        return "ES256";
-      case ES384:
-        return "ES384";
-      case ES512:
-        return "ES512";
-      default: // fall out
-    }
-    throw new GeneralSecurityException("unknown algorithm " + algo.name());
-  }
-
-  static final EllipticCurves.CurveType algorithmToCurve(JwtEcdsaAlgorithm algorithmProto)
-      throws GeneralSecurityException {
-
-    switch (algorithmProto) {
-      case ES256:
-        return EllipticCurves.CurveType.NIST_P256;
-      case ES384:
-        return EllipticCurves.CurveType.NIST_P384;
-      case ES512:
-        return EllipticCurves.CurveType.NIST_P521;
-      default:
-        throw new GeneralSecurityException("unknown algorithm " + algorithmProto.name());
-    }
-  }
-
   @Test
   public void basics() throws Exception {
     assertThat(manager.getKeyType())
@@ -236,33 +207,6 @@ public class JwtEcdsaSignKeyManagerTest {
   public void testJwtES512Template_ok() throws Exception {
     KeyTemplate template = JwtEcdsaSignKeyManager.jwtES512Template();
     checkTemplate(template, JwtEcdsaAlgorithm.ES512);
-  }
-
-  @Test
-  public void testJwtES256TemplateWithManager_ok() throws Exception {
-    JwtEcdsaKeyFormat format =
-        JwtEcdsaKeyFormat.parseFrom(
-            JwtEcdsaSignKeyManager.jwtES256Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtEcdsaSignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testJwtES384TemplateWithManager_ok() throws Exception {
-    JwtEcdsaKeyFormat format =
-        JwtEcdsaKeyFormat.parseFrom(
-            JwtEcdsaSignKeyManager.jwtES384Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtEcdsaSignKeyManager().keyFactory().validateKeyFormat(format);
-  }
-
-  @Test
-  public void testJwtES512TemplateWithManager_ok() throws Exception {
-    JwtEcdsaKeyFormat format =
-        JwtEcdsaKeyFormat.parseFrom(
-            JwtEcdsaSignKeyManager.jwtES512Template().getValue(),
-            ExtensionRegistryLite.getEmptyRegistry());
-    new JwtEcdsaSignKeyManager().keyFactory().validateKeyFormat(format);
   }
 
   @Test
