@@ -29,6 +29,8 @@ install_python3() {
   (
     cd /home/kbuilder/.pyenv/plugins/python-build/../..
     git pull
+    # TODO(b/187879867): Remove once pyenv issue is resolved.
+    git checkout 783870759566a77d09b426e0305bc0993a522765
   )
   # Install Python.
   eval "$(pyenv init -)"

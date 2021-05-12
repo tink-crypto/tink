@@ -21,17 +21,19 @@ cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 ./kokoro/copy_credentials.sh
 
 install_python3() {
-    : "${PYTHON_VERSION:=3.7.1}"
+  : "${PYTHON_VERSION:=3.7.1}"
 
-    # Update python version list.
-    (
-      cd /home/kbuilder/.pyenv/plugins/python-build/../..
-      git pull
-    )
-    # Install Python.
-    eval "$(pyenv init -)"
-    pyenv install -v "${PYTHON_VERSION}"
-    pyenv global "${PYTHON_VERSION}"
+  # Update python version list.
+  (
+    cd /home/kbuilder/.pyenv/plugins/python-build/../..
+    git pull
+    # TODO(b/187879867): Remove once pyenv issue is resolved.
+    git checkout 783870759566a77d09b426e0305bc0993a522765
+  )
+  # Install Python.
+  eval "$(pyenv init -)"
+  pyenv install -v "${PYTHON_VERSION}"
+  pyenv global "${PYTHON_VERSION}"
 }
 
 run_bazel_tests() {
