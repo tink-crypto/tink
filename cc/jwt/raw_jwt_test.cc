@@ -31,8 +31,9 @@ using ::testing::UnorderedElementsAreArray;
 namespace crypto {
 namespace tink {
 
-TEST(RawJwt, GetIssuerSubjectJwtIdOK) {
+TEST(RawJwt, GetTypeHeaderIssuerSubjectJwtIdOK) {
   auto jwt_or = RawJwtBuilder()
+                    .SetTypeHeader("typeHeader")
                     .SetIssuer("issuer")
                     .SetSubject("subject")
                     .SetJwtId("jwt_id")
@@ -40,6 +41,8 @@ TEST(RawJwt, GetIssuerSubjectJwtIdOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
+  EXPECT_TRUE(jwt.HasTypeHeader());
+  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_TRUE(jwt.HasIssuer());
   EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_TRUE(jwt.HasSubject());
@@ -255,6 +258,7 @@ TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
+  EXPECT_FALSE(jwt.HasTypeHeader());
   EXPECT_FALSE(jwt.HasIssuer());
   EXPECT_FALSE(jwt.HasSubject());
   EXPECT_FALSE(jwt.HasAudiences());
@@ -275,6 +279,7 @@ TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
+  EXPECT_FALSE(jwt.GetTypeHeader().ok());
   EXPECT_FALSE(jwt.GetIssuer().ok());
   EXPECT_FALSE(jwt.GetSubject().ok());
   EXPECT_FALSE(jwt.GetAudiences().ok());
@@ -307,12 +312,14 @@ TEST(RawJwt, BuildCanBeCalledTwice) {
   EXPECT_THAT(jwt2.GetSubject(), IsOkAndHolds("subject2"));
 }
 
-TEST(RawJwt, FromString) {
-  auto jwt_or = RawJwt::FromString(
+TEST(RawJwt, FromJson) {
+  auto jwt_or = RawJwt::FromJson(
+      absl::nullopt,
       R"({"iss":"issuer", "sub":"subject", "exp":123, "aud":["a1", "a2"]})");
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
+  EXPECT_FALSE(jwt.HasTypeHeader());
   EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
   EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
@@ -320,8 +327,17 @@ TEST(RawJwt, FromString) {
   EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
 }
 
-TEST(RawJwt, FromStringExpExpiration) {
-  auto jwt_or = RawJwt::FromString(R"({"exp":1e10})");
+TEST(RawJwt, FromJsonWithTypeHeader) {
+  auto jwt_or = RawJwt::FromJson("typeHeader", R"({"iss":"issuer"})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+}
+
+TEST(RawJwt, FromJsonExpExpiration) {
+  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":1e10})");
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -329,18 +345,18 @@ TEST(RawJwt, FromStringExpExpiration) {
               IsOkAndHolds(absl::FromUnixSeconds(10000000000)));
 }
 
-TEST(RawJwt, FromStringExpirationTooLarge) {
-  auto jwt_or = RawJwt::FromString(R"({"exp":1e30})");
+TEST(RawJwt, FromJsonExpirationTooLarge) {
+  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":1e30})");
   EXPECT_FALSE(jwt_or.ok());
 }
 
-TEST(RawJwt, FromStringNegativeExpirationAreInvalid) {
-  auto jwt_or = RawJwt::FromString(R"({"exp":-1})");
+TEST(RawJwt, FromJsonNegativeExpirationAreInvalid) {
+  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":-1})");
   EXPECT_FALSE(jwt_or.ok());
 }
 
-TEST(RawJwt, FromStringConvertsStringAudIntoListOfStrings) {
-  auto jwt_or = RawJwt::FromString(R"({"aud":"audience"})");
+TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
+  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"aud":"audience"})");
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -349,23 +365,23 @@ TEST(RawJwt, FromStringConvertsStringAudIntoListOfStrings) {
   EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
 }
 
-TEST(RawJwt, FromStringWithBadRegisteredTypes) {
-  EXPECT_FALSE(RawJwt::FromString(R"({"iss":123})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"sub":123})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"aud":123})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"aud":[]})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"aud":["abc",123]})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"exp":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"nbf":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromString(R"({"iat":"abc"})").ok());
+TEST(RawJwt, FromJsonWithBadRegisteredTypes) {
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iss":123})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"sub":123})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":123})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":[]})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":["abc",123]})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"exp":"abc"})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"nbf":"abc"})").ok());
+  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iat":"abc"})").ok());
 }
 
-TEST(RawJwt, ToString) {
+TEST(RawJwt, GetJsonPayload) {
   auto jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
-  ASSERT_THAT(jwt.ToString(), IsOkAndHolds(R"({"iss":"issuer"})"));
+  ASSERT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
 }
 
 }  // namespace tink

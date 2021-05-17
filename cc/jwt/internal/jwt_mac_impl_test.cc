@@ -34,6 +34,7 @@
 #include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 
 namespace crypto {
 namespace tink {
@@ -67,13 +68,16 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   std::unique_ptr<JwtMac> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
   absl::Time now = absl::Now();
-  auto builder = RawJwtBuilder().SetIssuer("issuer");
+  auto builder =
+      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
   ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
   ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
   ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
   auto raw_jwt_or = builder.Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
+  EXPECT_TRUE(raw_jwt.HasTypeHeader());
+  EXPECT_THAT(raw_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
 
   util::StatusOr<std::string> compact_or =
       jwt_mac->ComputeMacAndEncode(raw_jwt);
@@ -86,7 +90,8 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
-  EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
 
   JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
@@ -110,9 +115,9 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
       jwt_mac->VerifyMacAndDecode(compact, validator_1970);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
-  EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("joe"));
+  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("joe"));
   EXPECT_THAT(verified_jwt.GetBooleanClaim("http://example.com/is_root"),
-              test::IsOkAndHolds(true));
+              IsOkAndHolds(true));
 
   // verification fails because token is expired
   JwtValidator validator_now = JwtValidatorBuilder().Build();

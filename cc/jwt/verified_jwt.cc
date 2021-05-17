@@ -30,6 +30,12 @@ VerifiedJwt::VerifiedJwt(const RawJwt& raw_jwt) {
   raw_jwt_ = raw_jwt;
 }
 
+bool VerifiedJwt::HasTypeHeader() const { return raw_jwt_.HasTypeHeader(); }
+
+util::StatusOr<std::string> VerifiedJwt::GetTypeHeader() const {
+  return raw_jwt_.GetTypeHeader();
+}
+
 bool VerifiedJwt::HasIssuer() const {
   return raw_jwt_.HasIssuer();
 }
@@ -139,8 +145,8 @@ std::vector<std::string> VerifiedJwt::CustomClaimNames() const {
   return raw_jwt_.CustomClaimNames();
 }
 
-util::StatusOr<std::string> VerifiedJwt::ToString() {
-  return raw_jwt_.ToString();
+util::StatusOr<std::string> VerifiedJwt::GetJsonPayload() {
+  return raw_jwt_.GetJsonPayload();
 }
 
 }  // namespace tink

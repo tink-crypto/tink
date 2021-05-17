@@ -26,8 +26,16 @@ namespace jwt_internal {
 
 util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncode(
     const RawJwt& token) const {
-  std::string encoded_header = CreateHeader(algorithm_);
-  util::StatusOr<std::string> payload_or = token.ToString();
+  absl::optional<std::string> type_header;
+  if (token.HasTypeHeader()) {
+    util::StatusOr<std::string> type_or = token.GetTypeHeader();
+    if (!type_or.ok()) {
+      return type_or.status();
+    }
+    type_header = type_or.ValueOrDie();
+  }
+  std::string encoded_header = CreateHeader(algorithm_, type_header);
+  util::StatusOr<std::string> payload_or = token.GetJsonPayload();
   if (!payload_or.ok()) {
     return payload_or.status();
   }

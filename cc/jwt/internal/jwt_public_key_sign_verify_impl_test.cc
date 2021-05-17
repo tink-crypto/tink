@@ -66,7 +66,8 @@ class JwtSignatureImplTest : public ::testing::Test {
 
 TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   absl::Time now = absl::Now();
-  auto builder = RawJwtBuilder().SetIssuer("issuer");
+  auto builder =
+      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
   ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
   ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
   ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
@@ -86,6 +87,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
       jwt_verify_->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
+  EXPECT_THAT(verified_jwt.GetTypeHeader(), test::IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
   // Fails with wrong issuer

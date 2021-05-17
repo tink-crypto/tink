@@ -54,6 +54,7 @@ tink_cc_library(
     jwt_format.cc
     jwt_format.h
   DEPS
+    protobuf::libprotobuf
     tink::jwt::internal::json_util
     tink::util::status
     tink::util::statusor
@@ -64,6 +65,7 @@ tink_cc_test(
   NAME jwt_format_test
   SRCS jwt_format_test.cc
   DEPS
+    tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
     tink::util::test_matchers
     tink::util::test_util
@@ -488,6 +490,7 @@ tink_cc_library(
     jwt_public_key_verify_impl.cc
     jwt_public_key_verify_impl.h
   DEPS
+    tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
     tink::core::public_key_verify
     tink::jwt::jwt_public_key_verify

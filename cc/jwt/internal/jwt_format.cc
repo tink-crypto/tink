@@ -51,22 +51,29 @@ bool DecodeHeader(absl::string_view header, std::string* json_header) {
   return StrictWebSafeBase64Unescape(header, json_header);
 }
 
-std::string CreateHeader(absl::string_view algorithm) {
-  std::string header = absl::StrCat(R"({"alg":")", algorithm, R"("})");
-  return EncodeHeader(header);
+std::string CreateHeader(absl::string_view algorithm,
+                         absl::optional<absl::string_view> type_header) {
+  google::protobuf::Struct header;
+  auto fields = header.mutable_fields();
+  if (type_header.has_value()) {
+    google::protobuf::Value type_value;
+    type_value.set_string_value(std::string(type_header.value()));
+    (*fields)["typ"] = type_value;
+  }
+  google::protobuf::Value alg_value;
+  alg_value.set_string_value(std::string(algorithm));
+  (*fields)["alg"] = alg_value;
+  util::StatusOr<std::string> json_or =
+      jwt_internal::ProtoStructToJsonString(header);
+  if (!json_or.ok()) {
+    // do something
+  }
+  return EncodeHeader(json_or.ValueOrDie());
 }
 
-util::Status ValidateHeader(absl::string_view encoded_header,
+util::Status ValidateHeader(const google::protobuf::Struct& header,
                             absl::string_view algorithm) {
-  std::string json_header;
-  if (!DecodeHeader(encoded_header, &json_header)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
-  }
-  auto proto_or = JsonStringToProtoStruct(json_header);
-  if (!proto_or.ok()) {
-    return proto_or.status();
-  }
-  auto fields = proto_or.ValueOrDie().fields();
+  auto fields = header.fields();
   auto it = fields.find("alg");
   if (it == fields.end()) {
     return util::Status(util::error::INVALID_ARGUMENT, "header is missing alg");
@@ -83,6 +90,19 @@ util::Status ValidateHeader(absl::string_view encoded_header,
                         "all tokens with crit headers are rejected");
   }
   return util::OkStatus();
+}
+
+absl::optional<std::string> GetTypeHeader(
+    const google::protobuf::Struct& header) {
+  auto it = header.fields().find("typ");
+  if (it == header.fields().end()) {
+    return absl::nullopt;
+  }
+  const auto& value = it->second;
+  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+    return absl::nullopt;
+  }
+  return value.string_value();
 }
 
 std::string EncodePayload(absl::string_view json_payload) {

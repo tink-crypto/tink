@@ -36,6 +36,8 @@ class RawJwt {
  public:
   RawJwt();
 
+  bool HasTypeHeader() const;
+  util::StatusOr<std::string> GetTypeHeader() const;
   bool HasIssuer() const;
   util::StatusOr<std::string> GetIssuer() const;
   bool HasSubject() const;
@@ -63,8 +65,9 @@ class RawJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
   std::vector<std::string> CustomClaimNames() const;
 
-  static util::StatusOr<RawJwt> FromString(absl::string_view json_string);
-  util::StatusOr<std::string> ToString() const;
+  static util::StatusOr<RawJwt> FromJson(
+      absl::optional<std::string> type_header, absl::string_view json_payload);
+  util::StatusOr<std::string> GetJsonPayload() const;
 
   // RawJwt objects are copiable and movable.
   RawJwt(const RawJwt&) = default;
@@ -73,8 +76,10 @@ class RawJwt {
   RawJwt& operator=(RawJwt&& other) = default;
 
  private:
-  explicit RawJwt(google::protobuf::Struct json_proto);
+  explicit RawJwt(absl::optional<std::string> type_header,
+                  google::protobuf::Struct json_proto);
   friend class RawJwtBuilder;
+  absl::optional<std::string> type_header_;
   google::protobuf::Struct json_proto_;
 };
 
@@ -82,6 +87,7 @@ class RawJwtBuilder {
  public:
   RawJwtBuilder();
 
+  RawJwtBuilder& SetTypeHeader(absl::string_view type_header);
   RawJwtBuilder& SetIssuer(absl::string_view issuer);
   RawJwtBuilder& SetSubject(absl::string_view subject);
   RawJwtBuilder& AddAudience(absl::string_view audience);
@@ -107,6 +113,7 @@ class RawJwtBuilder {
   RawJwtBuilder& operator=(RawJwtBuilder&& other) = default;
 
  private:
+  absl::optional<std::string> type_header_;
   google::protobuf::Struct json_proto_;
 };
 

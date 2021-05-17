@@ -48,6 +48,8 @@ class VerifiedJwt {
   VerifiedJwt(const VerifiedJwt&) = default;
   VerifiedJwt& operator=(const VerifiedJwt&) = default;
 
+  bool HasTypeHeader() const;
+  util::StatusOr<std::string> GetTypeHeader() const;
   bool HasIssuer() const;
   util::StatusOr<std::string> GetIssuer() const;
   bool HasSubject() const;
@@ -76,7 +78,7 @@ class VerifiedJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
   std::vector<std::string> CustomClaimNames() const;
 
-  util::StatusOr<std::string> ToString();
+  util::StatusOr<std::string> GetJsonPayload();
 
  private:
   VerifiedJwt();

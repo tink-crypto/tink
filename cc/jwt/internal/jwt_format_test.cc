@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "tink/jwt/internal/json_util.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
@@ -79,72 +80,105 @@ TEST(JwtFormat, DecodeAndValidateFixedHeaderHS256) {
   // Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
   std::string encoded_header = "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9";
 
-  std::string output;
-  ASSERT_TRUE(DecodeHeader(encoded_header, &output));
-  EXPECT_THAT(output, Eq("{\"typ\":\"JWT\",\r\n \"alg\":\"HS256\"}"));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
+  EXPECT_THAT(json_header, Eq("{\"typ\":\"JWT\",\r\n \"alg\":\"HS256\"}"));
 
-  EXPECT_THAT(ValidateHeader(encoded_header, "HS256"), IsOk());
-  EXPECT_FALSE(ValidateHeader(encoded_header, "RS256").ok());
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "HS256"), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "RS256").ok());
 }
 
 TEST(JwtFormat, DecodeAndValidateFixedHeaderRS256) {
   // Example from https://tools.ietf.org/html/rfc7515#appendix-A.2
   std::string encoded_header = "eyJhbGciOiJSUzI1NiJ9";
 
-  std::string output;
-  ASSERT_TRUE(DecodeHeader(encoded_header, &output));
-  EXPECT_THAT(output, Eq(R"({"alg":"RS256"})"));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
+  EXPECT_THAT(json_header, Eq(R"({"alg":"RS256"})"));
 
-  EXPECT_THAT(ValidateHeader(encoded_header, "RS256"), IsOk());
-  EXPECT_FALSE(ValidateHeader(encoded_header, "HS256").ok());
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "RS256"), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
 }
 
 TEST(JwtFormat, CreateValidateHeader) {
-  std::string encoded_header = CreateHeader("PS384");
-  EXPECT_THAT(ValidateHeader(encoded_header, "PS384"), IsOk());
-  EXPECT_FALSE(ValidateHeader(encoded_header, "HS256").ok());
+  std::string encoded_header = CreateHeader("PS384", absl::nullopt);
+
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
+
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "PS384"), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
+}
+
+TEST(JwtFormat, CreateValidateHeaderWithType) {
+  std::string encoded_header = CreateHeader("PS384", "JWT");
+
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
+
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "PS384"), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
 }
 
 TEST(JwtFormat, ValidateEmptyHeaderFails) {
-  std::string header = "{}";
-  EXPECT_FALSE(ValidateHeader(EncodeHeader(header), "HS256").ok());
+  google::protobuf::Struct empty_header;
+  EXPECT_FALSE(ValidateHeader(empty_header, "HS256").ok());
 }
 
-TEST(JwtFormat, ValidateInvalidEncodedHeaderFails) {
-  EXPECT_FALSE(
-      ValidateHeader("eyJ0eXAiOiJKV1Q?LA0KICJhbGciOiJIUzI1NiJ9", "HS256").ok());
-}
+TEST(JwtFormat, ValidateHeaderWithUnknownTypeOk) {
+  std::string json_header = R"({"alg":"HS256","typ":"unknown"})";
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
 
-TEST(JwtFormat, ValidateInvalidJsonHeaderFails) {
-  std::string header = R"({"alg":"HS256")";  // missing }
-  EXPECT_FALSE(ValidateHeader(EncodeHeader(header), "HS256").ok());
-}
-
-TEST(JwtFormat, ValidateHeaderIgnoresTyp) {
-  std::string header = R"({"alg":"HS256","typ":"unknown"})";
-  EXPECT_THAT(ValidateHeader(EncodeHeader(header), "HS256"), IsOk());
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "HS256"), IsOk());
 }
 
 TEST(JwtFormat, ValidateHeaderRejectsCrit) {
-  std::string header =
+  std::string json_header =
       R"({"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],)"
       R"("http://example.invalid/UNDEFINED":true})";
-  EXPECT_FALSE(ValidateHeader(EncodeHeader(header), "HS256").ok());
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
 }
 
 TEST(JwtFormat, ValidateHeaderWithUnknownEntry) {
-  std::string header = R"({"alg":"HS256","unknown":"header"})";
-  EXPECT_THAT(ValidateHeader(EncodeHeader(header), "HS256"), IsOk());
+  std::string json_header = R"({"alg":"HS256","unknown":"header"})";
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "HS256"), IsOk());
 }
 
 TEST(JwtFormat, ValidateHeaderWithInvalidAlgTypFails) {
-  std::string header = R"({"alg":true})";
-  EXPECT_FALSE(ValidateHeader(EncodeHeader(header), "HS256").ok());
+  std::string json_header = R"({"alg":true})";
+  util::StatusOr<google::protobuf::Struct> header_or =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header_or.status(), IsOk());
+  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
 }
 
 TEST(JwtFormat, DecodeFixedPayload) {
   // Example from https://tools.ietf.org/html/rfc7519#section-3.1
-  std::string encoded_header =
+  std::string encoded_payload =
       "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0"
       "dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ";
 
@@ -152,7 +186,7 @@ TEST(JwtFormat, DecodeFixedPayload) {
       "{\"iss\":\"joe\",\r\n \"exp\":1300819380,\r\n "
       "\"http://example.com/is_root\":true}";
   std::string output;
-  ASSERT_TRUE(DecodePayload(encoded_header, &output));
+  ASSERT_TRUE(DecodePayload(encoded_payload, &output));
   EXPECT_THAT(output, Eq(expected));
 }
 

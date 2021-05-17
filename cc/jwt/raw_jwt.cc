@@ -148,8 +148,9 @@ util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
 
 }  // namespace
 
-util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
-  auto proto_or = jwt_internal::JsonStringToProtoStruct(json_string);
+util::StatusOr<RawJwt> RawJwt::FromJson(absl::optional<std::string> type_header,
+                                        absl::string_view json_payload) {
+  auto proto_or = jwt_internal::JsonStringToProtoStruct(json_payload);
   if (!proto_or.ok()) {
     return proto_or.status();
   }
@@ -166,18 +167,29 @@ util::StatusOr<RawJwt> RawJwt::FromString(absl::string_view json_string) {
   if (!audStatus.ok()) {
     return audStatus;
   }
-  RawJwt token(proto);
+  RawJwt token(type_header, proto);
   return token;
 }
 
-util::StatusOr<std::string> RawJwt::ToString() const {
+util::StatusOr<std::string> RawJwt::GetJsonPayload() const {
   return jwt_internal::ProtoStructToJsonString(json_proto_);
 }
 
 RawJwt::RawJwt() {}
 
-RawJwt::RawJwt(google::protobuf::Struct json_proto) {
+RawJwt::RawJwt(absl::optional<std::string> type_header,
+               google::protobuf::Struct json_proto) {
+  type_header_ = type_header;
   json_proto_ = json_proto;
+}
+
+bool RawJwt::HasTypeHeader() const { return type_header_.has_value(); }
+
+util::StatusOr<std::string> RawJwt::GetTypeHeader() const {
+  if (!type_header_.has_value()) {
+    return util::Status(util::error::INVALID_ARGUMENT, "No type header found");
+  }
+  return *type_header_;
 }
 
 bool RawJwt::HasIssuer() const {
@@ -457,6 +469,11 @@ std::vector<std::string> RawJwt::CustomClaimNames() const {
 
 RawJwtBuilder::RawJwtBuilder() {}
 
+RawJwtBuilder& RawJwtBuilder::SetTypeHeader(absl::string_view type_header) {
+  type_header_ = std::string(type_header);
+  return *this;
+}
+
 RawJwtBuilder& RawJwtBuilder::SetIssuer(absl::string_view issuer) {
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
@@ -612,7 +629,7 @@ util::Status RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
 }
 
 util::StatusOr<RawJwt> RawJwtBuilder::Build() {
-  RawJwt token(json_proto_);
+  RawJwt token(type_header_, json_proto_);
   return token;
 }
 

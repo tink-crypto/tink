@@ -76,8 +76,9 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
                                      validator_builder.Build());
 }
 
-TEST(VerifiedJwt, GetIssuerSubjectJwtIdOK) {
+TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {
   auto raw_jwt_or = RawJwtBuilder()
+                        .SetTypeHeader("typeHeader")
                         .SetIssuer("issuer")
                         .SetSubject("subject")
                         .SetJwtId("jwt_id")
@@ -87,6 +88,8 @@ TEST(VerifiedJwt, GetIssuerSubjectJwtIdOK) {
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
 
+  EXPECT_TRUE(jwt.HasTypeHeader());
+  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_TRUE(jwt.HasIssuer());
   EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_TRUE(jwt.HasSubject());
@@ -255,6 +258,7 @@ TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
 
+  EXPECT_FALSE(jwt.HasTypeHeader());
   EXPECT_FALSE(jwt.HasIssuer());
   EXPECT_FALSE(jwt.HasSubject());
   EXPECT_FALSE(jwt.HasAudiences());
@@ -277,6 +281,7 @@ TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
 
+  EXPECT_FALSE(jwt.GetTypeHeader().ok());
   EXPECT_FALSE(jwt.GetIssuer().ok());
   EXPECT_FALSE(jwt.GetSubject().ok());
   EXPECT_FALSE(jwt.GetAudiences().ok());
@@ -292,14 +297,14 @@ TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
   EXPECT_FALSE(jwt.GetJsonArrayClaim("array_claim").ok());
 }
 
-TEST(VerifiedJwt, ToString) {
+TEST(VerifiedJwt, GetJsonPayload) {
   auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
 
-  EXPECT_THAT(jwt.ToString(), IsOkAndHolds(R"({"iss":"issuer"})"));
+  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
 }
 
 TEST(VerifiedJwt, MoveMakesCopy) {

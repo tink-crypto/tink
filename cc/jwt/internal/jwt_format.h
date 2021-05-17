@@ -17,6 +17,7 @@
 #ifndef TINK_JWT_INTERNAL_JWT_FORMAT_H_
 #define TINK_JWT_INTERNAL_JWT_FORMAT_H_
 
+#include "google/protobuf/struct.pb.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -27,9 +28,12 @@ namespace jwt_internal {
 std::string EncodeHeader(absl::string_view json_header);
 bool DecodeHeader(absl::string_view header, std::string* json_header);
 
-std::string CreateHeader(absl::string_view algorithm);
-util::Status ValidateHeader(absl::string_view encoded_header,
+std::string CreateHeader(absl::string_view algorithm,
+                         absl::optional<absl::string_view> type_header);
+util::Status ValidateHeader(const google::protobuf::Struct& header,
                             absl::string_view algorithm);
+absl::optional<std::string> GetTypeHeader(
+    const google::protobuf::Struct& header);
 
 std::string EncodePayload(absl::string_view json_payload);
 bool DecodePayload(absl::string_view payload, std::string* json_payload);
