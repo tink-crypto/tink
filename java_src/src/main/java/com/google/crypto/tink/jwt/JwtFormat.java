@@ -18,6 +18,7 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.gson.JsonObject;
 import java.nio.ByteBuffer;
@@ -97,10 +98,13 @@ final class JwtFormat {
     }
   }
 
-  static String createHeader(String algorithm, Optional<String> typeHeader)
+  static String createHeader(String algorithm, Optional<String> typeHeader, Optional<String> kid)
       throws InvalidAlgorithmParameterException {
     validateAlgorithm(algorithm);
     JsonObject header = new JsonObject();
+    if (kid.isPresent()) {
+      header.addProperty(JwtNames.HEADER_KEY_ID, kid.get());
+    }
     header.addProperty(JwtNames.HEADER_ALGORITHM, algorithm);
     if (typeHeader.isPresent()) {
       header.addProperty(JwtNames.HEADER_TYPE, typeHeader.get());
@@ -171,6 +175,17 @@ final class JwtFormat {
     return strictUrlSafeDecode(signatureStr);
   }
 
+  static Optional<String> getKid(int keyId, OutputPrefixType prefix) throws JwtInvalidException {
+    if (prefix == OutputPrefixType.RAW) {
+      return Optional.empty();
+    }
+    if (prefix == OutputPrefixType.TINK) {
+      byte[] bigEndianKeyId = ByteBuffer.allocate(4).putInt(keyId).array();
+      return Optional.of(Base64.urlSafeEncode(bigEndianKeyId));
+    }
+    throw new JwtInvalidException("unsupported output prefix type");
+  }
+
   static Parts splitSignedCompact(String signedCompact) throws JwtInvalidException {
       validateASCII(signedCompact);
       int sigPos = signedCompact.lastIndexOf('.');
@@ -197,11 +212,11 @@ final class JwtFormat {
       return new Parts(unsignedCompact, mac, header, payload);
   }
 
-  // TODO(juerg): Refactor this to createUnsignedCompact(algorithm, rawJwt)
+  // TODO(juerg): Refactor this to createUnsignedCompact(algorithm, kid, rawJwt)
   static String createUnsignedCompact(
-      String algorithm, Optional<String> typeHeader, String jsonPayload)
+      String algorithm, Optional<String> typeHeader, Optional<String> kid, String jsonPayload)
       throws InvalidAlgorithmParameterException {
-    return createHeader(algorithm, typeHeader) + "." + encodePayload(jsonPayload);
+    return createHeader(algorithm, typeHeader, kid) + "." + encodePayload(jsonPayload);
   }
 
   static String createSignedCompact(String unsignedCompact, byte[] signature) {

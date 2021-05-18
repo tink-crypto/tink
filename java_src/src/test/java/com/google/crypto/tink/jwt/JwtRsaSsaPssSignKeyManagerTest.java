@@ -95,7 +95,16 @@ public class JwtRsaSsaPssSignKeyManagerTest {
       JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
       JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
       JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template()
+      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
+      KeyTemplate.create(
+          new JwtRsaSsaPssSignKeyManager().getKeyType(),
+          JwtRsaSsaPssKeyFormat.newBuilder()
+              .setAlgorithm(JwtRsaSsaPssAlgorithm.PS256)
+              .setModulusSizeInBits(2048)
+              .setPublicExponent(ByteString.copyFrom(RSAKeyGenParameterSpec.F4.toByteArray()))
+              .build()
+              .toByteArray(),
+          KeyTemplate.OutputPrefixType.TINK),
     };
   }
 
@@ -237,7 +246,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
             .build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySign.class));
+        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
   }
 
   @Test
@@ -449,5 +458,12 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
     verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
+
+    // token with an unknown "kid" in the header is valid
+    JsonObject unknownKidHeader = new JsonObject();
+    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
+    unknownKidHeader.addProperty("kid", "unknown");
+    String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
+    verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 }

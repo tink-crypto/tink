@@ -553,7 +553,8 @@ public class JwtHmacKeyManagerTest {
 
     // Normal, valid signed compact.
     String unsignedCompact =
-        JwtFormat.createUnsignedCompact(algorithm, Optional.empty(), payload.toString());
+        JwtFormat.createUnsignedCompact(
+            algorithm, Optional.empty(), Optional.empty(), payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawPrimitive.computeMac(unsignedCompact.getBytes(US_ASCII)));
@@ -588,6 +589,14 @@ public class JwtHmacKeyManagerTest {
     String unknownTypeSignedCompact = generateSignedCompact(
         rawPrimitive, unknownTypeHeader, payload);
     primitive.verifyMacAndDecode(unknownTypeSignedCompact, validator);
+
+    // token with an unknown "kid" in the header is valid
+    JsonObject unknownKidHeader = new JsonObject();
+    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    unknownKidHeader.addProperty("typ", "unknown");
+    String unknownKidSignedCompact = generateSignedCompact(
+        rawPrimitive, unknownTypeHeader, payload);
+    primitive.verifyMacAndDecode(unknownKidSignedCompact, validator);
   }
 
   private static KeysetHandle getRfc7515ExampleKeysetHandle() throws Exception {

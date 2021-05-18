@@ -51,9 +51,9 @@ public final class JwtEcdsaSignKeyManager
     extends PrivateKeyTypeManager<JwtEcdsaPrivateKey, JwtEcdsaPublicKey> {
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySign, JwtEcdsaPrivateKey> {
+      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtEcdsaPrivateKey> {
     public JwtPublicKeySignFactory() {
-      super(JwtPublicKeySign.class);
+      super(JwtPublicKeySignInternal.class);
     }
 
     private static final void selfTestKey(ECPrivateKey privateKey, JwtEcdsaPrivateKey keyProto)
@@ -72,7 +72,7 @@ public final class JwtEcdsaSignKeyManager
     }
 
     @Override
-    public JwtPublicKeySign getPrimitive(JwtEcdsaPrivateKey keyProto)
+    public JwtPublicKeySignInternal getPrimitive(JwtEcdsaPrivateKey keyProto)
         throws GeneralSecurityException {
       ECPrivateKey privateKey =
           EllipticCurves.getEcPrivateKey(
@@ -86,14 +86,15 @@ public final class JwtEcdsaSignKeyManager
       final EcdsaSignJce signer = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
       final String algorithmName = algorithm.name();
 
-      return new JwtPublicKeySign() {
+      return new JwtPublicKeySignInternal() {
         @Override
-        public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+        public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
+            throws GeneralSecurityException {
           String jsonPayload = rawJwt.getJsonPayload();
           Optional<String> typeHeader =
               rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, jsonPayload);
+              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, kid, jsonPayload);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }
@@ -238,6 +239,7 @@ public final class JwtEcdsaSignKeyManager
   public static final KeyTemplate jwtES512Template() {
     return createKeyTemplate(JwtEcdsaAlgorithm.ES512);
   }
+
   /**
    * Returns a {@link KeyTemplate} containing a {@link JwtEcdsaKeyFormat} with some specified
    * parameters.

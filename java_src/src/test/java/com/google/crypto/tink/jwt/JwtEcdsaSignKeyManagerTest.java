@@ -79,7 +79,11 @@ public class JwtEcdsaSignKeyManagerTest {
     return new Object[] {
       JwtEcdsaSignKeyManager.jwtES256Template(),
       JwtEcdsaSignKeyManager.jwtES384Template(),
-      JwtEcdsaSignKeyManager.jwtES512Template()
+      JwtEcdsaSignKeyManager.jwtES512Template(),
+      KeyTemplate.create(
+        new JwtEcdsaSignKeyManager().getKeyType(),
+        JwtEcdsaKeyFormat.newBuilder().setAlgorithm(JwtEcdsaAlgorithm.ES256).build().toByteArray(),
+        KeyTemplate.OutputPrefixType.TINK)
     };
   }
 
@@ -169,7 +173,7 @@ public class JwtEcdsaSignKeyManagerTest {
             .build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySign.class));
+        () -> manager.getPrimitive(corruptedKey, JwtPublicKeySignInternal.class));
   }
 
   @Test
@@ -358,7 +362,8 @@ public class JwtEcdsaSignKeyManagerTest {
 
     // Normal, valid signed compact.
     String unsignedCompact =
-        JwtFormat.createUnsignedCompact(algorithm.name(), Optional.empty(), payload.toString());
+        JwtFormat.createUnsignedCompact(
+            algorithm.name(), Optional.empty(), Optional.empty(), payload.toString());
     String normalSignedCompact =
         JwtFormat.createSignedCompact(
             unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));
@@ -392,5 +397,12 @@ public class JwtEcdsaSignKeyManagerTest {
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
     verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
+
+    // for raw keys, the validation should work even if a "kid" header is present.
+    JsonObject unknownKidHeader = new JsonObject();
+    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    unknownKidHeader.addProperty("kid", "unknown");
+    String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
+    verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 }

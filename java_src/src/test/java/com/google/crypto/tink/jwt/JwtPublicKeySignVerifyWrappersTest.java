@@ -72,12 +72,12 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  public void test_wrapNoRaw_throws() throws Exception {
+  public void test_wrapLegacy_throws() throws Exception {
     KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
-    // Convert the normal, raw template into a template with output prefix type TINK
+    // Convert the normal, raw template into a template with output prefix type LEGACY
     KeyTemplate tinkTemplate =
         KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.LEGACY);
     KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
     assertThrows(
         GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeySign.class));
@@ -85,6 +85,25 @@ public class JwtPublicKeySignVerifyWrappersTest {
     KeysetHandle publicHandle = handle.getPublicKeysetHandle();
     assertThrows(
         GeneralSecurityException.class, () -> publicHandle.getPrimitive(JwtPublicKeyVerify.class));
+  }
+
+  @Test
+  public void test_wrapSingleTinkKey_works() throws Exception {
+    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate tinkTemplate =
+        KeyTemplate.create(
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+
+    KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
+
+    JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    String signedCompact = signer.signAndEncode(rawToken);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
+    assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
   }
 
   @Test
@@ -122,17 +141,56 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeyVerify newVerifier =
         newHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
     String oldSignedCompact = oldSigner.signAndEncode(rawToken);
     String newSignedCompact = newSigner.signAndEncode(rawToken);
 
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThat(oldVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
     assertThat(newVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
     assertThat(newVerifier.verifyAndDecode(newSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> oldVerifier.verifyAndDecode(newSignedCompact, validator));
+  }
+
+  @Test
+  public void test_wrapMultipleTinkKeys() throws Exception {
+    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate tinkTemplate =
+        KeyTemplate.create(
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+
+    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
+    KeysetHandle oldHandle = manager.getKeysetHandle();
+
+    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
+
+    KeysetHandle newHandle = manager.getKeysetHandle();
+
+    JwtPublicKeySign oldSigner = oldHandle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeySign newSigner = newHandle.getPrimitive(JwtPublicKeySign.class);
+
+    JwtPublicKeyVerify oldVerifier =
+        oldHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtPublicKeyVerify newVerifier =
+        newHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+    String oldSignedCompact = oldSigner.signAndEncode(rawToken);
+    String newSignedCompact = newSigner.signAndEncode(rawToken);
+
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThat(oldVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(newVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(newVerifier.verifyAndDecode(newSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
     assertThrows(
         GeneralSecurityException.class,
         () -> oldVerifier.verifyAndDecode(newSignedCompact, validator));

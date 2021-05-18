@@ -73,7 +73,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   }
 
   @Immutable
-  private static final class JwtHmac implements JwtMac {
+  private static final class JwtHmac implements JwtMacInternal {
     private final PrfMac prfMac;
     private final String algorithm;
 
@@ -83,11 +83,13 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
 
     @Override
-    public String computeMacAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+    public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
+        throws GeneralSecurityException {
       String jsonPayload = rawJwt.getJsonPayload();
       Optional<String> typeHeader =
           rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
-      String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, typeHeader, jsonPayload);
+      String unsignedCompact =
+          JwtFormat.createUnsignedCompact(algorithm, typeHeader, kid, jsonPayload);
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }
@@ -107,9 +109,9 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   public JwtHmacKeyManager() {
     super(
         JwtHmacKey.class,
-        new PrimitiveFactory<JwtMac, JwtHmacKey>(JwtMac.class) {
+        new PrimitiveFactory<JwtMacInternal, JwtHmacKey>(JwtMacInternal.class) {
           @Override
-          public JwtMac getPrimitive(JwtHmacKey key) throws GeneralSecurityException {
+          public JwtMacInternal getPrimitive(JwtHmacKey key) throws GeneralSecurityException {
             JwtHmacAlgorithm algorithm = key.getAlgorithm();
             byte[] keyValue = key.getKeyValue().toByteArray();
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");

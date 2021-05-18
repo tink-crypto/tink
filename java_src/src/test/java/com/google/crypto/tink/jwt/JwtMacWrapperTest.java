@@ -50,21 +50,37 @@ public class JwtMacWrapperTest {
   }
 
   @Test
-  public void test_wrapNoRaw_throws() throws Exception {
+  public void test_wrapLegacy_throws() throws Exception {
     KeyTemplate rawTemplate = JwtHmacKeyManager.hs256Template();
-    // Convert the normal, raw template into a template with output prefix type TINK
+    // Convert the normal, raw template into a template with output prefix type LEGACY
     KeyTemplate tinkTemplate =
         KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.LEGACY);
     KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
     assertThrows(GeneralSecurityException.class, () -> handle.getPrimitive(JwtMac.class));
   }
 
   @Test
-  public void test_wrapSingleKey_works() throws Exception {
+  public void test_wrapSingleRawKey_works() throws Exception {
     KeyTemplate template = JwtHmacKeyManager.hs256Template();
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
+    JwtMac jwtMac = handle.getPrimitive(JwtMac.class);
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    String signedCompact = jwtMac.computeMacAndEncode(rawToken);
+    JwtValidator validator = new JwtValidator.Builder().build();
+    VerifiedJwt verifiedToken = jwtMac.verifyMacAndDecode(signedCompact, validator);
+    assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
+  }
+
+  @Test
+  public void test_wrapSingleTinkKey_works() throws Exception {
+    KeyTemplate rawTemplate = JwtHmacKeyManager.hs256Template();
+    KeyTemplate tinkTemplate =
+        KeyTemplate.create(
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+
+    KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
     JwtMac jwtMac = handle.getPrimitive(JwtMac.class);
     RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
     String signedCompact = jwtMac.computeMacAndEncode(rawToken);
@@ -88,17 +104,51 @@ public class JwtMacWrapperTest {
     JwtMac oldJwtMac = oldHandle.getPrimitive(JwtMac.class);
     JwtMac newJwtMac = newHandle.getPrimitive(JwtMac.class);
 
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
     String oldSignedCompact = oldJwtMac.computeMacAndEncode(rawToken);
     String newSignedCompact = newJwtMac.computeMacAndEncode(rawToken);
 
     JwtValidator validator = new JwtValidator.Builder().build();
     assertThat(oldJwtMac.verifyMacAndDecode(oldSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
     assertThat(newJwtMac.verifyMacAndDecode(oldSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
     assertThat(newJwtMac.verifyMacAndDecode(newSignedCompact, validator).getJwtId())
-        .isEqualTo("blah");
+        .isEqualTo("jwtId");
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> oldJwtMac.verifyMacAndDecode(newSignedCompact, validator));
+  }
+
+  @Test
+  public void test_wrapMultipleTinkKeys() throws Exception {
+    KeyTemplate rawTemplate = JwtHmacKeyManager.hs256Template();
+    KeyTemplate tinkTemplate =
+        KeyTemplate.create(
+            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+
+    KeysetManager manager = KeysetManager.withEmptyKeyset();
+    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
+    KeysetHandle oldHandle = manager.getKeysetHandle();
+
+    manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
+
+    KeysetHandle newHandle = manager.getKeysetHandle();
+
+    JwtMac oldJwtMac = oldHandle.getPrimitive(JwtMac.class);
+    JwtMac newJwtMac = newHandle.getPrimitive(JwtMac.class);
+
+    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+    String oldSignedCompact = oldJwtMac.computeMacAndEncode(rawToken);
+    String newSignedCompact = newJwtMac.computeMacAndEncode(rawToken);
+
+    JwtValidator validator = new JwtValidator.Builder().build();
+    assertThat(oldJwtMac.verifyMacAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(newJwtMac.verifyMacAndDecode(oldSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(newJwtMac.verifyMacAndDecode(newSignedCompact, validator).getJwtId())
+        .isEqualTo("jwtId");
     assertThrows(
         GeneralSecurityException.class,
         () -> oldJwtMac.verifyMacAndDecode(newSignedCompact, validator));

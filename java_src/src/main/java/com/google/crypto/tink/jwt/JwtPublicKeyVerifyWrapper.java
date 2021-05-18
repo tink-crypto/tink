@@ -19,6 +19,7 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -32,8 +33,13 @@ class JwtPublicKeyVerifyWrapper
     if (primitiveSet.getPrimary() == null) {
       throw new GeneralSecurityException("Primitive set has no primary.");
     }
-    if (primitiveSet.getAll().size() != 1 || primitiveSet.getRawPrimitives().isEmpty()) {
-      throw new GeneralSecurityException("All JWT JwtPublicKeyVerify keys must be raw.");
+    for (List<PrimitiveSet.Entry<JwtPublicKeyVerify>> entries : primitiveSet.getAll()) {
+      for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
+        if ((entry.getOutputPrefixType() != OutputPrefixType.RAW)
+            && (entry.getOutputPrefixType() != OutputPrefixType.TINK)) {
+          throw new GeneralSecurityException("unsupported OutputPrefixType");
+        }
+      }
     }
   }
 
@@ -50,19 +56,18 @@ class JwtPublicKeyVerifyWrapper
     @Override
     public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
         throws GeneralSecurityException {
-
-      // All JWT keys are raw.
-      List<PrimitiveSet.Entry<JwtPublicKeyVerify>> entries = primitives.getRawPrimitives();
       GeneralSecurityException interestingException = null;
-      for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
-        try {
-          return entry.getPrimitive().verifyAndDecode(compact, validator);
-        } catch (GeneralSecurityException e) {
-          if (e instanceof JwtInvalidException) {
-            // Keep this exception so that we are able to throw a meaningful message in the end
-            interestingException = e;
+      for (List<PrimitiveSet.Entry<JwtPublicKeyVerify>> entries : primitives.getAll()) {
+        for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
+          try {
+            return entry.getPrimitive().verifyAndDecode(compact, validator);
+          } catch (GeneralSecurityException e) {
+            if (e instanceof JwtInvalidException) {
+              // Keep this exception so that we are able to throw a meaningful message in the end
+              interestingException = e;
+            }
+            // Ignored as we want to continue verification with other raw keys.
           }
-          // Ignored as we want to continue verification with other raw keys.
         }
       }
       if (interestingException != null) {

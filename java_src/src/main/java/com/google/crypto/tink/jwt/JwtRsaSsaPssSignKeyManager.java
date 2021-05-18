@@ -87,13 +87,13 @@ public final class JwtRsaSsaPssSignKeyManager
   }
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySign, JwtRsaSsaPssPrivateKey> {
+      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtRsaSsaPssPrivateKey> {
     public JwtPublicKeySignFactory() {
-      super(JwtPublicKeySign.class);
+      super(JwtPublicKeySignInternal.class);
     }
 
     @Override
-    public JwtPublicKeySign getPrimitive(JwtRsaSsaPssPrivateKey keyProto)
+    public JwtPublicKeySignInternal getPrimitive(JwtRsaSsaPssPrivateKey keyProto)
         throws GeneralSecurityException {
       RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
       selfTestKey(privateKey, keyProto);
@@ -103,14 +103,15 @@ public final class JwtRsaSsaPssSignKeyManager
       final RsaSsaPssSignJce signer = new RsaSsaPssSignJce(privateKey, hash, hash, saltLength);
       final String algorithmName = algorithm.name();
 
-      return new JwtPublicKeySign() {
+      return new JwtPublicKeySignInternal() {
         @Override
-        public String signAndEncode(RawJwt rawJwt) throws GeneralSecurityException {
+        public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
+            throws GeneralSecurityException {
           String jsonPayload = rawJwt.getJsonPayload();
           Optional<String> typeHeader =
               rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
           String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, jsonPayload);
+              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, kid, jsonPayload);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

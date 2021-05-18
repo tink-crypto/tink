@@ -19,25 +19,34 @@ package com.google.crypto.tink.jwt;
 import com.google.crypto.tink.PrimitiveSet;
 import com.google.crypto.tink.PrimitiveWrapper;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * The implementation of {@code PrimitiveWrapper<JwtPublicKeySign>}.
+ * The implementation of {@code PrimitiveWrapper<JwtPublicKeySignInternal, JwtPublicKeySign>}.
  *
  * <p>The returned primitive works with a keyset (rather than a single key). To sign a message, it
  * uses the primary key in the keyset, and prepends to the signature a certain prefix associated
  * with the primary key.
  */
-class JwtPublicKeySignWrapper implements PrimitiveWrapper<JwtPublicKeySign, JwtPublicKeySign> {
+class JwtPublicKeySignWrapper
+    implements PrimitiveWrapper<JwtPublicKeySignInternal, JwtPublicKeySign> {
 
-  private static void validate(PrimitiveSet<JwtPublicKeySign> primitiveSet)
+  private static void validate(PrimitiveSet<JwtPublicKeySignInternal> primitiveSet)
       throws GeneralSecurityException {
     if (primitiveSet.getPrimary() == null) {
       throw new GeneralSecurityException("Primitive set has no primary.");
     }
-    if (primitiveSet.getAll().size() != 1 || primitiveSet.getRawPrimitives().isEmpty()) {
-      throw new GeneralSecurityException("All JWT PublicKeySign keys must be raw.");
+    for (List<PrimitiveSet.Entry<JwtPublicKeySignInternal>> entries : primitiveSet.getAll()) {
+      for (PrimitiveSet.Entry<JwtPublicKeySignInternal> entry : entries) {
+        if ((entry.getOutputPrefixType() != OutputPrefixType.RAW)
+            && (entry.getOutputPrefixType() != OutputPrefixType.TINK)) {
+          throw new GeneralSecurityException("unsupported OutputPrefixType");
+        }
+      }
     }
   }
 
@@ -45,22 +54,24 @@ class JwtPublicKeySignWrapper implements PrimitiveWrapper<JwtPublicKeySign, JwtP
   private static class WrappedJwtPublicKeySign implements JwtPublicKeySign {
 
     @SuppressWarnings("Immutable")
-    private final PrimitiveSet<JwtPublicKeySign> primitives;
+    private final PrimitiveSet<JwtPublicKeySignInternal> primitives;
 
-    public WrappedJwtPublicKeySign(final PrimitiveSet<JwtPublicKeySign> primitives) {
+    public WrappedJwtPublicKeySign(final PrimitiveSet<JwtPublicKeySignInternal> primitives) {
       this.primitives = primitives;
     }
 
     @Override
     public String signAndEncode(RawJwt token) throws GeneralSecurityException {
-      return primitives.getPrimary().getPrimitive().signAndEncode(token);
+      PrimitiveSet.Entry<JwtPublicKeySignInternal> entry = primitives.getPrimary();
+      Optional<String> kid = JwtFormat.getKid(entry.getKeyId(), entry.getOutputPrefixType());
+      return primitives.getPrimary().getPrimitive().signAndEncodeWithKid(token, kid);
     }
   }
 
   JwtPublicKeySignWrapper() {}
 
   @Override
-  public JwtPublicKeySign wrap(final PrimitiveSet<JwtPublicKeySign> primitives)
+  public JwtPublicKeySign wrap(final PrimitiveSet<JwtPublicKeySignInternal> primitives)
       throws GeneralSecurityException {
     validate(primitives);
     return new WrappedJwtPublicKeySign(primitives);
@@ -72,8 +83,8 @@ class JwtPublicKeySignWrapper implements PrimitiveWrapper<JwtPublicKeySign, JwtP
   }
 
   @Override
-  public Class<JwtPublicKeySign> getInputPrimitiveClass() {
-    return JwtPublicKeySign.class;
+  public Class<JwtPublicKeySignInternal> getInputPrimitiveClass() {
+    return JwtPublicKeySignInternal.class;
   }
 
   /**
