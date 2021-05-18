@@ -386,7 +386,7 @@ describe('registry test', function() {
   it('get primitive, without defining key type', async function() {
     // Get primitive from key proto without key type.
     try {
-      await Registry.getPrimitive(Aead, new PbMessage());
+      await Registry.getPrimitive(Aead, new PbHmacParams());
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString()).toBe(ExceptionText.keyTypeNotDefined());
