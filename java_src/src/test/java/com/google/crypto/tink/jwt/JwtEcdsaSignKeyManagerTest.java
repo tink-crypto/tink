@@ -16,7 +16,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
@@ -45,7 +44,6 @@ import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import junitparams.JUnitParamsRunner;
@@ -361,12 +359,9 @@ public class JwtEcdsaSignKeyManagerTest {
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Normal, valid signed compact.
-    String unsignedCompact =
-        JwtFormat.createUnsignedCompact(
-            algorithm.name(), Optional.empty(), Optional.empty(), payload.toString());
-    String normalSignedCompact =
-        JwtFormat.createSignedCompact(
-            unsignedCompact, rawSigner.sign(unsignedCompact.getBytes(US_ASCII)));
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    String normalSignedCompact = generateSignedCompact(rawSigner, normalHeader, payload);
     verifier.verifyAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header

@@ -18,7 +18,6 @@ package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
-import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.Assert.assertThrows;
@@ -48,7 +47,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.crypto.spec.SecretKeySpec;
@@ -542,7 +540,6 @@ public class JwtHmacKeyManagerTest {
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     byte[] keyValue = keyProto.getKeyValue().toByteArray();
     SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
-    String algorithm = "HS256";
     PrfHmacJce prf = new PrfHmacJce("HMACSHA256", keySpec);
     PrfMac rawPrimitive = new PrfMac(prf, prf.getMaxOutputLength());
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
@@ -552,12 +549,9 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = new JwtValidator.Builder().build();
 
     // Normal, valid signed compact.
-    String unsignedCompact =
-        JwtFormat.createUnsignedCompact(
-            algorithm, Optional.empty(), Optional.empty(), payload.toString());
-    String normalSignedCompact =
-        JwtFormat.createSignedCompact(
-            unsignedCompact, rawPrimitive.computeMac(unsignedCompact.getBytes(US_ASCII)));
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    String normalSignedCompact = generateSignedCompact(rawPrimitive, normalHeader, payload);
     primitive.verifyMacAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header

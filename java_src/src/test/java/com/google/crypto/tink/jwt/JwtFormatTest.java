@@ -241,11 +241,10 @@ public final class JwtFormatTest {
 
   @Test
   public void signedCompactCreateSplit_success() throws Exception {
-    String payload = "{\"iss\":\"joe\"}";
+    RawJwt rawJwt = new RawJwt.Builder().setIssuer("joe").build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
-    String unsignedCompact =
-        JwtFormat.createUnsignedCompact("RS256", Optional.empty(), Optional.empty(), payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
 
@@ -257,17 +256,16 @@ public final class JwtFormatTest {
     assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
     assertThat(parts.signatureOrMac).isEqualTo(signature);
     assertThat(parts.header).isEqualTo("{\"alg\":\"RS256\"}");
-    assertThat(parts.payload).isEqualTo(payload);
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
   }
 
 
   @Test
   public void signedCompactCreateSplitWithTypeHeader_success() throws Exception {
-    String payload = "{\"iss\":\"joe\"}";
+    RawJwt rawJwt = new RawJwt.Builder().setTypeHeader("JWT").setIssuer("joe").build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
-    String unsignedCompact =
-        JwtFormat.createUnsignedCompact("RS256", Optional.of("JWT"), Optional.empty(), payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
     JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
@@ -279,17 +277,16 @@ public final class JwtFormatTest {
     assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
     assertThat(parts.signatureOrMac).isEqualTo(signature);
     assertThat(parts.header).isEqualTo("{\"alg\":\"RS256\",\"typ\":\"JWT\"}");
-    assertThat(parts.payload).isEqualTo(payload);
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
   }
 
   @Test
   public void signedCompactCreateSplitWithKeyIdentifier_success() throws Exception {
     String kid = "AZxkm2U";
-    String payload = "{\"iss\":\"joe\"}";
+    RawJwt rawJwt = new RawJwt.Builder().setIssuer("joe").build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
-    String unsignedCompact =
-        JwtFormat.createUnsignedCompact("RS256", Optional.empty(), Optional.of(kid), payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.of(kid), rawJwt);
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
     JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
@@ -304,7 +301,7 @@ public final class JwtFormatTest {
     assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
     assertThat(parts.signatureOrMac).isEqualTo(signature);
     assertThat(parts.header).isEqualTo("{\"kid\":\"AZxkm2U\",\"alg\":\"RS256\"}");
-    assertThat(parts.payload).isEqualTo(payload);
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
   }
 
   @Test

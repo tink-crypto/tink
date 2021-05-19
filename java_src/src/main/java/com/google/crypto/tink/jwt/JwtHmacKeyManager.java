@@ -85,11 +85,7 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     @Override
     public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
         throws GeneralSecurityException {
-      String jsonPayload = rawJwt.getJsonPayload();
-      Optional<String> typeHeader =
-          rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
-      String unsignedCompact =
-          JwtFormat.createUnsignedCompact(algorithm, typeHeader, kid, jsonPayload);
+      String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
     }

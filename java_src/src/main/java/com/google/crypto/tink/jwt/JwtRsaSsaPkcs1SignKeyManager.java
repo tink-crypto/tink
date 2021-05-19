@@ -105,11 +105,7 @@ public final class JwtRsaSsaPkcs1SignKeyManager
         @Override
         public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
             throws GeneralSecurityException {
-          String jsonPayload = rawJwt.getJsonPayload();
-          Optional<String> typeHeader =
-              rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
-          String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, typeHeader, kid, jsonPayload);
+          String unsignedCompact = JwtFormat.createUnsignedCompact(algorithmName, kid, rawJwt);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }

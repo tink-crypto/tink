@@ -212,10 +212,11 @@ final class JwtFormat {
       return new Parts(unsignedCompact, mac, header, payload);
   }
 
-  // TODO(juerg): Refactor this to createUnsignedCompact(algorithm, kid, rawJwt)
-  static String createUnsignedCompact(
-      String algorithm, Optional<String> typeHeader, Optional<String> kid, String jsonPayload)
-      throws InvalidAlgorithmParameterException {
+  static String createUnsignedCompact(String algorithm, Optional<String> kid, RawJwt rawJwt)
+      throws InvalidAlgorithmParameterException, JwtInvalidException {
+    String jsonPayload = rawJwt.getJsonPayload();
+    Optional<String> typeHeader =
+        rawJwt.hasTypeHeader() ? Optional.of(rawJwt.getTypeHeader()) : Optional.empty();
     return createHeader(algorithm, typeHeader, kid) + "." + encodePayload(jsonPayload);
   }
 
