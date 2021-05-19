@@ -70,6 +70,9 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private RawJwt convertJwtTokenToRawJwt(JwtToken token) throws JwtInvalidException {
     RawJwt.Builder rawJwtBuilder = new RawJwt.Builder();
+    if (token.hasTypeHeader()) {
+      rawJwtBuilder.setTypeHeader(token.getTypeHeader().getValue());
+    }
     if (token.hasIssuer()) {
       rawJwtBuilder.setIssuer(token.getIssuer().getValue());
     }
@@ -205,6 +208,9 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtToken convertVerifiedJwtToJwtToken(VerifiedJwt verifiedJwt)
       throws JwtInvalidException {
     JwtToken.Builder builder = JwtToken.newBuilder();
+    if (verifiedJwt.hasTypeHeader()) {
+      builder.setTypeHeader(StringValue.newBuilder().setValue(verifiedJwt.getTypeHeader()));
+    }
     if (verifiedJwt.hasIssuer()) {
         builder.setIssuer(StringValue.newBuilder().setValue(verifiedJwt.getIssuer()));
     }

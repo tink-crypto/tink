@@ -60,6 +60,9 @@ Timestamp TimeToTimestamp(absl::Time time) {
 crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
     const JwtToken& raw_jwt_proto) {
   auto builder = crypto::tink::RawJwtBuilder();
+  if (raw_jwt_proto.has_type_header()) {
+    builder.SetTypeHeader(raw_jwt_proto.type_header().value());
+  }
   if (raw_jwt_proto.has_issuer()) {
     builder.SetIssuer(raw_jwt_proto.issuer().value());
   }
@@ -134,6 +137,10 @@ crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
 
 JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
   JwtToken token;
+  if (verified_jwt.HasTypeHeader()) {
+    token.mutable_type_header()->set_value(
+        verified_jwt.GetTypeHeader().ValueOrDie());
+  }
   if (verified_jwt.HasIssuer()) {
     token.mutable_issuer()->set_value(verified_jwt.GetIssuer().ValueOrDie());
   }
