@@ -38,7 +38,8 @@ def gen_maven_jar_rules(
         doctitle = "",
         android_api_level = 23,
         bottom_text = "",
-        external_javadoc_links = _EXTERNAL_JAVADOC_LINKS):
+        external_javadoc_links = _EXTERNAL_JAVADOC_LINKS,
+        manifest_lines = []):
     """
     Generates rules that generate Maven jars for a given package.
 
@@ -60,6 +61,8 @@ def gen_maven_jar_rules(
       android_api_level: See javadoc_library
       bottom_text: See javadoc_library
       external_javadoc_links: See javadoc_library
+      manifest_lines: lines to put in the output manifest file (manifest
+        files in the input jars are ignored)
     """
 
     if shaded_packages:
@@ -69,6 +72,7 @@ def gen_maven_jar_rules(
             deps = deps,
             resources = resources,
             root_packages = root_packages + shaded_packages,
+            manifest_lines = manifest_lines,
         )
         jar_jar(
             name = name,
@@ -81,6 +85,7 @@ def gen_maven_jar_rules(
             deps = deps,
             resources = resources,
             root_packages = root_packages,
+            manifest_lines = manifest_lines,
         )
 
     source_jar_name = name + "-src"

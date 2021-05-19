@@ -7,6 +7,9 @@ licenses(["notice"])
 gen_maven_jar_rules(
     name = "maven",
     doctitle = "Tink Cryptography API for Google Payment Method Token",
+    manifest_lines = [
+        "Automatic-Module-Name: com.google.crypto.tink.apps.paymentmethodtoken",
+    ],
     root_packages = ["com.google.crypto.tink.apps.paymentmethodtoken"],
     deps = [
         "//paymentmethodtoken/src/main/java/com/google/crypto/tink/apps/paymentmethodtoken:google_payments_public_keys_manager",
