@@ -26,6 +26,8 @@ import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
+import com.google.crypto.tink.proto.JwtRsaSsaPssPublicKey;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -128,7 +130,8 @@ public final class JwkSetConverter {
             keys.add(convertJwtRsaSsaPkcs1(key));
             break;
           case JWT_RSA_SSA_PSS_PUBLIC_KEY_URL:
-            throw new GeneralSecurityException("JwtRsaSsaPssPublicKey is not yet implemented");
+            keys.add(convertJwtRsaSsaPss(key));
+            break;
           default:
             throw new GeneralSecurityException(
                 String.format("key type %s is not supported", key.getKeyData().getTypeUrl()));
@@ -204,6 +207,40 @@ public final class JwkSetConverter {
       jsonKey.addProperty("kty", "RSA");
       jsonKey.addProperty("n", Base64.urlSafeEncode(jwtRsaSsaPkcs1PublicKey.getN().toByteArray()));
       jsonKey.addProperty("e", Base64.urlSafeEncode(jwtRsaSsaPkcs1PublicKey.getE().toByteArray()));
+      jsonKey.addProperty("use", "sig");
+      jsonKey.addProperty("alg", alg);
+      JsonArray keyOps = new JsonArray();
+      keyOps.add("verify");
+      jsonKey.add("key_ops", keyOps);
+      return jsonKey;
+    }
+
+    private static JsonObject convertJwtRsaSsaPss(Keyset.Key key)
+        throws IOException, GeneralSecurityException {
+      if (key.getOutputPrefixType() != OutputPrefixType.RAW) {
+        throw new GeneralSecurityException("only OutputPrefixType.RAW is supported");
+      }
+      JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey =
+          JwtRsaSsaPssPublicKey.parseFrom(
+              key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      String alg;
+      switch (jwtRsaSsaPssPublicKey.getAlgorithm()) {
+        case PS256:
+          alg = "PS256";
+          break;
+        case PS384:
+          alg = "PS384";
+          break;
+        case PS512:
+          alg = "PS512";
+          break;
+        default:
+          throw new GeneralSecurityException("unknown algorithm");
+      }
+      JsonObject jsonKey = new JsonObject();
+      jsonKey.addProperty("kty", "RSA");
+      jsonKey.addProperty("n", Base64.urlSafeEncode(jwtRsaSsaPssPublicKey.getN().toByteArray()));
+      jsonKey.addProperty("e", Base64.urlSafeEncode(jwtRsaSsaPssPublicKey.getE().toByteArray()));
       jsonKey.addProperty("use", "sig");
       jsonKey.addProperty("alg", alg);
       JsonArray keyOps = new JsonArray();
@@ -287,10 +324,12 @@ public final class JwkSetConverter {
           case "RS":
             builder.addKey(convertToRsaSsaPkcs1Key(jsonKey));
             break;
+          case "PS":
+            builder.addKey(convertToRsaSsaPssKey(jsonKey));
+            break;
           case "ES":
             builder.addKey(convertEcdsaKey(jsonKey));
             break;
-            // TODO(juerg): Add support for "PS".
           default:
             throw new IOException("unexpected alg value: " + getStringItem(jsonKey, "alg"));
         }
@@ -334,6 +373,52 @@ public final class JwkSetConverter {
       KeyData keyData =
           KeyData.newBuilder()
               .setTypeUrl(JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL)
+              .setValue(pkcs1PubKey.toByteString())
+              .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
+              .build();
+      return Keyset.Key.newBuilder()
+          .setStatus(KeyStatusType.ENABLED)
+          .setOutputPrefixType(OutputPrefixType.RAW)
+          .setKeyData(keyData)
+          .build();
+    }
+
+    private Keyset.Key convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
+      JwtRsaSsaPssAlgorithm algorithm;
+      switch (getStringItem(jsonKey, "alg")) {
+        case "PS256":
+          algorithm = JwtRsaSsaPssAlgorithm.PS256;
+          break;
+        case "PS384":
+          algorithm = JwtRsaSsaPssAlgorithm.PS384;
+          break;
+        case "PS512":
+          algorithm = JwtRsaSsaPssAlgorithm.PS512;
+          break;
+        default:
+          throw new IOException("Unknown Rsa Algorithm: " + getStringItem(jsonKey, "alg"));
+      }
+      if (jsonKey.has("p")
+          || jsonKey.has("q")
+          || jsonKey.has("dq")
+          || jsonKey.has("dq")
+          || jsonKey.has("d")
+          || jsonKey.has("qi")) {
+        throw new UnsupportedOperationException("importing RSA private keys is not implemented");
+      }
+      expectStringItem(jsonKey, "kty", "RSA");
+      validateUseIsSig(jsonKey);
+      validateKeyOpsIsVerify(jsonKey);
+      JwtRsaSsaPssPublicKey pkcs1PubKey =
+          JwtRsaSsaPssPublicKey.newBuilder()
+              .setVersion(0)
+              .setAlgorithm(algorithm)
+              .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
+              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))))
+              .build();
+      KeyData keyData =
+          KeyData.newBuilder()
+              .setTypeUrl(JWT_RSA_SSA_PSS_PUBLIC_KEY_URL)
               .setValue(pkcs1PubKey.toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();

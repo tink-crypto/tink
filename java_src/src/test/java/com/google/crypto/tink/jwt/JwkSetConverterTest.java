@@ -156,6 +156,82 @@ public final class JwkSetConverterTest {
           + "a_UN\","
           + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS512\",\"key_ops\":[\"verify\"]}]}";
 
+  private static final String PS256_KEYSET =
+      "{\"primaryKeyId\":1508587714,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey\","
+          + "\"value\":\"EAEagQMAj7Eud2n5G11qsdtjpgGWjW4cAKalSE1atm7d+Cp8biRX9wbmLJRMUvoO2j7Sp9Szx1"
+          + "TMmksY2Ugf/7+Nv9fY7vBbmxOiBQVTvikWn0FgPwhFTXTz+9fhGjM6E6sdSOUzjM6nsPulKqOQ8Aed+TLIlgvw"
+          + "uSTF4B5d6QkZWBymq7My6vV+epzWnoLpVDzCHh+c35r81Pyrj6tiTPQzPLN2ixeanclMjx8deNwlak3vwBdMDg"
+          + "wQ63rVCo2eWDS/BYK4rG22luSTDVfQVHU1NXlwXEnb/eONFSF6ZbD6JXFMT3uHT4okTOrX4Kd34stbPIUtZFUy"
+          + "3XiSeCGtghBXLMf/ge113Q9WDJ+RN1Xa4vgHJCO0+VO+cAugVkiu9UgsPP8o/r7tA2aP/Ps8EHYa1IaZg75vnr"
+          + "MZPvsTH7WG2SjSgW9GLLsbNJLFFqLFMwPuZPe8BbgvimPdStXasX/PN6DLKoK2PaT0I+iLK9mRi1Z4OjFbl9KA"
+          + "ZXXElhAQTzrEI2adIgMBAAE=\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\""
+          + "},\"status\":\"ENABLED\",\"keyId\":1508587714,\"outputPrefixType\":\"RAW\"}]}";
+
+  private static final String PS256_JWK_SET =
+      "{\"keys\":[{\"kty\":\"RSA\","
+          + "\"n\":\"AI-xLndp-RtdarHbY6YBlo1uHACmpUhNWrZu3fgqfG4kV_cG5iyUTFL6Dto-0qfUs8dUzJpLGNlIH_"
+          + "-_jb_X2O7wW5sTogUFU74pFp9BYD8IRU108_vX4RozOhOrHUjlM4zOp7D7pSqjkPAHnfkyyJYL8LkkxeAeXekJ"
+          + "GVgcpquzMur1fnqc1p6C6VQ8wh4fnN-a_NT8q4-rYkz0MzyzdosXmp3JTI8fHXjcJWpN78AXTA4MEOt61QqNnl"
+          + "g0vwWCuKxttpbkkw1X0FR1NTV5cFxJ2_3jjRUhemWw-iVxTE97h0-KJEzq1-Cnd-LLWzyFLWRVMt14knghrYIQ"
+          + "VyzH_4Htdd0PVgyfkTdV2uL4ByQjtPlTvnALoFZIrvVILDz_KP6-7QNmj_z7PBB2GtSGmYO-b56zGT77Ex-1ht"
+          + "ko0oFvRiy7GzSSxRaixTMD7mT3vAW4L4pj3UrV2rF_zzegyyqCtj2k9CPoiyvZkYtWeDoxW5fSgGV1xJYQEE86"
+          + "xCNmnQ\","
+          + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS256\",\"key_ops\":[\"verify\"]}]}";
+
+  private static final String PS384_KEYSET =
+      "{\"primaryKeyId\":1042230435,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey\","
+          + "\"value\":\"EAIagQMAv6a0OergWYmY1k6l6vx6Of5+RxCeeQ9jMTXQyvO0GCgMDExxtqVS8S25ehZ5LNDIiG"
+          + "jhE3v2++D7QEjnzOC5UqI1ZwPxUBSrOaf5oDbJ9vBc2c7wDyJhRV8UobQSpzunD4kXypVhytjwRdiP61vG0C/e"
+          + "L0x+LijtM/XVee1Y+5mWrypVrB6EHKtdkMx2WIYNpsFOForFrr6JzLbWfDRWoqbCXKYivnw+CSE38ddW1XsrAT"
+          + "76E2Vf+womuwyBbkjLaiWvNxNFBTap2IaBLKAni6x7pqYCeu1n9eMUi41oz9QM8xfOvpH+wubc2PjwyTsb1FDT"
+          + "LnhV36tQLTVGdQdCDMF2Z8Agrnio3n1SFjSbYgFyVtpCwFKM2Z0zfO7k9jVbYYkzglzkJfp/lQrsuWqe4CVJjF"
+          + "E1H4BxcU7L0j8755kGJI08h1b7LPgqJcPgtHjcqbxHFU2yOf7mNGlW7YTnoQBO0StzQUk7kEw3X0+niEwX/L8j"
+          + "qW4YMbxrGdAfkTnPIgMBAAE=\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\""
+          + "},\"status\":\"ENABLED\",\"keyId\":1042230435,\"outputPrefixType\":\"RAW\"}]}";
+
+  private static final String PS384_JWK_SET =
+      "{\"keys\":[{\"kty\":\"RSA\","
+          + "\"n\":\"AL-mtDnq4FmJmNZOper8ejn-fkcQnnkPYzE10MrztBgoDAxMcbalUvEtuXoWeSzQyIho4RN79vvg-0"
+          + "BI58zguVKiNWcD8VAUqzmn-aA2yfbwXNnO8A8iYUVfFKG0Eqc7pw-JF8qVYcrY8EXYj-tbxtAv3i9Mfi4o7TP1"
+          + "1XntWPuZlq8qVawehByrXZDMdliGDabBThaKxa6-icy21nw0VqKmwlymIr58PgkhN_HXVtV7KwE--hNlX_sKJr"
+          + "sMgW5Iy2olrzcTRQU2qdiGgSygJ4use6amAnrtZ_XjFIuNaM_UDPMXzr6R_sLm3Nj48Mk7G9RQ0y54Vd-rUC01"
+          + "RnUHQgzBdmfAIK54qN59UhY0m2IBclbaQsBSjNmdM3zu5PY1W2GJM4Jc5CX6f5UK7LlqnuAlSYxRNR-AcXFOy9"
+          + "I_O-eZBiSNPIdW-yz4KiXD4LR43Km8RxVNsjn-5jRpVu2E56EATtErc0FJO5BMN19Pp4hMF_y_I6luGDG8axnQ"
+          + "H5E5zw\","
+          + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS384\",\"key_ops\":[\"verify\"]}]}";
+
+  private static final String PS512_KEYSET =
+      "{\"primaryKeyId\":257081135,\"key\":[{\"keyData\":{"
+          + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey\","
+          + "\"value\":\"EAMagQQAnOUQvBwNRgeI3zlzIhVo4NzFVCsQn9hd2EIclz6cWBRMFr4EX5lXLK0StSIB7EQP4c"
+          + "iHa+vr59sOgMFMC2kiXRUXNtl99QhGwH0YjbWeDC50PKEAjH1hhhPgSw2dFcUVs4jbScDrwNn1sQ8rkgSNczvQ"
+          + "NpV1MtBhS/CC1PxVF88JaejG2zr+unoFlw7xnqxBWMzNrMHZHwqga2vL3inSbvA/RGQjnE2DzQSwZkXthGSwYB"
+          + "jOYbGawMN4onkAx/myHMyTg/TLAqG9GUyB0DVelvVoGZG/QJBY2Fp2FlpOQRKeBr6pC7Lk8zZL4GJk264KoOpG"
+          + "8v1t7PveN+STIdTE2D548K+GDOvsvrO4ZhofS/iqN9xLucuU1HkqKUqyLvMxsWum8Zhp7zinFdBnDOgeheOHUg"
+          + "N/iwjupk6u1Svt+RWNJsfb2l0jrvzf0cRMbPeLZRmpDwBxBvXWo61u6uaBEVb+ooZ6K5+hx3Rld7wXktjYIZzH"
+          + "qUr39P5yTw28b8Y2dPFWR4vwr2/0zBxcDmTRRtQ7vPOtZPD0/LVIXkgbBiLILpycnucWt9Lq9Hc62KFiTQOAuu"
+          + "Oxz7ObBegXjnFupiZZ9PyzO5WgT9lRpH7U7tzGLAjV+AUpjH6HA1o6bRLKOHFBPS+I9IqAYb/RpF6M/6hCmC2R"
+          + "z64yYzR3y4vHKGMiAwEAAQ==\","
+          + "\"keyMaterialType\":\"ASYMMETRIC_PUBLIC\""
+          + "},\"status\":\"ENABLED\",\"keyId\":257081135,\"outputPrefixType\":\"RAW\"}]}";
+
+  private static final String PS512_JWK_SET =
+      "{\"keys\":[{\"kty\":\"RSA\","
+          + "\"n\":\"AJzlELwcDUYHiN85cyIVaODcxVQrEJ_YXdhCHJc-nFgUTBa-BF-ZVyytErUiAexED-HIh2vr6-fbDo"
+          + "DBTAtpIl0VFzbZffUIRsB9GI21ngwudDyhAIx9YYYT4EsNnRXFFbOI20nA68DZ9bEPK5IEjXM70DaVdTLQYUvw"
+          + "gtT8VRfPCWnoxts6_rp6BZcO8Z6sQVjMzazB2R8KoGtry94p0m7wP0RkI5xNg80EsGZF7YRksGAYzmGxmsDDeK"
+          + "J5AMf5shzMk4P0ywKhvRlMgdA1Xpb1aBmRv0CQWNhadhZaTkESnga-qQuy5PM2S-BiZNuuCqDqRvL9bez73jfk"
+          + "kyHUxNg-ePCvhgzr7L6zuGYaH0v4qjfcS7nLlNR5KilKsi7zMbFrpvGYae84pxXQZwzoHoXjh1IDf4sI7qZOrt"
+          + "Ur7fkVjSbH29pdI67839HETGz3i2UZqQ8AcQb11qOtburmgRFW_qKGeiufocd0ZXe8F5LY2CGcx6lK9_T-ck8N"
+          + "vG_GNnTxVkeL8K9v9MwcXA5k0UbUO7zzrWTw9Py1SF5IGwYiyC6cnJ7nFrfS6vR3OtihYk0DgLrjsc-zmwXoF4"
+          + "5xbqYmWfT8szuVoE_ZUaR-1O7cxiwI1fgFKYx-hwNaOm0SyjhxQT0viPSKgGG_0aRejP-oQpgtkc-uMmM0d8uL"
+          + "xyhj\","
+          + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"PS512\",\"key_ops\":[\"verify\"]}]}";
+
   private static final String PRIVATEKEY_KEYSET =
       "{\"primaryKeyId\":152493399,\"key\":[{\"keyData\":{"
           + "\"typeUrl\":\"type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey\","
@@ -247,6 +323,13 @@ public final class JwkSetConverterTest {
   }
 
   @Test
+  public void convertRsaSsaPssKeysets_success() throws Exception {
+    assertEqualJwkSets(convertToJwkSet(PS256_KEYSET), PS256_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(PS384_KEYSET), PS384_JWK_SET);
+    assertEqualJwkSets(convertToJwkSet(PS512_KEYSET), PS512_JWK_SET);
+  }
+
+  @Test
   public void toKeysetHandleFromKeysetHandle_success() throws Exception {
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
@@ -278,6 +361,21 @@ public final class JwkSetConverterTest {
             JwkSetConverter.toKeysetHandle(RS512_JWK_SET, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
         RS512_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(PS256_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        PS256_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(PS384_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        PS384_JWK_SET);
+    assertEqualJwkSets(
+        JwkSetConverter.fromKeysetHandle(
+            JwkSetConverter.toKeysetHandle(PS512_JWK_SET, KeyAccess.publicAccess()),
+            KeyAccess.publicAccess()),
+        PS512_JWK_SET);
   }
 
   @Test
@@ -291,6 +389,10 @@ public final class JwkSetConverterTest {
       JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
       JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
       JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
+      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
     };
     for (KeyTemplate template : templates) {
       KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
@@ -305,11 +407,11 @@ public final class JwkSetConverterTest {
       JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
       JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
 
-      RawJwt rawToken = new RawJwt.Builder().setIssuer("issuer").build();
+      RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
       String signedCompact = signer.signAndEncode(rawToken);
       JwtValidator validator = new JwtValidator.Builder().build();
       VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
-      assertThat(verifiedToken.getIssuer()).isEqualTo("issuer");
+      assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
     }
   }
 
@@ -368,6 +470,24 @@ public final class JwkSetConverterTest {
   @Test
   public void crunchyRsaSsaPkcs1Keysets_fromKeysetHandleFails() throws Exception {
     String keyset = RS256_KEYSET.replace("RAW", "CRUNCHY");
+    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+  }
+
+  @Test
+  public void tinkRsaSsaPssKeysets_fromKeysetHandleFails() throws Exception {
+    String keyset = PS256_KEYSET.replace("RAW", "TINK");
+    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+  }
+
+  @Test
+  public void legacyRsaSsaPssKeysets_fromKeysetHandleFails() throws Exception {
+    String keyset = PS256_KEYSET.replace("RAW", "LEGACY");
+    assertThrows(IOException.class, () -> convertToJwkSet(keyset));
+  }
+
+  @Test
+  public void crunchyRsaSsaPssKeysets_fromKeysetHandleFails() throws Exception {
+    String keyset = PS256_KEYSET.replace("RAW", "CRUNCHY");
     assertThrows(IOException.class, () -> convertToJwkSet(keyset));
   }
 
@@ -611,6 +731,10 @@ public final class JwkSetConverterTest {
             + "\"e\":\"AQAB\",\"alg\":\"RS256\"}]}";
     // ignore returned value, we only test that it worked.
     JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess());
   }
 
   @Test
@@ -626,6 +750,10 @@ public final class JwkSetConverterTest {
             + "\"e\":\"AQAB\",\"use\":\"sig\",\"alg\":\"RS256\",\"key_ops\":[\"verify\"]}]}";
     // ignore returned value, we only test that it worked.
     JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    // ignore returned value, we only test that it worked.
+    JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess());
   }
 
   @Test
@@ -667,6 +795,11 @@ public final class JwkSetConverterTest {
     assertThrows(
         UnsupportedOperationException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 
   @Test
@@ -697,6 +830,11 @@ public final class JwkSetConverterTest {
     assertThrows(
         IOException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 
   @Test
@@ -708,6 +846,11 @@ public final class JwkSetConverterTest {
     KeysetHandle handle = JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess());
     assertThrows(
         GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeyVerify.class));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    KeysetHandle psHandle = JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess());
+    assertThrows(
+        GeneralSecurityException.class, () -> psHandle.getPrimitive(JwtPublicKeyVerify.class));
   }
 
   @Test
@@ -723,6 +866,11 @@ public final class JwkSetConverterTest {
     assertThrows(
         IOException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 
   @Test
@@ -738,6 +886,11 @@ public final class JwkSetConverterTest {
     assertThrows(
         IOException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 
   @Test
@@ -753,6 +906,11 @@ public final class JwkSetConverterTest {
     assertThrows(
         IOException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 
   @Test
@@ -768,5 +926,10 @@ public final class JwkSetConverterTest {
     assertThrows(
         IOException.class,
         () -> JwkSetConverter.toKeysetHandle(jwksString, KeyAccess.publicAccess()));
+
+    String psJwksString = jwksString.replace("RS256", "PS256");
+    assertThrows(
+        IOException.class,
+        () -> JwkSetConverter.toKeysetHandle(psJwksString, KeyAccess.publicAccess()));
   }
 }
