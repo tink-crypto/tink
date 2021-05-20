@@ -193,7 +193,7 @@ java_library(
     srcs = ["Validators.java"],
     deps = [
         ":enums",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
