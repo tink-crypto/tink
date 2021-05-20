@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_JWT_PUBLIC_KEY_VERIFY_H_
-#define TINK_JWT_PUBLIC_KEY_VERIFY_H_
+#ifndef TINK_JWT_JWT_PUBLIC_KEY_VERIFY_H_
+#define TINK_JWT_JWT_PUBLIC_KEY_VERIFY_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
@@ -54,4 +54,4 @@ class JwtPublicKeyVerify {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_JWT_PUBLIC_KEY_VERIFY_H_
+#endif  // TINK_JWT_JWT_PUBLIC_KEY_VERIFY_H_

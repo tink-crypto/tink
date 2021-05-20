@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_JWT_PUBLIC_KEY_SIGN_H_
-#define TINK_UTIL_JWT_PUBLIC_KEY_SIGN_H_
+#ifndef TINK_JWT_JWT_PUBLIC_KEY_SIGN_H_
+#define TINK_JWT_JWT_PUBLIC_KEY_SIGN_H_
 
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
@@ -42,4 +42,4 @@ class JwtPublicKeySign {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_UTIL_JWT_PUBLIC_KEY_SIGN_H_
+#endif  // TINK_JWT_JWT_PUBLIC_KEY_SIGN_H_
