@@ -68,6 +68,7 @@ public final class PaymentMethodTokenSender {
   private final String senderIntermediateCert;
   private final String senderId;
   private final String recipientId;
+  private final String contextInfo;
 
   private HybridEncrypt hybridEncrypter;
 
@@ -104,6 +105,7 @@ public final class PaymentMethodTokenSender {
       throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
     this.recipientId = builder.recipientId;
+    this.contextInfo = builder.contextInfo;
     this.senderIntermediateCert = builder.senderIntermediateCert;
   }
 
@@ -115,6 +117,7 @@ public final class PaymentMethodTokenSender {
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
+    private String contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
     private String recipientId = null;
     private ECPrivateKey senderSigningKey = null;
     private ECPrivateKey senderIntermediateSigningKey = null;
@@ -138,6 +141,12 @@ public final class PaymentMethodTokenSender {
     /** Sets the recipient Id. */
     public Builder recipientId(String val) {
       recipientId = val;
+      return this;
+    }
+
+    /** Sets the contextInfo. */
+    public Builder contextInfo(String val) {
+      contextInfo = val;
       return this;
     }
 
@@ -239,7 +248,7 @@ public final class PaymentMethodTokenSender {
         protocolVersionConfig.isEncryptionRequired
             ? new String(
                 hybridEncrypter.encrypt(
-                    message.getBytes(UTF_8), PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+                    message.getBytes(UTF_8), this.contextInfo),
                 UTF_8)
             : message;
     return signV1OrV2(signedMessage);
