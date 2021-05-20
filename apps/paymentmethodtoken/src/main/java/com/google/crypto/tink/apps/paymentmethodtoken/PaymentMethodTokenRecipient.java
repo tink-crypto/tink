@@ -88,7 +88,7 @@ public final class PaymentMethodTokenRecipient {
   private final List<HybridDecrypt> hybridDecrypters = new ArrayList<>();
   private final String senderId;
   private final String recipientId;
-  private final String contextInfo;
+  private final byte[] contextInfo;
 
   PaymentMethodTokenRecipient(
       String protocolVersion,
@@ -97,7 +97,7 @@ public final class PaymentMethodTokenRecipient {
       List<ECPrivateKey> recipientPrivateKeys,
       List<PaymentMethodTokenRecipientKem> recipientKems,
       String recipientId,
-      String contextInfo)
+      byte[] contextInfo)
 
       throws GeneralSecurityException {
     if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
@@ -164,7 +164,7 @@ public final class PaymentMethodTokenRecipient {
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
-    private String contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
+    private byte[] contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
     private String recipientId = null;
     private final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders =
         new ArrayList<SenderVerifyingKeysProvider>();
@@ -192,7 +192,7 @@ public final class PaymentMethodTokenRecipient {
     }
 
     /** Sets the contextInfo. */
-    public Builder contextInfo(String val) {
+    public Builder contextInfo(byte[] val) {
       contextInfo = val;
       return this;
     }

@@ -68,7 +68,7 @@ public final class PaymentMethodTokenSender {
   private final String senderIntermediateCert;
   private final String senderId;
   private final String recipientId;
-  private final String contextInfo;
+  private final byte[] contextInfo;
 
   private HybridEncrypt hybridEncrypter;
 
@@ -117,7 +117,7 @@ public final class PaymentMethodTokenSender {
   public static class Builder {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
-    private String contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
+    private byte[] contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
     private String recipientId = null;
     private ECPrivateKey senderSigningKey = null;
     private ECPrivateKey senderIntermediateSigningKey = null;
@@ -145,7 +145,7 @@ public final class PaymentMethodTokenSender {
     }
 
     /** Sets the contextInfo. */
-    public Builder contextInfo(String val) {
+    public Builder contextInfo(byte[] val) {
       contextInfo = val;
       return this;
     }
