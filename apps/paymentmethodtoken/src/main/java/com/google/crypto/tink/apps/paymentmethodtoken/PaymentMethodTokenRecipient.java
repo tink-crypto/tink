@@ -495,11 +495,10 @@ public final class PaymentMethodTokenRecipient {
     if (!jsonMsg.has(PaymentMethodTokenConstants.JSON_PROTOCOL_VERSION_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNATURE_KEY)
         || !jsonMsg.has(PaymentMethodTokenConstants.JSON_SIGNED_MESSAGE_KEY)
-        || !jsonMsg.has(PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY)
-        || jsonMsg.size() != 4) {
+        || !jsonMsg.has(PaymentMethodTokenConstants.JSON_INTERMEDIATE_SIGNING_KEY)) {
       throw new GeneralSecurityException(
           protocolVersion
-              + " message must contain exactly protocolVersion, intermediateSigningKey, "
+              + " message must contain protocolVersion, intermediateSigningKey, "
               + "signature and signedMessage");
     }
     String version =
