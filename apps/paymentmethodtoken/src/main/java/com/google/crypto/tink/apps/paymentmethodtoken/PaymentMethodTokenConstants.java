@@ -23,9 +23,12 @@ import java.nio.charset.StandardCharsets;
 /** Various constants. */
 class PaymentMethodTokenConstants {
   public static final String GOOGLE_SENDER_ID = "Google";
+  public static final String YANDEX_SENDER_ID = "Yandex";
   public static final String HMAC_SHA256_ALGO = "HmacSha256";
   public static final byte[] HKDF_EMPTY_SALT = new byte[0];
   public static final byte[] GOOGLE_CONTEXT_INFO_ECV1 = "Google".getBytes(StandardCharsets.UTF_8);
+  public static final byte[] YANDEX_CONTEXT_INFO_ECV1 = "Yandex".getBytes(StandardCharsets.UTF_8);
+  
   public static final String AES_CTR_ALGO = "AES/CTR/NoPadding";
   // Zero IV is fine here because each encryption uses a unique key.
   public static final byte[] AES_CTR_ZERO_IV = new byte[16];
