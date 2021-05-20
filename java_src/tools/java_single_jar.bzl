@@ -69,8 +69,7 @@ def _java_single_jar(ctx):
     if ctx.attr.exclude_build_data:
         args.add("--exclude_build_data")
 
-    if ctx.attr.manifest_lines:
-        args.add_all("--deploy_manifest_lines", ctx.attr.manifest_lines)
+    args.add_all("--deploy_manifest_lines", ctx.attr.manifest_lines, format_each = "\"%s\"")
 
     ctx.actions.run(
         inputs = inputs.to_list() + resource_files,
