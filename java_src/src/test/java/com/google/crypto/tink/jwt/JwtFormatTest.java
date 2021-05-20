@@ -69,6 +69,7 @@ public final class JwtFormatTest {
     int keyId = 0x1ac6a944;
     Optional<String> kid = JwtFormat.getKid(keyId, OutputPrefixType.TINK);
     assertThat(kid.get()).isEqualTo("GsapRA");
+    assertThat(JwtFormat.getKeyId(kid.get()).get()).isEqualTo(0x1ac6a944);
   }
 
   @Test
@@ -76,6 +77,30 @@ public final class JwtFormatTest {
     int keyId = 0x1ac6a944;
     Optional<String> kid = JwtFormat.getKid(keyId, OutputPrefixType.RAW);
     assertThat(kid.isPresent()).isFalse();
+  }
+
+  @Test
+  public void keyIdKidConversion_outputIsEqual() throws Exception {
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(0x12345678, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(0x12345678);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(-2147483648, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(-2147483648);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(-100, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(-100);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(0, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(0);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(100, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(100);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(2147483647, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(2147483647);
+  }
+
+  @Test
+  public void getKeyId_wrongFormat_isNotPresent() throws Exception {
+    assertThat(JwtFormat.getKeyId("GsapRAA").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("Gsap").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("dBjftJeZ4CVP-mB92K27uhbUJU1p1r").isPresent()).isFalse();
   }
 
   @Test

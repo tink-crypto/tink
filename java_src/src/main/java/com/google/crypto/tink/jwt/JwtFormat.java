@@ -186,6 +186,14 @@ final class JwtFormat {
     throw new JwtInvalidException("unsupported output prefix type");
   }
 
+  static Optional<Integer> getKeyId(String kid) {
+    byte[] encodedKeyId = Base64.urlSafeDecode(kid);
+    if (encodedKeyId.length != 4) {
+      return Optional.empty();
+    }
+    return Optional.of(ByteBuffer.wrap(encodedKeyId).getInt());
+  }
+
   static Parts splitSignedCompact(String signedCompact) throws JwtInvalidException {
       validateASCII(signedCompact);
       int sigPos = signedCompact.lastIndexOf('.');

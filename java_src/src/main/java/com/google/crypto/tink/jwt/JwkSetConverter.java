@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 
 /**
  * Provides functions to import and export Json Web Key (JWK) sets.
@@ -122,6 +123,10 @@ public final class JwkSetConverter {
         if (key.getKeyData().getKeyMaterialType() != KeyMaterialType.ASYMMETRIC_PUBLIC) {
           throw new GeneralSecurityException("only public keys can be converted");
         }
+        if ((key.getOutputPrefixType() != OutputPrefixType.RAW)
+            && (key.getOutputPrefixType() != OutputPrefixType.TINK)) {
+          throw new GeneralSecurityException("only OutputPrefixType RAW and TINK are supported");
+        }
         switch (key.getKeyData().getTypeUrl()) {
           case JWT_ECDSA_PUBLIC_KEY_URL:
             keys.add(convertJwtEcdsaKey(key));
@@ -144,9 +149,6 @@ public final class JwkSetConverter {
 
     private static JsonObject convertJwtEcdsaKey(Keyset.Key key)
         throws IOException, GeneralSecurityException {
-      if (key.getOutputPrefixType() != OutputPrefixType.RAW) {
-        throw new GeneralSecurityException("only OutputPrefixType.RAW is supported");
-      }
       JwtEcdsaPublicKey jwtEcdsaPublicKey =
           JwtEcdsaPublicKey.parseFrom(
               key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -178,14 +180,15 @@ public final class JwkSetConverter {
       JsonArray keyOps = new JsonArray();
       keyOps.add("verify");
       jsonKey.add("key_ops", keyOps);
+      Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
+      if (kid.isPresent()) {
+        jsonKey.addProperty("kid", kid.get());
+      }
       return jsonKey;
     }
 
     private static JsonObject convertJwtRsaSsaPkcs1(Keyset.Key key)
         throws IOException, GeneralSecurityException {
-      if (key.getOutputPrefixType() != OutputPrefixType.RAW) {
-        throw new GeneralSecurityException("only OutputPrefixType.RAW is supported");
-      }
       JwtRsaSsaPkcs1PublicKey jwtRsaSsaPkcs1PublicKey =
           JwtRsaSsaPkcs1PublicKey.parseFrom(
               key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -212,14 +215,15 @@ public final class JwkSetConverter {
       JsonArray keyOps = new JsonArray();
       keyOps.add("verify");
       jsonKey.add("key_ops", keyOps);
+      Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
+      if (kid.isPresent()) {
+        jsonKey.addProperty("kid", kid.get());
+      }
       return jsonKey;
     }
 
     private static JsonObject convertJwtRsaSsaPss(Keyset.Key key)
         throws IOException, GeneralSecurityException {
-      if (key.getOutputPrefixType() != OutputPrefixType.RAW) {
-        throw new GeneralSecurityException("only OutputPrefixType.RAW is supported");
-      }
       JwtRsaSsaPssPublicKey jwtRsaSsaPssPublicKey =
           JwtRsaSsaPssPublicKey.parseFrom(
               key.getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -246,6 +250,10 @@ public final class JwkSetConverter {
       JsonArray keyOps = new JsonArray();
       keyOps.add("verify");
       jsonKey.add("key_ops", keyOps);
+      Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
+      if (kid.isPresent()) {
+        jsonKey.addProperty("kid", kid.get());
+      }
       return jsonKey;
     }
   }
@@ -314,6 +322,13 @@ public final class JwkSetConverter {
       }
     }
 
+    private Optional<Integer> getKeyId(JsonObject jsonKey) throws IOException {
+      if (!jsonKey.has("kid")) {
+        return Optional.empty();
+      }
+      return JwtFormat.getKeyId(getStringItem(jsonKey, "kid"));
+    }
+
     private Keyset convertKeyset(JsonObject jsonKeyset) throws IOException {
       Keyset.Builder builder = Keyset.newBuilder();
       JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
@@ -335,6 +350,23 @@ public final class JwkSetConverter {
         }
       }
       return builder.build();
+    }
+
+    private Keyset.Key createKeysetKey(KeyData keyData, Optional<Integer> keyId) {
+      if (keyId.isPresent()) {
+        return Keyset.Key.newBuilder()
+            .setStatus(KeyStatusType.ENABLED)
+            .setKeyId(keyId.get())
+            .setOutputPrefixType(OutputPrefixType.TINK)
+            .setKeyData(keyData)
+            .build();
+      } else {
+        return Keyset.Key.newBuilder()
+            .setStatus(KeyStatusType.ENABLED)
+            .setOutputPrefixType(OutputPrefixType.RAW)
+            .setKeyData(keyData)
+            .build();
+      }
     }
 
     private Keyset.Key convertToRsaSsaPkcs1Key(JsonObject jsonKey) throws IOException {
@@ -376,11 +408,7 @@ public final class JwkSetConverter {
               .setValue(pkcs1PubKey.toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return Keyset.Key.newBuilder()
-          .setStatus(KeyStatusType.ENABLED)
-          .setOutputPrefixType(OutputPrefixType.RAW)
-          .setKeyData(keyData)
-          .build();
+      return createKeysetKey(keyData, getKeyId(jsonKey));
     }
 
     private Keyset.Key convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
@@ -422,11 +450,7 @@ public final class JwkSetConverter {
               .setValue(pkcs1PubKey.toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return Keyset.Key.newBuilder()
-          .setStatus(KeyStatusType.ENABLED)
-          .setOutputPrefixType(OutputPrefixType.RAW)
-          .setKeyData(keyData)
-          .build();
+      return createKeysetKey(keyData, getKeyId(jsonKey));
     }
 
     private Keyset.Key convertEcdsaKey(JsonObject jsonKey) throws IOException {
@@ -466,11 +490,7 @@ public final class JwkSetConverter {
               .setValue(ecdsaPubKey.toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return Keyset.Key.newBuilder()
-          .setStatus(KeyStatusType.ENABLED)
-          .setOutputPrefixType(OutputPrefixType.RAW)
-          .setKeyData(keyData)
-          .build();
+      return createKeysetKey(keyData, getKeyId(jsonKey));
     }
   }
 

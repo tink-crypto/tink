@@ -363,6 +363,7 @@ java_library(
     name = "jwk_set_converter",
     srcs = ["JwkSetConverter.java"],
     deps = [
+        ":jwt_format",
         "//proto:jwt_ecdsa_java_proto",
         "//proto:jwt_rsa_ssa_pkcs1_java_proto",
         "//proto:jwt_rsa_ssa_pss_java_proto",
@@ -382,6 +383,7 @@ android_library(
     name = "jwk_set_converter-android",
     srcs = ["JwkSetConverter.java"],
     deps = [
+        ":jwt_format-android",
         "//proto:jwt_ecdsa_java_proto_lite",
         "//proto:jwt_rsa_ssa_pkcs1_java_proto_lite",
         "//proto:jwt_rsa_ssa_pss_java_proto_lite",
