@@ -23,6 +23,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -380,6 +381,10 @@ public final class JwkSetConverterTest {
 
   @Test
   public void convertTinkToJwksTokenVerification_success() throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      return;
+    }
     // TODO(juerg): Use parametrized tests once b/26110951 is resolved.
     KeyTemplate[] templates = new KeyTemplate[] {
       JwtEcdsaSignKeyManager.jwtES256Template(),
