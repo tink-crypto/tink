@@ -154,6 +154,7 @@ class RawJwt(object):
 
   @classmethod
   def create(cls,
+             *,
              issuer: Optional[Text] = None,
              subject: Optional[Text] = None,
              audiences: Optional[List[Text]] = None,
@@ -196,7 +197,7 @@ class RawJwt(object):
     return raw_jwt
 
   @classmethod
-  def from_json_payload(cls, payload: Text) -> 'RawJwt':
+  def from_json(cls, payload: Text) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
     raw_jwt.__init__(_jwt_format.json_loads(payload))

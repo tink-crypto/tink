@@ -41,11 +41,8 @@ JwtPublicKeySign = _jwt_public_key_sign.JwtPublicKeySign
 JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
 
-def raw_jwt_from_json_payload(payload: Text) -> RawJwt:
-  return _raw_jwt.RawJwt.from_json_payload(payload)
-
-
-def new_raw_jwt(issuer: Optional[Text] = None,
+def new_raw_jwt(*,
+                issuer: Optional[Text] = None,
                 subject: Optional[Text] = None,
                 audiences: Optional[List[Text]] = None,
                 jwt_id: Optional[Text] = None,
@@ -53,17 +50,31 @@ def new_raw_jwt(issuer: Optional[Text] = None,
                 not_before: Optional[datetime.datetime] = None,
                 issued_at: Optional[datetime.datetime] = None,
                 custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
-  return _raw_jwt.RawJwt.create(issuer, subject, audiences, jwt_id, expiration,
-                                not_before, issued_at, custom_claims)
+  """Creates a new RawJwt."""
+  return _raw_jwt.RawJwt.create(
+      issuer=issuer,
+      subject=subject,
+      audiences=audiences,
+      jwt_id=jwt_id,
+      expiration=expiration,
+      not_before=not_before,
+      issued_at=issued_at,
+      custom_claims=custom_claims)
 
 
-def new_validator(issuer: Optional[Text] = None,
-                  subject: Optional[Text] = None,
-                  audience: Optional[Text] = None,
-                  clock_skew: Optional[datetime.timedelta] = None,
-                  fixed_now: Optional[datetime.datetime] = None
-                  ) -> JwtValidator:
-  return JwtValidator(issuer, subject, audience, clock_skew, fixed_now)
+def new_validator(
+    *,
+    issuer: Optional[Text] = None,
+    subject: Optional[Text] = None,
+    audience: Optional[Text] = None,
+    clock_skew: Optional[datetime.timedelta] = None,
+    fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
+  return JwtValidator(
+      issuer=issuer,
+      subject=subject,
+      audience=audience,
+      clock_skew=clock_skew,
+      fixed_now=fixed_now)
 
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template

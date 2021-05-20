@@ -127,49 +127,45 @@ class JwtFormatTest(parameterized.TestCase):
   ])
   def test_create_validate_header(self, algorithm):
     encoded_header = _jwt_format.create_header(algorithm)
-    header = _jwt_format.decode_header(encoded_header)
+    json_header = _jwt_format.decode_header(encoded_header)
+    header = _jwt_format.json_loads(json_header)
     _jwt_format.validate_header(header, algorithm)
 
-  def test_create_unknown_header_fails(self):
+  def test_create_header_with_unknown_alg_fails(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.create_header('unknown')
 
   def test_create_verify_different_algorithms_fails(self):
     encoded_header = _jwt_format.create_header('HS256')
-    header = _jwt_format.decode_header(encoded_header)
+    json_header = _jwt_format.decode_header(encoded_header)
+    header = _jwt_format.json_loads(json_header)
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.validate_header(header, 'ES256')
 
   def test_verify_empty_header_fails(self):
+    header = _jwt_format.json_loads('{}')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header('{}', 'ES256')
+      _jwt_format.validate_header(header, 'ES256')
 
   def test_validate_header_with_unknown_algorithm_fails(self):
+    header = _jwt_format.json_loads('{"alg":"HS123"}')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header('{"alg":"HS123"}', 'HS123')
-
-  def test_validate_header_without_quotes(self):
-    with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header('{alg:"RS256"}', 'RS256')
-
-  def test_validate_header_with_uppercase_typ_success(self):
-    _jwt_format.validate_header('{"alg":"HS256","typ":"JWT"}', 'HS256')
-
-  def test_validate_header_with_lowercase_typ_success(self):
-    _jwt_format.validate_header('{"alg":"HS256","typ":"jwt"}', 'HS256')
+      _jwt_format.validate_header(header, 'HS123')
 
   def test_validate_header_with_unknown_entry_success(self):
-    _jwt_format.validate_header('{"alg":"HS256","unknown":"header"}', 'HS256')
+    header = _jwt_format.json_loads('{"alg":"HS256","unknown":"header"}')
+    _jwt_format.validate_header(header, 'HS256')
 
   def test_validate_header_ignores_typ(self):
-    _jwt_format.validate_header('{"alg":"HS256","typ":"unknown"}', 'HS256')
+    header = _jwt_format.json_loads('{"alg":"HS256","typ":"unknown"}')
+    _jwt_format.validate_header(header, 'HS256')
 
   def test_validate_header_rejects_crit(self):
+    header = _jwt_format.json_loads(
+        '{"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],'
+        '"http://example.invalid/UNDEFINED":true}')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.validate_header(
-          '{"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],'
-          '"http://example.invalid/UNDEFINED":true}',
-          'HS256')
+      _jwt_format.validate_header(header, 'HS256')
 
   def test_json_decode_encode_payload_fixed_data(self):
     # Example from https://tools.ietf.org/html/rfc7519#section-3.1
@@ -239,7 +235,8 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(un_comp, unsigned_compact)
     self.assertEqual(sig, signature)
     self.assertEqual(hdr, '{"alg":"RS256"}')
-    _jwt_format.validate_header(hdr, 'RS256')
+    header = _jwt_format.json_loads(hdr)
+    _jwt_format.validate_header(header, 'RS256')
     self.assertEqual(pay, payload)
 
   def test_split_empty_signed_compact(self):

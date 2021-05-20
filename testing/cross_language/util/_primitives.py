@@ -424,8 +424,15 @@ def proto_to_verified_jwt(
       custom_claims[name] = json.loads(value.json_object_value)
     if value.HasField('json_array_value'):
       custom_claims[name] = json.loads(value.json_array_value)
-  raw_jwt = jwt.new_raw_jwt(issuer, subject, audiences, jwt_id, expiration,
-                            not_before, issued_at, custom_claims)
+  raw_jwt = jwt.new_raw_jwt(
+      issuer=issuer,
+      subject=subject,
+      audiences=audiences,
+      jwt_id=jwt_id,
+      expiration=expiration,
+      not_before=not_before,
+      issued_at=issued_at,
+      custom_claims=custom_claims)
   return jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
 
 

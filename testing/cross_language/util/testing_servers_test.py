@@ -189,7 +189,6 @@ class TestingServersTest(parameterized.TestCase):
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(audience='audience1', fixed_now=now)
-    # HERE
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')

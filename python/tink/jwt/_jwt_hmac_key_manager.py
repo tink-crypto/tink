@@ -69,8 +69,9 @@ class _JwtHmac(_jwt_mac.JwtMac):
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, mac = parts
     self._verify_mac(mac, unsigned_compact)
-    _jwt_format.validate_header(json_header, self._algorithm)
-    raw_jwt = _raw_jwt.RawJwt.from_json_payload(json_payload)
+    header = _jwt_format.json_loads(json_header)
+    _jwt_format.validate_header(header, self._algorithm)
+    raw_jwt = _raw_jwt.RawJwt.from_json(json_payload)
     _jwt_validator.validate(validator, raw_jwt)
     return _verified_jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
 

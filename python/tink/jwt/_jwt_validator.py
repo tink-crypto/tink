@@ -37,6 +37,7 @@ class JwtValidator(object):
   """
 
   def __init__(self,
+               *,
                issuer: Optional[Text] = None,
                subject: Optional[Text] = None,
                audience: Optional[Text] = None,

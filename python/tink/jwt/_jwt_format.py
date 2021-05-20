@@ -174,15 +174,14 @@ def split_signed_compact(
   return (unsigned_compact, json_header, json_payload, signature_or_mac)
 
 
-def validate_header(json_header: Text, algorithm: Text) -> None:
+def validate_header(header: Any, algorithm: Text) -> None:
   """Parses the header and validates its values."""
   _validate_algorithm(algorithm)
-  decoded_header = json_loads(json_header)
-  hdr_algorithm = decoded_header.get('alg', '')
+  hdr_algorithm = header.get('alg', '')
   if hdr_algorithm.upper() != algorithm:
     raise _jwt_error.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
                                      (algorithm, hdr_algorithm))
-  if 'crit' in decoded_header:
+  if 'crit' in header:
     raise _jwt_error.JwtInvalidError(
         'all tokens with crit headers are rejected')
 
