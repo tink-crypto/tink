@@ -569,13 +569,8 @@ public class TestUtil {
    * @return true if running on Android.
    */
   public static boolean isAndroid() {
-    try {
-      Class.forName("android.app.Application", /*initialize=*/ false, null);
-      return true;
-    } catch (Exception e) {
-      // If Application isn't loaded, it might as well not be Android.
-      return false;
-    }
+    // https://developer.android.com/reference/java/lang/System#getProperties%28%29
+    return "The Android Project".equals(System.getProperty("java.vendor"));
   }
 
   /**
