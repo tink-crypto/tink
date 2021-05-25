@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -149,18 +149,24 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code>static com.google.protobuf.ByteString</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/internal/SigUtil.html#toUnsignedIntByteString-java.math.BigInteger-">toUnsignedIntByteString</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;i)</code>
+<div class="block">Returns the unsigned byte representation of the input BigInteger.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/internal/SigUtil.html#validateEcdsaParams-com.google.crypto.tink.proto.EcdsaParams-">validateEcdsaParams</a></span>(com.google.crypto.tink.proto.EcdsaParams&nbsp;params)</code>
 <div class="block">Validates Ecdsa's parameters.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/internal/SigUtil.html#validateRsaSsaPkcs1Params-com.google.crypto.tink.proto.RsaSsaPkcs1Params-">validateRsaSsaPkcs1Params</a></span>(com.google.crypto.tink.proto.RsaSsaPkcs1Params&nbsp;params)</code>
 <div class="block">Validates RsaSsaPkcs1's parameters.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/signature/internal/SigUtil.html#validateRsaSsaPssParams-com.google.crypto.tink.proto.RsaSsaPssParams-">validateRsaSsaPssParams</a></span>(com.google.crypto.tink.proto.RsaSsaPssParams&nbsp;params)</code>
 <div class="block">Validates RsaSsaPss's parameters.</div>
@@ -279,7 +285,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <a name="toEcdsaEncoding-com.google.crypto.tink.proto.EcdsaSignatureEncoding-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>toEcdsaEncoding</h4>
 <pre>public static&nbsp;<a href="../../../../../../com/google/crypto/tink/subtle/EllipticCurves.EcdsaEncoding.html" title="enum in com.google.crypto.tink.subtle">EllipticCurves.EcdsaEncoding</a>&nbsp;toEcdsaEncoding(com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding)
@@ -290,6 +296,18 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
+</li>
+</ul>
+<a name="toUnsignedIntByteString-java.math.BigInteger-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>toUnsignedIntByteString</h4>
+<pre>public static&nbsp;com.google.protobuf.ByteString&nbsp;toUnsignedIntByteString(<a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html?is-external=true" title="class or interface in java.math">BigInteger</a>&nbsp;i)</pre>
+<div class="block">Returns the unsigned byte representation of the input BigInteger. BigInteger's toByteArray
+ returns a two's complement representation of non-negative integers, which might include an
+ extra zero byte at position 0 (in big endian).</div>
 </li>
 </ul>
 </li>
