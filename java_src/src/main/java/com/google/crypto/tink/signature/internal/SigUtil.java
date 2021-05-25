@@ -24,6 +24,8 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.subtle.EllipticCurves;
 import com.google.crypto.tink.subtle.Enums;
+import com.google.protobuf.ByteString;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 
 /** Utility functions to convert to and from signature-related proto. */
@@ -154,6 +156,19 @@ public final class SigUtil {
       default:
         throw new GeneralSecurityException("unknown ECDSA encoding: " + encoding.name());
     }
+  }
+
+  /**
+   * Returns the unsigned byte representation of the input BigInteger. BigInteger's toByteArray
+   * returns a two's complement representation of non-negative integers, which might include an
+   * extra zero byte at position 0 (in big endian).
+   */
+  public static ByteString toUnsignedIntByteString(BigInteger i) {
+    byte[] twosComplement = i.toByteArray();
+    if (twosComplement[0] == 0x00) {
+      return ByteString.copyFrom(twosComplement, 1, twosComplement.length - 1);
+    }
+    return ByteString.copyFrom(twosComplement);
   }
 
   private SigUtil() {}

@@ -30,6 +30,8 @@ import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
+import com.google.crypto.tink.testing.TestUtil;
 import com.google.protobuf.ExtensionRegistryLite;
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -79,9 +81,10 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getSaltLength()).isEqualTo(32);
-    assertThat(publicKeyProto.getN().toByteArray()).isEqualTo(publicKey.getModulus().toByteArray());
+    assertThat(publicKeyProto.getN().toByteArray())
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getModulus()).toByteArray());
     assertThat(publicKeyProto.getE().toByteArray())
-        .isEqualTo(publicKey.getPublicExponent().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getPublicExponent()).toByteArray());
   }
 
   @Test
@@ -112,9 +115,30 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(publicKeyProto.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
     assertThat(publicKeyProto.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.DER);
     assertThat(publicKeyProto.getX().toByteArray())
-        .isEqualTo(publicKey.getW().getAffineX().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getW().getAffineX()).toByteArray());
     assertThat(publicKeyProto.getY().toByteArray())
-        .isEqualTo(publicKey.getW().getAffineY().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getW().getAffineY()).toByteArray());
+  }
+
+  @Test
+  public void read_ensureUnsignedIntRepresentation() throws Exception {
+    String pem =
+        "-----BEGIN PUBLIC KEY-----\n"
+            + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1M5IlCiYLvNDGG65DmoErfQTZjWa\n"
+            + "UI/nrGayg/BmQa4f9db4zQRCc5IwErn3JtlLDAxQ8fXUoy99klswBEMZ/A==\n"
+            + "-----END PUBLIC KEY-----";
+
+    KeysetReader keysetReader =
+        SignaturePemKeysetReader.newBuilder().addPem(pem, PemKeyType.ECDSA_P256_SHA256).build();
+
+    Keyset ks = keysetReader.read();
+    Keyset.Key key = ks.getKey(0);
+    KeyData keyData = key.getKeyData();
+    EcdsaPublicKey publicKeyProto =
+        EcdsaPublicKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    assertThat(publicKeyProto.getX().toByteArray())
+        .isEqualTo(
+            TestUtil.hexDecode("D4CE489428982EF343186EB90E6A04ADF41366359A508FE7AC66B283F06641AE"));
   }
 
   @Test
@@ -159,9 +183,10 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getSaltLength()).isEqualTo(32);
-    assertThat(publicKeyProto.getN().toByteArray()).isEqualTo(publicKey.getModulus().toByteArray());
+    assertThat(publicKeyProto.getN().toByteArray())
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getModulus()).toByteArray());
     assertThat(publicKeyProto.getE().toByteArray())
-        .isEqualTo(publicKey.getPublicExponent().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getPublicExponent()).toByteArray());
 
     keyData = secondKey.getKeyData();
     publicKeyProto =
@@ -212,9 +237,10 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(publicKeyProto.getParams().getSigHash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
     assertThat(publicKeyProto.getParams().getSaltLength()).isEqualTo(32);
-    assertThat(publicKeyProto.getN().toByteArray()).isEqualTo(publicKey.getModulus().toByteArray());
+    assertThat(publicKeyProto.getN().toByteArray())
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getModulus()).toByteArray());
     assertThat(publicKeyProto.getE().toByteArray())
-        .isEqualTo(publicKey.getPublicExponent().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(publicKey.getPublicExponent()).toByteArray());
   }
 
   @Test
@@ -259,9 +285,9 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(rsaPublicKeyProto.getParams().getMgf1Hash()).isEqualTo(HashType.SHA256);
     assertThat(rsaPublicKeyProto.getParams().getSaltLength()).isEqualTo(32);
     assertThat(rsaPublicKeyProto.getN().toByteArray())
-        .isEqualTo(rsaPublicKey.getModulus().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(rsaPublicKey.getModulus()).toByteArray());
     assertThat(rsaPublicKeyProto.getE().toByteArray())
-        .isEqualTo(rsaPublicKey.getPublicExponent().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(rsaPublicKey.getPublicExponent()).toByteArray());
 
     Keyset.Key secondKey = ks.getKey(1);
     keyData = secondKey.getKeyData();
@@ -278,8 +304,8 @@ public final class SignaturePemKeysetReaderTest {
     assertThat(ecPublicKeyProto.getParams().getCurve()).isEqualTo(EllipticCurveType.NIST_P256);
     assertThat(ecPublicKeyProto.getParams().getEncoding()).isEqualTo(EcdsaSignatureEncoding.DER);
     assertThat(ecPublicKeyProto.getX().toByteArray())
-        .isEqualTo(ecPublicKey.getW().getAffineX().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(ecPublicKey.getW().getAffineX()).toByteArray());
     assertThat(ecPublicKeyProto.getY().toByteArray())
-        .isEqualTo(ecPublicKey.getW().getAffineY().toByteArray());
+        .isEqualTo(SigUtil.toUnsignedIntByteString(ecPublicKey.getW().getAffineY()).toByteArray());
   }
 }
