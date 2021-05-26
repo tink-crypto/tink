@@ -22,6 +22,7 @@
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
+#include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -41,10 +42,10 @@ namespace jwt_internal {
 class JwtHmacKeyManager
     : public KeyTypeManager<google::crypto::tink::JwtHmacKey,
                             google::crypto::tink::JwtHmacKeyFormat,
-                            List<JwtMac>> {
+                            List<JwtMacInternal>> {
  public:
-  class JwtMacFactory : public PrimitiveFactory<JwtMac> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtMac>> Create(
+  class JwtMacFactory : public PrimitiveFactory<JwtMacInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtMacInternal>> Create(
         const google::crypto::tink::JwtHmacKey& jwt_hmac_key) const override {
       int tag_size;
       std::string algorithm;
@@ -76,7 +77,7 @@ class JwtHmacKeyManager
       if (!mac_or.ok()) {
         return mac_or.status();
       }
-      std::unique_ptr<JwtMac> jwt_mac =
+      std::unique_ptr<JwtMacInternal> jwt_mac =
           absl::make_unique<jwt_internal::JwtMacImpl>(
               std::move(mac_or.ValueOrDie()), algorithm);
       return jwt_mac;

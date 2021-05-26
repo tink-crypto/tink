@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
 
+#include "tink/jwt/internal/jwt_format.h"
+#include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -27,13 +29,12 @@ namespace jwt_internal {
 
 using google::crypto::tink::OutputPrefixType;
 
-
 namespace {
 
 class JwtPublicKeySignSetWrapper : public JwtPublicKeySign {
  public:
   explicit JwtPublicKeySignSetWrapper(
-      std::unique_ptr<PrimitiveSet<JwtPublicKeySign>> jwt_sign_set)
+      std::unique_ptr<PrimitiveSet<JwtPublicKeySignInternal>> jwt_sign_set)
       : jwt_sign_set_(std::move(jwt_sign_set)) {}
 
   crypto::tink::util::StatusOr<std::string> SignAndEncode(
@@ -42,10 +43,10 @@ class JwtPublicKeySignSetWrapper : public JwtPublicKeySign {
   ~JwtPublicKeySignSetWrapper() override {}
 
  private:
-  std::unique_ptr<PrimitiveSet<JwtPublicKeySign>> jwt_sign_set_;
+  std::unique_ptr<PrimitiveSet<JwtPublicKeySignInternal>> jwt_sign_set_;
 };
 
-util::Status Validate(PrimitiveSet<JwtPublicKeySign>* jwt_sign_set) {
+util::Status Validate(PrimitiveSet<JwtPublicKeySignInternal>* jwt_sign_set) {
   if (jwt_sign_set == nullptr) {
     return util::Status(util::error::INTERNAL, "jwt_sign_set must be non-NULL");
   }
@@ -54,9 +55,10 @@ util::Status Validate(PrimitiveSet<JwtPublicKeySign>* jwt_sign_set) {
                         "jwt_sign_set has no primary");
   }
   for (const auto* entry : jwt_sign_set->get_all()) {
-    if (entry->get_output_prefix_type() != OutputPrefixType::RAW) {
+    if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
+        (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
       return util::Status(util::error::INVALID_ARGUMENT,
-                          "all keys must be raw");
+                          "all JWT keys must be either RAW or TINK");
     }
   }
   return util::Status::OK;
@@ -65,13 +67,15 @@ util::Status Validate(PrimitiveSet<JwtPublicKeySign>* jwt_sign_set) {
 util::StatusOr<std::string> JwtPublicKeySignSetWrapper::SignAndEncode(
     const crypto::tink::RawJwt& token) const {
   auto primary = jwt_sign_set_->get_primary();
-  return primary->get_primitive().SignAndEncode(token);
+  return primary->get_primitive().SignAndEncodeWithKid(
+      token, GetKid(primary->get_key_id(), primary->get_output_prefix_type()));
 }
 
 }  // namespace
 
 util::StatusOr<std::unique_ptr<JwtPublicKeySign>> JwtPublicKeySignWrapper::Wrap(
-    std::unique_ptr<PrimitiveSet<JwtPublicKeySign>> jwt_sign_set) const {
+    std::unique_ptr<PrimitiveSet<JwtPublicKeySignInternal>> jwt_sign_set)
+    const {
   util::Status status = Validate(jwt_sign_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<JwtPublicKeySign> jwt_sign =

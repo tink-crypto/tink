@@ -23,6 +23,7 @@
 #include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
+using ::google::crypto::tink::OutputPrefixType;
 using testing::Eq;
 
 namespace crypto {
@@ -109,7 +110,8 @@ TEST(JwtFormat, DecodeAndValidateFixedHeaderRS256) {
 }
 
 TEST(JwtFormat, CreateValidateHeader) {
-  std::string encoded_header = CreateHeader("PS384", absl::nullopt);
+  std::string encoded_header =
+      CreateHeader("PS384", absl::nullopt, absl::nullopt);
 
   std::string json_header;
   ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
@@ -122,8 +124,8 @@ TEST(JwtFormat, CreateValidateHeader) {
   EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
 }
 
-TEST(JwtFormat, CreateValidateHeaderWithType) {
-  std::string encoded_header = CreateHeader("PS384", "JWT");
+TEST(JwtFormat, CreateValidateHeaderWithTypeAndKid) {
+  std::string encoded_header = CreateHeader("PS384", "JWT", "kid-1234");
 
   std::string json_header;
   ASSERT_TRUE(DecodeHeader(encoded_header, &json_header));
@@ -131,9 +133,17 @@ TEST(JwtFormat, CreateValidateHeaderWithType) {
   util::StatusOr<google::protobuf::Struct> header_or =
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header_or.status(), IsOk());
+  google::protobuf::Struct header = header_or.ValueOrDie();
 
-  EXPECT_THAT(ValidateHeader(header_or.ValueOrDie(), "PS384"), IsOk());
-  EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
+  EXPECT_THAT(GetTypeHeader(header), Eq("JWT"));
+  EXPECT_THAT(ValidateHeader(header, "PS384"), IsOk());
+  EXPECT_FALSE(ValidateHeader(header, "HS256").ok());
+
+  auto it = header.fields().find("kid");
+  EXPECT_FALSE(it == header.fields().end());
+  const auto& value = it->second;
+  EXPECT_THAT(value.kind_case(), Eq(google::protobuf::Value::kStringValue));
+  EXPECT_THAT(value.string_value(), Eq("kid-1234"));
 }
 
 TEST(JwtFormat, ValidateEmptyHeaderFails) {
@@ -174,6 +184,41 @@ TEST(JwtFormat, ValidateHeaderWithInvalidAlgTypFails) {
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header_or.status(), IsOk());
   EXPECT_FALSE(ValidateHeader(header_or.ValueOrDie(), "HS256").ok());
+}
+
+TEST(JwtFormat, GetKidWithTinkOutputPrefixType) {
+  uint32_t keyId = 0x1ac6a944;
+  std::string kid = "GsapRA";
+  EXPECT_THAT(GetKid(keyId, OutputPrefixType::TINK), Eq(kid));
+  EXPECT_THAT(GetKeyId(kid), Eq(keyId));
+}
+
+TEST(JwtFormat, GetKeyId) {
+  uint32_t keyId = 0x1ac6a944;
+  std::string kid = "GsapRA";
+  EXPECT_THAT(GetKeyId(kid), Eq(keyId));
+}
+
+TEST(JwtFormat, GetKidWithRawOutputPrefixTypeIsNotPresent) {
+  uint32_t keyId = 0x1ac6a944;
+  EXPECT_THAT(GetKid(keyId, OutputPrefixType::RAW), Eq(absl::nullopt));
+}
+
+TEST(JwtFormat, KeyIdKidConversion) {
+  EXPECT_THAT(GetKeyId(*GetKid(0x12345678, OutputPrefixType::TINK)),
+              Eq(0x12345678));
+  EXPECT_THAT(GetKeyId(*GetKid(0, OutputPrefixType::TINK)), Eq(0));
+  EXPECT_THAT(GetKeyId(*GetKid(100, OutputPrefixType::TINK)), Eq(100));
+  EXPECT_THAT(GetKeyId(*GetKid(2147483647, OutputPrefixType::TINK)),
+              Eq(2147483647));
+  EXPECT_THAT(GetKeyId(*GetKid(0xffffffff, OutputPrefixType::TINK)),
+              Eq(0xffffffff));
+}
+
+TEST(JwtFormat, GetKeyIdFromInvalidKidIsNotPresent) {
+  EXPECT_THAT(GetKeyId(""), Eq(absl::nullopt));
+  EXPECT_THAT(GetKeyId("Gsap"), Eq(absl::nullopt));
+  EXPECT_THAT(GetKeyId("GsapRAAA"), Eq(absl::nullopt));
 }
 
 TEST(JwtFormat, DecodeFixedPayload) {

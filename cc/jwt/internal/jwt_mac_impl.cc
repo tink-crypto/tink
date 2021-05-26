@@ -25,8 +25,8 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncode(
-    const RawJwt& token) const {
+util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
+    const RawJwt& token, absl::optional<absl::string_view> kid) const {
   absl::optional<std::string> type_header;
   if (token.HasTypeHeader()) {
     util::StatusOr<std::string> type_or = token.GetTypeHeader();
@@ -35,7 +35,7 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncode(
     }
     type_header = type_or.ValueOrDie();
   }
-  std::string encoded_header = CreateHeader(algorithm_, type_header);
+  std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
   util::StatusOr<std::string> payload_or = token.GetJsonPayload();
   if (!payload_or.ok()) {
     return payload_or.status();

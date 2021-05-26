@@ -19,8 +19,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_split.h"
 #include "absl/time/time.h"
 #include "tink/core/key_manager_impl.h"
+#include "tink/jwt/internal/json_util.h"
+#include "tink/jwt/internal/jwt_format.h"
 #include "tink/mac.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
@@ -41,6 +44,7 @@ using ::google::crypto::tink::JwtHmacAlgorithm;
 using ::google::crypto::tink::JwtHmacKey;
 using ::google::crypto::tink::JwtHmacKeyFormat;
 using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
 using ::testing::Not;
 using ::testing::SizeIs;
 
@@ -163,7 +167,7 @@ TEST(JwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
               StatusIs(util::error::UNIMPLEMENTED));
 }
 
-TEST(JwtHmacKeyManagerTest, GetPrimitive) {
+TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
@@ -171,7 +175,7 @@ TEST(JwtHmacKeyManagerTest, GetPrimitive) {
   ASSERT_THAT(key_or.status(), IsOk());
 
   auto jwt_mac_or =
-      JwtHmacKeyManager().GetPrimitive<JwtMac>(key_or.ValueOrDie());
+      JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
   auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
@@ -179,7 +183,8 @@ TEST(JwtHmacKeyManagerTest, GetPrimitive) {
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact_or =
-      jwt_mac_or.ValueOrDie()->ComputeMacAndEncode(raw_jwt);
+      jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt,
+                                                          absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
 
@@ -193,6 +198,48 @@ TEST(JwtHmacKeyManagerTest, GetPrimitive) {
   EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
 }
 
+TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
+  JwtHmacKeyFormat key_format;
+  key_format.set_key_size(32);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
+  auto key_or = JwtHmacKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key_or.status(), IsOk());
+
+  auto jwt_mac_or =
+      JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
+  ASSERT_THAT(jwt_mac_or.status(), IsOk());
+
+  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  ASSERT_THAT(raw_jwt_or.status(), IsOk());
+  auto raw_jwt = raw_jwt_or.ValueOrDie();
+
+  util::StatusOr<std::string> compact_or =
+      jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
+  ASSERT_THAT(compact_or.status(), IsOk());
+  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+
+  util::StatusOr<VerifiedJwt> verified_jwt_or =
+      jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
+                                                  validator);
+  ASSERT_THAT(verified_jwt_or.status(), IsOk());
+  util::StatusOr<std::string> issuer_or =
+      verified_jwt_or.ValueOrDie().GetIssuer();
+  ASSERT_THAT(issuer_or.status(), IsOk());
+  EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
+
+  // parse header to make sure kid value is set correctly.
+  std::vector<absl::string_view> parts =
+      absl::StrSplit(compact_or.ValueOrDie(), '.');
+  ASSERT_THAT(parts.size(), Eq(3));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
+  auto header_or = JsonStringToProtoStruct(json_header);
+  ASSERT_THAT(header_or.status(), IsOk());
+  EXPECT_THAT(
+      header_or.ValueOrDie().fields().find("kid")->second.string_value(),
+      Eq("kid-123"));
+}
+
 TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   JwtHmacKey key;
   key.set_version(0);
@@ -204,7 +251,7 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
       "qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow",
       &key_value));
   key.set_key_value(key_value);
-  auto jwt_mac_or = JwtHmacKeyManager().GetPrimitive<JwtMac>(key);
+  auto jwt_mac_or = JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key);
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
   std::string compact =

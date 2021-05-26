@@ -50,14 +50,11 @@ util::Status Validate(PrimitiveSet<JwtPublicKeyVerify>* jwt_verify_set) {
     return util::Status(util::error::INTERNAL,
                         "jwt_verify_set must be non-NULL");
   }
-  if (jwt_verify_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "jwt_verify_set has no primary");
-  }
   for (const auto* entry : jwt_verify_set->get_all()) {
-    if (entry->get_output_prefix_type() != OutputPrefixType::RAW) {
+    if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
+        (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
       return util::Status(util::error::INVALID_ARGUMENT,
-                          "all JWT keys must be raw");
+                          "all JWT keys must be either RAW or TINK");
     }
   }
   return util::Status::OK;
@@ -67,14 +64,11 @@ util::StatusOr<crypto::tink::VerifiedJwt>
 JwtPublicKeyVerifySetWrapper::VerifyAndDecode(
     absl::string_view compact,
     const crypto::tink::JwtValidator& validator) const {
-  auto primitives_or = jwt_verify_set_->get_raw_primitives();
-  if (primitives_or.ok()) {
-    for (auto& entry : *(primitives_or.ValueOrDie())) {
-      JwtPublicKeyVerify& jwt_verify = entry->get_primitive();
-      auto verified_jwt_or = jwt_verify.VerifyAndDecode(compact, validator);
-      if (verified_jwt_or.ok()) {
-        return verified_jwt_or;
-      }
+  for (const auto* entry : jwt_verify_set_->get_all()) {
+    JwtPublicKeyVerify& jwt_verify = entry->get_primitive();
+    auto verified_jwt_or = jwt_verify.VerifyAndDecode(compact, validator);
+    if (verified_jwt_or.ok()) {
+      return verified_jwt_or;
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "verification failed");

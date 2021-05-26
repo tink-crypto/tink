@@ -18,11 +18,15 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "tink/crypto_format.h"
 #include "tink/jwt/internal/json_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
+
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace {
 
@@ -42,7 +46,6 @@ bool StrictWebSafeBase64Unescape(absl::string_view src, std::string* dest) {
 
 }  // namespace
 
-
 std::string EncodeHeader(absl::string_view json_header) {
   return absl::WebSafeBase64Escape(json_header);
 }
@@ -51,18 +54,41 @@ bool DecodeHeader(absl::string_view header, std::string* json_header) {
   return StrictWebSafeBase64Unescape(header, json_header);
 }
 
+absl::optional<std::string> GetKid(uint32_t key_id,
+                                   OutputPrefixType output_prefix_type) {
+  if (output_prefix_type != OutputPrefixType::TINK) {
+    return absl::nullopt;
+  }
+  char buffer[4];
+  absl::big_endian::Store32(buffer, key_id);
+  return absl::WebSafeBase64Escape(absl::string_view(buffer, 4));
+}
+
+absl::optional<uint32_t> GetKeyId(absl::string_view kid) {
+  std::string decoded_kid;
+  if (!StrictWebSafeBase64Unescape(kid, &decoded_kid)) {
+    return absl::nullopt;
+  }
+  if (decoded_kid.size() != 4) {
+    return absl::nullopt;
+  }
+
+  return absl::big_endian::Load32(decoded_kid.data());
+}
+
 std::string CreateHeader(absl::string_view algorithm,
-                         absl::optional<absl::string_view> type_header) {
+                         absl::optional<absl::string_view> type_header,
+                         absl::optional<absl::string_view> kid) {
   google::protobuf::Struct header;
   auto fields = header.mutable_fields();
-  if (type_header.has_value()) {
-    google::protobuf::Value type_value;
-    type_value.set_string_value(std::string(type_header.value()));
-    (*fields)["typ"] = type_value;
+  if (kid.has_value()) {
+    google::protobuf::Value kid_value;
+    (*fields)["kid"].set_string_value(std::string(kid.value()));
   }
-  google::protobuf::Value alg_value;
-  alg_value.set_string_value(std::string(algorithm));
-  (*fields)["alg"] = alg_value;
+  if (type_header.has_value()) {
+    (*fields)["typ"].set_string_value(std::string(type_header.value()));
+  }
+  (*fields)["alg"].set_string_value(std::string(algorithm));
   util::StatusOr<std::string> json_or =
       jwt_internal::ProtoStructToJsonString(header);
   if (!json_or.ok()) {

@@ -20,6 +20,7 @@
 #include "google/protobuf/struct.pb.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -28,8 +29,14 @@ namespace jwt_internal {
 std::string EncodeHeader(absl::string_view json_header);
 bool DecodeHeader(absl::string_view header, std::string* json_header);
 
+absl::optional<std::string> GetKid(
+    uint32_t key_id,
+    ::google::crypto::tink::OutputPrefixType output_prefix_type);
+absl::optional<uint32_t> GetKeyId(absl::string_view kid);
+
 std::string CreateHeader(absl::string_view algorithm,
-                         absl::optional<absl::string_view> type_header);
+                         absl::optional<absl::string_view> type_header,
+                         absl::optional<absl::string_view> kid);
 util::Status ValidateHeader(const google::protobuf::Struct& header,
                             absl::string_view algorithm);
 absl::optional<std::string> GetTypeHeader(

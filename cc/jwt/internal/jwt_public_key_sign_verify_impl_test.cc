@@ -17,6 +17,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
+#include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
@@ -30,6 +32,8 @@
 #include "tink/util/test_matchers.h"
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
+using ::testing::Eq;
 
 namespace crypto {
 namespace tink {
@@ -76,7 +80,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact_or =
-      jwt_sign_->SignAndEncode(raw_jwt);
+      jwt_sign_->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
@@ -87,8 +91,8 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
       jwt_verify_->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
-  EXPECT_THAT(verified_jwt.GetTypeHeader(), test::IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
 
   // Fails with wrong issuer
   JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
@@ -100,13 +104,51 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   EXPECT_FALSE(jwt_verify_->VerifyAndDecode(compact, validator_1970).ok());
 }
 
+TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
+  absl::Time now = absl::Now();
+  auto builder =
+      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
+  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
+  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
+  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
+  auto raw_jwt_or = builder.Build();
+  ASSERT_THAT(raw_jwt_or.status(), IsOk());
+  RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
+
+  util::StatusOr<std::string> compact_or =
+      jwt_sign_->SignAndEncodeWithKid(raw_jwt, "kid-123");
+  ASSERT_THAT(compact_or.status(), IsOk());
+  std::string compact = compact_or.ValueOrDie();
+
+  JwtValidator validator = JwtValidatorBuilder().Build();
+
+  util::StatusOr<VerifiedJwt> verified_jwt_or =
+      jwt_verify_->VerifyAndDecode(compact, validator);
+  ASSERT_THAT(verified_jwt_or.status(), IsOk());
+  auto verified_jwt = verified_jwt_or.ValueOrDie();
+  EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
+
+  // parse header to make sure the kid value is set correctly.
+  std::vector<absl::string_view> parts =
+      absl::StrSplit(compact_or.ValueOrDie(), '.');
+  ASSERT_THAT(parts.size(), Eq(3));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
+  auto header_or = JsonStringToProtoStruct(json_header);
+  ASSERT_THAT(header_or.status(), IsOk());
+  EXPECT_THAT(
+      header_or.ValueOrDie().fields().find("kid")->second.string_value(),
+      Eq("kid-123"));
+}
+
 TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
   auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact_or =
-      jwt_sign_->SignAndEncode(raw_jwt);
+      jwt_sign_->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
   JwtValidator validator = JwtValidatorBuilder().Build();

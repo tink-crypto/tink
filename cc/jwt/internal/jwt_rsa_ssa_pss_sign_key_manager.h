@@ -20,7 +20,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/core/private_key_type_manager.h"
-#include "tink/jwt/internal/jwt_public_key_sign_impl.h"
+#include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_sign_key_manager.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/util/status.h"
@@ -35,11 +35,12 @@ class JwtRsaSsaPssSignKeyManager
     : public PrivateKeyTypeManager<google::crypto::tink::JwtRsaSsaPssPrivateKey,
                                    google::crypto::tink::JwtRsaSsaPssKeyFormat,
                                    google::crypto::tink::JwtRsaSsaPssPublicKey,
-                                   List<JwtPublicKeySign>> {
+                                   List<JwtPublicKeySignInternal>> {
  public:
-  class PublicKeySignFactory : public PrimitiveFactory<JwtPublicKeySign> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySign>> Create(
-        const google::crypto::tink::JwtRsaSsaPssPrivateKey& private_key)
+  class PublicKeySignFactory
+      : public PrimitiveFactory<JwtPublicKeySignInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
+    Create(const google::crypto::tink::JwtRsaSsaPssPrivateKey& private_key)
         const override;
 
    private:

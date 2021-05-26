@@ -18,7 +18,7 @@
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_IMPL_H_
 
 #include "absl/strings/string_view.h"
-#include "tink/jwt/jwt_public_key_sign.h"
+#include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/status.h"
@@ -28,7 +28,7 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-class JwtPublicKeySignImpl : public JwtPublicKeySign {
+class JwtPublicKeySignImpl : public JwtPublicKeySignInternal {
  public:
   explicit JwtPublicKeySignImpl(
       std::unique_ptr<crypto::tink::PublicKeySign> sign,
@@ -37,8 +37,9 @@ class JwtPublicKeySignImpl : public JwtPublicKeySign {
     algorithm_ = std::string(algorithm);
   }
 
-  crypto::tink::util::StatusOr<std::string> SignAndEncode(
-      const crypto::tink::RawJwt& token) const override;
+  crypto::tink::util::StatusOr<std::string> SignAndEncodeWithKid(
+      const crypto::tink::RawJwt& token,
+      absl::optional<absl::string_view> kid) const override;
 
  private:
   std::unique_ptr<crypto::tink::PublicKeySign> sign_;

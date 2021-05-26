@@ -14,11 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
-#include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/str_split.h"
+#include "tink/jwt/internal/json_util.h"
+#include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
+#include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
+#include "tink/jwt/internal/jwt_format.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -29,11 +31,12 @@ namespace jwt_internal {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::JwtEcdsaAlgorithm;
+using ::google::crypto::tink::JwtEcdsaKeyFormat;
 using ::google::crypto::tink::JwtEcdsaPrivateKey;
 using ::google::crypto::tink::JwtEcdsaPublicKey;
-using ::google::crypto::tink::JwtEcdsaKeyFormat;
-using ::google::crypto::tink::JwtEcdsaAlgorithm;
 using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
 using ::testing::Not;
 
 namespace {
@@ -125,7 +128,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(key_or.status(), IsOk());
   auto key = key_or.ValueOrDie();
 
-  auto sign_or = JwtEcdsaSignKeyManager().GetPrimitive<JwtPublicKeySign>(key);
+  auto sign_or =
+      JwtEcdsaSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(key);
   ASSERT_THAT(sign_or.status(), IsOk());
   auto sign = std::move(sign_or.ValueOrDie());
 
@@ -133,7 +137,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
-  util::StatusOr<std::string> compact_or = sign->SignAndEncode(raw_jwt);
+  util::StatusOr<std::string> compact_or =
+      sign->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
@@ -149,7 +154,7 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   util::StatusOr<std::string> issuer_or =
       verified_jwt_or.ValueOrDie().GetIssuer();
   ASSERT_THAT(issuer_or.status(), IsOk());
-  EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
+  EXPECT_THAT(issuer_or.ValueOrDie(), Eq("issuer"));
 
   JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
@@ -166,7 +171,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(key2_or.status(), IsOk());
   auto key2 = key2_or.ValueOrDie();
 
-  auto sign1_or = JwtEcdsaSignKeyManager().GetPrimitive<JwtPublicKeySign>(key1);
+  auto sign1_or =
+      JwtEcdsaSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(key1);
   ASSERT_THAT(sign1_or.status(), IsOk());
   auto sign1 = std::move(sign1_or.ValueOrDie());
 
@@ -174,7 +180,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
-  util::StatusOr<std::string> compact_or = sign1->SignAndEncode(raw_jwt);
+  util::StatusOr<std::string> compact_or =
+      sign1->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 

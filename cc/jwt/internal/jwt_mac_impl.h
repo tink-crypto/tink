@@ -18,6 +18,7 @@
 #define TINK_JWT_INTERNAL_JWT_MAC_IMPL_H_
 
 #include "absl/strings/string_view.h"
+#include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/raw_jwt.h"
@@ -30,7 +31,7 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-class JwtMacImpl : public JwtMac {
+class JwtMacImpl : public JwtMacInternal {
  public:
   explicit JwtMacImpl(std::unique_ptr<crypto::tink::Mac> mac,
                       absl::string_view algorithm) {
@@ -38,8 +39,9 @@ class JwtMacImpl : public JwtMac {
     algorithm_ = std::string(algorithm);
   }
 
-  crypto::tink::util::StatusOr<std::string> ComputeMacAndEncode(
-      const crypto::tink::RawJwt& token) const override;
+  crypto::tink::util::StatusOr<std::string> ComputeMacAndEncodeWithKid(
+      const crypto::tink::RawJwt& token,
+      absl::optional<absl::string_view> kid) const override;
 
   crypto::tink::util::StatusOr<crypto::tink::VerifiedJwt> VerifyMacAndDecode(
       absl::string_view compact,

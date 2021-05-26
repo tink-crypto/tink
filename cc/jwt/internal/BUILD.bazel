@@ -84,6 +84,8 @@ cc_library(
     include_prefix = "tink/jwt/internal",
     deps = [
         ":json_util",
+        "//:crypto_format",
+        "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
@@ -111,6 +113,7 @@ cc_library(
     deps = [
         ":json_util",
         ":jwt_format",
+        ":jwt_mac_internal",
         "//:mac",
         "//jwt:jwt_mac",
         "//jwt:jwt_validator",
@@ -152,6 +155,7 @@ cc_library(
     include_prefix = "tink/jwt/internal",
     deps = [
         ":jwt_mac_impl",
+        ":jwt_mac_internal",
         ":raw_jwt_hmac_key_manager",
         "//:core/key_type_manager",
         "//:mac",
@@ -199,6 +203,8 @@ cc_library(
     hdrs = ["jwt_mac_wrapper.h"],
     include_prefix = "tink/jwt/internal",
     deps = [
+        ":jwt_format",
+        ":jwt_mac_internal",
         "//:primitive_set",
         "//:primitive_wrapper",
         "//jwt:jwt_mac",
@@ -211,6 +217,8 @@ cc_test(
     name = "jwt_mac_wrapper_test",
     srcs = ["jwt_mac_wrapper_test.cc"],
     deps = [
+        ":json_util",
+        ":jwt_format",
         ":jwt_hmac_key_manager",
         ":jwt_mac_wrapper",
         "//:keyset_manager",
@@ -220,6 +228,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -515,8 +524,8 @@ cc_library(
     include_prefix = "tink/jwt/internal",
     deps = [
         ":jwt_format",
+        ":jwt_public_key_sign_internal",
         "//:public_key_sign",
-        "//jwt:jwt_public_key_sign",
         "//jwt:raw_jwt",
         "//util:status",
         "//util:statusor",
@@ -572,6 +581,7 @@ cc_library(
     deps = [
         ":jwt_ecdsa_verify_key_manager",
         ":jwt_public_key_sign_impl",
+        ":jwt_public_key_sign_internal",
         ":raw_jwt_ecdsa_sign_key_manager",
         "//:core/private_key_type_manager",
         "//jwt:jwt_public_key_sign",
@@ -604,11 +614,14 @@ cc_test(
     srcs = ["jwt_ecdsa_sign_verify_key_manager_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":json_util",
         ":jwt_ecdsa_sign_key_manager",
         ":jwt_ecdsa_verify_key_manager",
+        ":jwt_format",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -619,6 +632,8 @@ cc_library(
     hdrs = ["jwt_public_key_sign_wrapper.h"],
     include_prefix = "tink/jwt/internal",
     deps = [
+        ":jwt_format",
+        ":jwt_public_key_sign_internal",
         "//:primitive_set",
         "//:primitive_wrapper",
         "//jwt:jwt_public_key_sign",
@@ -646,8 +661,10 @@ cc_test(
     srcs = ["jwt_public_key_wrappers_test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":json_util",
         ":jwt_ecdsa_sign_key_manager",
         ":jwt_ecdsa_verify_key_manager",
+        ":jwt_format",
         ":jwt_public_key_sign_wrapper",
         ":jwt_public_key_verify_wrapper",
         "//:keyset_manager",
@@ -657,6 +674,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -668,6 +686,7 @@ cc_library(
     include_prefix = "tink/jwt/internal",
     deps = [
         ":jwt_public_key_sign_impl",
+        ":jwt_public_key_sign_internal",
         ":jwt_rsa_ssa_pkcs1_verify_key_manager",
         ":raw_jwt_rsa_ssa_pkcs1_sign_key_manager",
         "//:core/private_key_type_manager",
@@ -700,6 +719,8 @@ cc_test(
     name = "jwt_rsa_ssa_pkcs1_sign_verify_key_manager_test",
     srcs = ["jwt_rsa_ssa_pkcs1_sign_verify_key_manager_test.cc"],
     deps = [
+        ":json_util",
+        ":jwt_format",
         ":jwt_rsa_ssa_pkcs1_sign_key_manager",
         ":jwt_rsa_ssa_pkcs1_verify_key_manager",
         "//subtle:subtle_util_boringssl",
@@ -707,6 +728,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -718,6 +740,7 @@ cc_library(
     include_prefix = "tink/jwt/internal",
     deps = [
         ":jwt_public_key_sign_impl",
+        ":jwt_public_key_sign_internal",
         ":jwt_rsa_ssa_pss_verify_key_manager",
         ":raw_jwt_rsa_ssa_pss_sign_key_manager",
         "//:core/private_key_type_manager",
@@ -750,6 +773,8 @@ cc_test(
     name = "jwt_rsa_ssa_pss_sign_verify_key_manager_test",
     srcs = ["jwt_rsa_ssa_pss_sign_verify_key_manager_test.cc"],
     deps = [
+        ":json_util",
+        ":jwt_format",
         ":jwt_rsa_ssa_pss_sign_key_manager",
         ":jwt_rsa_ssa_pss_verify_key_manager",
         "//subtle:subtle_util_boringssl",
@@ -757,6 +782,33 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "jwt_public_key_sign_internal",
+    hdrs = ["jwt_public_key_sign_internal.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//jwt:raw_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "jwt_mac_internal",
+    hdrs = ["jwt_mac_internal.h"],
+    include_prefix = "tink/jwt/internal",
+    deps = [
+        "//jwt:jwt_validator",
+        "//jwt:raw_jwt",
+        "//jwt:verified_jwt",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )

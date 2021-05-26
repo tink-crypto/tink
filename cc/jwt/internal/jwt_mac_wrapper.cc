@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_mac_wrapper.h"
 
+#include "tink/jwt/internal/jwt_format.h"
+#include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
@@ -25,13 +27,14 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-using google::crypto::tink::OutputPrefixType;
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace {
 
 class JwtMacSetWrapper : public JwtMac {
  public:
-  explicit JwtMacSetWrapper(std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set)
+  explicit JwtMacSetWrapper(
+      std::unique_ptr<PrimitiveSet<JwtMacInternal>> jwt_mac_set)
       : jwt_mac_set_(std::move(jwt_mac_set)) {}
 
   crypto::tink::util::StatusOr<std::string> ComputeMacAndEncode(
@@ -44,10 +47,10 @@ class JwtMacSetWrapper : public JwtMac {
   ~JwtMacSetWrapper() override {}
 
  private:
-  std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set_;
+  std::unique_ptr<PrimitiveSet<JwtMacInternal>> jwt_mac_set_;
 };
 
-util::Status Validate(PrimitiveSet<JwtMac>* jwt_mac_set) {
+util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
   if (jwt_mac_set == nullptr) {
     return util::Status(util::error::INTERNAL, "jwt_mac_set must be non-NULL");
   }
@@ -56,9 +59,10 @@ util::Status Validate(PrimitiveSet<JwtMac>* jwt_mac_set) {
                         "jwt_mac_set has no primary");
   }
   for (const auto* entry : jwt_mac_set->get_all()) {
-    if (entry->get_output_prefix_type() != OutputPrefixType::RAW) {
+    if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
+        (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
       return util::Status(util::error::INVALID_ARGUMENT,
-                          "all JWT MAC keys must be raw");
+                          "all JWT keys must be either RAW or TINK");
     }
   }
   return util::Status::OK;
@@ -67,20 +71,18 @@ util::Status Validate(PrimitiveSet<JwtMac>* jwt_mac_set) {
 util::StatusOr<std::string> JwtMacSetWrapper::ComputeMacAndEncode(
     const crypto::tink::RawJwt& token) const {
   auto primary = jwt_mac_set_->get_primary();
-  return primary->get_primitive().ComputeMacAndEncode(token);
+  return primary->get_primitive().ComputeMacAndEncodeWithKid(
+      token, GetKid(primary->get_key_id(), primary->get_output_prefix_type()));
 }
 
 util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
     absl::string_view compact,
     const crypto::tink::JwtValidator& validator) const {
-  auto raw_primitives_result = jwt_mac_set_->get_raw_primitives();
-  if (raw_primitives_result.ok()) {
-    for (auto& mac_entry : *(raw_primitives_result.ValueOrDie())) {
-      JwtMac& jwt_mac = mac_entry->get_primitive();
-      auto verified_jwt_or = jwt_mac.VerifyMacAndDecode(compact, validator);
-      if (verified_jwt_or.ok()) {
-        return verified_jwt_or;
-      }
+  for (const auto* mac_entry : jwt_mac_set_->get_all()) {
+    JwtMacInternal& jwt_mac = mac_entry->get_primitive();
+    auto verified_jwt_or = jwt_mac.VerifyMacAndDecode(compact, validator);
+    if (verified_jwt_or.ok()) {
+      return verified_jwt_or;
     }
   }
   return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
@@ -89,7 +91,7 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
 }  // namespace
 
 util::StatusOr<std::unique_ptr<JwtMac>> JwtMacWrapper::Wrap(
-    std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set) const {
+    std::unique_ptr<PrimitiveSet<JwtMacInternal>> jwt_mac_set) const {
   util::Status status = Validate(jwt_mac_set.get());
   if (!status.ok()) return status;
   std::unique_ptr<JwtMac> jwt_mac =

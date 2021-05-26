@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_sign_key_manager.h"
 
+#include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_verify_key_manager.h"
 
 namespace crypto {
@@ -27,7 +28,7 @@ using google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using google::crypto::tink::JwtRsaSsaPssPrivateKey;
 using google::crypto::tink::JwtRsaSsaPssPublicKey;
 
-StatusOr<std::unique_ptr<JwtPublicKeySign>>
+StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
 JwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
     const JwtRsaSsaPssPrivateKey& jwt_rsa_ssa_pss_private_key) const {
   StatusOr<std::string> name_or = JwtRsaSsaPssVerifyKeyManager::AlgorithmName(
@@ -40,7 +41,7 @@ JwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
   if (!sign_or.ok()) {
     return sign_or.status();
   }
-  std::unique_ptr<JwtPublicKeySign> jwt_public_key_sign =
+  std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
       absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
           std::move(sign_or.ValueOrDie()), name_or.ValueOrDie());
   return jwt_public_key_sign;

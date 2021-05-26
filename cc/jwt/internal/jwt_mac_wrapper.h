@@ -17,6 +17,7 @@
 #ifndef TINK_JWT_INTERNAL_JWT_MAC_WRAPPER_H_
 #define TINK_JWT_INTERNAL_JWT_MAC_WRAPPER_H_
 
+#include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
@@ -32,10 +33,10 @@ namespace jwt_internal {
 //   * JwtMac::ComputeMacAndEncode(...) uses the primary instance from the set
 //   * JwtMac::VerifyMacAndDecode(...) uses all instance from the set
 // only keys with RAW output prefix are supported.
-class JwtMacWrapper : public PrimitiveWrapper<JwtMac, JwtMac> {
+class JwtMacWrapper : public PrimitiveWrapper<JwtMacInternal, JwtMac> {
  public:
   util::StatusOr<std::unique_ptr<JwtMac>> Wrap(
-      std::unique_ptr<PrimitiveSet<JwtMac>> jwt_mac_set) const override;
+      std::unique_ptr<PrimitiveSet<JwtMacInternal>> jwt_mac_set) const override;
 };
 
 }  // namespace jwt_internal

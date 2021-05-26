@@ -59,6 +59,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::strings
+    tink::core::crypto_format
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -99,6 +101,7 @@ tink_cc_library(
   DEPS
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_mac_internal
     tink::core::mac
     tink::jwt::jwt_validator
     tink::jwt::raw_jwt
@@ -140,6 +143,7 @@ tink_cc_library(
     tink::core::mac
     tink::jwt::jwt_mac
     tink::jwt::internal::jwt_mac_impl
+    tink::jwt::internal::jwt_mac_internal
     tink::jwt::internal::raw_jwt_hmac_key_manager
     tink::subtle::hmac_boringssl
     tink::subtle::random
@@ -181,6 +185,8 @@ tink_cc_library(
     jwt_mac_wrapper.cc
     jwt_mac_wrapper.h
   DEPS
+    tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_mac_internal
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::jwt::jwt_mac
@@ -476,8 +482,8 @@ tink_cc_library(
     jwt_public_key_sign_impl.h
   DEPS
     tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_mac_internal
     tink::core::public_key_sign
-    tink::jwt::jwt_public_key_sign
     tink::jwt::raw_jwt
     tink::util::status
     tink::util::statusor
@@ -529,6 +535,7 @@ tink_cc_library(
   DEPS
     tink::jwt::internal::jwt_ecdsa_verify_key_manager
     tink::jwt::internal::jwt_public_key_sign_impl
+    tink::jwt::internal::jwt_mac_internal
     tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
     tink::core::private_key_type_manager
     tink::jwt::jwt_public_key_sign
@@ -572,6 +579,8 @@ tink_cc_library(
     jwt_public_key_sign_wrapper.cc
     jwt_public_key_sign_wrapper.h
   DEPS
+    tink::jwt::internal::jwt_format
+    tink::jwt::internal::jwt_mac_internal
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::jwt::jwt_public_key_sign
@@ -616,6 +625,7 @@ tink_cc_library(
     jwt_rsa_ssa_pkcs1_sign_key_manager.cc
     jwt_rsa_ssa_pkcs1_sign_key_manager.h
   DEPS
+    tink::jwt::internal::jwt_mac_internal
     tink::jwt::internal::jwt_public_key_sign_impl
     tink::jwt::internal::jwt_rsa_ssa_pkcs1_verify_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
@@ -663,6 +673,7 @@ tink_cc_library(
     jwt_rsa_ssa_pss_sign_key_manager.cc
     jwt_rsa_ssa_pss_sign_key_manager.h
   DEPS
+    tink::jwt::internal::jwt_mac_internal
     tink::jwt::internal::jwt_public_key_sign_impl
     tink::jwt::internal::jwt_rsa_ssa_pss_verify_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
@@ -702,4 +713,28 @@ tink_cc_test(
     tink::util::test_matchers
     crypto
     gmock
+)
+
+tink_cc_library(
+  NAME jwt_public_key_sign_internal
+  SRCS
+    jwt_public_key_sign_internal.h
+  DEPS
+    tink::jwt::raw_jwt
+    tink::jwt::jwt_validator
+    tink::jwt::verified_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_mac_internal
+  SRCS
+    jwt_mac_internal.h
+  DEPS
+    tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
 )

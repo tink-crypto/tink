@@ -16,8 +16,11 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/str_split.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
+#include "tink/jwt/internal/json_util.h"
+#include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/util/status.h"
@@ -37,6 +40,7 @@ using ::google::crypto::tink::JwtRsaSsaPkcs1KeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPkcs1PrivateKey;
 using ::google::crypto::tink::JwtRsaSsaPkcs1PublicKey;
 using ::google::crypto::tink::KeyData;
+using ::testing::Eq;
 using ::testing::Not;
 
 namespace {
@@ -140,7 +144,7 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, CreatePublicKeyAndValidate) {
   EXPECT_FALSE(JwtRsaSsaPkcs1VerifyKeyManager().ValidateKey(public_key).ok());
 }
 
-TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitive) {
+TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitives) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
   auto key_or = JwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
@@ -148,7 +152,8 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitive) {
   auto key = key_or.ValueOrDie();
 
   auto sign_or =
-      JwtRsaSsaPkcs1SignKeyManager().GetPrimitive<JwtPublicKeySign>(key);
+      JwtRsaSsaPkcs1SignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(
+          key);
   ASSERT_THAT(sign_or.status(), IsOk());
   auto sign = std::move(sign_or.ValueOrDie());
 
@@ -156,7 +161,8 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
-  util::StatusOr<std::string> compact_or = sign->SignAndEncode(raw_jwt);
+  util::StatusOr<std::string> compact_or =
+      sign->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
@@ -173,7 +179,7 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitive) {
   util::StatusOr<std::string> issuer_or =
       verified_jwt_or.ValueOrDie().GetIssuer();
   ASSERT_THAT(issuer_or.status(), IsOk());
-  EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
+  EXPECT_THAT(issuer_or.ValueOrDie(), Eq("issuer"));
 
   JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
@@ -191,7 +197,8 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   auto key2 = key2_or.ValueOrDie();
 
   auto sign1_or =
-      JwtRsaSsaPkcs1SignKeyManager().GetPrimitive<JwtPublicKeySign>(key1);
+      JwtRsaSsaPkcs1SignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(
+          key1);
   ASSERT_THAT(sign1_or.status(), IsOk());
   auto sign1 = std::move(sign1_or.ValueOrDie());
 
@@ -199,7 +206,8 @@ TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
-  util::StatusOr<std::string> compact_or = sign1->SignAndEncode(raw_jwt);
+  util::StatusOr<std::string> compact_or =
+      sign1->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
