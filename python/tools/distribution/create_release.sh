@@ -29,7 +29,7 @@ PYTHON_VERSIONS+=("3.8")
 readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
-readonly TINK_BASE="${PWD}/.."
+readonly TINK_SRC_PATH="${PWD}/.."
 readonly IMAGE_NAME="quay.io/pypa/manylinux2014_x86_64"
 readonly IMAGE_DIGEST="sha256:d4604fe14cb0d691031f202ee7daf240e6d463297b060e2de60994d82a8f22ac"
 readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
@@ -44,16 +44,16 @@ build_linux() {
   export DOCKER_CONTENT_TRUST=1
 
   # Build binary wheels.
-  docker run --volume "${TINK_BASE}:/tmp/tink" --workdir /tmp/tink/python \
+  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
     "${IMAGE}" /tmp/tink/python/tools/distribution/build_linux_binary_wheels.sh
 
   # Test binary wheels.
-  docker run --volume "${TINK_BASE}:/tmp/tink" --workdir /tmp/tink/python \
+  docker run --volume "${TINK_SRC_PATH}:/tmp/tink" --workdir /tmp/tink/python \
     "${IMAGE}" /tmp/tink/python/tools/distribution/test_linux_binary_wheels.sh
 
   # Build source wheels.
   pip3 install wheel
-  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_BASE}"
+  export TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH="${TINK_SRC_PATH}"
   # TODO(ckl): Is sudo necessary?
   sudo python3 setup.py sdist
   cp dist/*.tar.gz release/
