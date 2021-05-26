@@ -592,16 +592,6 @@ func TestECWycheproofCases(t *testing.T) {
 						}
 
 					case "invalid":
-						// TODO(ckl): ecdh_secp256r1_ecpoint_test.json contains an
-						// unflagged test case annotated as "invalid" despite being valid
-						// for secp256r1.
-						if strings.Contains(test.Comment, "secp256k1") {
-							// Go implements secp256r1, not secp256k1.
-							// https://golang.org/pkg/crypto/elliptic/#P256
-							t.Log("skipping test which mentions secp256k1 in its comment")
-							return
-						}
-
 						if errPub != nil {
 							// Public key not decoded. OK for invalid test case.
 							return
