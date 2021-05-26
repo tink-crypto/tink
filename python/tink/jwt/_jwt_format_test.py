@@ -126,17 +126,26 @@ class JwtFormatTest(parameterized.TestCase):
       'RS384', 'RS512', 'PS256', 'PS384', 'PS512'
   ])
   def test_create_validate_header(self, algorithm):
-    encoded_header = _jwt_format.create_header(algorithm)
+    encoded_header = _jwt_format.create_header(algorithm, None)
     json_header = _jwt_format.decode_header(encoded_header)
     header = _jwt_format.json_loads(json_header)
     _jwt_format.validate_header(header, algorithm)
+    self.assertIsNone(_jwt_format.get_type_header(header))
+
+  def test_create_header_with_type(self):
+    encoded_header = _jwt_format.create_header('HS256', 'typeHeader')
+    json_header = _jwt_format.decode_header(encoded_header)
+    self.assertEqual(json_header, '{"alg":"HS256","typ":"typeHeader"}')
+    header = _jwt_format.json_loads(json_header)
+    _jwt_format.validate_header(header, 'HS256')
+    self.assertEqual(_jwt_format.get_type_header(header), 'typeHeader')
 
   def test_create_header_with_unknown_alg_fails(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.create_header('unknown')
+      _jwt_format.create_header('unknown', None)
 
   def test_create_verify_different_algorithms_fails(self):
-    encoded_header = _jwt_format.create_header('HS256')
+    encoded_header = _jwt_format.create_header('HS256', None)
     json_header = _jwt_format.decode_header(encoded_header)
     header = _jwt_format.json_loads(json_header)
     with self.assertRaises(_jwt_error.JwtInvalidError):
@@ -204,7 +213,7 @@ class JwtFormatTest(parameterized.TestCase):
 
   def test_create_unsigned_compact_success(self):
     self.assertEqual(
-        _jwt_format.create_unsigned_compact('RS256', '{"iss":"joe"}'),
+        _jwt_format.create_unsigned_compact('RS256', None, '{"iss":"joe"}'),
         b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ')
 
   def test_encode_decode_signature_success(self):
@@ -221,23 +230,25 @@ class JwtFormatTest(parameterized.TestCase):
     payload = '{"iss":"joe"}'
     signature = _jwt_format.decode_signature(
         b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
-    unsigned_compact = _jwt_format.create_unsigned_compact('RS256', payload)
+    unsigned_compact = _jwt_format.create_unsigned_compact(
+        'RS256', 'JWT', payload)
     signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
                                                        signature)
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
 
     self.assertEqual(
         unsigned_compact,
-        b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ')
+        b'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJqb2UifQ')
     self.assertEqual(
-        signed_compact, 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ.'
-        'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+        signed_compact, 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.'
+        'eyJpc3MiOiJqb2UifQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     self.assertEqual(un_comp, unsigned_compact)
     self.assertEqual(sig, signature)
-    self.assertEqual(hdr, '{"alg":"RS256"}')
+    self.assertEqual(hdr, '{"alg":"RS256","typ":"JWT"}')
     header = _jwt_format.json_loads(hdr)
     _jwt_format.validate_header(header, 'RS256')
     self.assertEqual(pay, payload)
+    self.assertEqual(_jwt_format.get_type_header(header), 'JWT')
 
   def test_split_empty_signed_compact(self):
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact('..')

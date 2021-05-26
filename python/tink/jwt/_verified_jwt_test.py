@@ -28,6 +28,8 @@ class VerifiedJwtTest(absltest.TestCase):
   def test_empty(self):
     token = jwt.VerifiedJwt._create(jwt.new_raw_jwt())
     with self.assertRaises(KeyError):
+      token.type_header()
+    with self.assertRaises(KeyError):
       token.issuer()
     with self.assertRaises(KeyError):
       token.subject()
@@ -54,6 +56,7 @@ class VerifiedJwtTest(absltest.TestCase):
   def test_full(self):
     token = jwt.VerifiedJwt._create(
         jwt.new_raw_jwt(
+            type_header='TypeHeader',
             issuer='Issuer',
             subject='Subject',
             jwt_id='JWT ID',
@@ -61,6 +64,8 @@ class VerifiedJwtTest(absltest.TestCase):
             expiration=EXPIRATION,
             issued_at=ISSUED_AT,
             not_before=NOT_BEFORE))
+    self.assertTrue(token.has_type_header())
+    self.assertEqual(token.type_header(), 'TypeHeader')
     self.assertTrue(token.has_issuer())
     self.assertEqual(token.issuer(), 'Issuer')
     self.assertTrue(token.has_subject())

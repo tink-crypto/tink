@@ -45,6 +45,8 @@ class RawJwtTest(absltest.TestCase):
   def test_empty_access_raises_error(self):
     token = jwt.new_raw_jwt()
     with self.assertRaises(KeyError):
+      token.type_header()
+    with self.assertRaises(KeyError):
       token.issuer()
     with self.assertRaises(KeyError):
       token.subject()
@@ -63,6 +65,7 @@ class RawJwtTest(absltest.TestCase):
 
   def test_empty_has_returns_false(self):
     token = jwt.new_raw_jwt()
+    self.assertFalse(token.has_type_header())
     self.assertFalse(token.has_issuer())
     self.assertFalse(token.has_subject())
     self.assertFalse(token.has_jwt_id())
@@ -70,6 +73,11 @@ class RawJwtTest(absltest.TestCase):
     self.assertFalse(token.has_expiration())
     self.assertFalse(token.has_issued_at())
     self.assertFalse(token.has_not_before())
+
+  def test_type_header(self):
+    token = jwt.new_raw_jwt(type_header='TypeHeader')
+    self.assertTrue(token.has_type_header())
+    self.assertEqual(token.type_header(), 'TypeHeader')
 
   def test_issuer(self):
     token = jwt.new_raw_jwt(issuer='Issuer')
@@ -238,7 +246,7 @@ class RawJwtTest(absltest.TestCase):
         'array': [1, None, 'Bob', 2.2, {'foo': 'bar'}],
         'object': {'one': {'two': 3}}
     }
-    token = jwt.RawJwt.from_json(json.dumps(payload))
+    token = jwt.RawJwt.from_json(None, json.dumps(payload))
     self.assertEqual(json.loads(token.json_payload()), payload)
 
   def test_from_to_payload_with_string_audience(self):
@@ -246,7 +254,7 @@ class RawJwtTest(absltest.TestCase):
         'iss': 'Issuer',
         'aud': 'bob',
     }
-    token = jwt.RawJwt.from_json(json.dumps(payload))
+    token = jwt.RawJwt.from_json(None, json.dumps(payload))
     expected = {
         'iss': 'Issuer',
         'aud': ['bob'],
@@ -255,61 +263,61 @@ class RawJwtTest(absltest.TestCase):
 
   def test_from_payload_with_wrong_issuer_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"iss":123}')
+      jwt.RawJwt.from_json(None, '{"iss":123}')
 
   def test_from_payload_with_wrong_subject_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"sub":123}')
+      jwt.RawJwt.from_json(None, '{"sub":123}')
 
   def test_from_payload_with_wrong_jwt_id_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"jti":123}')
+      jwt.RawJwt.from_json(None, '{"jti":123}')
 
   def test_from_payload_with_wrong_expiration_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"exp":"123"}')
+      jwt.RawJwt.from_json(None, '{"exp":"123"}')
 
   def test_from_payload_with_wrong_issued_at_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"iat":"123"}')
+      jwt.RawJwt.from_json(None, '{"iat":"123"}')
 
   def test_from_payload_with_wrong_not_before_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"nbf":"123"}')
+      jwt.RawJwt.from_json(None, '{"nbf":"123"}')
 
   def test_from_payload_with_exp_expiration_success(self):
-    token = jwt.RawJwt.from_json('{"exp":1e10}')
+    token = jwt.RawJwt.from_json(None, '{"exp":1e10}')
     self.assertEqual(
         token.expiration(),
         datetime.datetime.fromtimestamp(10000000000, datetime.timezone.utc))
 
   def test_from_payload_with_large_expiration_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"exp":1e30}')
+      jwt.RawJwt.from_json(None, '{"exp":1e30}')
 
   def test_from_payload_with_negative_expiration_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"exp":-1}')
+      jwt.RawJwt.from_json(None, '{"exp":-1}')
 
   def test_from_payload_with_infinity_expiration_fails(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json('{"exp":Infinity}')
+      jwt.RawJwt.from_json(None, '{"exp":Infinity}')
 
   def test_from_payload_with_utf16_surrogate(self):
     # the json string contains "\uD834\uDD1E", which the JSON decoder decodes to
     # the G clef character (U+1D11E).
-    token = jwt.RawJwt.from_json(u'{"iss":"\\uD834\\uDD1E"}')
+    token = jwt.RawJwt.from_json(None, u'{"iss":"\\uD834\\uDD1E"}')
     self.assertEqual(token.issuer(), u'\U0001d11e')
 
   def test_from_payload_with_invalid_utf16(self):
     # the json string contains "\uD834", which gets decoded by the json decoder
     # into an invalid UTF16 character.
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json(u'{"iss":"\\uD834"}')
+      jwt.RawJwt.from_json(None, u'{"iss":"\\uD834"}')
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json(u'{"\\uD834":"issuer"}')
+      jwt.RawJwt.from_json(None, u'{"\\uD834":"issuer"}')
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.RawJwt.from_json(u'{"a":{"a":{"a":"\\uD834"}}}')
+      jwt.RawJwt.from_json(None, u'{"a":{"a":{"a":"\\uD834"}}}')
 
   def test_modification(self):
     audiences = ['alice', 'bob']

@@ -42,6 +42,7 @@ JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
 
 def new_raw_jwt(*,
+                type_header: Optional[Text] = None,
                 issuer: Optional[Text] = None,
                 subject: Optional[Text] = None,
                 audiences: Optional[List[Text]] = None,
@@ -52,6 +53,7 @@ def new_raw_jwt(*,
                 custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
   """Creates a new RawJwt."""
   return _raw_jwt.RawJwt.create(
+      type_header=type_header,
       issuer=issuer,
       subject=subject,
       audiences=audiences,

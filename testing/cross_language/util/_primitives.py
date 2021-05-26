@@ -348,6 +348,8 @@ def to_datetime(seconds: int, nanos: int) -> datetime.datetime:
 def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
   """Converts a jwt.RawJwt into a proto."""
   raw_token = testing_api_pb2.JwtToken()
+  if raw_jwt.has_type_header():
+    raw_token.type_header.value = raw_jwt.type_header()
   if raw_jwt.has_issuer():
     raw_token.issuer.value = raw_jwt.issuer()
   if raw_jwt.has_subject():
@@ -388,6 +390,9 @@ def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
 def proto_to_verified_jwt(
     token: testing_api_pb2.JwtToken) -> jwt.VerifiedJwt:
   """Converts a proto JwtToken into a jwt.VerifiedJwt."""
+  type_header = None
+  if token.HasField('type_header'):
+    type_header = token.type_header.value
   issuer = None
   if token.HasField('issuer'):
     issuer = token.issuer.value
@@ -425,6 +430,7 @@ def proto_to_verified_jwt(
     if value.HasField('json_array_value'):
       custom_claims[name] = json.loads(value.json_array_value)
   raw_jwt = jwt.new_raw_jwt(
+      type_header=type_header,
       issuer=issuer,
       subject=subject,
       audiences=audiences,

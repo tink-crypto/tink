@@ -57,7 +57,11 @@ class _JwtHmac(_jwt_mac.JwtMac):
 
   def compute_mac_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
     """Computes a MAC and encodes the token."""
-    unsigned = _jwt_format.create_unsigned_compact(self._algorithm,
+    if raw_jwt.has_type_header():
+      type_header = raw_jwt.type_header()
+    else:
+      type_header = None
+    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
                                                    raw_jwt.json_payload())
     return _jwt_format.create_signed_compact(unsigned,
                                              self._compute_mac(unsigned))
@@ -71,7 +75,8 @@ class _JwtHmac(_jwt_mac.JwtMac):
     self._verify_mac(mac, unsigned_compact)
     header = _jwt_format.json_loads(json_header)
     _jwt_format.validate_header(header, self._algorithm)
-    raw_jwt = _raw_jwt.RawJwt.from_json(json_payload)
+    raw_jwt = _raw_jwt.RawJwt.from_json(
+        _jwt_format.get_type_header(header), json_payload)
     _jwt_validator.validate(validator, raw_jwt)
     return _verified_jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
 

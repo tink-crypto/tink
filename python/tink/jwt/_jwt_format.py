@@ -17,7 +17,7 @@ import base64
 import binascii
 import json
 
-from typing import Any, Text, Tuple
+from typing import Any, Text, Tuple, Optional
 
 from tink.jwt import _jwt_error
 
@@ -139,9 +139,12 @@ def decode_signature(encoded_signature: bytes) -> bytes:
   return _base64_decode(encoded_signature)
 
 
-def create_header(algorithm: Text) -> bytes:
+def create_header(algorithm: Text, type_header: Optional[Text]) -> bytes:
   _validate_algorithm(algorithm)
-  return encode_header(json_dumps({'alg': algorithm}))
+  header = {'alg': algorithm}
+  if type_header:
+    header['typ'] = type_header
+  return encode_header(json_dumps(header))
 
 
 def split_signed_compact(
@@ -186,8 +189,14 @@ def validate_header(header: Any, algorithm: Text) -> None:
         'all tokens with crit headers are rejected')
 
 
-def create_unsigned_compact(algorithm: Text, json_payload: Text) -> bytes:
-  return create_header(algorithm) + b'.' + encode_payload(json_payload)
+def get_type_header(header: Any) -> Optional[Text]:
+  return header.get('typ', None)
+
+
+def create_unsigned_compact(algorithm: Text, typ_header: Optional[Text],
+                            json_payload: Text) -> bytes:
+  header = create_header(algorithm, typ_header)
+  return header + b'.' + encode_payload(json_payload)
 
 
 def create_signed_compact(unsigned_compact: bytes, signature: bytes) -> Text:

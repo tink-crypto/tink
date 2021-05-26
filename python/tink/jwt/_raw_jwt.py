@@ -55,11 +55,13 @@ class RawJwt(object):
   def __new__(cls):
     raise core.TinkError('RawJwt cannot be instantiated directly.')
 
-  def __init__(self, payload: Dict[Text, Any]) -> None:
+  def __init__(self, type_header: Optional[Text], payload: Dict[Text,
+                                                                Any]) -> None:
     # No need to copy payload, because only create and from_json_payload
     # call this method.
     if not isinstance(payload, Dict):
       raise _jwt_error.JwtInvalidError('payload must be a dict')
+    self._type_header = type_header
     self._payload = payload
     self._validate_string_claim('iss')
     self._validate_string_claim('sub')
@@ -95,6 +97,14 @@ class RawJwt(object):
         raise _jwt_error.JwtInvalidError('audiences must only contain Text')
 
   # TODO(juerg): Consider adding a raw_ prefix to all access methods
+  def has_type_header(self) -> bool:
+    return self._type_header is not None
+
+  def type_header(self) -> Text:
+    if not self.has_type_header():
+      raise KeyError('type header is not set')
+    return self._type_header
+
   def has_issuer(self) -> bool:
     return 'iss' in self._payload
 
@@ -155,6 +165,7 @@ class RawJwt(object):
   @classmethod
   def create(cls,
              *,
+             type_header: Optional[Text] = None,
              issuer: Optional[Text] = None,
              subject: Optional[Text] = None,
              audiences: Optional[List[Text]] = None,
@@ -193,12 +204,12 @@ class RawJwt(object):
         else:
           raise _jwt_error.JwtInvalidError('claim %s has unknown type' % name)
     raw_jwt = object.__new__(cls)
-    raw_jwt.__init__(payload)
+    raw_jwt.__init__(type_header, payload)
     return raw_jwt
 
   @classmethod
-  def from_json(cls, payload: Text) -> 'RawJwt':
+  def from_json(cls, type_header: Optional[Text], payload: Text) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
-    raw_jwt.__init__(_jwt_format.json_loads(payload))
+    raw_jwt.__init__(type_header, _jwt_format.json_loads(payload))
     return raw_jwt

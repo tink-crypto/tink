@@ -54,6 +54,9 @@ def _from_duration_proto(
 
 def raw_jwt_from_proto(proto_raw_jwt: testing_api_pb2.JwtToken) -> jwt.RawJwt:
   """Converts a proto JwtToken into a jwt.RawJwt."""
+  type_header = None
+  if proto_raw_jwt.HasField('type_header'):
+    type_header = proto_raw_jwt.type_header.value
   issuer = None
   if proto_raw_jwt.HasField('issuer'):
     issuer = proto_raw_jwt.issuer.value
@@ -83,6 +86,7 @@ def raw_jwt_from_proto(proto_raw_jwt: testing_api_pb2.JwtToken) -> jwt.RawJwt:
     else:
       raise ValueError('claim %s has unknown type' % name)
   return jwt.new_raw_jwt(
+      type_header=type_header,
       issuer=issuer,
       subject=subject,
       audiences=audiences,
@@ -97,6 +101,8 @@ def verifiedjwt_to_proto(
     verified_jwt: jwt.VerifiedJwt) -> testing_api_pb2.JwtToken:
   """Converts a jwt.VerifiedJwt into a proto JwtToken."""
   token = testing_api_pb2.JwtToken()
+  if verified_jwt.has_type_header():
+    token.type_header.value = verified_jwt.type_header()
   if verified_jwt.has_issuer():
     token.issuer.value = verified_jwt.issuer()
   if verified_jwt.has_subject():

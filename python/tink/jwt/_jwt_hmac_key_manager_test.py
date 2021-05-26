@@ -89,11 +89,12 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     key_data = key_manager.new_key_data(template)
     jwt_hmac = key_manager.primitive(key_data)
 
-    raw_jwt = jwt.new_raw_jwt(issuer='issuer')
+    raw_jwt = jwt.new_raw_jwt(type_header='typeHeader', issuer='issuer')
     signed_compact = jwt_hmac.compute_mac_and_encode(raw_jwt)
 
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact, jwt.new_validator(fixed_now=DATETIME_1970))
+    self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
 
   def test_fixed_signed_compact(self):
@@ -110,6 +111,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     self.assertCountEqual(verified_jwt.custom_claim_names(),
                           ['http://example.com/is_root'])
     self.assertTrue(verified_jwt.custom_claim('http://example.com/is_root'))
+    self.assertTrue(verified_jwt.type_header(), 'JWT')
 
     # fails because it is expired
     with self.assertRaises(tink.TinkError):

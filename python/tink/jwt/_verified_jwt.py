@@ -39,6 +39,12 @@ class VerifiedJwt(object):
   def __init__(self, raw_jwt: _raw_jwt.RawJwt) -> None:
     self._raw_jwt = raw_jwt
 
+  def has_type_header(self) -> bool:
+    return self._raw_jwt.has_type_header()
+
+  def type_header(self) -> Text:
+    return self._raw_jwt.type_header()
+
   def has_issuer(self) -> bool:
     return self._raw_jwt.has_issuer()
 

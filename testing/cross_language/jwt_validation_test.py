@@ -161,10 +161,11 @@ class JwtTest(parameterized.TestCase):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_verify_ignores_typ_header(self, lang):
+  def test_unknown_typ_header_valid(self, lang):
     token = generate_token('{"typ":"unknown", "alg":"HS256"}', '{"iss":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-    jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+    verified_jwt = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+    self.assertEqual(verified_jwt.type_header(), 'unknown')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_expiration(self, lang):
