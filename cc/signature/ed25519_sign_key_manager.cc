@@ -25,6 +25,7 @@
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -83,8 +84,8 @@ StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::DeriveKey(
       ValidateVersion(key_format.version(), get_version());
   if (!status.ok()) return status;
 
-  crypto::tink::util::StatusOr<std::string> randomness =
-      ReadBytesFromStream(kEd25519SecretSeedSize, input_stream);
+  crypto::tink::util::StatusOr<util::SecretData> randomness =
+      ReadSecretBytesFromStream(kEd25519SecretSeedSize, input_stream);
   if (!randomness.ok()) {
     if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
       return crypto::tink::util::Status(
@@ -94,7 +95,7 @@ StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::DeriveKey(
     return randomness.status();
   }
   auto key = subtle::SubtleUtilBoringSSL::GetNewEd25519KeyFromSeed(
-      util::SecretDataFromStringView(randomness.ValueOrDie()));
+      randomness.ValueOrDie());
 
   Ed25519PrivateKey ed25519_private_key;
   ed25519_private_key.set_version(get_version());
