@@ -173,7 +173,7 @@ class RawJwt(object):
              expiration: Optional[datetime.datetime] = None,
              not_before: Optional[datetime.datetime] = None,
              issued_at: Optional[datetime.datetime] = None,
-             custom_claims: Mapping[Text, Claim] = None) -> 'RawJwt':
+             custom_claims: Optional[Mapping[Text, Claim]] = None) -> 'RawJwt':
     """Create a new RawJwt instance."""
     payload = {}
     if issuer:

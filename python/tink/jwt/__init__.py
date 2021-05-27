@@ -50,7 +50,7 @@ def new_raw_jwt(*,
                 expiration: Optional[datetime.datetime] = None,
                 not_before: Optional[datetime.datetime] = None,
                 issued_at: Optional[datetime.datetime] = None,
-                custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
+                custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
   """Creates a new RawJwt."""
   return _raw_jwt.RawJwt.create(
       type_header=type_header,
