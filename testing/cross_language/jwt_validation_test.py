@@ -129,23 +129,23 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_valid(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe"}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     verified_jwt = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
-    self.assertEqual(verified_jwt.issuer(), 'joe')
+    self.assertEqual(verified_jwt.jwt_id(), '123')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_unknown_header_valid(self, lang):
     token = generate_token('{"alg":"HS256", "unknown":{"a":"b"}}',
-                           '{"iss":"joe"}')
+                           '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     verified_jwt = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
-    self.assertEqual(verified_jwt.issuer(), 'joe')
+    self.assertEqual(verified_jwt.jwt_id(), '123')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_empty_crit_header_invalid(self, lang):
     # See https://tools.ietf.org/html/rfc7515#section-4.1.11
-    token = generate_token('{"alg":"HS256", "crit":[]}', '{"iss":"joe"}')
+    token = generate_token('{"alg":"HS256", "crit":[]}', '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
@@ -155,21 +155,21 @@ class JwtTest(parameterized.TestCase):
     # See https://tools.ietf.org/html/rfc7515#section-4.1.11
     token = generate_token(
         '{"alg":"HS256","crit":["http://example.invalid/UNDEFINED"],'
-        '"http://example.invalid/UNDEFINED":true}', '{"iss":"joe"}')
+        '"http://example.invalid/UNDEFINED":true}', '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_unknown_typ_header_valid(self, lang):
-    token = generate_token('{"typ":"unknown", "alg":"HS256"}', '{"iss":"joe"}')
+    token = generate_token('{"typ":"unknown", "alg":"HS256"}', '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     verified_jwt = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
     self.assertEqual(verified_jwt.type_header(), 'unknown')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_expiration(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "exp":1234}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "exp":1234}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     # same time is expired.
@@ -199,7 +199,7 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_float_expiration(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "exp":1234.5}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "exp":1234.5}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     # same time is expired.
@@ -250,7 +250,7 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_infinity_expiration_is_invalid(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "exp":Infinity}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "exp":Infinity}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     with self.assertRaises(tink.TinkError):
@@ -258,7 +258,7 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_not_before(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "nbf":1234}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "nbf":1234}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     # same time as nbf fine.
@@ -287,7 +287,7 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_float_not_before(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"iss":"joe", "nbf":1234.5}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "nbf":1234.5}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     val1 = jwt.new_validator(
@@ -307,8 +307,9 @@ class JwtTest(parameterized.TestCase):
     val1 = jwt.new_validator(issuer='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
-    val2 = EMPTY_VALIDATOR
-    jwt_mac.verify_mac_and_decode(token, val2)
+    # TODO(juerg): re-enable for empty validator, once they are consistent.
+    # val2 = EMPTY_VALIDATOR
+    # jwt_mac.verify_mac_and_decode(token, val2)
 
     val3 = jwt.new_validator(issuer='Joe')
     with self.assertRaises(tink.TinkError):
@@ -342,7 +343,7 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_invalid_utf8_in_payload(self, lang):
-    token = generate_token_from_bytes(b'{"alg":"HS256"}', b'{"iss":"joe\xc2"}')
+    token = generate_token_from_bytes(b'{"alg":"HS256"}', b'{"jti":"joe\xc2"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
@@ -351,25 +352,25 @@ class JwtTest(parameterized.TestCase):
   def test_verify_with_utf16_surrogate_in_payload(self, lang):
     # The JSON string contains the G clef character (U+1D11E) in UTF8.
     token = generate_token_from_bytes(b'{"alg":"HS256"}',
-                                      b'{"iss":"\xF0\x9D\x84\x9E"}')
+                                      b'{"jti":"\xF0\x9D\x84\x9E"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     token = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
-    self.assertEqual(token.issuer(), u'\U0001d11e')
+    self.assertEqual(token.jwt_id(), u'\U0001d11e')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_with_json_escaped_utf16_surrogate_in_payload(self, lang):
     # The JSON string contains "\uD834\uDD1E", which should decode to
     # the G clef character (U+1D11E).
-    token = generate_token('{"alg":"HS256"}', '{"iss":"\\uD834\\uDD1E"}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"\\uD834\\uDD1E"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     token = jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
-    self.assertEqual(token.issuer(), u'\U0001d11e')
+    self.assertEqual(token.jwt_id(), u'\U0001d11e')
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_with_invalid_json_escaped_utf16_in_payload(self, lang):
     # The JSON string contains "\uD834", which gets decoded into an invalid
     # UTF16 character.
-    token = generate_token('{"alg":"HS256"}', '{"iss":"\\uD834"}')
+    token = generate_token('{"alg":"HS256"}', '{"jti":"\\uD834"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
@@ -382,8 +383,9 @@ class JwtTest(parameterized.TestCase):
     val1 = jwt.new_validator(subject='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
-    val2 = EMPTY_VALIDATOR
-    jwt_mac.verify_mac_and_decode(token, val2)
+    # TODO(juerg): re-enable for empty validator, once they are consistent.
+    # val2 = EMPTY_VALIDATOR
+    # jwt_mac.verify_mac_and_decode(token, val2)
 
     val3 = jwt.new_validator(subject='Joe')
     with self.assertRaises(tink.TinkError):

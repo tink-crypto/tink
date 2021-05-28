@@ -223,7 +223,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeyVerify jwtVerifier = publicHandle.getPrimitive(JwtPublicKeyVerify.class);
     RawJwt rawJwt = new RawJwt.Builder().setIssuer("Justus").build();
     String compact = jwtSigner.signAndEncode(rawJwt);
-    JwtValidator validator = new JwtValidator.Builder().setIssuer("Peter").build();
+    JwtValidator validator = JwtValidator.newBuilder().expectIssuer("Peter").build();
     assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 

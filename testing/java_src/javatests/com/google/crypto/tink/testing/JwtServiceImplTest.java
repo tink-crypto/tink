@@ -142,6 +142,7 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
+            .setIssuer(StringValue.newBuilder().setValue("issuer"))
             .setAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
@@ -208,6 +209,7 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
+            .setIssuer(StringValue.newBuilder().setValue("issuer"))
             .setAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();

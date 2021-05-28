@@ -22,14 +22,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-/** A set of expected claims and headers to validate against another JWT. */
+/** Defines how the headers and claims of a JWT should be validated. */
 @Immutable
 public final class JwtValidator {
   private static final Duration MAX_CLOCK_SKEW = Duration.ofMinutes(10);
 
-  private final Optional<String> issuer;
-  private final Optional<String> subject;
-  private final Optional<String> audience;
+  private final Optional<String> expectedIssuer;
+  private final boolean ignoreIssuer;
+  private final Optional<String> expectedSubject;
+  private final boolean ignoreSubject;
+  private final Optional<String> expectedAudience;
+  private final boolean ignoreAudience;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -37,66 +40,122 @@ public final class JwtValidator {
   private final Duration clockSkew;
 
   private JwtValidator(Builder builder) {
-    this.issuer = builder.issuer;
-    this.subject = builder.subject;
-    this.audience = builder.audience;
+    this.expectedIssuer = builder.expectedIssuer;
+    this.ignoreIssuer = builder.ignoreIssuer;
+    this.expectedSubject = builder.expectedSubject;
+    this.ignoreSubject = builder.ignoreSubject;
+    this.expectedAudience = builder.expectedAudience;
+    this.ignoreAudience = builder.ignoreAudience;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
 
+  /**
+   * Returns a new JwtValidator.Builder.
+   *
+   * <p>By default, the JwtValidator only accepts tokens without issuer, subject or audience claims.
+   * This can be changed using the "expect..." or "ignore..." methods.
+   *
+   * <p>If present, JwtValidator validates expiration and not-before claims against the current
+   * time, without any clock skew. This can be changed with the "setClock" and "setClockSkew"
+   * methods.
+   */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
   /** Builder for JwtValidator */
   public static final class Builder {
-    private Optional<String> issuer;
-    private Optional<String> subject;
-    private Optional<String> audience;
+    private Optional<String> expectedTypeHeader;
+    private boolean ignoreTypeHeader;
+    private Optional<String> expectedIssuer;
+    private boolean ignoreIssuer;
+    private Optional<String> expectedSubject;
+    private boolean ignoreSubject;
+    private Optional<String> expectedAudience;
+    private boolean ignoreAudience;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
+    // TODO(juerg): Make this private once everybody is migrated to newBuilder.
     public Builder() {
-      this.issuer = Optional.empty();
-      this.subject = Optional.empty();
-      this.audience = Optional.empty();
+      this.expectedIssuer = Optional.empty();
+      this.ignoreIssuer = false;
+      this.expectedSubject = Optional.empty();
+      this.ignoreSubject = false;
+      this.expectedAudience = Optional.empty();
+      this.ignoreAudience = false;
     }
 
     /**
-     * Sets the expected issuer of the token. When this is set, all tokens with missing or different
-     * {@code iss} claims are rejected.
+     * Sets the expected issuer claim of the token. When this is set, all tokens with missing or
+     * different {@code iss} claims are rejected. When this is not set, all token that have a {@code
+     * iss} claim are rejected. So this must be set for token that have a {@code iss} claim.
+     *
+     * <p>If you want to ignore this claim or if you want to validate it yourself, use
+     * ignoreIssuer().
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
      */
-    public Builder setIssuer(String value) {
+    public Builder expectIssuer(String value) {
       if (value == null) {
         throw new NullPointerException("issuer cannot be null");
       }
-      this.issuer = Optional.of(value);
+      this.expectedIssuer = Optional.of(value);
+      return this;
+    }
+
+    /** Lets the validator ignore the {@code iss} claim. */
+    public Builder ignoreIssuer() {
+      this.ignoreIssuer = true;
       return this;
     }
 
     /**
-     * Sets the expected subject of the token. When this is set, all tokens with missing or
-     * different {@code sub} claims are rejected.
+     * Sets the expected subject claim of the token. When this is set, all tokens with missing or
+     * different {@code sub} claims are rejected. When this is not set, all token that have a {@code
+     * sub} claim are rejected. So this must be set for token that have a {@code sub} claim.
+     *
+     * <p>If you want to ignore this claim or if you want to validate it yourself, use
+     * ignoreSubject().
+     *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
      */
-    public Builder setSubject(String value) {
+    public Builder expectSubject(String value) {
       if (value == null) {
         throw new NullPointerException("subject cannot be null");
       }
-      this.subject = Optional.of(value);
+      this.expectedSubject = Optional.of(value);
+      return this;
+    }
+
+    /** Lets the validator ignore the {@code sub} claim. */
+    public Builder ignoreSubject() {
+      this.ignoreSubject = true;
       return this;
     }
 
     /**
-     * Sets the expected audience. When this is set, all tokens that do not contain this audience
-     * in their {@code aud} claims are rejected. If is not set, all token that have {@code aud}
+     * Sets the expected audience. When this is set, all tokens that do not contain this audience in
+     * their {@code aud} claims are rejected. When this is not set, all token that have {@code aud}
      * claims are rejected. So this must be set for token that have {@code aud} claims.
+     *
+     * <p>If you want to ignore this claim or if you want to validate it yourself, use
+     * ignoreAudience().
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
-    public Builder setAudience(String value) {
+    public Builder expectAudience(String value) {
       if (value == null) {
         throw new NullPointerException("audience cannot be null");
       }
-      this.audience = Optional.of(value);
+      this.expectedAudience = Optional.of(value);
+      return this;
+    }
+
+    /** Lets the validator ignore the {@code aud} claim. */
+    public Builder ignoreAudience() {
+      this.ignoreAudience = true;
       return this;
     }
 
@@ -125,6 +184,22 @@ public final class JwtValidator {
     }
 
     public JwtValidator build() {
+      if (this.ignoreTypeHeader && this.expectedTypeHeader.isPresent()) {
+        throw new IllegalArgumentException(
+            "ignoreTypeHeader() and expectedTypeHeader() cannot be used together.");
+      }
+      if (this.ignoreIssuer && this.expectedIssuer.isPresent()) {
+        throw new IllegalArgumentException(
+            "ignoreIssuer() and expectedIssuer() cannot be used together.");
+      }
+      if (this.ignoreSubject && this.expectedSubject.isPresent()) {
+        throw new IllegalArgumentException(
+            "ignoreSubject() and expectedSubject() cannot be used together.");
+      }
+      if (this.ignoreAudience && this.expectedAudience.isPresent()) {
+        throw new IllegalArgumentException(
+            "ignoreAudience() and expectedAudience() cannot be used together.");
+      }
       return new JwtValidator(this);
     }
   }
@@ -135,36 +210,46 @@ public final class JwtValidator {
    */
   VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
-
-    if (this.issuer.isPresent()) {
+    if (this.expectedIssuer.isPresent()) {
       if (!target.hasIssuer()) {
         throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected issuer %s.", this.issuer.get()));
+            String.format("invalid JWT; missing expected issuer %s.", this.expectedIssuer.get()));
       }
-      if (!target.getIssuer().equals(this.issuer.get())) {
+      if (!target.getIssuer().equals(this.expectedIssuer.get())) {
         throw new JwtInvalidException(
             String.format(
-                "invalid JWT; expected issuer %s, but got %s", this.issuer.get(), issuer));
-      }
-    }
-    if (this.subject.isPresent()) {
-      if (!target.hasSubject()) {
-        throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected subject %s.", this.subject.get()));
-      }
-      if (!target.getSubject().equals(this.subject.get())) {
-        throw new JwtInvalidException(
-            String.format(
-                "invalid JWT; expected subject %s, but got %s", this.subject.get(), subject));
-      }
-    }
-    if (this.audience.isPresent()) {
-      if (!target.hasAudiences() || !target.getAudiences().contains(this.audience.get())) {
-        throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected audience %s.", this.audience.get()));
+                "invalid JWT; expected issuer %s, but got %s",
+                this.expectedIssuer.get(), target.getIssuer()));
       }
     } else {
-      if (target.hasAudiences()) {
+      if (target.hasIssuer() && !this.ignoreIssuer) {
+        throw new JwtInvalidException("invalid JWT; token has issuer set, but validator not.");
+      }
+    }
+    if (this.expectedSubject.isPresent()) {
+      if (!target.hasSubject()) {
+        throw new JwtInvalidException(
+            String.format("invalid JWT; missing expected subject %s.", this.expectedSubject.get()));
+      }
+      if (!target.getSubject().equals(this.expectedSubject.get())) {
+        throw new JwtInvalidException(
+            String.format(
+                "invalid JWT; expected subject %s, but got %s",
+                this.expectedSubject.get(), target.getSubject()));
+      }
+    } else {
+      if (target.hasSubject() && !this.ignoreSubject) {
+        throw new JwtInvalidException("invalid JWT; token has subject set, but validator not.");
+      }
+    }
+    if (this.expectedAudience.isPresent()) {
+      if (!target.hasAudiences() || !target.getAudiences().contains(this.expectedAudience.get())) {
+        throw new JwtInvalidException(
+            String.format(
+                "invalid JWT; missing expected audience %s.", this.expectedAudience.get()));
+      }
+    } else {
+      if (target.hasAudiences() && !this.ignoreAudience) {
         throw new JwtInvalidException("invalid JWT; token has audience set, but validator not.");
       }
     }

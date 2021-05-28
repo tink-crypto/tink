@@ -174,7 +174,7 @@ public class JwtMacWrapperTest {
     JwtMac jwtMac = keysetHandle.getPrimitive(JwtMac.class);
     RawJwt rawJwt = new RawJwt.Builder().setIssuer("Justus").build();
     String compact = jwtMac.computeMacAndEncode(rawJwt);
-    JwtValidator validator = new JwtValidator.Builder().setIssuer("Peter").build();
+    JwtValidator validator = JwtValidator.newBuilder().expectIssuer("Peter").build();
     assertThrows(JwtInvalidException.class, () -> jwtMac.verifyMacAndDecode(compact, validator));
   }
 

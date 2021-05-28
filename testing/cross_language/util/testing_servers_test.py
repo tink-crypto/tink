@@ -189,7 +189,8 @@ class TestingServersTest(parameterized.TestCase):
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
-    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    validator = jwt.new_validator(
+        issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
     self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
@@ -223,7 +224,8 @@ class TestingServersTest(parameterized.TestCase):
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = signer.sign_and_encode(token)
-    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    validator = jwt.new_validator(
+        issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
     self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')

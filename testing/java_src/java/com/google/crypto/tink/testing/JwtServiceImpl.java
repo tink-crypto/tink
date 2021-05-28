@@ -242,15 +242,15 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private JwtValidator convertProtoValidatorToValidator(
       com.google.crypto.tink.proto.testing.JwtValidator validator) throws JwtInvalidException {
-    JwtValidator.Builder validatorBuilder = new JwtValidator.Builder();
+    JwtValidator.Builder validatorBuilder = JwtValidator.newBuilder();
     if (validator.hasIssuer()) {
-      validatorBuilder.setIssuer(validator.getIssuer().getValue());
+      validatorBuilder.expectIssuer(validator.getIssuer().getValue());
     }
     if (validator.hasSubject()) {
-      validatorBuilder.setSubject(validator.getSubject().getValue());
+      validatorBuilder.expectSubject(validator.getSubject().getValue());
     }
     if (validator.hasAudience()) {
-      validatorBuilder.setAudience(validator.getAudience().getValue());
+      validatorBuilder.expectAudience(validator.getAudience().getValue());
     }
     if (validator.hasNow()) {
       Instant now = timestampToInstant(validator.getNow());
