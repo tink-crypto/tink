@@ -99,9 +99,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("blah").build();
     String signedCompact = signer.signAndEncode(rawToken);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
   }
@@ -114,9 +114,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("blah").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("blah").build();
     String signedCompact = signer.signAndEncode(rawToken);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("blah");
   }
@@ -141,11 +141,11 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeyVerify newVerifier =
         newHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
     String oldSignedCompact = oldSigner.signAndEncode(rawToken);
     String newSignedCompact = newSigner.signAndEncode(rawToken);
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThat(oldVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(newVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
@@ -180,11 +180,11 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeyVerify newVerifier =
         newHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
-    RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
     String oldSignedCompact = oldSigner.signAndEncode(rawToken);
     String newSignedCompact = newSigner.signAndEncode(rawToken);
 
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThat(oldVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(newVerifier.verifyAndDecode(oldSignedCompact, validator).getJwtId())
@@ -201,9 +201,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
   public void wrongKey_throwsInvalidSignatureException(KeyTemplate template) throws Exception {
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSign = keysetHandle.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawJwt = new RawJwt.Builder().build();
+    RawJwt rawJwt = RawJwt.newBuilder().build();
     String compact = jwtSign.signAndEncode(rawJwt);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
 
     KeysetHandle wrongKeysetHandle = KeysetHandle.generateNew(template);
     KeysetHandle wrongPublicKeysetHandle = wrongKeysetHandle.getPublicKeysetHandle();
@@ -221,7 +221,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
     JwtPublicKeySign jwtSigner = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     KeysetHandle publicHandle = keysetHandle.getPublicKeysetHandle();
     JwtPublicKeyVerify jwtVerifier = publicHandle.getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawJwt = new RawJwt.Builder().setIssuer("Justus").build();
+    RawJwt rawJwt = RawJwt.newBuilder().setIssuer("Justus").build();
     String compact = jwtSigner.signAndEncode(rawJwt);
     JwtValidator validator = JwtValidator.newBuilder().expectIssuer("Peter").build();
     assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
@@ -237,12 +237,12 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
     Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
     RawJwt rawJwt =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .setExpiration(now.minusSeconds(100)) // exipired 100 seconds ago
             .setIssuedAt(now.minusSeconds(200))
             .build();
     String compact = jwtSigner.signAndEncode(rawJwt);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 
@@ -256,12 +256,12 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
     Instant now = Clock.systemUTC().instant().truncatedTo(ChronoUnit.SECONDS);
     RawJwt rawJwt =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .setNotBefore(now.plusSeconds(3600)) // is valid in 1 hour, but not before
             .setIssuedAt(now)
             .build();
     String compact = jwtSigner.signAndEncode(rawJwt);
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThrows(JwtInvalidException.class, () -> jwtVerifier.verifyAndDecode(compact, validator));
   }
 }

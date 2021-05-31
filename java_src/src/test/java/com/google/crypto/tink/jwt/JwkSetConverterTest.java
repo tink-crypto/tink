@@ -520,9 +520,9 @@ public final class JwkSetConverterTest {
       JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
       JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
 
-      RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+      RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
       String signedCompact = signer.signAndEncode(rawToken);
-      JwtValidator validator = new JwtValidator.Builder().build();
+      JwtValidator validator = JwtValidator.newBuilder().build();
       VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
       assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
     }

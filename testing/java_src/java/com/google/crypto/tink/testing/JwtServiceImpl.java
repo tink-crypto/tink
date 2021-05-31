@@ -69,7 +69,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   }
 
   private RawJwt convertJwtTokenToRawJwt(JwtToken token) throws JwtInvalidException {
-    RawJwt.Builder rawJwtBuilder = new RawJwt.Builder();
+    RawJwt.Builder rawJwtBuilder = RawJwt.newBuilder();
     if (token.hasTypeHeader()) {
       rawJwtBuilder.setTypeHeader(token.getTypeHeader().getValue());
     }

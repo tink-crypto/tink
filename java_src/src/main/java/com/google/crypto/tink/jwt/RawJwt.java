@@ -114,12 +114,19 @@ public final class RawJwt {
     return new RawJwt(typeHeader, jsonPayload);
   }
 
+  /**
+   * Returns a new RawJwt.Builder.
+   */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
   /** Builder for RawJwt */
   public static final class Builder {
     private Optional<String> typeHeader;
     private final JsonObject payload;
 
-    public Builder() {
+    private Builder() {
       typeHeader = Optional.empty();
       payload = new JsonObject();
     }

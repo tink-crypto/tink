@@ -85,8 +85,8 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     JwtPublicKeySignInternal signer =
         signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
     JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
+    RawJwt token = RawJwt.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     verifier.verifyAndDecode(signer.signAndEncodeWithKid(token, Optional.empty()), validator);
   }
 
@@ -105,8 +105,8 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     JwtPublicKeySignInternal signer =
         signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
     JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
+    RawJwt token = RawJwt.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().build();
     assertThrows(
         GeneralSecurityException.class,
         () ->

@@ -77,8 +77,7 @@ public final class JwtValidator {
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
-    // TODO(juerg): Make this private once everybody is migrated to newBuilder.
-    public Builder() {
+    private Builder() {
       this.expectedIssuer = Optional.empty();
       this.ignoreIssuer = false;
       this.expectedSubject = Optional.empty();

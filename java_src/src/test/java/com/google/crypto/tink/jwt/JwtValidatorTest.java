@@ -46,7 +46,7 @@ public final class JwtValidatorTest {
     Clock clock1 = Clock.systemUTC();
     // This token expires in 1 minute in the future.
     RawJwt token =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .setExpiration(clock1.instant().plus(Duration.ofMinutes(1)))
             .build();
 
@@ -63,7 +63,7 @@ public final class JwtValidatorTest {
     // This token expires in 1 minute in the future.
     Instant expiration = clock.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setExpiration(expiration).build();
+        RawJwt.newBuilder().setExpiration(expiration).build();
     JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt token = validator.validate(unverified);
 
@@ -76,7 +76,7 @@ public final class JwtValidatorTest {
     // This token expires in 1 minutes in the future.
     Instant expiration = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setExpiration(expiration).build();
+        RawJwt.newBuilder().setExpiration(expiration).build();
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = validator.validate(unverified);
@@ -89,7 +89,7 @@ public final class JwtValidatorTest {
     Instant expiration = Instant.ofEpochSecond(1234);
     Clock clock = Clock.fixed(expiration, ZoneOffset.UTC);
     RawJwt rawJwt =
-        new RawJwt.Builder().setExpiration(expiration).build();
+        RawJwt.newBuilder().setExpiration(expiration).build();
     JwtValidator validator = JwtValidator.newBuilder().setClock(clock).build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(rawJwt));
@@ -101,7 +101,7 @@ public final class JwtValidatorTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock.instant().plus(Duration.ofMinutes(1));
     RawJwt token =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).build();
     JwtValidator validator = JwtValidator.newBuilder().build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(token));
@@ -113,7 +113,7 @@ public final class JwtValidatorTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).build();
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
     JwtValidator validator = JwtValidator.newBuilder().setClock(clock2).build();
@@ -127,7 +127,7 @@ public final class JwtValidatorTest {
     Instant notBefore = Instant.ofEpochSecond(1234);
     Clock clock = Clock.fixed(notBefore, ZoneOffset.UTC);
     RawJwt rawJwt =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).build();
     JwtValidator validator = JwtValidator.newBuilder().setClock(clock).build();
     VerifiedJwt token = validator.validate(rawJwt);
     assertThat(token.getNotBefore()).isEqualTo(notBefore);
@@ -139,7 +139,7 @@ public final class JwtValidatorTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        new RawJwt.Builder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).build();
     // A clock skew of 1 minute is allowed.
     JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = validator.validate(unverified);
@@ -149,7 +149,7 @@ public final class JwtValidatorTest {
 
   @Test
   public void requireIssuerButNoIssuerInToken_shouldThrow() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
+    RawJwt token = RawJwt.newBuilder().build();
     JwtValidator validator = JwtValidator.newBuilder().expectIssuer("123").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(token));
@@ -158,7 +158,7 @@ public final class JwtValidatorTest {
   @Test
   public void wrongIssuerInToken_shouldThrow() throws Exception {
     RawJwt token =
-        new RawJwt.Builder().setIssuer("blah").build();
+        RawJwt.newBuilder().setIssuer("blah").build();
     JwtValidator validator = JwtValidator.newBuilder().expectIssuer("123").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(token));
@@ -167,7 +167,7 @@ public final class JwtValidatorTest {
   @Test
   public void correctIssuerInToken_success() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder().setIssuer("123").build();
+        RawJwt.newBuilder().setIssuer("123").build();
     JwtValidator validator = JwtValidator.newBuilder().expectIssuer("123").build();
     VerifiedJwt token = validator.validate(unverified);
     assertThat(token.getIssuer()).isEqualTo("123");
@@ -177,7 +177,7 @@ public final class JwtValidatorTest {
   public void noIssuer_success() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().build();
 
-    RawJwt tokenWithoutIssuer = new RawJwt.Builder().build();
+    RawJwt tokenWithoutIssuer = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutIssuer);
   }
 
@@ -185,7 +185,7 @@ public final class JwtValidatorTest {
   public void issuerInTokenButNoIssuerSetInValidator_shouldThrow() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().build();
 
-    RawJwt tokenWithIssuer = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt tokenWithIssuer = RawJwt.newBuilder().setIssuer("issuer").build();
     assertThrows(JwtInvalidException.class, () -> validator.validate(tokenWithIssuer));
   }
 
@@ -193,15 +193,15 @@ public final class JwtValidatorTest {
   public void ignoreIssuerSkipsValidationOfIssuer() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().ignoreIssuer().build();
 
-    RawJwt tokenWithIssuer = new RawJwt.Builder().setIssuer("issuer").build();
+    RawJwt tokenWithIssuer = RawJwt.newBuilder().setIssuer("issuer").build();
     validator.validate(tokenWithIssuer);
-    RawJwt tokenWithoutIssuer = new RawJwt.Builder().build();
+    RawJwt tokenWithoutIssuer = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutIssuer);
   }
 
   @Test
   public void requireSubjectButNoSubjectInToken_shouldThrow() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
+    RawJwt token = RawJwt.newBuilder().build();
     JwtValidator validator = JwtValidator.newBuilder().expectSubject("123").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(token));
@@ -210,7 +210,7 @@ public final class JwtValidatorTest {
   @Test
   public void wrongSubjectInToken_shouldThrow() throws Exception {
     RawJwt token =
-        new RawJwt.Builder().setSubject("blah").build();
+        RawJwt.newBuilder().setSubject("blah").build();
     JwtValidator validator = JwtValidator.newBuilder().expectSubject("123").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(token));
@@ -219,7 +219,7 @@ public final class JwtValidatorTest {
   @Test
   public void correctSubjectInToken_success() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder().setSubject("123").build();
+        RawJwt.newBuilder().setSubject("123").build();
     JwtValidator validator = JwtValidator.newBuilder().expectSubject("123").build();
     VerifiedJwt token = validator.validate(unverified);
 
@@ -230,7 +230,7 @@ public final class JwtValidatorTest {
   public void noSubject_success() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().build();
 
-    RawJwt tokenWithoutSubject = new RawJwt.Builder().build();
+    RawJwt tokenWithoutSubject = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutSubject);
   }
 
@@ -238,7 +238,7 @@ public final class JwtValidatorTest {
   public void subjectInTokenButNoSubjectSetInValidator_shouldThrow() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().build();
 
-    RawJwt tokenWithSubject = new RawJwt.Builder().setSubject("subject").build();
+    RawJwt tokenWithSubject = RawJwt.newBuilder().setSubject("subject").build();
     assertThrows(JwtInvalidException.class, () -> validator.validate(tokenWithSubject));
   }
 
@@ -246,15 +246,15 @@ public final class JwtValidatorTest {
   public void ignoreSubjectSkipsValidationOfSubject() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().ignoreSubject().build();
 
-    RawJwt tokenWithSubject = new RawJwt.Builder().setSubject("subject").build();
+    RawJwt tokenWithSubject = RawJwt.newBuilder().setSubject("subject").build();
     validator.validate(tokenWithSubject);
-    RawJwt tokenWithoutSubject = new RawJwt.Builder().build();
+    RawJwt tokenWithoutSubject = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutSubject);
   }
 
   @Test
   public void requireAudienceButNoAudienceInToken_shouldThrow() throws Exception {
-    RawJwt unverified = new RawJwt.Builder().build();
+    RawJwt unverified = RawJwt.newBuilder().build();
     JwtValidator validator = JwtValidator.newBuilder().expectAudience("foo").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(unverified));
@@ -263,7 +263,7 @@ public final class JwtValidatorTest {
   @Test
   public void audienceInTokenButNoAudienceSetInValidator_shouldThrow() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").build();
     JwtValidator validator = JwtValidator.newBuilder().build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(unverified));
@@ -271,7 +271,7 @@ public final class JwtValidatorTest {
 
   @Test
   public void noAudience_success() throws Exception {
-    RawJwt token = new RawJwt.Builder().build();
+    RawJwt token = RawJwt.newBuilder().build();
     JwtValidator validator = JwtValidator.newBuilder().build();
     validator.validate(token);
   }
@@ -279,7 +279,7 @@ public final class JwtValidatorTest {
   @Test
   public void wrongAudienceInToken_shouldThrow() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").build();
     JwtValidator validator = JwtValidator.newBuilder().expectAudience("bar").build();
 
     assertThrows(JwtInvalidException.class, () -> validator.validate(unverified));
@@ -288,7 +288,7 @@ public final class JwtValidatorTest {
   @Test
   public void correctAudienceInToken_success() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").build();
     JwtValidator validator = JwtValidator.newBuilder().expectAudience("foo").build();
     VerifiedJwt token = validator.validate(unverified);
 
@@ -298,7 +298,7 @@ public final class JwtValidatorTest {
   @Test
   public void correctAudienceInToken2_success() throws Exception {
     RawJwt unverified =
-        new RawJwt.Builder()
+        RawJwt.newBuilder()
             .addAudience("foo")
             .addAudience("bar")
             .build();
@@ -312,9 +312,9 @@ public final class JwtValidatorTest {
   public void ignoreAudienceSkipsValidationOfAudience() throws Exception {
     JwtValidator validator = JwtValidator.newBuilder().ignoreAudience().build();
 
-    RawJwt tokenWithAudience = new RawJwt.Builder().addAudience("audience").build();
+    RawJwt tokenWithAudience = RawJwt.newBuilder().addAudience("audience").build();
     validator.validate(tokenWithAudience);
-    RawJwt tokenWithoutAudience = new RawJwt.Builder().build();
+    RawJwt tokenWithoutAudience = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutAudience);
   }
 }
