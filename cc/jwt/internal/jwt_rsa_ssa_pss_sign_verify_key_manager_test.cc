@@ -164,7 +164,7 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
   auto verify_or =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
           key.public_key());
@@ -179,7 +179,8 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   ASSERT_THAT(issuer_or.status(), IsOk());
   EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 =
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
 }
 

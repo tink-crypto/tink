@@ -25,19 +25,19 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 
 }
 
-JwtValidator::JwtValidator(absl::optional<absl::string_view> issuer,
-                           absl::optional<absl::string_view> subject,
-                           absl::optional<absl::string_view> audience,
+JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
+                           absl::optional<absl::string_view> expected_subject,
+                           absl::optional<absl::string_view> expected_audience,
                            absl::Duration clock_skew,
                            absl::optional<absl::Time> fixed_now) {
-  if (issuer.has_value()) {
-    issuer_ = std::string(issuer.value());
+  if (expected_issuer.has_value()) {
+    expected_issuer_ = std::string(expected_issuer.value());
   }
-  if (subject.has_value()) {
-    subject_ = std::string(subject.value());
+  if (expected_subject.has_value()) {
+    expected_subject_ = std::string(expected_subject.value());
   }
-  if (audience.has_value()) {
-    audience_ = std::string(audience.value());
+  if (expected_audience.has_value()) {
+    expected_audience_ = std::string(expected_audience.value());
   }
   clock_skew_ = clock_skew;
   fixed_now_ = fixed_now;
@@ -69,7 +69,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
                         "token cannot yet be used");
     }
   }
-  if (issuer_.has_value()){
+  if (expected_issuer_.has_value()){
     if (!raw_jwt.HasIssuer()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected issuer");
@@ -78,11 +78,11 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (!issuer_or.ok()) {
       return issuer_or.status();
     }
-    if (issuer_.value() != issuer_or.ValueOrDie()) {
+    if (expected_issuer_.value() != issuer_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong issuer");
     }
   }
-  if (subject_.has_value()) {
+  if (expected_subject_.has_value()) {
     if (!raw_jwt.HasSubject()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected subject");
@@ -91,11 +91,11 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (!subject_or.ok()) {
       return subject_or.status();
     }
-    if (subject_.value() != subject_or.ValueOrDie()) {
+    if (expected_subject_.value() != subject_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong subject");
     }
   }
-  if (audience_.has_value()) {
+  if (expected_audience_.has_value()) {
     if (!raw_jwt.HasAudiences()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected audiences");
@@ -105,7 +105,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return audiences_or.status();
     }
     std::vector<std::string> audiences = audiences_or.ValueOrDie();
-    auto it = std::find(audiences.begin(), audiences.end(), audience_);
+    auto it = std::find(audiences.begin(), audiences.end(), expected_audience_);
     if (it == audiences.end()) {
       return util::Status(util::error::INVALID_ARGUMENT, "audience not found");
     }
@@ -123,20 +123,21 @@ JwtValidatorBuilder::JwtValidatorBuilder() {
   clock_skew_ = absl::ZeroDuration();
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetIssuer(absl::string_view issuer) {
-  issuer_ = std::string(issuer);
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectIssuer(
+    absl::string_view issuer) {
+  expected_issuer_ = std::string(issuer);
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetSubject(
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectSubject(
     absl::string_view subject) {
-  subject_ = std::string(subject);
+  expected_subject_ = std::string(subject);
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetAudience(
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectAudience(
     absl::string_view audience) {
-  audience_ = std::string(audience);
+  expected_audience_ = std::string(audience);
   return *this;
 }
 
@@ -156,7 +157,8 @@ JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
 }
 
 JwtValidator JwtValidatorBuilder::Build() {
-  JwtValidator validator(issuer_, subject_, audience_, clock_skew_, fixed_now_);
+  JwtValidator validator(expected_issuer_, expected_subject_,
+                         expected_audience_, clock_skew_, fixed_now_);
   return validator;
 }
 

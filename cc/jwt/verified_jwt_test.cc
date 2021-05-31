@@ -72,7 +72,7 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   }
   auto audience_or = raw_jwt.GetAudiences();
   if (audience_or.ok()) {
-    validator_builder.SetAudience(audience_or.ValueOrDie()[0]);
+    validator_builder.ExpectAudience(audience_or.ValueOrDie()[0]);
   }
   return jwt_mac->VerifyMacAndDecode(compact_or.ValueOrDie(),
                                      validator_builder.Build());

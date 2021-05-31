@@ -198,13 +198,13 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
     const JwtValidator& validator_proto) {
   auto builder = crypto::tink::JwtValidatorBuilder();
   if (validator_proto.has_issuer()) {
-    builder.SetIssuer(validator_proto.issuer().value());
+    builder.ExpectIssuer(validator_proto.issuer().value());
   }
   if (validator_proto.has_subject()) {
-    builder.SetSubject(validator_proto.subject().value());
+    builder.ExpectSubject(validator_proto.subject().value());
   }
   if (validator_proto.has_audience()) {
-    builder.SetAudience(validator_proto.audience().value());
+    builder.ExpectAudience(validator_proto.audience().value());
   }
   if (validator_proto.has_now()) {
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));

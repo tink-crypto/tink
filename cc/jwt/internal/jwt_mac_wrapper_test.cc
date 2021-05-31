@@ -112,7 +112,8 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 =
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 

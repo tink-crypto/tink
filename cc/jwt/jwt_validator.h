@@ -48,9 +48,9 @@ class JwtValidator {
                         absl::Duration clock_skew,
                         absl::optional<absl::Time> fixed_now);
   friend class JwtValidatorBuilder;
-  absl::optional<std::string> issuer_;
-  absl::optional<std::string> subject_;
-  absl::optional<std::string> audience_;
+  absl::optional<std::string> expected_issuer_;
+  absl::optional<std::string> expected_subject_;
+  absl::optional<std::string> expected_audience_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };
@@ -65,9 +65,9 @@ class JwtValidatorBuilder {
   JwtValidatorBuilder(JwtValidatorBuilder&& other) = default;
   JwtValidatorBuilder& operator=(JwtValidatorBuilder&& other) = default;
 
-  JwtValidatorBuilder& SetIssuer(absl::string_view issuer);
-  JwtValidatorBuilder& SetSubject(absl::string_view subject);
-  JwtValidatorBuilder& SetAudience(absl::string_view audience);
+  JwtValidatorBuilder& ExpectIssuer(absl::string_view expected_issuer);
+  JwtValidatorBuilder& ExpectSubject(absl::string_view expected_subject);
+  JwtValidatorBuilder& ExpectAudience(absl::string_view expected_audience);
 
   util::Status SetClockSkew(absl::Duration clock_skew);
   JwtValidatorBuilder& SetFixedNow(absl::Time fixed_now);
@@ -75,9 +75,9 @@ class JwtValidatorBuilder {
   JwtValidator Build();
 
  private:
-  absl::optional<std::string> issuer_;
-  absl::optional<std::string> subject_;
-  absl::optional<std::string> audience_;
+  absl::optional<std::string> expected_issuer_;
+  absl::optional<std::string> expected_subject_;
+  absl::optional<std::string> expected_audience_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };

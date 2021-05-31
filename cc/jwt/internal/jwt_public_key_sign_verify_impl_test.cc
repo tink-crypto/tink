@@ -95,7 +95,8 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
 
   // Fails with wrong issuer
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 =
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
   EXPECT_FALSE(jwt_verify_->VerifyAndDecode(compact, validator2).ok());
 
   // Fails because token is not yet valid

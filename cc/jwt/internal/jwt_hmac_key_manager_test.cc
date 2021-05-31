@@ -186,7 +186,7 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt,
                                                           absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -216,7 +216,7 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
   util::StatusOr<std::string> compact_or =
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),

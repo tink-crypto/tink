@@ -144,7 +144,7 @@ TEST(JwtValidator, RequiresIssuerButNotIssuerNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -154,7 +154,7 @@ TEST(JwtValidator, InvalidIssuerNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -164,7 +164,7 @@ TEST(JwtValidator, CorrectIssuerOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
 
   EXPECT_THAT(validator.Validate(jwt), IsOk());
 }
@@ -184,7 +184,8 @@ TEST(JwtValidator, RequiresSubjectButNotSubjectNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectSubject("subject").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -194,7 +195,8 @@ TEST(JwtValidator, InvalidSubjectNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectSubject("subject").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -204,7 +206,8 @@ TEST(JwtValidator, CorrectSubjectOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectSubject("subject").Build();
 
   EXPECT_THAT(validator.Validate(jwt), IsOk());
 }
@@ -224,7 +227,8 @@ TEST(JwtValidator, RequiresAudienceButNotAudienceNotOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectSubject("subject").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -235,7 +239,7 @@ TEST(JwtValidator, InvalidAudienceNotOK) {
   RawJwt jwt = jwt_or.ValueOrDie();
 
   JwtValidator validator =
-      JwtValidatorBuilder().SetAudience("audience").Build();
+      JwtValidatorBuilder().ExpectAudience("audience").Build();
 
   EXPECT_FALSE(validator.Validate(jwt).ok());
 }
@@ -249,7 +253,7 @@ TEST(JwtValidator, CorrectAudienceOK) {
   RawJwt jwt = jwt_or.ValueOrDie();
 
   JwtValidator validator =
-      JwtValidatorBuilder().SetAudience("audience").Build();
+      JwtValidatorBuilder().ExpectAudience("audience").Build();
 
   EXPECT_THAT(validator.Validate(jwt), IsOk());
 }
@@ -321,10 +325,10 @@ TEST(JwtValidator, FixedNowValidOk) {
 TEST(JwtValidator, CallBuildTwiceOk) {
   JwtValidatorBuilder builder = JwtValidatorBuilder();
 
-  builder.SetIssuer("issuer1");
+  builder.ExpectIssuer("issuer1");
   JwtValidator validator1 = builder.Build();
 
-  builder.SetIssuer("issuer2");
+  builder.ExpectIssuer("issuer2");
   JwtValidator validator2 = builder.Build();
 
   util::StatusOr<RawJwt> jwt1_or = RawJwtBuilder()
