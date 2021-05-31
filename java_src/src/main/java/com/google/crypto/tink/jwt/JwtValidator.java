@@ -27,6 +27,8 @@ import java.util.Optional;
 public final class JwtValidator {
   private static final Duration MAX_CLOCK_SKEW = Duration.ofMinutes(10);
 
+  private final Optional<String> expectedTypeHeader;
+  private final boolean ignoreTypeHeader;
   private final Optional<String> expectedIssuer;
   private final boolean ignoreIssuer;
   private final Optional<String> expectedSubject;
@@ -40,6 +42,8 @@ public final class JwtValidator {
   private final Duration clockSkew;
 
   private JwtValidator(Builder builder) {
+    this.expectedTypeHeader = builder.expectedTypeHeader;
+    this.ignoreTypeHeader = builder.ignoreTypeHeader;
     this.expectedIssuer = builder.expectedIssuer;
     this.ignoreIssuer = builder.ignoreIssuer;
     this.expectedSubject = builder.expectedSubject;
@@ -78,6 +82,8 @@ public final class JwtValidator {
     private Duration clockSkew = Duration.ZERO;
 
     private Builder() {
+      this.expectedTypeHeader = Optional.empty();
+      this.ignoreTypeHeader = false;
       this.expectedIssuer = Optional.empty();
       this.ignoreIssuer = false;
       this.expectedSubject = Optional.empty();
@@ -87,11 +93,35 @@ public final class JwtValidator {
     }
 
     /**
+     * Sets the expected type header of the token. When this is set, all tokens with missing or
+     * different {@code typ} header are rejected. When this is not set, all token that have a {@code
+     * typ} header are rejected. So this must be set for token that have a {@code typ} header.
+     *
+     * <p>If you want to ignore the type header or if you want to validate it yourself, use
+     * ignoreTypeHeader().
+     *
+     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
+     */
+    public Builder expectTypeHeader(String value) {
+      if (value == null) {
+        throw new NullPointerException("typ header cannot be null");
+      }
+      this.expectedTypeHeader = Optional.of(value);
+      return this;
+    }
+
+    /** Lets the validator ignore the {@code typ} header. */
+    public Builder ignoreTypeHeader() {
+      this.ignoreTypeHeader = true;
+      return this;
+    }
+
+    /**
      * Sets the expected issuer claim of the token. When this is set, all tokens with missing or
      * different {@code iss} claims are rejected. When this is not set, all token that have a {@code
      * iss} claim are rejected. So this must be set for token that have a {@code iss} claim.
      *
-     * <p>If you want to ignore this claim or if you want to validate it yourself, use
+     * <p>If you want to ignore the issuer claim or if you want to validate it yourself, use
      * ignoreIssuer().
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.1
@@ -209,6 +239,24 @@ public final class JwtValidator {
    */
   VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
     validateTimestampClaims(target);
+
+    if (this.expectedTypeHeader.isPresent()) {
+      if (!target.hasTypeHeader()) {
+        throw new JwtInvalidException(
+            String.format(
+                "invalid JWT; missing expected type header %s.", this.expectedTypeHeader.get()));
+      }
+      if (!target.getTypeHeader().equals(this.expectedTypeHeader.get())) {
+        throw new JwtInvalidException(
+            String.format(
+                "invalid JWT; expected type header %s, but got %s",
+                this.expectedTypeHeader.get(), target.getTypeHeader()));
+      }
+    } else {
+      if (target.hasTypeHeader() && !this.ignoreTypeHeader) {
+        throw new JwtInvalidException("invalid JWT; token has type header set, but validator not.");
+      }
+    }
     if (this.expectedIssuer.isPresent()) {
       if (!target.hasIssuer()) {
         throw new JwtInvalidException(

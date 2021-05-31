@@ -229,7 +229,10 @@ public class JwtEcdsaSignKeyManagerTest {
 
     RawJwt rawTokenWithType = RawJwt.newBuilder().setTypeHeader("typeHeader").build();
     String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
-    VerifiedJwt verifiedTokenWithType = verifier.verifyAndDecode(signedCompactWithType, validator);
+    VerifiedJwt verifiedTokenWithType =
+        verifier.verifyAndDecode(
+            signedCompactWithType,
+            JwtValidator.newBuilder().expectTypeHeader("typeHeader").build());
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
@@ -369,7 +372,8 @@ public class JwtEcdsaSignKeyManagerTest {
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verifyAndDecode(goodSignedCompact, validator);
+    verifier.verifyAndDecode(
+        goodSignedCompact, JwtValidator.newBuilder().expectTypeHeader("JWT").build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -391,7 +395,8 @@ public class JwtEcdsaSignKeyManagerTest {
     unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
-    verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
+    verifier.verifyAndDecode(
+        unknownTypeSignedCompact, JwtValidator.newBuilder().expectTypeHeader("unknown").build());
 
     // for raw keys, the validation should work even if a "kid" header is present.
     JsonObject unknownKidHeader = new JsonObject();

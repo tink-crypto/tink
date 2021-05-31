@@ -181,7 +181,6 @@ class TestingServersTest(parameterized.TestCase):
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
-        type_header='typeHeader',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
@@ -192,7 +191,6 @@ class TestingServersTest(parameterized.TestCase):
     validator = jwt.new_validator(
         issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
-    self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
@@ -216,7 +214,6 @@ class TestingServersTest(parameterized.TestCase):
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
-        type_header='typeHeader',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
@@ -227,7 +224,6 @@ class TestingServersTest(parameterized.TestCase):
     validator = jwt.new_validator(
         issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
-    self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')

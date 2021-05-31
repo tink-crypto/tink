@@ -148,6 +148,58 @@ public final class JwtValidatorTest {
   }
 
   @Test
+  public void requireTypeHeaderButNoTypeHeaderInToken_shouldThrow() throws Exception {
+    RawJwt token = RawJwt.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().expectTypeHeader("jwt").build();
+
+    assertThrows(JwtInvalidException.class, () -> validator.validate(token));
+  }
+
+  @Test
+  public void wrongTypeHeaderInToken_shouldThrow() throws Exception {
+    RawJwt token =
+        RawJwt.newBuilder().setTypeHeader("blah").build();
+    JwtValidator validator = JwtValidator.newBuilder().expectTypeHeader("jwt").build();
+
+    assertThrows(JwtInvalidException.class, () -> validator.validate(token));
+  }
+
+  @Test
+  public void correctTypeHeaderInToken_success() throws Exception {
+    RawJwt unverified =
+        RawJwt.newBuilder().setTypeHeader("jwt").build();
+    JwtValidator validator = JwtValidator.newBuilder().expectTypeHeader("jwt").build();
+    VerifiedJwt token = validator.validate(unverified);
+    assertThat(token.getTypeHeader()).isEqualTo("jwt");
+  }
+
+  @Test
+  public void noTypeHeader_success() throws Exception {
+    JwtValidator validator = JwtValidator.newBuilder().build();
+
+    RawJwt tokenWithoutTypeHeader = RawJwt.newBuilder().build();
+    validator.validate(tokenWithoutTypeHeader);
+  }
+
+  @Test
+  public void typeHeaderInTokenButNoTypeHeaderSetInValidator_shouldThrow() throws Exception {
+    JwtValidator validator = JwtValidator.newBuilder().build();
+
+    RawJwt tokenWithTypeHeader = RawJwt.newBuilder().setTypeHeader("headerType").build();
+    assertThrows(JwtInvalidException.class, () -> validator.validate(tokenWithTypeHeader));
+  }
+
+  @Test
+  public void ignoreTypeHeaderSkipsValidationOfTypeHeader() throws Exception {
+    JwtValidator validator = JwtValidator.newBuilder().ignoreTypeHeader().build();
+
+    RawJwt tokenWithTypeHeader = RawJwt.newBuilder().setTypeHeader("headerType").build();
+    validator.validate(tokenWithTypeHeader);
+    RawJwt tokenWithoutTypeHeader = RawJwt.newBuilder().build();
+    validator.validate(tokenWithoutTypeHeader);
+  }
+
+  @Test
   public void requireIssuerButNoIssuerInToken_shouldThrow() throws Exception {
     RawJwt token = RawJwt.newBuilder().build();
     JwtValidator validator = JwtValidator.newBuilder().expectIssuer("123").build();
@@ -316,5 +368,21 @@ public final class JwtValidatorTest {
     validator.validate(tokenWithAudience);
     RawJwt tokenWithoutAudience = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutAudience);
+  }
+
+  @Test
+  public void invalidValidators_fail() throws Exception {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> JwtValidator.newBuilder().expectTypeHeader("a").ignoreTypeHeader().build());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> JwtValidator.newBuilder().expectIssuer("a").ignoreIssuer().build());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> JwtValidator.newBuilder().expectSubject("a").ignoreSubject().build());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> JwtValidator.newBuilder().expectAudience("a").ignoreAudience().build());
   }
 }

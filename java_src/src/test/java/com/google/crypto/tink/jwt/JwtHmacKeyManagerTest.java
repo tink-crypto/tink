@@ -320,7 +320,11 @@ public class JwtHmacKeyManagerTest {
             .build();
     String compact = mac.computeMacAndEncode(unverified);
     JwtValidator validator =
-        JwtValidator.newBuilder().expectIssuer(issuer).expectAudience(audience).build();
+        JwtValidator.newBuilder()
+            .expectTypeHeader("myType")
+            .expectIssuer(issuer)
+            .expectAudience(audience)
+            .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getTypeHeader()).isEqualTo("myType");
@@ -560,7 +564,8 @@ public class JwtHmacKeyManagerTest {
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
-    primitive.verifyMacAndDecode(goodSignedCompact, validator);
+    primitive.verifyMacAndDecode(
+        goodSignedCompact, JwtValidator.newBuilder().expectTypeHeader("JWT").build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -583,13 +588,15 @@ public class JwtHmacKeyManagerTest {
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(
         rawPrimitive, unknownTypeHeader, payload);
-    primitive.verifyMacAndDecode(unknownTypeSignedCompact, validator);
+    primitive.verifyMacAndDecode(
+        unknownTypeSignedCompact, JwtValidator.newBuilder().expectTypeHeader("unknown").build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();
     unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
     unknownKidHeader.addProperty("kid", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(rawPrimitive, unknownKidHeader, payload);
+    String unknownKidSignedCompact = generateSignedCompact(
+        rawPrimitive, unknownKidHeader, payload);
     primitive.verifyMacAndDecode(unknownKidSignedCompact, validator);
   }
 
@@ -650,7 +657,12 @@ public class JwtHmacKeyManagerTest {
     // One minute earlier than the expiration time of the sample token.
     String instant = "2011-03-22T18:42:00Z";
     Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-    JwtValidator validator = JwtValidator.newBuilder().expectIssuer("joe").setClock(clock).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .expectTypeHeader("JWT")
+            .expectIssuer("joe")
+            .setClock(clock)
+            .build();
 
     VerifiedJwt token = primitive.verifyMacAndDecode(compact, validator);
 

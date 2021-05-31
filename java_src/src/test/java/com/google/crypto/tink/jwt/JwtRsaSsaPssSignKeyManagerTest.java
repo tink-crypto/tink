@@ -315,7 +315,10 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
     RawJwt rawTokenWithType = RawJwt.newBuilder().setTypeHeader("typeHeader").build();
     String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
-    VerifiedJwt verifiedTokenWithType = verifier.verifyAndDecode(signedCompactWithType, validator);
+    VerifiedJwt verifiedTokenWithType =
+        verifier.verifyAndDecode(
+            signedCompactWithType,
+            JwtValidator.newBuilder().expectTypeHeader("typeHeader").build());
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
@@ -435,7 +438,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
-    verifier.verifyAndDecode(goodSignedCompact, validator);
+    verifier.verifyAndDecode(
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("JWT").build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -457,7 +462,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
-    verifier.verifyAndDecode(unknownTypeSignedCompact, validator);
+    verifier.verifyAndDecode(
+        unknownTypeSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("unknown").build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();

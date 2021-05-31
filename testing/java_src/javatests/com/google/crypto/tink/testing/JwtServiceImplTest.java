@@ -104,7 +104,8 @@ public final class JwtServiceImplTest {
 
   private JwtToken generateToken(String audience, long expSeconds, int expNanos) {
     return JwtToken.newBuilder()
-        .setTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+        // TODO(juerg): support typ header.
+        // .setTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
         .setIssuer(StringValue.newBuilder().setValue("issuer"))
         .addAudiences(audience)
         .addAudiences(audience + "2")
