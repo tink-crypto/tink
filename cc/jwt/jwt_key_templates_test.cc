@@ -59,7 +59,8 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -67,7 +68,7 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
   JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 
@@ -105,7 +106,8 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       verify->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -113,7 +115,7 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
   JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
 }
 

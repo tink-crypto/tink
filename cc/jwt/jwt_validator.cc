@@ -28,7 +28,8 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
                            absl::optional<absl::string_view> expected_subject,
                            absl::optional<absl::string_view> expected_audience,
-                           absl::Duration clock_skew,
+                           bool ignore_issuer, bool ignore_subject,
+                           bool ignore_audience, absl::Duration clock_skew,
                            absl::optional<absl::Time> fixed_now) {
   if (expected_issuer.has_value()) {
     expected_issuer_ = std::string(expected_issuer.value());
@@ -39,6 +40,9 @@ JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
   if (expected_audience.has_value()) {
     expected_audience_ = std::string(expected_audience.value());
   }
+  ignore_issuer_ = ignore_issuer;
+  ignore_subject_ = ignore_subject;
+  ignore_audience_ = ignore_audience;
   clock_skew_ = clock_skew;
   fixed_now_ = fixed_now;
 }
@@ -81,6 +85,12 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (expected_issuer_.value() != issuer_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong issuer");
     }
+  } else {
+    if (raw_jwt.HasIssuer() && !ignore_issuer_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has issuer set, but validator not");
+    }
   }
   if (expected_subject_.has_value()) {
     if (!raw_jwt.HasSubject()) {
@@ -93,6 +103,12 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     }
     if (expected_subject_.value() != subject_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong subject");
+    }
+  } else {
+    if (raw_jwt.HasSubject() && !ignore_subject_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has subject set, but validator not");
     }
   }
   if (expected_audience_.has_value()) {
@@ -110,7 +126,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT, "audience not found");
     }
   } else {
-    if (raw_jwt.HasAudiences()) {
+    if (raw_jwt.HasAudiences() && !ignore_audience_) {
       return util::Status(
           util::error::INVALID_ARGUMENT,
           "invalid JWT; token has audience set, but validator not");
@@ -120,6 +136,9 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
 }
 
 JwtValidatorBuilder::JwtValidatorBuilder() {
+  ignore_issuer_ = false;
+  ignore_subject_ = false;
+  ignore_audience_ = false;
   clock_skew_ = absl::ZeroDuration();
 }
 
@@ -141,6 +160,21 @@ JwtValidatorBuilder& JwtValidatorBuilder::ExpectAudience(
   return *this;
 }
 
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreIssuer() {
+  ignore_issuer_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreSubject() {
+  ignore_subject_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudience() {
+  ignore_audience_ = true;
+  return *this;
+}
+
 util::Status JwtValidatorBuilder::SetClockSkew(
     absl::Duration clock_skew) {
   if (clock_skew > kJwtMaxClockSkew) {
@@ -156,9 +190,25 @@ JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
   return *this;
 }
 
-JwtValidator JwtValidatorBuilder::Build() {
+util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
+  if (expected_issuer_.has_value() && ignore_issuer_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "ignoreIssuer() and expectedIssuer() cannot be used together");
+  }
+  if (expected_subject_.has_value() && ignore_subject_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "ignoreSubject() and expectedSubject() cannot be used together");
+  }
+  if (expected_audience_.has_value() && ignore_audience_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "ignoreAudience() and expectedAudience() cannot be used together");
+  }
   JwtValidator validator(expected_issuer_, expected_subject_,
-                         expected_audience_, clock_skew_, fixed_now_);
+                         expected_audience_, ignore_issuer_, ignore_subject_,
+                         ignore_audience_, clock_skew_, fixed_now_);
   return validator;
 }
 

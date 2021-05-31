@@ -186,7 +186,8 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt,
                                                           absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -216,7 +217,8 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
   util::StatusOr<std::string> compact_or =
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -258,8 +260,11 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
-  JwtValidator validator =
-      JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("joe")
+                               .SetFixedNow(absl::FromUnixSeconds(12345))
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact, validator);
@@ -269,7 +274,7 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   EXPECT_THAT(verified_jwt.GetBooleanClaim("http://example.com/is_root"),
               test::IsOkAndHolds(true));
 
-  JwtValidator validator_now = JwtValidatorBuilder().Build();
+  JwtValidator validator_now = JwtValidatorBuilder().Build().ValueOrDie();
   EXPECT_FALSE(
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact, validator_now).ok());
 

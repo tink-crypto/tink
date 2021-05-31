@@ -95,6 +95,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   auto validator = verify_request.mutable_validator();
   validator->mutable_issuer()->set_value("issuer");
+  validator->mutable_subject()->set_value("subject");
   validator->mutable_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;
@@ -225,6 +226,7 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   auto validator = verify_request.mutable_validator();
   validator->mutable_issuer()->set_value("issuer");
+  validator->mutable_subject()->set_value("subject");
   validator->mutable_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;

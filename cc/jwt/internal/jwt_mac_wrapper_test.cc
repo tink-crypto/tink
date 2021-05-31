@@ -105,7 +105,8 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -113,7 +114,7 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
   JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 
@@ -135,7 +136,8 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -198,7 +200,8 @@ TEST_F(JwtMacWrapperTest, KeyRotation) {
     auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
     ASSERT_THAT(raw_jwt_or.status(), IsOk());
     RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
-    JwtValidator validator = JwtValidatorBuilder().Build();
+    JwtValidator validator =
+        JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
 
     util::StatusOr<std::string> compact1_or =
         jwt_mac1->ComputeMacAndEncode(raw_jwt);

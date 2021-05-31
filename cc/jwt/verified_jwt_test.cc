@@ -65,17 +65,14 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   if (!compact_or.ok()) {
     return compact_or.status();
   }
-  auto validator_builder = JwtValidatorBuilder();
+  auto validator_builder =
+      JwtValidatorBuilder().IgnoreIssuer().IgnoreSubject().IgnoreAudience();
   auto issued_at_or = raw_jwt.GetIssuedAt();
   if (issued_at_or.ok()) {
     validator_builder.SetFixedNow(issued_at_or.ValueOrDie());
   }
-  auto audience_or = raw_jwt.GetAudiences();
-  if (audience_or.ok()) {
-    validator_builder.ExpectAudience(audience_or.ValueOrDie()[0]);
-  }
   return jwt_mac->VerifyMacAndDecode(compact_or.ValueOrDie(),
-                                     validator_builder.Build());
+                                     validator_builder.Build().ValueOrDie());
 }
 
 TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {

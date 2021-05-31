@@ -72,7 +72,7 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
 
   absl::Time now = absl::Now();
   auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
+      RawJwtBuilder().SetTypeHeader("typeHeader").SetJwtId("id123");
   ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
   ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
   ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
@@ -87,17 +87,17 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetJwtId(), IsOkAndHolds("id123"));
 
   JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 
@@ -108,7 +108,7 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
 
   absl::Time now = absl::Now();
   auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
+      RawJwtBuilder().SetTypeHeader("typeHeader").SetJwtId("id123");
   ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
   ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
   ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
@@ -123,14 +123,14 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetJwtId(), IsOkAndHolds("id123"));
 
   // parse header to make sure the kid value is set correctly.
   std::vector<absl::string_view> parts =
@@ -155,8 +155,11 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
-  JwtValidator validator_1970 =
-      JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
+  JwtValidator validator_1970 = JwtValidatorBuilder()
+                                    .ExpectIssuer("joe")
+                                    .SetFixedNow(absl::FromUnixSeconds(12345))
+                                    .Build()
+                                    .ValueOrDie();
 
   // verification succeeds because token was valid 1970
   util::StatusOr<VerifiedJwt> verified_jwt_or =
@@ -168,7 +171,7 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
               IsOkAndHolds(true));
 
   // verification fails because token is expired
-  JwtValidator validator_now = JwtValidatorBuilder().Build();
+  JwtValidator validator_now = JwtValidatorBuilder().Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator_now).ok());
 
   // verification fails because token was modified
@@ -185,7 +188,7 @@ TEST(JwtMacImplTest, ValidateInvalidTokens) {
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
 
   EXPECT_FALSE(
       jwt_mac->VerifyMacAndDecode("eyJhbGciOiJIUzI1NiJ9.e30.abc.", validator)

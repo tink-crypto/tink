@@ -142,7 +142,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().ExpectIssuer("issuer").Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
   auto verify_or = JwtEcdsaVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
       key.public_key());
   ASSERT_THAT(verify_or.status(), IsOk());
@@ -157,7 +158,7 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   EXPECT_THAT(issuer_or.ValueOrDie(), Eq("issuer"));
 
   JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build();
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
 }
 
@@ -186,7 +187,7 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
   auto verify2_or = JwtEcdsaVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
       key2.public_key());
   ASSERT_THAT(verify2_or.status(), IsOk());
