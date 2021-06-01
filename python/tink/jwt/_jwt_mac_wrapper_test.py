@@ -46,7 +46,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     jwtmac4 = builder.keyset_handle().primitive(jwt.JwtMac)
 
     raw_jwt = jwt.new_raw_jwt(issuer='a')
-    validator = jwt.JwtValidator()
+    validator = jwt.new_validator(expected_issuer='a')
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 uses the older key. So 1, 2 and 3 can verify the mac, but not 4.

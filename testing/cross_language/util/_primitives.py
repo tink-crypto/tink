@@ -446,12 +446,12 @@ def jwt_validator_to_proto(
     validator: jwt.JwtValidator) -> testing_api_pb2.JwtValidator:
   """Converts a jwt.JwtValidator into a proto JwtValidator."""
   proto_validator = testing_api_pb2.JwtValidator()
-  if validator.has_issuer():
-    proto_validator.issuer.value = validator.issuer()
-  if validator.has_subject():
-    proto_validator.subject.value = validator.subject()
-  if validator.has_audience():
-    proto_validator.audience.value = validator.audience()
+  if validator.has_expected_issuer():
+    proto_validator.issuer.value = validator.expected_issuer()
+  if validator.has_expected_subject():
+    proto_validator.subject.value = validator.expected_subject()
+  if validator.has_expected_audience():
+    proto_validator.audience.value = validator.expected_audience()
   proto_validator.clock_skew.seconds = validator.clock_skew().seconds
   if validator.has_fixed_now():
     seconds, nanos = split_datetime(validator.fixed_now())

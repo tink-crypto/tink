@@ -109,6 +109,7 @@ class JwtServiceTest(absltest.TestCase):
     verify_request = testing_api_pb2.JwtVerifyRequest(
         keyset=keyset, signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.issuer.value = 'issuer'
+    verify_request.validator.subject.value = 'subject'
     verify_request.validator.now.seconds = 1234
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')

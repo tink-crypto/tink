@@ -189,7 +189,10 @@ class TestingServersTest(parameterized.TestCase):
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(
-        issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience1',
+        fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
@@ -197,7 +200,8 @@ class TestingServersTest(parameterized.TestCase):
     self.assertEqual(verified_jwt.custom_claim('switch'), True)
     self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
 
-    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    validator2 = jwt.new_validator(
+        expected_audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
       jwt_mac_primitive.verify_mac_and_decode(compact, validator2)
 
@@ -222,7 +226,10 @@ class TestingServersTest(parameterized.TestCase):
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = signer.sign_and_encode(token)
     validator = jwt.new_validator(
-        issuer='issuer', subject='subject', audience='audience1', fixed_now=now)
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience1',
+        fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
@@ -230,7 +237,8 @@ class TestingServersTest(parameterized.TestCase):
     self.assertEqual(verified_jwt.custom_claim('switch'), True)
     self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
 
-    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    validator2 = jwt.new_validator(
+        expected_audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
       verifier.verify_and_decode(compact, validator2)
 

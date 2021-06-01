@@ -307,18 +307,18 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"iss":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(issuer='joe')
+    val1 = jwt.new_validator(expected_issuer='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
     # TODO(juerg): re-enable for empty validator, once they are consistent.
     # val2 = EMPTY_VALIDATOR
     # jwt_mac.verify_mac_and_decode(token, val2)
 
-    val3 = jwt.new_validator(issuer='Joe')
+    val3 = jwt.new_validator(expected_issuer='Joe')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val3)
 
-    val4 = jwt.new_validator(issuer='joe ')
+    val4 = jwt.new_validator(expected_issuer='joe ')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val4)
 
@@ -326,7 +326,7 @@ class JwtTest(parameterized.TestCase):
   def test_verify_empty_string_issuer(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"iss":""}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-    jwt_mac.verify_mac_and_decode(token, jwt.new_validator(issuer=''))
+    jwt_mac.verify_mac_and_decode(token, jwt.new_validator(expected_issuer=''))
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_issuer_with_wrong_type(self, lang):
@@ -383,18 +383,18 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"sub":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(subject='joe')
+    val1 = jwt.new_validator(expected_subject='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
     # TODO(juerg): re-enable for empty validator, once they are consistent.
     # val2 = EMPTY_VALIDATOR
     # jwt_mac.verify_mac_and_decode(token, val2)
 
-    val3 = jwt.new_validator(subject='Joe')
+    val3 = jwt.new_validator(expected_subject='Joe')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val3)
 
-    val4 = jwt.new_validator(subject='joe ')
+    val4 = jwt.new_validator(expected_subject='joe ')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val4)
 
@@ -402,7 +402,7 @@ class JwtTest(parameterized.TestCase):
   def test_verify_empty_string_subject(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"sub":""}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-    jwt_mac.verify_mac_and_decode(token, jwt.new_validator(subject=''))
+    jwt_mac.verify_mac_and_decode(token, jwt.new_validator(expected_subject=''))
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_subject_with_wrong_type(self, lang):
@@ -417,21 +417,21 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"aud":["joe", "jane"]}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(audience='joe')
+    val1 = jwt.new_validator(expected_audience='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
-    val2 = jwt.new_validator(audience='jane')
+    val2 = jwt.new_validator(expected_audience='jane')
     jwt_mac.verify_mac_and_decode(token, val2)
 
     val3 = EMPTY_VALIDATOR
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val3)
 
-    val4 = jwt.new_validator(audience='Joe')
+    val4 = jwt.new_validator(expected_audience='Joe')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val4)
 
-    val5 = jwt.new_validator(audience='jane ')
+    val5 = jwt.new_validator(expected_audience='jane ')
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val5)
 
@@ -440,7 +440,7 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"aud":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(audience='joe')
+    val1 = jwt.new_validator(expected_audience='joe')
     jwt_mac.verify_mac_and_decode(token, val1)
 
     val3 = EMPTY_VALIDATOR

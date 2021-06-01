@@ -90,9 +90,9 @@ class PrimitivesTest(absltest.TestCase):
   def test_jwt_validator_to_proto(self):
     now = datetime.datetime.fromtimestamp(1234567.125, datetime.timezone.utc)
     validator = jwt.new_validator(
-        issuer='issuer',
-        subject='subject',
-        audience='audience',
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience',
         clock_skew=datetime.timedelta(seconds=123),
         fixed_now=now)
     proto = _primitives.jwt_validator_to_proto(validator)

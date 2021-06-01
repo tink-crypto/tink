@@ -145,19 +145,19 @@ def verifiedjwt_to_proto(
 def validator_from_proto(
     proto_validator: testing_api_pb2.JwtValidator) -> jwt.JwtValidator:
   """Converts a proto JwtValidator into a JwtValidator."""
-  issuer = None
+  expected_issuer = None
   if proto_validator.HasField('issuer'):
-    issuer = proto_validator.issuer.value
-  subject = None
+    expected_issuer = proto_validator.issuer.value
+  expected_subject = None
   if proto_validator.HasField('subject'):
-    subject = proto_validator.subject.value
-  audience = None
+    expected_subject = proto_validator.subject.value
+  expected_audience = None
   if proto_validator.HasField('audience'):
-    audience = proto_validator.audience.value
+    expected_audience = proto_validator.audience.value
   return jwt.new_validator(
-      issuer=issuer,
-      subject=subject,
-      audience=audience,
+      expected_issuer=expected_issuer,
+      expected_subject=expected_subject,
+      expected_audience=expected_audience,
       fixed_now=_from_timestamp_proto(proto_validator.now),
       clock_skew=_from_duration_proto(proto_validator.clock_skew))
 

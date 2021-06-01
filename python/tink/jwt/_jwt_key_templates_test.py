@@ -67,7 +67,9 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
     jwt_hmac = keyset_handle.primitive(jwt.JwtMac)
     token = jwt.new_raw_jwt(issuer='issuer', subject='subject')
     compact = jwt_hmac.compute_mac_and_encode(token)
-    output_token = jwt_hmac.verify_mac_and_decode(compact, jwt.new_validator())
+    output_token = jwt_hmac.verify_mac_and_decode(
+        compact,
+        jwt.new_validator(expected_issuer='issuer', expected_subject='subject'))
     self.assertEqual(output_token.issuer(), token.issuer())
     self.assertEqual(output_token.subject(), token.subject())
 

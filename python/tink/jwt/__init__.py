@@ -66,15 +66,22 @@ def new_raw_jwt(*,
 
 def new_validator(
     *,
-    issuer: Optional[Text] = None,
-    subject: Optional[Text] = None,
-    audience: Optional[Text] = None,
+    expected_issuer: Optional[Text] = None,
+    expected_subject: Optional[Text] = None,
+    expected_audience: Optional[Text] = None,
+    ignore_issuer: bool = False,
+    ignore_subject: bool = False,
+    ignore_audiences: bool = False,
     clock_skew: Optional[datetime.timedelta] = None,
     fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
+  """Creates a new JwtValidator."""
   return JwtValidator(
-      issuer=issuer,
-      subject=subject,
-      audience=audience,
+      expected_issuer=expected_issuer,
+      expected_subject=expected_subject,
+      expected_audience=expected_audience,
+      ignore_issuer=ignore_issuer,
+      ignore_subject=ignore_subject,
+      ignore_audiences=ignore_audiences,
       clock_skew=clock_skew,
       fixed_now=fixed_now)
 
