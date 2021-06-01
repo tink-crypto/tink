@@ -29,7 +29,7 @@ JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
                            absl::optional<absl::string_view> expected_subject,
                            absl::optional<absl::string_view> expected_audience,
                            bool ignore_issuer, bool ignore_subject,
-                           bool ignore_audience, absl::Duration clock_skew,
+                           bool ignore_audiences, absl::Duration clock_skew,
                            absl::optional<absl::Time> fixed_now) {
   if (expected_issuer.has_value()) {
     expected_issuer_ = std::string(expected_issuer.value());
@@ -42,7 +42,7 @@ JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
   }
   ignore_issuer_ = ignore_issuer;
   ignore_subject_ = ignore_subject;
-  ignore_audience_ = ignore_audience;
+  ignore_audiences_ = ignore_audiences;
   clock_skew_ = clock_skew;
   fixed_now_ = fixed_now;
 }
@@ -126,7 +126,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT, "audience not found");
     }
   } else {
-    if (raw_jwt.HasAudiences() && !ignore_audience_) {
+    if (raw_jwt.HasAudiences() && !ignore_audiences_) {
       return util::Status(
           util::error::INVALID_ARGUMENT,
           "invalid JWT; token has audience set, but validator not");
@@ -138,7 +138,7 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
 JwtValidatorBuilder::JwtValidatorBuilder() {
   ignore_issuer_ = false;
   ignore_subject_ = false;
-  ignore_audience_ = false;
+  ignore_audiences_ = false;
   clock_skew_ = absl::ZeroDuration();
 }
 
@@ -170,8 +170,8 @@ JwtValidatorBuilder& JwtValidatorBuilder::IgnoreSubject() {
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudience() {
-  ignore_audience_ = true;
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudiences() {
+  ignore_audiences_ = true;
   return *this;
 }
 
@@ -201,14 +201,14 @@ util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
         util::error::INVALID_ARGUMENT,
         "ignoreSubject() and expectedSubject() cannot be used together");
   }
-  if (expected_audience_.has_value() && ignore_audience_) {
+  if (expected_audience_.has_value() && ignore_audiences_) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
-        "ignoreAudience() and expectedAudience() cannot be used together");
+        "ignoreAudiences() and expectedAudience() cannot be used together");
   }
   JwtValidator validator(expected_issuer_, expected_subject_,
                          expected_audience_, ignore_issuer_, ignore_subject_,
-                         ignore_audience_, clock_skew_, fixed_now_);
+                         ignore_audiences_, clock_skew_, fixed_now_);
   return validator;
 }
 

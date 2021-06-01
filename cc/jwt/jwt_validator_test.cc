@@ -308,14 +308,14 @@ TEST(JwtValidator, NoAudienceOK) {
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
-TEST(JwtValidator, IgnoreAudienceOK) {
+TEST(JwtValidator, IgnoreAudiencesOK) {
   util::StatusOr<RawJwt> jwt_or =
       RawJwtBuilder().AddAudience("audience").Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
   util::StatusOr<JwtValidator> validator_or =
-      JwtValidatorBuilder().IgnoreAudience().Build();
+      JwtValidatorBuilder().IgnoreAudiences().Build();
   ASSERT_THAT(validator_or.status(), IsOk());
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
@@ -397,7 +397,7 @@ TEST(JwtValidator, InvalidValidators) {
   EXPECT_FALSE(
       JwtValidatorBuilder().ExpectSubject("a").IgnoreSubject().Build().ok());
   EXPECT_FALSE(
-      JwtValidatorBuilder().ExpectAudience("a").IgnoreAudience().Build().ok());
+      JwtValidatorBuilder().ExpectAudience("a").IgnoreAudiences().Build().ok());
 }
 
 

@@ -34,7 +34,7 @@ public final class JwtValidator {
   private final Optional<String> expectedSubject;
   private final boolean ignoreSubject;
   private final Optional<String> expectedAudience;
-  private final boolean ignoreAudience;
+  private final boolean ignoreAudiences;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -49,7 +49,7 @@ public final class JwtValidator {
     this.expectedSubject = builder.expectedSubject;
     this.ignoreSubject = builder.ignoreSubject;
     this.expectedAudience = builder.expectedAudience;
-    this.ignoreAudience = builder.ignoreAudience;
+    this.ignoreAudiences = builder.ignoreAudiences;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
@@ -77,7 +77,7 @@ public final class JwtValidator {
     private Optional<String> expectedSubject;
     private boolean ignoreSubject;
     private Optional<String> expectedAudience;
-    private boolean ignoreAudience;
+    private boolean ignoreAudiences;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
@@ -89,7 +89,7 @@ public final class JwtValidator {
       this.expectedSubject = Optional.empty();
       this.ignoreSubject = false;
       this.expectedAudience = Optional.empty();
-      this.ignoreAudience = false;
+      this.ignoreAudiences = false;
     }
 
     /**
@@ -170,7 +170,7 @@ public final class JwtValidator {
      * claims are rejected. So this must be set for token that have {@code aud} claims.
      *
      * <p>If you want to ignore this claim or if you want to validate it yourself, use
-     * ignoreAudience().
+     * ignoreAudiences().
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
@@ -183,8 +183,8 @@ public final class JwtValidator {
     }
 
     /** Lets the validator ignore the {@code aud} claim. */
-    public Builder ignoreAudience() {
-      this.ignoreAudience = true;
+    public Builder ignoreAudiences() {
+      this.ignoreAudiences = true;
       return this;
     }
 
@@ -225,9 +225,9 @@ public final class JwtValidator {
         throw new IllegalArgumentException(
             "ignoreSubject() and expectedSubject() cannot be used together.");
       }
-      if (this.ignoreAudience && this.expectedAudience.isPresent()) {
+      if (this.ignoreAudiences && this.expectedAudience.isPresent()) {
         throw new IllegalArgumentException(
-            "ignoreAudience() and expectedAudience() cannot be used together.");
+            "ignoreAudiences() and expectedAudience() cannot be used together.");
       }
       return new JwtValidator(this);
     }
@@ -296,7 +296,7 @@ public final class JwtValidator {
                 "invalid JWT; missing expected audience %s.", this.expectedAudience.get()));
       }
     } else {
-      if (target.hasAudiences() && !this.ignoreAudience) {
+      if (target.hasAudiences() && !this.ignoreAudiences) {
         throw new JwtInvalidException("invalid JWT; token has audience set, but validator not.");
       }
     }

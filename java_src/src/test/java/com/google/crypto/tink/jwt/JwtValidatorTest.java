@@ -361,11 +361,12 @@ public final class JwtValidatorTest {
   }
 
   @Test
-  public void ignoreAudienceSkipsValidationOfAudience() throws Exception {
-    JwtValidator validator = JwtValidator.newBuilder().ignoreAudience().build();
+  public void ignoreAudiencesSkipsValidationOfAudiences() throws Exception {
+    JwtValidator validator = JwtValidator.newBuilder().ignoreAudiences().build();
 
-    RawJwt tokenWithAudience = RawJwt.newBuilder().addAudience("audience").build();
-    validator.validate(tokenWithAudience);
+    RawJwt tokenWithAudiences =
+        RawJwt.newBuilder().addAudience("audience1").addAudience("audience2").build();
+    validator.validate(tokenWithAudiences);
     RawJwt tokenWithoutAudience = RawJwt.newBuilder().build();
     validator.validate(tokenWithoutAudience);
   }
@@ -383,6 +384,6 @@ public final class JwtValidatorTest {
         () -> JwtValidator.newBuilder().expectSubject("a").ignoreSubject().build());
     assertThrows(
         IllegalArgumentException.class,
-        () -> JwtValidator.newBuilder().expectAudience("a").ignoreAudience().build());
+        () -> JwtValidator.newBuilder().expectAudience("a").ignoreAudiences().build());
   }
 }
