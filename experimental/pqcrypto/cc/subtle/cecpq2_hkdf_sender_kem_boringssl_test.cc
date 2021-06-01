@@ -50,10 +50,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Creating an instance of Cecpq2HkdfSenderKemBoringSsl specifying an unknown
   // curve
@@ -75,10 +75,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Creating an instance of Cecpq2HkdfSenderKemBoringSsl specifying a
   // unsupported curve
@@ -106,10 +106,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
   // Not post-quantum secure output key length
   int out_len = 31;
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Creating an instance of Cecpq2HkdfSenderKemBoringSsl
   auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(
@@ -140,10 +140,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
   std::string info_hex = "0b0b0b0b0b0b0b0b";
   int out_len = 32;
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Creating an instance of Cecpq2HkdfSenderKemBoringSsl
   auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(
@@ -178,10 +178,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
   std::string info_hex = "0b0b0b0b0b0b0b0b";
   int out_len = 32;
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Creating an instance of Cecpq2HkdfSenderKemBoringSsl
   auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(
@@ -190,6 +190,68 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowSuccess) {
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
   ASSERT_TRUE(status_or_sender_kem.ok());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  // Generating sender's shared secret
+  auto status_or_kem_key = sender_kem->GenerateKey(
+      HashType::SHA256, test::HexDecodeOrDie(salt_hex),
+      test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
+  ASSERT_TRUE(status_or_kem_key.ok());
+  auto kem_key = std::move(status_or_kem_key.ValueOrDie());
+
+  // Initializing recipient's KEM data structure using recipient's private keys
+  auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
+      EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.priv,
+      std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed));
+  ASSERT_TRUE(status_or_recipient_kem.ok());
+  auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
+
+  // Generating recipient's shared secret
+  auto status_or_shared_secret = recipient_kem->GenerateKey(
+      kem_key->get_kem_bytes(), HashType::SHA256,
+      test::HexDecodeOrDie(salt_hex), test::HexDecodeOrDie(info_hex), out_len,
+      EcPointFormat::COMPRESSED);
+  ASSERT_TRUE(status_or_shared_secret.ok());
+
+  // Asserting that both shared secrets match
+  EXPECT_EQ(test::HexEncode(
+                util::SecretDataAsStringView(kem_key->get_symmetric_key())),
+            test::HexEncode(util::SecretDataAsStringView(
+                status_or_shared_secret.ValueOrDie())));
+}
+
+// This test evaluates the whole KEM flow as in
+// TestSenderRecipientFullFlowSuccess with the difference that the caller's
+// public key is erased after Cecpq2HkdfSenderKemBoringSsl object is created.
+// This test would detect if the caller's public key buffers are being used
+// by Cecpq2HkdfSenderKemBoringSsl instead of Cecpq2HkdfSenderKemBoringSsl
+// having its own explicit copy.
+TEST(Cecpq2HkdfSenderKemBoringSslTest, TestFullFlowErasedCallersPublicKey) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  // Declaring auxiliary parameters
+  std::string salt_hex = "0b0b0b0b";
+  std::string info_hex = "0b0b0b0b0b0b0b0b";
+  int out_len = 32;
+
+  auto status_or_cecpq2_key =
+      pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
+
+  // Creating an instance of Cecpq2HkdfSenderKemBoringSsl
+  auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(
+      EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
+      cecpq2_key_pair.x25519_key_pair.pub_y,
+      cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
+  ASSERT_TRUE(status_or_sender_kem.ok());
+  auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
+
+  // Erasing caller's public key buffers
+  cecpq2_key_pair.x25519_key_pair.pub_x.clear();
+  cecpq2_key_pair.x25519_key_pair.pub_y.clear();
+  cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled.clear();
 
   // Generating sender's shared secret
   auto status_or_kem_key = sender_kem->GenerateKey(
@@ -233,10 +295,10 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
   std::string salt_hex = "0b0b0b0b";
   int out_len = 32;
 
-  auto statur_or_cecpq2_key =
+  auto status_or_cecpq2_key =
       pqc::GenerateCecpq2Keypair(EllipticCurveType::CURVE25519);
-  ASSERT_TRUE(statur_or_cecpq2_key.ok());
-  auto cecpq2_key_pair = std::move(statur_or_cecpq2_key).ValueOrDie();
+  ASSERT_TRUE(status_or_cecpq2_key.ok());
+  auto cecpq2_key_pair = std::move(status_or_cecpq2_key).ValueOrDie();
 
   // Initializing sender's KEM data structure using recipient's public keys
   auto status_or_sender_kem = Cecpq2HkdfSenderKemBoringSsl::New(

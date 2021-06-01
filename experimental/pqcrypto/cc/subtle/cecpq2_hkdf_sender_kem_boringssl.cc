@@ -53,10 +53,8 @@ Cecpq2HkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
 Cecpq2HkdfX25519SenderKemBoringSsl::Cecpq2HkdfX25519SenderKemBoringSsl(
     const absl::string_view peer_ec_pubx,
     const absl::string_view marshalled_hrss_pub) {
-  peer_public_key_x25519_ =
-      reinterpret_cast<const uint8_t*>(peer_ec_pubx.data());
-  peer_marshalled_public_key_hrss_ =
-      reinterpret_cast<const uint8_t*>(marshalled_hrss_pub.data());
+  peer_public_key_x25519_.assign(peer_ec_pubx);
+  peer_marshalled_public_key_hrss_.assign(marshalled_hrss_pub);
 }
 
 // static
@@ -120,7 +118,7 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
   // locally generated ephemeral X25519 private key
   util::SecretData x25519_shared_secret(X25519_SHARED_KEY_LEN);
   X25519(x25519_shared_secret.data(), ephemeral_x25519_private_key.data(),
-         peer_public_key_x25519_);
+         reinterpret_cast<const uint8_t *>(peer_public_key_x25519_.data()));
 
   // Declare the hrss_shared_secret and hrss_kem_bytes to be used in HRSS encaps
   util::SecretData hrss_shared_secret;
@@ -132,7 +130,8 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
   // Recover the internal HRSS public key representation from marshalled version
   struct HRSS_public_key peer_public_key_hrss;
   HRSS_parse_public_key(&peer_public_key_hrss,
-                        peer_marshalled_public_key_hrss_);
+                        reinterpret_cast<const uint8_t *>(
+                            peer_marshalled_public_key_hrss_.data()));
 
   // Generate entropy to be used in encaps
   util::SecretData encaps_entropy =

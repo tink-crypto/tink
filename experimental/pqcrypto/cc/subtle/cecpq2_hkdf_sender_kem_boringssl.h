@@ -143,10 +143,10 @@ class Cecpq2HkdfX25519SenderKemBoringSsl : public Cecpq2HkdfSenderKemBoringSsl {
   // not done, the internal raw HRSS public key representation (using the struct
   // HRSS_public_key data structure) might cause padding problems depending on
   // the compiler options.
-  // Pointer to array of size X25519_PUBLIC_VALUE_LEN bytes
-  const uint8_t* peer_public_key_x25519_;
-  // Pointer to array of size HRSS_PUBLIC_KEY_BYTES bytes
-  const uint8_t* peer_marshalled_public_key_hrss_;
+  // X25519 public key of size X25519_PUBLIC_VALUE_LEN
+  std::string peer_public_key_x25519_;
+  // HRSS public key of size HRSS_PUBLIC_KEY_BYTES
+  std::string peer_marshalled_public_key_hrss_;
 };
 
 }  // namespace subtle
