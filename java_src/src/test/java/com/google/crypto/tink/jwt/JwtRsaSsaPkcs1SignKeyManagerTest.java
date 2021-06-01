@@ -144,6 +144,14 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     factory.validateKeyFormat(format);
   }
 
+  @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtRsaSsaPkcs1KeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
+  }
+
   private static Object[] parametersAlgos() {
     return new Object[] {
       JwtRsaSsaPkcs1Algorithm.RS256, JwtRsaSsaPkcs1Algorithm.RS384, JwtRsaSsaPkcs1Algorithm.RS512

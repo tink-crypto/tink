@@ -36,6 +36,9 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -179,6 +182,30 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
           throws GeneralSecurityException {
         throw new UnsupportedOperationException();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_HS256_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS256",
+            createKeyFormat(JwtHmacAlgorithm.HS256, 32, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_HS384_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS384",
+            createKeyFormat(JwtHmacAlgorithm.HS384, 48, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_HS512_RAW",
+            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_HS512",
+            createKeyFormat(JwtHmacAlgorithm.HS512, 64, KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -188,29 +215,36 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS256 256-bit keys. */
   public static final KeyTemplate hs256Template() {
-    return createTemplate(32, JwtHmacAlgorithm.HS256);
+    return createTemplate(JwtHmacAlgorithm.HS256, 32);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS384 384-bit keys. */
   public static final KeyTemplate hs384Template() {
-    return createTemplate(48, JwtHmacAlgorithm.HS384);
+    return createTemplate(JwtHmacAlgorithm.HS384, 48);
   }
 
   /** Returns a {@link KeyTemplate} that generates new instances of HS512 384-bit keys. */
   public static final KeyTemplate hs512Template() {
-    return createTemplate(64, JwtHmacAlgorithm.HS512);
+    return createTemplate(JwtHmacAlgorithm.HS512, 64);
   }
 
   /**
    * @return a {@link KeyTemplate} containing a {@link JwtHmacKeyFormat} with some specified
    *     parameters.
    */
-  private static KeyTemplate createTemplate(int keySize, JwtHmacAlgorithm algorithm) {
+  private static KeyTemplate createTemplate(JwtHmacAlgorithm algorithm, int keySize) {
     JwtHmacKeyFormat format =
         JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
     return KeyTemplate.create(
         new JwtHmacKeyManager().getKeyType(),
         format.toByteArray(),
         KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static KeyFactory.KeyFormat<JwtHmacKeyFormat> createKeyFormat(
+      JwtHmacAlgorithm algorithm, int keySize, KeyTemplate.OutputPrefixType prefixType) {
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.newBuilder().setAlgorithm(algorithm).setKeySize(keySize).build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

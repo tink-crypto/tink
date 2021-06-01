@@ -105,6 +105,14 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtHmacKeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
+  }
+
+  @Test
   public void createKey_valid() throws Exception {
     manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));
     manager.validateKey(factory.createKey(makeJwtHmacKeyFormat(32, JwtHmacAlgorithm.HS256)));

@@ -212,6 +212,14 @@ public class JwtEcdsaSignKeyManagerTest {
   }
 
   @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtEcdsaKeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
+  }
+
+  @Test
   @Parameters(method = "templates")
   public void createSignVerify_success(KeyTemplate template) throws Exception {
     assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.

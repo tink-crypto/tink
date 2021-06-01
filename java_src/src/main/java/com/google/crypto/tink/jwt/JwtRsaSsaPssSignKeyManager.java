@@ -44,6 +44,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -212,8 +215,71 @@ public final class JwtRsaSsaPssSignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_PS256_2048_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                2048,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS256_2048_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                2048,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS256_3072_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS256_3072_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS256,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS384_3072_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS384,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS384_3072_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS384,
+                3072,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_PS512_4096_F4_RAW",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS512,
+                4096,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_PS512_4096_F4",
+            createKeyFormat(
+                JwtRsaSsaPssAlgorithm.PS512,
+                4096,
+                RSAKeyGenParameterSpec.F4,
+                KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
+
   /**
    * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager} with
    * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
@@ -291,5 +357,19 @@ public final class JwtRsaSsaPssSignKeyManager
         new JwtRsaSsaPssSignKeyManager().getKeyType(),
         format.toByteArray(),
         KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> createKeyFormat(
+      JwtRsaSsaPssAlgorithm algorithm,
+      int modulusSize,
+      BigInteger publicExponent,
+      KeyTemplate.OutputPrefixType prefixType) {
+    JwtRsaSsaPssKeyFormat format =
+        JwtRsaSsaPssKeyFormat.newBuilder()
+            .setAlgorithm(algorithm)
+            .setModulusSizeInBits(modulusSize)
+            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+            .build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

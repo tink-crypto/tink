@@ -41,6 +41,8 @@ java_library(
         "@maven//:args4j_args4j",
         "@tink_java//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
         "@tink_java//src/main/java/com/google/crypto/tink/hybrid:hybrid_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_mac_config",
+        "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/prf:prf_config",
         "@tink_java//src/main/java/com/google/crypto/tink/signature:signature_config",
         "@tink_java//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",

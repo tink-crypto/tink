@@ -41,6 +41,9 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -177,6 +180,30 @@ public final class JwtEcdsaSignKeyManager
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_ES256_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES256",
+            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_ES384_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES384",
+            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_ES512_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES512",
+            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
   /**
@@ -246,5 +273,11 @@ public final class JwtEcdsaSignKeyManager
         new JwtEcdsaSignKeyManager().getKeyType(),
         format.toByteArray(),
         KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static KeyFactory.KeyFormat<JwtEcdsaKeyFormat> createKeyFormat(
+      JwtEcdsaAlgorithm algorithm, KeyTemplate.OutputPrefixType prefixType) {
+    JwtEcdsaKeyFormat format = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

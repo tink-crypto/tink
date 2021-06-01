@@ -132,6 +132,14 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   }
 
   @Test
+  public void testKeyFormatsAreValid() throws Exception {
+    for (KeyTypeManager.KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> format :
+        factory.keyFormats().values()) {
+      factory.validateKeyFormat(format.keyFormat);
+    }
+  }
+
+  @Test
   public void invalidKeyFormat_smallKey_throw()
       throws GeneralSecurityException {
     JwtRsaSsaPssKeyFormat format =
