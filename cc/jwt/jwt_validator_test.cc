@@ -143,6 +143,64 @@ TEST(JwtValidator, NotBeforeInTheNearFutureWithClockSkewOK) {
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
+TEST(JwtValidator, RequiresTypeHeaderButNotTypHeaderNotOK) {
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, InvalidTypeHeaderNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("unknown").Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().ExpectTypeHeader("JWT").Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, CorrectTypeHeaderOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
+}
+
+TEST(JwtValidator, TypeHeaderInTokenButNotInValiatorNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, IgnoreTypeHeaderOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().IgnoreTypeHeader().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
+}
+
 TEST(JwtValidator, RequiresIssuerButNotIssuerNotOK) {
   util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
@@ -392,6 +450,11 @@ TEST(JwtValidator, CallBuildTwiceOk) {
 }
 
 TEST(JwtValidator, InvalidValidators) {
+  EXPECT_FALSE(JwtValidatorBuilder()
+                   .ExpectTypeHeader("a")
+                   .IgnoreTypeHeader()
+                   .Build()
+                   .ok());
   EXPECT_FALSE(
       JwtValidatorBuilder().ExpectIssuer("a").IgnoreIssuer().Build().ok());
   EXPECT_FALSE(

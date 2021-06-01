@@ -69,7 +69,6 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   JwtSignRequest comp_request;
   comp_request.set_keyset(keyset);
   auto raw_jwt = comp_request.mutable_raw_jwt();
-  raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
   raw_jwt->mutable_audiences()->Add("audience1");
@@ -104,7 +103,6 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
       jwt.VerifyMacAndDecode(nullptr, &verify_request, &verify_response).ok());
   EXPECT_THAT(verify_response.err(), IsEmpty());
   auto verified_jwt = verify_response.verified_jwt();
-  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
   EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));
@@ -201,7 +199,6 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   JwtSignRequest comp_request;
   comp_request.set_keyset(private_keyset_);
   auto raw_jwt = comp_request.mutable_raw_jwt();
-  raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
   raw_jwt->mutable_audiences()->Add("audience1");
@@ -236,7 +233,6 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
           .ok());
   EXPECT_THAT(verify_response.err(), IsEmpty());
   auto verified_jwt = verify_response.verified_jwt();
-  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
   EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));

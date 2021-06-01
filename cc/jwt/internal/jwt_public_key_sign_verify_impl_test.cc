@@ -83,7 +83,8 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   // Success
   util::StatusOr<VerifiedJwt> verified_jwt_or =
@@ -121,7 +122,8 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_verify_->VerifyAndDecode(compact, validator);

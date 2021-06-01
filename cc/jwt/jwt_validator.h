@@ -42,16 +42,21 @@ class JwtValidator {
   util::Status Validate(crypto::tink::RawJwt const& raw_jwt) const;
 
  private:
-  explicit JwtValidator(absl::optional<absl::string_view> issuer,
-                        absl::optional<absl::string_view> subject,
-                        absl::optional<absl::string_view> audience,
-                        bool ignore_issuer, bool ignore_subject,
-                        bool ignore_audiences, absl::Duration clock_skew,
+  // TODO(juerg): pass a const JwtValidatorBuilder& instead..
+  explicit JwtValidator(absl::optional<absl::string_view> expected_type_header,
+                        absl::optional<absl::string_view> expected_issuer,
+                        absl::optional<absl::string_view> expected_subject,
+                        absl::optional<absl::string_view> expected_audience,
+                        bool ignore_type_header, bool ignore_issuer,
+                        bool ignore_subject, bool ignore_audiences,
+                        absl::Duration clock_skew,
                         absl::optional<absl::Time> fixed_now);
   friend class JwtValidatorBuilder;
+  absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
   absl::optional<std::string> expected_subject_;
   absl::optional<std::string> expected_audience_;
+  bool ignore_type_header_;
   bool ignore_issuer_;
   bool ignore_subject_;
   bool ignore_audiences_;
@@ -69,10 +74,12 @@ class JwtValidatorBuilder {
   JwtValidatorBuilder(JwtValidatorBuilder&& other) = default;
   JwtValidatorBuilder& operator=(JwtValidatorBuilder&& other) = default;
 
+  JwtValidatorBuilder& ExpectTypeHeader(absl::string_view expected_type_header);
   JwtValidatorBuilder& ExpectIssuer(absl::string_view expected_issuer);
   JwtValidatorBuilder& ExpectSubject(absl::string_view expected_subject);
   JwtValidatorBuilder& ExpectAudience(absl::string_view expected_audience);
 
+  JwtValidatorBuilder& IgnoreTypeHeader();
   JwtValidatorBuilder& IgnoreIssuer();
   JwtValidatorBuilder& IgnoreSubject();
   JwtValidatorBuilder& IgnoreAudiences();
@@ -83,9 +90,11 @@ class JwtValidatorBuilder {
   util::StatusOr<JwtValidator> Build();
 
  private:
+  absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
   absl::optional<std::string> expected_subject_;
   absl::optional<std::string> expected_audience_;
+  bool ignore_type_header_;
   bool ignore_issuer_;
   bool ignore_subject_;
   bool ignore_audiences_;

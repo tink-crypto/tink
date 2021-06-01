@@ -87,7 +87,8 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
@@ -123,7 +124,8 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
@@ -156,6 +158,7 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
   JwtValidator validator_1970 = JwtValidatorBuilder()
+                                    .ExpectTypeHeader("JWT")
                                     .ExpectIssuer("joe")
                                     .SetFixedNow(absl::FromUnixSeconds(12345))
                                     .Build()

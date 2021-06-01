@@ -65,8 +65,11 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   if (!compact_or.ok()) {
     return compact_or.status();
   }
-  auto validator_builder =
-      JwtValidatorBuilder().IgnoreIssuer().IgnoreSubject().IgnoreAudiences();
+  auto validator_builder = JwtValidatorBuilder()
+                               .IgnoreTypeHeader()
+                               .IgnoreIssuer()
+                               .IgnoreSubject()
+                               .IgnoreAudiences();
   auto issued_at_or = raw_jwt.GetIssuedAt();
   if (issued_at_or.ok()) {
     validator_builder.SetFixedNow(issued_at_or.ValueOrDie());

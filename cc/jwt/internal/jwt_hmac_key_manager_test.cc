@@ -261,6 +261,7 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
   JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectTypeHeader("JWT")
                                .ExpectIssuer("joe")
                                .SetFixedNow(absl::FromUnixSeconds(12345))
                                .Build()

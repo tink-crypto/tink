@@ -25,12 +25,17 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 
 }
 
-JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
-                           absl::optional<absl::string_view> expected_subject,
-                           absl::optional<absl::string_view> expected_audience,
-                           bool ignore_issuer, bool ignore_subject,
-                           bool ignore_audiences, absl::Duration clock_skew,
-                           absl::optional<absl::Time> fixed_now) {
+JwtValidator::JwtValidator(
+    absl::optional<absl::string_view> expected_type_header,
+    absl::optional<absl::string_view> expected_issuer,
+    absl::optional<absl::string_view> expected_subject,
+    absl::optional<absl::string_view> expected_audience,
+    bool ignore_type_header, bool ignore_issuer, bool ignore_subject,
+    bool ignore_audiences, absl::Duration clock_skew,
+    absl::optional<absl::Time> fixed_now) {
+  if (expected_type_header.has_value()) {
+    expected_type_header_ = std::string(expected_type_header.value());
+  }
   if (expected_issuer.has_value()) {
     expected_issuer_ = std::string(expected_issuer.value());
   }
@@ -40,6 +45,7 @@ JwtValidator::JwtValidator(absl::optional<absl::string_view> expected_issuer,
   if (expected_audience.has_value()) {
     expected_audience_ = std::string(expected_audience.value());
   }
+  ignore_type_header_ = ignore_type_header;
   ignore_issuer_ = ignore_issuer;
   ignore_subject_ = ignore_subject;
   ignore_audiences_ = ignore_audiences;
@@ -71,6 +77,29 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (not_before_or.ValueOrDie() > now + clock_skew_) {
       return util::Status(util::error::INVALID_ARGUMENT,
                         "token cannot yet be used");
+    }
+  }
+  if (expected_type_header_.has_value()) {
+    std::cout << " expected type header" << expected_type_header_.value();
+    if (!raw_jwt.HasTypeHeader()) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "missing expected type header");
+    }
+    auto type_header_or = raw_jwt.GetTypeHeader();
+    if (!type_header_or.ok()) {
+      return type_header_or.status();
+    }
+    if (expected_type_header_.value() != type_header_or.ValueOrDie()) {
+      return util::Status(util::error::INVALID_ARGUMENT, "wrong type header");
+    }
+  } else {
+    std::cout << " !expected type header";
+    std::cout << " ignore_type_header_: " << ignore_type_header_;
+    std::cout << " raw_jwt.HasTypeHeader(): " << raw_jwt.HasTypeHeader();
+    if (raw_jwt.HasTypeHeader() && !ignore_type_header_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has type header set, but validator not");
     }
   }
   if (expected_issuer_.has_value()){
@@ -136,10 +165,17 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
 }
 
 JwtValidatorBuilder::JwtValidatorBuilder() {
+  ignore_type_header_ = false;
   ignore_issuer_ = false;
   ignore_subject_ = false;
   ignore_audiences_ = false;
   clock_skew_ = absl::ZeroDuration();
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectTypeHeader(
+    absl::string_view type_header) {
+  expected_type_header_ = std::string(type_header);
+  return *this;
 }
 
 JwtValidatorBuilder& JwtValidatorBuilder::ExpectIssuer(
@@ -157,6 +193,11 @@ JwtValidatorBuilder& JwtValidatorBuilder::ExpectSubject(
 JwtValidatorBuilder& JwtValidatorBuilder::ExpectAudience(
     absl::string_view audience) {
   expected_audience_ = std::string(audience);
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreTypeHeader() {
+  ignore_type_header_ = true;
   return *this;
 }
 
@@ -191,23 +232,29 @@ JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
 }
 
 util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
+  if (expected_type_header_.has_value() && ignore_type_header_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "IgnoreTypeHeader() and ExpectTypeHeader() cannot be used together");
+  }
   if (expected_issuer_.has_value() && ignore_issuer_) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
-        "ignoreIssuer() and expectedIssuer() cannot be used together");
+        "IgnoreIssuer() and ExpectedIssuer() cannot be used together");
   }
   if (expected_subject_.has_value() && ignore_subject_) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
-        "ignoreSubject() and expectedSubject() cannot be used together");
+        "IgnoreSubject() and ExpectSubject() cannot be used together");
   }
   if (expected_audience_.has_value() && ignore_audiences_) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
-        "ignoreAudiences() and expectedAudience() cannot be used together");
+        "IgnoreAudiences() and ExpectAudience() cannot be used together");
   }
-  JwtValidator validator(expected_issuer_, expected_subject_,
-                         expected_audience_, ignore_issuer_, ignore_subject_,
+  JwtValidator validator(expected_type_header_, expected_issuer_,
+                         expected_subject_, expected_audience_,
+                         ignore_type_header_, ignore_issuer_, ignore_subject_,
                          ignore_audiences_, clock_skew_, fixed_now_);
   return validator;
 }
