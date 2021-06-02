@@ -35,6 +35,7 @@
 #include "pqcrypto/cc/subtle/cecpq2_subtle_boringssl_util.h"
 
 using ::crypto::tink::test::StatusIs;
+using ::crypto::tink::test::IsOk;
 using ::testing::HasSubstr;
 
 namespace crypto {
@@ -116,7 +117,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
       cecpq2_key_pair.x25519_key_pair.pub_y,
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
-  ASSERT_TRUE(status_or_sender_kem.ok());
+  ASSERT_THAT(status_or_sender_kem.status(), IsOk());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
 
   // Generating a symmetric key
@@ -150,7 +151,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
       cecpq2_key_pair.x25519_key_pair.pub_y,
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
-  ASSERT_TRUE(status_or_sender_kem.ok());
+  ASSERT_THAT(status_or_sender_kem.status(), IsOk());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
 
   // Generating a symmetric key
@@ -159,7 +160,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestGenerateKey) {
       test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
 
   // Asserting that the symmetric key has been successfully generated
-  ASSERT_TRUE(status_or_kem_key.ok());
+  ASSERT_THAT(status_or_kem_key.status(), IsOk());
   auto kem_key = std::move(status_or_kem_key.ValueOrDie());
   EXPECT_FALSE(kem_key->get_kem_bytes().empty());
   EXPECT_EQ(kem_key->get_symmetric_key().size(), out_len);
@@ -245,7 +246,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestFullFlowErasedCallersPublicKey) {
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
       cecpq2_key_pair.x25519_key_pair.pub_y,
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
-  ASSERT_TRUE(status_or_sender_kem.ok());
+  ASSERT_THAT(status_or_sender_kem.status(), IsOk());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
 
   // Erasing caller's public key buffers
@@ -257,14 +258,14 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestFullFlowErasedCallersPublicKey) {
   auto status_or_kem_key = sender_kem->GenerateKey(
       HashType::SHA256, test::HexDecodeOrDie(salt_hex),
       test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
-  ASSERT_TRUE(status_or_kem_key.ok());
+  ASSERT_THAT(status_or_kem_key.status(), IsOk());
   auto kem_key = std::move(status_or_kem_key.ValueOrDie());
 
   // Initializing recipient's KEM data structure using recipient's private keys
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.priv,
       std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed));
-  ASSERT_TRUE(status_or_recipient_kem.ok());
+  ASSERT_THAT(status_or_recipient_kem.status(), IsOk());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 
   // Generating recipient's shared secret
@@ -272,7 +273,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestFullFlowErasedCallersPublicKey) {
       kem_key->get_kem_bytes(), HashType::SHA256,
       test::HexDecodeOrDie(salt_hex), test::HexDecodeOrDie(info_hex), out_len,
       EcPointFormat::COMPRESSED);
-  ASSERT_TRUE(status_or_shared_secret.ok());
+  ASSERT_THAT(status_or_shared_secret.status(), IsOk());
 
   // Asserting that both shared secrets match
   EXPECT_EQ(test::HexEncode(
@@ -305,21 +306,21 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestSenderRecipientFullFlowFailure) {
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.pub_x,
       cecpq2_key_pair.x25519_key_pair.pub_y,
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
-  ASSERT_TRUE(status_or_sender_kem.ok());
+  ASSERT_THAT(status_or_sender_kem.status(), IsOk());
   auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
 
   // Generating sender's shared secret (using salt_hex1)
   auto status_or_kem_key = sender_kem->GenerateKey(
       HashType::SHA256, test::HexDecodeOrDie(salt_hex),
       test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
-  ASSERT_TRUE(status_or_kem_key.ok());
+  ASSERT_THAT(status_or_kem_key.status(), IsOk());
   auto kem_key = std::move(status_or_kem_key.ValueOrDie());
 
   // Initializing recipient's KEM data structure using recipient's private keys
   auto status_or_recipient_kem = Cecpq2HkdfRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, cecpq2_key_pair.x25519_key_pair.priv,
       std::move(cecpq2_key_pair.hrss_key_pair.hrss_private_key_seed));
-  ASSERT_TRUE(status_or_recipient_kem.ok());
+  ASSERT_THAT(status_or_recipient_kem.status(), IsOk());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 
   // Here, we corrupt kem_bytes (we change all bytes to "a") so that
