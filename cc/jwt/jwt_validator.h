@@ -31,6 +31,8 @@ namespace tink {
 // A JwtValidator defines how JSON Web Tokens (JWTs) should be validated.
 //
 
+class JwtValidatorBuilder;
+
 class JwtValidator {
  public:
   // JwtValidator objects are copiable and movable.
@@ -42,15 +44,7 @@ class JwtValidator {
   util::Status Validate(crypto::tink::RawJwt const& raw_jwt) const;
 
  private:
-  // TODO(juerg): pass a const JwtValidatorBuilder& instead..
-  explicit JwtValidator(absl::optional<absl::string_view> expected_type_header,
-                        absl::optional<absl::string_view> expected_issuer,
-                        absl::optional<absl::string_view> expected_subject,
-                        absl::optional<absl::string_view> expected_audience,
-                        bool ignore_type_header, bool ignore_issuer,
-                        bool ignore_subject, bool ignore_audiences,
-                        absl::Duration clock_skew,
-                        absl::optional<absl::Time> fixed_now);
+  explicit JwtValidator(const JwtValidatorBuilder& builder);
   friend class JwtValidatorBuilder;
   absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
@@ -90,6 +84,7 @@ class JwtValidatorBuilder {
   util::StatusOr<JwtValidator> Build();
 
  private:
+  friend class JwtValidator;
   absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
   absl::optional<std::string> expected_subject_;

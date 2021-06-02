@@ -25,32 +25,17 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 
 }
 
-JwtValidator::JwtValidator(
-    absl::optional<absl::string_view> expected_type_header,
-    absl::optional<absl::string_view> expected_issuer,
-    absl::optional<absl::string_view> expected_subject,
-    absl::optional<absl::string_view> expected_audience,
-    bool ignore_type_header, bool ignore_issuer, bool ignore_subject,
-    bool ignore_audiences, absl::Duration clock_skew,
-    absl::optional<absl::Time> fixed_now) {
-  if (expected_type_header.has_value()) {
-    expected_type_header_ = std::string(expected_type_header.value());
-  }
-  if (expected_issuer.has_value()) {
-    expected_issuer_ = std::string(expected_issuer.value());
-  }
-  if (expected_subject.has_value()) {
-    expected_subject_ = std::string(expected_subject.value());
-  }
-  if (expected_audience.has_value()) {
-    expected_audience_ = std::string(expected_audience.value());
-  }
-  ignore_type_header_ = ignore_type_header;
-  ignore_issuer_ = ignore_issuer;
-  ignore_subject_ = ignore_subject;
-  ignore_audiences_ = ignore_audiences;
-  clock_skew_ = clock_skew;
-  fixed_now_ = fixed_now;
+JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
+  expected_type_header_ = builder.expected_type_header_;
+  expected_issuer_ = builder.expected_issuer_;
+  expected_subject_ = builder.expected_subject_;
+  expected_audience_ = builder.expected_audience_;
+  ignore_type_header_ = builder.ignore_type_header_;
+  ignore_issuer_ = builder.ignore_issuer_;
+  ignore_subject_ = builder.ignore_subject_;
+  ignore_audiences_ = builder.ignore_audiences_;
+  clock_skew_ = builder.clock_skew_;
+  fixed_now_ = builder.fixed_now_;
 }
 
 util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
@@ -252,10 +237,7 @@ util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
         util::error::INVALID_ARGUMENT,
         "IgnoreAudiences() and ExpectAudience() cannot be used together");
   }
-  JwtValidator validator(expected_type_header_, expected_issuer_,
-                         expected_subject_, expected_audience_,
-                         ignore_type_header_, ignore_issuer_, ignore_subject_,
-                         ignore_audiences_, clock_skew_, fixed_now_);
+  JwtValidator validator(*this);
   return validator;
 }
 
