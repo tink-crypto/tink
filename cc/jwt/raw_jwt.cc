@@ -467,7 +467,7 @@ std::vector<std::string> RawJwt::CustomClaimNames() const {
   return values;
 }
 
-RawJwtBuilder::RawJwtBuilder() {}
+RawJwtBuilder::RawJwtBuilder() { without_expiration_ = false; }
 
 RawJwtBuilder& RawJwtBuilder::SetTypeHeader(absl::string_view type_header) {
   type_header_ = std::string(type_header);
@@ -504,6 +504,11 @@ RawJwtBuilder& RawJwtBuilder::SetJwtId(absl::string_view jwid) {
   google::protobuf::Value value;
   value.set_string_value(std::string(jwid));
   (*fields)[std::string(kJwtClaimJwtId)] = value;
+  return *this;
+}
+
+RawJwtBuilder& RawJwtBuilder::WithoutExpiration() {
+  without_expiration_ = true;
   return *this;
 }
 
@@ -629,6 +634,18 @@ util::Status RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
 }
 
 util::StatusOr<RawJwt> RawJwtBuilder::Build() {
+  if (!json_proto_.fields().contains(std::string(kJwtClaimExpiration)) &&
+      !without_expiration_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "neither SetExpiration() nor WithoutExpiration() was called");
+  }
+  if (json_proto_.fields().contains(std::string(kJwtClaimExpiration)) &&
+      without_expiration_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "SetExpiration() and WithoutExpiration() must not be called together");
+  }
   RawJwt token(type_header_, json_proto_);
   return token;
 }

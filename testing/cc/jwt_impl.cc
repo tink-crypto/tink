@@ -81,6 +81,8 @@ crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
     if (!status.ok()) {
       return status;
     }
+  } else {
+    builder.WithoutExpiration();
   }
   if (raw_jwt_proto.has_issued_at()) {
     auto status = builder.SetIssuedAt(
@@ -206,6 +208,8 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
   if (validator_proto.has_audience()) {
     builder.ExpectAudience(validator_proto.audience().value());
   }
+  // TODO(juerg): Add AllowMissingExpiration to validator proto.
+  builder.AllowMissingExpiration();
   if (validator_proto.has_now()) {
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }

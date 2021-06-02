@@ -34,6 +34,7 @@ JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
   ignore_issuer_ = builder.ignore_issuer_;
   ignore_subject_ = builder.ignore_subject_;
   ignore_audiences_ = builder.ignore_audiences_;
+  allow_missing_expiration_ = builder.allow_missing_expiration_;
   clock_skew_ = builder.clock_skew_;
   fixed_now_ = builder.fixed_now_;
 }
@@ -44,6 +45,10 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     now = fixed_now_.value();
   } else {
     now = absl::Now();
+  }
+  if (!raw_jwt.HasExpiration() && !allow_missing_expiration_) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "token does not have an expiration set");
   }
   if (raw_jwt.HasExpiration()) {
     auto expiration_or = raw_jwt.GetExpiration();
@@ -154,6 +159,7 @@ JwtValidatorBuilder::JwtValidatorBuilder() {
   ignore_issuer_ = false;
   ignore_subject_ = false;
   ignore_audiences_ = false;
+  allow_missing_expiration_ = false;
   clock_skew_ = absl::ZeroDuration();
 }
 
@@ -198,6 +204,11 @@ JwtValidatorBuilder& JwtValidatorBuilder::IgnoreSubject() {
 
 JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudiences() {
   ignore_audiences_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::AllowMissingExpiration() {
+  allow_missing_expiration_ = true;
   return *this;
 }
 

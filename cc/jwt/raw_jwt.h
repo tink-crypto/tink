@@ -92,6 +92,7 @@ class RawJwtBuilder {
   RawJwtBuilder& SetSubject(absl::string_view subject);
   RawJwtBuilder& AddAudience(absl::string_view audience);
   RawJwtBuilder& SetJwtId(absl::string_view jwid);
+  RawJwtBuilder& WithoutExpiration();
   util::Status SetExpiration(absl::Time expiration);
   util::Status SetNotBefore(absl::Time notBefore);
   util::Status SetIssuedAt(absl::Time issuedAt);
@@ -114,6 +115,7 @@ class RawJwtBuilder {
 
  private:
   absl::optional<std::string> type_header_;
+  bool without_expiration_;
   google::protobuf::Struct json_proto_;
 };
 

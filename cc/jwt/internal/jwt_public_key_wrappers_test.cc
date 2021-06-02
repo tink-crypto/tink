@@ -115,7 +115,8 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   std::unique_ptr<JwtPublicKeyVerify> jwt_verify =
       std::move(jwt_verify_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -123,16 +124,22 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_verify->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
+  JwtValidator validator2 = JwtValidatorBuilder()
+                                .ExpectIssuer("unknown")
+                                .AllowMissingExpiration()
+                                .Build()
+                                .ValueOrDie();
   EXPECT_FALSE(jwt_verify->VerifyAndDecode(compact, validator2).ok());
 }
 
@@ -153,7 +160,8 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   std::unique_ptr<JwtPublicKeyVerify> jwt_verify =
       std::move(jwt_verify_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -161,8 +169,11 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_verify->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -254,10 +265,12 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
     std::unique_ptr<JwtPublicKeyVerify> jwt_verify4 =
         std::move(jwt_verify4_or.ValueOrDie());
 
-    auto raw_jwt_or = RawJwtBuilder().SetJwtId("id123").Build();
+    auto raw_jwt_or =
+        RawJwtBuilder().SetJwtId("id123").WithoutExpiration().Build();
     ASSERT_THAT(raw_jwt_or.status(), IsOk());
     RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
-    JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+    JwtValidator validator =
+        JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
 
     util::StatusOr<std::string> compact1_or = jwt_sign1->SignAndEncode(raw_jwt);
     ASSERT_THAT(compact1_or.status(), IsOk());

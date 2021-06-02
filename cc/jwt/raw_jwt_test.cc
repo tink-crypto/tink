@@ -37,6 +37,7 @@ TEST(RawJwt, GetTypeHeaderIssuerSubjectJwtIdOK) {
                     .SetIssuer("issuer")
                     .SetSubject("subject")
                     .SetJwtId("jwt_id")
+                    .WithoutExpiration()
                     .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
@@ -113,10 +114,22 @@ TEST(RawJwt, NegativeTimestampsFail) {
   EXPECT_FALSE(builder.SetNotBefore(neg).ok());
 }
 
+TEST(RawJwt, SetExpirationAndWithoutExpirationFail) {
+  absl::Time exp = absl::FromUnixMillis(12345);
+  auto builder = RawJwtBuilder().WithoutExpiration();
+  ASSERT_THAT(builder.SetExpiration(exp), IsOk());
+  EXPECT_FALSE(builder.Build().ok());
+}
+
+TEST(RawJwt, NeitherSetExpirationNorWithoutExpirationFail) {
+  EXPECT_FALSE(RawJwtBuilder().Build().ok());
+}
+
 TEST(RawJwt, AddGetAudiencesOK) {
   auto jwt_or = RawJwtBuilder()
                     .AddAudience("audience1")
                     .AddAudience("audience2")
+                    .WithoutExpiration()
                     .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
@@ -127,7 +140,7 @@ TEST(RawJwt, AddGetAudiencesOK) {
 }
 
 TEST(RawJwt, GetCustomClaimOK) {
-  auto builder = RawJwtBuilder();
+  auto builder = RawJwtBuilder().WithoutExpiration();
   ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
   ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
   ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
@@ -165,7 +178,7 @@ TEST(RawJwt, GetCustomClaimOK) {
 }
 
 TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
-  auto builder = RawJwtBuilder();
+  auto builder = RawJwtBuilder().WithoutExpiration();
   ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
   ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
   ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
@@ -224,7 +237,7 @@ TEST(RawJwt, GetRegisteredCustomClaimNotOK) {
 }
 
 TEST(RawJwt, SetRegisteredCustomClaimNotOK) {
-  auto builder = RawJwtBuilder();
+  auto builder = RawJwtBuilder().WithoutExpiration();
   EXPECT_FALSE(builder.AddStringClaim("iss", "issuer").ok());
   EXPECT_FALSE(builder.AddStringClaim("sub", "issuer").ok());
   EXPECT_FALSE(builder.AddStringClaim("jti", "issuer").ok());
@@ -238,7 +251,7 @@ TEST(RawJwt, SetRegisteredCustomClaimNotOK) {
 }
 
 TEST(RawJwt, SetInvalidJsonObjectClaimNotOK) {
-  auto builder = RawJwtBuilder();
+  auto builder = RawJwtBuilder().WithoutExpiration();
   EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "invalid").ok());
   EXPECT_FALSE(builder.AddJsonObjectClaim("obj", R"("string")").ok());
   EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "42").ok());
@@ -246,7 +259,7 @@ TEST(RawJwt, SetInvalidJsonObjectClaimNotOK) {
 }
 
 TEST(RawJwt, SetInvalidJsonArrayClaimNotOK) {
-  auto builder = RawJwtBuilder();
+  auto builder = RawJwtBuilder().WithoutExpiration();
   EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "invalid").ok());
   EXPECT_FALSE(builder.AddJsonArrayClaim("arr", R"("string")").ok());
   EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "42").ok());
@@ -254,7 +267,7 @@ TEST(RawJwt, SetInvalidJsonArrayClaimNotOK) {
 }
 
 TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
-  auto jwt_or = RawJwtBuilder().Build();
+  auto jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -275,7 +288,7 @@ TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
 }
 
 TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
-  auto jwt_or = RawJwtBuilder().Build();
+  auto jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -296,7 +309,10 @@ TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
 }
 
 TEST(RawJwt, BuildCanBeCalledTwice) {
-  auto builder = RawJwtBuilder().SetIssuer("issuer").SetSubject("subject");
+  auto builder = RawJwtBuilder()
+                     .SetIssuer("issuer")
+                     .SetSubject("subject")
+                     .WithoutExpiration();
   auto jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
@@ -377,7 +393,7 @@ TEST(RawJwt, FromJsonWithBadRegisteredTypes) {
 }
 
 TEST(RawJwt, GetJsonPayload) {
-  auto jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto jwt_or = RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 

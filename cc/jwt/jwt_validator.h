@@ -54,6 +54,7 @@ class JwtValidator {
   bool ignore_issuer_;
   bool ignore_subject_;
   bool ignore_audiences_;
+  bool allow_missing_expiration_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };
@@ -78,6 +79,8 @@ class JwtValidatorBuilder {
   JwtValidatorBuilder& IgnoreSubject();
   JwtValidatorBuilder& IgnoreAudiences();
 
+  JwtValidatorBuilder& AllowMissingExpiration();
+
   util::Status SetClockSkew(absl::Duration clock_skew);
   JwtValidatorBuilder& SetFixedNow(absl::Time fixed_now);
 
@@ -93,6 +96,7 @@ class JwtValidatorBuilder {
   bool ignore_issuer_;
   bool ignore_subject_;
   bool ignore_audiences_;
+  bool allow_missing_expiration_;
   absl::Duration clock_skew_;
   absl::optional<absl::Time> fixed_now_;
 };

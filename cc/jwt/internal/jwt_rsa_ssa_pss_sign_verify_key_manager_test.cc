@@ -155,7 +155,8 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   ASSERT_THAT(sign_or.status(), IsOk());
   auto sign = std::move(sign_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -164,8 +165,11 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   auto verify_or =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
           key.public_key());
@@ -180,8 +184,11 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, GetAndUsePrimitives) {
   ASSERT_THAT(issuer_or.status(), IsOk());
   EXPECT_THAT(issuer_or.ValueOrDie(), testing::Eq("issuer"));
 
-  JwtValidator validator2 =
-      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
+  JwtValidator validator2 = JwtValidatorBuilder()
+                                .ExpectIssuer("unknown")
+                                .AllowMissingExpiration()
+                                .Build()
+                                .ValueOrDie();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
 }
 
@@ -201,7 +208,8 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(sign1_or.status(), IsOk());
   auto sign1 = std::move(sign1_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -210,7 +218,8 @@ TEST(JwtRsaSsaPssSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
   auto verify2_or =
       JwtRsaSsaPssVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
           key2.public_key());

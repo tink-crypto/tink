@@ -146,7 +146,8 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
 }
 
 TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
-  auto raw_jwt_or = RawJwtBuilder().SetJwtId("id123").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetJwtId("id123").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -154,7 +155,8 @@ TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
       jwt_sign_->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
 
   EXPECT_THAT(jwt_verify_->VerifyAndDecode(compact, validator).status(),
               IsOk());
@@ -169,7 +171,8 @@ TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
 }
 
 TEST_F(JwtSignatureImplTest, FailsWithInvalidTokens) {
-  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
+  JwtValidator validator =
+      JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
   EXPECT_FALSE(
       jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9.e30.YWJj.", validator)
           .ok());

@@ -178,7 +178,8 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -186,8 +187,11 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt,
                                                           absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator =
-      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -210,15 +214,19 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact_or =
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator =
-      JwtValidatorBuilder().ExpectIssuer("issuer").Build().ValueOrDie();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
