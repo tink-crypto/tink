@@ -25,11 +25,14 @@ class JwtValidatorTest(absltest.TestCase):
     fixed_now = datetime.datetime.fromtimestamp(12345, datetime.timezone.utc)
     clock_skew = datetime.timedelta(minutes=1)
     validator = jwt.new_validator(
+        expected_type_header='type_header',
         expected_issuer='issuer',
         expected_subject='subject',
         expected_audience='audience',
         fixed_now=fixed_now,
         clock_skew=clock_skew)
+    self.assertTrue(validator.has_expected_type_header())
+    self.assertEqual(validator.expected_type_header(), 'type_header')
     self.assertTrue(validator.has_expected_issuer())
     self.assertEqual(validator.expected_issuer(), 'issuer')
     self.assertTrue(validator.has_expected_subject())
@@ -45,15 +48,18 @@ class JwtValidatorTest(absltest.TestCase):
 
   def test_validator_ignore_getters(self):
     validator = jwt.new_validator(
+        ignore_type_header=True,
         ignore_issuer=True,
         ignore_subject=True,
         ignore_audiences=True)
+    self.assertTrue(validator.ignore_type_header())
     self.assertTrue(validator.ignore_issuer())
     self.assertTrue(validator.ignore_subject())
     self.assertTrue(validator.ignore_audiences())
 
   def test_empty_validator_getters(self):
     validator = jwt.new_validator()
+    self.assertFalse(validator.has_expected_type_header())
     self.assertFalse(validator.has_expected_issuer())
     self.assertFalse(validator.has_expected_subject())
     self.assertFalse(validator.has_expected_audience())
@@ -121,6 +127,36 @@ class JwtValidatorTest(absltest.TestCase):
     token = jwt.new_raw_jwt(not_before=in_one_minute)
     validator = jwt.new_validator(clock_skew=datetime.timedelta(minutes=2))
     _jwt_validator.validate(validator, token)
+
+  def test_requires_type_header_but_no_type_header_set_fails(self):
+    token = jwt.new_raw_jwt()
+    validator = jwt.new_validator(expected_type_header='type_header')
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(validator, token)
+
+  def test_invalid_type_header_fails(self):
+    token = jwt.new_raw_jwt(type_header='unknown')
+    validator = jwt.new_validator(expected_type_header='type_header')
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(validator, token)
+
+  def test_correct_type_header_success(self):
+    token = jwt.new_raw_jwt(type_header='type_header')
+    validator = jwt.new_validator(expected_type_header='type_header')
+    _jwt_validator.validate(validator, token)
+
+  def test_type_header_in_token_but_not_in_validator_fails(self):
+    validator = jwt.new_validator()
+    token_with_type_header = jwt.new_raw_jwt(type_header='type_header')
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(validator, token_with_type_header)
+
+  def test_ignore_type_header_success(self):
+    validator = jwt.new_validator(ignore_type_header=True)
+    token_without_type_header = jwt.new_raw_jwt()
+    _jwt_validator.validate(validator, token_without_type_header)
+    token_with_type_header = jwt.new_raw_jwt(type_header='type_header')
+    _jwt_validator.validate(validator, token_with_type_header)
 
   def test_requires_issuer_but_no_issuer_set_fails(self):
     token = jwt.new_raw_jwt()

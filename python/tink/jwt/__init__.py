@@ -66,9 +66,11 @@ def new_raw_jwt(*,
 
 def new_validator(
     *,
+    expected_type_header: Optional[Text] = None,
     expected_issuer: Optional[Text] = None,
     expected_subject: Optional[Text] = None,
     expected_audience: Optional[Text] = None,
+    ignore_type_header: bool = False,
     ignore_issuer: bool = False,
     ignore_subject: bool = False,
     ignore_audiences: bool = False,
@@ -76,9 +78,11 @@ def new_validator(
     fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
   """Creates a new JwtValidator."""
   return JwtValidator(
+      expected_type_header=expected_type_header,
       expected_issuer=expected_issuer,
       expected_subject=expected_subject,
       expected_audience=expected_audience,
+      ignore_type_header=ignore_type_header,
       ignore_issuer=ignore_issuer,
       ignore_subject=ignore_subject,
       ignore_audiences=ignore_audiences,

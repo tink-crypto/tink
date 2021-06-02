@@ -96,7 +96,6 @@ class JwtServiceTest(absltest.TestCase):
     keyset = gen_response.keyset
 
     comp_request = testing_api_pb2.JwtSignRequest(keyset=keyset)
-    comp_request.raw_jwt.type_header.value = 'type_header'
     comp_request.raw_jwt.issuer.value = 'issuer'
     comp_request.raw_jwt.subject.value = 'subject'
     comp_request.raw_jwt.custom_claims['myclaim'].bool_value = True
@@ -113,8 +112,6 @@ class JwtServiceTest(absltest.TestCase):
     verify_request.validator.now.seconds = 1234
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
-    self.assertEqual(verify_response.verified_jwt.type_header.value,
-                     'type_header')
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
     self.assertEqual(verify_response.verified_jwt.subject.value, 'subject')
     self.assertEqual(verify_response.verified_jwt.expiration.seconds, 1334)

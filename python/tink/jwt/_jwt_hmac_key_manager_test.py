@@ -94,7 +94,10 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact,
-        jwt.new_validator(expected_issuer='issuer', fixed_now=DATETIME_1970))
+        jwt.new_validator(
+            expected_type_header='typeHeader',
+            expected_issuer='issuer',
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
 
@@ -106,7 +109,10 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     jwt_hmac = create_fixed_jwt_hmac()
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact,
-        jwt.new_validator(expected_issuer='joe', fixed_now=DATETIME_1970))
+        jwt.new_validator(
+            expected_type_header='JWT',
+            expected_issuer='joe',
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.issuer(), 'joe')
     self.assertEqual(verified_jwt.expiration().year, 2011)
     self.assertCountEqual(verified_jwt.custom_claim_names(),
@@ -127,17 +133,21 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
   def test_valid_signed_compact(self):
     jwt_hmac = create_fixed_jwt_hmac()
-    validator = jwt.new_validator(
-        expected_issuer='joe', fixed_now=DATETIME_1970)
 
     valid_token = create_signed_token('{"alg":"HS256"}', '{"iss":"joe"}')
-    verified = jwt_hmac.verify_mac_and_decode(valid_token, validator)
+    verified = jwt_hmac.verify_mac_and_decode(
+        valid_token,
+        jwt.new_validator(expected_issuer='joe', fixed_now=DATETIME_1970))
     self.assertEqual(verified.issuer(), 'joe')
 
     token_with_unknown_typ = create_signed_token(
         '{"alg":"HS256","typ":"unknown"}', '{"iss":"joe"}')
-    verified2 = jwt_hmac.verify_mac_and_decode(token_with_unknown_typ,
-                                               validator)
+    verified2 = jwt_hmac.verify_mac_and_decode(
+        token_with_unknown_typ,
+        jwt.new_validator(
+            expected_type_header='unknown',
+            expected_issuer='joe',
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified2.issuer(), 'joe')
 
   def test_invalid_signed_compact_with_valid_signature(self):
