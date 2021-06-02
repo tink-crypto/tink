@@ -227,20 +227,24 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
     assertThat(verifiedToken.hasTypeHeader()).isFalse();
 
-    RawJwt rawTokenWithType = RawJwt.newBuilder().setTypeHeader("typeHeader").build();
+    RawJwt rawTokenWithType =
+        RawJwt.newBuilder().setTypeHeader("typeHeader").withoutExpiration().build();
     String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
     VerifiedJwt verifiedTokenWithType =
         verifier.verifyAndDecode(
             signedCompactWithType,
-            JwtValidator.newBuilder().expectTypeHeader("typeHeader").build());
+            JwtValidator.newBuilder()
+                .allowMissingExpiration()
+                .expectTypeHeader("typeHeader")
+                .build());
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
@@ -250,13 +254,13 @@ public class JwtEcdsaSignKeyManagerTest {
     assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtPublicKeyVerify otherVerifier =
         otherHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
@@ -270,7 +274,7 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("issuer").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the header by adding a space at the end.
@@ -279,7 +283,7 @@ public class JwtEcdsaSignKeyManagerTest {
     String headerBase64 = Base64.urlSafeEncode((header + " ").getBytes(UTF_8));
     String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
 
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
@@ -292,7 +296,7 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the payload by adding a space at the end.
@@ -301,7 +305,7 @@ public class JwtEcdsaSignKeyManagerTest {
     String payloadBase64 = Base64.urlSafeEncode((payload + " ").getBytes(UTF_8));
     String modifiedCompact = parts[0] + "." + payloadBase64 + "." + parts[2];
 
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
@@ -314,9 +318,9 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String result = signer.signAndEncode(rawToken);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     char[] validJwt = new char[result.length()];
     for (int j = 0; j < result.length(); j++) {
       validJwt[j] = result.charAt(j);
@@ -365,7 +369,7 @@ public class JwtEcdsaSignKeyManagerTest {
 
     JsonObject payload = new JsonObject();
     payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
@@ -381,7 +385,8 @@ public class JwtEcdsaSignKeyManagerTest {
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
-        goodSignedCompact, JwtValidator.newBuilder().expectTypeHeader("JWT").build());
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("JWT").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -398,13 +403,15 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
 
+    // TODO(juerg): Remove this test case.
     // token with an unknown "typ" in the header is valid
     JsonObject unknownTypeHeader = new JsonObject();
     unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
     unknownTypeHeader.addProperty("typ", "unknown");
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
     verifier.verifyAndDecode(
-        unknownTypeSignedCompact, JwtValidator.newBuilder().expectTypeHeader("unknown").build());
+        unknownTypeSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("unknown").allowMissingExpiration().build());
 
     // for raw keys, the validation should work even if a "kid" header is present.
     JsonObject unknownKidHeader = new JsonObject();

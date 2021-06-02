@@ -35,6 +35,7 @@ public final class JwtValidator {
   private final boolean ignoreSubject;
   private final Optional<String> expectedAudience;
   private final boolean ignoreAudiences;
+  private final boolean allowMissingExpiration;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -50,6 +51,7 @@ public final class JwtValidator {
     this.ignoreSubject = builder.ignoreSubject;
     this.expectedAudience = builder.expectedAudience;
     this.ignoreAudiences = builder.ignoreAudiences;
+    this.allowMissingExpiration = builder.allowMissingExpiration;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
@@ -57,12 +59,12 @@ public final class JwtValidator {
   /**
    * Returns a new JwtValidator.Builder.
    *
-   * <p>By default, the JwtValidator only accepts tokens without issuer, subject or audience claims.
-   * This can be changed using the "expect..." or "ignore..." methods.
+   * <p>By default, the JwtValidator requires that a token has a valid expiration claim, no issuer,
+   * no subject, and no audience claim. This can be changed using the expect...(),  ignore...() and
+   * allowMissingExpiration() methods.
    *
-   * <p>If present, JwtValidator validates expiration and not-before claims against the current
-   * time, without any clock skew. This can be changed with the "setClock" and "setClockSkew"
-   * methods.
+   * <p>If present, the JwtValidator also validates the not-before claim. The validation time can
+   * be changed using the setClock() method.
    */
   public static Builder newBuilder() {
     return new Builder();
@@ -78,6 +80,7 @@ public final class JwtValidator {
     private boolean ignoreSubject;
     private Optional<String> expectedAudience;
     private boolean ignoreAudiences;
+    private boolean allowMissingExpiration;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
@@ -90,6 +93,7 @@ public final class JwtValidator {
       this.ignoreSubject = false;
       this.expectedAudience = Optional.empty();
       this.ignoreAudiences = false;
+      this.allowMissingExpiration = false;
     }
 
     /**
@@ -212,6 +216,17 @@ public final class JwtValidator {
       return this;
     }
 
+    /**
+     * When set, the validator accepts tokens that do not have an expiration set.
+     *
+     * <p>In most cases, tokens should always have an expiration, so this option should rarely be
+     * used.
+     */
+    public Builder allowMissingExpiration() {
+      this.allowMissingExpiration = true;
+      return this;
+    }
+
     public JwtValidator build() {
       if (this.ignoreTypeHeader && this.expectedTypeHeader.isPresent()) {
         throw new IllegalArgumentException(
@@ -305,6 +320,10 @@ public final class JwtValidator {
 
   private void validateTimestampClaims(RawJwt target) throws JwtInvalidException {
     Instant now = this.clock.instant();
+
+    if (!target.hasExpiration() && !this.allowMissingExpiration) {
+      throw new JwtInvalidException("token does not have an expiration set");
+    }
 
     // If expiration = now.minus(clockSkew), then the token is expired.
     if (target.hasExpiration() && !target.getExpiration().isAfter(now.minus(this.clockSkew))) {

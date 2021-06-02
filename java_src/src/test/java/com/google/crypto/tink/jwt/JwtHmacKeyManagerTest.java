@@ -216,9 +216,9 @@ public class JwtHmacKeyManagerTest {
   public void createSignVerify_success(KeyTemplate template) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = primitive.computeMacAndEncode(rawToken);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     VerifiedJwt verifiedToken = primitive.verifyMacAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
   }
@@ -228,12 +228,12 @@ public class JwtHmacKeyManagerTest {
   public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String compact = primitive.computeMacAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtMac otherPrimitive = otherHandle.getPrimitive(JwtMac.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> otherPrimitive.verifyMacAndDecode(compact, validator));
@@ -246,9 +246,9 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] header = Base64.urlSafeDecode(parts[0]);
@@ -269,9 +269,9 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] payload = Base64.urlSafeDecode(parts[1]);
@@ -292,9 +292,9 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
-    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).build();
+    RawJwt unverified = RawJwt.newBuilder().setJwtId(jwtId).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     String[] parts = compact.split("\\.", -1);
     byte[] signature = Base64.urlSafeDecode(parts[1]);
@@ -325,6 +325,7 @@ public class JwtHmacKeyManagerTest {
             .addAudience(audience)
             .setJwtId(jwtId)
             .addNumberClaim("amount", amount)
+            .withoutExpiration()
             .build();
     String compact = mac.computeMacAndEncode(unverified);
     JwtValidator validator =
@@ -332,6 +333,7 @@ public class JwtHmacKeyManagerTest {
             .expectTypeHeader("myType")
             .expectIssuer(issuer)
             .expectAudience(audience)
+            .allowMissingExpiration()
             .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
@@ -411,10 +413,10 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        RawJwt.newBuilder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
@@ -429,12 +431,13 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        RawJwt.newBuilder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
     // Move the clock to 2 minutes in the future.
     Clock clock2 = Clock.offset(clock1, Duration.ofMinutes(2));
-    JwtValidator validator = JwtValidator.newBuilder().setClock(clock2).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().setClock(clock2).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
@@ -450,11 +453,15 @@ public class JwtHmacKeyManagerTest {
     // This token cannot be used until 1 minute in the future.
     Instant notBefore = clock1.instant().plus(Duration.ofMinutes(1));
     RawJwt unverified =
-        RawJwt.newBuilder().setNotBefore(notBefore).build();
+        RawJwt.newBuilder().setNotBefore(notBefore).withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
 
     // A clock skew of 1 minute is allowed.
-    JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .allowMissingExpiration()
+            .setClockSkew(Duration.ofMinutes(1))
+            .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
@@ -466,9 +473,10 @@ public class JwtHmacKeyManagerTest {
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
-    RawJwt unverified = RawJwt.newBuilder().build();
+    RawJwt unverified = RawJwt.newBuilder().withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().expectAudience("foo").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("foo").build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
@@ -480,9 +488,9 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        RawJwt.newBuilder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
@@ -494,9 +502,10 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        RawJwt.newBuilder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().expectAudience("bar").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("bar").build();
 
     assertThrows(JwtInvalidException.class, () -> mac.verifyMacAndDecode(compact, validator));
   }
@@ -508,9 +517,10 @@ public class JwtHmacKeyManagerTest {
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     RawJwt unverified =
-        RawJwt.newBuilder().addAudience("foo").build();
+        RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().expectAudience("foo").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("foo").build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo");
@@ -525,10 +535,11 @@ public class JwtHmacKeyManagerTest {
     RawJwt unverified =
         RawJwt.newBuilder()
             .addAudience("foo")
-            .addAudience("bar")
+            .addAudience("bar").withoutExpiration()
             .build();
     String compact = mac.computeMacAndEncode(unverified);
-    JwtValidator validator = JwtValidator.newBuilder().expectAudience("bar").build();
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().expectAudience("bar").build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
     assertThat(token.getAudiences()).containsExactly("foo", "bar");
@@ -559,7 +570,7 @@ public class JwtHmacKeyManagerTest {
 
     JsonObject payload = new JsonObject();
     payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
@@ -573,7 +584,8 @@ public class JwtHmacKeyManagerTest {
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
     primitive.verifyMacAndDecode(
-        goodSignedCompact, JwtValidator.newBuilder().expectTypeHeader("JWT").build());
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("JWT").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -590,6 +602,7 @@ public class JwtHmacKeyManagerTest {
         GeneralSecurityException.class,
         () -> primitive.verifyMacAndDecode(badAlgoSignedCompact, validator));
 
+    // TODO(juerg): Remove this test case
     // token with an unknown "typ" in the header is valid
     JsonObject unknownTypeHeader = new JsonObject();
     unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
@@ -597,7 +610,8 @@ public class JwtHmacKeyManagerTest {
     String unknownTypeSignedCompact = generateSignedCompact(
         rawPrimitive, unknownTypeHeader, payload);
     primitive.verifyMacAndDecode(
-        unknownTypeSignedCompact, JwtValidator.newBuilder().expectTypeHeader("unknown").build());
+        unknownTypeSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("unknown").allowMissingExpiration().build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();

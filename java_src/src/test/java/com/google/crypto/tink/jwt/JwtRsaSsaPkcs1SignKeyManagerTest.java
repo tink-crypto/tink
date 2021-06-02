@@ -370,20 +370,24 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
     VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
     assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
     assertThat(verifiedToken.hasTypeHeader()).isFalse();
 
-    RawJwt rawTokenWithType = RawJwt.newBuilder().setTypeHeader("typeHeader").build();
+    RawJwt rawTokenWithType =
+        RawJwt.newBuilder().setTypeHeader("typeHeader").withoutExpiration().build();
     String signedCompactWithType = signer.signAndEncode(rawTokenWithType);
     VerifiedJwt verifiedTokenWithType =
         verifier.verifyAndDecode(
             signedCompactWithType,
-            JwtValidator.newBuilder().expectTypeHeader("typeHeader").build());
+            JwtValidator.newBuilder()
+                .expectTypeHeader("typeHeader")
+                .allowMissingExpiration()
+                .build());
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
@@ -396,13 +400,13 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     KeysetHandle otherHandle = KeysetHandle.generateNew(template);
     JwtPublicKeyVerify otherVerifier =
         otherHandle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
@@ -419,7 +423,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the header by adding a space at the end.
@@ -428,7 +432,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     String headerBase64 = Base64.urlSafeEncode((header + " ").getBytes(UTF_8));
     String modifiedCompact = headerBase64 + "." + parts[1] + "." + parts[2];
 
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
@@ -444,7 +448,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("issuer").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
     String signedCompact = signer.signAndEncode(rawToken);
 
     // Modify the payload by adding a space at the end.
@@ -453,7 +457,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     String payloadBase64 = Base64.urlSafeEncode((payload + " ").getBytes(UTF_8));
     String modifiedCompact = parts[0] + "." + payloadBase64 + "." + parts[2];
 
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
@@ -503,7 +507,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     RsaSsaPkcs1SignJce rawSigner = new RsaSsaPkcs1SignJce(privateKey, hash);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
-    JwtValidator validator = JwtValidator.newBuilder().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     JsonObject payload = new JsonObject();
     payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
@@ -514,7 +518,8 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     goodHeader.addProperty("typ", "JWT");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
-        goodSignedCompact, JwtValidator.newBuilder().expectTypeHeader("JWT").build());
+        goodSignedCompact,
+        JwtValidator.newBuilder().expectTypeHeader("JWT").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -538,7 +543,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
     verifier.verifyAndDecode(
         unknownTypeSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("unknown").build());
+        JwtValidator.newBuilder().expectTypeHeader("unknown").allowMissingExpiration().build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();

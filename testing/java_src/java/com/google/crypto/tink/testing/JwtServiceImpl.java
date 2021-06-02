@@ -87,6 +87,8 @@ public final class JwtServiceImpl extends JwtImplBase {
     }
     if (token.hasExpiration()) {
       rawJwtBuilder.setExpiration(timestampToInstant(token.getExpiration()));
+    } else {
+      rawJwtBuilder.withoutExpiration();
     }
     if (token.hasNotBefore()) {
       rawJwtBuilder.setNotBefore(timestampToInstant(token.getNotBefore()));
@@ -259,6 +261,8 @@ public final class JwtServiceImpl extends JwtImplBase {
     if (validator.hasClockSkew()) {
       validatorBuilder.setClockSkew(Duration.ofSeconds(validator.getClockSkew().getSeconds()));
     }
+    // TODO(juerg): Add allowMissingExpiration to testing api proto.
+    validatorBuilder.allowMissingExpiration();
     return validatorBuilder.build();
   }
 

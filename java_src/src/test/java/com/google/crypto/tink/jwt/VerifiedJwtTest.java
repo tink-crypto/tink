@@ -31,7 +31,7 @@ import org.junit.runners.JUnit4;
 public final class VerifiedJwtTest {
   @Test
   public void emptyToken_getMethodsShouldThrow() throws Exception {
-    VerifiedJwt emptyToken = new VerifiedJwt(RawJwt.newBuilder().build());
+    VerifiedJwt emptyToken = new VerifiedJwt(RawJwt.newBuilder().withoutExpiration().build());
 
     assertThrows(JwtInvalidException.class, emptyToken::getIssuer);
     assertThrows(JwtInvalidException.class, emptyToken::getSubject);
@@ -49,7 +49,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void emptyToken_hasMethodsShouldReturnFalse() throws Exception {
-    RawJwt emptyToken = RawJwt.newBuilder().build();
+    RawJwt emptyToken = RawJwt.newBuilder().withoutExpiration().build();
     assertThat(emptyToken.hasIssuer()).isFalse();
     assertThat(emptyToken.hasSubject()).isFalse();
     assertThat(emptyToken.hasAudiences()).isFalse();
@@ -66,13 +66,13 @@ public final class VerifiedJwtTest {
 
   @Test
   public void emptyToken_isNullClaimReturnFalse() throws Exception {
-    RawJwt emptyToken = RawJwt.newBuilder().build();
+    RawJwt emptyToken = RawJwt.newBuilder().withoutExpiration().build();
     assertThat(emptyToken.isNullClaim("claim")).isFalse();
   }
 
   @Test
   public void getIssuer_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().setIssuer("foo").build();
+    RawJwt rawToken = RawJwt.newBuilder().setIssuer("foo").withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasIssuer()).isTrue();
@@ -81,7 +81,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getSubject_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().setSubject("foo").build();
+    RawJwt rawToken = RawJwt.newBuilder().setSubject("foo").withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasSubject()).isTrue();
@@ -90,7 +90,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getAudiences_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().addAudience("foo").build();
+    RawJwt rawToken = RawJwt.newBuilder().addAudience("foo").withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasAudiences()).isTrue();
@@ -99,7 +99,8 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getMultipleAudiences_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().addAudience("foo").addAudience("bar").build();
+    RawJwt rawToken =
+        RawJwt.newBuilder().addAudience("foo").addAudience("bar").withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasAudiences()).isTrue();
@@ -108,7 +109,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getJwtId_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().setJwtId("foo").build();
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("foo").withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasJwtId()).isTrue();
@@ -126,7 +127,11 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getNotBefore_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().setNotBefore(Instant.ofEpochSecond(1234567)).build();
+    RawJwt rawToken =
+        RawJwt.newBuilder()
+            .setNotBefore(Instant.ofEpochSecond(1234567))
+            .withoutExpiration()
+            .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasNotBefore()).isTrue();
@@ -135,7 +140,8 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getIssuedAt_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder().setIssuedAt(Instant.ofEpochSecond(1234567)).build();
+    RawJwt rawToken =
+        RawJwt.newBuilder().setIssuedAt(Instant.ofEpochSecond(1234567)).withoutExpiration().build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThat(token.hasIssuedAt()).isTrue();
@@ -178,6 +184,7 @@ public final class VerifiedJwtTest {
             .addNumberClaim("int", 123)
             .addBooleanClaim("bool", true)
             .addNumberClaim("double", 123.456)
+            .withoutExpiration()
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
@@ -193,10 +200,12 @@ public final class VerifiedJwtTest {
 
   @Test
   public void getNullClaim_success() throws Exception {
-    RawJwt rawToken = RawJwt.newBuilder()
-        .addNullClaim("null_object")
-        .addStringClaim("null_string", "null")
-        .build();
+    RawJwt rawToken =
+        RawJwt.newBuilder()
+            .addNullClaim("null_object")
+            .addStringClaim("null_string", "null")
+            .withoutExpiration()
+            .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.hasStringClaim("null_object")).isFalse();
     assertThat(token.isNullClaim("null_object")).isTrue();
@@ -212,6 +221,7 @@ public final class VerifiedJwtTest {
         RawJwt.newBuilder()
             .setJwtId("id")
             .addJsonArrayClaim("collection", "[true, 123, 123.456, \"value\", [1,2]]")
+            .withoutExpiration()
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.hasJsonArrayClaim("collection")).isTrue();
@@ -225,6 +235,7 @@ public final class VerifiedJwtTest {
         RawJwt.newBuilder()
             .setJwtId("id")
             .addJsonObjectClaim("obj", "{\"obj1\": {\"obj2\": {\"42\": [42]}}}")
+            .withoutExpiration()
             .build();
     VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.getJwtId()).isEqualTo("id");
@@ -249,7 +260,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void customClaimNames_empty() throws Exception {
-    RawJwt token = RawJwt.newBuilder().build();
+    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
     assertThat(token.customClaimNames()).isEmpty();
   }
 }
