@@ -167,6 +167,35 @@ TEST(StatusOrTest, OperatorStar) {
   EXPECT_EQ("hello", *std::move(rvalue));
 }
 
+TEST(StatusOrTest, OperatorArrowQualifiers) {
+  static_assert(
+      std::is_same<
+          const int*,
+          decltype(std::declval<const util::StatusOr<int>&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          int*, decltype(std::declval<util::StatusOr<int>&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          const int*,
+          decltype(std::declval<const util::StatusOr<int>&&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          int*, decltype(std::declval<util::StatusOr<int>&&>().operator->())>(),
+      "Unexpected qualifiers");
+}
+
+TEST(StatusOrTest, OperatorArrow) {
+  const util::StatusOr<std::string> const_lvalue("hello");
+  EXPECT_EQ(std::string("hello"), const_lvalue->c_str());
+
+  util::StatusOr<std::string> lvalue("hello");
+  EXPECT_EQ(std::string("hello"), lvalue->c_str());
+}
+
 }  // namespace
 
 }  // namespace util

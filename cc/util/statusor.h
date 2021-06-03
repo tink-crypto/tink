@@ -119,6 +119,17 @@ class StatusOr {
     return *std::move(value_);
   }
 
+  // Returns reference to value or crashes if ok() is false.
+  T* operator->() {
+    EnsureOk();
+    return &(value_.value());
+  }
+
+  const T* operator->() const {
+    EnsureOk();
+    return &(value_.value());
+  }
+
   template <typename U>
   friend class StatusOr;
 
