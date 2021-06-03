@@ -33,6 +33,7 @@ template <typename T>
 class ABSL_MUST_USE_RESULT StatusOr;
 #endif
 
+// TODO(b/122292096): Migrate this to absl::StatusOr
 // A StatusOr holds a Status (in the case of an error), or a value T.
 template <typename T>
 class StatusOr {
