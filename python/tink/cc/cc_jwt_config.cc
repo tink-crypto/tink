@@ -25,13 +25,13 @@ namespace tink {
 
 util::Status CcJwtConfigRegister() {
   auto status = Registry::RegisterKeyTypeManager(
-      absl::make_unique<internal::RawJwtHmacKeyManager>(), true);
+      absl::make_unique<jwt_internal::RawJwtHmacKeyManager>(), true);
   if (!status.ok()) {
     return status;
   }
   return Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<RawJwtEcdsaSignKeyManager>(),
-      absl::make_unique<RawJwtEcdsaVerifyKeyManager>(), true);
+      absl::make_unique<jwt_internal::RawJwtEcdsaSignKeyManager>(),
+      absl::make_unique<jwt_internal::RawJwtEcdsaVerifyKeyManager>(), true);
 }
 
 }  // namespace tink

@@ -81,9 +81,6 @@ class RawJwtEcdsaSignKeyManager
 
 }  // namespace jwt_internal
 
-// TODO(juerg): remove this once all users are migrated.
-typedef jwt_internal::RawJwtEcdsaSignKeyManager RawJwtEcdsaSignKeyManager;
-
 }  // namespace tink
 }  // namespace crypto
 
