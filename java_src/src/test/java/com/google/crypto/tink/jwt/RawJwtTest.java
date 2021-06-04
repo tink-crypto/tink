@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-// TODO(juerg): Add validation and tests for StringOrURI.
-
 /** Unit tests for RawJwt */
 @RunWith(JUnit4.class)
 public final class RawJwtTest {
