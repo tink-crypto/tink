@@ -85,15 +85,26 @@ def raw_jwt_from_proto(proto_raw_jwt: testing_api_pb2.JwtToken) -> jwt.RawJwt:
       custom_claims[name] = json.loads(claim.json_array_value)
     else:
       raise ValueError('claim %s has unknown type' % name)
+  expiration = None
+  if proto_raw_jwt.HasField('expiration'):
+    expiration = _from_timestamp_proto(proto_raw_jwt.expiration)
+  not_before = None
+  if proto_raw_jwt.HasField('not_before'):
+    not_before = _from_timestamp_proto(proto_raw_jwt.not_before)
+  issued_at = None
+  if proto_raw_jwt.HasField('issued_at'):
+    issued_at = _from_timestamp_proto(proto_raw_jwt.issued_at)
+  without_expiration = not expiration
   return jwt.new_raw_jwt(
       type_header=type_header,
       issuer=issuer,
       subject=subject,
       audiences=audiences,
       jwt_id=jwt_id,
-      expiration=_from_timestamp_proto(proto_raw_jwt.expiration),
-      not_before=_from_timestamp_proto(proto_raw_jwt.not_before),
-      issued_at=_from_timestamp_proto(proto_raw_jwt.issued_at),
+      expiration=expiration,
+      without_expiration=without_expiration,
+      not_before=not_before,
+      issued_at=issued_at,
       custom_claims=custom_claims)
 
 
@@ -154,12 +165,20 @@ def validator_from_proto(
   expected_audience = None
   if proto_validator.HasField('audience'):
     expected_audience = proto_validator.audience.value
+  fixed_now = None
+  if proto_validator.HasField('now'):
+    fixed_now = _from_timestamp_proto(proto_validator.now)
+  clock_skew = None
+  if proto_validator.HasField('clock_skew'):
+    clock_skew = _from_duration_proto(proto_validator.clock_skew)
+  # TODO(juerg): support allow_missing_expiration in proto.
   return jwt.new_validator(
       expected_issuer=expected_issuer,
       expected_subject=expected_subject,
       expected_audience=expected_audience,
-      fixed_now=_from_timestamp_proto(proto_validator.now),
-      clock_skew=_from_duration_proto(proto_validator.clock_skew))
+      allow_missing_expiration=True,
+      fixed_now=fixed_now,
+      clock_skew=clock_skew)
 
 
 class JwtServicer(testing_api_pb2_grpc.JwtServicer):

@@ -405,9 +405,12 @@ def proto_to_verified_jwt(
   audiences = None
   if token.audiences:
     audiences = list(token.audiences)
-  expiration = None
   if token.HasField('expiration'):
     expiration = to_datetime(token.expiration.seconds, token.expiration.nanos)
+    without_expiration = False
+  else:
+    expiration = None
+    without_expiration = True
   not_before = None
   if token.HasField('not_before'):
     not_before = to_datetime(token.not_before.seconds, token.not_before.nanos)
@@ -436,6 +439,7 @@ def proto_to_verified_jwt(
       audiences=audiences,
       jwt_id=jwt_id,
       expiration=expiration,
+      without_expiration=without_expiration,
       not_before=not_before,
       issued_at=issued_at,
       custom_claims=custom_claims)

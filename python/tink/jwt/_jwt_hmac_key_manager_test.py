@@ -89,7 +89,8 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     key_data = key_manager.new_key_data(template)
     jwt_hmac = key_manager.primitive(key_data)
 
-    raw_jwt = jwt.new_raw_jwt(type_header='typeHeader', issuer='issuer')
+    raw_jwt = jwt.new_raw_jwt(
+        type_header='typeHeader', issuer='issuer', without_expiration=True)
     signed_compact = jwt_hmac.compute_mac_and_encode(raw_jwt)
 
     verified_jwt = jwt_hmac.verify_mac_and_decode(
@@ -97,6 +98,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
         jwt.new_validator(
             expected_type_header='typeHeader',
             expected_issuer='issuer',
+            allow_missing_expiration=True,
             fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
@@ -137,7 +139,10 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     valid_token = create_signed_token('{"alg":"HS256"}', '{"iss":"joe"}')
     verified = jwt_hmac.verify_mac_and_decode(
         valid_token,
-        jwt.new_validator(expected_issuer='joe', fixed_now=DATETIME_1970))
+        jwt.new_validator(
+            expected_issuer='joe',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified.issuer(), 'joe')
 
     token_with_unknown_typ = create_signed_token(
@@ -147,13 +152,16 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
         jwt.new_validator(
             expected_type_header='unknown',
             expected_issuer='joe',
+            allow_missing_expiration=True,
             fixed_now=DATETIME_1970))
     self.assertEqual(verified2.issuer(), 'joe')
 
   def test_invalid_signed_compact_with_valid_signature(self):
     jwt_hmac = create_fixed_jwt_hmac()
     validator = jwt.new_validator(
-        expected_issuer='joe', fixed_now=DATETIME_1970)
+        expected_issuer='joe',
+        allow_missing_expiration=True,
+        fixed_now=DATETIME_1970)
 
     # token with valid signature but invalid alg header
     token_with_invalid_header = create_signed_token('{"alg":"RS256"}',
@@ -189,7 +197,9 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
   def test_invalid_signed_compact(self, invalid_signed_compact):
     jwt_hmac = create_fixed_jwt_hmac()
     validator = jwt.new_validator(
-        expected_issuer='joe', fixed_now=DATETIME_1970)
+        expected_issuer='joe',
+        allow_missing_expiration=True,
+        fixed_now=DATETIME_1970)
 
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode(invalid_signed_compact, validator)

@@ -117,6 +117,30 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(verify_response.verified_jwt.expiration.seconds, 1334)
     self.assertEqual(verify_response.verified_jwt.expiration.nanos, 123000000)
 
+  def test_generate_compute_verify_mac_without_expiration(self):
+    keyset_servicer = services.KeysetServicer()
+    jwt_servicer = jwt_service.JwtServicer()
+
+    template = jwt.jwt_hs256_template().SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    keyset = gen_response.keyset
+
+    comp_request = testing_api_pb2.JwtSignRequest(keyset=keyset)
+    comp_request.raw_jwt.issuer.value = 'issuer'
+
+    comp_response = jwt_servicer.ComputeMacAndEncode(comp_request, self._ctx)
+    self.assertEqual(comp_response.WhichOneof('result'), 'signed_compact_jwt')
+    signed_compact_jwt = comp_response.signed_compact_jwt
+    verify_request = testing_api_pb2.JwtVerifyRequest(
+        keyset=keyset, signed_compact_jwt=signed_compact_jwt)
+    verify_request.validator.issuer.value = 'issuer'
+    verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
+    print(verify_response.err)
+    self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
+    self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
+
 
 if __name__ == '__main__':
   absltest.main()

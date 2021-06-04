@@ -48,6 +48,7 @@ def new_raw_jwt(*,
                 audiences: Optional[List[Text]] = None,
                 jwt_id: Optional[Text] = None,
                 expiration: Optional[datetime.datetime] = None,
+                without_expiration: bool = False,
                 not_before: Optional[datetime.datetime] = None,
                 issued_at: Optional[datetime.datetime] = None,
                 custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
@@ -59,6 +60,7 @@ def new_raw_jwt(*,
       audiences=audiences,
       jwt_id=jwt_id,
       expiration=expiration,
+      without_expiration=without_expiration,
       not_before=not_before,
       issued_at=issued_at,
       custom_claims=custom_claims)
@@ -74,6 +76,7 @@ def new_validator(
     ignore_issuer: bool = False,
     ignore_subject: bool = False,
     ignore_audiences: bool = False,
+    allow_missing_expiration: bool = False,
     clock_skew: Optional[datetime.timedelta] = None,
     fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
   """Creates a new JwtValidator."""
@@ -86,6 +89,7 @@ def new_validator(
       ignore_issuer=ignore_issuer,
       ignore_subject=ignore_subject,
       ignore_audiences=ignore_audiences,
+      allow_missing_expiration=allow_missing_expiration,
       clock_skew=clock_skew,
       fixed_now=fixed_now)
 

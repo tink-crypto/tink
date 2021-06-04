@@ -25,7 +25,7 @@ def setUpModule():
   jwt.register_jwt_mac()
 
 
-class JwtHmacKeyManagerTest(parameterized.TestCase):
+class JwtMacWrapperTest(parameterized.TestCase):
 
   def test_key_rotation(self):
     old_key_tmpl = jwt.jwt_hs256_template()
@@ -45,8 +45,9 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     builder.disable_key(older_key_id)
     jwtmac4 = builder.keyset_handle().primitive(jwt.JwtMac)
 
-    raw_jwt = jwt.new_raw_jwt(issuer='a')
-    validator = jwt.new_validator(expected_issuer='a')
+    raw_jwt = jwt.new_raw_jwt(issuer='a', without_expiration=True)
+    validator = jwt.new_validator(
+        expected_issuer='a', allow_missing_expiration=True)
 
     self.assertNotEqual(older_key_id, newer_key_id)
     # 1 uses the older key. So 1, 2 and 3 can verify the mac, but not 4.

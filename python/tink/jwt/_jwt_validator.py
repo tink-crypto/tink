@@ -44,6 +44,7 @@ class JwtValidator(object):
                ignore_issuer: bool,
                ignore_subject: bool,
                ignore_audiences: bool,
+               allow_missing_expiration: bool,
                clock_skew: Optional[datetime.timedelta],
                fixed_now: Optional[datetime.datetime]) -> None:
     if expected_type_header and ignore_type_header:
@@ -66,6 +67,7 @@ class JwtValidator(object):
     self._ignore_issuer = ignore_issuer
     self._ignore_subject = ignore_subject
     self._ignore_audiences = ignore_audiences
+    self._allow_missing_expiration = allow_missing_expiration
     if clock_skew:
       if clock_skew > _MAX_CLOCK_SKEW:
         raise ValueError('clock skew too large, max is 10 minutes')
@@ -112,6 +114,9 @@ class JwtValidator(object):
   def ignore_audiences(self) -> bool:
     return self._ignore_audiences
 
+  def allow_missing_expiration(self) -> bool:
+    return self._allow_missing_expiration
+
   def clock_skew(self) -> datetime.timedelta:
     return self._clock_skew
 
@@ -138,6 +143,8 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     now = validator.fixed_now()
   else:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
+  if not raw_jwt.has_expiration() and not validator.allow_missing_expiration():
+    raise _jwt_error.JwtInvalidError('token is missing an expiration')
   if (raw_jwt.has_expiration() and
       raw_jwt.expiration() <= now - validator.clock_skew()):
     raise _jwt_error.JwtInvalidError('token has expired since %s' %

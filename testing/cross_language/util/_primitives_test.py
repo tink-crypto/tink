@@ -75,7 +75,7 @@ class PrimitivesTest(absltest.TestCase):
         {'list': [1, 3.14], 'null': None, 'bool': False})
 
   def test_empty_raw_jwt_to_proto_to_verified_jwt(self):
-    raw = jwt.new_raw_jwt()
+    raw = jwt.new_raw_jwt(without_expiration=True)
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
     self.assertFalse(verified.has_issuer())

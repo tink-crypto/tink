@@ -171,10 +171,16 @@ class RawJwt(object):
              audiences: Optional[List[Text]] = None,
              jwt_id: Optional[Text] = None,
              expiration: Optional[datetime.datetime] = None,
+             without_expiration: Optional[bool] = None,
              not_before: Optional[datetime.datetime] = None,
              issued_at: Optional[datetime.datetime] = None,
              custom_claims: Optional[Mapping[Text, Claim]] = None) -> 'RawJwt':
     """Create a new RawJwt instance."""
+    if not expiration and not without_expiration:
+      raise ValueError('either expiration or without_expiration must be set')
+    if expiration and without_expiration:
+      raise ValueError(
+          'expiration and without_expiration cannot be set at the same time')
     payload = {}
     if issuer:
       payload['iss'] = issuer
