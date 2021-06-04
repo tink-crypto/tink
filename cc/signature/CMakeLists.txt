@@ -94,6 +94,7 @@ tink_cc_library(
     ecdsa_sign_key_manager.h
   DEPS
     tink::signature::ecdsa_verify_key_manager
+    tink::config::tink_fips
     tink::core::private_key_type_manager
     tink::core::public_key_sign
     tink::subtle::ecdsa_sign_boringssl
@@ -101,6 +102,7 @@ tink_cc_library(
     tink::util::constants
     tink::util::enums
     tink::util::errors
+    tink::util::input_stream_util
     tink::util::protobuf_helper
     tink::util::secret_data
     tink::util::status
@@ -497,6 +499,7 @@ tink_cc_test(
     tink::subtle::ecdsa_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::enums
+    tink::util::istream_input_stream
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

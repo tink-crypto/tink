@@ -16,6 +16,8 @@
 
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
+#include <tuple>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/public_key_sign.h"
@@ -24,6 +26,7 @@
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
+#include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -92,9 +95,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP256) {
   params->set_curve(EllipticCurveType::NIST_P256);
   params->set_hash_type(HashType::SHA512);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
@@ -103,9 +105,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
   params->set_curve(EllipticCurveType::NIST_P384);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
@@ -114,9 +115,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
   params->set_curve(EllipticCurveType::NIST_P521);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKeyFormat(format),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, CreateKey) {
@@ -163,9 +163,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
   params->set_curve(EllipticCurveType::NIST_P256);
   params->set_hash_type(HashType::SHA512);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
@@ -174,9 +173,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
   params->set_curve(EllipticCurveType::NIST_P384);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
@@ -185,9 +183,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
   params->set_curve(EllipticCurveType::NIST_P521);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
+              StatusIs(util::error::INVALID_ARGUMENT));
 }
 
 TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
@@ -257,6 +254,107 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
   EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
                   signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
               Not(IsOk()));
+}
+
+TEST(EcdsaSignKeyManagerTest, DeriveKeySignVerify) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  EcdsaPrivateKey key =
+      EcdsaSignKeyManager().DeriveKey(format, &input_stream).ValueOrDie();
+  util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
+      EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(key);
+  ASSERT_THAT(signer.status(), IsOk());
+
+  std::string message = "Some message";
+  util::StatusOr<std::string> signature = (*signer)->Sign(message).ValueOrDie();
+
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
+      EcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(key.public_key());
+
+  EXPECT_THAT(verifier.ValueOrDie()->Verify(*signature, message), IsOk());
+}
+
+TEST(EcdsaSignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("tooshort")};
+
+  ASSERT_THAT(EcdsaSignKeyManager().DeriveKey(format, &input_stream).status(),
+              test::StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+TEST(EcdsaSignKeyManagerTest, DeriveKeyInvalidCurve) {
+  EcdsaKeyFormat format = CreateValidKeyFormat();
+  EcdsaParams* params = format.mutable_params();
+  params->set_curve(EllipticCurveType::CURVE25519);
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
+
+  ASSERT_THAT(EcdsaSignKeyManager().DeriveKey(format, &input_stream).status(),
+              test::StatusIs(util::error::INVALID_ARGUMENT));
+}
+
+// Test vectors have been manually generated based on BoringSSL
+// Date: 2021/06/03 commit: 88df13d73d5a74505f046f0bf37fb2fb3e1f1a58
+using NistCurveParamsDeriveTest = ::testing::TestWithParam<
+    std::tuple<EllipticCurveType, std::string, std::string>>;
+INSTANTIATE_TEST_SUITE_P(
+    NistCurvesParams, NistCurveParamsDeriveTest,
+    ::testing::Values(
+        std::make_tuple(
+            EllipticCurveType::NIST_P256, "0123456789abcdef0123456789abcdef",
+            "ed615ab1a0a8bc0412a02f097e747f33c61c5d1f0c720f3e232213ce4a4b7c38"),
+        std::make_tuple(
+            EllipticCurveType::NIST_P256, "0000000000000000",
+            "19d85dacc6634391175a26a692af2230a1de00860bda799d90e2df6ed8e1e5c6"),
+        std::make_tuple(
+            EllipticCurveType::NIST_P256, "4242424242424242",
+            "055d555a117782553a01a93544ffeced88bc08a50a22138b54c422c4a8cfb3ec"),
+        std::make_tuple(EllipticCurveType::NIST_P384,
+                        "0123456789abcdef0123456789abcdef",
+                        "4c2204d997b64a288ce7c8dbcb9d9543f45c7de458410cd996f28a"
+                        "d123e45a146367c2d2100a4336bad949535d1d9e89"),
+        std::make_tuple(EllipticCurveType::NIST_P384,
+                        "000000000000000000000000",
+                        "88d0af7371ae92b3aa2daea3d68d514a5c335ac6c6e5af2a7cf60a"
+                        "f71364241d318c022f7846b261c6345bc0c810d816"),
+        std::make_tuple(EllipticCurveType::NIST_P384,
+                        "424242424242424242424242",
+                        "53cfa0a8205c69cd56173a76a99caf19b15bd56ce9a08c6d26067e"
+                        "b6b48925bd445cdf213e35b69330e47535ff8f27ad"),
+        std::make_tuple(EllipticCurveType::NIST_P521,
+                        "0123456789abcdef0123456789abcdef",
+                        "014ef526b2a9e965227e83396387a34a441d471f5ab3fe62607e78"
+                        "e56619a698ad73bba12e42459e457c08dfa8492daaf8188f72f707"
+                        "6b8bc902d4c68729a3330b8f"),
+        std::make_tuple(EllipticCurveType::NIST_P521,
+                        "00000000000000000000000000000000",
+                        "01effa21f65dda9fe6eacd5d4a1865a4117db0ac5617cdaaaae1cf"
+                        "f17b261a5fd1804e75e49d8cca288bd3f0a7b77d39bb230c9c5192"
+                        "c70e1af9f93403e3705a49d6"),
+        std::make_tuple(EllipticCurveType::NIST_P521,
+                        "42424242424242424242424242424242",
+                        "013fa619e3ea1f71f923b6716619d0044d168637d36e44b828901e"
+                        "cef00f6fabcffbd6b5c2c24468a35fed8611aaeeb36b2af7be1eff"
+                        "d393151c6b5135a07789f8a4")));
+
+TEST_P(NistCurveParamsDeriveTest, TestVectors) {
+  EcdsaKeyFormat key_format;
+  key_format.mutable_params()->set_curve(std::get<0>(GetParam()));
+
+  util::IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>(std::get<1>(GetParam()))};
+
+  util::StatusOr<EcdsaPrivateKey> private_key =
+      EcdsaSignKeyManager().DeriveKey(key_format, &input_stream);
+  ASSERT_THAT(private_key.status(), IsOk());
+  EXPECT_THAT(private_key->key_value(),
+              Eq(test::HexDecodeOrDie(std::get<2>(GetParam()))));
 }
 
 }  // namespace

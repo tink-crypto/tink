@@ -18,12 +18,14 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "tink/config/tink_fips.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/subtle/ecdsa_sign_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/input_stream_util.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -58,6 +60,70 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::CreateKey(
   ecdsa_public_key->set_version(get_version());
   ecdsa_public_key->set_x(ec_key.pub_x);
   ecdsa_public_key->set_y(ec_key.pub_y);
+  *(ecdsa_public_key->mutable_params()) = ecdsa_key_format.params();
+  return ecdsa_private_key;
+}
+
+StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
+    const EcdsaKeyFormat& ecdsa_key_format, InputStream* input_stream) const {
+  if (IsFipsModeEnabled()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INTERNAL,
+        "Deriving EC keys is not allowed in FIPS mode.");
+  }
+
+  // Extract enough random bytes from the input_stream to match the security
+  // level of the EC. Note that the input_stream here must come from a PRF
+  // and will not use more bytes than required by the security level of the EC.
+  // Providing an input_stream which has more bytes available than required,
+  // will result in the same keys being generated.
+  int random_bytes_used = 0;
+  switch (ecdsa_key_format.params().curve()) {
+    case subtle::EllipticCurveType::NIST_P256:
+      random_bytes_used = 16;
+      break;
+    case subtle::EllipticCurveType::NIST_P384:
+      random_bytes_used = 24;
+      break;
+    case subtle::EllipticCurveType::NIST_P521:
+      random_bytes_used = 32;
+      break;
+    default:
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          "Curve does not support key derivation.");
+  }
+
+  crypto::tink::util::StatusOr<util::SecretData> randomness =
+      ReadSecretBytesFromStream(random_bytes_used, input_stream);
+  if (!randomness.ok()) {
+    if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+      return crypto::tink::util::Status(
+          crypto::tink::util::error::INVALID_ARGUMENT,
+          "Could not get enough pseudorandomness from input stream");
+    }
+    return randomness.status();
+  }
+
+  // Generate new EC key from the seed.
+  crypto::tink::util::StatusOr<subtle::SubtleUtilBoringSSL::EcKey> ec_key =
+      subtle::SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
+          util::Enums::ProtoToSubtle(ecdsa_key_format.params().curve()),
+          *randomness);
+
+  if (!ec_key.ok()) {
+    return ec_key.status();
+  }
+
+  // Build EcdsaPrivateKey.
+  EcdsaPrivateKey ecdsa_private_key;
+  ecdsa_private_key.set_version(get_version());
+  ecdsa_private_key.set_key_value(
+      std::string(util::SecretDataAsStringView(ec_key->priv)));
+  EcdsaPublicKey* ecdsa_public_key = ecdsa_private_key.mutable_public_key();
+  ecdsa_public_key->set_version(get_version());
+  ecdsa_public_key->set_x(ec_key->pub_x);
+  ecdsa_public_key->set_y(ec_key->pub_y);
   *(ecdsa_public_key->mutable_params()) = ecdsa_key_format.params();
   return ecdsa_private_key;
 }
