@@ -581,11 +581,11 @@ public class JwtHmacKeyManagerTest {
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    goodHeader.addProperty("typ", "JWT");
+    goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
     primitive.verifyMacAndDecode(
         goodSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("JWT").allowMissingExpiration().build());
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -601,17 +601,6 @@ public class JwtHmacKeyManagerTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> primitive.verifyMacAndDecode(badAlgoSignedCompact, validator));
-
-    // TODO(juerg): Remove this test case
-    // token with an unknown "typ" in the header is valid
-    JsonObject unknownTypeHeader = new JsonObject();
-    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    unknownTypeHeader.addProperty("typ", "unknown");
-    String unknownTypeSignedCompact = generateSignedCompact(
-        rawPrimitive, unknownTypeHeader, payload);
-    primitive.verifyMacAndDecode(
-        unknownTypeSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("unknown").allowMissingExpiration().build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();

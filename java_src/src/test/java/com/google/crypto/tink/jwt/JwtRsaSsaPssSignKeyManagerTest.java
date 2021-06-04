@@ -448,11 +448,11 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
     goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
-    goodHeader.addProperty("typ", "JWT");
+    goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
         goodSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("JWT").allowMissingExpiration().build());
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
 
     // invalid token with an empty header
     JsonObject emptyHeader = new JsonObject();
@@ -468,16 +468,6 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> verifier.verifyAndDecode(badAlgoSignedCompact, validator));
-
-    // TODO(juerg): Remove this test case, it does not do anything new, really.
-    // token with an unknown "typ" in the header is valid
-    JsonObject unknownTypeHeader = new JsonObject();
-    unknownTypeHeader.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
-    unknownTypeHeader.addProperty("typ", "unknown");
-    String unknownTypeSignedCompact = generateSignedCompact(rawSigner, unknownTypeHeader, payload);
-    verifier.verifyAndDecode(
-        unknownTypeSignedCompact,
-        JwtValidator.newBuilder().expectTypeHeader("unknown").allowMissingExpiration().build());
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();
