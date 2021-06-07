@@ -202,6 +202,19 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
 util::StatusOr<SubtleUtilBoringSSL::EcKey>
 SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
                                          const util::SecretData &secret_seed) {
+  // EC_KEY_derive_from_secret() is not defined in the version of BoringSSL
+  // used when FIPS-only mode is enabled at compile time.
+#ifdef TINK_USE_ONLY_FIPS
+  return crypto::tink::util::Status(
+      crypto::tink::util::error::INTERNAL,
+      "Deriving EC keys is not allowed in FIPS mode.");
+#else
+  if (IsFipsModeEnabled()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INTERNAL,
+        "Deriving EC keys is not allowed in FIPS mode.");
+  }
+
   if (curve_type == EllipticCurveType::CURVE25519) {
     return util::Status(util::error::INTERNAL,
                         "Creating a X25519 key from a seed is not supported.");
@@ -222,6 +235,7 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
   }
 
   return EcKeyFromBoringEcKey(curve_type, *key);
+#endif
 }
 
 // static

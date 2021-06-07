@@ -30,6 +30,7 @@
 #include "openssl/evp.h"
 #include "openssl/x509.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -563,6 +564,10 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(NIST_P256, NIST_P384, NIST_P521));
 
 TEST_P(NistCurveParamTest, KeysFromDifferentSeedAreDifferent) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData seed1 = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   util::SecretData seed2 = util::SecretDataFromStringView(
@@ -585,6 +590,10 @@ TEST_P(NistCurveParamTest, KeysFromDifferentSeedAreDifferent) {
 
 
 TEST_P(NistCurveParamTest, SameSeedGivesSameKey) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData seed1 = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
 
@@ -607,6 +616,10 @@ TEST_P(NistCurveParamTest, SameSeedGivesSameKey) {
 }
 
 TEST(SubtleUtilBoringSSLTest, GenerationWithSeedFailsWithWrongCurve) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
   util::SecretData seed = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
 
