@@ -136,10 +136,12 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
 INSTANTIATE_TEST_SUITE_P(
     JwtSignatureKeyTemplatesTest, JwtSignatureKeyTemplatesTest,
     testing::Values(JwtEs256Template(), JwtEs384Template(), JwtEs512Template(),
-                    JwtRs256_2048_F4_Template(), JwtRs256_3072_F4_Template(),
-                    JwtRs384_3072_F4_Template(), JwtRs512_4096_F4_Template(),
+                    RawJwtEs256Template(), JwtRs256_2048_F4_Template(),
+                    JwtRs256_3072_F4_Template(), JwtRs384_3072_F4_Template(),
+                    JwtRs512_4096_F4_Template(), RawJwtRs256_2048_F4_Template(),
                     JwtPs256_2048_F4_Template(), JwtPs256_3072_F4_Template(),
-                    JwtPs384_3072_F4_Template(), JwtPs512_4096_F4_Template()));
+                    JwtPs384_3072_F4_Template(), JwtPs512_4096_F4_Template(),
+                    RawJwtPs256_2048_F4_Template()));
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
