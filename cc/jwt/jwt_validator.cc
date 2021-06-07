@@ -70,7 +70,6 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     }
   }
   if (expected_type_header_.has_value()) {
-    std::cout << " expected type header" << expected_type_header_.value();
     if (!raw_jwt.HasTypeHeader()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected type header");
@@ -83,9 +82,6 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong type header");
     }
   } else {
-    std::cout << " !expected type header";
-    std::cout << " ignore_type_header_: " << ignore_type_header_;
-    std::cout << " raw_jwt.HasTypeHeader(): " << raw_jwt.HasTypeHeader();
     if (raw_jwt.HasTypeHeader() && !ignore_type_header_) {
       return util::Status(
           util::error::INVALID_ARGUMENT,
