@@ -115,7 +115,7 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
     self.assertEqual(verify_response.verified_jwt.subject.value, 'subject')
     self.assertEqual(verify_response.verified_jwt.expiration.seconds, 1334)
-    self.assertEqual(verify_response.verified_jwt.expiration.nanos, 123000000)
+    self.assertEqual(verify_response.verified_jwt.expiration.nanos, 0)
 
   def test_generate_compute_verify_mac_without_expiration(self):
     keyset_servicer = services.KeysetServicer()

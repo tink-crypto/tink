@@ -134,7 +134,9 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -154,9 +156,10 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test
@@ -198,7 +201,9 @@ public final class JwtServiceImplTest {
     assertThat(pubResponse.getErr()).isEmpty();
     byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -221,9 +226,10 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test

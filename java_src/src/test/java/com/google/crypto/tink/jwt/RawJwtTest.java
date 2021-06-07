@@ -314,11 +314,17 @@ public final class RawJwtTest {
 
   @Test
   public void setExpiration_success() throws Exception {
-    Instant instant = Instant.ofEpochMilli(1234567890);
+    Instant instant = Instant.ofEpochSecond(1234567890);
     RawJwt token = RawJwt.newBuilder().setExpiration(instant).build();
 
     assertThat(token.hasExpiration()).isTrue();
     assertThat(token.getExpiration()).isEqualTo(instant);
+  }
+
+  @Test
+  public void setExpiration_roundDownFraction_success() throws Exception {
+    RawJwt token = RawJwt.newBuilder().setExpiration(Instant.ofEpochMilli(123999)).build();
+    assertThat(token.getExpiration()).isEqualTo(Instant.ofEpochSecond(123));
   }
 
   @Test
@@ -336,21 +342,34 @@ public final class RawJwtTest {
 
   @Test
   public void setNotBefore_success() throws Exception {
-    Instant instant = Instant.ofEpochMilli(1234567890);
+    Instant instant = Instant.ofEpochSecond(1234567890);
     RawJwt token = RawJwt.newBuilder().setNotBefore(instant).withoutExpiration().build();
 
     assertThat(token.hasNotBefore()).isTrue();
     assertThat(token.getNotBefore()).isEqualTo(instant);
   }
 
+  @Test
+  public void setNotBefore_roundDownFraction_success() throws Exception {
+    RawJwt token =
+        RawJwt.newBuilder().setNotBefore(Instant.ofEpochMilli(123999)).withoutExpiration().build();
+    assertThat(token.getNotBefore()).isEqualTo(Instant.ofEpochSecond(123));
+  }
 
   @Test
   public void setIssuedAt_success() throws Exception {
-    Instant instant = Instant.ofEpochMilli(1234567890);
+    Instant instant = Instant.ofEpochSecond(1234567890);
     RawJwt token = RawJwt.newBuilder().setIssuedAt(instant).withoutExpiration().build();
 
     assertThat(token.hasIssuedAt()).isTrue();
     assertThat(token.getIssuedAt()).isEqualTo(instant);
+  }
+
+  @Test
+  public void setIssuedAt_roundDownFraction_success() throws Exception {
+    RawJwt token =
+        RawJwt.newBuilder().setIssuedAt(Instant.ofEpochMilli(123999)).withoutExpiration().build();
+    assertThat(token.getIssuedAt()).isEqualTo(Instant.ofEpochSecond(123));
   }
 
   @Test
@@ -387,6 +406,18 @@ public final class RawJwtTest {
   public void getJsonPayload_success() throws Exception {
     RawJwt token = RawJwt.newBuilder().setJwtId("blah").withoutExpiration().build();
     assertThat(token.getJsonPayload()).isEqualTo("{\"jti\":\"blah\"}");
+  }
+
+  @Test
+  public void getJsonPayload_expiration_success() throws Exception {
+    RawJwt token = RawJwt.newBuilder().setExpiration(Instant.ofEpochSecond(1622656120)).build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"exp\":1622656120}");
+  }
+
+  @Test
+  public void getJsonPayload_milliExpiration_success() throws Exception {
+    RawJwt token = RawJwt.newBuilder().setExpiration(Instant.ofEpochMilli(123999)).build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"exp\":123}");
   }
 
   @Test

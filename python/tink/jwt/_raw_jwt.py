@@ -29,10 +29,10 @@ _MAX_TIMESTAMP_VALUE = 253402300799  # 31 Dec 9999, 23:59:59 GMT
 Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
 
 
-def _from_datetime(t: datetime.datetime) -> float:
+def _from_datetime(t: datetime.datetime) -> int:
   if not t.tzinfo:
     raise _jwt_error.JwtInvalidError('datetime must have tzinfo')
-  return t.timestamp()
+  return int(t.timestamp())
 
 
 def _to_datetime(timestamp: float) -> datetime.datetime:

@@ -53,9 +53,9 @@ TEST(RawJwt, GetTypeHeaderIssuerSubjectJwtIdOK) {
 }
 
 TEST(RawJwt, TimestampsOK) {
-  absl::Time nbf = absl::FromUnixMillis(1234567890123);
-  absl::Time iat = absl::FromUnixMillis(1234567891123);
-  absl::Time exp = absl::FromUnixMillis(1234567892123);
+  absl::Time nbf = absl::FromUnixSeconds(1234567890);
+  absl::Time iat = absl::FromUnixSeconds(1234567891);
+  absl::Time exp = absl::FromUnixSeconds(1234567892);
   auto builder = RawJwtBuilder();
   ASSERT_THAT(builder.SetNotBefore(nbf), IsOk());
   ASSERT_THAT(builder.SetIssuedAt(iat), IsOk());
@@ -78,6 +78,48 @@ TEST(RawJwt, TimestampsOK) {
   auto exp_or = jwt.GetExpiration();
   ASSERT_THAT(exp_or.status(), IsOk());
   EXPECT_THAT(exp_or.ValueOrDie(), Eq(exp));
+}
+
+TEST(RawJwt, ExpWithMillisAlwaysRoundDown) {
+  absl::Time exp = absl::FromUnixMillis(123999);
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetExpiration(exp), IsOk());
+  auto jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasExpiration());
+  auto exp_or = jwt.GetExpiration();
+  ASSERT_THAT(exp_or.status(), IsOk());
+  EXPECT_THAT(exp_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
+}
+
+TEST(RawJwt, NbfWithMillisAlwaysRoundDown) {
+  absl::Time nbf = absl::FromUnixMillis(123999);
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetNotBefore(nbf), IsOk());
+  auto jwt_or = builder.WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasNotBefore());
+  auto nbf_or = jwt.GetNotBefore();
+  ASSERT_THAT(nbf_or.status(), IsOk());
+  EXPECT_THAT(nbf_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
+}
+
+TEST(RawJwt, IatWithMillisAlwaysRoundDown) {
+  absl::Time iat = absl::FromUnixMillis(123999);
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetIssuedAt(iat), IsOk());
+  auto jwt_or = builder.WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasIssuedAt());
+  auto iat_or = jwt.GetIssuedAt();
+  ASSERT_THAT(iat_or.status(), IsOk());
+  EXPECT_THAT(iat_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
 }
 
 TEST(RawJwt, LargeExpirationWorks) {
@@ -398,6 +440,26 @@ TEST(RawJwt, GetJsonPayload) {
   auto jwt = jwt_or.ValueOrDie();
 
   ASSERT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
+}
+
+TEST(RawJwt, GetExpirationJsonPayload) {
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetExpiration(absl::FromUnixSeconds(2218027244)), IsOk());
+  util::StatusOr<RawJwt> jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"exp":2218027244})"));
+}
+
+TEST(RawJwt, GetNanoExpirationJsonPayload) {
+  auto builder = RawJwtBuilder();
+  ASSERT_THAT(builder.SetExpiration(absl::FromUnixNanos(123456789012)), IsOk());
+  util::StatusOr<RawJwt> jwt_or = builder.Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"exp":123})"));
 }
 
 }  // namespace tink

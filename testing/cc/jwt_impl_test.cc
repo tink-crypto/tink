@@ -110,7 +110,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   EXPECT_THAT(verified_jwt.audiences(1), Eq("audience2"));
   EXPECT_THAT(verified_jwt.jwt_id().value(), Eq("jwt_id"));
   EXPECT_THAT(verified_jwt.not_before().seconds(), Eq(12345));
-  EXPECT_THAT(verified_jwt.not_before().nanos(), Eq(123000000));
+  EXPECT_THAT(verified_jwt.not_before().nanos(), Eq(0));
   EXPECT_THAT(verified_jwt.issued_at().seconds(), Eq(23456));
   EXPECT_THAT(verified_jwt.issued_at().nanos(), Eq(0));
   EXPECT_THAT(verified_jwt.expiration().seconds(), Eq(34567));

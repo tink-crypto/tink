@@ -31,25 +31,31 @@ class PrimitivesTest(absltest.TestCase):
     self.assertEqual(_primitives.to_datetime(seconds, nanos), dt)
 
   def test_raw_jwt_to_proto_to_verified_jwt(self):
-    nbf = datetime.datetime.fromtimestamp(1234567.89, datetime.timezone.utc)
-    iat = datetime.datetime.fromtimestamp(2345678.9, datetime.timezone.utc)
-    exp = datetime.datetime.fromtimestamp(3456789, datetime.timezone.utc)
     raw = jwt.new_raw_jwt(
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
         jwt_id='jwt_id',
-        not_before=nbf,
-        issued_at=iat,
-        expiration=exp,
+        not_before=datetime.datetime.fromtimestamp(1234567.89,
+                                                   datetime.timezone.utc),
+        issued_at=datetime.datetime.fromtimestamp(2345678.9,
+                                                  datetime.timezone.utc),
+        expiration=datetime.datetime.fromtimestamp(3456789,
+                                                   datetime.timezone.utc),
         custom_claims={
             'null': None,
             'string': 'aString',
             'number': 123.456,
             'integer': 123,
             'bool': True,
-            'list': [None, True, 'foo', 42, {'pi': 3.14}],
-            'obj': {'list': [1, 3.14], 'null': None, 'bool': False}
+            'list': [None, True, 'foo', 42, {
+                'pi': 3.14
+            }],
+            'obj': {
+                'list': [1, 3.14],
+                'null': None,
+                'bool': False
+            }
         })
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
@@ -57,9 +63,15 @@ class PrimitivesTest(absltest.TestCase):
     self.assertEqual(verified.subject(), 'subject')
     self.assertEqual(verified.audiences(), ['audience1', 'audience2'])
     self.assertEqual(verified.jwt_id(), 'jwt_id')
-    self.assertEqual(verified.not_before(), nbf)
-    self.assertEqual(verified.issued_at(), iat)
-    self.assertEqual(verified.expiration(), exp)
+    self.assertEqual(
+        verified.not_before(),
+        datetime.datetime.fromtimestamp(1234567, datetime.timezone.utc))
+    self.assertEqual(
+        verified.issued_at(),
+        datetime.datetime.fromtimestamp(2345678, datetime.timezone.utc))
+    self.assertEqual(
+        verified.expiration(),
+        datetime.datetime.fromtimestamp(3456789, datetime.timezone.utc))
     self.assertEqual(
         verified.custom_claim_names(),
         {'null', 'string', 'number', 'integer', 'bool', 'list', 'obj'})

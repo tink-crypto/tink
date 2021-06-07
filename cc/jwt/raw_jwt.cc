@@ -99,21 +99,16 @@ bool ClaimIsNotATimestamp(const google::protobuf::Struct& json_proto,
   return (timestamp > kJwtTimestampMax) || (timestamp < 0);
 }
 
-util::StatusOr<double> TimeToTimestamp(absl::Time time) {
-  double millis = absl::ToUnixMillis(time);
-  double timestamp = millis / 1000;
-  if ((timestamp > kJwtTimestampMax) || (timestamp < 0)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
-  }
-  return timestamp;
+int64_t TimeToTimestamp(absl::Time time) {
+  // We round the timestamp to a whole number. We always round down.
+  return absl::ToUnixSeconds(time);
 }
 
 absl::Time TimestampToTime(double timestamp) {
   if (timestamp > kJwtTimestampMax) {
-    return absl::FromUnixMillis(kJwtTimestampMax * 1000);
+    return absl::FromUnixSeconds(kJwtTimestampMax);
   }
-  int64_t millis = timestamp * 1000;
-  return absl::FromUnixMillis(millis);
+  return absl::FromUnixSeconds(timestamp);
 }
 
 util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
@@ -513,37 +508,41 @@ RawJwtBuilder& RawJwtBuilder::WithoutExpiration() {
 }
 
 util::Status RawJwtBuilder::SetExpiration(absl::Time expiration) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(expiration);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+  int64_t exp_timestamp = TimeToTimestamp(expiration);
+  // TODO(juerg): move the timestamp validation into Build().
+  if ((exp_timestamp > kJwtTimestampMax) || (exp_timestamp < 0)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(exp_timestamp);
   (*fields)[std::string(kJwtClaimExpiration)] = value;
   return util::OkStatus();
 }
 
-util::Status RawJwtBuilder::SetNotBefore(absl::Time notBefore) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(notBefore);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+util::Status RawJwtBuilder::SetNotBefore(absl::Time not_before) {
+  // We round the timestamp to a whole number. We always round down.
+  int64_t nbf_timestamp = TimeToTimestamp(not_before);
+  // TODO(juerg): move the timestamp validation into Build().
+  if ((nbf_timestamp > kJwtTimestampMax) || (nbf_timestamp < 0)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(nbf_timestamp);
   (*fields)[std::string(kJwtClaimNotBefore)] = value;
   return util::OkStatus();
 }
 
-util::Status RawJwtBuilder::SetIssuedAt(absl::Time issuedAt) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(issuedAt);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+util::Status RawJwtBuilder::SetIssuedAt(absl::Time issued_at) {
+  int64_t iat_timestamp = TimeToTimestamp(issued_at);
+  // TODO(juerg): move the timestamp validation into Build().
+  if ((iat_timestamp > kJwtTimestampMax) || (iat_timestamp < 0)) {
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(iat_timestamp);
   (*fields)[std::string(kJwtClaimIssuedAt)] = value;
   return util::OkStatus();
 }

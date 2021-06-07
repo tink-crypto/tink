@@ -114,6 +114,14 @@ class RawJwtTest(absltest.TestCase):
     self.assertTrue(token.has_expiration())
     self.assertEqual(token.expiration(), EXPIRATION)
 
+  def test_round_down_expiration_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        expiration=datetime.datetime.fromtimestamp(123.999,
+                                                   datetime.timezone.utc))
+    self.assertEqual(
+        token.expiration(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
+
   def test_large_timestamps_success(self):
     # year 9999
     large = datetime.datetime.fromtimestamp(253402300799,
@@ -145,10 +153,28 @@ class RawJwtTest(absltest.TestCase):
     self.assertTrue(token.has_issued_at())
     self.assertEqual(token.issued_at(), ISSUED_AT)
 
+  def test_round_down_issued_at_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        without_expiration=True,
+        issued_at=datetime.datetime.fromtimestamp(123.999,
+                                                  datetime.timezone.utc))
+    self.assertEqual(
+        token.issued_at(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
+
   def test_not_before(self):
     token = jwt.new_raw_jwt(not_before=NOT_BEFORE, without_expiration=True)
     self.assertTrue(token.has_not_before())
     self.assertEqual(token.not_before(), NOT_BEFORE)
+
+  def test_round_down_not_before_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        without_expiration=True,
+        not_before=datetime.datetime.fromtimestamp(123.999,
+                                                   datetime.timezone.utc))
+    self.assertEqual(
+        token.not_before(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
 
   def test_rejects_naive_time(self):
     with self.assertRaises(jwt.JwtInvalidError):
@@ -253,6 +279,17 @@ class RawJwtTest(absltest.TestCase):
     }
     token = jwt.RawJwt.from_json(None, json.dumps(payload))
     self.assertEqual(json.loads(token.json_payload()), payload)
+
+  def test_exp_to_payload(self):
+    expiration = datetime.datetime.fromtimestamp(2218027244,
+                                                 datetime.timezone.utc)
+    token = jwt.new_raw_jwt(expiration=expiration)
+    self.assertEqual(token.json_payload(), '{"exp":2218027244}')
+
+  def test_float_exp_to_payload(self):
+    expiration = datetime.datetime.fromtimestamp(123.999, datetime.timezone.utc)
+    token = jwt.new_raw_jwt(expiration=expiration)
+    self.assertEqual(token.json_payload(), '{"exp":123}')
 
   def test_from_to_payload_with_string_audience(self):
     payload = {

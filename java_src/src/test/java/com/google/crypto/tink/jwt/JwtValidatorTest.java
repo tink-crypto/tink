@@ -17,7 +17,6 @@
 package com.google.crypto.tink.jwt;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.Assert.assertThrows;
 
 import java.time.Clock;
@@ -69,7 +68,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt token = validator.validate(unverified);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
@@ -83,7 +82,7 @@ public final class JwtValidatorTest {
     JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = validator.validate(unverified);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
@@ -122,7 +121,7 @@ public final class JwtValidatorTest {
         JwtValidator.newBuilder().allowMissingExpiration().setClock(clock2).build();
     VerifiedJwt token = validator.validate(unverified);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test
@@ -152,7 +151,7 @@ public final class JwtValidatorTest {
             .build();
     VerifiedJwt token = validator.validate(unverified);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test

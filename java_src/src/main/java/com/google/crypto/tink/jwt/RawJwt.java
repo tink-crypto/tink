@@ -211,13 +211,13 @@ public final class RawJwt {
     }
 
     private void setTimestampClaim(String name, Instant value) {
-      long millis = value.toEpochMilli();
-      if ((millis > MAX_TIMESTAMP_VALUE * 1000) || (millis < 0)) {
+      // We round the timestamp to a whole number. We always round down.
+      long timestamp = value.getEpochSecond();
+      if ((timestamp > MAX_TIMESTAMP_VALUE) || (timestamp < 0)) {
         throw new IllegalArgumentException(
             "timestamp of claim " + name + " is out of range");
       }
-      double doubleMillis = millis;
-      payload.add(name, new JsonPrimitive(doubleMillis / 1000));
+      payload.add(name, new JsonPrimitive(timestamp));
     }
 
     /**

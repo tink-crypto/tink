@@ -19,7 +19,6 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
@@ -380,7 +379,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = JwtValidator.newBuilder().build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
@@ -400,7 +399,7 @@ public class JwtHmacKeyManagerTest {
     JwtValidator validator = JwtValidator.newBuilder().setClockSkew(Duration.ofMinutes(1)).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getExpiration()).isEqualTo(expiration.truncatedTo(MILLIS));
+    assertThat(token.getExpiration()).isEqualTo(unverified.getExpiration());
   }
 
   @Test
@@ -440,7 +439,7 @@ public class JwtHmacKeyManagerTest {
         JwtValidator.newBuilder().allowMissingExpiration().setClock(clock2).build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test
@@ -464,7 +463,7 @@ public class JwtHmacKeyManagerTest {
             .build();
     VerifiedJwt token = mac.verifyMacAndDecode(compact, validator);
 
-    assertThat(token.getNotBefore()).isEqualTo(notBefore.truncatedTo(MILLIS));
+    assertThat(token.getNotBefore()).isEqualTo(unverified.getNotBefore());
   }
 
   @Test

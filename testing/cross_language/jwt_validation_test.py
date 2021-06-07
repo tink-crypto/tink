@@ -212,16 +212,9 @@ class JwtTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val1)
 
-    # a fraction of a second after is expired.
-    val1 = jwt.new_validator(
-        fixed_now=datetime.datetime.fromtimestamp(1234.75,
-                                                  datetime.timezone.utc))
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val1)
-
-    # a fraction of a second before is fine
+    # a second before is fine
     val2 = jwt.new_validator(
-        fixed_now=datetime.datetime.fromtimestamp(1234.25,
+        fixed_now=datetime.datetime.fromtimestamp(1233.5,
                                                   datetime.timezone.utc))
     jwt_mac.verify_mac_and_decode(token, val2)
 
@@ -298,14 +291,14 @@ class JwtTest(parameterized.TestCase):
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     val1 = jwt.new_validator(
-        allow_missing_expiration=True,
-        fixed_now=datetime.datetime.fromtimestamp(1234, datetime.timezone.utc))
+        fixed_now=datetime.datetime.fromtimestamp(1233.5,
+                                                  datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
       jwt_mac.verify_mac_and_decode(token, val1)
 
     val2 = jwt.new_validator(
-        allow_missing_expiration=True,
-        fixed_now=datetime.datetime.fromtimestamp(1235, datetime.timezone.utc))
+        fixed_now=datetime.datetime.fromtimestamp(1235.5,
+                                                  datetime.timezone.utc))
     jwt_mac.verify_mac_and_decode(token, val2)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
