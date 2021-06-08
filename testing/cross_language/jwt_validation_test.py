@@ -161,14 +161,27 @@ class JwtTest(parameterized.TestCase):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_typ_header_must_be_validated_if_set(self, lang):
-    if lang == 'cc' or lang == 'python':
-      # TODO(juerg) remove this once cc and python validate typ header.
-      return
-    token = generate_token('{"typ":"JWT", "alg":"HS256"}', '{"jti":"123"}')
+  def test_verify_typ_header(self, lang):
+    token = generate_token(
+        '{"typ":"typeHeader", "alg":"HS256"}', '{"jti":"123"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+
+    validator_with_correct_type_header = jwt.new_validator(
+        expected_type_header='typeHeader', allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_with_correct_type_header)
+
+    validator_with_missing_type_header = jwt.new_validator(
+        allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
+      jwt_mac.verify_mac_and_decode(token, validator_with_missing_type_header)
+
+    validator_that_ignores_type_header = jwt.new_validator(
+        ignore_type_header=True, allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_that_ignores_type_header)
+
+    validator_with_wrong_type_header = jwt.new_validator(
+        expected_type_header='typeHeader', allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_with_wrong_type_header)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_expiration(self, lang):
@@ -176,47 +189,45 @@ class JwtTest(parameterized.TestCase):
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
     # same time is expired.
-    val1 = jwt.new_validator(
+    validator_with_same_time = jwt.new_validator(
         fixed_now=datetime.datetime.fromtimestamp(1234, datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val1)
+      jwt_mac.verify_mac_and_decode(token, validator_with_same_time)
 
-    # a fraction of a second before is fine
-    val2 = jwt.new_validator(
-        fixed_now=datetime.datetime.fromtimestamp(1233.75,
+    # a second before is fine
+    validator_before = jwt.new_validator(
+        fixed_now=datetime.datetime.fromtimestamp(1233,
                                                   datetime.timezone.utc))
-    jwt_mac.verify_mac_and_decode(token, val2)
+    jwt_mac.verify_mac_and_decode(token, validator_before)
 
     # 3 seconds too late with 3 seconds clock skew is expired.
-    val4 = jwt.new_validator(
+    validator_too_late_with_clockskew = jwt.new_validator(
         fixed_now=datetime.datetime.fromtimestamp(1237, datetime.timezone.utc),
         clock_skew=datetime.timedelta(seconds=3))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val4)
+      jwt_mac.verify_mac_and_decode(token, validator_too_late_with_clockskew)
 
     # 2 seconds too late with 3 seconds clock skew is fine.
-    val3 = jwt.new_validator(
+    validator_still_ok_with_clockskew = jwt.new_validator(
         fixed_now=datetime.datetime.fromtimestamp(1236, datetime.timezone.utc),
         clock_skew=datetime.timedelta(seconds=3))
-    jwt_mac.verify_mac_and_decode(token, val3)
+    jwt_mac.verify_mac_and_decode(token, validator_still_ok_with_clockskew)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_float_expiration(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"jti":"123", "exp":1234.5}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    # same time is expired.
-    val1 = jwt.new_validator(
-        fixed_now=datetime.datetime.fromtimestamp(1234.5,
+    validate_after = jwt.new_validator(
+        fixed_now=datetime.datetime.fromtimestamp(1235.5,
                                                   datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val1)
+      jwt_mac.verify_mac_and_decode(token, validate_after)
 
-    # a second before is fine
-    val2 = jwt.new_validator(
+    validate_before = jwt.new_validator(
         fixed_now=datetime.datetime.fromtimestamp(1233.5,
                                                   datetime.timezone.utc))
-    jwt_mac.verify_mac_and_decode(token, val2)
+    jwt_mac.verify_mac_and_decode(token, validate_before)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_exp_expiration_is_fine(self, lang):
@@ -257,67 +268,73 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"jti":"123", "nbf":1234}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    # same time as nbf fine.
-    val1 = jwt.new_validator(
+    # same time as not-before fine.
+    validator_same_time = jwt.new_validator(
         allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1234, datetime.timezone.utc))
-    jwt_mac.verify_mac_and_decode(token, val1)
+    jwt_mac.verify_mac_and_decode(token, validator_same_time)
 
     # one second before is not yet valid
-    val2 = jwt.new_validator(
+    validator_before = jwt.new_validator(
         allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1233, datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val2)
+      jwt_mac.verify_mac_and_decode(token, validator_before)
 
     # 3 seconds too early with 3 seconds clock skew is fine
-    val4 = jwt.new_validator(
+    validator_ok_with_clockskew = jwt.new_validator(
         allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1231, datetime.timezone.utc),
         clock_skew=datetime.timedelta(seconds=3))
-    jwt_mac.verify_mac_and_decode(token, val4)
+    jwt_mac.verify_mac_and_decode(token, validator_ok_with_clockskew)
 
-    # 3 seconds too late with 2 seconds clock skew is fine.
-    val3 = jwt.new_validator(
+    # 3 seconds too early with 2 seconds clock skew is fine.
+    validator_too_early_with_clockskew = jwt.new_validator(
         allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1231, datetime.timezone.utc),
         clock_skew=datetime.timedelta(seconds=2))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val3)
+      jwt_mac.verify_mac_and_decode(token, validator_too_early_with_clockskew)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_float_not_before(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"jti":"123", "nbf":1234.5}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(
+    validator_before = jwt.new_validator(
+        allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1233.5,
                                                   datetime.timezone.utc))
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val1)
+      jwt_mac.verify_mac_and_decode(token, validator_before)
 
-    val2 = jwt.new_validator(
+    validator_after = jwt.new_validator(
+        allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1235.5,
                                                   datetime.timezone.utc))
-    jwt_mac.verify_mac_and_decode(token, val2)
+    jwt_mac.verify_mac_and_decode(token, validator_after)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_issuer(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"iss":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(
+    validator_with_correct_issuer = jwt.new_validator(
         expected_issuer='joe', allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, val1)
+    jwt_mac.verify_mac_and_decode(token, validator_with_correct_issuer)
 
-    # TODO(juerg): re-enable for empty validator, once they are consistent.
-    # val2 = EMPTY_VALIDATOR
-    # jwt_mac.verify_mac_and_decode(token, val2)
+    validator_without_issuer = jwt.new_validator(allow_missing_expiration=True)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, validator_without_issuer)
 
-    val3 = jwt.new_validator(
+    validator_that_ignores_issuer = jwt.new_validator(
+        ignore_issuer=True, allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_that_ignores_issuer)
+
+    validator_with_wrong_issuer = jwt.new_validator(
         expected_issuer='Joe', allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val3)
+      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_issuer)
 
     val4 = jwt.new_validator(
         expected_issuer='joe ', allow_missing_expiration=True)
@@ -387,22 +404,28 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"sub":"joe"}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(
+    validator_with_correct_subject = jwt.new_validator(
         expected_subject='joe', allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, val1)
+    jwt_mac.verify_mac_and_decode(token, validator_with_correct_subject)
 
-    # TODO(juerg): re-enable for empty validator, once they are consistent.
-    # val2 = EMPTY_VALIDATOR
-    # jwt_mac.verify_mac_and_decode(token, val2)
+    validator_without_subject = jwt.new_validator(
+        allow_missing_expiration=True)
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, validator_without_subject)
 
-    val3 = jwt.new_validator(
+    validator_that_ignores_subject = jwt.new_validator(
+        ignore_subject=True, allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_that_ignores_subject)
+
+    validator_with_wrong_subject = jwt.new_validator(
         expected_subject='Joe', allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val3)
+      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_subject)
 
-    val4 = jwt.new_validator(expected_subject='joe ')
+    validator_with_wrong_subject2 = jwt.new_validator(
+        expected_subject='joe ', allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val4)
+      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_subject2)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_empty_string_subject(self, lang):
@@ -425,22 +448,27 @@ class JwtTest(parameterized.TestCase):
     token = generate_token('{"alg":"HS256"}', '{"aud":["joe", "jane"]}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 
-    val1 = jwt.new_validator(
+    validator_with_correct_audience = jwt.new_validator(
         expected_audience='joe', allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, val1)
+    jwt_mac.verify_mac_and_decode(token, validator_with_correct_audience)
 
-    val2 = jwt.new_validator(
+    validator_with_correct_audience2 = jwt.new_validator(
         expected_audience='jane', allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, val2)
+    jwt_mac.verify_mac_and_decode(token, validator_with_correct_audience2)
 
-    val3 = EMPTY_VALIDATOR
+    validator_without_audience = jwt.new_validator(
+        allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val3)
+      jwt_mac.verify_mac_and_decode(token, validator_without_audience)
 
-    val4 = jwt.new_validator(
+    validator_that_ignores_audience = jwt.new_validator(
+        ignore_audiences=True, allow_missing_expiration=True)
+    jwt_mac.verify_mac_and_decode(token, validator_that_ignores_audience)
+
+    validator_with_wrong_audience = jwt.new_validator(
         expected_audience='Joe', allow_missing_expiration=True)
     with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, val4)
+      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_audience)
 
     val5 = jwt.new_validator(
         expected_audience='jane ', allow_missing_expiration=True)

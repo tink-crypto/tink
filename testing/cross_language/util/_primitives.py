@@ -450,12 +450,21 @@ def jwt_validator_to_proto(
     validator: jwt.JwtValidator) -> testing_api_pb2.JwtValidator:
   """Converts a jwt.JwtValidator into a proto JwtValidator."""
   proto_validator = testing_api_pb2.JwtValidator()
+  if validator.has_expected_type_header():
+    proto_validator.expected_type_header.value = validator.expected_type_header(
+    )
   if validator.has_expected_issuer():
-    proto_validator.issuer.value = validator.expected_issuer()
+    proto_validator.expected_issuer.value = validator.expected_issuer()
   if validator.has_expected_subject():
-    proto_validator.subject.value = validator.expected_subject()
+    proto_validator.expected_subject.value = validator.expected_subject()
   if validator.has_expected_audience():
-    proto_validator.audience.value = validator.expected_audience()
+    proto_validator.expected_audience.value = validator.expected_audience()
+  proto_validator.ignore_type_header = validator.ignore_type_header()
+  proto_validator.ignore_issuer = validator.ignore_issuer()
+  proto_validator.ignore_subject = validator.ignore_subject()
+  proto_validator.ignore_audience = validator.ignore_audiences()
+  proto_validator.allow_missing_expiration = validator.allow_missing_expiration(
+  )
   proto_validator.clock_skew.seconds = validator.clock_skew().seconds
   if validator.has_fixed_now():
     seconds, nanos = split_datetime(validator.fixed_now())

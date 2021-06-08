@@ -69,6 +69,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   JwtSignRequest comp_request;
   comp_request.set_keyset(keyset);
   auto raw_jwt = comp_request.mutable_raw_jwt();
+  raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
   raw_jwt->mutable_audiences()->Add("audience1");
@@ -93,16 +94,18 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   verify_request.set_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   auto validator = verify_request.mutable_validator();
-  validator->mutable_issuer()->set_value("issuer");
-  validator->mutable_subject()->set_value("subject");
-  validator->mutable_audience()->set_value("audience2");
+  validator->mutable_expected_type_header()->set_value("type_header");
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_expected_subject()->set_value("subject");
+  validator->mutable_expected_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;
 
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       jwt.VerifyMacAndDecode(nullptr, &verify_request, &verify_response).ok());
-  EXPECT_THAT(verify_response.err(), IsEmpty());
+  ASSERT_THAT(verify_response.err(), IsEmpty());
   auto verified_jwt = verify_response.verified_jwt();
+  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
   EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));
@@ -151,7 +154,8 @@ TEST_F(JwtImplMacTest, VerifyWithWrongIssuerFails) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(keyset);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  verify_request.mutable_validator()->mutable_issuer()->set_value("issuer");
+  verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
+      "issuer");
   JwtVerifyResponse verify_response;
 
   EXPECT_TRUE(
@@ -199,6 +203,7 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   JwtSignRequest comp_request;
   comp_request.set_keyset(private_keyset_);
   auto raw_jwt = comp_request.mutable_raw_jwt();
+  raw_jwt->mutable_type_header()->set_value("type_header");
   raw_jwt->mutable_issuer()->set_value("issuer");
   raw_jwt->mutable_subject()->set_value("subject");
   raw_jwt->mutable_audiences()->Add("audience1");
@@ -222,17 +227,19 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   verify_request.set_keyset(public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
   auto validator = verify_request.mutable_validator();
-  validator->mutable_issuer()->set_value("issuer");
-  validator->mutable_subject()->set_value("subject");
-  validator->mutable_audience()->set_value("audience2");
+  validator->mutable_expected_type_header()->set_value("type_header");
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_expected_subject()->set_value("subject");
+  validator->mutable_expected_audience()->set_value("audience2");
   validator->mutable_now()->set_seconds(23456);
   JwtVerifyResponse verify_response;
 
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
           .ok());
-  EXPECT_THAT(verify_response.err(), IsEmpty());
+  ASSERT_THAT(verify_response.err(), IsEmpty());
   auto verified_jwt = verify_response.verified_jwt();
+  EXPECT_THAT(verified_jwt.type_header().value(), Eq("type_header"));
   EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
   EXPECT_THAT(verified_jwt.subject().value(), Eq("subject"));
   EXPECT_THAT(verified_jwt.audiences_size(), Eq(2));
@@ -277,7 +284,8 @@ TEST_F(JwtImplSignatureTest, VerifyWithWrongIssuerFails) {
   JwtVerifyRequest verify_request;
   verify_request.set_keyset(public_keyset_);
   verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
-  verify_request.mutable_validator()->mutable_issuer()->set_value("issuer");
+  verify_request.mutable_validator()->mutable_expected_issuer()->set_value(
+      "issuer");
   JwtVerifyResponse verify_response;
 
   EXPECT_TRUE(

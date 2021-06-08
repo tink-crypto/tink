@@ -32,6 +32,7 @@ class PrimitivesTest(absltest.TestCase):
 
   def test_raw_jwt_to_proto_to_verified_jwt(self):
     raw = jwt.new_raw_jwt(
+        type_header='type_header',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
@@ -59,6 +60,7 @@ class PrimitivesTest(absltest.TestCase):
         })
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
+    self.assertEqual(verified.type_header(), 'type_header')
     self.assertEqual(verified.issuer(), 'issuer')
     self.assertEqual(verified.subject(), 'subject')
     self.assertEqual(verified.audiences(), ['audience1', 'audience2'])
@@ -90,6 +92,7 @@ class PrimitivesTest(absltest.TestCase):
     raw = jwt.new_raw_jwt(without_expiration=True)
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
+    self.assertFalse(verified.has_type_header())
     self.assertFalse(verified.has_issuer())
     self.assertFalse(verified.has_subject())
     self.assertFalse(verified.has_audiences())
@@ -102,6 +105,7 @@ class PrimitivesTest(absltest.TestCase):
   def test_jwt_validator_to_proto(self):
     now = datetime.datetime.fromtimestamp(1234567.125, datetime.timezone.utc)
     validator = jwt.new_validator(
+        expected_type_header='type_header',
         expected_issuer='issuer',
         expected_subject='subject',
         expected_audience='audience',
@@ -109,9 +113,10 @@ class PrimitivesTest(absltest.TestCase):
         fixed_now=now)
     proto = _primitives.jwt_validator_to_proto(validator)
     expected = testing_api_pb2.JwtValidator()
-    expected.issuer.value = 'issuer'
-    expected.subject.value = 'subject'
-    expected.audience.value = 'audience'
+    expected.expected_type_header.value = 'type_header'
+    expected.expected_issuer.value = 'issuer'
+    expected.expected_subject.value = 'subject'
+    expected.expected_audience.value = 'audience'
     expected.clock_skew.seconds = 123
     expected.now.seconds = 1234567
     expected.now.nanos = 125000000

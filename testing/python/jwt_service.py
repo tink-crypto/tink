@@ -156,27 +156,34 @@ def verifiedjwt_to_proto(
 def validator_from_proto(
     proto_validator: testing_api_pb2.JwtValidator) -> jwt.JwtValidator:
   """Converts a proto JwtValidator into a JwtValidator."""
+  expected_type_header = None
+  if proto_validator.HasField('expected_type_header'):
+    expected_type_header = proto_validator.expected_type_header.value
   expected_issuer = None
-  if proto_validator.HasField('issuer'):
-    expected_issuer = proto_validator.issuer.value
+  if proto_validator.HasField('expected_issuer'):
+    expected_issuer = proto_validator.expected_issuer.value
   expected_subject = None
-  if proto_validator.HasField('subject'):
-    expected_subject = proto_validator.subject.value
+  if proto_validator.HasField('expected_subject'):
+    expected_subject = proto_validator.expected_subject.value
   expected_audience = None
-  if proto_validator.HasField('audience'):
-    expected_audience = proto_validator.audience.value
+  if proto_validator.HasField('expected_audience'):
+    expected_audience = proto_validator.expected_audience.value
   fixed_now = None
   if proto_validator.HasField('now'):
     fixed_now = _from_timestamp_proto(proto_validator.now)
   clock_skew = None
   if proto_validator.HasField('clock_skew'):
     clock_skew = _from_duration_proto(proto_validator.clock_skew)
-  # TODO(juerg): support allow_missing_expiration in proto.
   return jwt.new_validator(
+      expected_type_header=expected_type_header,
       expected_issuer=expected_issuer,
       expected_subject=expected_subject,
       expected_audience=expected_audience,
-      allow_missing_expiration=True,
+      ignore_type_header=proto_validator.ignore_type_header,
+      ignore_issuer=proto_validator.ignore_issuer,
+      ignore_subject=proto_validator.ignore_subject,
+      ignore_audiences=proto_validator.ignore_audience,
+      allow_missing_expiration=proto_validator.allow_missing_expiration,
       fixed_now=fixed_now,
       clock_skew=clock_skew)
 

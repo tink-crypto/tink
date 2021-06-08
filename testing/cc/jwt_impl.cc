@@ -199,17 +199,33 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
 crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
     const JwtValidator& validator_proto) {
   auto builder = crypto::tink::JwtValidatorBuilder();
-  if (validator_proto.has_issuer()) {
-    builder.ExpectIssuer(validator_proto.issuer().value());
+  if (validator_proto.has_expected_type_header()) {
+    builder.ExpectTypeHeader(validator_proto.expected_type_header().value());
   }
-  if (validator_proto.has_subject()) {
-    builder.ExpectSubject(validator_proto.subject().value());
+  if (validator_proto.has_expected_issuer()) {
+    builder.ExpectIssuer(validator_proto.expected_issuer().value());
   }
-  if (validator_proto.has_audience()) {
-    builder.ExpectAudience(validator_proto.audience().value());
+  if (validator_proto.has_expected_subject()) {
+    builder.ExpectSubject(validator_proto.expected_subject().value());
   }
-  // TODO(juerg): Add AllowMissingExpiration to validator proto.
-  builder.AllowMissingExpiration();
+  if (validator_proto.has_expected_audience()) {
+    builder.ExpectAudience(validator_proto.expected_audience().value());
+  }
+  if (validator_proto.ignore_type_header()) {
+    builder.IgnoreTypeHeader();
+  }
+  if (validator_proto.ignore_issuer()) {
+    builder.IgnoreIssuer();
+  }
+  if (validator_proto.ignore_subject()) {
+    builder.IgnoreSubject();
+  }
+  if (validator_proto.ignore_audience()) {
+    builder.IgnoreAudiences();
+  }
+  if (validator_proto.allow_missing_expiration()) {
+    builder.AllowMissingExpiration();
+  }
   if (validator_proto.has_now()) {
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }

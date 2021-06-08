@@ -245,14 +245,32 @@ public final class JwtServiceImpl extends JwtImplBase {
   private JwtValidator convertProtoValidatorToValidator(
       com.google.crypto.tink.proto.testing.JwtValidator validator) throws JwtInvalidException {
     JwtValidator.Builder validatorBuilder = JwtValidator.newBuilder();
-    if (validator.hasIssuer()) {
-      validatorBuilder.expectIssuer(validator.getIssuer().getValue());
+    if (validator.hasExpectedTypeHeader()) {
+      validatorBuilder.expectTypeHeader(validator.getExpectedTypeHeader().getValue());
     }
-    if (validator.hasSubject()) {
-      validatorBuilder.expectSubject(validator.getSubject().getValue());
+    if (validator.hasExpectedIssuer()) {
+      validatorBuilder.expectIssuer(validator.getExpectedIssuer().getValue());
     }
-    if (validator.hasAudience()) {
-      validatorBuilder.expectAudience(validator.getAudience().getValue());
+    if (validator.hasExpectedSubject()) {
+      validatorBuilder.expectSubject(validator.getExpectedSubject().getValue());
+    }
+    if (validator.hasExpectedAudience()) {
+      validatorBuilder.expectAudience(validator.getExpectedAudience().getValue());
+    }
+    if (validator.getIgnoreTypeHeader()) {
+      validatorBuilder.ignoreTypeHeader();
+    }
+    if (validator.getIgnoreIssuer()) {
+      validatorBuilder.ignoreIssuer();
+    }
+    if (validator.getIgnoreSubject()) {
+      validatorBuilder.ignoreSubject();
+    }
+    if (validator.getIgnoreAudience()) {
+      validatorBuilder.ignoreAudiences();
+    }
+    if (validator.getAllowMissingExpiration()) {
+      validatorBuilder.allowMissingExpiration();
     }
     if (validator.hasNow()) {
       Instant now = timestampToInstant(validator.getNow());
@@ -261,8 +279,6 @@ public final class JwtServiceImpl extends JwtImplBase {
     if (validator.hasClockSkew()) {
       validatorBuilder.setClockSkew(Duration.ofSeconds(validator.getClockSkew().getSeconds()));
     }
-    // TODO(juerg): Add allowMissingExpiration to testing api proto.
-    validatorBuilder.allowMissingExpiration();
     return validatorBuilder.build();
   }
 

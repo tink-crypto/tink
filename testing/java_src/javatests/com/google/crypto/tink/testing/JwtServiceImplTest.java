@@ -104,8 +104,7 @@ public final class JwtServiceImplTest {
 
   private JwtToken generateToken(String audience, long expSeconds, int expNanos) {
     return JwtToken.newBuilder()
-        // TODO(juerg): support typ header.
-        // .setTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+        .setTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
         .setIssuer(StringValue.newBuilder().setValue("issuer"))
         .addAudiences(audience)
         .addAudiences(audience + "2")
@@ -145,8 +144,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setIssuer(StringValue.newBuilder().setValue("issuer"))
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -176,7 +176,7 @@ public final class JwtServiceImplTest {
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
-    JwtValidator validator = JwtValidator.getDefaultInstance();
+    JwtValidator validator = JwtValidator.newBuilder().setAllowMissingExpiration(true).build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(keyset))
@@ -215,8 +215,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setIssuer(StringValue.newBuilder().setValue("issuer"))
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -262,7 +263,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -295,7 +298,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -333,7 +338,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
