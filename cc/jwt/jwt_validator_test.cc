@@ -30,9 +30,8 @@ namespace tink {
 
 TEST(JwtValidator, ExpiredTokenNotOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now - absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -43,9 +42,8 @@ TEST(JwtValidator, ExpiredTokenNotOK) {
 
 TEST(JwtValidator, NotExpiredTokenOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now + absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -56,9 +54,7 @@ TEST(JwtValidator, NotExpiredTokenOK) {
 
 TEST(JwtValidator, TokenWithExpEqualToNowIsExpired) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetExpiration(now).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -75,9 +71,8 @@ TEST(JwtValidator, ClockSkewIsToLarge) {
 
 TEST(JwtValidator, RecentlyExpiredTokenWithClockSkewOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now - absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -89,9 +84,10 @@ TEST(JwtValidator, RecentlyExpiredTokenWithClockSkewOK) {
 
 TEST(JwtValidator, NotBeforeInTheFutureNotOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now + absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -103,9 +99,10 @@ TEST(JwtValidator, NotBeforeInTheFutureNotOK) {
 
 TEST(JwtValidator, NotBeforeInThePastOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -117,9 +114,8 @@ TEST(JwtValidator, NotBeforeInThePastOK) {
 
 TEST(JwtValidator, TokenWithNotBeforeEqualToNowIsValid) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetNotBefore(now).WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -131,9 +127,10 @@ TEST(JwtValidator, TokenWithNotBeforeEqualToNowIsValid) {
 
 TEST(JwtValidator, NotBeforeInTheNearFutureWithClockSkewOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now + absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -421,9 +418,8 @@ TEST(JwtValidator, IgnoreAudiencesOK) {
 
 TEST(JwtValidator, FixedNowExpiredNotOk) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now + absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -438,9 +434,10 @@ TEST(JwtValidator, FixedNowExpiredNotOk) {
 
 TEST(JwtValidator, FixedNowNotYetValidNotOk) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
@@ -455,10 +452,10 @@ TEST(JwtValidator, FixedNowNotYetValidNotOk) {
 
 TEST(JwtValidator, FixedNowValidOk) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetExpiration(now + absl::Seconds(100))
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 

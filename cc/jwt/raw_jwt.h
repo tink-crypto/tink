@@ -93,17 +93,18 @@ class RawJwtBuilder {
   RawJwtBuilder& AddAudience(absl::string_view audience);
   RawJwtBuilder& SetJwtId(absl::string_view jwid);
   RawJwtBuilder& WithoutExpiration();
-  util::Status SetExpiration(absl::Time expiration);
-  util::Status SetNotBefore(absl::Time not_before);
-  util::Status SetIssuedAt(absl::Time issued_at);
-  util::Status AddNullClaim(absl::string_view name);
-  util::Status AddBooleanClaim(absl::string_view name, bool bool_value);
-  util::Status AddStringClaim(absl::string_view name, std::string string_value);
-  util::Status AddNumberClaim(absl::string_view name, double double_value);
-  util::Status AddJsonObjectClaim(
-      absl::string_view name, absl::string_view object_value);
-  util::Status AddJsonArrayClaim(absl::string_view name,
-                                 absl::string_view array_value);
+  RawJwtBuilder& SetExpiration(absl::Time expiration);
+  RawJwtBuilder& SetNotBefore(absl::Time not_before);
+  RawJwtBuilder& SetIssuedAt(absl::Time issued_at);
+  RawJwtBuilder& AddNullClaim(absl::string_view name);
+  RawJwtBuilder& AddBooleanClaim(absl::string_view name, bool bool_value);
+  RawJwtBuilder& AddStringClaim(absl::string_view name,
+                                std::string string_value);
+  RawJwtBuilder& AddNumberClaim(absl::string_view name, double double_value);
+  RawJwtBuilder& AddJsonObjectClaim(absl::string_view name,
+                                    absl::string_view object_value);
+  RawJwtBuilder& AddJsonArrayClaim(absl::string_view name,
+                                   absl::string_view array_value);
 
   util::StatusOr<RawJwt> Build();
 
@@ -114,7 +115,11 @@ class RawJwtBuilder {
   RawJwtBuilder& operator=(RawJwtBuilder&& other) = default;
 
  private:
+  absl::optional<util::Status> error_;
   absl::optional<std::string> type_header_;
+  // absl::optional<absl::Time> expiration_;
+  // absl::optional<absl::Time> not_before_;
+  // absl::optional<absl::Time> issued_at_;
   bool without_expiration_;
   google::protobuf::Struct json_proto_;
 };

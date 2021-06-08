@@ -80,13 +80,13 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
 }
 
 TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {
-  auto raw_jwt_or = RawJwtBuilder()
-                        .SetTypeHeader("typeHeader")
-                        .SetIssuer("issuer")
-                        .SetSubject("subject")
-                        .SetJwtId("jwt_id")
-                        .WithoutExpiration()
-                        .Build();
+  util::StatusOr<RawJwt> raw_jwt_or = RawJwtBuilder()
+                                          .SetTypeHeader("typeHeader")
+                                          .SetIssuer("issuer")
+                                          .SetSubject("subject")
+                                          .SetJwtId("jwt_id")
+                                          .WithoutExpiration()
+                                          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -104,11 +104,13 @@ TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {
 
 TEST(VerifiedJwt, TimestampsOK) {
   absl::Time now = absl::Now();
-  auto builder = RawJwtBuilder().SetIssuer("issuer");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetIssuer("issuer")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -137,11 +139,11 @@ TEST(VerifiedJwt, TimestampsOK) {
 }
 
 TEST(VerifiedJwt, GetAudiencesOK) {
-  auto raw_jwt_or = RawJwtBuilder()
-                        .AddAudience("audience1")
-                        .AddAudience("audience2")
-                        .WithoutExpiration()
-                        .Build();
+  util::StatusOr<RawJwt> raw_jwt_or = RawJwtBuilder()
+                                          .AddAudience("audience1")
+                                          .AddAudience("audience2")
+                                          .WithoutExpiration()
+                                          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -153,19 +155,16 @@ TEST(VerifiedJwt, GetAudiencesOK) {
 }
 
 TEST(VerifiedJwt, GetCustomClaimOK) {
-  auto builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
-  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
-  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
-  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
-  ASSERT_THAT(
-      builder.AddJsonObjectClaim("object_claim", R"({ "number": 123.456})"),
-      IsOk());
-  ASSERT_THAT(
-      builder.AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])"),
-      IsOk());
-
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .WithoutExpiration()
+          .AddNullClaim("null_claim")
+          .AddBooleanClaim("boolean_claim", true)
+          .AddNumberClaim("number_claim", 123.456)
+          .AddStringClaim("string_claim", "a string")
+          .AddJsonObjectClaim("object_claim", R"({ "number": 123.456})")
+          .AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])")
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -193,13 +192,14 @@ TEST(VerifiedJwt, GetCustomClaimOK) {
 }
 
 TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
-  auto builder = RawJwtBuilder().WithoutExpiration();
-  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
-  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
-  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
-  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
-
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .WithoutExpiration()
+          .AddNullClaim("null_claim")
+          .AddBooleanClaim("boolean_claim", true)
+          .AddNumberClaim("number_claim", 123.456)
+          .AddStringClaim("string_claim", "a string")
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -213,14 +213,15 @@ TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
 
 TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   absl::Time now = absl::Now();
-  auto builder = RawJwtBuilder()
-                        .SetIssuer("issuer")
-                        .SetSubject("subject")
-                        .SetJwtId("jwt_id");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetIssuer("issuer")
+          .SetSubject("subject")
+          .SetJwtId("jwt_id")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -238,13 +239,15 @@ TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
 
 TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetIssuer("issuer").SetSubject("subject").SetJwtId(
-          "jwt_id");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetIssuer("issuer")
+          .SetSubject("subject")
+          .SetJwtId("jwt_id")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -259,7 +262,8 @@ TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
 }
 
 TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
-  auto raw_jwt_or = RawJwtBuilder().WithoutExpiration().Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -282,7 +286,8 @@ TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
 }
 
 TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
-  auto raw_jwt_or = RawJwtBuilder().WithoutExpiration().Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
@@ -305,7 +310,7 @@ TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
 }
 
 TEST(VerifiedJwt, GetJsonPayload) {
-  auto raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt_or =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
@@ -316,7 +321,7 @@ TEST(VerifiedJwt, GetJsonPayload) {
 }
 
 TEST(VerifiedJwt, MoveMakesCopy) {
-  auto raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt_or =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());

@@ -71,12 +71,14 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetJwtId("id123");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetTypeHeader("typeHeader")
+          .SetJwtId("id123")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
   EXPECT_TRUE(raw_jwt.HasTypeHeader());
@@ -108,12 +110,14 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetJwtId("id123");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetTypeHeader("typeHeader")
+          .SetJwtId("id123")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
   EXPECT_TRUE(raw_jwt.HasTypeHeader());
