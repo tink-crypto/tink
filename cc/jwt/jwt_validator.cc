@@ -208,14 +208,10 @@ JwtValidatorBuilder& JwtValidatorBuilder::AllowMissingExpiration() {
   return *this;
 }
 
-util::Status JwtValidatorBuilder::SetClockSkew(
+JwtValidatorBuilder& JwtValidatorBuilder::SetClockSkew(
     absl::Duration clock_skew) {
-  if (clock_skew > kJwtMaxClockSkew) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "clock skew too large, max is 10 minutes");
-  }
   clock_skew_ = clock_skew;
-  return util::OkStatus();
+  return *this;
 }
 
 JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
@@ -243,6 +239,10 @@ util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         "IgnoreAudiences() and ExpectAudience() cannot be used together");
+  }
+  if (clock_skew_ > kJwtMaxClockSkew) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "clock skew too large, max is 10 minutes");
   }
   JwtValidator validator(*this);
   return validator;

@@ -69,8 +69,8 @@ TEST(JwtValidator, TokenWithExpEqualToNowIsExpired) {
 }
 
 TEST(JwtValidator, ClockSkewIsToLarge) {
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
-  EXPECT_FALSE(builder.SetClockSkew(absl::Minutes(11)).ok());
+  EXPECT_FALSE(
+      JwtValidatorBuilder().SetClockSkew(absl::Minutes(11)).Build().ok());
 }
 
 TEST(JwtValidator, RecentlyExpiredTokenWithClockSkewOK) {
@@ -81,9 +81,8 @@ TEST(JwtValidator, RecentlyExpiredTokenWithClockSkewOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
-  ASSERT_THAT(builder.SetClockSkew(absl::Seconds(200)), IsOk());
-  util::StatusOr<JwtValidator> validator_or = builder.Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().SetClockSkew(absl::Seconds(200)).Build();
   ASSERT_THAT(validator_or.status(), IsOk());
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
@@ -138,9 +137,11 @@ TEST(JwtValidator, NotBeforeInTheNearFutureWithClockSkewOK) {
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidatorBuilder builder = JwtValidatorBuilder().AllowMissingExpiration();
-  ASSERT_THAT(builder.SetClockSkew(absl::Seconds(200)), IsOk());
-  util::StatusOr<JwtValidator> validator_or = builder.Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder()
+          .AllowMissingExpiration()
+          .SetClockSkew(absl::Seconds(200))
+          .Build();
   ASSERT_THAT(validator_or.status(), IsOk());
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }

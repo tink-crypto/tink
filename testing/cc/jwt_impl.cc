@@ -214,11 +214,8 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }
   if (validator_proto.has_clock_skew()) {
-    auto skew_status = builder.SetClockSkew(
+    builder.SetClockSkew(
         absl::Seconds(validator_proto.clock_skew().seconds()));
-    if (!skew_status.ok()) {
-      return skew_status;
-    }
   }
   return builder.Build();
 }

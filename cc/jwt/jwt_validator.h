@@ -81,7 +81,7 @@ class JwtValidatorBuilder {
 
   JwtValidatorBuilder& AllowMissingExpiration();
 
-  util::Status SetClockSkew(absl::Duration clock_skew);
+  JwtValidatorBuilder& SetClockSkew(absl::Duration clock_skew);
   JwtValidatorBuilder& SetFixedNow(absl::Time fixed_now);
 
   util::StatusOr<JwtValidator> Build();
