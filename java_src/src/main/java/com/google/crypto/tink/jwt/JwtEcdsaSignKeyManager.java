@@ -181,6 +181,11 @@ public final class JwtEcdsaSignKeyManager
             .build();
       }
 
+      /**
+       * List of default templates to generate tokens with algorithms "ES256", "ES384" or "ES512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
       @Override
       public Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> keyFormats() {
         Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> result = new HashMap<>();
@@ -206,6 +211,7 @@ public final class JwtEcdsaSignKeyManager
       }
     };
   }
+
   /**
    * Registers the {@link EcdsaSignKeyManager} and the {@link EcdsaVerifyKeyManager} with the
    * registry, so that the the Ecdsa-Keys can be used with Tink.
@@ -213,66 +219,6 @@ public final class JwtEcdsaSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new JwtEcdsaSignKeyManager(), new JwtEcdsaVerifyKeyManager(), newKeyAllowed);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with ES256:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256
-   *   <li>Curve: NIST P-256
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES256Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES256);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with the ES256:
-   *
-   * <ul>
-   *   <li>Hash function: SHA384
-   *   <li>Curve: NIST P-384
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES384Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES384);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with ES512:
-   *
-   * <ul>
-   *   <li>Hash function: SHA512
-   *   <li>Curve: NIST P-512
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES512Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES512);
-  }
-
-  /**
-   * Returns a {@link KeyTemplate} containing a {@link JwtEcdsaKeyFormat} with some specified
-   * parameters.
-   */
-  private static KeyTemplate createKeyTemplate(JwtEcdsaAlgorithm algorithm) {
-    JwtEcdsaKeyFormat format = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
-    return KeyTemplate.create(
-        new JwtEcdsaSignKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
   }
 
   private static KeyFactory.KeyFormat<JwtEcdsaKeyFormat> createKeyFormat(

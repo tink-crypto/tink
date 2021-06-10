@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
@@ -494,21 +494,24 @@ public final class JwkSetConverterTest {
       return;
     }
     // TODO(juerg): Use parametrized tests once b/26110951 is resolved.
-    KeyTemplate[] templates = new KeyTemplate[] {
-      JwtEcdsaSignKeyManager.jwtES256Template(),
-      JwtEcdsaSignKeyManager.jwtES384Template(),
-      JwtEcdsaSignKeyManager.jwtES512Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
+    String[] templateNames = new String[] {
+      "JWT_ES256",
+      "JWT_ES384",
+      "JWT_ES512",
+      "JWT_ES256_RAW",
+      "JWT_RS256_2048_F4",
+      "JWT_RS256_3072_F4",
+      "JWT_RS384_3072_F4",
+      "JWT_RS512_4096_F4",
+      "JWT_RS256_2048_F4_RAW",
+      "JWT_PS256_2048_F4",
+      "JWT_PS256_3072_F4",
+      "JWT_PS384_3072_F4",
+      "JWT_PS512_4096_F4",
+      "JWT_PS256_2048_F4_RAW",
     };
-    for (KeyTemplate template : templates) {
-      KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+    for (String templateName : templateNames) {
+      KeysetHandle keysetHandle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
 
       String jwksString =
           JwkSetConverter.fromKeysetHandle(

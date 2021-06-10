@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
@@ -37,19 +38,22 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitParamsRunner.class)
 public class JwtPublicKeySignVerifyWrappersTest {
 
-  private static Object[] parametersTemplates() {
+  private static Object[] templateNamess() throws GeneralSecurityException {
     return new Object[] {
-      JwtEcdsaSignKeyManager.jwtES256Template(),
-      JwtEcdsaSignKeyManager.jwtES384Template(),
-      JwtEcdsaSignKeyManager.jwtES512Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
+      "JWT_ES256",
+      "JWT_ES384",
+      "JWT_ES512",
+      "JWT_ES256_RAW",
+      "JWT_RS256_2048_F4",
+      "JWT_RS256_3072_F4",
+      "JWT_RS384_3072_F4",
+      "JWT_RS512_4096_F4",
+      "JWT_RS256_2048_F4_RAW",
+      "JWT_PS256_2048_F4",
+      "JWT_PS256_3072_F4",
+      "JWT_PS384_3072_F4",
+      "JWT_PS512_4096_F4",
+      "JWT_PS256_2048_F4_RAW",
     };
   }
 
@@ -59,21 +63,25 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  public void test_wrapNoPrimary_throws() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+  public void test_noPrimary_getSignPrimitive_fails() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
     KeysetManager manager = KeysetManager.withEmptyKeyset().add(template);
     KeysetHandle handle = manager.getKeysetHandle();
     assertThrows(
         GeneralSecurityException.class, () -> handle.getPrimitive(JwtPublicKeySign.class));
+  }
 
-    KeysetHandle publicHandle = handle.getPublicKeysetHandle();
-    assertThrows(
-        GeneralSecurityException.class, () -> publicHandle.getPrimitive(JwtPublicKeyVerify.class));
+  @Test
+  public void test_noPrimary_getVerifyPrimitive_success() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
+    KeysetManager manager = KeysetManager.withEmptyKeyset().add(template);
+    KeysetHandle publicHandle = manager.getKeysetHandle().getPublicKeysetHandle();
+    publicHandle.getPrimitive(JwtPublicKeyVerify.class);
   }
 
   @Test
   public void test_wrapLegacy_throws() throws Exception {
-    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate rawTemplate = KeyTemplates.get("JWT_ES256_RAW");
     // Convert the normal, raw template into a template with output prefix type LEGACY
     KeyTemplate tinkTemplate =
         KeyTemplate.create(
@@ -89,10 +97,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_wrapSingleTinkKey_works() throws Exception {
-    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
-    KeyTemplate tinkTemplate =
-        KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+    KeyTemplate tinkTemplate = KeyTemplates.get("JWT_ES256");
 
     KeysetHandle handle = KeysetHandle.generateNew(tinkTemplate);
 
@@ -107,8 +112,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  public void test_wrapSingleKey_works() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+  public void test_wrapSingleRawKey_works() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
@@ -122,8 +127,8 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  public void test_wrapMultipleKeys() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+  public void test_wrapMultipleRawKeys() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
 
     KeysetManager manager = KeysetManager.withEmptyKeyset();
     manager.addNewKey(KeyTemplateProtoConverter.toProto(template), /*asPrimary=*/ true);
@@ -159,10 +164,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void test_wrapMultipleTinkKeys() throws Exception {
-    KeyTemplate rawTemplate = JwtEcdsaSignKeyManager.jwtES256Template();
-    KeyTemplate tinkTemplate =
-        KeyTemplate.create(
-            rawTemplate.getTypeUrl(), rawTemplate.getValue(), KeyTemplate.OutputPrefixType.TINK);
+    KeyTemplate tinkTemplate = KeyTemplates.get("JWT_ES256");
 
     KeysetManager manager = KeysetManager.withEmptyKeyset();
     manager.addNewKey(KeyTemplateProtoConverter.toProto(tinkTemplate), /*asPrimary=*/ true);
@@ -197,8 +199,9 @@ public class JwtPublicKeySignVerifyWrappersTest {
   }
 
   @Test
-  @Parameters(method = "parametersTemplates")
-  public void wrongKey_throwsInvalidSignatureException(KeyTemplate template) throws Exception {
+  @Parameters(method = "templateNamess")
+  public void wrongKey_throwsInvalidSignatureException(String templateName) throws Exception {
+    KeyTemplate template = KeyTemplates.get(templateName);
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSign = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawJwt = RawJwt.newBuilder().withoutExpiration().build();
@@ -216,7 +219,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void wrongIssuer_throwsInvalidException() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSigner = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     KeysetHandle publicHandle = keysetHandle.getPublicKeysetHandle();
@@ -230,7 +233,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void expiredCompact_throwsInvalidException() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSigner = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     KeysetHandle publicHandle = keysetHandle.getPublicKeysetHandle();
@@ -249,7 +252,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
 
   @Test
   public void notYetValidCompact_throwsInvalidException() throws Exception {
-    KeyTemplate template = JwtEcdsaSignKeyManager.jwtES256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_ES256");
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSigner = keysetHandle.getPrimitive(JwtPublicKeySign.class);
     KeysetHandle publicHandle = keysetHandle.getPublicKeysetHandle();

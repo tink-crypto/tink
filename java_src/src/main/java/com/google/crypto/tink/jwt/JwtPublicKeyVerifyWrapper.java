@@ -30,9 +30,6 @@ class JwtPublicKeyVerifyWrapper
 
   private static void validate(PrimitiveSet<JwtPublicKeyVerify> primitiveSet)
       throws GeneralSecurityException {
-    if (primitiveSet.getPrimary() == null) {
-      throw new GeneralSecurityException("Primitive set has no primary.");
-    }
     for (List<PrimitiveSet.Entry<JwtPublicKeyVerify>> entries : primitiveSet.getAll()) {
       for (PrimitiveSet.Entry<JwtPublicKeyVerify> entry : entries) {
         if ((entry.getOutputPrefixType() != OutputPrefixType.RAW)

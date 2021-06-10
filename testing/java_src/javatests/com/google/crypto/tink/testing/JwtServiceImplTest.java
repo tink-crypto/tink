@@ -20,8 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
-import com.google.crypto.tink.jwt.JwtEcdsaSignKeyManager;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
@@ -128,7 +128,7 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtComputeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
@@ -191,8 +191,7 @@ public final class JwtServiceImplTest {
 
   @Test
   public void publicKeySignVerify_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        JwtEcdsaSignKeyManager.jwtES256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
