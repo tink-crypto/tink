@@ -1,0 +1,41 @@
+# package containing useful functions for hybrid encryption PQC primitives
+
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+proto_library(
+    name = "cecpq2_aead_hkdf_proto",
+    srcs = [
+        "cecpq2_aead_hkdf.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@tink_base//proto:common_proto",
+        "@tink_base//proto:tink_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "cecpq2_aead_hkdf_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":cecpq2_aead_hkdf_proto"],
+)
+
+go_proto_library(
+    name = "cecpq2_aead_hkdf_go_proto",
+    visibility = ["//visibility:public"],
+    deps = [":cecpq2_aead_hkdf_proto"],
+)
+
+java_proto_library(
+    name = "cecpq2_aead_hkdf_java_proto",
+    visibility = ["//visibility:public"],
+    deps = [":cecpq2_aead_hkdf_proto"],
+)
+
+py_proto_library(
+    name = "cecpq2_aead_hkdf_py_pb2",
+    visibility = ["//visibility:public"],
+    deps = [":cecpq2_aead_hkdf_proto"],
+)
