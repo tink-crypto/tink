@@ -35,6 +35,10 @@ message JwtEcdsaPublicKey {
   JwtEcdsaAlgorithm algorithm = 2;
   bytes x = 3;
   bytes y = 4;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  string custom_kid = 5;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey
