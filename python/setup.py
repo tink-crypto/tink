@@ -194,6 +194,11 @@ class BuildBazelExtension(build_ext.build_ext):
     if not os.path.exists(self.build_temp):
       os.makedirs(self.build_temp)
 
+    # Ensure no artifacts from previous builds are reused (i.e. from builds
+    # using a different Python version).
+    bazel_clean_argv = [bazel, 'clean', '--expunge']
+    self.spawn(bazel_clean_argv)
+
     bazel_argv = [
         bazel, 'build', ext.bazel_target,
         '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
