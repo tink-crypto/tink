@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
@@ -69,9 +70,10 @@ public class JwtHmacKeyManagerTest {
 
   private static Object[] templates() {
     return new Object[] {
-      JwtHmacKeyManager.hs256Template(),
-      JwtHmacKeyManager.hs384Template(),
-      JwtHmacKeyManager.hs512Template(),
+      "JWT_HS256",
+      "JWT_HS384",
+      "JWT_HS512",
+      "JWT_HS256_RAW",
     };
   }
 
@@ -169,7 +171,43 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void testHs256Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(32);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS256);
+  }
+
+  @Test
+  public void testHs384Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS384");
+    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(48);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS384);
+  }
+
+  @Test
+  public void testHs512Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS512");
+    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
+    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    JwtHmacKeyFormat format =
+        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+
+    assertThat(format.getKeySize()).isEqualTo(64);
+    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS512);
+  }
+
+  @Test
+  public void testRawHs256Template() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
     assertThat(template.getTypeUrl()).isEqualTo(manager.getKeyType());
     assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
     JwtHmacKeyFormat format =
@@ -180,40 +218,17 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void testHs384Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs384Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(48);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS384);
-  }
-
-  @Test
-  public void testHs512Template() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs512Template();
-    assertThat(template.getTypeUrl()).isEqualTo(new JwtHmacKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
-    JwtHmacKeyFormat format =
-        JwtHmacKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
-
-    assertThat(format.getKeySize()).isEqualTo(64);
-    assertThat(format.getAlgorithm()).isEqualTo(JwtHmacAlgorithm.HS512);
-  }
-
-  @Test
   public void testKeyTemplateAndManagerCompatibility() throws Exception {
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs256Template());
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs384Template());
-    testKeyTemplateCompatible(manager, JwtHmacKeyManager.hs512Template());
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS256"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS384"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512"));
+    testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
   }
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_success(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  public void createSignVerify_success(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompact = primitive.computeMacAndEncode(rawToken);
@@ -224,7 +239,8 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
+  public void createSignVerifyDifferentKey_throw(String templateNames) throws Exception {
+    KeyTemplate template = KeyTemplates.get(templateNames);
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
@@ -240,8 +256,8 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_modifiedHeader_throw(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  public void createSignVerify_modifiedHeader_throw(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
@@ -263,8 +279,8 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_modifiedPayload_throw(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  public void createSignVerify_modifiedPayload_throw(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
@@ -286,8 +302,8 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void verify_modifiedSignature_shouldThrow(KeyTemplate template) throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+  public void verify_modifiedSignature_shouldThrow(String templateNames) throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
     String jwtId = "user123";
@@ -309,7 +325,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void computeVerify_canGetData() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -345,7 +361,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_expired_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -366,7 +382,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_notExpired_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -384,7 +400,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_notExpired_clockSkew_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -404,7 +420,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_before_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -422,7 +438,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void validate_notBefore_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -444,7 +460,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void validate_notBefore_clockSkew_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -468,7 +484,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_noAudienceInJwt_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -482,7 +498,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_noAudienceInValidator_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -496,7 +512,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_wrongAudience_shouldThrow() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -511,7 +527,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_audience_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -527,7 +543,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void verify_multipleAudiences_success() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtMac mac = handle.getPrimitive(JwtMac.class);
 
@@ -555,7 +571,7 @@ public class JwtHmacKeyManagerTest {
 
   @Test
   public void createSignVerify_withDifferentHeaders() throws Exception {
-    KeyTemplate template = JwtHmacKeyManager.hs256Template();
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtHmacKey keyProto =

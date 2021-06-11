@@ -183,6 +183,11 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
         throw new UnsupportedOperationException();
       }
 
+      /**
+       * List of default templates to generate tokens with algorithms "HS256", "HS384" or "HS512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
       @Override
       public Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> keyFormats() {
         Map<String, KeyFactory.KeyFormat<JwtHmacKeyFormat>> result = new HashMap<>();

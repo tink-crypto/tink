@@ -216,6 +216,11 @@ public final class JwtRsaSsaPssSignKeyManager
             .build();
       }
 
+      /**
+       * List of default templates to generate tokens with algorithms "PS256", "PS384" or "PS512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
       @Override
       public Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> keyFormats() {
         Map<String, KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat>> result = new HashMap<>();
@@ -287,76 +292,6 @@ public final class JwtRsaSsaPssSignKeyManager
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
         new JwtRsaSsaPssSignKeyManager(), new JwtRsaSsaPssVerifyKeyManager(), newKeyAllowed);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS256 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256.
-   *   <li>Modulus size: 2048 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs256_2048_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 2048, RSAKeyGenParameterSpec.F4);
-  }
-
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS256 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256.
-   *   <li>Modulus size: 3072 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs256_3072_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS256, 3072, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT PS384 key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA384.
-   *   <li>Modulus size: 3072 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix).
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs384_3072_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS384, 3072, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of JWT key pairs:
-   *
-   * <ul>
-   *   <li>Hash function: SHA512.
-   *   <li>Modulus size: 4096 bit.
-   *   <li>Public exponent: 65537 (aka F4).
-   *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}.
-   * </ul>
-   */
-  public static final KeyTemplate jwtPs512_4096_F4_Template() {
-    return createKeyTemplate(JwtRsaSsaPssAlgorithm.PS512, 4096, RSAKeyGenParameterSpec.F4);
-  }
-  /**
-   * Returns a {@link KeyTemplate} containing a {@link RsaSsaPssKeyFormat} with some specified
-   * parameters.
-   */
-  private static KeyTemplate createKeyTemplate(
-      JwtRsaSsaPssAlgorithm algorithm, int modulusSize, BigInteger publicExponent) {
-    JwtRsaSsaPssKeyFormat format =
-        JwtRsaSsaPssKeyFormat.newBuilder()
-            .setAlgorithm(algorithm)
-            .setModulusSizeInBits(modulusSize)
-            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-            .build();
-    return KeyTemplate.create(
-        new JwtRsaSsaPssSignKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
   }
 
   private static KeyFactory.KeyFormat<JwtRsaSsaPssKeyFormat> createKeyFormat(

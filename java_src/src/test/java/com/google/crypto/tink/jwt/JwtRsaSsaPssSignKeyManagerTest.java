@@ -23,6 +23,7 @@ import static org.junit.Assume.assumeFalse;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.JwtRsaSsaPssAlgorithm;
@@ -92,19 +93,11 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   private static Object[] templates() {
     return new Object[] {
-      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
-      KeyTemplate.create(
-          new JwtRsaSsaPssSignKeyManager().getKeyType(),
-          JwtRsaSsaPssKeyFormat.newBuilder()
-              .setAlgorithm(JwtRsaSsaPssAlgorithm.PS256)
-              .setModulusSizeInBits(2048)
-              .setPublicExponent(ByteString.copyFrom(RSAKeyGenParameterSpec.F4.toByteArray()))
-              .build()
-              .toByteArray(),
-          KeyTemplate.OutputPrefixType.TINK),
+      "JWT_PS256_2048_F4",
+      "JWT_PS256_3072_F4",
+      "JWT_PS384_3072_F4",
+      "JWT_PS512_4096_F4",
+      "JWT_PS256_2048_F4_RAW",
     };
   }
 
@@ -271,7 +264,6 @@ public class JwtRsaSsaPssSignKeyManagerTest {
       KeyTemplate template, JwtRsaSsaPssAlgorithm algorithm, int moduloSize, int publicExponent)
       throws Exception {
     assertThat(template.getTypeUrl()).isEqualTo(new JwtRsaSsaPssSignKeyManager().getKeyType());
-    assertThat(template.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.RAW);
     JwtRsaSsaPssKeyFormat format =
         JwtRsaSsaPssKeyFormat.parseFrom(
             template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -283,33 +275,61 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   public void testJwtRsa2048AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS256_2048_F4"), JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS256_2048_F4_RAW"), JwtRsaSsaPssAlgorithm.PS256, 2048, 65537);
   }
 
   @Test
   public void testJwtRsa4096AlgoRS512F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS512_4096_F4"), JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS512_4096_F4_RAW"), JwtRsaSsaPssAlgorithm.PS512, 4096, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS384F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS384_3072_F4"), JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS384_3072_F4_RAW"), JwtRsaSsaPssAlgorithm.PS384, 3072, 65537);
   }
 
   @Test
   public void testJwtRsa3072AlgoRS256F4Template_ok() throws Exception {
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template();
-    checkTemplate(template, JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
+    checkTemplate(KeyTemplates.get("JWT_PS256_3072_F4"), JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
+    checkTemplate(
+        KeyTemplates.get("JWT_PS256_3072_F4_RAW"), JwtRsaSsaPssAlgorithm.PS256, 3072, 65537);
+  }
+
+  @Test
+  public void testTinkTemplatesAreTink() throws Exception {
+    assertThat(KeyTemplates.get("JWT_PS256_2048_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS256_3072_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS384_3072_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    assertThat(KeyTemplates.get("JWT_PS512_4096_F4").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+  }
+
+  @Test
+  public void testRawTemplatesAreRaw() throws Exception {
+    assertThat(KeyTemplates.get("JWT_PS256_2048_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS256_3072_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS384_3072_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
+    assertThat(KeyTemplates.get("JWT_PS512_4096_F4_RAW").getOutputPrefixType())
+        .isEqualTo(KeyTemplate.OutputPrefixType.RAW);
   }
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_success(KeyTemplate template) throws Exception {
+  public void createSignVerify_success(String templateName) throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
@@ -336,8 +356,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerifyDifferentKey_throw(KeyTemplate template) throws Exception {
+  public void createSignVerifyDifferentKey_throw(String templateName) throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get(templateName);
     KeysetHandle handle = KeysetHandle.generateNew(template);
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
@@ -354,9 +375,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_header_modification_throw(KeyTemplate template) throws Exception {
+  public void createSignVerify_header_modification_throw(String templateName) throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
@@ -376,9 +397,9 @@ public class JwtRsaSsaPssSignKeyManagerTest {
 
   @Test
   @Parameters(method = "templates")
-  public void createSignVerify_payload_modification_throw(KeyTemplate template) throws Exception {
+  public void createSignVerify_payload_modification_throw(String templateName) throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeysetHandle handle = KeysetHandle.generateNew(template);
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
@@ -426,7 +447,7 @@ public class JwtRsaSsaPssSignKeyManagerTest {
   @Test
   public void createSignVerify_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeyTemplate template = JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template();
+    KeyTemplate template = KeyTemplates.get("JWT_PS256_2048_F4");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtRsaSsaPssPrivateKey keyProto =
