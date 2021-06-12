@@ -23,8 +23,7 @@ set -euo pipefail
 declare -a PYTHON_VERSIONS=
 PYTHON_VERSIONS+=("3.7")
 PYTHON_VERSIONS+=("3.8")
-# TODO(ckl): Enable when macOS solution is in place.
-#PYTHON_VERSIONS+=("3.9")
+PYTHON_VERSIONS+=("3.9")
 readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
