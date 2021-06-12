@@ -24,18 +24,14 @@ import posixpath
 import re
 import shutil
 import subprocess
-import sys
 
 import setuptools
 from setuptools.command import build_ext
 
 
-here = os.path.dirname(os.path.abspath(__file__))
-
-
-def _get_tink_version():
+def _get_tink_version(directory):
   """Parses the version number from VERSION file."""
-  with open(os.path.join(here, 'VERSION')) as f:
+  with open(os.path.join(directory, 'VERSION')) as f:
     try:
       version_line = next(
           line for line in f if line.startswith('TINK_VERSION_LABEL'))
@@ -44,53 +40,47 @@ def _get_tink_version():
     else:
       return version_line.split(' = ')[-1].strip('\n \'"')
 
-# Check Bazel enviroment and set executable
-if spawn.find_executable('bazelisk'):
-  bazel = 'bazelisk'
-elif spawn.find_executable('bazel'):
-  bazel = 'bazel'
-else:
-  sys.stderr.write('Could not find bazel executable. Please install bazel to'
-                   'compile the Tink Python package.')
-  sys.exit(-1)
 
-# Find the Protocol Compiler.
-if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
-  protoc = os.environ['PROTOC']
-else:
-  protoc = spawn.find_executable('protoc')
+def _get_bazel_command():
+  """Finds the bazel command."""
+  if spawn.find_executable('bazelisk'):
+    return 'bazelisk'
+  elif spawn.find_executable('bazel'):
+    return 'bazel'
+  raise FileNotFoundError('Could not find bazel executable. Please install '
+                          'bazel to compile the Tink Python package.')
 
 
-def _generate_proto(source):
+def _get_protoc_command():
+  """Finds the protoc command."""
+  if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
+    return os.environ['PROTOC']
+  else:
+    return spawn.find_executable('protoc')
+  raise FileNotFoundError('Could not find protoc executable. Please install '
+                          'protoc to compile the Tink Python package.')
+
+
+def _generate_proto(protoc, source):
   """Invokes the Protocol Compiler to generate a _pb2.py."""
+
+  if not os.path.exists(source):
+    raise FileNotFoundError('Cannot find required file: {}'.format(source))
 
   output = source.replace('.proto', '_pb2.py')
 
-  if (not os.path.exists(output) or
-      (os.path.exists(source) and
-       os.path.getmtime(source) > os.path.getmtime(output))):
-    print('Generating %s...' % output)
+  if (os.path.exists(output) and
+      os.path.getmtime(source) < os.path.getmtime(output)):
+    # No need to regenerate if output is newer than source.
+    return
 
-    if not os.path.exists(source):
-      sys.stderr.write('Cannot find required file: %s\n' % source)
-      sys.exit(-1)
-
-    if protoc is None:
-      sys.stderr.write(
-          'protoc is not installed nor found in ../src.  Please compile it '
-          'or install the binary package.\n')
-      sys.exit(-1)
-
-    protoc_command = [protoc, '-I.', '--python_out=.', source]
-    if subprocess.call(protoc_command) != 0:
-      sys.exit(-1)
-
-for proto_file in glob.glob('tink/proto/*.proto'):
-  _generate_proto(proto_file)
+  print('Generating {}...'.format(output))
+  protoc_args = [protoc, '-I.', '--python_out=.', source]
+  subprocess.run(args=protoc_args, check=True)
 
 
-def _parse_requirements(path):
-  with open(os.path.join(here, path)) as f:
+def _parse_requirements(directory, filename):
+  with open(os.path.join(directory, filename)) as f:
     return [
         line.rstrip()
         for line in f
@@ -101,19 +91,17 @@ def _parse_requirements(path):
 def _patch_workspace(workspace_content):
   """Change inclusion of the other WORKSPACEs in Tink to be absolute.
 
-  Setuptools builds in a temporary folder, therefore the relative paths can not
-  be resolved. Instead we use the http_archives during the build.
+  setuptools builds in a temporary folder which breaks the relative paths
+  defined in WORKSPACE.  This replaces the paths with the latest http_archive.
+
+  To override this with a local WORKSPACE use the
+  TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH environment variable.
 
   Args:
     workspace_content: The original tink/python WORKSPACE.
   Returns:
     The workspace_content using http_archive for tink_base and tink_cc.
   """
-  # This is run by pip from a temporary folder which breaks the WORKSPACE paths.
-  # This replaces the paths with the latest http_archive.
-  # In order to override this with a local WORKSPACE use the
-  # TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH environment variable.
-
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
     workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
@@ -123,7 +111,8 @@ def _patch_workspace(workspace_content):
                                base_path + '/cc' + '",  # Modified by setup.py',
                                workspace_content)
   else:
-    # If not base is specified use the latest version from GitHub
+    # If base is not specified use the latest version from GitHub
+
     # Add http_archive load
     workspace_lines = workspace_content.split('\n')
     http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
@@ -179,6 +168,10 @@ class BazelExtension(setuptools.Extension):
 class BuildBazelExtension(build_ext.build_ext):
   """A command that runs Bazel to build a C/C++ extension."""
 
+  def __init__(self, dist):
+    super(BuildBazelExtension, self).__init__(dist)
+    self.bazel_command = _get_bazel_command()
+
   def run(self):
     for ext in self.extensions:
       self.bazel_build(ext)
@@ -196,11 +189,11 @@ class BuildBazelExtension(build_ext.build_ext):
 
     # Ensure no artifacts from previous builds are reused (i.e. from builds
     # using a different Python version).
-    bazel_clean_argv = [bazel, 'clean', '--expunge']
+    bazel_clean_argv = [self.bazel_command, 'clean', '--expunge']
     self.spawn(bazel_clean_argv)
 
     bazel_argv = [
-        bazel, 'build', ext.bazel_target,
+        self.bazel_command, 'build', ext.bazel_target,
         '--compilation_mode=' + ('dbg' if self.debug else 'opt'),
         '--incompatible_linkopts_to_linklibs'
         # TODO(https://github.com/bazelbuild/bazel/issues/9254): Remove linkopts
@@ -216,9 +209,17 @@ class BuildBazelExtension(build_ext.build_ext):
     shutil.copyfile(ext_bazel_bin_path, ext_dest_path)
 
 
+# Generate compiled protocol buffers.
+protoc_command = _get_protoc_command()
+for proto_file in glob.glob('tink/proto/*.proto'):
+  _generate_proto(protoc_command, proto_file)
+
+# Get directory setup.py is located in.
+here = os.path.dirname(os.path.abspath(__file__))
+
 setuptools.setup(
     name='tink',
-    version=_get_tink_version(),
+    version=_get_tink_version(here),
     url='https://github.com/google/tink',
     description='A multi-language, cross-platform library that provides '
     'cryptographic APIs that are secure, easy to use correctly, '
@@ -229,7 +230,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     # Contained modules and scripts.
     packages=setuptools.find_packages(),
-    install_requires=_parse_requirements('requirements.txt'),
+    install_requires=_parse_requirements(here, 'requirements.txt'),
     cmdclass=dict(build_ext=BuildBazelExtension),
     ext_modules=[
         BazelExtension('//tink/cc/pybind:tink_bindings'),
