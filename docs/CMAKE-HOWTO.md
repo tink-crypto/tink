@@ -15,6 +15,7 @@ your top-level CMake script should look like this:
 
     cmake_minimum_required(VERSION 3.5)
     project(YourProject CXX)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_STANDARD 11)
 
     add_subdirectory(third_party/tink)
@@ -23,6 +24,7 @@ your top-level CMake script should look like this:
     target_link_libraries(your_app tink::static)
 
 NOTE: You need at least CMake 3.5 to build Tink and its dependencies.
+NOTE2: "set(CMAKE_CXX_STANDARD_REQUIRED ON)" Required to propagate your settings, Tink uses as fallback CMAKE_CXX_STANDARD 11, use "set(TINK_CXX_STANDARD XX)" to specify a different one.
 
 Include Tink headers in `your_app.cc` as follows:
 
