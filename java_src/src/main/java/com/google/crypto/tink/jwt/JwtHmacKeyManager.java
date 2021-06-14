@@ -79,15 +79,23 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   private static final class JwtHmac implements JwtMacInternal {
     private final PrfMac prfMac;
     private final String algorithm;
+    private final Optional<String> customKid;
 
-    public JwtHmac(String algorithm, PrfMac prfMac) {
+    public JwtHmac(String algorithm, Optional<String> customKid, PrfMac prfMac) {
       this.algorithm = algorithm;
+      this.customKid = customKid;
       this.prfMac = prfMac;
     }
 
     @Override
     public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
         throws GeneralSecurityException {
+      if (customKid.isPresent()) {
+        if (kid.isPresent()) {
+          throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+        }
+        kid = customKid;
+      }
       String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
       return JwtFormat.createSignedCompact(
           unsignedCompact, prfMac.computeMac(unsignedCompact.getBytes(US_ASCII)));
@@ -116,7 +124,9 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
             SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
             PrfHmacJce prf = new PrfHmacJce(getHmacAlgorithm(algorithm), keySpec);
             final PrfMac prfMac = new PrfMac(prf, prf.getMaxOutputLength());
-            return new JwtHmac(getAlgorithmName(algorithm), prfMac);
+            final Optional<String> customKid =
+                key.hasCustomKid() ? Optional.of(key.getCustomKid().getValue()) : Optional.empty();
+            return new JwtHmac(getAlgorithmName(algorithm), customKid, prfMac);
           }
         });
   }

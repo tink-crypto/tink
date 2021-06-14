@@ -104,10 +104,21 @@ public final class JwtRsaSsaPkcs1SignKeyManager
       Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
       final RsaSsaPkcs1SignJce signer = new RsaSsaPkcs1SignJce(privateKey, hash);
       final String algorithmName = algorithm.name();
+      final Optional<String> customKid =
+          keyProto.getPublicKey().hasCustomKid()
+              ? Optional.of(keyProto.getPublicKey().getCustomKid().getValue())
+              : Optional.empty();
+
       return new JwtPublicKeySignInternal() {
         @Override
         public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
             throws GeneralSecurityException {
+          if (customKid.isPresent()) {
+            if (kid.isPresent()) {
+              throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+            }
+            kid = customKid;
+          }
           String unsignedCompact = JwtFormat.createUnsignedCompact(algorithmName, kid, rawJwt);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));

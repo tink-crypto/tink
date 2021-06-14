@@ -28,6 +28,7 @@ import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.proto.JwtHmacAlgorithm;
 import com.google.crypto.tink.proto.JwtHmacKey;
+import com.google.crypto.tink.proto.JwtHmacKey.CustomKid;
 import com.google.crypto.tink.proto.JwtHmacKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
@@ -694,5 +695,82 @@ public class JwtHmacKeyManagerTest {
 
     assertThat(token.getIssuer()).isEqualTo("joe");
     assertThat(token.getBooleanClaim("http://example.com/is_root")).isTrue();
+  }
+
+  @Test
+  public void macWithCustomKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    // Create a new handle with the "kid" value set.
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtHmacKey hmacKey =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtHmacKey hmacKeyWithKid =
+        hmacKey.toBuilder()
+            .setCustomKid(
+                CustomKid.newBuilder()
+                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+                    .build())
+            .build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder().setValue(hmacKeyWithKid.toByteString()).build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithKid =
+        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithoutKid = handle.getPrimitive(JwtMac.class);
+
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
+
+    // Verify that the kid is set in the header
+    String jsonHeader = JwtFormat.splitSignedCompact(compactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeader).get("kid").getAsString();
+    assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    // Both JwtMacs must accept compactWithKid.
+    assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+
+    String compactWithoutKid = jwtMacWithoutKid.computeMacAndEncode(rawToken);
+    // Both JwtMacs must accept signedCompactWithoutKid.
+    assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+    assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+  }
+
+  @Test
+  public void macWithTinkKeyAndCustomKid_fails() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+
+    // Create a new handle with the "kid" value set.
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtHmacKey hmacKey =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    JwtHmacKey hmacKeyWithKid =
+        hmacKey.toBuilder()
+            .setCustomKid(
+                CustomKid.newBuilder()
+                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+                    .build())
+            .build();
+    KeyData keyDataWithKid =
+        keyset.getKey(0).getKeyData().toBuilder().setValue(hmacKeyWithKid.toByteString()).build();
+    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithKid =
+        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    assertThrows(JwtInvalidException.class, () -> jwtMacWithKid.computeMacAndEncode(rawToken));
   }
 }
