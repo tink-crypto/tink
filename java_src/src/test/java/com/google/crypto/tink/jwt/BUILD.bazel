@@ -334,6 +334,7 @@ java_test(
     name = "JwkSetConverterTest",
     srcs = ["JwkSetConverterTest.java"],
     deps = [
+        "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
         "//src/main/java/com/google/crypto/tink:json_keyset_reader",
         "//src/main/java/com/google/crypto/tink:key_template",

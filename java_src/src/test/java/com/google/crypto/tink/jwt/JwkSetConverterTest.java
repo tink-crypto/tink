@@ -23,6 +23,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
@@ -464,27 +465,38 @@ public final class JwkSetConverterTest {
   }
 
   @Test
-  public void toKeysetHandleWithInvalidKid_fromKeysetHandle_jwkSetWithoutKid() throws Exception {
-    // When the kid cannot be decoded, the keys will have output prefix type RAW, and the
-    // kid will be missing when converted to JWK Set.
-    String esWithInvalidKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"ENgjPAENgjPA\"");
+  public void jwkWithKid_isImportedAsRaw() throws Exception {
+    KeysetHandle es = JwkSetConverter.toKeysetHandle(ES256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(es).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+    KeysetHandle rs = JwkSetConverter.toKeysetHandle(RS256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(rs).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+    KeysetHandle ps = JwkSetConverter.toKeysetHandle(PS256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(ps).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+  }
+
+  @Test
+  public void jwkWithEmptyKid_kidIsPreserved() throws Exception {
+    String esWithEmptyKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(esWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(esWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        ES256_JWK_SET);
-    String rsWithInvalidKid = RS256_JWK_SET_KID.replace("\"HL1QoQ\"", "\"HL1QoQHL1QoQ\"");
+        esWithEmptyKid);
+    String rsWithEmptyKid = RS256_JWK_SET_KID.replace("\"HL1QoQ\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(rsWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(rsWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        RS256_JWK_SET);
-    String psWithInvalidKid = PS256_JWK_SET_KID.replace("\"Wes4wg\"", "\"Wes4wgWes4wg\"");
+        rsWithEmptyKid);
+    String psWithEmptyKid = PS256_JWK_SET_KID.replace("\"Wes4wg\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(psWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(psWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        PS256_JWK_SET);
+        psWithEmptyKid);
   }
 
   @Test
