@@ -50,6 +50,16 @@ class HybridKeyTemplates {
   // EciesAeadHkdfPrivateKey with the following parameters:
   //   - KEM: ECDH over NIST P-256
   //   - DEM: AES128-GCM
+  //   - KDF: HKDF-HMAC-SHA512 with an empty salt
+  //   - EC Point Format: Uncompressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesP256HkdfHmacSha512Aes128Gcm();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over NIST P-256
+  //   - DEM: AES128-GCM
   //   - KDF: HKDF-HMAC-SHA256 with an empty salt
   //   - EC Point Format: Compressed
   //   - OutputPrefixType: RAW
@@ -69,6 +79,20 @@ class HybridKeyTemplates {
   //   - OutputPrefixType: TINK
   static const google::crypto::tink::KeyTemplate&
   EciesP256HkdfHmacSha256Aes128CtrHmacSha256();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over NIST P-256
+  //   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
+  //          * AES key size: 16 bytes
+  //          * AES CTR IV size: 16 bytes
+  //          * HMAC key size: 32 bytes
+  //          * HMAC tag size: 16 bytes
+  //   - KDF: HKDF-HMAC-SHA512 with an empty salt
+  //   - EC Point Format: Uncompressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesP256HkdfHmacSha512Aes128CtrHmacSha256();
 
   // Returns a KeyTemplate that generates new instances of
   // EciesAeadHkdfPrivateKey with the following parameters:

@@ -72,6 +72,16 @@ const KeyTemplate& HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128Gcm() {
 }
 
 // static
+const KeyTemplate& HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128Gcm() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::NIST_P256, HashType::SHA512,
+      EcPointFormat::UNCOMPRESSED, AeadKeyTemplates::Aes128Gcm(),
+      OutputPrefixType::TINK,
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
 const KeyTemplate&
 HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix() {
   static const KeyTemplate* key_template =
@@ -84,7 +94,6 @@ HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix() {
   return *key_template;
 }
 
-
 // static
 const KeyTemplate&
 HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256() {
@@ -95,6 +104,17 @@ HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256() {
                                   AeadKeyTemplates::Aes128CtrHmacSha256(),
                                   OutputPrefixType::TINK,
                                   /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
+const KeyTemplate&
+HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128CtrHmacSha256() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::NIST_P256, HashType::SHA512,
+      EcPointFormat::UNCOMPRESSED, AeadKeyTemplates::Aes128CtrHmacSha256(),
+      OutputPrefixType::TINK,
+      /* hkdf_salt= */ "");
   return *key_template;
 }
 
