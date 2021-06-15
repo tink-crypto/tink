@@ -24,21 +24,29 @@ import posixpath
 import re
 import shutil
 import subprocess
+import textwrap
 
 import setuptools
 from setuptools.command import build_ext
 
 
-def _get_tink_version(directory):
+_PROJECT_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _get_tink_version():
   """Parses the version number from VERSION file."""
-  with open(os.path.join(directory, 'VERSION')) as f:
+  with open(os.path.join(_PROJECT_BASE_DIR, 'VERSION')) as f:
     try:
       version_line = next(
           line for line in f if line.startswith('TINK_VERSION_LABEL'))
     except StopIteration:
-      raise ValueError('Version not defined in python/VERSION')
+      raise ValueError(
+          'Version not defined in {}/VERSION'.format(_PROJECT_BASE_DIR))
     else:
       return version_line.split(' = ')[-1].strip('\n \'"')
+
+
+_TINK_VERSION = _get_tink_version()
 
 
 def _get_bazel_command():
@@ -79,8 +87,8 @@ def _generate_proto(protoc, source):
   subprocess.run(args=protoc_args, check=True)
 
 
-def _parse_requirements(directory, filename):
-  with open(os.path.join(directory, filename)) as f:
+def _parse_requirements(filename):
+  with open(os.path.join(_PROJECT_BASE_DIR, filename)) as f:
     return [
         line.rstrip()
         for line in f
@@ -89,65 +97,103 @@ def _parse_requirements(directory, filename):
 
 
 def _patch_workspace(workspace_content):
-  """Change inclusion of the other WORKSPACEs in Tink to be absolute.
+  """Update the Bazel workspace with valid repository references.
 
   setuptools builds in a temporary folder which breaks the relative paths
-  defined in WORKSPACE.  This replaces the paths with the latest http_archive.
+  defined in the Bazel workspace.  By default, the local_repository() rules will
+  be replaced with http_archive() rules which contain URLs that point to an
+  archive of the Tink GitHub repository as of the latest commit as of the master
+  branch.
 
-  To override this with a local WORKSPACE use the
-  TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH environment variable.
+  This behavior can be modified via the following environment variables, in
+  order of precedence:
+
+    * TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH
+        Instead of using http_archive() rules, update the local_repository()
+        rules with the specified alternative local path. This allows for
+        building using a local copy of the project (e.g. for testing).
+
+    * TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION
+        Instead of providing a URL of an archive of the current master branch,
+        instead link to an archive that correspond with the tagged version (e.g.
+        for creating release artifacts).
 
   Args:
     workspace_content: The original tink/python WORKSPACE.
   Returns:
     The workspace_content using http_archive for tink_base and tink_cc.
   """
+
   if 'TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH' in os.environ:
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
-    workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
-                               base_path + '",  # Modified by setup.py',
-                               workspace_content)
-    workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
-                               base_path + '/cc' + '",  # Modified by setup.py',
-                               workspace_content)
-  else:
-    # If base is not specified use the latest version from GitHub
+    return _patch_with_local_path(workspace_content, base_path)
 
-    # Add http_archive load
-    workspace_lines = workspace_content.split('\n')
-    http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
-                         '"http_archive")')
-    workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
-                                  workspace_lines[1:])
+  if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.eviron:
+    archive_filename = 'v{}.zip'.format(_TINK_VERSION)
+    return _patch_with_http_archive(workspace_content, archive_filename)
 
-    base = ('local_repository(\n'
-            '    name = "tink_base",\n'
-            '    path = "..",\n'
-            ')\n')
+  return _patch_with_http_archive(workspace_content, 'master.zip')
 
-    cc = ('local_repository(\n'
-          '    name = "tink_cc",\n'
-          '    path = "../cc",\n'
-          ')\n')
 
-    base_patched = (
-        '# Modified by setup.py\n'
-        'http_archive(\n'
-        '    name = "tink_base",\n'
-        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-        '    strip_prefix = "tink-master/",\n'
-        ')\n')
+def _patch_with_local_path(workspace_content, base_path):
+  """Replaces the base paths in the local_repository() rules."""
 
-    cc_patched = (
-        '# Modified by setup.py\n'
-        'http_archive(\n'
-        '    name = "tink_cc",\n'
-        '    urls = ["https://github.com/google/tink/archive/master.zip"],\n'
-        '    strip_prefix = "tink-master/cc",\n'
-        ')\n')
+  workspace_content = re.sub(r'(?<="tink_base",\n    path = ").*(?=\n)',
+                             base_path + '",  # Modified by setup.py',
+                             workspace_content)
+  workspace_content = re.sub(r'(?<="tink_cc",\n    path = ").*(?=\n)',
+                             base_path + '/cc",  # Modified by setup.py',
+                             workspace_content)
+  return workspace_content
 
-    workspace_content = workspace_content.replace(base, base_patched)
-    workspace_content = workspace_content.replace(cc, cc_patched)
+
+def _patch_with_http_archive(workspace_content, filename):
+  """Replaces local_repository() rules with http_archive() rules."""
+
+  workspace_lines = workspace_content.split('\n')
+  http_archive_load = ('load("@bazel_tools//tools/build_defs/repo:http.bzl", '
+                       '"http_archive")')
+  workspace_content = '\n'.join([workspace_lines[0], http_archive_load] +
+                                workspace_lines[1:])
+
+  base = textwrap.dedent(
+      '''\
+      local_repository(
+          name = "tink_base",
+          path = "..",
+      )
+      ''')
+
+  cc = textwrap.dedent(
+      '''\
+      local_repository(
+          name = "tink_cc",
+          path = "../cc",
+      ))
+      ''')
+
+  base_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_base",
+          urls = ["https://github.com/google/tink/archive/{}.zip"],
+          strip_prefix = "tink-master/",
+      ))
+      '''.format(filename))
+
+  cc_patched = textwrap.dedent(
+      '''\
+      # Modified by setup.py
+      http_archive(
+          name = "tink_cc",
+          urls = ["https://github.com/google/tink/archive/{}.zip"],
+          strip_prefix = "tink-master/cc",
+      ))
+      '''.format(filename))
+
+  workspace_content = workspace_content.replace(base, base_patched)
+  workspace_content = workspace_content.replace(cc, cc_patched)
   return workspace_content
 
 
@@ -209,39 +255,41 @@ class BuildBazelExtension(build_ext.build_ext):
     shutil.copyfile(ext_bazel_bin_path, ext_dest_path)
 
 
-# Generate compiled protocol buffers.
-protoc_command = _get_protoc_command()
-for proto_file in glob.glob('tink/proto/*.proto'):
-  _generate_proto(protoc_command, proto_file)
+def main():
+  # Generate compiled protocol buffers.
+  protoc_command = _get_protoc_command()
+  for proto_file in glob.glob('tink/proto/*.proto'):
+    _generate_proto(protoc_command, proto_file)
 
-# Get directory setup.py is located in.
-here = os.path.dirname(os.path.abspath(__file__))
+  setuptools.setup(
+      name='tink',
+      version=_TINK_VERSION,
+      url='https://github.com/google/tink',
+      description='A multi-language, cross-platform library that provides '
+      'cryptographic APIs that are secure, easy to use correctly, '
+      'and hard(er) to misuse.',
+      author='Tink Developers',
+      author_email='tink-users@googlegroups.com',
+      long_description=open('README.md').read(),
+      long_description_content_type='text/markdown',
+      # Contained modules and scripts.
+      packages=setuptools.find_packages(),
+      install_requires=_parse_requirements('requirements.txt'),
+      cmdclass=dict(build_ext=BuildBazelExtension),
+      ext_modules=[
+          BazelExtension('//tink/cc/pybind:tink_bindings'),
+      ],
+      zip_safe=False,
+      # PyPI package information.
+      classifiers=[
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+          'Topic :: Software Development :: Libraries',
+      ],
+      license='Apache 2.0',
+      keywords='tink cryptography',
+  )
 
-setuptools.setup(
-    name='tink',
-    version=_get_tink_version(here),
-    url='https://github.com/google/tink',
-    description='A multi-language, cross-platform library that provides '
-    'cryptographic APIs that are secure, easy to use correctly, '
-    'and hard(er) to misuse.',
-    author='Tink Developers',
-    author_email='tink-users@googlegroups.com',
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
-    # Contained modules and scripts.
-    packages=setuptools.find_packages(),
-    install_requires=_parse_requirements(here, 'requirements.txt'),
-    cmdclass=dict(build_ext=BuildBazelExtension),
-    ext_modules=[
-        BazelExtension('//tink/cc/pybind:tink_bindings'),
-    ],
-    zip_safe=False,
-    # PyPI package information.
-    classifiers=[
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Topic :: Software Development :: Libraries',
-    ],
-    license='Apache 2.0',
-    keywords='tink cryptography',
-)
+
+if __name__ == '__main__':
+  main()
