@@ -39,7 +39,9 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
   }
   util::Status verify_result = verify_->Verify(signature, unsigned_token);
   if (!verify_result.ok()) {
-    return verify_result;
+    // Use a different error code so that we can distinguish it.
+    return util::Status(util::error::UNAUTHENTICATED,
+                        verify_result.error_message());
   }
   std::vector<absl::string_view> parts = absl::StrSplit(unsigned_token, '.');
   if (parts.size() != 2) {

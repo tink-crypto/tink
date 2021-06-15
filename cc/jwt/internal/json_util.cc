@@ -39,7 +39,7 @@ util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid JSON");
   }
   return proto;
 }
@@ -51,7 +51,7 @@ util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return util::Status(util::error::INVALID_ARGUMENT, "invalid JSON");
   }
   return proto;
 }

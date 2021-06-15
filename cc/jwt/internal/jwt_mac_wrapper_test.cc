@@ -122,7 +122,11 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
                                 .AllowMissingExpiration()
                                 .Build()
                                 .ValueOrDie();
-  EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
+  util::StatusOr<VerifiedJwt> verified_jwt_or2 =
+      jwt_mac->VerifyMacAndDecode(compact, validator2);
+  EXPECT_FALSE(verified_jwt_or2.ok());
+  // Make sure the error message is interesting
+  EXPECT_THAT(verified_jwt_or2.status().error_message(), Eq("wrong issuer"));
 }
 
 TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
