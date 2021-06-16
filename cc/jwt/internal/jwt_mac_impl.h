@@ -17,6 +17,9 @@
 #ifndef TINK_JWT_INTERNAL_JWT_MAC_IMPL_H_
 #define TINK_JWT_INTERNAL_JWT_MAC_IMPL_H_
 
+#include <string>
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
@@ -34,9 +37,13 @@ namespace jwt_internal {
 class JwtMacImpl : public JwtMacInternal {
  public:
   explicit JwtMacImpl(std::unique_ptr<crypto::tink::Mac> mac,
-                      absl::string_view algorithm) {
+                      absl::string_view algorithm,
+                      absl::optional<absl::string_view> custom_kid) {
     mac_ = std::move(mac);
     algorithm_ = std::string(algorithm);
+    if (custom_kid.has_value()) {
+      custom_kid_ = std::string(*custom_kid);
+    }
   }
 
   crypto::tink::util::StatusOr<std::string> ComputeMacAndEncodeWithKid(
@@ -50,6 +57,7 @@ class JwtMacImpl : public JwtMacInternal {
  private:
   std::unique_ptr<crypto::tink::Mac> mac_;
   std::string algorithm_;
+  absl::optional<std::string> custom_kid_;
 };
 
 }  // namespace jwt_internal

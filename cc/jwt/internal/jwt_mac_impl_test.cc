@@ -16,6 +16,9 @@
 
 #include "tink/jwt/internal/jwt_mac_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -60,8 +63,8 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
   if (!mac_or.ok()) {
     return mac_or.status();
   }
-  std::unique_ptr<JwtMacInternal> jwt_mac =
-      absl::make_unique<JwtMacImpl>(std::move(mac_or.ValueOrDie()), "HS256");
+  std::unique_ptr<JwtMacInternal> jwt_mac = absl::make_unique<JwtMacImpl>(
+      std::move(mac_or.ValueOrDie()), "HS256", absl::nullopt);
   return jwt_mac;
 }
 

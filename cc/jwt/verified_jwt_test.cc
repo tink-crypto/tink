@@ -16,6 +16,9 @@
 
 #include "tink/jwt/verified_jwt.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
@@ -59,7 +62,7 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   }
   std::unique_ptr<jwt_internal::JwtMacInternal> jwt_mac =
       absl::make_unique<jwt_internal::JwtMacImpl>(
-          std::move(mac_or.ValueOrDie()), "HS256");
+          std::move(mac_or.ValueOrDie()), "HS256", absl::nullopt);
 
   auto compact_or = jwt_mac->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
   if (!compact_or.ok()) {
