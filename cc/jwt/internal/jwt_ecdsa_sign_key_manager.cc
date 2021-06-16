@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 
@@ -41,9 +44,13 @@ JwtEcdsaSignKeyManager::PublicKeySignFactory::Create(
   if (!result.ok()) {
     return result.status();
   }
+  absl::optional<absl::string_view> custom_kid = absl::nullopt;
+  if (jwt_ecdsa_private_key.public_key().has_custom_kid()) {
+    custom_kid = jwt_ecdsa_private_key.public_key().custom_kid().value();
+  }
   std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
       absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
-          std::move(result.ValueOrDie()), name_or.ValueOrDie());
+          std::move(result.ValueOrDie()), name_or.ValueOrDie(), custom_kid);
   return jwt_public_key_sign;
 }
 

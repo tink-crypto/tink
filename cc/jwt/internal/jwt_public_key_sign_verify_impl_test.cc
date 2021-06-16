@@ -14,6 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
@@ -60,7 +63,7 @@ class JwtSignatureImplTest : public ::testing::Test {
     ASSERT_THAT(verify_result.status(), IsOk());
 
     jwt_sign_ = absl::make_unique<JwtPublicKeySignImpl>(
-        std::move(sign_result.ValueOrDie()), "ES256");
+        std::move(sign_result.ValueOrDie()), "ES256", absl::nullopt);
     jwt_verify_ = absl::make_unique<JwtPublicKeyVerifyImpl>(
         std::move(verify_result.ValueOrDie()), "ES256");
   }
