@@ -376,7 +376,7 @@ public final class JwkSetConverter {
       }
       if (jsonKey.has("p")
           || jsonKey.has("q")
-          || jsonKey.has("dq")
+          || jsonKey.has("dp")
           || jsonKey.has("dq")
           || jsonKey.has("d")
           || jsonKey.has("qi")) {
