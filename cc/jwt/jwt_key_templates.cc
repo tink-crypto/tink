@@ -43,13 +43,14 @@ namespace tink {
 namespace {
 
 KeyTemplate* NewJwtHmacKeyTemplate(JwtHmacAlgorithm algorithm,
+                                   uint32_t key_size,
                                    OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtHmacKey");
   key_template->set_output_prefix_type(output_prefix_type);
   JwtHmacKeyFormat key_format;
-  key_format.set_key_size(32);
+  key_format.set_key_size(key_size);
   key_format.set_algorithm(algorithm);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
@@ -110,38 +111,38 @@ KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
 }  // anonymous namespace
 
 const KeyTemplate& JwtHs256Template() {
-  static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256, OutputPrefixType::TINK);
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS256, 32, OutputPrefixType::TINK);
   return *key_template;
 }
 
 const KeyTemplate& RawJwtHs256Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256, OutputPrefixType::RAW);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256, 32, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs384Template() {
-  static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384, OutputPrefixType::TINK);
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS384, 48, OutputPrefixType::TINK);
   return *key_template;
 }
 
 const KeyTemplate& RawJwtHs384Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384, OutputPrefixType::RAW);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384, 48, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs512Template() {
-  static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512, OutputPrefixType::TINK);
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS512, 64, OutputPrefixType::TINK);
   return *key_template;
 }
 
 const KeyTemplate& RawJwtHs512Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512, OutputPrefixType::RAW);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512, 64, OutputPrefixType::RAW);
   return *key_template;
 }
 

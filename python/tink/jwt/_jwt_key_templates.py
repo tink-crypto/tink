@@ -21,10 +21,13 @@ from tink.proto import tink_pb2
 
 _F4 = 65537
 
+# TODO(juerg): Add TINK key templates.
 
-def _create_jwt_hmac_template(
-    algorithm: jwt_hmac_pb2.JwtHmacAlgorithm) -> tink_pb2.KeyTemplate:
-  key_format = jwt_hmac_pb2.JwtHmacKeyFormat(algorithm=algorithm, key_size=32)
+
+def _create_jwt_hmac_template(algorithm: jwt_hmac_pb2.JwtHmacAlgorithm,
+                              key_size: int) -> tink_pb2.KeyTemplate:
+  key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
+      algorithm=algorithm, key_size=key_size)
   return tink_pb2.KeyTemplate(
       type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
       value=key_format.SerializeToString(),
@@ -85,15 +88,15 @@ def _create_jwt_rsa_ssa_pss_template(
 
 # Hmac Templates
 def jwt_hs256_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(jwt_hmac_pb2.HS256)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS256, 32)
 
 
 def jwt_hs384_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(jwt_hmac_pb2.HS384)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS384, 48)
 
 
 def jwt_hs512_template() -> tink_pb2.KeyTemplate:
-  return _create_jwt_hmac_template(jwt_hmac_pb2.HS512)
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS512, 64)
 
 
 # ECDSA Templates
