@@ -16,6 +16,9 @@
 
 #include "tink/jwt/jwt_validator.h"
 
+#include <algorithm>
+#include <string>
+
 namespace crypto {
 namespace tink {
 

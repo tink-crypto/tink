@@ -93,7 +93,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink:tink_python",
-        "//tink/proto:common_py_pb2",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",

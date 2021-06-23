@@ -16,11 +16,14 @@
 
 #include "tink/jwt/jwt_key_templates.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/jwt/jwt_mac.h"
+#include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
-#include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/raw_jwt.h"

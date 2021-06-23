@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_public_key_verify_wrapper.h"
 
+#include <utility>
+
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
