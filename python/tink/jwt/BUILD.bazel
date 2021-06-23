@@ -18,6 +18,8 @@ py_library(
         ":_jwt_mac_wrapper",
         ":_jwt_public_key_sign",
         ":_jwt_public_key_verify",
+        ":_jwt_signature_key_manager",
+        ":_jwt_signature_wrappers",
         ":_jwt_validator",
         ":_raw_jwt",
         ":_verified_jwt",
@@ -220,6 +222,69 @@ py_test(
     name = "_jwt_mac_wrapper_test",
     srcs = ["_jwt_mac_wrapper_test.py"],
     python_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink:tink_python",
+        "//tink/testing:keyset_builder",
+    ],
+)
+
+py_library(
+    name = "_jwt_signature_key_manager",
+    srcs = ["_jwt_signature_key_manager.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_error",
+        ":_jwt_format",
+        ":_jwt_public_key_sign",
+        ":_jwt_public_key_verify",
+        ":_jwt_validator",
+        ":_raw_jwt",
+        ":_verified_jwt",
+        "//tink/cc/pybind:tink_bindings",
+        "//tink/core",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_signature_key_manager_test",
+    srcs = ["_jwt_signature_key_manager_test.py"],
+    deps = [
+        ":_jwt_format",
+        ":_jwt_signature_key_manager",
+        ":_jwt_signature_wrappers",
+        ":jwt",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:tink_py_pb2",
+        requirement("absl-py"),
+        "//tink:tink_python",
+    ],
+)
+
+py_library(
+    name = "_jwt_signature_wrappers",
+    srcs = ["_jwt_signature_wrappers.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":_jwt_error",
+        ":_jwt_public_key_sign",
+        ":_jwt_public_key_verify",
+        ":_jwt_validator",
+        ":_raw_jwt",
+        ":_verified_jwt",
+        "//tink/core",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwt_signature_wrappers_test",
+    srcs = ["_jwt_signature_wrappers_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
     deps = [
         ":jwt",
         requirement("absl-py"),

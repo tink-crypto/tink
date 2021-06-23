@@ -27,6 +27,8 @@ from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_mac_wrapper
 from tink.jwt import _jwt_public_key_sign
 from tink.jwt import _jwt_public_key_verify
+from tink.jwt import _jwt_signature_key_manager
+from tink.jwt import _jwt_signature_wrappers
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -113,3 +115,8 @@ jwt_ps512_4096_f4_template = _jwt_key_templates.jwt_ps512_4096_f4_template
 def register_jwt_mac() -> None:
   _jwt_hmac_key_manager.register()
   _jwt_mac_wrapper.register()
+
+
+def register_jwt_signature() -> None:
+  _jwt_signature_key_manager.register()
+  _jwt_signature_wrappers.register()
