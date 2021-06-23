@@ -16,6 +16,8 @@
 
 #include "tink/jwt/raw_jwt.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/time/time.h"
@@ -430,75 +432,6 @@ TEST(RawJwt, BuildCanBeCalledTwice) {
   EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
   EXPECT_THAT(jwt2.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_THAT(jwt2.GetSubject(), IsOkAndHolds("subject2"));
-}
-
-TEST(RawJwt, FromJson) {
-  util::StatusOr<RawJwt> jwt_or = RawJwt::FromJson(
-      absl::nullopt,
-      R"({"iss":"issuer", "sub":"subject", "exp":123, "aud":["a1", "a2"]})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_FALSE(jwt.HasTypeHeader());
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-  EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
-  EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
-  std::vector<std::string> expected_audiences = {"a1", "a2"};
-  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
-}
-
-TEST(RawJwt, FromJsonWithTypeHeader) {
-  util::StatusOr<RawJwt> jwt_or =
-      RawJwt::FromJson("typeHeader", R"({"iss":"issuer"})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-}
-
-TEST(RawJwt, FromJsonExpExpiration) {
-  util::StatusOr<RawJwt> jwt_or =
-      RawJwt::FromJson(absl::nullopt, R"({"exp":1e10})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_THAT(jwt.GetExpiration(),
-              IsOkAndHolds(absl::FromUnixSeconds(10000000000)));
-}
-
-TEST(RawJwt, FromJsonExpirationTooLarge) {
-  util::StatusOr<RawJwt> jwt_or =
-      RawJwt::FromJson(absl::nullopt, R"({"exp":1e30})");
-  EXPECT_FALSE(jwt_or.ok());
-}
-
-TEST(RawJwt, FromJsonNegativeExpirationAreInvalid) {
-  util::StatusOr<RawJwt> jwt_or =
-      RawJwt::FromJson(absl::nullopt, R"({"exp":-1})");
-  EXPECT_FALSE(jwt_or.ok());
-}
-
-TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
-  util::StatusOr<RawJwt> jwt_or =
-      RawJwt::FromJson(absl::nullopt, R"({"aud":"audience"})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  std::vector<std::string> expected = {"audience"};
-  EXPECT_TRUE(jwt.HasAudiences());
-  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
-}
-
-TEST(RawJwt, FromJsonWithBadRegisteredTypes) {
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iss":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"sub":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":[]})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":["abc",123]})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"exp":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"nbf":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iat":"abc"})").ok());
 }
 
 TEST(RawJwt, GetJsonPayload) {

@@ -17,7 +17,10 @@
 #ifndef TINK_JWT_INTERNAL_JWT_FORMAT_H_
 #define TINK_JWT_INTERNAL_JWT_FORMAT_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -48,6 +51,12 @@ bool DecodePayload(absl::string_view payload, std::string* json_payload);
 std::string EncodeSignature(absl::string_view signature);
 bool DecodeSignature(absl::string_view encoded_signature,
                      std::string* signature);
+
+class RawJwtParser {
+ public:
+  static util::StatusOr<RawJwt> FromJson(
+      absl::optional<std::string> type_header, absl::string_view json_payload);
+};
 
 }  // namespace jwt_internal
 }  // namespace tink

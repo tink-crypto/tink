@@ -85,6 +85,7 @@ cc_library(
     deps = [
         ":json_util",
         "//:crypto_format",
+        "//jwt:raw_jwt",
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",

@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
 
+#include <string>
+
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -66,8 +68,8 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
   if (!DecodePayload(parts[1], &json_payload)) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT payload");
   }
-  auto raw_jwt_or =
-      RawJwt::FromJson(GetTypeHeader(header_or.ValueOrDie()), json_payload);
+  auto raw_jwt_or = RawJwtParser::FromJson(
+      GetTypeHeader(header_or.ValueOrDie()), json_payload);
   if (!raw_jwt_or.ok()) {
     return raw_jwt_or.status();
   }

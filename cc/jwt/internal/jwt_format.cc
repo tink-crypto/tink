@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_format.h"
 
+#include <string>
+
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/crypto_format.h"
@@ -146,6 +148,11 @@ std::string EncodeSignature(absl::string_view signature) {
 bool DecodeSignature(absl::string_view encoded_signature,
                      std::string* signature) {
   return StrictWebSafeBase64Unescape(encoded_signature, signature);
+}
+
+util::StatusOr<RawJwt> RawJwtParser::FromJson(
+    absl::optional<std::string> type_header, absl::string_view json_payload) {
+  return RawJwt::FromJson(type_header, json_payload);
 }
 
 }  // namespace jwt_internal

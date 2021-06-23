@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_RAW_JWT_H_
 #define TINK_JWT_RAW_JWT_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
@@ -26,6 +28,13 @@
 
 namespace crypto {
 namespace tink {
+
+namespace jwt_internal {
+
+// For friend declaration
+class RawJwtParser;
+
+}  // namespace jwt_internal
 
 ///////////////////////////////////////////////////////////////////////////////
 // A raw JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
@@ -65,8 +74,6 @@ class RawJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
   std::vector<std::string> CustomClaimNames() const;
 
-  static util::StatusOr<RawJwt> FromJson(
-      absl::optional<std::string> type_header, absl::string_view json_payload);
   util::StatusOr<std::string> GetJsonPayload() const;
 
   // RawJwt objects are copiable and movable.
@@ -76,9 +83,12 @@ class RawJwt {
   RawJwt& operator=(RawJwt&& other) = default;
 
  private:
+  static util::StatusOr<RawJwt> FromJson(
+      absl::optional<std::string> type_header, absl::string_view json_payload);
   explicit RawJwt(absl::optional<std::string> type_header,
                   google::protobuf::Struct json_proto);
   friend class RawJwtBuilder;
+  friend class jwt_internal::RawJwtParser;
   absl::optional<std::string> type_header_;
   google::protobuf::Struct json_proto_;
 };
