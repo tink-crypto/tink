@@ -93,6 +93,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink.tinkkey">com.google.crypto.tink.tinkkey</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.tinkkey.internal">com.google.crypto.tink.tinkkey.internal</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -195,19 +199,6 @@ the order they are declared.</div>
 </a>
 <h3>Uses of <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a> in <a href="../../../../../com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></h3>
 <table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
-<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a> that return <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></code></td>
-<td class="colLast"><span class="typeNameLabel">ProtoKey.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/ProtoKey.html#getOutputPrefixType--">getOutputPrefixType</a></span>()</code>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
 <caption><span>Methods in <a href="../../../../../com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a> with parameters of type <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></span><span class="tabEnd">&nbsp;</span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
@@ -220,6 +211,39 @@ the order they are declared.</div>
              <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;opt)</code>
 <div class="block">Returns a <code>KeyHandle</code> instance where the underlying <code>TinkKey</code> wraps the input
  <code>keyData</code>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.tinkkey.internal">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a> in <a href="../../../../../com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a> that return <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></code></td>
+<td class="colLast"><span class="typeNameLabel">ProtoKey.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/internal/ProtoKey.html#getOutputPrefixType--">getOutputPrefixType</a></span>()</code>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing constructors, and an explanation">
+<caption><span>Constructors in <a href="../../../../../com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a> with parameters of type <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/internal/ProtoKey.html#ProtoKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">ProtoKey</a></span>(com.google.crypto.tink.proto.KeyData&nbsp;keyData,
+        <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;opt)</code>
+<div class="block">Constructs a ProtoKey with <code>hasSecret()</code> returning true if the input <code>KeyData</code> has
+ key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.</div>
 </td>
 </tr>
 </tbody>
