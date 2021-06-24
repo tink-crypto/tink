@@ -13,11 +13,12 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-package com.google.crypto.tink.tinkkey;
+package com.google.crypto.tink.tinkkey.internal;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.tinkkey.TinkKey;
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -36,7 +37,7 @@ public final class ProtoKey implements TinkKey {
    * Constructs a ProtoKey with {@code hasSecret()} returning true if the input {@code KeyData} has
    * key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
    */
-  ProtoKey(KeyData keyData, OutputPrefixType opt) {
+  public ProtoKey(KeyData keyData, OutputPrefixType opt) {
     this.hasSecret = isSecret(keyData);
     this.keyData = keyData;
     this.outputPrefixType = opt;
