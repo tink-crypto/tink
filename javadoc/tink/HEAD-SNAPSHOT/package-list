@@ -14,4 +14,5 @@ com.google.crypto.tink.streamingaead
 com.google.crypto.tink.subtle
 com.google.crypto.tink.subtle.prf
 com.google.crypto.tink.tinkkey
+com.google.crypto.tink.tinkkey.internal
 com.google.crypto.tink.util
