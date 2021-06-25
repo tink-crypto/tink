@@ -16,8 +16,11 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from tink.proto import jwt_hmac_pb2
+from tink.proto import tink_pb2
 import tink
 from tink import jwt
+from tink.jwt import _jwt_format
 from tink.testing import keyset_builder
 
 
@@ -25,11 +28,30 @@ def setUpModule():
   jwt.register_jwt_mac()
 
 
+def _create_jwt_hmac_template(
+    algorithm: jwt_hmac_pb2.JwtHmacAlgorithm, key_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType) -> tink_pb2.KeyTemplate:
+  key_format = jwt_hmac_pb2.JwtHmacKeyFormat(
+      algorithm=algorithm, key_size=key_size)
+  return tink_pb2.KeyTemplate(
+      type_url='type.googleapis.com/google.crypto.tink.JwtHmacKey',
+      value=key_format.SerializeToString(),
+      output_prefix_type=output_prefix_type)
+
+
+def jwt_hs256_tink_template() -> tink_pb2.KeyTemplate:
+  return _create_jwt_hmac_template(jwt_hmac_pb2.HS256, 32, tink_pb2.TINK)
+
+
 class JwtMacWrapperTest(parameterized.TestCase):
 
-  def test_key_rotation(self):
-    old_key_tmpl = jwt.jwt_hs256_template()
-    new_key_tmpl = jwt.jwt_hs384_template()
+  @parameterized.parameters([
+      (jwt.jwt_hs256_template(), jwt.jwt_hs256_template()),
+      (jwt.jwt_hs256_template(), jwt_hs256_tink_template()),
+      (jwt_hs256_tink_template(), jwt.jwt_hs256_template()),
+      (jwt_hs256_tink_template(), jwt_hs256_tink_template()),
+  ])
+  def test_key_rotation(self, old_key_tmpl, new_key_tmpl):
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
 
@@ -94,6 +116,37 @@ class JwtMacWrapperTest(parameterized.TestCase):
     self.assertEqual(
         jwtmac4.verify_mac_and_decode(compact4, validator).issuer(), 'a')
 
+  def test_tink_output_prefix_type_encodes_a_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt_hs256_tink_template())
+    jwt_mac = keyset_handle.primitive(jwt.JwtMac)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = jwt_mac.compute_mac_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertIn('kid', header)
+
+  def test_legacy_key_fails(self):
+    template = _create_jwt_hmac_template(jwt_hmac_pb2.HS256, 32,
+                                         tink_pb2.LEGACY)
+    builder = keyset_builder.new_keyset_builder()
+    key_id = builder.add_new_key(template)
+    builder.set_primary_key(key_id)
+    handle = builder.keyset_handle()
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtMac)
+
+  def test_legacy_non_primary_key_fails(self):
+    builder = keyset_builder.new_keyset_builder()
+    old_template = _create_jwt_hmac_template(jwt_hmac_pb2.HS256, 32,
+                                             tink_pb2.LEGACY)
+    _ = builder.add_new_key(old_template)
+    current_key_id = builder.add_new_key(jwt.jwt_hs256_template())
+    builder.set_primary_key(current_key_id)
+    handle = builder.keyset_handle()
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtMac)
 
 if __name__ == '__main__':
   absltest.main()

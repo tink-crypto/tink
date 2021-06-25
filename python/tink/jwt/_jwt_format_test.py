@@ -15,6 +15,7 @@
 
 from absl.testing import absltest
 from absl.testing import parameterized
+from tink.proto import tink_pb2
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_format
 
@@ -126,26 +127,35 @@ class JwtFormatTest(parameterized.TestCase):
       'RS384', 'RS512', 'PS256', 'PS384', 'PS512'
   ])
   def test_create_validate_header(self, algorithm):
-    encoded_header = _jwt_format.create_header(algorithm, None)
+    encoded_header = _jwt_format.create_header(algorithm, None, None)
     json_header = _jwt_format.decode_header(encoded_header)
     header = _jwt_format.json_loads(json_header)
     _jwt_format.validate_header(header, algorithm)
     self.assertIsNone(_jwt_format.get_type_header(header))
 
   def test_create_header_with_type(self):
-    encoded_header = _jwt_format.create_header('HS256', 'typeHeader')
+    encoded_header = _jwt_format.create_header('HS256', 'typeHeader', None)
     json_header = _jwt_format.decode_header(encoded_header)
     self.assertEqual(json_header, '{"alg":"HS256","typ":"typeHeader"}')
     header = _jwt_format.json_loads(json_header)
     _jwt_format.validate_header(header, 'HS256')
     self.assertEqual(_jwt_format.get_type_header(header), 'typeHeader')
 
+  def test_create_header_with_type_and_kid(self):
+    encoded_header = _jwt_format.create_header('HS256', 'typeHeader', 'GsapRA')
+    json_header = _jwt_format.decode_header(encoded_header)
+    self.assertEqual(json_header,
+                     '{"kid":"GsapRA","alg":"HS256","typ":"typeHeader"}')
+    header = _jwt_format.json_loads(json_header)
+    _jwt_format.validate_header(header, 'HS256')
+    self.assertEqual(_jwt_format.get_type_header(header), 'typeHeader')
+
   def test_create_header_with_unknown_alg_fails(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format.create_header('unknown', None)
+      _jwt_format.create_header('unknown', None, None)
 
   def test_create_verify_different_algorithms_fails(self):
-    encoded_header = _jwt_format.create_header('HS256', None)
+    encoded_header = _jwt_format.create_header('HS256', None, None)
     json_header = _jwt_format.decode_header(encoded_header)
     header = _jwt_format.json_loads(json_header)
     with self.assertRaises(_jwt_error.JwtInvalidError):
@@ -175,6 +185,21 @@ class JwtFormatTest(parameterized.TestCase):
         '"http://example.invalid/UNDEFINED":true}')
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.validate_header(header, 'HS256')
+
+  def test_get_kid_success(self):
+    key_id = 0x1ac6a944
+    self.assertEqual(_jwt_format.get_kid(key_id, tink_pb2.TINK), 'GsapRA')
+    self.assertIsNone(_jwt_format.get_kid(key_id, tink_pb2.RAW), None)
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.get_kid(key_id, tink_pb2.LEGACY)
+
+  def test_get_kid_invalid_input_fails(self):
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.get_kid(123, tink_pb2.LEGACY)
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.get_kid(-1, tink_pb2.TINK)
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.get_kid(2**33, tink_pb2.TINK)
 
   def test_json_decode_encode_payload_fixed_data(self):
     # Example from https://tools.ietf.org/html/rfc7519#section-3.1
@@ -213,7 +238,8 @@ class JwtFormatTest(parameterized.TestCase):
 
   def test_create_unsigned_compact_success(self):
     self.assertEqual(
-        _jwt_format.create_unsigned_compact('RS256', None, '{"iss":"joe"}'),
+        _jwt_format.create_unsigned_compact('RS256', None, None,
+                                            '{"iss":"joe"}'),
         b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ')
 
   def test_encode_decode_signature_success(self):
@@ -231,7 +257,7 @@ class JwtFormatTest(parameterized.TestCase):
     signature = _jwt_format.decode_signature(
         b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     unsigned_compact = _jwt_format.create_unsigned_compact(
-        'RS256', 'JWT', payload)
+        'RS256', 'JWT', None, payload)
     signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
                                                        signature)
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
@@ -249,6 +275,31 @@ class JwtFormatTest(parameterized.TestCase):
     _jwt_format.validate_header(header, 'RS256')
     self.assertEqual(pay, payload)
     self.assertEqual(_jwt_format.get_type_header(header), 'JWT')
+
+  def test_signed_compact_create_split_with_kid(self):
+    payload = '{"iss":"joe"}'
+    signature = _jwt_format.decode_signature(
+        b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+    unsigned_compact = _jwt_format.create_unsigned_compact(
+        'RS256', None, 'AZxkm2U', payload)
+    signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
+                                                       signature)
+    un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
+
+    self.assertEqual(
+        unsigned_compact,
+        b'eyJraWQiOiJBWnhrbTJVIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJqb2UifQ')
+    self.assertEqual(
+        signed_compact,
+        'eyJraWQiOiJBWnhrbTJVIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJqb2UifQ'
+        '.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+    self.assertEqual(un_comp, unsigned_compact)
+    self.assertEqual(sig, signature)
+    self.assertEqual(hdr, '{"kid":"AZxkm2U","alg":"RS256"}')
+    header = _jwt_format.json_loads(hdr)
+    _jwt_format.validate_header(header, 'RS256')
+    self.assertEqual(pay, payload)
+    self.assertIsNone(_jwt_format.get_type_header(header))
 
   def test_split_empty_signed_compact(self):
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact('..')

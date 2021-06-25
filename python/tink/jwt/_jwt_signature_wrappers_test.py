@@ -16,8 +16,11 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from tink.proto import jwt_ecdsa_pb2
+from tink.proto import tink_pb2
 import tink
 from tink import jwt
+from tink.jwt import _jwt_format
 from tink.testing import keyset_builder
 
 
@@ -25,7 +28,23 @@ def setUpModule():
   jwt.register_jwt_signature()
 
 
+def _create_jwt_ecdsa_template(
+    algorithm: jwt_ecdsa_pb2.JwtEcdsaAlgorithm,
+    output_prefix_type: tink_pb2.OutputPrefixType) -> tink_pb2.KeyTemplate:
+  key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(algorithm=algorithm)
+  return tink_pb2.KeyTemplate(
+      type_url='type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey',
+      value=key_format.SerializeToString(),
+      output_prefix_type=output_prefix_type)
+
+
+def jwt_es256_tink_template():
+  return _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256, tink_pb2.TINK)
+
+
 class JwtSignatureWrapperTest(parameterized.TestCase):
+
+  # TODO(juerg): Add tests with TINK templates
 
   def test_interesting_error(self):
     private_handle = tink.new_keyset_handle(jwt.jwt_es256_template())
@@ -39,7 +58,13 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
       verify.verify_and_decode(compact, jwt.new_validator(
           expected_issuer='unknown', allow_missing_expiration=True))
 
-  def test_key_rotation(self):
+  @parameterized.parameters([
+      (jwt.jwt_es256_template(), jwt.jwt_es256_template()),
+      (jwt.jwt_es256_template(), jwt_es256_tink_template()),
+      (jwt_es256_tink_template, jwt.jwt_es256_template()),
+      (jwt_es256_tink_template(), jwt_es256_tink_template()),
+  ])
+  def test_key_rotation(self, old_key_tmpl, new_key_tmpl):
     old_key_tmpl = jwt.jwt_es256_template()
     new_key_tmpl = jwt.jwt_es384_template()
     builder = keyset_builder.new_keyset_builder()
@@ -114,6 +139,40 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     self.assertEqual(
         verify4.verify_and_decode(compact4, validator).issuer(), 'a')
 
+  def test_tink_output_prefix_type_encodes_a_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt_es256_tink_template())
+    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = sign.sign_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertIn('kid', header)
+
+  def test_legacy_template_fails(self):
+    template = _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256, tink_pb2.LEGACY)
+    builder = keyset_builder.new_keyset_builder()
+    key_id = builder.add_new_key(template)
+    builder.set_primary_key(key_id)
+    handle = builder.keyset_handle()
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtPublicKeySign)
+    with self.assertRaises(tink.TinkError):
+      handle.public_keyset_handle().primitive(jwt.JwtPublicKeyVerify)
+
+  def test_legacy_non_primary_key_fails(self):
+    builder = keyset_builder.new_keyset_builder()
+    old_template = _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256,
+                                              tink_pb2.LEGACY)
+    _ = builder.add_new_key(old_template)
+    current_key_id = builder.add_new_key(jwt.jwt_es256_template())
+    builder.set_primary_key(current_key_id)
+    handle = builder.keyset_handle()
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtPublicKeySign)
+    with self.assertRaises(tink.TinkError):
+      handle.public_keyset_handle().primitive(jwt.JwtPublicKeyVerify)
 
 if __name__ == '__main__':
   absltest.main()

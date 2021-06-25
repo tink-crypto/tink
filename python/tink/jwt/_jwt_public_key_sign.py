@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-from typing import Text
+from typing import Optional, Text
 
 import six
 
@@ -45,4 +45,14 @@ class JwtPublicKeySign(object):
     Raises:
       tink.TinkError if the operation fails.
     """
+    raise NotImplementedError()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class JwtPublicKeySignInternal(object):
+  """Internal interface for creating a signed JWT."""
+
+  @abc.abstractmethod
+  def sign_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
+                               kid: Optional[Text]) -> Text:
     raise NotImplementedError()

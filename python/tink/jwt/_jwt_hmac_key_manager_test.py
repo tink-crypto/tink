@@ -28,6 +28,7 @@ from tink import jwt
 from tink.cc.pybind import tink_bindings
 from tink.jwt import _jwt_format
 from tink.jwt import _jwt_hmac_key_manager
+from tink.jwt import _jwt_mac
 
 
 DATETIME_1970 = datetime.datetime.fromtimestamp(12345, datetime.timezone.utc)
@@ -75,7 +76,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
   def test_basic(self):
     key_manager = _jwt_hmac_key_manager.MacCcToPyJwtMacKeyManager()
-    self.assertEqual(key_manager.primitive_class(), jwt.JwtMac)
+    self.assertEqual(key_manager.primitive_class(), _jwt_mac.JwtMacInternal)
     self.assertEqual(key_manager.key_type(),
                      'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
@@ -91,7 +92,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
     raw_jwt = jwt.new_raw_jwt(
         type_header='typeHeader', issuer='issuer', without_expiration=True)
-    signed_compact = jwt_hmac.compute_mac_and_encode(raw_jwt)
+    signed_compact = jwt_hmac.compute_mac_and_encode_with_kid(raw_jwt, None)
 
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact,
@@ -151,6 +152,16 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
         token_with_unknown_typ,
         jwt.new_validator(
             expected_type_header='unknown',
+            expected_issuer='joe',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
+    self.assertEqual(verified2.issuer(), 'joe')
+
+    token_with_unknown_kid = create_signed_token(
+        '{"kid":"unknown","alg":"HS256"}', '{"iss":"joe"}')
+    verified2 = jwt_hmac.verify_mac_and_decode(
+        token_with_unknown_kid,
+        jwt.new_validator(
             expected_issuer='joe',
             allow_missing_expiration=True,
             fixed_now=DATETIME_1970))

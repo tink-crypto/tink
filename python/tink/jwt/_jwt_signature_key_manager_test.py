@@ -98,6 +98,8 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode('a' + signed_compact, validator)
 
+    # TODO(juerg): Add tests with kid headers
+
   def test_create_sign_verify_with_type_header(self):
     handle = tink.new_keyset_handle(jwt.jwt_es256_template())
     sign = handle.primitive(jwt.JwtPublicKeySign)

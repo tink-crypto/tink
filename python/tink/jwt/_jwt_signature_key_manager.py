@@ -18,7 +18,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from typing import Text, Type, Callable
+from typing import Optional, Text, Type, Callable
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import tink_pb2
@@ -42,8 +42,8 @@ _ECDSA_ALGORITHM_TEXTS = {
 }
 
 
-class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySign):
-  """Implementation of JwtPublicKeySign using a PublicKeySign."""
+class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySignInternal):
+  """Implementation of JwtPublicKeySignInternal using a PublicKeySign."""
 
   def __init__(self, cc_primitive: tink_bindings.PublicKeySign,
                algorithm: Text):
@@ -54,13 +54,13 @@ class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySign):
   def _sign(self, data: bytes) -> bytes:
     return self._public_key_sign.sign(data)
 
-  # TODO(juerg): Add kid, as in Java and C++.
-  def sign_and_encode(self, token: _raw_jwt.RawJwt) -> Text:
+  def sign_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
+                               kid: Optional[Text]) -> Text:
     """Computes a signature and encodes the token."""
     type_header = token.type_header() if token.has_type_header() else None
-    unsigned = _jwt_format.create_unsigned_compact(self._algorithm,
-                                                   type_header,
-                                                   token.json_payload())
+    # TODO(juerg): Add support for custom_kid.
+    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
+                                                   kid, token.json_payload())
     return _jwt_format.create_signed_compact(unsigned, self._sign(unsigned))
 
 
@@ -92,7 +92,7 @@ class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
 
 
 class _JwtPublicKeySignKeyManagerCcToPyWrapper(
-    core.PrivateKeyManager[_jwt_public_key_sign.JwtPublicKeySign]):
+    core.PrivateKeyManager[_jwt_public_key_sign.JwtPublicKeySignInternal]):
   """Converts a C++ sign key manager into a JwtPublicKeySignKeyManager."""
 
   def __init__(
@@ -102,13 +102,14 @@ class _JwtPublicKeySignKeyManagerCcToPyWrapper(
     self._cc_key_manager = cc_key_manager
     self._key_data_to_algorithm = key_data_to_algorithm
 
-  def primitive_class(self) -> Type[_jwt_public_key_sign.JwtPublicKeySign]:
-    return _jwt_public_key_sign.JwtPublicKeySign
+  def primitive_class(
+      self) -> Type[_jwt_public_key_sign.JwtPublicKeySignInternal]:
+    return _jwt_public_key_sign.JwtPublicKeySignInternal
 
   @core.use_tink_errors
   def primitive(
-      self,
-      key_data: tink_pb2.KeyData) -> _jwt_public_key_sign.JwtPublicKeySign:
+      self, key_data: tink_pb2.KeyData
+  ) -> _jwt_public_key_sign.JwtPublicKeySignInternal:
     sign = self._cc_key_manager.primitive(key_data.SerializeToString())
     algorithm = self._key_data_to_algorithm(key_data)
     return _JwtPublicKeySign(sign, algorithm)

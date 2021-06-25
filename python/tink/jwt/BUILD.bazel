@@ -128,8 +128,10 @@ py_library(
     name = "_jwt_format",
     srcs = ["_jwt_format.py"],
     srcs_version = "PY3",
-    visibility = ["//visibility:public"],
-    deps = [":_jwt_error"],
+    deps = [
+        ":_jwt_error",
+        "//tink/proto:tink_py_pb2",
+    ],
 )
 
 py_test(
@@ -139,6 +141,7 @@ py_test(
     deps = [
         ":_jwt_error",
         ":_jwt_format",
+        "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
     ],
 )
@@ -195,6 +198,9 @@ py_test(
     srcs = ["_jwt_hmac_key_manager_test.py"],
     python_version = "PY3",
     deps = [
+        ":_jwt_format",
+        ":_jwt_hmac_key_manager",
+        ":_jwt_mac",
         ":jwt",
         requirement("absl-py"),
         "//tink:tink_python",
@@ -208,6 +214,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_jwt_error",
+        ":_jwt_format",
         ":_jwt_mac",
         ":_jwt_validator",
         ":_raw_jwt",
@@ -222,7 +229,10 @@ py_test(
     srcs = ["_jwt_mac_wrapper_test.py"],
     python_version = "PY3",
     deps = [
+        ":_jwt_format",
         ":jwt",
+        "//tink/proto:jwt_hmac_py_pb2",
+        "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
@@ -269,6 +279,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_jwt_error",
+        ":_jwt_format",
         ":_jwt_public_key_sign",
         ":_jwt_public_key_verify",
         ":_jwt_validator",
@@ -285,7 +296,10 @@ py_test(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        ":_jwt_format",
         ":jwt",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
