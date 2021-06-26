@@ -441,8 +441,8 @@ func TestKeysetManagerDisableWithMissingKey(t *testing.T) {
 	if err == nil {
 		t.Errorf("ksm1.Disable on missing key succeeded, want error")
 	}
-	if !strings.Contains(err.Error(), "key not found") {
-		t.Errorf("expected 'key not found' message, got %s", err)
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("expected 'not found' message, got %s", err)
 	}
 }
 
@@ -598,8 +598,8 @@ func TestKeysetManagerDeleteWithMissingKey(t *testing.T) {
 	if err == nil {
 		t.Errorf("ksm1.Delete succeeded but expected error")
 	}
-	if !strings.Contains(err.Error(), "key not found") {
-		t.Errorf("expected 'key not found' message but got %s", err)
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("expected 'not found' message but got %s", err)
 	}
 }
 

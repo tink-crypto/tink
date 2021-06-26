@@ -109,7 +109,7 @@ func (km *Manager) SetPrimary(keyID uint32) error {
 			return fmt.Errorf("keyset_manager: cannot set key as primary because it's not enabled")
 		}
 	}
-	return fmt.Errorf("keyset_manager: key not found %d", keyID)
+	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
 
 // Enable will enable the key with given keyID
@@ -124,10 +124,10 @@ func (km *Manager) Enable(keyID uint32) error {
 				km.ks.Key[i].Status = tinkpb.KeyStatusType_ENABLED
 				return nil
 			}
-			return fmt.Errorf("keyset_manager: cannot enable key with id %d", keyID)
+			return fmt.Errorf("keyset_manager: cannot enable key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
 		}
 	}
-	return fmt.Errorf("keyset_manager: key not found %d", keyID)
+	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
 
 // Disable will disable the key with given keyID
@@ -145,10 +145,10 @@ func (km *Manager) Disable(keyID uint32) error {
 				km.ks.Key[i].Status = tinkpb.KeyStatusType_DISABLED
 				return nil
 			}
-			return fmt.Errorf("keyset_manager: cannot disable key with id %d", keyID)
+			return fmt.Errorf("keyset_manager: cannot disable key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
 		}
 	}
-	return fmt.Errorf("keyset_manager: key not found %d", keyID)
+	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
 
 // Delete will delete the key with given keyID, removing the key from the keyset entirely
@@ -171,13 +171,13 @@ func (km *Manager) Delete(keyID uint32) error {
 		keys = append(keys, key)
 	}
 	if !found {
-		return fmt.Errorf("keyset_manager: key not found %d", keyID)
+		return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 	}
 	km.ks.Key = keys
 	return nil
 }
 
-// Destroy will destroy will the key material associated with a given keyID
+// Destroy will destroy the key material associated with a given keyID
 // returns an error if the key is not found or it is the primary key
 func (km *Manager) Destroy(keyID uint32) error {
 	if km.ks == nil {
@@ -188,15 +188,17 @@ func (km *Manager) Destroy(keyID uint32) error {
 	}
 	for i := 0; i < len(km.ks.Key); i++ {
 		if km.ks.Key[i].KeyId == keyID {
-			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED || km.ks.Key[i].Status == tinkpb.KeyStatusType_DISABLED || km.ks.Key[i].Status == tinkpb.KeyStatusType_DESTROYED {
+			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED ||
+				km.ks.Key[i].Status == tinkpb.KeyStatusType_DISABLED ||
+				km.ks.Key[i].Status == tinkpb.KeyStatusType_DESTROYED {
 				km.ks.Key[i].Status = tinkpb.KeyStatusType_DESTROYED
 				km.ks.Key[i].KeyData = nil
 				return nil
 			}
-			return fmt.Errorf("keyset_manager: cannot destroy key with id %d", keyID)
+			return fmt.Errorf("keyset_manager: cannot destroy key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
 		}
 	}
-	return fmt.Errorf("keyset_manager: key not found %d", keyID)
+	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
 
 // Handle creates a new Handle for the managed keyset.
