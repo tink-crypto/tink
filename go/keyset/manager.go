@@ -17,6 +17,7 @@
 package keyset
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/tink/go/core/registry"
@@ -47,6 +48,7 @@ func NewManagerFromHandle(kh *Handle) *Manager {
 
 // Rotate generates a fresh key using the given key template and
 // sets the new key as the primary key.
+//
 // Deprecated: please use Add instead. Rotate adds a new key and immediately promotes it to primary.
 // However, when you do keyset rotation, you almost never want to make the new key primary,
 // because old binaries don't know the new key yet.
@@ -71,13 +73,13 @@ func (km *Manager) Add(kt *tinkpb.KeyTemplate) error {
 // and return the id of the generated key
 func (km *Manager) add(kt *tinkpb.KeyTemplate) (uint32, error) {
 	if kt == nil {
-		return 0, fmt.Errorf("keyset_manager: cannot add key, need key template")
+		return 0, errors.New("keyset_manager: cannot add key, need key template")
 	}
 	if kt.OutputPrefixType == tinkpb.OutputPrefixType_UNKNOWN_PREFIX {
-		return 0, fmt.Errorf("keyset_manager: unknown output prefix type")
+		return 0, errors.New("keyset_manager: unknown output prefix type")
 	}
 	if km.ks == nil {
-		return 0, fmt.Errorf("keyset_manager: cannot add key to nil keyset")
+		return 0, errors.New("keyset_manager: cannot add key to nil keyset")
 	}
 	keyData, err := registry.NewKeyData(kt)
 	if err != nil {
@@ -98,16 +100,18 @@ func (km *Manager) add(kt *tinkpb.KeyTemplate) (uint32, error) {
 // returns an error if the key is not found or not enabled
 func (km *Manager) SetPrimary(keyID uint32) error {
 	if km.ks == nil {
-		return fmt.Errorf("keyset_manager: cannot set primary, no keyset")
+		return errors.New("keyset_manager: cannot set primary, no keyset")
 	}
-	for i := 0; i < len(km.ks.Key); i++ {
-		if km.ks.Key[i].KeyId == keyID {
-			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED {
-				km.ks.PrimaryKeyId = keyID
-				return nil
-			}
-			return fmt.Errorf("keyset_manager: cannot set key as primary because it's not enabled")
+	for _, key := range km.ks.Key {
+		if key.KeyId != keyID {
+			continue
 		}
+		if key.Status == tinkpb.KeyStatusType_ENABLED {
+			km.ks.PrimaryKeyId = keyID
+			return nil
+		}
+		return errors.New("keyset_manager: cannot set key as primary because it's not enabled")
+
 	}
 	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
@@ -116,16 +120,17 @@ func (km *Manager) SetPrimary(keyID uint32) error {
 // returns an error if the key is not found or is not enabled or disabled already
 func (km *Manager) Enable(keyID uint32) error {
 	if km.ks == nil {
-		return fmt.Errorf("keyset_manager: cannot enable key, no keyset")
+		return errors.New("keyset_manager: cannot enable key, no keyset")
 	}
-	for i := 0; i < len(km.ks.Key); i++ {
-		if km.ks.Key[i].KeyId == keyID {
-			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED || km.ks.Key[i].Status == tinkpb.KeyStatusType_DISABLED {
-				km.ks.Key[i].Status = tinkpb.KeyStatusType_ENABLED
-				return nil
-			}
-			return fmt.Errorf("keyset_manager: cannot enable key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
+	for i, key := range km.ks.Key {
+		if key.KeyId != keyID {
+			continue
 		}
+		if key.Status == tinkpb.KeyStatusType_ENABLED || key.Status == tinkpb.KeyStatusType_DISABLED {
+			km.ks.Key[i].Status = tinkpb.KeyStatusType_ENABLED
+			return nil
+		}
+		return fmt.Errorf("keyset_manager: cannot enable key with id %d with status %s", keyID, key.Status.String())
 	}
 	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
@@ -134,19 +139,20 @@ func (km *Manager) Enable(keyID uint32) error {
 // returns an error if the key is not found or it is the primary key
 func (km *Manager) Disable(keyID uint32) error {
 	if km.ks == nil {
-		return fmt.Errorf("keyset_manager: cannot disable key, no keyset")
+		return errors.New("keyset_manager: cannot disable key, no keyset")
 	}
 	if km.ks.PrimaryKeyId == keyID {
-		return fmt.Errorf("keyset_manager: cannot disable the primary key")
+		return errors.New("keyset_manager: cannot disable the primary key")
 	}
-	for i := 0; i < len(km.ks.Key); i++ {
-		if km.ks.Key[i].KeyId == keyID {
-			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED || km.ks.Key[i].Status == tinkpb.KeyStatusType_DISABLED {
-				km.ks.Key[i].Status = tinkpb.KeyStatusType_DISABLED
-				return nil
-			}
-			return fmt.Errorf("keyset_manager: cannot disable key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
+	for i, key := range km.ks.Key {
+		if key.KeyId != keyID {
+			continue
 		}
+		if key.Status == tinkpb.KeyStatusType_ENABLED || key.Status == tinkpb.KeyStatusType_DISABLED {
+			km.ks.Key[i].Status = tinkpb.KeyStatusType_DISABLED
+			return nil
+		}
+		return fmt.Errorf("keyset_manager: cannot disable key with id %d with status %s", keyID, key.Status.String())
 	}
 	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 }
@@ -155,25 +161,25 @@ func (km *Manager) Disable(keyID uint32) error {
 // returns an error if the key is not found or it is the primary key
 func (km *Manager) Delete(keyID uint32) error {
 	if km.ks == nil {
-		return fmt.Errorf("keyset_manager: cannot delete key, no keyset")
+		return errors.New("keyset_manager: cannot delete key, no keyset")
 	}
 	if km.ks.PrimaryKeyId == keyID {
-		return fmt.Errorf("keyset_manager: cannot delete the primary key")
+		return errors.New("keyset_manager: cannot delete the primary key")
 	}
-	// simpler to copy elements to new keys object
-	var keys []*tinkpb.Keyset_Key
-	var found bool
-	for _, key := range km.ks.Key {
+	deleteIdx, found := 0, false
+	for i, key := range km.ks.Key {
 		if key.KeyId == keyID {
 			found = true
-			continue
+			deleteIdx = i
 		}
-		keys = append(keys, key)
 	}
 	if !found {
 		return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
 	}
-	km.ks.Key = keys
+	// swap elements
+	km.ks.Key[deleteIdx] = km.ks.Key[len(km.ks.Key)-1]
+	// trim last element
+	km.ks.Key = km.ks.Key[:len(km.ks.Key)-1]
 	return nil
 }
 
@@ -181,20 +187,21 @@ func (km *Manager) Delete(keyID uint32) error {
 // returns an error if the key is not found or it is the primary key
 func (km *Manager) Destroy(keyID uint32) error {
 	if km.ks == nil {
-		return fmt.Errorf("keyset_manager: cannot destroy key, no keyset")
+		return errors.New("keyset_manager: cannot destroy key, no keyset")
 	}
 	if km.ks.PrimaryKeyId == keyID {
-		return fmt.Errorf("keyset_manager: cannot destroy the primary key")
+		return errors.New("keyset_manager: cannot destroy the primary key")
 	}
-	for i := 0; i < len(km.ks.Key); i++ {
-		if km.ks.Key[i].KeyId == keyID {
-			if km.ks.Key[i].Status == tinkpb.KeyStatusType_ENABLED ||
-				km.ks.Key[i].Status == tinkpb.KeyStatusType_DISABLED ||
-				km.ks.Key[i].Status == tinkpb.KeyStatusType_DESTROYED {
-				km.ks.Key[i].Status = tinkpb.KeyStatusType_DESTROYED
-				km.ks.Key[i].KeyData = nil
-				return nil
-			}
+	for i, key := range km.ks.Key {
+		if key.KeyId != keyID {
+			continue
+		}
+		switch key.Status {
+		case tinkpb.KeyStatusType_ENABLED, tinkpb.KeyStatusType_DISABLED, tinkpb.KeyStatusType_DESTROYED:
+			km.ks.Key[i].Status = tinkpb.KeyStatusType_DESTROYED
+			km.ks.Key[i].KeyData = nil
+			return nil
+		default:
 			return fmt.Errorf("keyset_manager: cannot destroy key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
 		}
 	}
