@@ -84,6 +84,7 @@ class JwtServiceTest(absltest.TestCase):
   def setUpClass(cls):
     super().setUpClass()
     jwt.register_jwt_mac()
+    jwt.register_jwt_signature()
 
   def test_generate_compute_verify_mac(self):
     keyset_servicer = services.KeysetServicer()
@@ -139,6 +140,40 @@ class JwtServiceTest(absltest.TestCase):
     verify_request.validator.allow_missing_expiration = True
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
     print(verify_response.err)
+    self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
+    self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
+
+  def test_generate_compute_verify_signature(self):
+    keyset_servicer = services.KeysetServicer()
+    jwt_servicer = jwt_service.JwtServicer()
+
+    template = jwt.jwt_es256_template().SerializeToString()
+    gen_request = testing_api_pb2.KeysetGenerateRequest(template=template)
+    gen_response = keyset_servicer.Generate(gen_request, self._ctx)
+    self.assertEqual(gen_response.WhichOneof('result'), 'keyset')
+    private_keyset = gen_response.keyset
+
+    comp_request = testing_api_pb2.JwtSignRequest(keyset=private_keyset)
+    comp_request.raw_jwt.issuer.value = 'issuer'
+    comp_request.raw_jwt.subject.value = 'subject'
+    comp_request.raw_jwt.custom_claims['myclaim'].bool_value = True
+    comp_response = jwt_servicer.PublicKeySignAndEncode(comp_request, self._ctx)
+    self.assertEqual(comp_response.WhichOneof('result'), 'signed_compact_jwt')
+    signed_compact_jwt = comp_response.signed_compact_jwt
+
+    pub_request = testing_api_pb2.KeysetPublicRequest(
+        private_keyset=private_keyset)
+    pub_response = keyset_servicer.Public(pub_request, self._ctx)
+    self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
+    public_keyset = pub_response.public_keyset
+
+    verify_request = testing_api_pb2.JwtVerifyRequest(
+        keyset=public_keyset, signed_compact_jwt=signed_compact_jwt)
+    verify_request.validator.expected_issuer.value = 'issuer'
+    verify_request.validator.expected_subject.value = 'subject'
+    verify_request.validator.allow_missing_expiration = True
+    verify_response = jwt_servicer.PublicKeyVerifyAndDecode(
+        verify_request, self._ctx)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
 

@@ -53,6 +53,7 @@ def main(unused_argv):
   signature.register()
   streaming_aead.register()
   jwt.register_jwt_mac()
+  jwt.register_jwt_signature()
   fake_kms.register_client()
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
   testing_api_pb2_grpc.add_MetadataServicer_to_server(

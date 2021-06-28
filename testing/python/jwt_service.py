@@ -226,10 +226,28 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
       self, request: testing_api_pb2.JwtSignRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.JwtSignResponse:
     """Computes a signed compact JWT token."""
-    return testing_api_pb2.JwtSignResponse(err='Not yet implemented.')
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(jwt.JwtPublicKeySign)
+      raw_jwt = raw_jwt_from_proto(request.raw_jwt)
+      signed_compact_jwt = p.sign_and_encode(raw_jwt)
+      return testing_api_pb2.JwtSignResponse(
+          signed_compact_jwt=signed_compact_jwt)
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtSignResponse(err=str(e))
 
   def PublicKeyVerifyAndDecode(
       self, request: testing_api_pb2.JwtVerifyRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.JwtVerifyResponse:
     """Verifies the validity of the signed compact JWT token."""
-    return testing_api_pb2.JwtVerifyResponse(err='Not yet implemented.')
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      validator = validator_from_proto(request.validator)
+      p = keyset_handle.primitive(jwt.JwtPublicKeyVerify)
+      verified_jwt = p.verify_and_decode(request.signed_compact_jwt, validator)
+      return testing_api_pb2.JwtVerifyResponse(
+          verified_jwt=verifiedjwt_to_proto(verified_jwt))
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtVerifyResponse(err=str(e))
