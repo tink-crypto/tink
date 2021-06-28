@@ -204,7 +204,6 @@ py_test(
         "@tink_py//tink:cleartext_keyset_handle",
         "@tink_py//tink:tink_python",
         "@tink_py//tink/jwt",
-        "@tink_py//tink/jwt:_jwt_format",
         "@tink_py//tink/mac",
         "@tink_py//tink/proto:common_py_pb2",
         "@tink_py//tink/proto:hmac_py_pb2",

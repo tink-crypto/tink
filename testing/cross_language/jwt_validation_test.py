@@ -37,7 +37,6 @@ from tink.proto import hmac_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import jwt
-from tink.jwt import _jwt_format
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']
@@ -52,6 +51,11 @@ KEY_VALUE = (b'AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-'
 KEYSET = None
 MAC = None
 EMPTY_VALIDATOR = jwt.new_validator(allow_missing_expiration=True)
+
+
+def _base64_encode(data: bytes) -> bytes:
+  """Does a URL-safe base64 encoding without padding."""
+  return base64.urlsafe_b64encode(data).rstrip(b'=')
 
 
 def _keyset() -> bytes:
@@ -104,12 +108,9 @@ def tearDownModule():
 
 def generate_token_from_bytes(header: bytes, payload: bytes) -> Text:
   """Generates tokens from bytes with valid MACs."""
-  unsigned_compact = (
-      _jwt_format._base64_encode(header) + b'.' +
-      _jwt_format._base64_encode(payload))
+  unsigned_compact = (_base64_encode(header) + b'.' + _base64_encode(payload))
   mac_value = MAC.compute_mac(unsigned_compact)
-  return (unsigned_compact + b'.' +
-          _jwt_format.encode_signature(mac_value)).decode('utf8')
+  return (unsigned_compact + b'.' + _base64_encode(mac_value)).decode('utf8')
 
 
 def generate_token(header: Text, payload: Text) -> Text:
