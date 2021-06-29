@@ -5,6 +5,7 @@ licenses(["notice"])
 PUBLIC_APIS = [
     "common_enums.h",
     "aes_gcm_boringssl.h",
+    "aes_siv_boringssl.h",
     "encrypt_then_authenticate.h",
     "hmac_boringssl.h",
     "hkdf.h",
@@ -19,6 +20,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aes_gcm_boringssl",
+        ":aes_siv_boringssl",
         ":common_enums",
         ":encrypt_then_authenticate",
         ":hkdf",
