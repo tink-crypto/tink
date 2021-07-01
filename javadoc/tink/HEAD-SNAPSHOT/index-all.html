@@ -1985,6 +1985,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveSet.Entry.html#getStatus--">getStatus()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveSet.Entry.html" title="class in com.google.crypto.tink">PrimitiveSet.Entry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#getStatus--">getStatus()</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Returns the status of the key.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.KemKey.html#getSymmetricKey--">getSymmetricKey()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesHkdfSenderKem.KemKey.html" title="class in com.google.crypto.tink.subtle">EciesHkdfSenderKem.KemKey</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html#getSymmetricKeySizeInBytes--">getSymmetricKeySizeInBytes()</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfDemHelper.html" title="interface in com.google.crypto.tink.subtle">EciesAeadHkdfDemHelper</a></dt>
@@ -2453,6 +2457,11 @@
 <dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
 <dd>
 <div class="block">Wraps a <code>TinkKey</code> and enforces access to the underlying <code>TinkKey</code> with <code>KeyAccess</code>.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle.KeyStatusType</span></a> - Enum in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block">KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
+ a <code>Keyset</code>.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">KeyManager</span></a>&lt;<a href="com/google/crypto/tink/KeyManager.html" title="type parameter in KeyManager">P</a>&gt; - Interface in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
@@ -3621,6 +3630,10 @@
 <dd>
 <div class="block">Sets given Entry <code>primary</code> as the primary one.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#setStatus-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-">setStatus(KeyHandle.KeyStatusType)</a></span> - Method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Sets the status of the key.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/util/KeysDownloader.Builder.html#setUrl-java.lang.String-">setUrl(String)</a></span> - Method in class com.google.crypto.tink.util.<a href="com/google/crypto/tink/util/KeysDownloader.Builder.html" title="class in com.google.crypto.tink.util">KeysDownloader.Builder</a></dt>
 <dd>
 <div class="block">Sets the url which must point to a HTTPS server.</div>
@@ -4054,6 +4067,10 @@
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this type with the specified name.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/config/TinkFips.AlgorithmFipsCompatibility.html#values--">values()</a></span> - Static method in enum com.google.crypto.tink.config.<a href="com/google/crypto/tink/config/TinkFips.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config">TinkFips.AlgorithmFipsCompatibility</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum type, in
@@ -4092,6 +4109,11 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/PemKeyType.html#values--">values()</a></span> - Static method in enum com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/PemKeyType.html" title="enum in com.google.crypto.tink.subtle">PemKeyType</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
+<div class="block">Returns an array containing the constants of this enum type, in
+the order they are declared.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html#values--">values()</a></span> - Static method in enum com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></dt>
+<dd>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
 </dd>
