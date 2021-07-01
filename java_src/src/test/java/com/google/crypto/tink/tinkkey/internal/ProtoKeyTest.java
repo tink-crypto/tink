@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.proto.KeyData;
@@ -41,7 +42,7 @@ public final class ProtoKeyTest {
 
   @Test
   public void testProtoKey_keyDataSYMMETRIC_shouldHaveSecret() throws GeneralSecurityException {
-    KeyTemplate kt = AesEaxKeyManager.aes128EaxTemplate();
+    KeyTemplate kt = KeyTemplates.get("AES128_EAX");
     KeyData kd = Registry.newKeyData(kt);
 
     ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
@@ -54,7 +55,7 @@ public final class ProtoKeyTest {
   @Test
   public void testProtoKey_keyDataASYMMETRICPRIVATE_shouldHaveSecret()
       throws GeneralSecurityException {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd = Registry.newKeyData(kt);
 
     ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
@@ -66,7 +67,7 @@ public final class ProtoKeyTest {
 
   @Test
   public void testProtoKey_keyDataUNKNOWN_shouldHaveSecret() throws GeneralSecurityException {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
         KeyData.newBuilder()
             .mergeFrom(Registry.newKeyData(kt))
@@ -83,7 +84,7 @@ public final class ProtoKeyTest {
   @Test
   public void testProtoKey_keyDataASYMMETRICPUBLIC_shouldNotHaveSecret()
       throws GeneralSecurityException {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd = Registry.getPublicKeyData(kt.getTypeUrl(), Registry.newKeyData(kt).getValue());
 
     ProtoKey pk = new ProtoKey(kd, kt.getOutputPrefixType());
@@ -95,7 +96,7 @@ public final class ProtoKeyTest {
 
   @Test
   public void testProtoKey_keyDataREMOTE_shouldNotHaveSecret() throws GeneralSecurityException {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
         KeyData.newBuilder()
             .mergeFrom(Registry.newKeyData(kt))
