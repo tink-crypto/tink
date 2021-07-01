@@ -17,6 +17,7 @@
 #include "tink/jwt/raw_jwt.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
@@ -147,24 +148,24 @@ util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
 
 util::StatusOr<RawJwt> RawJwt::FromJson(absl::optional<std::string> type_header,
                                         absl::string_view json_payload) {
-  auto proto_or = jwt_internal::JsonStringToProtoStruct(json_payload);
-  if (!proto_or.ok()) {
-    return proto_or.status();
+  util::StatusOr<google::protobuf::Struct> proto =
+      jwt_internal::JsonStringToProtoStruct(json_payload);
+  if (!proto.ok()) {
+    return proto.status();
   }
-  auto& proto = proto_or.ValueOrDie();
-  if (ClaimIsNotAString(proto, kJwtClaimIssuer) ||
-      ClaimIsNotAString(proto, kJwtClaimSubject) ||
-      ClaimIsNotATimestamp(proto, kJwtClaimExpiration) ||
-      ClaimIsNotATimestamp(proto, kJwtClaimNotBefore) ||
-      ClaimIsNotATimestamp(proto, kJwtClaimIssuedAt)) {
+  if (ClaimIsNotAString(*proto, kJwtClaimIssuer) ||
+      ClaimIsNotAString(*proto, kJwtClaimSubject) ||
+      ClaimIsNotATimestamp(*proto, kJwtClaimExpiration) ||
+      ClaimIsNotATimestamp(*proto, kJwtClaimNotBefore) ||
+      ClaimIsNotATimestamp(*proto, kJwtClaimIssuedAt)) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "contains an invalid registered claim");
   }
-  auto audStatus = ValidateAndFixAudienceClaim(&proto);
-  if (!audStatus.ok()) {
-    return audStatus;
+  util::Status aud_status = ValidateAndFixAudienceClaim(&(*proto));
+  if (!aud_status.ok()) {
+    return aud_status;
   }
-  RawJwt token(type_header, proto);
+  RawJwt token(type_header, *std::move(proto));
   return token;
 }
 
@@ -629,16 +630,17 @@ RawJwtBuilder& RawJwtBuilder::AddJsonObjectClaim(
     }
     return *this;
   }
-  auto proto_or = jwt_internal::JsonStringToProtoStruct(object_value);
-  if (!proto_or.ok()) {
+  util::StatusOr<google::protobuf::Struct> proto =
+      jwt_internal::JsonStringToProtoStruct(object_value);
+  if (!proto.ok()) {
     if (!error_.has_value()) {
-      error_ = proto_or.status();
+      error_ = proto.status();
     }
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  *value.mutable_struct_value() = proto_or.ValueOrDie();
+  *value.mutable_struct_value() = *std::move(proto);
   (*fields)[std::string(name)] = value;
   return *this;
 }

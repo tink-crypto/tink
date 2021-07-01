@@ -17,6 +17,7 @@
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
@@ -55,12 +56,12 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
   if (!DecodeHeader(parts[0], &json_header)) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
   }
-  auto header_or = JsonStringToProtoStruct(json_header);
-  if (!header_or.ok()) {
-    return header_or.status();
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  if (!header.ok()) {
+    return header.status();
   }
-  util::Status validate_header_result =
-      ValidateHeader(header_or.ValueOrDie(), algorithm_);
+  util::Status validate_header_result = ValidateHeader(*header, algorithm_);
   if (!validate_header_result.ok()) {
     return validate_header_result;
   }
@@ -68,17 +69,16 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
   if (!DecodePayload(parts[1], &json_payload)) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT payload");
   }
-  auto raw_jwt_or = RawJwtParser::FromJson(
-      GetTypeHeader(header_or.ValueOrDie()), json_payload);
-  if (!raw_jwt_or.ok()) {
-    return raw_jwt_or.status();
+  util::StatusOr<RawJwt> raw_jwt = RawJwtParser::FromJson(
+      GetTypeHeader(*header), json_payload);
+  if (!raw_jwt.ok()) {
+    return raw_jwt.status();
   }
-  RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
-  util::Status validate_result = validator.Validate(raw_jwt);
+  util::Status validate_result = validator.Validate(*raw_jwt);
   if (!validate_result.ok()) {
     return validate_result;
   }
-  return VerifiedJwt(raw_jwt);
+  return VerifiedJwt(*std::move(raw_jwt));
 }
 
 }  // namespace jwt_internal
