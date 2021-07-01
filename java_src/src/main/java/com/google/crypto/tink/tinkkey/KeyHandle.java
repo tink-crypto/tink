@@ -28,6 +28,18 @@ import java.security.GeneralSecurityException;
 public final class KeyHandle {
 
   /**
+   * KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
+   * a {@code Keyset}. A key's status in the Keyset is either ENABLED (able to perform cryptographic
+   * operations), DISABLED (unable to perform operations, but could be re-enabled), or DESTROYED
+   * (the key's data is no longer present in the keyset).
+   */
+  public enum KeyStatusType {
+    ENABLED,
+    DISABLED,
+    DESTROYED;
+  }
+
+  /**
    * Returns a {@code KeyHandle} instance with {@code key} as the underlying {@code TinkKey} if the
    * caller provides the correct {@code KeyAccess} instance.
    *
@@ -50,14 +62,27 @@ public final class KeyHandle {
   }
 
   private final TinkKey key;
+  private KeyStatusType status;
 
+  /** Constructs a KeyHandle wrapping the input TinkKey and KeyStatusType ENABLED. */
   private KeyHandle(TinkKey key) {
     this.key = key;
+    this.status = KeyStatusType.ENABLED;
   }
 
   /** Returns {@code true} if the underlying {@code TinkKey} has a secret. */
   public boolean hasSecret() {
     return key.hasSecret();
+  }
+
+  /** Returns the status of the key. See {@link KeyStatusType}. */
+  public KeyStatusType getStatus() {
+    return this.status;
+  }
+
+  /** Sets the status of the key. See {@link KeyStatusType}. */
+  public void setStatus(KeyStatusType status) {
+    this.status = status;
   }
 
   /**
