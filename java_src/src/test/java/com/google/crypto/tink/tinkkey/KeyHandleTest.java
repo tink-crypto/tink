@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.proto.KeyData;
@@ -69,9 +70,8 @@ public final class KeyHandleTest {
   }
 
   @Test
-  public void createFromKey_keyDataSymmetric_shouldHaveSecret()
-      throws Exception {
-    KeyTemplate kt = AesEaxKeyManager.aes128EaxTemplate();
+  public void createFromKey_keyDataSymmetric_shouldHaveSecret() throws Exception {
+    KeyTemplate kt = KeyTemplates.get("AES128_EAX");
     KeyData kd = Registry.newKeyData(kt);
 
     KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
@@ -80,9 +80,8 @@ public final class KeyHandleTest {
   }
 
   @Test
-  public void createFromKey_keyDataAsymmetricPrivate_shouldHaveSecret()
-      throws Exception {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+  public void createFromKey_keyDataAsymmetricPrivate_shouldHaveSecret() throws Exception {
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd = Registry.newKeyData(kt);
 
     KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
@@ -92,7 +91,7 @@ public final class KeyHandleTest {
 
   @Test
   public void createFromKey_keyDataUnknown_shouldHaveSecret() throws Exception {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
         KeyData.newBuilder()
             .mergeFrom(Registry.newKeyData(kt))
@@ -105,9 +104,8 @@ public final class KeyHandleTest {
   }
 
   @Test
-  public void createFromKey_keyDataAsymmetricPublic_shouldNotHaveSecret()
-      throws Exception {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+  public void createFromKey_keyDataAsymmetricPublic_shouldNotHaveSecret() throws Exception {
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd = Registry.getPublicKeyData(kt.getTypeUrl(), Registry.newKeyData(kt).getValue());
 
     KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
@@ -116,9 +114,8 @@ public final class KeyHandleTest {
   }
 
   @Test
-  public void createFromKey_keyDataRemote_shouldNotHaveSecret()
-      throws Exception {
-    KeyTemplate kt = Ed25519PrivateKeyManager.ed25519Template();
+  public void createFromKey_keyDataRemote_shouldNotHaveSecret() throws Exception {
+    KeyTemplate kt = KeyTemplates.get("ED25519");
     KeyData kd =
         KeyData.newBuilder()
             .mergeFrom(Registry.newKeyData(kt))
@@ -141,7 +138,7 @@ public final class KeyHandleTest {
 
   @Test
   public void hasSecret_tinkKeyWithoutSecret_shouldReturnFalse() throws Exception {
-    TinkKey key = new DummyTinkKey(/* hasSecret= */false);
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ false);
     KeyAccess access = KeyAccess.publicAccess();
     KeyHandle kh = KeyHandle.createFromKey(key, access);
 
@@ -150,7 +147,7 @@ public final class KeyHandleTest {
 
   @Test
   public void getKey_tinkKeyWithoutSecret_noSecretKeyAccess_shouldWork() throws Exception {
-    TinkKey key = new DummyTinkKey(/* hasSecret= */false);
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ false);
     KeyAccess access = KeyAccess.publicAccess();
     KeyHandle kh = KeyHandle.createFromKey(key, access);
 
@@ -159,7 +156,7 @@ public final class KeyHandleTest {
 
   @Test
   public void getKey_tinkKeyWithoutSecret_secretKeyAccess_shouldWork() throws Exception {
-    TinkKey key = new DummyTinkKey(/* hasSecret= */false);
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ false);
     KeyAccess access = SecretKeyAccess.insecureSecretAccess();
     KeyHandle kh = KeyHandle.createFromKey(key, access);
 
@@ -167,9 +164,8 @@ public final class KeyHandleTest {
   }
 
   @Test
-  public void getKey_tinkKeyWithSecret_noSecretKeyAccess_shouldThrowException()
-      throws Exception {
-    TinkKey key = new DummyTinkKey(/* hasSecret= */true);
+  public void getKey_tinkKeyWithSecret_noSecretKeyAccess_shouldThrowException() throws Exception {
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ true);
     KeyAccess access = SecretKeyAccess.insecureSecretAccess();
     KeyHandle kh = KeyHandle.createFromKey(key, access);
     KeyAccess pubAccess = KeyAccess.publicAccess();
@@ -179,7 +175,7 @@ public final class KeyHandleTest {
 
   @Test
   public void getKey_tinkKeyWithSecret_secretKeyAccess_shouldWork() throws Exception {
-    TinkKey key = new DummyTinkKey(/* hasSecret= */true);
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ true);
     KeyAccess access = SecretKeyAccess.insecureSecretAccess();
     KeyHandle kh = KeyHandle.createFromKey(key, access);
 
