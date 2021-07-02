@@ -879,8 +879,9 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createFromKey(KeyData, KeyTemplate.OutputPrefixType)</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
 <dd>
-<div class="block">Returns a <code>KeyHandle</code> instance where the underlying <code>TinkKey</code> wraps the input
- <code>keyData</code>.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">Use the KeyHandle(TinkKey, KeyAccess) constructor instead.</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html#createHmacKeyTemplate-int-int-com.google.crypto.tink.proto.HashType-">createHmacKeyTemplate(int, int, HashType)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">MacKeyTemplates</a></dt>
 <dd>
@@ -2420,6 +2421,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init(ByteBuffer, byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle">StreamSegmentDecrypter</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html#insecureSecretAccess--">insecureSecretAccess()</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey">SecretKeyAccess</a></dt>
+<dd>
+<div class="block">Returns a <code>KeyAccess</code> instance where <code>canAccessSecret()</code> returns true.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/SubtleUtil.html#integer2Bytes-java.math.BigInteger-int-">integer2Bytes(BigInteger, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/SubtleUtil.html" title="class in com.google.crypto.tink.subtle">SubtleUtil</a></dt>
 <dd>
 <div class="block">Converts a nonnegative integer to a byte array of a specified length
@@ -3709,6 +3714,10 @@
 <dl>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Ed25519Sign.html#SECRET_KEY_LEN">SECRET_KEY_LEN</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Ed25519Sign.html" title="class in com.google.crypto.tink.subtle">Ed25519Sign</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><span class="typeNameLink">SecretKeyAccess</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
+<dd>
+<div class="block">A class used to generate <code>KeyAccess</code> instances granting secret access.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/subtle/SelfKeyTestValidators.html" title="class in com.google.crypto.tink.subtle"><span class="typeNameLink">SelfKeyTestValidators</span></a> - Class in <a href="com/google/crypto/tink/subtle/package-summary.html">com.google.crypto.tink.subtle</a></dt>
 <dd>
 <div class="block">Self Key tests validation helper methods.</div>
