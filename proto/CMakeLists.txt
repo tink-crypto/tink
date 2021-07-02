@@ -160,6 +160,11 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME hpke_cc_proto
+  SRCS hpke.proto
+)
+
+tink_cc_proto(
   NAME prf_based_deriver_cc_proto
   SRCS prf_based_deriver.proto
   DEPS
