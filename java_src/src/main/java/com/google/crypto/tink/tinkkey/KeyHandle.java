@@ -56,7 +56,10 @@ public final class KeyHandle {
    * Returns a {@code KeyHandle} instance where the underlying {@code TinkKey} wraps the input
    * {@code keyData}. The returned KeyHandle has a secret if keyData has key material of type
    * UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.
+   *
+   * @deprecated Use the KeyHandle(TinkKey, KeyAccess) constructor instead.
    */
+  @Deprecated
   public static KeyHandle createFromKey(KeyData keyData, OutputPrefixType opt) {
     return new KeyHandle(new ProtoKey(keyData, opt));
   }

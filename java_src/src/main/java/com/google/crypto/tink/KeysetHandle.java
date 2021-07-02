@@ -23,6 +23,8 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
+import com.google.crypto.tink.tinkkey.SecretKeyAccess;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -134,7 +136,9 @@ public final class KeysetHandle {
       Keyset keyset = reader.read();
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (
+        @SuppressWarnings("UnusedException")
+        InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -156,7 +160,9 @@ public final class KeysetHandle {
       Keyset keyset = Keyset.parseFrom(serialized, ExtensionRegistryLite.getEmptyRegistry());
       assertNoSecretKeyMaterial(keyset);
       return KeysetHandle.fromKeyset(keyset);
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (
+        @SuppressWarnings("UnusedException")
+        InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset");
     }
@@ -198,7 +204,9 @@ public final class KeysetHandle {
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
       }
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (
+        @SuppressWarnings("UnusedException")
+        InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -221,7 +229,9 @@ public final class KeysetHandle {
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);
       return keyset;
-    } catch (@SuppressWarnings("UnusedException") InvalidProtocolBufferException e) {
+    } catch (
+        @SuppressWarnings("UnusedException")
+        InvalidProtocolBufferException e) {
       // Do not propagate InvalidProtocolBufferException to guarantee no key material is leaked
       throw new GeneralSecurityException("invalid keyset, corrupted key material");
     }
@@ -339,8 +349,7 @@ public final class KeysetHandle {
   public <P> P getPrimitive(Class<P> targetClassObject) throws GeneralSecurityException {
     Class<?> inputPrimitiveClassObject = Registry.getInputPrimitive(targetClassObject);
     if (inputPrimitiveClassObject == null) {
-      throw new GeneralSecurityException(
-          "No wrapper found for " + targetClassObject.getName());
+      throw new GeneralSecurityException("No wrapper found for " + targetClassObject.getName());
     }
     return getPrimitiveWithKnownInputPrimitive(targetClassObject, inputPrimitiveClassObject);
   }
@@ -354,7 +363,8 @@ public final class KeysetHandle {
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getKeyId() == primaryKeyId) {
         return KeyHandle.createFromKey(
-            key.getKeyData(), KeyTemplate.fromProto(key.getOutputPrefixType()));
+            new ProtoKey(key.getKeyData(), KeyTemplate.fromProto(key.getOutputPrefixType())),
+            SecretKeyAccess.insecureSecretAccess());
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");

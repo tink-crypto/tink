@@ -108,6 +108,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
         "//src/main/java/com/google/crypto/tink/tinkkey:secret_key_access",
         "//src/main/java/com/google/crypto/tink/tinkkey:tink_key",
+        "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

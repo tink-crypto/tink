@@ -130,8 +130,7 @@ public final class KeyHandleTest {
   @Test
   public void hasSecret_tinkKeyWithSecret_shouldReturnTrue() throws Exception {
     TinkKey key = new DummyTinkKey(/* hasSecret= */ true);
-    KeyAccess access = SecretKeyAccess.insecureSecretAccess();
-    KeyHandle kh = KeyHandle.createFromKey(key, access);
+    KeyHandle kh = KeyHandle.createFromKey(key, SecretKeyAccess.insecureSecretAccess());
 
     assertThat(kh.hasSecret()).isTrue();
   }
@@ -166,8 +165,7 @@ public final class KeyHandleTest {
   @Test
   public void getKey_tinkKeyWithSecret_noSecretKeyAccess_shouldThrowException() throws Exception {
     TinkKey key = new DummyTinkKey(/* hasSecret= */ true);
-    KeyAccess access = SecretKeyAccess.insecureSecretAccess();
-    KeyHandle kh = KeyHandle.createFromKey(key, access);
+    KeyHandle kh = KeyHandle.createFromKey(key, SecretKeyAccess.insecureSecretAccess());
     KeyAccess pubAccess = KeyAccess.publicAccess();
 
     assertThrows(GeneralSecurityException.class, () -> kh.getKey(pubAccess));
