@@ -158,15 +158,15 @@
 <td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeyHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyAccess-">createFromKey</a></span>(<a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a>&nbsp;key,
              <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
-<div class="block">Returns a <code>KeyHandle</code> instance with <code>key</code> as the underlying <code>TinkKey</code> if the
- caller provides the correct <code>KeyAccess</code> instance.</div>
+<div class="block">Returns a <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> instance with <code>key</code> as the underlying <a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> if the
+ caller provides the correct <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyAccess</code></a> instance.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeyHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#getKey-com.google.crypto.tink.tinkkey.KeyAccess-">getKey</a></span>(<a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
-<div class="block">Returns the underlying <code>TinkKey</code> key if <code>access</code> is a <code>SecretKeyAccess</code> and
- the key has a secret, or if the key does not have a secret, otherwise throws a <code>GeneralSecurityException</code>.</div>
+<div class="block">Returns the underlying <a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> key if <code>access</code> is a <a href="../../../../../../com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>SecretKeyAccess</code></a> and
+ the key has a secret, or if the key does not have a secret, otherwise throws a <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security"><code>GeneralSecurityException</code></a>.</div>
 </td>
 </tr>
 </tbody>
