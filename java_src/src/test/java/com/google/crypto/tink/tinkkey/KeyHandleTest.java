@@ -38,9 +38,16 @@ public final class KeyHandleTest {
   @Immutable
   static final class DummyTinkKey implements TinkKey {
     private final boolean hasSecret;
+    private final KeyTemplate template;
 
     public DummyTinkKey(boolean hasSecret) {
       this.hasSecret = hasSecret;
+      this.template = null;
+    }
+
+    public DummyTinkKey(boolean hasSecret, KeyTemplate template) {
+      this.hasSecret = hasSecret;
+      this.template = template;
     }
 
     @Override
@@ -50,7 +57,10 @@ public final class KeyHandleTest {
 
     @Override
     public KeyTemplate getKeyTemplate() {
-      throw new UnsupportedOperationException();
+      if (template == null) {
+        throw new UnsupportedOperationException();
+      }
+      return template;
     }
   }
 
@@ -178,5 +188,24 @@ public final class KeyHandleTest {
     KeyHandle kh = KeyHandle.createFromKey(key, access);
 
     assertThat(kh.getKey(access)).isEqualTo(key);
+  }
+
+  @Test
+  public void getKeyTemplate() throws Exception {
+    KeyTemplate keyTemplate = KeyTemplates.get("ED25519_RAW");
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ false, keyTemplate);
+    KeyHandle keyHandle = KeyHandle.createFromKey(key, KeyAccess.publicAccess());
+
+    KeyTemplate returnedKeyTemplate = keyHandle.getKeyTemplate();
+
+    assertThat(returnedKeyTemplate.getValue()).isEqualTo(keyTemplate.getValue());
+  }
+
+  @Test
+  public void getKeyTemplate_tinkKeyWithoutKeyTemplateSupport_shouldThrow() throws Exception {
+    TinkKey key = new DummyTinkKey(/* hasSecret= */ false);
+    KeyHandle keyHandle = KeyHandle.createFromKey(key, KeyAccess.publicAccess());
+
+    assertThrows(UnsupportedOperationException.class, keyHandle::getKeyTemplate);
   }
 }
