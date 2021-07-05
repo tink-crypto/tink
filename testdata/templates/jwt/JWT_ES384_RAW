@@ -4,4 +4,4 @@ type_url: "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey"
 #   algorithm: ES384
 # }
 value: "\020\002"
-output_prefix_type: TINK
+output_prefix_type: RAW

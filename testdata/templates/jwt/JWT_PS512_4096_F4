@@ -6,4 +6,4 @@ type_url: "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey"
 #   public_exponent: "\001\000\001"
 # }
 value: "\020\003\030\200 \"\003\001\000\001"
-output_prefix_type: RAW
+output_prefix_type: TINK

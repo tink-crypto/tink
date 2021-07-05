@@ -5,4 +5,4 @@ type_url: "type.googleapis.com/google.crypto.tink.JwtHmacKey"
 #   key_size: 32
 # }
 value: "\020\001\030 "
-output_prefix_type: RAW
+output_prefix_type: TINK
