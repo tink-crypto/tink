@@ -109,7 +109,7 @@ class RawJwtBuilder {
   RawJwtBuilder& AddNullClaim(absl::string_view name);
   RawJwtBuilder& AddBooleanClaim(absl::string_view name, bool bool_value);
   RawJwtBuilder& AddStringClaim(absl::string_view name,
-                                std::string string_value);
+                                absl::string_view string_value);
   RawJwtBuilder& AddNumberClaim(absl::string_view name, double double_value);
   RawJwtBuilder& AddJsonObjectClaim(absl::string_view name,
                                     absl::string_view object_value);

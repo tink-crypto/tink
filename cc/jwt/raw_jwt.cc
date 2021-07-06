@@ -590,7 +590,7 @@ RawJwtBuilder& RawJwtBuilder::AddBooleanClaim(absl::string_view name,
 }
 
 RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
-                                             std::string string_value) {
+                                             absl::string_view string_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
@@ -600,7 +600,7 @@ RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_string_value(string_value);
+  value.set_string_value(std::string(string_value));
   (*fields)[std::string(name)] = value;
   return *this;
 }
