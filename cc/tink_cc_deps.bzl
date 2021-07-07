@@ -19,12 +19,12 @@ def tink_cc_deps():
         )
 
     if not native.existing_rule("boringssl"):
-        # Commit from 2020-06-23
+        # Commit from 2021-07-02
         http_archive(
             name = "boringssl",
-            strip_prefix = "boringssl-597b810379e126ae05d32c1d94b1a9464385acd0",
-            url = "https://github.com/google/boringssl/archive/597b810379e126ae05d32c1d94b1a9464385acd0.zip",
-            sha256 = "c4e8414cb36e62d2fee451296cc864f7ad1a4670396c8a67e1ee77ae84cc4167",
+            strip_prefix = "boringssl-7686eb8ac9bc60198cbc8354fcba7f54c02792ec",
+            url = "https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip",
+            sha256 = "73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84",
         )
 
     # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
