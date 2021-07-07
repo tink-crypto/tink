@@ -51,14 +51,6 @@ message HpkePublicKey {
   // KEM-encoding of public key (i.e., SerializePublicKey() ) as described in
   // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html#name-cryptographic-dependencies.
   bytes public_key = 3;
-  // `app_info` is an optional parameter that binds the derived key material
-  // to application-specific information as described in Section 5.1 of
-  // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html.
-  //
-  // NOTE: This API sets a constant 'app_info' parameter for each key, but the
-  // HPKE standard itself does not impose this restriction.  For per-context
-  // 'app_info' parameters, this API is not suitable.
-  bytes app_info = 4;
 }
 
 message HpkePrivateKey {
@@ -71,12 +63,4 @@ message HpkePrivateKey {
 
 message HpkeKeyFormat {
   HpkeParams params = 1;
-  // `app_info` is an optional parameter that binds the derived key material
-  // to application-specific information as described in Section 5.1 of
-  // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html.
-  //
-  // NOTE: This API sets a constant 'app_info' parameter for each key, but the
-  // HPKE standard itself does not impose this restriction.  For per-context
-  // 'app_info' parameters, this API is not suitable.
-  bytes app_info = 2;
 }
