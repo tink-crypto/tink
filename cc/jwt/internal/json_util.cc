@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/json_util.h"
 
+#include <string>
+
 #include <google/protobuf/util/json_util.h>
 #include "absl/strings/substitute.h"
 

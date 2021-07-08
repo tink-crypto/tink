@@ -37,7 +37,7 @@ class RawJwtParser;
 }  // namespace jwt_internal
 
 ///////////////////////////////////////////////////////////////////////////////
-// A raw JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
+// A raw JSON Web Token (JWT), https://tools.ietf.org/html/rfc7519.
 //
 // It can be signed or MAC'ed to obtain a compact JWT. It can also be a token
 // that has been parsed from a compact JWT, but not yet verified.

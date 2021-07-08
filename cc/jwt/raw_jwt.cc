@@ -70,7 +70,7 @@ bool HasClaimOfKind(const google::protobuf::Struct& json_proto,
   if (it == fields.end()) {
     return false;
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   return value.kind_case() == kind;
 }
 
@@ -94,7 +94,7 @@ bool ClaimIsNotATimestamp(const google::protobuf::Struct& json_proto,
   if (it == fields.end()) {
     return false;
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
     return true;
   }
@@ -120,7 +120,7 @@ util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
   if (it == fields->end()) {
     return util::OkStatus();
   }
-  auto& value = it->second;
+  google::protobuf::Value& value = it->second;
   if (value.kind_case() == google::protobuf::Value::kStringValue) {
     std::string aud = value.string_value();
     value.mutable_list_value()->add_values()->set_string_value(aud);
@@ -200,7 +200,7 @@ util::StatusOr<std::string> RawJwt::GetIssuer() const {
   if (it == fields.end()) {
     return util::Status(util::error::INVALID_ARGUMENT, "No Issuer found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Issuer is not a string");
@@ -218,7 +218,7 @@ util::StatusOr<std::string> RawJwt::GetSubject() const {
   if (it == fields.end()) {
     return util::Status(util::error::INVALID_ARGUMENT, "No Subject found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Subject is not a string");
@@ -236,7 +236,7 @@ util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
   if (it == fields.end()) {
     return util::Status(util::error::NOT_FOUND, "No Audiences found");
   }
-  auto list = it->second;
+  google::protobuf::Value list = it->second;
   if (list.kind_case() != google::protobuf::Value::kListValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Audiences is not a list");
@@ -264,7 +264,7 @@ util::StatusOr<std::string> RawJwt::GetJwtId() const {
   if (it == fields.end()) {
     return util::Status(util::error::NOT_FOUND, "No JwtId found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
     return util::Status(util::error::INVALID_ARGUMENT, "JwtId is not a string");
   }
@@ -281,7 +281,7 @@ util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
   if (it == fields.end()) {
     return util::Status(util::error::NOT_FOUND, "No Expiration found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Expiration is not a number");
@@ -299,7 +299,7 @@ util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
   if (it == fields.end()) {
     return util::Status(util::error::NOT_FOUND, "No NotBefore found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "NotBefore is not a number");
@@ -317,7 +317,7 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
   if (it == fields.end()) {
     return util::Status(util::error::NOT_FOUND, "No IssuedAt found");
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "IssuedAt is not a number");
@@ -335,7 +335,7 @@ bool RawJwt::HasBooleanClaim(absl::string_view name) const {
 
 util::StatusOr<bool> RawJwt::GetBooleanClaim(
     absl::string_view name) const {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     return status;
   }
@@ -345,7 +345,7 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
     return util::Status(util::error::NOT_FOUND,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kBoolValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         absl::Substitute("claim '$0' is not a bool", name));
@@ -360,7 +360,7 @@ bool RawJwt::HasStringClaim(absl::string_view name) const {
 
 util::StatusOr<std::string> RawJwt::GetStringClaim(
     absl::string_view name) const {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     return status;
   }
@@ -370,7 +370,7 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
     return util::Status(util::error::NOT_FOUND,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         absl::Substitute("claim '$0' is not a string", name));
@@ -384,7 +384,7 @@ bool RawJwt::HasNumberClaim(absl::string_view name) const {
 }
 
 util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     return status;
   }
@@ -394,7 +394,7 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
     return util::Status(util::error::NOT_FOUND,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         absl::Substitute("claim '$0' is not a number", name));
@@ -409,7 +409,7 @@ bool RawJwt::HasJsonObjectClaim(absl::string_view name) const {
 
 util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
     absl::string_view name) const {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     return status;
   }
@@ -419,7 +419,7 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
     return util::Status(util::error::NOT_FOUND,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStructValue) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
@@ -435,7 +435,7 @@ bool RawJwt::HasJsonArrayClaim(absl::string_view name) const {
 
 util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
     absl::string_view name) const {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     return status;
   }
@@ -445,7 +445,7 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
     return util::Status(util::error::NOT_FOUND,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const auto& value = it->second;
+  const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kListValue) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
@@ -492,7 +492,8 @@ RawJwtBuilder& RawJwtBuilder::AddAudience(absl::string_view audience) {
   auto fields = json_proto_.mutable_fields();
   auto insertion_result = fields->insert(
       {std::string(kJwtClaimAudience), google::protobuf::Value()});
-  auto list_value = insertion_result.first->second.mutable_list_value();
+  google::protobuf::ListValue* list_value =
+      insertion_result.first->second.mutable_list_value();
   list_value->add_values()->set_string_value(std::string(audience));
   return *this;
 }
@@ -559,7 +560,7 @@ RawJwtBuilder& RawJwtBuilder::SetIssuedAt(absl::Time issued_at) {
 }
 
 RawJwtBuilder& RawJwtBuilder::AddNullClaim(absl::string_view name) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
@@ -575,7 +576,7 @@ RawJwtBuilder& RawJwtBuilder::AddNullClaim(absl::string_view name) {
 
 RawJwtBuilder& RawJwtBuilder::AddBooleanClaim(absl::string_view name,
                                               bool bool_value) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
@@ -591,7 +592,7 @@ RawJwtBuilder& RawJwtBuilder::AddBooleanClaim(absl::string_view name,
 
 RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
                                              absl::string_view string_value) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
@@ -607,7 +608,7 @@ RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
 
 RawJwtBuilder& RawJwtBuilder::AddNumberClaim(absl::string_view name,
                                              double double_value) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
@@ -623,7 +624,7 @@ RawJwtBuilder& RawJwtBuilder::AddNumberClaim(absl::string_view name,
 
 RawJwtBuilder& RawJwtBuilder::AddJsonObjectClaim(
     absl::string_view name, absl::string_view object_value) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
@@ -647,23 +648,24 @@ RawJwtBuilder& RawJwtBuilder::AddJsonObjectClaim(
 
 RawJwtBuilder& RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
                                                 absl::string_view array_value) {
-  auto status = ValidatePayloadName(name);
+  util::Status status = ValidatePayloadName(name);
   if (!status.ok()) {
     if (!error_.has_value()) {
       error_ = status;
     }
     return *this;
   }
-  auto list_or = jwt_internal::JsonStringToProtoList(array_value);
-  if (!list_or.ok()) {
+  util::StatusOr<google::protobuf::ListValue> list =
+      jwt_internal::JsonStringToProtoList(array_value);
+  if (!list.ok()) {
     if (!error_.has_value()) {
-      error_ = list_or.status();
+      error_ = list.status();
     }
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  *value.mutable_list_value() = list_or.ValueOrDie();
+  *value.mutable_list_value() = *list;
   (*fields)[std::string(name)] = value;
   return *this;
 }
