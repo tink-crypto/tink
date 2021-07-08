@@ -30,6 +30,7 @@
 #include "openssl/evp.h"
 #include "openssl/x509.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -555,6 +556,79 @@ TEST(X25519KeyFromEcKeyTest, RejectNistPCurves) {
   EXPECT_THAT(x25519_key_or_status.status(),
               StatusIs(util::error::INVALID_ARGUMENT));
 }
+
+
+using NistCurveParamTest = ::testing::TestWithParam<EllipticCurveType>;
+INSTANTIATE_TEST_SUITE_P(
+    NistCurvesParams, NistCurveParamTest,
+    ::testing::Values(NIST_P256, NIST_P384, NIST_P521));
+
+TEST_P(NistCurveParamTest, KeysFromDifferentSeedAreDifferent) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::SecretData seed1 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData seed2 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("0f0e0d0c0b0a09080706050403020100"));
+
+  crypto::tink::subtle::EllipticCurveType curve = GetParam();
+
+  crypto::tink::util::StatusOr<SubtleUtilBoringSSL::EcKey> keypair1 =
+      SubtleUtilBoringSSL::GetNewEcKeyFromSeed(curve, seed1);
+  crypto::tink::util::StatusOr<SubtleUtilBoringSSL::EcKey> keypair2 =
+      SubtleUtilBoringSSL::GetNewEcKeyFromSeed(curve, seed2);
+
+  ASSERT_THAT(keypair1.status(), IsOk());
+  ASSERT_THAT(keypair2.status(), IsOk());
+
+  EXPECT_NE(keypair1->priv, keypair2->priv);
+  EXPECT_NE(keypair1->pub_x, keypair2->pub_x);
+  EXPECT_NE(keypair1->pub_y, keypair2->pub_y);
+}
+
+
+TEST_P(NistCurveParamTest, SameSeedGivesSameKey) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::SecretData seed1 = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+
+  auto curve = GetParam();
+
+  auto keypair1_or_status = SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
+      curve, seed1);
+  auto keypair2_or_status = SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
+      curve, seed1);
+
+  ASSERT_THAT(keypair1_or_status.status(), IsOk());
+  ASSERT_THAT(keypair2_or_status.status(), IsOk());
+
+  auto keypair1 = keypair1_or_status.ValueOrDie();
+  auto keypair2 = keypair2_or_status.ValueOrDie();
+
+  EXPECT_EQ(keypair1.priv, keypair2.priv);
+  EXPECT_EQ(keypair1.pub_x, keypair2.pub_x);
+  EXPECT_EQ(keypair1.pub_y, keypair2.pub_y);
+}
+
+TEST(SubtleUtilBoringSSLTest, GenerationWithSeedFailsWithWrongCurve) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::SecretData seed = util::SecretDataFromStringView(
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+
+  auto keypair_or_status = SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
+      EllipticCurveType::CURVE25519, seed);
+
+  EXPECT_THAT(keypair_or_status.status(), StatusIs(util::error::INTERNAL));
+}
+
 
 TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
   SubtleUtilBoringSSL::RsaPublicKey public_key;

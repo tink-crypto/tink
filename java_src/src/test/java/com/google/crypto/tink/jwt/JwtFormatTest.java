@@ -266,7 +266,7 @@ public final class JwtFormatTest {
 
   @Test
   public void signedCompactCreateSplit_success() throws Exception {
-    RawJwt rawJwt = new RawJwt.Builder().setIssuer("joe").build();
+    RawJwt rawJwt = RawJwt.newBuilder().setIssuer("joe").withoutExpiration().build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
     String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
@@ -287,7 +287,8 @@ public final class JwtFormatTest {
 
   @Test
   public void signedCompactCreateSplitWithTypeHeader_success() throws Exception {
-    RawJwt rawJwt = new RawJwt.Builder().setTypeHeader("JWT").setIssuer("joe").build();
+    RawJwt rawJwt =
+        RawJwt.newBuilder().setTypeHeader("JWT").setIssuer("joe").withoutExpiration().build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
     String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
@@ -308,7 +309,7 @@ public final class JwtFormatTest {
   @Test
   public void signedCompactCreateSplitWithKeyIdentifier_success() throws Exception {
     String kid = "AZxkm2U";
-    RawJwt rawJwt = new RawJwt.Builder().setIssuer("joe").build();
+    RawJwt rawJwt = RawJwt.newBuilder().setIssuer("joe").withoutExpiration().build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
     String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.of(kid), rawJwt);

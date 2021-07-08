@@ -27,6 +27,8 @@ from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_mac_wrapper
 from tink.jwt import _jwt_public_key_sign
 from tink.jwt import _jwt_public_key_verify
+from tink.jwt import _jwt_signature_key_manager
+from tink.jwt import _jwt_signature_wrappers
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -48,9 +50,10 @@ def new_raw_jwt(*,
                 audiences: Optional[List[Text]] = None,
                 jwt_id: Optional[Text] = None,
                 expiration: Optional[datetime.datetime] = None,
+                without_expiration: bool = False,
                 not_before: Optional[datetime.datetime] = None,
                 issued_at: Optional[datetime.datetime] = None,
-                custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
+                custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
   """Creates a new RawJwt."""
   return _raw_jwt.RawJwt.create(
       type_header=type_header,
@@ -59,6 +62,7 @@ def new_raw_jwt(*,
       audiences=audiences,
       jwt_id=jwt_id,
       expiration=expiration,
+      without_expiration=without_expiration,
       not_before=not_before,
       issued_at=issued_at,
       custom_claims=custom_claims)
@@ -66,15 +70,28 @@ def new_raw_jwt(*,
 
 def new_validator(
     *,
-    issuer: Optional[Text] = None,
-    subject: Optional[Text] = None,
-    audience: Optional[Text] = None,
+    expected_type_header: Optional[Text] = None,
+    expected_issuer: Optional[Text] = None,
+    expected_subject: Optional[Text] = None,
+    expected_audience: Optional[Text] = None,
+    ignore_type_header: bool = False,
+    ignore_issuer: bool = False,
+    ignore_subject: bool = False,
+    ignore_audiences: bool = False,
+    allow_missing_expiration: bool = False,
     clock_skew: Optional[datetime.timedelta] = None,
     fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
+  """Creates a new JwtValidator."""
   return JwtValidator(
-      issuer=issuer,
-      subject=subject,
-      audience=audience,
+      expected_type_header=expected_type_header,
+      expected_issuer=expected_issuer,
+      expected_subject=expected_subject,
+      expected_audience=expected_audience,
+      ignore_type_header=ignore_type_header,
+      ignore_issuer=ignore_issuer,
+      ignore_subject=ignore_subject,
+      ignore_audiences=ignore_audiences,
+      allow_missing_expiration=allow_missing_expiration,
       clock_skew=clock_skew,
       fixed_now=fixed_now)
 
@@ -98,3 +115,8 @@ jwt_ps512_4096_f4_template = _jwt_key_templates.jwt_ps512_4096_f4_template
 def register_jwt_mac() -> None:
   _jwt_hmac_key_manager.register()
   _jwt_mac_wrapper.register()
+
+
+def register_jwt_signature() -> None:
+  _jwt_signature_key_manager.register()
+  _jwt_signature_wrappers.register()

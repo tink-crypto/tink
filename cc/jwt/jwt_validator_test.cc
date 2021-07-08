@@ -30,319 +30,492 @@ namespace tink {
 
 TEST(JwtValidator, ExpiredTokenNotOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now - absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, NotExpiredTokenOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now + absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, TokenWithExpEqualToNowIsExpired) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetExpiration(now).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetFixedNow(now).Build();
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().SetFixedNow(now).Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, ClockSkewIsToLarge) {
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
-  EXPECT_FALSE(builder.SetClockSkew(absl::Minutes(11)).ok());
+  EXPECT_FALSE(
+      JwtValidatorBuilder().SetClockSkew(absl::Minutes(11)).Build().ok());
 }
 
 TEST(JwtValidator, RecentlyExpiredTokenWithClockSkewOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now - absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
-  ASSERT_THAT(builder.SetClockSkew(absl::Seconds(200)), IsOk());
-  JwtValidator validator = builder.Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().SetClockSkew(absl::Seconds(200)).Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, NotBeforeInTheFutureNotOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now + absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, NotBeforeInThePastOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, TokenWithNotBeforeEqualToNowIsValid) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetNotBefore(now).WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetFixedNow(now).Build();
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().SetFixedNow(now).AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, NotBeforeInTheNearFutureWithClockSkewOK) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now + absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
-  ASSERT_THAT(builder.SetClockSkew(absl::Seconds(200)), IsOk());
-  JwtValidator validator = builder.Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder()
+          .AllowMissingExpiration()
+          .SetClockSkew(absl::Seconds(200))
+          .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
+}
 
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+TEST(JwtValidator, RequiresTypeHeaderButNotTypHeaderNotOK) {
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, InvalidTypeHeaderNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("unknown").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectTypeHeader("JWT")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, CorrectTypeHeaderOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder()
+          .ExpectTypeHeader("typeHeader")
+          .AllowMissingExpiration()
+          .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
+}
+
+TEST(JwtValidator, TypeHeaderInTokenButNotInValiatorNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
+
+TEST(JwtValidator, IgnoreTypeHeaderOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetTypeHeader("typeHeader").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().IgnoreTypeHeader().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, RequiresIssuerButNotIssuerNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectIssuer("issuer")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, InvalidIssuerNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetIssuer("unknown").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuer("unknown").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectIssuer("issuer")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, CorrectIssuerOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectIssuer("issuer")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
-TEST(JwtValidator, DontCheckIssuerOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+TEST(JwtValidator, IssuerInTokenButNotInValiatorNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
 
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+TEST(JwtValidator, IgnoreIssuerOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().IgnoreIssuer().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, RequiresSubjectButNotSubjectNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectSubject("subject")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, InvalidSubjectNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetSubject("unknown").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetSubject("unknown").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectSubject("subject")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, CorrectSubjectOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetSubject("subject").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetSubject("subject").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectSubject("subject")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
-TEST(JwtValidator, DontCheckSubjectOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetSubject("subject").Build();
+TEST(JwtValidator, SubjectInTokenButNotInValiatorNotOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetSubject("subject").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
+}
 
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+TEST(JwtValidator, IgnoreSubjectOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetSubject("subject").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().IgnoreSubject().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, RequiresAudienceButNotAudienceNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetSubject("subject").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectSubject("subject")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, InvalidAudienceNotOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetSubject("unknown").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetSubject("unknown").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().SetAudience("audience").Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectAudience("audience")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, CorrectAudienceOK) {
   util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
-                    .AddAudience("otherAudience")
-                    .AddAudience("audience")
-                    .Build();
+                                      .AddAudience("otherAudience")
+                                      .AddAudience("audience")
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().SetAudience("audience").Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or = JwtValidatorBuilder()
+                                                  .ExpectAudience("audience")
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, AudienceInTokenButNotInValiatorNotOK) {
   util::StatusOr<RawJwt> jwt_or =
-      RawJwtBuilder().AddAudience("audience").Build();
+      RawJwtBuilder().AddAudience("audience").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, NoAudienceOK) {
-  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
+}
 
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+TEST(JwtValidator, IgnoreAudiencesOK) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().AddAudience("audience").WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().IgnoreAudiences().AllowMissingExpiration().Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
 TEST(JwtValidator, FixedNowExpiredNotOk) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(now + absl::Seconds(100)).Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().SetFixedNow(now + absl::Seconds(200)).Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder()
+          .SetFixedNow(now + absl::Seconds(200))
+          .AllowMissingExpiration()
+          .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, FixedNowNotYetValidNotOk) {
   absl::Time now = absl::Now();
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator =
-      JwtValidatorBuilder().SetFixedNow(now - absl::Seconds(200)).Build();
-
-  EXPECT_FALSE(validator.Validate(jwt).ok());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder()
+          .SetFixedNow(now - absl::Seconds(200))
+          .AllowMissingExpiration()
+          .Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_FALSE(validator_or.ValueOrDie().Validate(jwt).ok());
 }
 
 TEST(JwtValidator, FixedNowValidOk) {
   absl::Time now = absl::FromUnixSeconds(12345);
-  auto jwt_builder = RawJwtBuilder();
-  ASSERT_THAT(jwt_builder.SetExpiration(now + absl::Seconds(100)), IsOk());
-  ASSERT_THAT(jwt_builder.SetNotBefore(now - absl::Seconds(100)), IsOk());
-  util::StatusOr<RawJwt> jwt_or = jwt_builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetExpiration(now + absl::Seconds(100))
+                                      .SetNotBefore(now - absl::Seconds(100))
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   RawJwt jwt = jwt_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetFixedNow(now).Build();
-
-  EXPECT_THAT(validator.Validate(jwt), IsOk());
+  util::StatusOr<JwtValidator> validator_or =
+      JwtValidatorBuilder().SetFixedNow(now).Build();
+  ASSERT_THAT(validator_or.status(), IsOk());
+  EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
-
 TEST(JwtValidator, CallBuildTwiceOk) {
-  JwtValidatorBuilder builder = JwtValidatorBuilder();
+  JwtValidatorBuilder builder = JwtValidatorBuilder().AllowMissingExpiration();
 
-  builder.SetIssuer("issuer1");
-  JwtValidator validator1 = builder.Build();
+  builder.ExpectIssuer("issuer1");
+  util::StatusOr<JwtValidator> validator1_or = builder.Build();
+  ASSERT_THAT(validator1_or.status(), IsOk());
 
-  builder.SetIssuer("issuer2");
-  JwtValidator validator2 = builder.Build();
+  builder.ExpectIssuer("issuer2");
+  util::StatusOr<JwtValidator> validator2_or = builder.Build();
+  ASSERT_THAT(validator2_or.status(), IsOk());
 
-  util::StatusOr<RawJwt> jwt1_or = RawJwtBuilder()
-                    .SetIssuer("issuer1")
-                    .Build();
+  util::StatusOr<RawJwt> jwt1_or =
+      RawJwtBuilder().SetIssuer("issuer1").WithoutExpiration().Build();
   ASSERT_THAT(jwt1_or.status(), IsOk());
   RawJwt jwt1 = jwt1_or.ValueOrDie();
-  util::StatusOr<RawJwt> jwt2_or = RawJwtBuilder()
-                    .SetIssuer("issuer2")
-                    .Build();
+  util::StatusOr<RawJwt> jwt2_or =
+      RawJwtBuilder().SetIssuer("issuer2").WithoutExpiration().Build();
   ASSERT_THAT(jwt2_or.status(), IsOk());
   RawJwt jwt2 = jwt2_or.ValueOrDie();
 
+  EXPECT_THAT(validator1_or.ValueOrDie().Validate(jwt1), IsOk());
+  EXPECT_FALSE(validator1_or.ValueOrDie().Validate(jwt2).ok());
+  EXPECT_THAT(validator2_or.ValueOrDie().Validate(jwt2), IsOk());
+  EXPECT_FALSE(validator2_or.ValueOrDie().Validate(jwt1).ok());
+}
 
-  EXPECT_THAT(validator1.Validate(jwt1), IsOk());
-  EXPECT_FALSE(validator1.Validate(jwt2).ok());
-  EXPECT_THAT(validator2.Validate(jwt2), IsOk());
-  EXPECT_FALSE(validator2.Validate(jwt1).ok());
+TEST(JwtValidator, InvalidValidators) {
+  EXPECT_FALSE(JwtValidatorBuilder()
+                   .ExpectTypeHeader("a")
+                   .IgnoreTypeHeader()
+                   .AllowMissingExpiration()
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(JwtValidatorBuilder()
+                   .ExpectIssuer("a")
+                   .IgnoreIssuer()
+                   .AllowMissingExpiration()
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(JwtValidatorBuilder()
+                   .ExpectSubject("a")
+                   .IgnoreSubject()
+                   .AllowMissingExpiration()
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(JwtValidatorBuilder()
+                   .ExpectAudience("a")
+                   .IgnoreAudiences()
+                   .AllowMissingExpiration()
+                   .Build()
+                   .ok());
 }
 
 

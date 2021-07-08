@@ -16,6 +16,8 @@
 
 #include "tink/jwt/raw_jwt.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "absl/time/time.h"
@@ -32,12 +34,13 @@ namespace crypto {
 namespace tink {
 
 TEST(RawJwt, GetTypeHeaderIssuerSubjectJwtIdOK) {
-  auto jwt_or = RawJwtBuilder()
-                    .SetTypeHeader("typeHeader")
-                    .SetIssuer("issuer")
-                    .SetSubject("subject")
-                    .SetJwtId("jwt_id")
-                    .Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetTypeHeader("typeHeader")
+                                      .SetIssuer("issuer")
+                                      .SetSubject("subject")
+                                      .SetJwtId("jwt_id")
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -52,14 +55,14 @@ TEST(RawJwt, GetTypeHeaderIssuerSubjectJwtIdOK) {
 }
 
 TEST(RawJwt, TimestampsOK) {
-  absl::Time nbf = absl::FromUnixMillis(1234567890123);
-  absl::Time iat = absl::FromUnixMillis(1234567891123);
-  absl::Time exp = absl::FromUnixMillis(1234567892123);
-  auto builder = RawJwtBuilder();
-  ASSERT_THAT(builder.SetNotBefore(nbf), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(iat), IsOk());
-  ASSERT_THAT(builder.SetExpiration(exp), IsOk());
-  auto jwt_or = builder.Build();
+  absl::Time nbf = absl::FromUnixSeconds(1234567890);
+  absl::Time iat = absl::FromUnixSeconds(1234567891);
+  absl::Time exp = absl::FromUnixSeconds(1234567892);
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(nbf)
+                                      .SetIssuedAt(iat)
+                                      .SetExpiration(exp)
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -79,13 +82,51 @@ TEST(RawJwt, TimestampsOK) {
   EXPECT_THAT(exp_or.ValueOrDie(), Eq(exp));
 }
 
+TEST(RawJwt, ExpWithMillisAlwaysRoundDown) {
+  absl::Time exp = absl::FromUnixMillis(123999);
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().SetExpiration(exp).Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasExpiration());
+  auto exp_or = jwt.GetExpiration();
+  ASSERT_THAT(exp_or.status(), IsOk());
+  EXPECT_THAT(exp_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
+}
+
+TEST(RawJwt, NbfWithMillisAlwaysRoundDown) {
+  absl::Time nbf = absl::FromUnixMillis(123999);
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetNotBefore(nbf).WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasNotBefore());
+  auto nbf_or = jwt.GetNotBefore();
+  ASSERT_THAT(nbf_or.status(), IsOk());
+  EXPECT_THAT(nbf_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
+}
+
+TEST(RawJwt, IatWithMillisAlwaysRoundDown) {
+  absl::Time iat = absl::FromUnixMillis(123999);
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuedAt(iat).WithoutExpiration().Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  auto jwt = jwt_or.ValueOrDie();
+
+  EXPECT_TRUE(jwt.HasIssuedAt());
+  auto iat_or = jwt.GetIssuedAt();
+  ASSERT_THAT(iat_or.status(), IsOk());
+  EXPECT_THAT(iat_or.ValueOrDie(), Eq(absl::FromUnixSeconds(123)));
+}
+
 TEST(RawJwt, LargeExpirationWorks) {
   absl::Time large = absl::FromUnixSeconds(253402300799);  // year 9999
-  auto builder = RawJwtBuilder();
-  ASSERT_THAT(builder.SetExpiration(large), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(large), IsOk());
-  ASSERT_THAT(builder.SetNotBefore(large), IsOk());
-  auto jwt_or = builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetNotBefore(large)
+                                      .SetIssuedAt(large)
+                                      .SetExpiration(large)
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -99,25 +140,38 @@ TEST(RawJwt, LargeExpirationWorks) {
 
 TEST(RawJwt, TooLargeTimestampsFail) {
   absl::Time too_large = absl::FromUnixSeconds(253402300800);  // year 10000
-  auto builder = RawJwtBuilder();
-  EXPECT_FALSE(builder.SetExpiration(too_large).ok());
-  EXPECT_FALSE(builder.SetIssuedAt(too_large).ok());
-  EXPECT_FALSE(builder.SetNotBefore(too_large).ok());
+  EXPECT_FALSE(RawJwtBuilder().SetExpiration(too_large).Build().ok());
+  EXPECT_FALSE(
+      RawJwtBuilder().SetIssuedAt(too_large).WithoutExpiration().Build().ok());
+  EXPECT_FALSE(
+      RawJwtBuilder().SetNotBefore(too_large).WithoutExpiration().Build().ok());
 }
 
 TEST(RawJwt, NegativeTimestampsFail) {
   absl::Time neg = absl::FromUnixMillis(-1);
-  auto builder = RawJwtBuilder();
-  EXPECT_FALSE(builder.SetExpiration(neg).ok());
-  EXPECT_FALSE(builder.SetIssuedAt(neg).ok());
-  EXPECT_FALSE(builder.SetNotBefore(neg).ok());
+  EXPECT_FALSE(RawJwtBuilder().SetExpiration(neg).Build().ok());
+  EXPECT_FALSE(
+      RawJwtBuilder().SetIssuedAt(neg).WithoutExpiration().Build().ok());
+  EXPECT_FALSE(
+      RawJwtBuilder().SetNotBefore(neg).WithoutExpiration().Build().ok());
+}
+
+TEST(RawJwt, SetExpirationAndWithoutExpirationFail) {
+  absl::Time exp = absl::FromUnixMillis(12345);
+  EXPECT_FALSE(
+      RawJwtBuilder().SetExpiration(exp).WithoutExpiration().Build().ok());
+}
+
+TEST(RawJwt, NeitherSetExpirationNorWithoutExpirationFail) {
+  EXPECT_FALSE(RawJwtBuilder().Build().ok());
 }
 
 TEST(RawJwt, AddGetAudiencesOK) {
-  auto jwt_or = RawJwtBuilder()
-                    .AddAudience("audience1")
-                    .AddAudience("audience2")
-                    .Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .AddAudience("audience1")
+                                      .AddAudience("audience2")
+                                      .WithoutExpiration()
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -127,19 +181,16 @@ TEST(RawJwt, AddGetAudiencesOK) {
 }
 
 TEST(RawJwt, GetCustomClaimOK) {
-  auto builder = RawJwtBuilder();
-  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
-  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
-  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
-  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
-  ASSERT_THAT(
-      builder.AddJsonObjectClaim("object_claim", R"({ "number": 123.456})"),
-      IsOk());
-  ASSERT_THAT(
-      builder.AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])"),
-      IsOk());
-
-  auto jwt_or = builder.Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder()
+          .WithoutExpiration()
+          .AddNullClaim("null_claim")
+          .AddBooleanClaim("boolean_claim", true)
+          .AddNumberClaim("number_claim", 123.456)
+          .AddStringClaim("string_claim", "a string")
+          .AddJsonObjectClaim("object_claim", R"({ "number": 123.456})")
+          .AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])")
+          .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -165,13 +216,13 @@ TEST(RawJwt, GetCustomClaimOK) {
 }
 
 TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
-  auto builder = RawJwtBuilder();
-  ASSERT_THAT(builder.AddNullClaim("null_claim"), IsOk());
-  ASSERT_THAT(builder.AddBooleanClaim("boolean_claim", true), IsOk());
-  ASSERT_THAT(builder.AddNumberClaim("number_claim", 123.456), IsOk());
-  ASSERT_THAT(builder.AddStringClaim("string_claim", "a string"), IsOk());
-
-  auto jwt_or = builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                     .WithoutExpiration()
+                     .AddNullClaim("null_claim")
+                     .AddBooleanClaim("boolean_claim", true)
+                     .AddNumberClaim("number_claim", 123.456)
+                     .AddStringClaim("string_claim", "a string")
+                     .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -183,13 +234,14 @@ TEST(RawJwt, HasCustomClaimIsFalseForWrongType) {
 
 TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetIssuer("issuer").SetSubject("subject").SetJwtId(
-          "jwt_id");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto jwt_or = builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetIssuer("issuer")
+                                      .SetSubject("subject")
+                                      .SetJwtId("jwt_id")
+                                      .SetNotBefore(now - absl::Seconds(300))
+                                      .SetIssuedAt(now)
+                                      .SetExpiration(now + absl::Seconds(300))
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -205,13 +257,14 @@ TEST(RawJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
 
 TEST(RawJwt, GetRegisteredCustomClaimNotOK) {
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetIssuer("issuer").SetSubject("subject").SetJwtId(
-          "jwt_id");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto jwt_or = builder.Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder()
+                                      .SetIssuer("issuer")
+                                      .SetSubject("subject")
+                                      .SetJwtId("jwt_id")
+                                      .SetNotBefore(now - absl::Seconds(300))
+                                      .SetIssuedAt(now)
+                                      .SetExpiration(now + absl::Seconds(300))
+                                      .Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -224,37 +277,103 @@ TEST(RawJwt, GetRegisteredCustomClaimNotOK) {
 }
 
 TEST(RawJwt, SetRegisteredCustomClaimNotOK) {
-  auto builder = RawJwtBuilder();
-  EXPECT_FALSE(builder.AddStringClaim("iss", "issuer").ok());
-  EXPECT_FALSE(builder.AddStringClaim("sub", "issuer").ok());
-  EXPECT_FALSE(builder.AddStringClaim("jti", "issuer").ok());
-  EXPECT_FALSE(builder.AddNumberClaim("nbf", 123).ok());
-  EXPECT_FALSE(builder.AddNumberClaim("iat", 123).ok());
-  EXPECT_FALSE(builder.AddNumberClaim("exp", 123).ok());
-  EXPECT_FALSE(builder.AddBooleanClaim("iss", true).ok());
-  EXPECT_FALSE(builder.AddNullClaim("iss").ok());
-  EXPECT_FALSE(builder.AddJsonObjectClaim("iss", "{\"1\": 2}").ok());
-  EXPECT_FALSE(builder.AddJsonArrayClaim("iss", "[1,2]").ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddStringClaim("iss", "issuer")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddStringClaim("sub", "issuer")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddStringClaim("jti", "issuer")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddNumberClaim("nbf", 123)
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddNumberClaim("iat", 123)
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddNumberClaim("exp", 123)
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddBooleanClaim("iss", true)
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(
+      RawJwtBuilder().WithoutExpiration().AddNullClaim("iss").Build().ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonObjectClaim("iss", "{\"1\": 2}")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonArrayClaim("iss", "[1,2]")
+                   .Build()
+                   .ok());
 }
 
 TEST(RawJwt, SetInvalidJsonObjectClaimNotOK) {
-  auto builder = RawJwtBuilder();
-  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "invalid").ok());
-  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", R"("string")").ok());
-  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "42").ok());
-  EXPECT_FALSE(builder.AddJsonObjectClaim("obj", "[1,2]").ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonObjectClaim("obj", "invalid")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonObjectClaim("obj", R"("string")")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonObjectClaim("obj", "42")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonObjectClaim("obj", "[1,2]")
+                   .Build()
+                   .ok());
 }
 
 TEST(RawJwt, SetInvalidJsonArrayClaimNotOK) {
-  auto builder = RawJwtBuilder();
-  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "invalid").ok());
-  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", R"("string")").ok());
-  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", "42").ok());
-  EXPECT_FALSE(builder.AddJsonArrayClaim("arr", R"({"1": 2})").ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonArrayClaim("arr", "invalid")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonArrayClaim("arr", R"("string")")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonArrayClaim("arr", "42")
+                   .Build()
+                   .ok());
+  EXPECT_FALSE(RawJwtBuilder()
+                   .WithoutExpiration()
+                   .AddJsonArrayClaim("arr", R"({"1": 2})")
+                   .Build()
+                   .ok());
 }
 
 TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
-  auto jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -275,7 +394,7 @@ TEST(RawJwt, EmptyTokenHasAndIsReturnsFalse) {
 }
 
 TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
-  auto jwt_or = RawJwtBuilder().Build();
+  util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
@@ -296,13 +415,16 @@ TEST(RawJwt, EmptyTokenGetReturnsNotOK) {
 }
 
 TEST(RawJwt, BuildCanBeCalledTwice) {
-  auto builder = RawJwtBuilder().SetIssuer("issuer").SetSubject("subject");
-  auto jwt_or = builder.Build();
+  auto builder = RawJwtBuilder()
+                     .SetIssuer("issuer")
+                     .SetSubject("subject")
+                     .WithoutExpiration();
+  util::StatusOr<RawJwt> jwt_or = builder.Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
   builder.SetSubject("subject2");
-  auto jwt2_or = builder.Build();
+  util::StatusOr<RawJwt> jwt2_or = builder.Build();
   ASSERT_THAT(jwt2_or.status(), IsOk());
   auto jwt2 = jwt2_or.ValueOrDie();
 
@@ -312,76 +434,31 @@ TEST(RawJwt, BuildCanBeCalledTwice) {
   EXPECT_THAT(jwt2.GetSubject(), IsOkAndHolds("subject2"));
 }
 
-TEST(RawJwt, FromJson) {
-  auto jwt_or = RawJwt::FromJson(
-      absl::nullopt,
-      R"({"iss":"issuer", "sub":"subject", "exp":123, "aud":["a1", "a2"]})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_FALSE(jwt.HasTypeHeader());
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-  EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
-  EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
-  std::vector<std::string> expected_audiences = {"a1", "a2"};
-  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
-}
-
-TEST(RawJwt, FromJsonWithTypeHeader) {
-  auto jwt_or = RawJwt::FromJson("typeHeader", R"({"iss":"issuer"})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-}
-
-TEST(RawJwt, FromJsonExpExpiration) {
-  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":1e10})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  EXPECT_THAT(jwt.GetExpiration(),
-              IsOkAndHolds(absl::FromUnixSeconds(10000000000)));
-}
-
-TEST(RawJwt, FromJsonExpirationTooLarge) {
-  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":1e30})");
-  EXPECT_FALSE(jwt_or.ok());
-}
-
-TEST(RawJwt, FromJsonNegativeExpirationAreInvalid) {
-  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"exp":-1})");
-  EXPECT_FALSE(jwt_or.ok());
-}
-
-TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
-  auto jwt_or = RawJwt::FromJson(absl::nullopt, R"({"aud":"audience"})");
-  ASSERT_THAT(jwt_or.status(), IsOk());
-  RawJwt jwt = jwt_or.ValueOrDie();
-
-  std::vector<std::string> expected = {"audience"};
-  EXPECT_TRUE(jwt.HasAudiences());
-  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
-}
-
-TEST(RawJwt, FromJsonWithBadRegisteredTypes) {
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iss":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"sub":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":123})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":[]})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"aud":["abc",123]})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"exp":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"nbf":"abc"})").ok());
-  EXPECT_FALSE(RawJwt::FromJson(absl::nullopt, R"({"iat":"abc"})").ok());
-}
-
 TEST(RawJwt, GetJsonPayload) {
-  auto jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
   auto jwt = jwt_or.ValueOrDie();
 
   ASSERT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
+}
+
+TEST(RawJwt, GetExpirationJsonPayload) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(absl::FromUnixSeconds(2218027244)).Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"exp":2218027244})"));
+}
+
+TEST(RawJwt, GetNanoExpirationJsonPayload) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtBuilder().SetExpiration(absl::FromUnixNanos(123456789012)).Build();
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"exp":123})"));
 }
 
 }  // namespace tink

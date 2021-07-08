@@ -16,6 +16,9 @@
 
 #include "tink/jwt/internal/jwt_mac_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -60,8 +63,8 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
   if (!mac_or.ok()) {
     return mac_or.status();
   }
-  std::unique_ptr<JwtMacInternal> jwt_mac =
-      absl::make_unique<JwtMacImpl>(std::move(mac_or.ValueOrDie()), "HS256");
+  std::unique_ptr<JwtMacInternal> jwt_mac = absl::make_unique<JwtMacImpl>(
+      std::move(mac_or.ValueOrDie()), "HS256", absl::nullopt);
   return jwt_mac;
 }
 
@@ -71,12 +74,14 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetTypeHeader("typeHeader")
+          .SetJwtId("id123")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
   EXPECT_TRUE(raw_jwt.HasTypeHeader());
@@ -87,16 +92,18 @@ TEST(JwtMacImplTest, CreateAndValidateToken) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetJwtId(), IsOkAndHolds("id123"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 =
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 
@@ -106,12 +113,14 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
   absl::Time now = absl::Now();
-  auto builder =
-      RawJwtBuilder().SetTypeHeader("typeHeader").SetIssuer("issuer");
-  ASSERT_THAT(builder.SetNotBefore(now - absl::Seconds(300)), IsOk());
-  ASSERT_THAT(builder.SetIssuedAt(now), IsOk());
-  ASSERT_THAT(builder.SetExpiration(now + absl::Seconds(300)), IsOk());
-  auto raw_jwt_or = builder.Build();
+  util::StatusOr<RawJwt> raw_jwt_or =
+      RawJwtBuilder()
+          .SetTypeHeader("typeHeader")
+          .SetJwtId("id123")
+          .SetNotBefore(now - absl::Seconds(300))
+          .SetIssuedAt(now)
+          .SetExpiration(now + absl::Seconds(300))
+          .Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
   EXPECT_TRUE(raw_jwt.HasTypeHeader());
@@ -122,14 +131,15 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build().ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_THAT(verified_jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt.GetJwtId(), IsOkAndHolds("id123"));
 
   // parse header to make sure the kid value is set correctly.
   std::vector<absl::string_view> parts =
@@ -154,8 +164,12 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
-  JwtValidator validator_1970 =
-      JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
+  JwtValidator validator_1970 = JwtValidatorBuilder()
+                                    .ExpectTypeHeader("JWT")
+                                    .ExpectIssuer("joe")
+                                    .SetFixedNow(absl::FromUnixSeconds(12345))
+                                    .Build()
+                                    .ValueOrDie();
 
   // verification succeeds because token was valid 1970
   util::StatusOr<VerifiedJwt> verified_jwt_or =
@@ -167,7 +181,7 @@ TEST(JwtMacImplTest, ValidateFixedToken) {
               IsOkAndHolds(true));
 
   // verification fails because token is expired
-  JwtValidator validator_now = JwtValidatorBuilder().Build();
+  JwtValidator validator_now = JwtValidatorBuilder().Build().ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator_now).ok());
 
   // verification fails because token was modified
@@ -184,7 +198,7 @@ TEST(JwtMacImplTest, ValidateInvalidTokens) {
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
   std::unique_ptr<JwtMacInternal> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder().Build().ValueOrDie();
 
   EXPECT_FALSE(
       jwt_mac->VerifyMacAndDecode("eyJhbGciOiJIUzI1NiJ9.e30.abc.", validator)

@@ -29,8 +29,7 @@ set -euo pipefail
 declare -A PYTHON_VERSIONS
 PYTHON_VERSIONS["3.7"]="cp37-cp37m"
 PYTHON_VERSIONS["3.8"]="cp38-cp38"
-# TODO(ckl): Enable when macOS solution is in place.
-#PYTHON_VERSIONS["3.9"]="cp39-cp39"
+PYTHON_VERSIONS["3.9"]="cp39-cp39"
 readonly -A PYTHON_VERSIONS
 
 readonly BAZEL_VERSION='3.7.2'

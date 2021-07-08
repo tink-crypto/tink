@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_format.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/jwt/internal/json_util.h"
@@ -23,6 +25,7 @@
 #include "tink/util/test_util.h"
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::google::crypto::tink::OutputPrefixType;
 using testing::Eq;
 
@@ -257,6 +260,76 @@ TEST(JwtFormat, DecodeSignatureWithLineFeedFails) {
   std::string output;
   ASSERT_FALSE(
       DecodePayload("dBjftJeZ4CVP-mB92K2\n7uhbUJU1p1r_wW1gFWFOEjXk", &output));
+}
+
+TEST(RawJwt, FromJson) {
+  util::StatusOr<RawJwt> jwt_or = RawJwtParser::FromJson(
+      absl::nullopt,
+      R"({"iss":"issuer", "sub":"subject", "exp":123, "aud":["a1", "a2"]})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_FALSE(jwt.HasTypeHeader());
+  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
+  EXPECT_THAT(jwt.GetExpiration(), IsOkAndHolds(absl::FromUnixSeconds(123)));
+  std::vector<std::string> expected_audiences = {"a1", "a2"};
+  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected_audiences));
+}
+
+TEST(RawJwt, FromJsonWithTypeHeader) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtParser::FromJson("typeHeader", R"({"iss":"issuer"})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+}
+
+TEST(RawJwt, FromJsonExpExpiration) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtParser::FromJson(absl::nullopt, R"({"exp":1e10})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  EXPECT_THAT(jwt.GetExpiration(),
+              IsOkAndHolds(absl::FromUnixSeconds(10000000000)));
+}
+
+TEST(RawJwt, FromJsonExpirationTooLarge) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtParser::FromJson(absl::nullopt, R"({"exp":1e30})");
+  EXPECT_FALSE(jwt_or.ok());
+}
+
+TEST(RawJwt, FromJsonNegativeExpirationAreInvalid) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtParser::FromJson(absl::nullopt, R"({"exp":-1})");
+  EXPECT_FALSE(jwt_or.ok());
+}
+
+TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
+  util::StatusOr<RawJwt> jwt_or =
+      RawJwtParser::FromJson(absl::nullopt, R"({"aud":"audience"})");
+  ASSERT_THAT(jwt_or.status(), IsOk());
+  RawJwt jwt = jwt_or.ValueOrDie();
+
+  std::vector<std::string> expected = {"audience"};
+  EXPECT_TRUE(jwt.HasAudiences());
+  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
+}
+
+TEST(RawJwt, FromJsonWithBadRegisteredTypes) {
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"iss":123})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"sub":123})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"aud":123})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"aud":[]})").ok());
+  EXPECT_FALSE(
+      RawJwtParser::FromJson(absl::nullopt, R"({"aud":["abc",123]})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"exp":"abc"})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"nbf":"abc"})").ok());
+  EXPECT_FALSE(RawJwtParser::FromJson(absl::nullopt, R"({"iat":"abc"})").ok());
 }
 
 }  // namespace jwt_internal

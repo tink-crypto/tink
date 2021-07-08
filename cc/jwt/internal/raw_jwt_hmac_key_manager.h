@@ -104,11 +104,6 @@ class RawJwtHmacKeyManager
 
 }  // namespace jwt_internal
 
-// TODO(juerg): remove this once all users are migrated.
-namespace internal {
-  typedef jwt_internal::RawJwtHmacKeyManager RawJwtHmacKeyManager;
-}  // namespace internal
-
 }  // namespace tink
 }  // namespace crypto
 

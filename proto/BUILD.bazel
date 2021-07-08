@@ -162,7 +162,6 @@ proto_library(
         "jwt_hmac.proto",
     ],
     visibility = ["//visibility:public"],
-    deps = [":common_proto"],
 )
 
 # -----------------------------------------------

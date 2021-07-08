@@ -27,6 +27,7 @@ from tink.testing import helper
 
 def setUpModule():
   jwt.register_jwt_mac()
+  jwt.register_jwt_signature()
 
 
 class JwtKeyTemplatesTest(parameterized.TestCase):
@@ -65,11 +66,39 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
   def test_mac_success(self, key_template):
     keyset_handle = tink.new_keyset_handle(key_template)
     jwt_hmac = keyset_handle.primitive(jwt.JwtMac)
-    token = jwt.new_raw_jwt(issuer='issuer', subject='subject')
+    token = jwt.new_raw_jwt(
+        issuer='issuer', subject='subject', without_expiration=True)
     compact = jwt_hmac.compute_mac_and_encode(token)
-    output_token = jwt_hmac.verify_mac_and_decode(compact, jwt.new_validator())
+    output_token = jwt_hmac.verify_mac_and_decode(
+        compact,
+        jwt.new_validator(
+            expected_issuer='issuer',
+            expected_subject='subject',
+            allow_missing_expiration=True))
     self.assertEqual(output_token.issuer(), token.issuer())
     self.assertEqual(output_token.subject(), token.subject())
+
+  @parameterized.named_parameters([
+      ('JWT_ES256', jwt.jwt_es256_template()),
+      ('JWT_ES384', jwt.jwt_es384_template()),
+      ('JWT_ES512', jwt.jwt_es512_template()),
+  ])
+  def test_new_keydata_primitive_success(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    sign = private_handle.primitive(jwt.JwtPublicKeySign)
+    verify = private_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
+    raw_jwt = jwt.new_raw_jwt(
+        issuer='issuer', subject='subject', without_expiration=True)
+    compact = sign.sign_and_encode(raw_jwt)
+    verified_jwt = verify.verify_and_decode(
+        compact,
+        jwt.new_validator(
+            expected_issuer='issuer',
+            expected_subject='subject',
+            allow_missing_expiration=True))
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+    self.assertEqual(verified_jwt.subject(), 'subject')
 
 if __name__ == '__main__':
   absltest.main()

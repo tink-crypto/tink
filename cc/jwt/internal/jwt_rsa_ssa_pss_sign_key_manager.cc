@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_sign_key_manager.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_verify_key_manager.h"
 
@@ -41,9 +44,13 @@ JwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
   if (!sign_or.ok()) {
     return sign_or.status();
   }
+  absl::optional<absl::string_view> custom_kid = absl::nullopt;
+  if (jwt_rsa_ssa_pss_private_key.public_key().has_custom_kid()) {
+    custom_kid = jwt_rsa_ssa_pss_private_key.public_key().custom_kid().value();
+  }
   std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
       absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
-          std::move(sign_or.ValueOrDie()), name_or.ValueOrDie());
+          std::move(sign_or.ValueOrDie()), name_or.ValueOrDie(), custom_kid);
   return jwt_public_key_sign;
 }
 

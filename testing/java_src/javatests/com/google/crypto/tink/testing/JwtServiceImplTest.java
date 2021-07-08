@@ -20,8 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
-import com.google.crypto.tink.jwt.JwtEcdsaSignKeyManager;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
@@ -128,12 +128,14 @@ public final class JwtServiceImplTest {
 
   @Test
   public void jwtComputeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -142,7 +144,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -152,9 +156,10 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test
@@ -171,7 +176,7 @@ public final class JwtServiceImplTest {
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
-    JwtValidator validator = JwtValidator.getDefaultInstance();
+    JwtValidator validator = JwtValidator.newBuilder().setAllowMissingExpiration(true).build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(keyset))
@@ -186,8 +191,7 @@ public final class JwtServiceImplTest {
 
   @Test
   public void publicKeySignVerify_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        JwtEcdsaSignKeyManager.jwtES256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -196,7 +200,9 @@ public final class JwtServiceImplTest {
     assertThat(pubResponse.getErr()).isEmpty();
     byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", 1234 + 100, 567000000);
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -208,7 +214,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -218,9 +226,10 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test
@@ -253,7 +262,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -286,7 +297,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
@@ -324,7 +337,9 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
             .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =

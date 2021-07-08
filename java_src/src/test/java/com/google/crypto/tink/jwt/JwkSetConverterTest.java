@@ -21,8 +21,9 @@ import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.gson.JsonArray;
@@ -464,27 +465,38 @@ public final class JwkSetConverterTest {
   }
 
   @Test
-  public void toKeysetHandleWithInvalidKid_fromKeysetHandle_jwkSetWithoutKid() throws Exception {
-    // When the kid cannot be decoded, the keys will have output prefix type RAW, and the
-    // kid will be missing when converted to JWK Set.
-    String esWithInvalidKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"ENgjPAENgjPA\"");
+  public void jwkWithKid_isImportedAsRaw() throws Exception {
+    KeysetHandle es = JwkSetConverter.toKeysetHandle(ES256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(es).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+    KeysetHandle rs = JwkSetConverter.toKeysetHandle(RS256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(rs).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+    KeysetHandle ps = JwkSetConverter.toKeysetHandle(PS256_JWK_SET_KID, KeyAccess.publicAccess());
+    assertThat(CleartextKeysetHandle.getKeyset(ps).getKey(0).getOutputPrefixType())
+        .isEqualTo(OutputPrefixType.RAW);
+  }
+
+  @Test
+  public void jwkWithEmptyKid_kidIsPreserved() throws Exception {
+    String esWithEmptyKid = ES256_JWK_SET_KID.replace("\"ENgjPA\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(esWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(esWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        ES256_JWK_SET);
-    String rsWithInvalidKid = RS256_JWK_SET_KID.replace("\"HL1QoQ\"", "\"HL1QoQHL1QoQ\"");
+        esWithEmptyKid);
+    String rsWithEmptyKid = RS256_JWK_SET_KID.replace("\"HL1QoQ\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(rsWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(rsWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        RS256_JWK_SET);
-    String psWithInvalidKid = PS256_JWK_SET_KID.replace("\"Wes4wg\"", "\"Wes4wgWes4wg\"");
+        rsWithEmptyKid);
+    String psWithEmptyKid = PS256_JWK_SET_KID.replace("\"Wes4wg\"", "\"\"");
     assertEqualJwkSets(
         JwkSetConverter.fromKeysetHandle(
-            JwkSetConverter.toKeysetHandle(psWithInvalidKid, KeyAccess.publicAccess()),
+            JwkSetConverter.toKeysetHandle(psWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
-        PS256_JWK_SET);
+        psWithEmptyKid);
   }
 
   @Test
@@ -494,21 +506,24 @@ public final class JwkSetConverterTest {
       return;
     }
     // TODO(juerg): Use parametrized tests once b/26110951 is resolved.
-    KeyTemplate[] templates = new KeyTemplate[] {
-      JwtEcdsaSignKeyManager.jwtES256Template(),
-      JwtEcdsaSignKeyManager.jwtES384Template(),
-      JwtEcdsaSignKeyManager.jwtES512Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_2048_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs256_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs384_3072_F4_Template(),
-      JwtRsaSsaPkcs1SignKeyManager.jwtRs512_4096_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_2048_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs256_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs384_3072_F4_Template(),
-      JwtRsaSsaPssSignKeyManager.jwtPs512_4096_F4_Template(),
+    String[] templateNames = new String[] {
+      "JWT_ES256",
+      "JWT_ES384",
+      "JWT_ES512",
+      "JWT_ES256_RAW",
+      "JWT_RS256_2048_F4",
+      "JWT_RS256_3072_F4",
+      "JWT_RS384_3072_F4",
+      "JWT_RS512_4096_F4",
+      "JWT_RS256_2048_F4_RAW",
+      "JWT_PS256_2048_F4",
+      "JWT_PS256_3072_F4",
+      "JWT_PS384_3072_F4",
+      "JWT_PS512_4096_F4",
+      "JWT_PS256_2048_F4_RAW",
     };
-    for (KeyTemplate template : templates) {
-      KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
+    for (String templateName : templateNames) {
+      KeysetHandle keysetHandle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
 
       String jwksString =
           JwkSetConverter.fromKeysetHandle(
@@ -520,9 +535,9 @@ public final class JwkSetConverterTest {
       JwtPublicKeySign signer = keysetHandle.getPrimitive(JwtPublicKeySign.class);
       JwtPublicKeyVerify verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
 
-      RawJwt rawToken = new RawJwt.Builder().setJwtId("jwtId").build();
+      RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
       String signedCompact = signer.signAndEncode(rawToken);
-      JwtValidator validator = new JwtValidator.Builder().build();
+      JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
       VerifiedJwt verifiedToken = verifier.verifyAndDecode(signedCompact, validator);
       assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
     }

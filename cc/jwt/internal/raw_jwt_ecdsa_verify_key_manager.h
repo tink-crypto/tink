@@ -79,9 +79,6 @@ class RawJwtEcdsaVerifyKeyManager
 
 }  // namespace jwt_internal
 
-// TODO(juerg): remove this once all users are migrated.
-typedef jwt_internal::RawJwtEcdsaVerifyKeyManager RawJwtEcdsaVerifyKeyManager;
-
 }  // namespace tink
 }  // namespace crypto
 

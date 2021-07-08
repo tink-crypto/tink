@@ -85,15 +85,26 @@ def raw_jwt_from_proto(proto_raw_jwt: testing_api_pb2.JwtToken) -> jwt.RawJwt:
       custom_claims[name] = json.loads(claim.json_array_value)
     else:
       raise ValueError('claim %s has unknown type' % name)
+  expiration = None
+  if proto_raw_jwt.HasField('expiration'):
+    expiration = _from_timestamp_proto(proto_raw_jwt.expiration)
+  not_before = None
+  if proto_raw_jwt.HasField('not_before'):
+    not_before = _from_timestamp_proto(proto_raw_jwt.not_before)
+  issued_at = None
+  if proto_raw_jwt.HasField('issued_at'):
+    issued_at = _from_timestamp_proto(proto_raw_jwt.issued_at)
+  without_expiration = not expiration
   return jwt.new_raw_jwt(
       type_header=type_header,
       issuer=issuer,
       subject=subject,
       audiences=audiences,
       jwt_id=jwt_id,
-      expiration=_from_timestamp_proto(proto_raw_jwt.expiration),
-      not_before=_from_timestamp_proto(proto_raw_jwt.not_before),
-      issued_at=_from_timestamp_proto(proto_raw_jwt.issued_at),
+      expiration=expiration,
+      without_expiration=without_expiration,
+      not_before=not_before,
+      issued_at=issued_at,
       custom_claims=custom_claims)
 
 
@@ -145,21 +156,36 @@ def verifiedjwt_to_proto(
 def validator_from_proto(
     proto_validator: testing_api_pb2.JwtValidator) -> jwt.JwtValidator:
   """Converts a proto JwtValidator into a JwtValidator."""
-  issuer = None
-  if proto_validator.HasField('issuer'):
-    issuer = proto_validator.issuer.value
-  subject = None
-  if proto_validator.HasField('subject'):
-    subject = proto_validator.subject.value
-  audience = None
-  if proto_validator.HasField('audience'):
-    audience = proto_validator.audience.value
+  expected_type_header = None
+  if proto_validator.HasField('expected_type_header'):
+    expected_type_header = proto_validator.expected_type_header.value
+  expected_issuer = None
+  if proto_validator.HasField('expected_issuer'):
+    expected_issuer = proto_validator.expected_issuer.value
+  expected_subject = None
+  if proto_validator.HasField('expected_subject'):
+    expected_subject = proto_validator.expected_subject.value
+  expected_audience = None
+  if proto_validator.HasField('expected_audience'):
+    expected_audience = proto_validator.expected_audience.value
+  fixed_now = None
+  if proto_validator.HasField('now'):
+    fixed_now = _from_timestamp_proto(proto_validator.now)
+  clock_skew = None
+  if proto_validator.HasField('clock_skew'):
+    clock_skew = _from_duration_proto(proto_validator.clock_skew)
   return jwt.new_validator(
-      issuer=issuer,
-      subject=subject,
-      audience=audience,
-      fixed_now=_from_timestamp_proto(proto_validator.now),
-      clock_skew=_from_duration_proto(proto_validator.clock_skew))
+      expected_type_header=expected_type_header,
+      expected_issuer=expected_issuer,
+      expected_subject=expected_subject,
+      expected_audience=expected_audience,
+      ignore_type_header=proto_validator.ignore_type_header,
+      ignore_issuer=proto_validator.ignore_issuer,
+      ignore_subject=proto_validator.ignore_subject,
+      ignore_audiences=proto_validator.ignore_audience,
+      allow_missing_expiration=proto_validator.allow_missing_expiration,
+      fixed_now=fixed_now,
+      clock_skew=clock_skew)
 
 
 class JwtServicer(testing_api_pb2_grpc.JwtServicer):
@@ -200,10 +226,28 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
       self, request: testing_api_pb2.JwtSignRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.JwtSignResponse:
     """Computes a signed compact JWT token."""
-    return testing_api_pb2.JwtSignResponse(err='Not yet implemented.')
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      p = keyset_handle.primitive(jwt.JwtPublicKeySign)
+      raw_jwt = raw_jwt_from_proto(request.raw_jwt)
+      signed_compact_jwt = p.sign_and_encode(raw_jwt)
+      return testing_api_pb2.JwtSignResponse(
+          signed_compact_jwt=signed_compact_jwt)
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtSignResponse(err=str(e))
 
   def PublicKeyVerifyAndDecode(
       self, request: testing_api_pb2.JwtVerifyRequest,
       context: grpc.ServicerContext) -> testing_api_pb2.JwtVerifyResponse:
     """Verifies the validity of the signed compact JWT token."""
-    return testing_api_pb2.JwtVerifyResponse(err='Not yet implemented.')
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      validator = validator_from_proto(request.validator)
+      p = keyset_handle.primitive(jwt.JwtPublicKeyVerify)
+      verified_jwt = p.verify_and_decode(request.signed_compact_jwt, validator)
+      return testing_api_pb2.JwtVerifyResponse(
+          verified_jwt=verifiedjwt_to_proto(verified_jwt))
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtVerifyResponse(err=str(e))

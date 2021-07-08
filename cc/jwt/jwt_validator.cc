@@ -16,6 +16,9 @@
 
 #include "tink/jwt/jwt_validator.h"
 
+#include <algorithm>
+#include <string>
+
 namespace crypto {
 namespace tink {
 
@@ -25,22 +28,18 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 
 }
 
-JwtValidator::JwtValidator(absl::optional<absl::string_view> issuer,
-                           absl::optional<absl::string_view> subject,
-                           absl::optional<absl::string_view> audience,
-                           absl::Duration clock_skew,
-                           absl::optional<absl::Time> fixed_now) {
-  if (issuer.has_value()) {
-    issuer_ = std::string(issuer.value());
-  }
-  if (subject.has_value()) {
-    subject_ = std::string(subject.value());
-  }
-  if (audience.has_value()) {
-    audience_ = std::string(audience.value());
-  }
-  clock_skew_ = clock_skew;
-  fixed_now_ = fixed_now;
+JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
+  expected_type_header_ = builder.expected_type_header_;
+  expected_issuer_ = builder.expected_issuer_;
+  expected_subject_ = builder.expected_subject_;
+  expected_audience_ = builder.expected_audience_;
+  ignore_type_header_ = builder.ignore_type_header_;
+  ignore_issuer_ = builder.ignore_issuer_;
+  ignore_subject_ = builder.ignore_subject_;
+  ignore_audiences_ = builder.ignore_audiences_;
+  allow_missing_expiration_ = builder.allow_missing_expiration_;
+  clock_skew_ = builder.clock_skew_;
+  fixed_now_ = builder.fixed_now_;
 }
 
 util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
@@ -49,6 +48,10 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     now = fixed_now_.value();
   } else {
     now = absl::Now();
+  }
+  if (!raw_jwt.HasExpiration() && !allow_missing_expiration_) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "token does not have an expiration set");
   }
   if (raw_jwt.HasExpiration()) {
     auto expiration_or = raw_jwt.GetExpiration();
@@ -69,7 +72,26 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
                         "token cannot yet be used");
     }
   }
-  if (issuer_.has_value()){
+  if (expected_type_header_.has_value()) {
+    if (!raw_jwt.HasTypeHeader()) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "missing expected type header");
+    }
+    auto type_header_or = raw_jwt.GetTypeHeader();
+    if (!type_header_or.ok()) {
+      return type_header_or.status();
+    }
+    if (expected_type_header_.value() != type_header_or.ValueOrDie()) {
+      return util::Status(util::error::INVALID_ARGUMENT, "wrong type header");
+    }
+  } else {
+    if (raw_jwt.HasTypeHeader() && !ignore_type_header_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has type header set, but validator not");
+    }
+  }
+  if (expected_issuer_.has_value()){
     if (!raw_jwt.HasIssuer()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected issuer");
@@ -78,11 +100,17 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (!issuer_or.ok()) {
       return issuer_or.status();
     }
-    if (issuer_.value() != issuer_or.ValueOrDie()) {
+    if (expected_issuer_.value() != issuer_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong issuer");
     }
+  } else {
+    if (raw_jwt.HasIssuer() && !ignore_issuer_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has issuer set, but validator not");
+    }
   }
-  if (subject_.has_value()) {
+  if (expected_subject_.has_value()) {
     if (!raw_jwt.HasSubject()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected subject");
@@ -91,11 +119,17 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (!subject_or.ok()) {
       return subject_or.status();
     }
-    if (subject_.value() != subject_or.ValueOrDie()) {
+    if (expected_subject_.value() != subject_or.ValueOrDie()) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong subject");
     }
+  } else {
+    if (raw_jwt.HasSubject() && !ignore_subject_) {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          "invalid JWT; token has subject set, but validator not");
+    }
   }
-  if (audience_.has_value()) {
+  if (expected_audience_.has_value()) {
     if (!raw_jwt.HasAudiences()) {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected audiences");
@@ -105,12 +139,12 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return audiences_or.status();
     }
     std::vector<std::string> audiences = audiences_or.ValueOrDie();
-    auto it = std::find(audiences.begin(), audiences.end(), audience_);
+    auto it = std::find(audiences.begin(), audiences.end(), expected_audience_);
     if (it == audiences.end()) {
       return util::Status(util::error::INVALID_ARGUMENT, "audience not found");
     }
   } else {
-    if (raw_jwt.HasAudiences()) {
+    if (raw_jwt.HasAudiences() && !ignore_audiences_) {
       return util::Status(
           util::error::INVALID_ARGUMENT,
           "invalid JWT; token has audience set, but validator not");
@@ -120,34 +154,67 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
 }
 
 JwtValidatorBuilder::JwtValidatorBuilder() {
+  ignore_type_header_ = false;
+  ignore_issuer_ = false;
+  ignore_subject_ = false;
+  ignore_audiences_ = false;
+  allow_missing_expiration_ = false;
   clock_skew_ = absl::ZeroDuration();
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetIssuer(absl::string_view issuer) {
-  issuer_ = std::string(issuer);
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectTypeHeader(
+    absl::string_view type_header) {
+  expected_type_header_ = std::string(type_header);
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetSubject(
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectIssuer(
+    absl::string_view issuer) {
+  expected_issuer_ = std::string(issuer);
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectSubject(
     absl::string_view subject) {
-  subject_ = std::string(subject);
+  expected_subject_ = std::string(subject);
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::SetAudience(
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectAudience(
     absl::string_view audience) {
-  audience_ = std::string(audience);
+  expected_audience_ = std::string(audience);
   return *this;
 }
 
-util::Status JwtValidatorBuilder::SetClockSkew(
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreTypeHeader() {
+  ignore_type_header_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreIssuer() {
+  ignore_issuer_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreSubject() {
+  ignore_subject_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudiences() {
+  ignore_audiences_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::AllowMissingExpiration() {
+  allow_missing_expiration_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::SetClockSkew(
     absl::Duration clock_skew) {
-  if (clock_skew > kJwtMaxClockSkew) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        "clock skew too large, max is 10 minutes");
-  }
   clock_skew_ = clock_skew;
-  return util::OkStatus();
+  return *this;
 }
 
 JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
@@ -155,8 +222,32 @@ JwtValidatorBuilder& JwtValidatorBuilder::SetFixedNow(absl::Time fixed_now) {
   return *this;
 }
 
-JwtValidator JwtValidatorBuilder::Build() {
-  JwtValidator validator(issuer_, subject_, audience_, clock_skew_, fixed_now_);
+util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
+  if (expected_type_header_.has_value() && ignore_type_header_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "IgnoreTypeHeader() and ExpectTypeHeader() cannot be used together");
+  }
+  if (expected_issuer_.has_value() && ignore_issuer_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "IgnoreIssuer() and ExpectedIssuer() cannot be used together");
+  }
+  if (expected_subject_.has_value() && ignore_subject_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "IgnoreSubject() and ExpectSubject() cannot be used together");
+  }
+  if (expected_audience_.has_value() && ignore_audiences_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "IgnoreAudiences() and ExpectAudience() cannot be used together");
+  }
+  if (clock_skew_ > kJwtMaxClockSkew) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "clock skew too large, max is 10 minutes");
+  }
+  JwtValidator validator(*this);
   return validator;
 }
 

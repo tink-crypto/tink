@@ -183,6 +183,8 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtEcdsaPublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtEcdsaPublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
@@ -218,6 +220,8 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtRsaSsaPkcs1PublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtRsaSsaPkcs1PublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
@@ -253,6 +257,8 @@ public final class JwkSetConverter {
       Optional<String> kid = JwtFormat.getKid(key.getKeyId(), key.getOutputPrefixType());
       if (kid.isPresent()) {
         jsonKey.addProperty("kid", kid.get());
+      } else if (jwtRsaSsaPssPublicKey.hasCustomKid()) {
+        jsonKey.addProperty("kid", jwtRsaSsaPssPublicKey.getCustomKid().getValue());
       }
       return jsonKey;
     }
@@ -322,13 +328,6 @@ public final class JwkSetConverter {
       }
     }
 
-    private Optional<Integer> getKeyId(JsonObject jsonKey) throws IOException {
-      if (!jsonKey.has("kid")) {
-        return Optional.empty();
-      }
-      return JwtFormat.getKeyId(getStringItem(jsonKey, "kid"));
-    }
-
     private Keyset convertKeyset(JsonObject jsonKeyset) throws IOException {
       Keyset.Builder builder = Keyset.newBuilder();
       JsonArray jsonKeys = jsonKeyset.get("keys").getAsJsonArray();
@@ -352,21 +351,12 @@ public final class JwkSetConverter {
       return builder.build();
     }
 
-    private Keyset.Key createKeysetKey(KeyData keyData, Optional<Integer> keyId) {
-      if (keyId.isPresent()) {
-        return Keyset.Key.newBuilder()
-            .setStatus(KeyStatusType.ENABLED)
-            .setKeyId(keyId.get())
-            .setOutputPrefixType(OutputPrefixType.TINK)
-            .setKeyData(keyData)
-            .build();
-      } else {
-        return Keyset.Key.newBuilder()
-            .setStatus(KeyStatusType.ENABLED)
-            .setOutputPrefixType(OutputPrefixType.RAW)
-            .setKeyData(keyData)
-            .build();
-      }
+    private Keyset.Key createKeysetKey(KeyData keyData) {
+      return Keyset.Key.newBuilder()
+          .setStatus(KeyStatusType.ENABLED)
+          .setOutputPrefixType(OutputPrefixType.RAW)
+          .setKeyData(keyData)
+          .build();
     }
 
     private Keyset.Key convertToRsaSsaPkcs1Key(JsonObject jsonKey) throws IOException {
@@ -386,7 +376,7 @@ public final class JwkSetConverter {
       }
       if (jsonKey.has("p")
           || jsonKey.has("q")
-          || jsonKey.has("dq")
+          || jsonKey.has("dp")
           || jsonKey.has("dq")
           || jsonKey.has("d")
           || jsonKey.has("qi")) {
@@ -395,20 +385,25 @@ public final class JwkSetConverter {
       expectStringItem(jsonKey, "kty", "RSA");
       validateUseIsSig(jsonKey);
       validateKeyOpsIsVerify(jsonKey);
-      JwtRsaSsaPkcs1PublicKey pkcs1PubKey =
+      JwtRsaSsaPkcs1PublicKey.Builder pkcs1PubKeyBuilder =
           JwtRsaSsaPkcs1PublicKey.newBuilder()
               .setVersion(0)
               .setAlgorithm(algorithm)
               .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))))
-              .build();
+              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+      if (jsonKey.has("kid")) {
+        pkcs1PubKeyBuilder.setCustomKid(
+            JwtRsaSsaPkcs1PublicKey.CustomKid.newBuilder()
+                .setValue(getStringItem(jsonKey, "kid"))
+                .build());
+      }
       KeyData keyData =
           KeyData.newBuilder()
               .setTypeUrl(JWT_RSA_SSA_PKCS1_PUBLIC_KEY_URL)
-              .setValue(pkcs1PubKey.toByteString())
+              .setValue(pkcs1PubKeyBuilder.build().toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
+      return createKeysetKey(keyData);
     }
 
     private Keyset.Key convertToRsaSsaPssKey(JsonObject jsonKey) throws IOException {
@@ -437,20 +432,25 @@ public final class JwkSetConverter {
       expectStringItem(jsonKey, "kty", "RSA");
       validateUseIsSig(jsonKey);
       validateKeyOpsIsVerify(jsonKey);
-      JwtRsaSsaPssPublicKey pkcs1PubKey =
+      JwtRsaSsaPssPublicKey.Builder pssPubKeyBuilder =
           JwtRsaSsaPssPublicKey.newBuilder()
               .setVersion(0)
               .setAlgorithm(algorithm)
               .setE(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "e"))))
-              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))))
-              .build();
+              .setN(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "n"))));
+      if (jsonKey.has("kid")) {
+        pssPubKeyBuilder.setCustomKid(
+            JwtRsaSsaPssPublicKey.CustomKid.newBuilder()
+                .setValue(getStringItem(jsonKey, "kid"))
+                .build());
+      }
       KeyData keyData =
           KeyData.newBuilder()
               .setTypeUrl(JWT_RSA_SSA_PSS_PUBLIC_KEY_URL)
-              .setValue(pkcs1PubKey.toByteString())
+              .setValue(pssPubKeyBuilder.build().toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
+      return createKeysetKey(keyData);
     }
 
     private Keyset.Key convertEcdsaKey(JsonObject jsonKey) throws IOException {
@@ -477,20 +477,25 @@ public final class JwkSetConverter {
       expectStringItem(jsonKey, "kty", "EC");
       validateUseIsSig(jsonKey);
       validateKeyOpsIsVerify(jsonKey);
-      JwtEcdsaPublicKey ecdsaPubKey =
+      JwtEcdsaPublicKey.Builder ecdsaPubKeyBuilder =
           JwtEcdsaPublicKey.newBuilder()
               .setVersion(0)
               .setAlgorithm(algorithm)
               .setX(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "x"))))
-              .setY(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "y"))))
-              .build();
+              .setY(ByteString.copyFrom(Base64.urlSafeDecode(getStringItem(jsonKey, "y"))));
+      if (jsonKey.has("kid")) {
+        ecdsaPubKeyBuilder.setCustomKid(
+            JwtEcdsaPublicKey.CustomKid.newBuilder()
+                .setValue(getStringItem(jsonKey, "kid"))
+                .build());
+      }
       KeyData keyData =
           KeyData.newBuilder()
               .setTypeUrl(JWT_ECDSA_PUBLIC_KEY_URL)
-              .setValue(ecdsaPubKey.toByteString())
+              .setValue(ecdsaPubKeyBuilder.build().toByteString())
               .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
               .build();
-      return createKeysetKey(keyData, getKeyId(jsonKey));
+      return createKeysetKey(keyData);
     }
   }
 

@@ -29,10 +29,10 @@ _MAX_TIMESTAMP_VALUE = 253402300799  # 31 Dec 9999, 23:59:59 GMT
 Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
 
 
-def _from_datetime(t: datetime.datetime) -> float:
+def _from_datetime(t: datetime.datetime) -> int:
   if not t.tzinfo:
     raise _jwt_error.JwtInvalidError('datetime must have tzinfo')
-  return t.timestamp()
+  return int(t.timestamp())
 
 
 def _to_datetime(timestamp: float) -> datetime.datetime:
@@ -171,10 +171,16 @@ class RawJwt(object):
              audiences: Optional[List[Text]] = None,
              jwt_id: Optional[Text] = None,
              expiration: Optional[datetime.datetime] = None,
+             without_expiration: Optional[bool] = None,
              not_before: Optional[datetime.datetime] = None,
              issued_at: Optional[datetime.datetime] = None,
-             custom_claims: Mapping[Text, Claim] = None) -> 'RawJwt':
+             custom_claims: Optional[Mapping[Text, Claim]] = None) -> 'RawJwt':
     """Create a new RawJwt instance."""
+    if not expiration and not without_expiration:
+      raise ValueError('either expiration or without_expiration must be set')
+    if expiration and without_expiration:
+      raise ValueError(
+          'expiration and without_expiration cannot be set at the same time')
     payload = {}
     if issuer:
       payload['iss'] = issuer

@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
 
+#include <string>
+
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/jwt_format.h"
@@ -33,6 +35,13 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
       return type_or.status();
     }
     type_header = type_or.ValueOrDie();
+  }
+  if (custom_kid_.has_value()) {
+    if (kid.has_value()) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "TINK keys are not allowed to have a kid value set.");
+    }
+    kid = *custom_kid_;
   }
   std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
   util::StatusOr<std::string> payload_or = token.GetJsonPayload();

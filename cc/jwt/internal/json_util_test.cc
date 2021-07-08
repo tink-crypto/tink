@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/json_util.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/test_matchers.h"

@@ -405,9 +405,12 @@ def proto_to_verified_jwt(
   audiences = None
   if token.audiences:
     audiences = list(token.audiences)
-  expiration = None
   if token.HasField('expiration'):
     expiration = to_datetime(token.expiration.seconds, token.expiration.nanos)
+    without_expiration = False
+  else:
+    expiration = None
+    without_expiration = True
   not_before = None
   if token.HasField('not_before'):
     not_before = to_datetime(token.not_before.seconds, token.not_before.nanos)
@@ -436,6 +439,7 @@ def proto_to_verified_jwt(
       audiences=audiences,
       jwt_id=jwt_id,
       expiration=expiration,
+      without_expiration=without_expiration,
       not_before=not_before,
       issued_at=issued_at,
       custom_claims=custom_claims)
@@ -446,12 +450,21 @@ def jwt_validator_to_proto(
     validator: jwt.JwtValidator) -> testing_api_pb2.JwtValidator:
   """Converts a jwt.JwtValidator into a proto JwtValidator."""
   proto_validator = testing_api_pb2.JwtValidator()
-  if validator.has_issuer():
-    proto_validator.issuer.value = validator.issuer()
-  if validator.has_subject():
-    proto_validator.subject.value = validator.subject()
-  if validator.has_audience():
-    proto_validator.audience.value = validator.audience()
+  if validator.has_expected_type_header():
+    proto_validator.expected_type_header.value = validator.expected_type_header(
+    )
+  if validator.has_expected_issuer():
+    proto_validator.expected_issuer.value = validator.expected_issuer()
+  if validator.has_expected_subject():
+    proto_validator.expected_subject.value = validator.expected_subject()
+  if validator.has_expected_audience():
+    proto_validator.expected_audience.value = validator.expected_audience()
+  proto_validator.ignore_type_header = validator.ignore_type_header()
+  proto_validator.ignore_issuer = validator.ignore_issuer()
+  proto_validator.ignore_subject = validator.ignore_subject()
+  proto_validator.ignore_audience = validator.ignore_audiences()
+  proto_validator.allow_missing_expiration = validator.allow_missing_expiration(
+  )
   proto_validator.clock_skew.seconds = validator.clock_skew().seconds
   if validator.has_fixed_now():
     seconds, nanos = split_datetime(validator.fixed_now())

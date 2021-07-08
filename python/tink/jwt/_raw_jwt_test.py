@@ -43,7 +43,7 @@ class RawJwtTest(absltest.TestCase):
     self.assertEqual(int(d.timestamp()), t)
 
   def test_empty_access_raises_error(self):
-    token = jwt.new_raw_jwt()
+    token = jwt.new_raw_jwt(without_expiration=True)
     with self.assertRaises(KeyError):
       token.type_header()
     with self.assertRaises(KeyError):
@@ -64,7 +64,7 @@ class RawJwtTest(absltest.TestCase):
       token.custom_claim('unknown')
 
   def test_empty_has_returns_false(self):
-    token = jwt.new_raw_jwt()
+    token = jwt.new_raw_jwt(without_expiration=True)
     self.assertFalse(token.has_type_header())
     self.assertFalse(token.has_issuer())
     self.assertFalse(token.has_subject())
@@ -75,43 +75,52 @@ class RawJwtTest(absltest.TestCase):
     self.assertFalse(token.has_not_before())
 
   def test_type_header(self):
-    token = jwt.new_raw_jwt(type_header='TypeHeader')
+    token = jwt.new_raw_jwt(type_header='TypeHeader', without_expiration=True)
     self.assertTrue(token.has_type_header())
     self.assertEqual(token.type_header(), 'TypeHeader')
 
   def test_issuer(self):
-    token = jwt.new_raw_jwt(issuer='Issuer')
+    token = jwt.new_raw_jwt(issuer='Issuer', without_expiration=True)
     self.assertTrue(token.has_issuer())
     self.assertEqual(token.issuer(), 'Issuer')
 
   def test_subject(self):
-    token = jwt.new_raw_jwt(subject='Subject')
+    token = jwt.new_raw_jwt(subject='Subject', without_expiration=True)
     self.assertTrue(token.has_subject())
     self.assertEqual(token.subject(), 'Subject')
 
   def test_jwt_id(self):
-    token = jwt.new_raw_jwt(jwt_id='JWT ID')
+    token = jwt.new_raw_jwt(jwt_id='JWT ID', without_expiration=True)
     self.assertTrue(token.has_jwt_id())
     self.assertEqual(token.jwt_id(), 'JWT ID')
 
   def test_audiences(self):
-    token = jwt.new_raw_jwt(audiences=['bob', 'eve'])
+    token = jwt.new_raw_jwt(audiences=['bob', 'eve'], without_expiration=True)
     self.assertTrue(token.has_audiences())
     self.assertEqual(token.audiences(), ['bob', 'eve'])
 
   def test_string_audiences(self):
-    token = jwt.new_raw_jwt(audiences=cast(List[Text], 'bob'))
+    token = jwt.new_raw_jwt(
+        audiences=cast(List[Text], 'bob'), without_expiration=True)
     self.assertTrue(token.has_audiences())
     self.assertEqual(token.audiences(), ['bob'])
 
   def test_empty_audiences(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(audiences=[])
+      jwt.new_raw_jwt(audiences=[], without_expiration=True)
 
   def test_expiration(self):
     token = jwt.new_raw_jwt(expiration=EXPIRATION)
     self.assertTrue(token.has_expiration())
     self.assertEqual(token.expiration(), EXPIRATION)
+
+  def test_round_down_expiration_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        expiration=datetime.datetime.fromtimestamp(123.999,
+                                                   datetime.timezone.utc))
+    self.assertEqual(
+        token.expiration(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
 
   def test_large_timestamps_success(self):
     # year 9999
@@ -135,25 +144,45 @@ class RawJwtTest(absltest.TestCase):
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.new_raw_jwt(expiration=neg)
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(issued_at=neg)
+      jwt.new_raw_jwt(issued_at=neg, without_expiration=True)
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(not_before=neg)
+      jwt.new_raw_jwt(not_before=neg, without_expiration=True)
 
   def test_issued_at(self):
-    token = jwt.new_raw_jwt(issued_at=ISSUED_AT)
+    token = jwt.new_raw_jwt(issued_at=ISSUED_AT, without_expiration=True)
     self.assertTrue(token.has_issued_at())
     self.assertEqual(token.issued_at(), ISSUED_AT)
 
+  def test_round_down_issued_at_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        without_expiration=True,
+        issued_at=datetime.datetime.fromtimestamp(123.999,
+                                                  datetime.timezone.utc))
+    self.assertEqual(
+        token.issued_at(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
+
   def test_not_before(self):
-    token = jwt.new_raw_jwt(not_before=NOT_BEFORE)
+    token = jwt.new_raw_jwt(not_before=NOT_BEFORE, without_expiration=True)
     self.assertTrue(token.has_not_before())
     self.assertEqual(token.not_before(), NOT_BEFORE)
 
+  def test_round_down_not_before_with_fraction(self):
+    token = jwt.new_raw_jwt(
+        without_expiration=True,
+        not_before=datetime.datetime.fromtimestamp(123.999,
+                                                   datetime.timezone.utc))
+    self.assertEqual(
+        token.not_before(),
+        datetime.datetime.fromtimestamp(123, datetime.timezone.utc))
+
   def test_rejects_naive_time(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(issued_at=ISSUED_AT.replace(tzinfo=None))
+      jwt.new_raw_jwt(
+          issued_at=ISSUED_AT.replace(tzinfo=None), without_expiration=True)
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(not_before=NOT_BEFORE.replace(tzinfo=None))
+      jwt.new_raw_jwt(
+          not_before=NOT_BEFORE.replace(tzinfo=None), without_expiration=True)
     with self.assertRaises(jwt.JwtInvalidError):
       jwt.new_raw_jwt(expiration=EXPIRATION.replace(tzinfo=None))
 
@@ -165,7 +194,8 @@ class RawJwtTest(absltest.TestCase):
                      'null': None,
                      'array': [1, None, 'Bob', 2.2, {'foo': 'bar'}],
                      'object': {'one': {'two': 3}}}
-    token = jwt.new_raw_jwt(custom_claims=custom_claims)
+    token = jwt.new_raw_jwt(
+        custom_claims=custom_claims, without_expiration=True)
     self.assertCountEqual(
         token.custom_claim_names(),
         {'string', 'boolean', 'number', 'integer', 'null', 'array', 'object'})
@@ -179,20 +209,21 @@ class RawJwtTest(absltest.TestCase):
     self.assertEqual(token.custom_claim('object'), {'one': {'two': 3}})
 
   def test_empty_custom_claim_names(self):
-    token = jwt.new_raw_jwt()
+    token = jwt.new_raw_jwt(without_expiration=True)
     self.assertEmpty(token.custom_claim_names())
 
   def test_registered_name_as_custom_claim_is_invalid(self):
     with self.assertRaises(jwt.JwtInvalidError):
-      jwt.new_raw_jwt(custom_claims={'iss': 'issuer'})
+      jwt.new_raw_jwt(custom_claims={'iss': 'issuer'}, without_expiration=True)
 
   def test_custom_claim_using_registered_name_fails(self):
-    token = jwt.new_raw_jwt(issuer='issuer')
+    token = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
     with self.assertRaises(jwt.JwtInvalidError):
       token.custom_claim('iss')
 
   def test_null_custom_claim(self):
-    token = jwt.new_raw_jwt(custom_claims={'null_claim': None})
+    token = jwt.new_raw_jwt(
+        custom_claims={'null_claim': None}, without_expiration=True)
     self.assertCountEqual(token.custom_claim_names(), ['null_claim'])
     self.assertIsNone(token.custom_claim('null_claim'))
 
@@ -248,6 +279,17 @@ class RawJwtTest(absltest.TestCase):
     }
     token = jwt.RawJwt.from_json(None, json.dumps(payload))
     self.assertEqual(json.loads(token.json_payload()), payload)
+
+  def test_exp_to_payload(self):
+    expiration = datetime.datetime.fromtimestamp(2218027244,
+                                                 datetime.timezone.utc)
+    token = jwt.new_raw_jwt(expiration=expiration)
+    self.assertEqual(token.json_payload(), '{"exp":2218027244}')
+
+  def test_float_exp_to_payload(self):
+    expiration = datetime.datetime.fromtimestamp(123.999, datetime.timezone.utc)
+    token = jwt.new_raw_jwt(expiration=expiration)
+    self.assertEqual(token.json_payload(), '{"exp":123}')
 
   def test_from_to_payload_with_string_audience(self):
     payload = {
@@ -326,7 +368,8 @@ class RawJwtTest(absltest.TestCase):
     token = jwt.new_raw_jwt(
         issuer='Issuer',
         audiences=audiences,
-        custom_claims=custom_claims)
+        custom_claims=custom_claims,
+        without_expiration=True)
 
     # modify inputs and outputs of token
     audiences.append('eve')

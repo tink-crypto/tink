@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_mac_impl.h"
 
+#include <string>
+
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -34,6 +36,13 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
       return type_or.status();
     }
     type_header = type_or.ValueOrDie();
+  }
+  if (custom_kid_.has_value()) {
+    if (kid.has_value()) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "TINK keys are not allowed to have a kid value set.");
+    }
+    kid = *custom_kid_;
   }
   std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
   util::StatusOr<std::string> payload_or = token.GetJsonPayload();
@@ -64,7 +73,9 @@ util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecode(
   }
   util::Status verify_result = mac_->VerifyMac(mac_value, unsigned_token);
   if (!verify_result.ok()) {
-    return verify_result;
+    // Use a different error code so that we can distinguish it.
+    return util::Status(util::error::UNAUTHENTICATED,
+                        verify_result.error_message());
   }
   std::vector<absl::string_view> parts = absl::StrSplit(unsigned_token, '.');
   if (parts.size() != 2) {
@@ -89,8 +100,8 @@ util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecode(
   if (!DecodePayload(parts[1], &json_payload)) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT payload");
   }
-  auto raw_jwt_or =
-      RawJwt::FromJson(GetTypeHeader(header_or.ValueOrDie()), json_payload);
+  auto raw_jwt_or = RawJwtParser::FromJson(
+      GetTypeHeader(header_or.ValueOrDie()), json_payload);
   if (!raw_jwt_or.ok()) {
     return raw_jwt_or.status();
   }

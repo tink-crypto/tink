@@ -1213,6 +1213,7 @@ tink_cc_test(
   SRCS subtle_util_boringssl_test.cc
   DATA wycheproof::testvectors
   DEPS
+    tink::config::tink_fips
     tink::subtle::ec_util
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util

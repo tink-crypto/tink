@@ -17,6 +17,9 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_IMPL_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_SIGN_IMPL_H_
 
+#include <string>
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/raw_jwt.h"
@@ -32,11 +35,14 @@ class JwtPublicKeySignImpl : public JwtPublicKeySignInternal {
  public:
   explicit JwtPublicKeySignImpl(
       std::unique_ptr<crypto::tink::PublicKeySign> sign,
-      absl::string_view algorithm) {
+      absl::string_view algorithm,
+      absl::optional<absl::string_view> custom_kid) {
     sign_ = std::move(sign);
     algorithm_ = std::string(algorithm);
+    if (custom_kid.has_value()) {
+      custom_kid_ = std::string(*custom_kid);
+    }
   }
-
   crypto::tink::util::StatusOr<std::string> SignAndEncodeWithKid(
       const crypto::tink::RawJwt& token,
       absl::optional<absl::string_view> kid) const override;
@@ -44,6 +50,7 @@ class JwtPublicKeySignImpl : public JwtPublicKeySignInternal {
  private:
   std::unique_ptr<crypto::tink::PublicKeySign> sign_;
   std::string algorithm_;
+  absl::optional<std::string> custom_kid_;
 };
 
 }  // namespace jwt_internal

@@ -28,6 +28,7 @@ from tink import jwt
 from tink.cc.pybind import tink_bindings
 from tink.jwt import _jwt_format
 from tink.jwt import _jwt_hmac_key_manager
+from tink.jwt import _jwt_mac
 
 
 DATETIME_1970 = datetime.datetime.fromtimestamp(12345, datetime.timezone.utc)
@@ -75,7 +76,7 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
   def test_basic(self):
     key_manager = _jwt_hmac_key_manager.MacCcToPyJwtMacKeyManager()
-    self.assertEqual(key_manager.primitive_class(), jwt.JwtMac)
+    self.assertEqual(key_manager.primitive_class(), _jwt_mac.JwtMacInternal)
     self.assertEqual(key_manager.key_type(),
                      'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
@@ -89,11 +90,17 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     key_data = key_manager.new_key_data(template)
     jwt_hmac = key_manager.primitive(key_data)
 
-    raw_jwt = jwt.new_raw_jwt(type_header='typeHeader', issuer='issuer')
-    signed_compact = jwt_hmac.compute_mac_and_encode(raw_jwt)
+    raw_jwt = jwt.new_raw_jwt(
+        type_header='typeHeader', issuer='issuer', without_expiration=True)
+    signed_compact = jwt_hmac.compute_mac_and_encode_with_kid(raw_jwt, None)
 
     verified_jwt = jwt_hmac.verify_mac_and_decode(
-        signed_compact, jwt.new_validator(fixed_now=DATETIME_1970))
+        signed_compact,
+        jwt.new_validator(
+            expected_type_header='typeHeader',
+            expected_issuer='issuer',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
 
@@ -105,7 +112,10 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     jwt_hmac = create_fixed_jwt_hmac()
     verified_jwt = jwt_hmac.verify_mac_and_decode(
         signed_compact,
-        jwt.new_validator(issuer='joe', fixed_now=DATETIME_1970))
+        jwt.new_validator(
+            expected_type_header='JWT',
+            expected_issuer='joe',
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified_jwt.issuer(), 'joe')
     self.assertEqual(verified_jwt.expiration().year, 2011)
     self.assertCountEqual(verified_jwt.custom_claim_names(),
@@ -122,25 +132,47 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode(
           signed_compact,
-          jwt.new_validator(issuer='jane', fixed_now=DATETIME_1970))
+          jwt.new_validator(expected_issuer='jane', fixed_now=DATETIME_1970))
 
   def test_valid_signed_compact(self):
     jwt_hmac = create_fixed_jwt_hmac()
-    validator = jwt.new_validator(issuer='joe', fixed_now=DATETIME_1970)
 
     valid_token = create_signed_token('{"alg":"HS256"}', '{"iss":"joe"}')
-    verified = jwt_hmac.verify_mac_and_decode(valid_token, validator)
+    verified = jwt_hmac.verify_mac_and_decode(
+        valid_token,
+        jwt.new_validator(
+            expected_issuer='joe',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified.issuer(), 'joe')
 
     token_with_unknown_typ = create_signed_token(
         '{"alg":"HS256","typ":"unknown"}', '{"iss":"joe"}')
-    verified2 = jwt_hmac.verify_mac_and_decode(token_with_unknown_typ,
-                                               validator)
+    verified2 = jwt_hmac.verify_mac_and_decode(
+        token_with_unknown_typ,
+        jwt.new_validator(
+            expected_type_header='unknown',
+            expected_issuer='joe',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
+    self.assertEqual(verified2.issuer(), 'joe')
+
+    token_with_unknown_kid = create_signed_token(
+        '{"kid":"unknown","alg":"HS256"}', '{"iss":"joe"}')
+    verified2 = jwt_hmac.verify_mac_and_decode(
+        token_with_unknown_kid,
+        jwt.new_validator(
+            expected_issuer='joe',
+            allow_missing_expiration=True,
+            fixed_now=DATETIME_1970))
     self.assertEqual(verified2.issuer(), 'joe')
 
   def test_invalid_signed_compact_with_valid_signature(self):
     jwt_hmac = create_fixed_jwt_hmac()
-    validator = jwt.new_validator(issuer='joe', fixed_now=DATETIME_1970)
+    validator = jwt.new_validator(
+        expected_issuer='joe',
+        allow_missing_expiration=True,
+        fixed_now=DATETIME_1970)
 
     # token with valid signature but invalid alg header
     token_with_invalid_header = create_signed_token('{"alg":"RS256"}',
@@ -175,7 +207,10 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
   ])
   def test_invalid_signed_compact(self, invalid_signed_compact):
     jwt_hmac = create_fixed_jwt_hmac()
-    validator = jwt.new_validator(issuer='joe', fixed_now=DATETIME_1970)
+    validator = jwt.new_validator(
+        expected_issuer='joe',
+        allow_missing_expiration=True,
+        fixed_now=DATETIME_1970)
 
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode(invalid_signed_compact, validator)

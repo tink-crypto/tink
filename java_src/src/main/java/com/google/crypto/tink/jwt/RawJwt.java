@@ -46,6 +46,14 @@ public final class RawJwt {
   private final Optional<String> typeHeader;
 
   private RawJwt(Builder builder) {
+    if (!builder.payload.has(JwtNames.CLAIM_EXPIRATION) && !builder.withoutExpiration) {
+      throw new IllegalArgumentException(
+          "neither setExpiration() nor withoutExpiration() was called");
+    }
+    if (builder.payload.has(JwtNames.CLAIM_EXPIRATION) && builder.withoutExpiration) {
+      throw new IllegalArgumentException(
+          "setExpiration() and withoutExpiration() must not be called together");
+    }
     this.typeHeader = builder.typeHeader;
     this.payload = builder.payload.deepCopy();
   }
@@ -114,13 +122,22 @@ public final class RawJwt {
     return new RawJwt(typeHeader, jsonPayload);
   }
 
+  /**
+   * Returns a new RawJwt.Builder.
+   */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
   /** Builder for RawJwt */
   public static final class Builder {
     private Optional<String> typeHeader;
+    private boolean withoutExpiration;
     private final JsonObject payload;
 
-    public Builder() {
+    private Builder() {
       typeHeader = Optional.empty();
+      withoutExpiration = false;
       payload = new JsonObject();
     }
 
@@ -194,13 +211,13 @@ public final class RawJwt {
     }
 
     private void setTimestampClaim(String name, Instant value) {
-      long millis = value.toEpochMilli();
-      if ((millis > MAX_TIMESTAMP_VALUE * 1000) || (millis < 0)) {
+      // We round the timestamp to a whole number. We always round down.
+      long timestamp = value.getEpochSecond();
+      if ((timestamp > MAX_TIMESTAMP_VALUE) || (timestamp < 0)) {
         throw new IllegalArgumentException(
             "timestamp of claim " + name + " is out of range");
       }
-      double doubleMillis = millis;
-      payload.add(name, new JsonPrimitive(doubleMillis / 1000));
+      payload.add(name, new JsonPrimitive(timestamp));
     }
 
     /**
@@ -215,6 +232,18 @@ public final class RawJwt {
      */
     public Builder setExpiration(Instant value) {
       setTimestampClaim(JwtNames.CLAIM_EXPIRATION, value);
+      return this;
+    }
+
+    /**
+     * Allow generating tokens without an expiration.
+     *
+     * <p>For most applications of JWT, an expiration date should be set. This function makes sure
+     * that this is not forgotten, by requiring to user to explicitly state that no expiration
+     * should be set.
+     */
+    public Builder withoutExpiration() {
+      this.withoutExpiration = true;
       return this;
     }
 

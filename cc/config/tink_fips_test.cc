@@ -68,6 +68,8 @@ TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is available.";
   }
 
+  Registry::Reset();
+
   // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
   EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
 
@@ -80,12 +82,16 @@ TEST(TinkFipsTest, CompatibilityChecksWithBoringCrypto) {
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
       IsOk());
+
+  internal::UnSetFipsRestricted();
 }
 
 TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
   if (FIPS_mode()) {
     GTEST_SKIP() << "Test only run if BoringCrypto module is not available.";
   }
+
+  Registry::Reset();
 
   // Tink is not build in FIPS mode, but the FIPS mode is enabled at runtime.
   EXPECT_THAT(crypto::tink::RestrictToFips(), IsOk());
@@ -100,6 +106,8 @@ TEST(TinkFipsTest, CompatibilityChecksWithoutBoringCrypto) {
   EXPECT_THAT(
       internal::CheckFipsCompatibility<FipsCompatibleWithBoringCrypto>(),
       StatusIs(util::error::INTERNAL));
+
+  internal::UnSetFipsRestricted();
 }
 
 TEST(TinkFipsTest, FailIfRegistryNotEmpty) {

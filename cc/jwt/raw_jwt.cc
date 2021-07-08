@@ -16,6 +16,8 @@
 
 #include "tink/jwt/raw_jwt.h"
 
+#include <string>
+
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
@@ -99,21 +101,16 @@ bool ClaimIsNotATimestamp(const google::protobuf::Struct& json_proto,
   return (timestamp > kJwtTimestampMax) || (timestamp < 0);
 }
 
-util::StatusOr<double> TimeToTimestamp(absl::Time time) {
-  double millis = absl::ToUnixMillis(time);
-  double timestamp = millis / 1000;
-  if ((timestamp > kJwtTimestampMax) || (timestamp < 0)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid timestamp");
-  }
-  return timestamp;
+int64_t TimeToTimestamp(absl::Time time) {
+  // We round the timestamp to a whole number. We always round down.
+  return absl::ToUnixSeconds(time);
 }
 
 absl::Time TimestampToTime(double timestamp) {
   if (timestamp > kJwtTimestampMax) {
-    return absl::FromUnixMillis(kJwtTimestampMax * 1000);
+    return absl::FromUnixSeconds(kJwtTimestampMax);
   }
-  int64_t millis = timestamp * 1000;
-  return absl::FromUnixMillis(millis);
+  return absl::FromUnixSeconds(timestamp);
 }
 
 util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
@@ -467,7 +464,7 @@ std::vector<std::string> RawJwt::CustomClaimNames() const {
   return values;
 }
 
-RawJwtBuilder::RawJwtBuilder() {}
+RawJwtBuilder::RawJwtBuilder() { without_expiration_ = false; }
 
 RawJwtBuilder& RawJwtBuilder::SetTypeHeader(absl::string_view type_header) {
   type_header_ = std::string(type_header);
@@ -507,128 +504,184 @@ RawJwtBuilder& RawJwtBuilder::SetJwtId(absl::string_view jwid) {
   return *this;
 }
 
-util::Status RawJwtBuilder::SetExpiration(absl::Time expiration) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(expiration);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+RawJwtBuilder& RawJwtBuilder::WithoutExpiration() {
+  without_expiration_ = true;
+  return *this;
+}
+
+RawJwtBuilder& RawJwtBuilder::SetExpiration(absl::Time expiration) {
+  int64_t exp_timestamp = TimeToTimestamp(expiration);
+  if ((exp_timestamp > kJwtTimestampMax) || (exp_timestamp < 0)) {
+    if (!error_.has_value()) {
+      error_ = util::Status(util::error::INVALID_ARGUMENT,
+                            "invalid expiration timestamp");
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(exp_timestamp);
   (*fields)[std::string(kJwtClaimExpiration)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::SetNotBefore(absl::Time notBefore) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(notBefore);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+RawJwtBuilder& RawJwtBuilder::SetNotBefore(absl::Time not_before) {
+  int64_t nbf_timestamp = TimeToTimestamp(not_before);
+  if ((nbf_timestamp > kJwtTimestampMax) || (nbf_timestamp < 0)) {
+    if (!error_.has_value()) {
+      error_ = util::Status(util::error::INVALID_ARGUMENT,
+                            "invalid not_before timestamp");
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(nbf_timestamp);
   (*fields)[std::string(kJwtClaimNotBefore)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::SetIssuedAt(absl::Time issuedAt) {
-  util::StatusOr<double> timestamp_or = TimeToTimestamp(issuedAt);
-  if (!timestamp_or.ok()) {
-    return timestamp_or.status();
+RawJwtBuilder& RawJwtBuilder::SetIssuedAt(absl::Time issued_at) {
+  int64_t iat_timestamp = TimeToTimestamp(issued_at);
+  if ((iat_timestamp > kJwtTimestampMax) || (iat_timestamp < 0)) {
+    if (!error_.has_value()) {
+      error_ = util::Status(util::error::INVALID_ARGUMENT,
+                            "invalid issued_at timestamp");
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
-  value.set_number_value(timestamp_or.ValueOrDie());
+  value.set_number_value(iat_timestamp);
   (*fields)[std::string(kJwtClaimIssuedAt)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddNullClaim(absl::string_view name) {
+RawJwtBuilder& RawJwtBuilder::AddNullClaim(absl::string_view name) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   value.set_null_value(google::protobuf::NULL_VALUE);
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddBooleanClaim(absl::string_view name,
-                                            bool bool_value) {
+RawJwtBuilder& RawJwtBuilder::AddBooleanClaim(absl::string_view name,
+                                              bool bool_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   value.set_bool_value(bool_value);
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddStringClaim(absl::string_view name,
-                                           std::string string_value) {
+RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
+                                             std::string string_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   value.set_string_value(string_value);
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddNumberClaim(absl::string_view name,
-                                           double double_value) {
+RawJwtBuilder& RawJwtBuilder::AddNumberClaim(absl::string_view name,
+                                             double double_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   value.set_number_value(double_value);
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddJsonObjectClaim(absl::string_view name,
-                                               absl::string_view object_value) {
+RawJwtBuilder& RawJwtBuilder::AddJsonObjectClaim(
+    absl::string_view name, absl::string_view object_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto proto_or = jwt_internal::JsonStringToProtoStruct(object_value);
   if (!proto_or.ok()) {
-    return proto_or.status();
+    if (!error_.has_value()) {
+      error_ = proto_or.status();
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   *value.mutable_struct_value() = proto_or.ValueOrDie();
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
-util::Status RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
-                                              absl::string_view array_value) {
+RawJwtBuilder& RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
+                                                absl::string_view array_value) {
   auto status = ValidatePayloadName(name);
   if (!status.ok()) {
-    return status;
+    if (!error_.has_value()) {
+      error_ = status;
+    }
+    return *this;
   }
   auto list_or = jwt_internal::JsonStringToProtoList(array_value);
   if (!list_or.ok()) {
-    return list_or.status();
+    if (!error_.has_value()) {
+      error_ = list_or.status();
+    }
+    return *this;
   }
   auto fields = json_proto_.mutable_fields();
   google::protobuf::Value value;
   *value.mutable_list_value() = list_or.ValueOrDie();
   (*fields)[std::string(name)] = value;
-  return util::OkStatus();
+  return *this;
 }
 
 util::StatusOr<RawJwt> RawJwtBuilder::Build() {
+  if (error_.has_value()) {
+    return *error_;
+  }
+  if (!json_proto_.fields().contains(std::string(kJwtClaimExpiration)) &&
+      !without_expiration_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "neither SetExpiration() nor WithoutExpiration() was called");
+  }
+  if (json_proto_.fields().contains(std::string(kJwtClaimExpiration)) &&
+      without_expiration_) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "SetExpiration() and WithoutExpiration() must not be called together");
+  }
   RawJwt token(type_header_, json_proto_);
   return token;
 }

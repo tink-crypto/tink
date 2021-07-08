@@ -169,8 +169,6 @@ tink_cc_proto(
 tink_cc_proto(
   NAME jwt_hmac_cc_proto
   SRCS jwt_hmac.proto
-  DEPS
-    tink::proto::hmac_cc_proto
 )
 
 tink_cc_proto(

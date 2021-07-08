@@ -116,6 +116,86 @@ TEST(StatusOrTest, MoveOutMoveOnly) {
   ASSERT_THAT(*ten, Eq(10));
 }
 
+TEST(StatusOrTest, TestValueConst) {
+  const int kI = 4;
+  const absl::StatusOr<int> thing(kI);
+  EXPECT_EQ(kI, *thing);
+}
+
+TEST(StatusOrTest, TestPointerValue) {
+  const int kI = 0;
+  absl::StatusOr<const int*> thing(&kI);
+  EXPECT_EQ(&kI, *thing);
+}
+
+TEST(StatusOrTest, TestPointerValueConst) {
+  const int kI = 0;
+  const absl::StatusOr<const int*> thing(&kI);
+  EXPECT_EQ(&kI, *thing);
+}
+
+TEST(StatusOrTest, OperatorStarRefQualifiers) {
+  static_assert(
+      std::is_same<const int&,
+                   decltype(*std::declval<const absl::StatusOr<int>&>())>(),
+      "Unexpected ref-qualifiers");
+  static_assert(
+      std::is_same<int&, decltype(*std::declval<absl::StatusOr<int>&>())>(),
+      "Unexpected ref-qualifiers");
+  static_assert(
+      std::is_same<const int&&,
+                   decltype(*std::declval<const absl::StatusOr<int>&&>())>(),
+      "Unexpected ref-qualifiers");
+  static_assert(
+      std::is_same<int&&, decltype(*std::declval<absl::StatusOr<int>&&>())>(),
+      "Unexpected ref-qualifiers");
+}
+
+TEST(StatusOrTest, OperatorStar) {
+  const util::StatusOr<std::string> const_lvalue("hello");
+  EXPECT_EQ("hello", *const_lvalue);
+
+  util::StatusOr<std::string> lvalue("hello");
+  EXPECT_EQ("hello", *lvalue);
+
+  // Note: Recall that std::move() is equivalent to a static_cast to an rvalue
+  // reference type.
+  const util::StatusOr<std::string> const_rvalue("hello");
+  EXPECT_EQ("hello", *std::move(const_rvalue));  // NOLINT
+
+  util::StatusOr<std::string> rvalue("hello");
+  EXPECT_EQ("hello", *std::move(rvalue));
+}
+
+TEST(StatusOrTest, OperatorArrowQualifiers) {
+  static_assert(
+      std::is_same<
+          const int*,
+          decltype(std::declval<const util::StatusOr<int>&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          int*, decltype(std::declval<util::StatusOr<int>&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          const int*,
+          decltype(std::declval<const util::StatusOr<int>&&>().operator->())>(),
+      "Unexpected qualifiers");
+  static_assert(
+      std::is_same<
+          int*, decltype(std::declval<util::StatusOr<int>&&>().operator->())>(),
+      "Unexpected qualifiers");
+}
+
+TEST(StatusOrTest, OperatorArrow) {
+  const util::StatusOr<std::string> const_lvalue("hello");
+  EXPECT_EQ(std::string("hello"), const_lvalue->c_str());
+
+  util::StatusOr<std::string> lvalue("hello");
+  EXPECT_EQ(std::string("hello"), lvalue->c_str());
+}
+
 }  // namespace
 
 }  // namespace util

@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import abc
 
-from typing import Text
+from typing import Optional, Text
 
 import six
 
@@ -77,4 +77,20 @@ class JwtMac(object):
     Raises:
       tink.TinkError if the operation fails.
     """
+    raise NotImplementedError()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class JwtMacInternal(object):
+  """Internal interface for authenticating and verifying JWT with JWS MAC."""
+
+  @abc.abstractmethod
+  def compute_mac_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
+                                      kid: Optional[Text]) -> Text:
+    raise NotImplementedError()
+
+  @abc.abstractmethod
+  def verify_mac_and_decode(
+      self, compact: Text,
+      validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     raise NotImplementedError()

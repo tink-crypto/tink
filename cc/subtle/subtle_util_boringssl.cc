@@ -53,6 +53,47 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
   return (degree_bits + 7) / 8;
 }
 
+util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
+    EllipticCurveType curve, const EC_KEY &key) {
+  util::StatusOr<EC_GROUP *> group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  if (!group.ok()) {
+    return group.status();
+  }
+
+  const BIGNUM *priv_key = EC_KEY_get0_private_key(&key);
+  const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
+  bssl::UniquePtr<BIGNUM> pub_key_x_bn(BN_new());
+  bssl::UniquePtr<BIGNUM> pub_key_y_bn(BN_new());
+  if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key,
+                                           pub_key_x_bn.get(),
+                                           pub_key_y_bn.get(), nullptr)) {
+    return util::Status(util::error::INTERNAL,
+                        "EC_POINT_get_affine_coordinates_GFp failed");
+  }
+  SubtleUtilBoringSSL::EcKey ec_key;
+  ec_key.curve = curve;
+  util::StatusOr<std::string> pub_x_str = SubtleUtilBoringSSL::bn2str(
+      pub_key_x_bn.get(), FieldElementSizeInBytes(*group));
+  if (!pub_x_str.ok()) {
+    return pub_x_str.status();
+  }
+  ec_key.pub_x = std::move(*pub_x_str);
+  util::StatusOr<std::string> pub_y_str = SubtleUtilBoringSSL::bn2str(
+      pub_key_y_bn.get(), FieldElementSizeInBytes(*group));
+  if (!pub_y_str.ok()) {
+    return pub_y_str.status();
+  }
+  ec_key.pub_y =  std::move(*pub_y_str);
+  util::StatusOr<util::SecretData> priv_key_or =
+      SubtleUtilBoringSSL::BignumToSecretData(priv_key,
+                                              ScalarSizeInBytes(*group));
+  if (!priv_key_or.ok()) {
+    return priv_key_or.status();
+  }
+  ec_key.priv =  std::move(*priv_key_or);
+  return ec_key;
+}
+
 }  // namespace
 
 // static
@@ -145,39 +186,56 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
   if (!status_or_group.ok()) return status_or_group.status();
   bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
   bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
+
+  if (key.get() == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "EC key generation failed in BoringSSL.");
+  }
+
   EC_KEY_set_group(key.get(), group.get());
   EC_KEY_generate_key(key.get());
-  const BIGNUM *priv_key = EC_KEY_get0_private_key(key.get());
-  const EC_POINT *pub_key = EC_KEY_get0_public_key(key.get());
-  bssl::UniquePtr<BIGNUM> pub_key_x_bn(BN_new());
-  bssl::UniquePtr<BIGNUM> pub_key_y_bn(BN_new());
-  if (!EC_POINT_get_affine_coordinates_GFp(group.get(), pub_key,
-                                           pub_key_x_bn.get(),
-                                           pub_key_y_bn.get(), nullptr)) {
+
+  return EcKeyFromBoringEcKey(curve_type, *key);
+}
+
+// static
+util::StatusOr<SubtleUtilBoringSSL::EcKey>
+SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
+                                         const util::SecretData &secret_seed) {
+  // EC_KEY_derive_from_secret() is not defined in the version of BoringSSL
+  // used when FIPS-only mode is enabled at compile time.
+#ifdef TINK_USE_ONLY_FIPS
+  return crypto::tink::util::Status(
+      crypto::tink::util::error::INTERNAL,
+      "Deriving EC keys is not allowed in FIPS mode.");
+#else
+  if (IsFipsModeEnabled()) {
+    return crypto::tink::util::Status(
+        crypto::tink::util::error::INTERNAL,
+        "Deriving EC keys is not allowed in FIPS mode.");
+  }
+
+  if (curve_type == EllipticCurveType::CURVE25519) {
     return util::Status(util::error::INTERNAL,
-                        "EC_POINT_get_affine_coordinates_GFp failed");
+                        "Creating a X25519 key from a seed is not supported.");
   }
-  EcKey ec_key;
-  ec_key.curve = curve_type;
-  auto pub_x_str =
-      bn2str(pub_key_x_bn.get(), FieldElementSizeInBytes(group.get()));
-  if (!pub_x_str.ok()) {
-    return pub_x_str.status();
+
+  util::StatusOr<EC_GROUP *> group =
+      SubtleUtilBoringSSL::GetEcGroup(curve_type);
+  if (!group.ok()) {
+    return group.status();
   }
-  ec_key.pub_x = pub_x_str.ValueOrDie();
-  auto pub_y_str =
-      bn2str(pub_key_y_bn.get(), FieldElementSizeInBytes(group.get()));
-  if (!pub_y_str.ok()) {
-    return pub_y_str.status();
+
+  bssl::UniquePtr<EC_KEY> key(EC_KEY_derive_from_secret(
+      *group, secret_seed.data(), secret_seed.size()));
+
+  if (key.get() == nullptr) {
+    return util::Status(util::error::INTERNAL,
+                        "EC key generation failed in BoringSSL.");
   }
-  ec_key.pub_y = pub_y_str.ValueOrDie();
-  auto priv_key_or =
-      BignumToSecretData(priv_key, ScalarSizeInBytes(group.get()));
-  if (!priv_key_or.ok()) {
-    return priv_key_or.status();
-  }
-  ec_key.priv = priv_key_or.ValueOrDie();
-  return ec_key;
+
+  return EcKeyFromBoringEcKey(curve_type, *key);
+#endif
 }
 
 // static

@@ -56,6 +56,7 @@ tink_cc_library(
   DEPS
     protobuf::libprotobuf
     tink::jwt::internal::json_util
+    tink::jwt::raw_jwt
     tink::util::status
     tink::util::statusor
     absl::strings

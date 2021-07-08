@@ -42,23 +42,26 @@ namespace tink {
 
 namespace {
 
-KeyTemplate* NewJwtHmacKeyTemplate(JwtHmacAlgorithm algorithm) {
+KeyTemplate* NewJwtHmacKeyTemplate(JwtHmacAlgorithm algorithm,
+                                   uint32_t key_size,
+                                   OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtHmacKey");
-  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  key_template->set_output_prefix_type(output_prefix_type);
   JwtHmacKeyFormat key_format;
-  key_format.set_key_size(32);
+  key_format.set_key_size(key_size);
   key_format.set_algorithm(algorithm);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
 
-KeyTemplate* NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm algorithm) {
+KeyTemplate* NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm algorithm,
+                                    OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey");
-  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  key_template->set_output_prefix_type(output_prefix_type);
   JwtEcdsaKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.SerializeToString(key_template->mutable_value());
@@ -67,11 +70,12 @@ KeyTemplate* NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm algorithm) {
 
 KeyTemplate* NewJwtRsaSsaPkcs1KeyTemplate(JwtRsaSsaPkcs1Algorithm algorithm,
                                           int modulus_size_in_bits,
-                                          int public_exponent) {
+                                          int public_exponent,
+                                          OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey");
-  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  key_template->set_output_prefix_type(output_prefix_type);
   JwtRsaSsaPkcs1KeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
@@ -85,12 +89,13 @@ KeyTemplate* NewJwtRsaSsaPkcs1KeyTemplate(JwtRsaSsaPkcs1Algorithm algorithm,
 }
 
 KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
-                                          int modulus_size_in_bits,
-                                          int public_exponent) {
+                                        int modulus_size_in_bits,
+                                        int public_exponent,
+                                        OutputPrefixType output_prefix_type) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       "type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey");
-  key_template->set_output_prefix_type(OutputPrefixType::RAW);
+  key_template->set_output_prefix_type(output_prefix_type);
   JwtRsaSsaPssKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
@@ -106,86 +111,170 @@ KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
 }  // anonymous namespace
 
 const KeyTemplate& JwtHs256Template() {
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS256, 32, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtHs256Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS256, 32, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs384Template() {
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS384, 48, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtHs384Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS384, 48, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtHs512Template() {
+  static const KeyTemplate* key_template = NewJwtHmacKeyTemplate(
+      JwtHmacAlgorithm::HS512, 64, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtHs512Template() {
   static const KeyTemplate* key_template =
-      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512);
+      NewJwtHmacKeyTemplate(JwtHmacAlgorithm::HS512, 64, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtEs256Template() {
   static const KeyTemplate* key_template =
-      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES256);
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES256, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtEs256Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES256, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtEs384Template() {
   static const KeyTemplate* key_template =
-      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES384);
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES384, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtEs384Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES384, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtEs512Template() {
   static const KeyTemplate* key_template =
-      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES512);
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES512, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtEs512Template() {
+  static const KeyTemplate* key_template =
+      NewJwtEcdsaKeyTemplate(JwtEcdsaAlgorithm::ES512, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtRs256_2048_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
-      JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
+      JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtRs256_2048_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
+      JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtRs256_3072_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
-      JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
+      JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtRs256_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
+      JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtRs384_3072_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
-      JwtRsaSsaPkcs1Algorithm::RS384, 3072, RSA_F4);
+      JwtRsaSsaPkcs1Algorithm::RS384, 3072, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtRs384_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
+      JwtRsaSsaPkcs1Algorithm::RS384, 3072, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtRs512_4096_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
-      JwtRsaSsaPkcs1Algorithm::RS512, 4096, RSA_F4);
+      JwtRsaSsaPkcs1Algorithm::RS512, 4096, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtRs512_4096_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPkcs1KeyTemplate(
+      JwtRsaSsaPkcs1Algorithm::RS512, 4096, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtPs256_2048_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
-      JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4);
+      JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtPs256_2048_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS256, 2048, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtPs256_3072_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
-      JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4);
+      JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtPs256_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtPs384_3072_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
-      JwtRsaSsaPssAlgorithm::PS384, 3072, RSA_F4);
+      JwtRsaSsaPssAlgorithm::PS384, 3072, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtPs384_3072_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS384, 3072, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 
 const KeyTemplate& JwtPs512_4096_F4_Template() {
   static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
-      JwtRsaSsaPssAlgorithm::PS512, 4096, RSA_F4);
+      JwtRsaSsaPssAlgorithm::PS512, 4096, RSA_F4, OutputPrefixType::TINK);
+  return *key_template;
+}
+
+const KeyTemplate& RawJwtPs512_4096_F4_Template() {
+  static const KeyTemplate* key_template = NewJwtRsaSsaPssKeyTemplate(
+      JwtRsaSsaPssAlgorithm::PS512, 4096, RSA_F4, OutputPrefixType::RAW);
   return *key_template;
 }
 

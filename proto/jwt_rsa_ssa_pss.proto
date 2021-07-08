@@ -39,6 +39,13 @@ message JwtRsaSsaPssPublicKey {
   // Public exponent.
   // Unsigned big integer in bigendian representation.
   bytes e = 4;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 5;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey

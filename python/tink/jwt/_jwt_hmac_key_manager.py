@@ -18,7 +18,7 @@ from __future__ import division
 # Placeholder for import for type annotations
 from __future__ import print_function
 
-from typing import Text, Type
+from typing import Optional, Text, Type
 
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
@@ -40,7 +40,7 @@ _ALGORITHM_STRING = {
 }
 
 
-class _JwtHmac(_jwt_mac.JwtMac):
+class _JwtHmac(_jwt_mac.JwtMacInternal):
   """Interface for authenticating and verifying JWT with JWS MAC."""
 
   def __init__(self, cc_mac: tink_bindings.Mac, algorithm: Text):
@@ -55,14 +55,16 @@ class _JwtHmac(_jwt_mac.JwtMac):
   def _verify_mac(self, mac_value: bytes, data: bytes) -> None:
     self._cc_mac.verify_mac(mac_value, data)
 
-  def compute_mac_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
+  def compute_mac_and_encode_with_kid(self, raw_jwt: _raw_jwt.RawJwt,
+                                      kid: Optional[Text]) -> Text:
     """Computes a MAC and encodes the token."""
     if raw_jwt.has_type_header():
       type_header = raw_jwt.type_header()
     else:
       type_header = None
+    # TODO(juerg): Add support for custom_kid.
     unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
-                                                   raw_jwt.json_payload())
+                                                   kid, raw_jwt.json_payload())
     return _jwt_format.create_signed_compact(unsigned,
                                              self._compute_mac(unsigned))
 
@@ -81,18 +83,18 @@ class _JwtHmac(_jwt_mac.JwtMac):
     return _verified_jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
 
 
-class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMac]):
+class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMacInternal]):
   """Transforms C++ KeyManager into a Python KeyManager."""
 
   def __init__(self):
     self._cc_key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
-  def primitive_class(self) -> Type[_jwt_mac.JwtMac]:
-    return _jwt_mac.JwtMac
+  def primitive_class(self) -> Type[_jwt_mac.JwtMacInternal]:
+    return _jwt_mac.JwtMacInternal
 
   @core.use_tink_errors
-  def primitive(self, key_data: tink_pb2.KeyData) -> _jwt_mac.JwtMac:
+  def primitive(self, key_data: tink_pb2.KeyData) -> _jwt_mac.JwtMacInternal:
     if key_data.type_url != _JWT_HMAC_KEY_TYPE:
       raise _jwt_error.JwtInvalidError('Invalid key data key type')
     jwt_hmac_key = jwt_hmac_pb2.JwtHmacKey.FromString(key_data.value)

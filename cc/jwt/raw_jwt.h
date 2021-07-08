@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_RAW_JWT_H_
 #define TINK_JWT_RAW_JWT_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
@@ -26,6 +28,13 @@
 
 namespace crypto {
 namespace tink {
+
+namespace jwt_internal {
+
+// For friend declaration
+class RawJwtParser;
+
+}  // namespace jwt_internal
 
 ///////////////////////////////////////////////////////////////////////////////
 // A raw JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
@@ -65,8 +74,6 @@ class RawJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
   std::vector<std::string> CustomClaimNames() const;
 
-  static util::StatusOr<RawJwt> FromJson(
-      absl::optional<std::string> type_header, absl::string_view json_payload);
   util::StatusOr<std::string> GetJsonPayload() const;
 
   // RawJwt objects are copiable and movable.
@@ -76,9 +83,12 @@ class RawJwt {
   RawJwt& operator=(RawJwt&& other) = default;
 
  private:
+  static util::StatusOr<RawJwt> FromJson(
+      absl::optional<std::string> type_header, absl::string_view json_payload);
   explicit RawJwt(absl::optional<std::string> type_header,
                   google::protobuf::Struct json_proto);
   friend class RawJwtBuilder;
+  friend class jwt_internal::RawJwtParser;
   absl::optional<std::string> type_header_;
   google::protobuf::Struct json_proto_;
 };
@@ -92,17 +102,19 @@ class RawJwtBuilder {
   RawJwtBuilder& SetSubject(absl::string_view subject);
   RawJwtBuilder& AddAudience(absl::string_view audience);
   RawJwtBuilder& SetJwtId(absl::string_view jwid);
-  util::Status SetExpiration(absl::Time expiration);
-  util::Status SetNotBefore(absl::Time notBefore);
-  util::Status SetIssuedAt(absl::Time issuedAt);
-  util::Status AddNullClaim(absl::string_view name);
-  util::Status AddBooleanClaim(absl::string_view name, bool bool_value);
-  util::Status AddStringClaim(absl::string_view name, std::string string_value);
-  util::Status AddNumberClaim(absl::string_view name, double double_value);
-  util::Status AddJsonObjectClaim(
-      absl::string_view name, absl::string_view object_value);
-  util::Status AddJsonArrayClaim(absl::string_view name,
-                                 absl::string_view array_value);
+  RawJwtBuilder& WithoutExpiration();
+  RawJwtBuilder& SetExpiration(absl::Time expiration);
+  RawJwtBuilder& SetNotBefore(absl::Time not_before);
+  RawJwtBuilder& SetIssuedAt(absl::Time issued_at);
+  RawJwtBuilder& AddNullClaim(absl::string_view name);
+  RawJwtBuilder& AddBooleanClaim(absl::string_view name, bool bool_value);
+  RawJwtBuilder& AddStringClaim(absl::string_view name,
+                                std::string string_value);
+  RawJwtBuilder& AddNumberClaim(absl::string_view name, double double_value);
+  RawJwtBuilder& AddJsonObjectClaim(absl::string_view name,
+                                    absl::string_view object_value);
+  RawJwtBuilder& AddJsonArrayClaim(absl::string_view name,
+                                   absl::string_view array_value);
 
   util::StatusOr<RawJwt> Build();
 
@@ -113,7 +125,12 @@ class RawJwtBuilder {
   RawJwtBuilder& operator=(RawJwtBuilder&& other) = default;
 
  private:
+  absl::optional<util::Status> error_;
   absl::optional<std::string> type_header_;
+  // absl::optional<absl::Time> expiration_;
+  // absl::optional<absl::Time> not_before_;
+  // absl::optional<absl::Time> issued_at_;
+  bool without_expiration_;
   google::protobuf::Struct json_proto_;
 };
 

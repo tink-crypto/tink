@@ -76,60 +76,32 @@ crypto::tink::util::StatusOr<crypto::tink::RawJwt> RawJwtFromProto(
     builder.SetJwtId(raw_jwt_proto.jwt_id().value());
   }
   if (raw_jwt_proto.has_expiration()) {
-    auto status = builder.SetExpiration(
-        TimestampToTime(raw_jwt_proto.expiration()));
-    if (!status.ok()) {
-      return status;
-    }
+    builder.SetExpiration(TimestampToTime(raw_jwt_proto.expiration()));
+  } else {
+    builder.WithoutExpiration();
   }
   if (raw_jwt_proto.has_issued_at()) {
-    auto status = builder.SetIssuedAt(
-        TimestampToTime(raw_jwt_proto.issued_at()));
-    if (!status.ok()) {
-      return status;
-    }
+    builder.SetIssuedAt(TimestampToTime(raw_jwt_proto.issued_at()));
   }
   if (raw_jwt_proto.has_not_before()) {
-    auto status = builder.SetNotBefore(
-        TimestampToTime(raw_jwt_proto.not_before()));
-    if (!status.ok()) {
-      return status;
-    }
+    builder.SetNotBefore(TimestampToTime(raw_jwt_proto.not_before()));
   }
   auto claims = raw_jwt_proto.custom_claims();
   for (auto it = claims.begin(); it != claims.end(); it++) {
     const auto& name = it->first;
     const auto& value = it->second;
     if (value.kind_case() == JwtClaimValue::kNullValue) {
-      auto status = builder.AddNullClaim(name);
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddNullClaim(name);
     } else if (value.kind_case() == JwtClaimValue::kBoolValue) {
-      auto status = builder.AddBooleanClaim(name, value.bool_value());
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddBooleanClaim(name, value.bool_value());
     } else if (value.kind_case() == JwtClaimValue::kNumberValue) {
-      auto status = builder.AddNumberClaim(name, value.number_value());
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddNumberClaim(name, value.number_value());
     } else if (value.kind_case() == JwtClaimValue::kStringValue) {
-      auto status = builder.AddStringClaim(name, value.string_value());
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddStringClaim(name, value.string_value());
     } else if (value.kind_case() == JwtClaimValue::kJsonObjectValue) {
-      auto status = builder.AddJsonObjectClaim(name, value.json_object_value());
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddJsonObjectClaim(name, value.json_object_value());
     } else if (value.kind_case() == JwtClaimValue::kJsonArrayValue) {
-      auto status = builder.AddJsonArrayClaim(name, value.json_array_value());
-      if (!status.ok()) {
-        return status;
-      }
+      builder.AddJsonArrayClaim(name, value.json_array_value());
     }
   }
   return builder.Build();
@@ -197,24 +169,39 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
 crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
     const JwtValidator& validator_proto) {
   auto builder = crypto::tink::JwtValidatorBuilder();
-  if (validator_proto.has_issuer()) {
-    builder.SetIssuer(validator_proto.issuer().value());
+  if (validator_proto.has_expected_type_header()) {
+    builder.ExpectTypeHeader(validator_proto.expected_type_header().value());
   }
-  if (validator_proto.has_subject()) {
-    builder.SetSubject(validator_proto.subject().value());
+  if (validator_proto.has_expected_issuer()) {
+    builder.ExpectIssuer(validator_proto.expected_issuer().value());
   }
-  if (validator_proto.has_audience()) {
-    builder.SetAudience(validator_proto.audience().value());
+  if (validator_proto.has_expected_subject()) {
+    builder.ExpectSubject(validator_proto.expected_subject().value());
+  }
+  if (validator_proto.has_expected_audience()) {
+    builder.ExpectAudience(validator_proto.expected_audience().value());
+  }
+  if (validator_proto.ignore_type_header()) {
+    builder.IgnoreTypeHeader();
+  }
+  if (validator_proto.ignore_issuer()) {
+    builder.IgnoreIssuer();
+  }
+  if (validator_proto.ignore_subject()) {
+    builder.IgnoreSubject();
+  }
+  if (validator_proto.ignore_audience()) {
+    builder.IgnoreAudiences();
+  }
+  if (validator_proto.allow_missing_expiration()) {
+    builder.AllowMissingExpiration();
   }
   if (validator_proto.has_now()) {
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }
   if (validator_proto.has_clock_skew()) {
-    auto skew_status = builder.SetClockSkew(
+    builder.SetClockSkew(
         absl::Seconds(validator_proto.clock_skew().seconds()));
-    if (!skew_status.ok()) {
-      return skew_status;
-    }
   }
   return builder.Build();
 }

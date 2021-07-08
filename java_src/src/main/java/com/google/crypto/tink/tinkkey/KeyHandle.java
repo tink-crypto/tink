@@ -17,6 +17,7 @@ package com.google.crypto.tink.tinkkey;
 
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.proto.KeyData;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import java.security.GeneralSecurityException;
 
 /**

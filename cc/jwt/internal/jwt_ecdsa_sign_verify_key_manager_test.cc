@@ -14,6 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_split.h"
@@ -133,7 +136,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(sign_or.status(), IsOk());
   auto sign = std::move(sign_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -142,7 +146,11 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   auto verify_or = JwtEcdsaVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
       key.public_key());
   ASSERT_THAT(verify_or.status(), IsOk());
@@ -156,8 +164,67 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(issuer_or.status(), IsOk());
   EXPECT_THAT(issuer_or.ValueOrDie(), Eq("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 =
+      JwtValidatorBuilder().ExpectIssuer("unknown").Build().ValueOrDie();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
+}
+
+TEST(JwtRsaSsaPkcs1SignVerifyKeyManagerTest, GetAndUsePrimitivesWithCustomKid) {
+  JwtEcdsaKeyFormat key_format;
+  key_format.set_algorithm(JwtEcdsaAlgorithm::ES256);
+  util::StatusOr<JwtEcdsaPrivateKey> key =
+      JwtEcdsaSignKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key.status(), IsOk());
+  key->mutable_public_key()->mutable_custom_kid()->set_value(
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+  util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>> sign =
+      JwtEcdsaSignKeyManager().GetPrimitive<JwtPublicKeySignInternal>(*key);
+  ASSERT_THAT(sign.status(), IsOk());
+
+  util::StatusOr<RawJwt> raw_jwt =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+
+  util::StatusOr<std::string> compact =
+      (*sign)->SignAndEncodeWithKid(*raw_jwt, absl::nullopt);
+  ASSERT_THAT(compact.status(), IsOk());
+
+  // parse header and check "kid"
+  std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
+  ASSERT_THAT(parts.size(), Eq(3));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  ASSERT_THAT(header.status(), IsOk());
+  auto it = header->fields().find("kid");
+  ASSERT_FALSE(it == header->fields().end());
+  EXPECT_THAT(it->second.string_value(),
+              Eq("Lorem ipsum dolor sit amet, consectetur adipiscing elit"));
+
+  // validate token
+  util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
+                                               .ExpectIssuer("issuer")
+                                               .AllowMissingExpiration()
+                                               .Build();
+  ASSERT_THAT(validator.status(), IsOk());
+  util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify =
+      JwtEcdsaVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
+          key->public_key());
+  ASSERT_THAT(verify.status(), IsOk());
+
+  util::StatusOr<VerifiedJwt> verified_jwt =
+      (*verify)->VerifyAndDecode(*compact, *validator);
+  ASSERT_THAT(verified_jwt.status(), IsOk());
+  util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
+  ASSERT_THAT(issuer.status(), IsOk());
+  EXPECT_THAT(*issuer, Eq("issuer"));
+
+  // passing a kid when custom_kid is set should fail
+  util::StatusOr<std::string> compact2 =
+      (*sign)->SignAndEncodeWithKid(*raw_jwt, "kid123");
+  ASSERT_FALSE(compact2.ok());
 }
 
 TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
@@ -176,7 +243,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(sign1_or.status(), IsOk());
   auto sign1 = std::move(sign1_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -185,7 +253,8 @@ TEST(JwtEcdsaSignVerifyKeyManagerTest, VerifyFailsWithDifferentKey) {
   ASSERT_THAT(compact_or.status(), IsOk());
   auto compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator =
+      JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
   auto verify2_or = JwtEcdsaVerifyKeyManager().GetPrimitive<JwtPublicKeyVerify>(
       key2.public_key());
   ASSERT_THAT(verify2_or.status(), IsOk());

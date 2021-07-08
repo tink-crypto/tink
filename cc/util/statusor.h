@@ -33,6 +33,7 @@ template <typename T>
 class ABSL_MUST_USE_RESULT StatusOr;
 #endif
 
+// TODO(b/122292096): Migrate this to absl::StatusOr
 // A StatusOr holds a Status (in the case of an error), or a value T.
 template <typename T>
 class StatusOr {
@@ -77,35 +78,19 @@ class StatusOr {
 
   // Returns value or crashes if ok() is false.
   inline const T& ValueOrDie() const& {
-    if (!ok()) {
-      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
-      std::cerr << status() << std::endl;
-      std::_Exit(1);
-    }
+    EnsureOk();
     return *value_;
   }
   inline T& ValueOrDie() & {
-    if (!ok()) {
-      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
-      std::cerr << status() << std::endl;
-      std::_Exit(1);
-    }
+    EnsureOk();
     return *value_;
   }
   inline const T&& ValueOrDie() const&& {
-    if (!ok()) {
-      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
-      std::cerr << status() << std::endl;
-      std::_Exit(1);
-    }
+    EnsureOk();
     return *std::move(value_);
   }
   inline T&& ValueOrDie() && {
-    if (!ok()) {
-      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
-      std::cerr << status() << std::endl;
-      std::_Exit(1);
-    }
+    EnsureOk();
     return *std::move(value_);
   }
 
@@ -114,10 +99,50 @@ class StatusOr {
   operator ::absl::StatusOr<T>() const&;  // NOLINT
   operator ::absl::StatusOr<T>() &&;      // NOLINT
 
+  // Returns value or crashes if ok() is false.
+  inline const T& operator*() const& {
+    EnsureOk();
+    return *value_;
+  }
+
+  inline T& operator*() & {
+    EnsureOk();
+    return *value_;
+  }
+
+  inline T&& operator*() && {
+    EnsureOk();
+    return *std::move(value_);
+  }
+
+  inline const T&& operator*() const&& {
+    EnsureOk();
+    return *std::move(value_);
+  }
+
+  // Returns reference to value or crashes if ok() is false.
+  T* operator->() {
+    EnsureOk();
+    return &(value_.value());
+  }
+
+  const T* operator->() const {
+    EnsureOk();
+    return &(value_.value());
+  }
+
   template <typename U>
   friend class StatusOr;
 
  private:
+  void EnsureOk() const {
+    if (ABSL_PREDICT_FALSE(!ok())) {
+      std::cerr << "Attempting to fetch value of non-OK StatusOr\n";
+      std::cerr << status() << std::endl;
+      std::_Exit(1);
+    }
+  }
+
   Status status_;
   absl::optional<T> value_;
 };
@@ -197,6 +222,7 @@ StatusOr<T>::operator ::absl::StatusOr<T>() && {
   if (!ok()) return ::absl::Status(std::move(status_));
   return std::move(*value_);
 }
+
 
 }  // namespace util
 }  // namespace tink

@@ -16,11 +16,11 @@
 import base64
 import binascii
 import json
+import struct
+from typing import Any, Optional, Text, Tuple
 
-from typing import Any, Text, Tuple, Optional
-
+from tink.proto import tink_pb2
 from tink.jwt import _jwt_error
-
 
 _VALID_ALGORITHMS = frozenset({
     'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
@@ -139,12 +139,27 @@ def decode_signature(encoded_signature: bytes) -> bytes:
   return _base64_decode(encoded_signature)
 
 
-def create_header(algorithm: Text, type_header: Optional[Text]) -> bytes:
+def create_header(algorithm: Text, type_header: Optional[Text],
+                  kid: Optional[Text]) -> bytes:
   _validate_algorithm(algorithm)
-  header = {'alg': algorithm}
+  header = {}
+  if kid:
+    header['kid'] = kid
+  header['alg'] = algorithm
   if type_header:
     header['typ'] = type_header
   return encode_header(json_dumps(header))
+
+
+def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[Text]:
+  """Returns the encoded key_id, or None."""
+  if prefix == tink_pb2.RAW:
+    return None
+  if prefix == tink_pb2.TINK:
+    if key_id < 0 or key_id > 2**32:
+      raise _jwt_error.JwtInvalidError('invalid key_id')
+    return _base64_encode(struct.pack('>L', key_id)).decode('utf8')
+  raise _jwt_error.JwtInvalidError('unexpected output prefix type')
 
 
 def split_signed_compact(
@@ -193,9 +208,10 @@ def get_type_header(header: Any) -> Optional[Text]:
   return header.get('typ', None)
 
 
+# TODO(juerg): Refactor this to create_unsigned_compact(algorithm, kid, raw_jwt)
 def create_unsigned_compact(algorithm: Text, typ_header: Optional[Text],
-                            json_payload: Text) -> bytes:
-  header = create_header(algorithm, typ_header)
+                            kid: Optional[Text], json_payload: Text) -> bytes:
+  header = create_header(algorithm, typ_header, kid)
   return header + b'.' + encode_payload(json_payload)
 
 

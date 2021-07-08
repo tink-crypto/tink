@@ -140,6 +140,10 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
       EllipticCurveType curve_type);
 
+  // Returns a new EC key for the specified curve derived from a seed.
+  static crypto::tink::util::StatusOr<EcKey> GetNewEcKeyFromSeed(
+      EllipticCurveType curve_type, const util::SecretData &secret_seed);
+
   // Returns a new X25519 key.
   static std::unique_ptr<X25519Key> GenerateNewX25519Key();
 

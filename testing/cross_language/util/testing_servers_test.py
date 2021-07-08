@@ -181,7 +181,6 @@ class TestingServersTest(parameterized.TestCase):
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
-        type_header='typeHeader',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
@@ -189,16 +188,20 @@ class TestingServersTest(parameterized.TestCase):
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
-    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    validator = jwt.new_validator(
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience1',
+        fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
-    self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
     self.assertEqual(verified_jwt.custom_claim('switch'), True)
     self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
 
-    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    validator2 = jwt.new_validator(
+        expected_audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
       jwt_mac_primitive.verify_mac_and_decode(compact, validator2)
 
@@ -215,7 +218,6 @@ class TestingServersTest(parameterized.TestCase):
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     token = jwt.new_raw_jwt(
-        type_header='typeHeader',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
@@ -223,16 +225,20 @@ class TestingServersTest(parameterized.TestCase):
         expiration=now + datetime.timedelta(seconds=10),
         custom_claims={'switch': True, 'pi': 3.14159})
     compact = signer.sign_and_encode(token)
-    validator = jwt.new_validator(audience='audience1', fixed_now=now)
+    validator = jwt.new_validator(
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience1',
+        fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
-    self.assertEqual(verified_jwt.type_header(), 'typeHeader')
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')
     self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
     self.assertEqual(verified_jwt.custom_claim('switch'), True)
     self.assertEqual(verified_jwt.custom_claim('pi'), 3.14159)
 
-    validator2 = jwt.new_validator(audience='wrong_audience', fixed_now=now)
+    validator2 = jwt.new_validator(
+        expected_audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
       verifier.verify_and_decode(compact, validator2)
 

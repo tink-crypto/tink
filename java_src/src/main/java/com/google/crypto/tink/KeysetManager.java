@@ -22,7 +22,7 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
-import com.google.crypto.tink.tinkkey.ProtoKey;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
@@ -181,8 +181,7 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
-        if (key.getStatus() != KeyStatusType.ENABLED
-            && key.getStatus() != KeyStatusType.DISABLED) {
+        if (key.getStatus() != KeyStatusType.ENABLED && key.getStatus() != KeyStatusType.DISABLED) {
           throw new GeneralSecurityException("cannot enable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.ENABLED).build());
@@ -205,8 +204,7 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
-        if (key.getStatus() != KeyStatusType.ENABLED
-            && key.getStatus() != KeyStatusType.DISABLED) {
+        if (key.getStatus() != KeyStatusType.ENABLED && key.getStatus() != KeyStatusType.DISABLED) {
           throw new GeneralSecurityException("cannot disable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.DISABLED).build());

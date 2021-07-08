@@ -31,35 +31,49 @@ class PrimitivesTest(absltest.TestCase):
     self.assertEqual(_primitives.to_datetime(seconds, nanos), dt)
 
   def test_raw_jwt_to_proto_to_verified_jwt(self):
-    nbf = datetime.datetime.fromtimestamp(1234567.89, datetime.timezone.utc)
-    iat = datetime.datetime.fromtimestamp(2345678.9, datetime.timezone.utc)
-    exp = datetime.datetime.fromtimestamp(3456789, datetime.timezone.utc)
     raw = jwt.new_raw_jwt(
+        type_header='type_header',
         issuer='issuer',
         subject='subject',
         audiences=['audience1', 'audience2'],
         jwt_id='jwt_id',
-        not_before=nbf,
-        issued_at=iat,
-        expiration=exp,
+        not_before=datetime.datetime.fromtimestamp(1234567.89,
+                                                   datetime.timezone.utc),
+        issued_at=datetime.datetime.fromtimestamp(2345678.9,
+                                                  datetime.timezone.utc),
+        expiration=datetime.datetime.fromtimestamp(3456789,
+                                                   datetime.timezone.utc),
         custom_claims={
             'null': None,
             'string': 'aString',
             'number': 123.456,
             'integer': 123,
             'bool': True,
-            'list': [None, True, 'foo', 42, {'pi': 3.14}],
-            'obj': {'list': [1, 3.14], 'null': None, 'bool': False}
+            'list': [None, True, 'foo', 42, {
+                'pi': 3.14
+            }],
+            'obj': {
+                'list': [1, 3.14],
+                'null': None,
+                'bool': False
+            }
         })
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
+    self.assertEqual(verified.type_header(), 'type_header')
     self.assertEqual(verified.issuer(), 'issuer')
     self.assertEqual(verified.subject(), 'subject')
     self.assertEqual(verified.audiences(), ['audience1', 'audience2'])
     self.assertEqual(verified.jwt_id(), 'jwt_id')
-    self.assertEqual(verified.not_before(), nbf)
-    self.assertEqual(verified.issued_at(), iat)
-    self.assertEqual(verified.expiration(), exp)
+    self.assertEqual(
+        verified.not_before(),
+        datetime.datetime.fromtimestamp(1234567, datetime.timezone.utc))
+    self.assertEqual(
+        verified.issued_at(),
+        datetime.datetime.fromtimestamp(2345678, datetime.timezone.utc))
+    self.assertEqual(
+        verified.expiration(),
+        datetime.datetime.fromtimestamp(3456789, datetime.timezone.utc))
     self.assertEqual(
         verified.custom_claim_names(),
         {'null', 'string', 'number', 'integer', 'bool', 'list', 'obj'})
@@ -75,9 +89,10 @@ class PrimitivesTest(absltest.TestCase):
         {'list': [1, 3.14], 'null': None, 'bool': False})
 
   def test_empty_raw_jwt_to_proto_to_verified_jwt(self):
-    raw = jwt.new_raw_jwt()
+    raw = jwt.new_raw_jwt(without_expiration=True)
     proto = _primitives.raw_jwt_to_proto(raw)
     verified = _primitives.proto_to_verified_jwt(proto)
+    self.assertFalse(verified.has_type_header())
     self.assertFalse(verified.has_issuer())
     self.assertFalse(verified.has_subject())
     self.assertFalse(verified.has_audiences())
@@ -90,16 +105,18 @@ class PrimitivesTest(absltest.TestCase):
   def test_jwt_validator_to_proto(self):
     now = datetime.datetime.fromtimestamp(1234567.125, datetime.timezone.utc)
     validator = jwt.new_validator(
-        issuer='issuer',
-        subject='subject',
-        audience='audience',
+        expected_type_header='type_header',
+        expected_issuer='issuer',
+        expected_subject='subject',
+        expected_audience='audience',
         clock_skew=datetime.timedelta(seconds=123),
         fixed_now=now)
     proto = _primitives.jwt_validator_to_proto(validator)
     expected = testing_api_pb2.JwtValidator()
-    expected.issuer.value = 'issuer'
-    expected.subject.value = 'subject'
-    expected.audience.value = 'audience'
+    expected.expected_type_header.value = 'type_header'
+    expected.expected_issuer.value = 'issuer'
+    expected.expected_subject.value = 'subject'
+    expected.expected_audience.value = 'audience'
     expected.clock_skew.seconds = 123
     expected.now.seconds = 1234567
     expected.now.nanos = 125000000

@@ -16,11 +16,14 @@
 
 #include "tink/jwt/jwt_key_templates.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/jwt/jwt_mac.h"
+#include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
-#include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
 #include "tink/jwt/jwt_validator.h"
 #include "tink/jwt/raw_jwt.h"
@@ -50,7 +53,8 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
   std::unique_ptr<JwtMac> jwt_mac = std::move(jwt_mac_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -59,14 +63,22 @@ TEST_P(JwtMacKeyTemplatesTest, CreateComputeVerify) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac->VerifyMacAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 = JwtValidatorBuilder()
+                                .ExpectIssuer("unknown")
+                                .AllowMissingExpiration()
+                                .Build()
+                                .ValueOrDie();
   EXPECT_FALSE(jwt_mac->VerifyMacAndDecode(compact, validator2).ok());
 }
 
@@ -96,7 +108,8 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
   std::unique_ptr<JwtPublicKeyVerify> verify =
       std::move(verify_or.ValueOrDie());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -104,24 +117,34 @@ TEST_P(JwtSignatureKeyTemplatesTest, CreateComputeVerify) {
   ASSERT_THAT(compact_or.status(), IsOk());
   std::string compact = compact_or.ValueOrDie();
 
-  JwtValidator validator = JwtValidatorBuilder().Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       verify->VerifyAndDecode(compact, validator);
   ASSERT_THAT(verified_jwt_or.status(), IsOk());
   auto verified_jwt = verified_jwt_or.ValueOrDie();
   EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder().SetIssuer("unknown").Build();
+  JwtValidator validator2 = JwtValidatorBuilder()
+                                .ExpectIssuer("unknown")
+                                .AllowMissingExpiration()
+                                .Build()
+                                .ValueOrDie();
   EXPECT_FALSE(verify->VerifyAndDecode(compact, validator2).ok());
 }
 
 INSTANTIATE_TEST_SUITE_P(
     JwtSignatureKeyTemplatesTest, JwtSignatureKeyTemplatesTest,
     testing::Values(JwtEs256Template(), JwtEs384Template(), JwtEs512Template(),
-                    JwtRs256_2048_F4_Template(), JwtRs256_3072_F4_Template(),
-                    JwtRs384_3072_F4_Template(), JwtRs512_4096_F4_Template(),
+                    RawJwtEs256Template(), JwtRs256_2048_F4_Template(),
+                    JwtRs256_3072_F4_Template(), JwtRs384_3072_F4_Template(),
+                    JwtRs512_4096_F4_Template(), RawJwtRs256_2048_F4_Template(),
                     JwtPs256_2048_F4_Template(), JwtPs256_3072_F4_Template(),
-                    JwtPs384_3072_F4_Template(), JwtPs512_4096_F4_Template()));
+                    JwtPs384_3072_F4_Template(), JwtPs512_4096_F4_Template(),
+                    RawJwtPs256_2048_F4_Template()));
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

@@ -80,6 +80,39 @@ TEST_F(HybridKeyTemplatesTest, testEciesP256HkdfHmacSha256Aes128Gcm) {
   EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
 }
 
+TEST_F(HybridKeyTemplatesTest, testEciesP256HkdfHmacSha512Aes128Gcm) {
+  // Check that returned template is correct.
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128Gcm();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+  EciesAeadHkdfKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_EQ(EcPointFormat::UNCOMPRESSED, key_format.params().ec_point_format());
+  auto dem_params = key_format.mutable_params()->mutable_dem_params();
+  auto expected_dem = AeadKeyTemplates::Aes128Gcm();
+  EXPECT_EQ(expected_dem.output_prefix_type(),
+            dem_params->aead_dem().output_prefix_type());
+  EXPECT_EQ(expected_dem.type_url(), dem_params->aead_dem().type_url());
+  EXPECT_EQ(expected_dem.value(), dem_params->aead_dem().value());
+  auto kem_params = key_format.mutable_params()->mutable_kem_params();
+  EXPECT_EQ(EllipticCurveType::NIST_P256, kem_params->curve_type());
+  EXPECT_EQ(HashType::SHA512, kem_params->hkdf_hash_type());
+  EXPECT_EQ("", kem_params->hkdf_salt());
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128Gcm();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the template works with the key manager.
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
+}
+
 TEST_F(HybridKeyTemplatesTest,
        testEciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix) {
   // Check that returned template is correct.
@@ -139,6 +172,39 @@ TEST_F(HybridKeyTemplatesTest, testEciesP256HkdfHmacSha256Aes128CtrHmacSha256) {
   // Check that reference to the same object is returned.
   const KeyTemplate& key_template_2 =
       HybridKeyTemplates::EciesP256HkdfHmacSha256Aes128CtrHmacSha256();
+  EXPECT_EQ(&key_template, &key_template_2);
+
+  // Check that the template works with the key manager.
+  EciesAeadHkdfPrivateKeyManager key_manager;
+  EXPECT_EQ(key_manager.get_key_type(), key_template.type_url());
+  EXPECT_THAT(key_manager.ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST_F(HybridKeyTemplatesTest, testEciesP256HkdfHmacSha512Aes128CtrHmacSha256) {
+  // Check that returned template is correct.
+  std::string type_url =
+      "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+  const KeyTemplate& key_template =
+      HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128CtrHmacSha256();
+  EXPECT_EQ(type_url, key_template.type_url());
+  EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
+  EciesAeadHkdfKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_EQ(EcPointFormat::UNCOMPRESSED, key_format.params().ec_point_format());
+  auto dem_params = key_format.mutable_params()->mutable_dem_params();
+  auto expected_dem = AeadKeyTemplates::Aes128CtrHmacSha256();
+  EXPECT_EQ(expected_dem.output_prefix_type(),
+            dem_params->aead_dem().output_prefix_type());
+  EXPECT_EQ(expected_dem.type_url(), dem_params->aead_dem().type_url());
+  EXPECT_EQ(expected_dem.value(), dem_params->aead_dem().value());
+  auto kem_params = key_format.mutable_params()->mutable_kem_params();
+  EXPECT_EQ(EllipticCurveType::NIST_P256, kem_params->curve_type());
+  EXPECT_EQ(HashType::SHA512, kem_params->hkdf_hash_type());
+  EXPECT_EQ("", kem_params->hkdf_salt());
+
+  // Check that reference to the same object is returned.
+  const KeyTemplate& key_template_2 =
+      HybridKeyTemplates::EciesP256HkdfHmacSha512Aes128CtrHmacSha256();
   EXPECT_EQ(&key_template, &key_template_2);
 
   // Check that the template works with the key manager.

@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/jwt_hmac_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -178,7 +180,8 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
@@ -186,7 +189,11 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt,
                                                           absl::nullopt);
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -209,14 +216,19 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
       JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(key_or.ValueOrDie());
   ASSERT_THAT(jwt_mac_or.status(), IsOk());
 
-  auto raw_jwt_or = RawJwtBuilder().SetIssuer("issuer").Build();
+  auto raw_jwt_or =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt_or.status(), IsOk());
   auto raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact_or =
       jwt_mac_or.ValueOrDie()->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
   ASSERT_THAT(compact_or.status(), IsOk());
-  JwtValidator validator = JwtValidatorBuilder().SetIssuer("issuer").Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectIssuer("issuer")
+                               .AllowMissingExpiration()
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact_or.ValueOrDie(),
@@ -240,6 +252,57 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
       Eq("kid-123"));
 }
 
+TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
+  JwtHmacKeyFormat key_format;
+  key_format.set_key_size(32);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
+  util::StatusOr<JwtHmacKey> key = JwtHmacKeyManager().CreateKey(key_format);
+  ASSERT_THAT(key.status(), IsOk());
+  key->mutable_custom_kid()->set_value(
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+  auto jwt_mac = JwtHmacKeyManager().GetPrimitive<JwtMacInternal>(*key);
+  ASSERT_THAT(jwt_mac.status(), IsOk());
+
+  auto raw_jwt =
+      RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+
+  util::StatusOr<std::string> compact =
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, absl::nullopt);
+  ASSERT_THAT(compact.status(), IsOk());
+  util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
+                                               .ExpectIssuer("issuer")
+                                               .AllowMissingExpiration()
+                                               .Build();
+  ASSERT_THAT(validator.status(), IsOk());
+  // parse header and check "kid"
+  std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
+  ASSERT_THAT(parts.size(), Eq(3));
+  std::string json_header;
+  ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  ASSERT_THAT(header.status(), IsOk());
+  auto it = header->fields().find("kid");
+  ASSERT_FALSE(it == header->fields().end());
+  EXPECT_THAT(it->second.string_value(),
+              Eq("Lorem ipsum dolor sit amet, consectetur adipiscing elit"));
+
+  // validate token
+  util::StatusOr<VerifiedJwt> verified_jwt =
+      (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
+  ASSERT_THAT(verified_jwt.status(), IsOk());
+  util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
+  ASSERT_THAT(issuer.status(), IsOk());
+  EXPECT_THAT(*issuer, testing::Eq("issuer"));
+
+  // passing a kid when custom_kid is set should fail
+  util::StatusOr<std::string> compact2 =
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, "kid123");
+  ASSERT_FALSE(compact2.ok());
+}
+
 TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   JwtHmacKey key;
   key.set_version(0);
@@ -258,8 +321,12 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
-  JwtValidator validator =
-      JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
+  JwtValidator validator = JwtValidatorBuilder()
+                               .ExpectTypeHeader("JWT")
+                               .ExpectIssuer("joe")
+                               .SetFixedNow(absl::FromUnixSeconds(12345))
+                               .Build()
+                               .ValueOrDie();
 
   util::StatusOr<VerifiedJwt> verified_jwt_or =
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact, validator);
@@ -269,7 +336,7 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   EXPECT_THAT(verified_jwt.GetBooleanClaim("http://example.com/is_root"),
               test::IsOkAndHolds(true));
 
-  JwtValidator validator_now = JwtValidatorBuilder().Build();
+  JwtValidator validator_now = JwtValidatorBuilder().Build().ValueOrDie();
   EXPECT_FALSE(
       jwt_mac_or.ValueOrDie()->VerifyMacAndDecode(compact, validator_now).ok());
 

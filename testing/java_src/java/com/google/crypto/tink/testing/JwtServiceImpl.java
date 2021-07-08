@@ -69,7 +69,7 @@ public final class JwtServiceImpl extends JwtImplBase {
   }
 
   private RawJwt convertJwtTokenToRawJwt(JwtToken token) throws JwtInvalidException {
-    RawJwt.Builder rawJwtBuilder = new RawJwt.Builder();
+    RawJwt.Builder rawJwtBuilder = RawJwt.newBuilder();
     if (token.hasTypeHeader()) {
       rawJwtBuilder.setTypeHeader(token.getTypeHeader().getValue());
     }
@@ -87,6 +87,8 @@ public final class JwtServiceImpl extends JwtImplBase {
     }
     if (token.hasExpiration()) {
       rawJwtBuilder.setExpiration(timestampToInstant(token.getExpiration()));
+    } else {
+      rawJwtBuilder.withoutExpiration();
     }
     if (token.hasNotBefore()) {
       rawJwtBuilder.setNotBefore(timestampToInstant(token.getNotBefore()));
@@ -242,15 +244,33 @@ public final class JwtServiceImpl extends JwtImplBase {
 
   private JwtValidator convertProtoValidatorToValidator(
       com.google.crypto.tink.proto.testing.JwtValidator validator) throws JwtInvalidException {
-    JwtValidator.Builder validatorBuilder = new JwtValidator.Builder();
-    if (validator.hasIssuer()) {
-      validatorBuilder.setIssuer(validator.getIssuer().getValue());
+    JwtValidator.Builder validatorBuilder = JwtValidator.newBuilder();
+    if (validator.hasExpectedTypeHeader()) {
+      validatorBuilder.expectTypeHeader(validator.getExpectedTypeHeader().getValue());
     }
-    if (validator.hasSubject()) {
-      validatorBuilder.setSubject(validator.getSubject().getValue());
+    if (validator.hasExpectedIssuer()) {
+      validatorBuilder.expectIssuer(validator.getExpectedIssuer().getValue());
     }
-    if (validator.hasAudience()) {
-      validatorBuilder.setAudience(validator.getAudience().getValue());
+    if (validator.hasExpectedSubject()) {
+      validatorBuilder.expectSubject(validator.getExpectedSubject().getValue());
+    }
+    if (validator.hasExpectedAudience()) {
+      validatorBuilder.expectAudience(validator.getExpectedAudience().getValue());
+    }
+    if (validator.getIgnoreTypeHeader()) {
+      validatorBuilder.ignoreTypeHeader();
+    }
+    if (validator.getIgnoreIssuer()) {
+      validatorBuilder.ignoreIssuer();
+    }
+    if (validator.getIgnoreSubject()) {
+      validatorBuilder.ignoreSubject();
+    }
+    if (validator.getIgnoreAudience()) {
+      validatorBuilder.ignoreAudiences();
+    }
+    if (validator.getAllowMissingExpiration()) {
+      validatorBuilder.allowMissingExpiration();
     }
     if (validator.hasNow()) {
       Instant now = timestampToInstant(validator.getNow());
