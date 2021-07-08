@@ -333,6 +333,7 @@ cc_library(
     srcs = ["raw_jwt_rsa_ssa_pkcs1_sign_key_manager.cc"],
     hdrs = ["raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"],
     include_prefix = "tink/jwt/internal",
+    visibility = ["//visibility:public"],
     deps = [
         ":raw_jwt_rsa_ssa_pkcs1_verify_key_manager",
         "//:core/private_key_type_manager",
@@ -381,6 +382,7 @@ cc_library(
     srcs = ["raw_jwt_rsa_ssa_pkcs1_verify_key_manager.cc"],
     hdrs = ["raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h"],
     include_prefix = "tink/jwt/internal",
+    visibility = ["//visibility:public"],
     deps = [
         "//:core/key_type_manager",
         "//:public_key_verify",
@@ -428,6 +430,7 @@ cc_library(
     srcs = ["raw_jwt_rsa_ssa_pss_sign_key_manager.cc"],
     hdrs = ["raw_jwt_rsa_ssa_pss_sign_key_manager.h"],
     include_prefix = "tink/jwt/internal",
+    visibility = ["//visibility:public"],
     deps = [
         ":raw_jwt_rsa_ssa_pss_verify_key_manager",
         "//:core/key_type_manager",
@@ -475,6 +478,7 @@ cc_library(
     srcs = ["raw_jwt_rsa_ssa_pss_verify_key_manager.cc"],
     hdrs = ["raw_jwt_rsa_ssa_pss_verify_key_manager.h"],
     include_prefix = "tink/jwt/internal",
+    visibility = ["//visibility:public"],
     deps = [
         "//:core/key_type_manager",
         "//:public_key_sign",

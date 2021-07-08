@@ -102,6 +102,22 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
       ('JWT_ES384_RAW', jwt.raw_jwt_es384_template()),
       ('JWT_ES512', jwt.jwt_es512_template()),
       ('JWT_ES512_RAW', jwt.raw_jwt_es512_template()),
+      ('JWT_RS256_2048_F4', jwt.jwt_rs256_2048_f4_template()),
+      ('JWT_RS256_2048_F4_RAW', jwt.raw_jwt_rs256_2048_f4_template()),
+      ('JWT_RS256_3072_F4', jwt.jwt_rs256_3072_f4_template()),
+      ('JWT_RS256_3072_F4_RAW', jwt.raw_jwt_rs256_3072_f4_template()),
+      ('JWT_RS384_3072_F4', jwt.jwt_rs384_3072_f4_template()),
+      ('JWT_RS384_3072_F4_RAW', jwt.raw_jwt_rs384_3072_f4_template()),
+      ('JWT_RS512_4096_F4', jwt.jwt_rs512_4096_f4_template()),
+      ('JWT_RS512_4096_F4_RAW', jwt.raw_jwt_rs512_4096_f4_template()),
+      ('JWT_PS256_2048_F4', jwt.jwt_ps256_2048_f4_template()),
+      ('JWT_PS256_2048_F4_RAW', jwt.raw_jwt_ps256_2048_f4_template()),
+      ('JWT_PS256_3072_F4', jwt.jwt_ps256_3072_f4_template()),
+      ('JWT_PS256_3072_F4_RAW', jwt.raw_jwt_ps256_3072_f4_template()),
+      ('JWT_PS384_3072_F4', jwt.jwt_ps384_3072_f4_template()),
+      ('JWT_PS384_3072_F4_RAW', jwt.raw_jwt_ps384_3072_f4_template()),
+      ('JWT_PS512_4096_F4', jwt.jwt_ps512_4096_f4_template()),
+      ('JWT_PS512_4096_F4_RAW', jwt.raw_jwt_ps512_4096_f4_template()),
   ])
   def test_new_keydata_primitive_success(self, template):
     private_handle = tink.new_keyset_handle(template)

@@ -33,6 +33,10 @@ cc_library(
         "@tink_cc//jwt/internal:raw_jwt_ecdsa_sign_key_manager",
         "@tink_cc//jwt/internal:raw_jwt_ecdsa_verify_key_manager",
         "@tink_cc//jwt/internal:raw_jwt_hmac_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pkcs1_sign_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pkcs1_verify_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pss_sign_key_manager",
+        "@tink_cc//jwt/internal:raw_jwt_rsa_ssa_pss_verify_key_manager",
         "@tink_cc//util:status",
     ],
 )

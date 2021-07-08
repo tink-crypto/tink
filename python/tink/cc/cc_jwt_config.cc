@@ -19,19 +19,35 @@
 #include "tink/jwt/internal/raw_jwt_ecdsa_sign_key_manager.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
+#include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"
+#include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h"
+#include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_sign_key_manager.h"
+#include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 
 namespace crypto {
 namespace tink {
 
 util::Status CcJwtConfigRegister() {
-  auto status = Registry::RegisterKeyTypeManager(
+  util::Status status = Registry::RegisterKeyTypeManager(
       absl::make_unique<jwt_internal::RawJwtHmacKeyManager>(), true);
   if (!status.ok()) {
     return status;
   }
-  return Registry::RegisterAsymmetricKeyManagers(
+  status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<jwt_internal::RawJwtEcdsaSignKeyManager>(),
       absl::make_unique<jwt_internal::RawJwtEcdsaVerifyKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<RawJwtRsaSsaPkcs1SignKeyManager>(),
+      absl::make_unique<RawJwtRsaSsaPkcs1VerifyKeyManager>(), true);
+  if (!status.ok()) {
+    return status;
+  }
+  return Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<RawJwtRsaSsaPssSignKeyManager>(),
+      absl::make_unique<RawJwtRsaSsaPssVerifyKeyManager>(), true);
 }
 
 }  // namespace tink

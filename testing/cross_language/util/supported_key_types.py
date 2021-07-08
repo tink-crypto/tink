@@ -111,8 +111,8 @@ SUPPORTED_LANGUAGES = {
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
     'JwtHmacKey': ['cc', 'java', 'python'],
     'JwtEcdsaPrivateKey': ['cc', 'java', 'python'],
-    'JwtRsaSsaPkcs1PrivateKey': ['cc', 'java'],
-    'JwtRsaSsaPssPrivateKey': ['cc', 'java'],
+    'JwtRsaSsaPkcs1PrivateKey': ['cc', 'java', 'python'],
+    'JwtRsaSsaPssPrivateKey': ['cc', 'java', 'python'],
 }
 
 KEY_TYPE_FROM_URL = {
