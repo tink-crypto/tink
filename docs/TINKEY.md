@@ -10,7 +10,7 @@ Tinkey requires Java 8 or later to run.
 ## Install from prebuilt binaries
 
 Download the latest version of Tinkey from
-https://storage.googleapis.com/tinkey/tinkey-1.5.0.tar.gz. This version should
+https://storage.googleapis.com/tinkey/tinkey-1.6.0.tar.gz. This version should
 work well on Linux, macOS and Windows.
 
 ## Install with Homebrew
