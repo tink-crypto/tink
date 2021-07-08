@@ -20,6 +20,7 @@ import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
 /**
@@ -27,6 +28,7 @@ import java.security.GeneralSecurityException;
  * KeyAccess}. Specifically, if the underlying {@link TinkKey} has a secret, then one can only get
  * it with a {@link SecretKeyAccess} instance.
  */
+@Immutable
 public final class KeyHandle {
 
   /**
@@ -67,7 +69,7 @@ public final class KeyHandle {
   }
 
   private final TinkKey key;
-  private KeyStatusType status;
+  private final KeyStatusType status;
   private final int id;
 
   /**
@@ -88,11 +90,6 @@ public final class KeyHandle {
   /** Returns the status of the key. See {@link KeyStatusType}. */
   public KeyStatusType getStatus() {
     return this.status;
-  }
-
-  /** Sets the status of the key. See {@link KeyStatusType}. */
-  public void setStatus(KeyStatusType status) {
-    this.status = status;
   }
 
   /**

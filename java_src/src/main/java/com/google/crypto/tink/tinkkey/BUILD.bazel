@@ -40,6 +40,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink/internal:util",
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
 
@@ -77,5 +78,6 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink/internal:util-android",
         "//src/main/java/com/google/crypto/tink/tinkkey/internal:proto_key-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
