@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":41,"i1":9,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
+var methods = {"i0":41,"i1":9,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -108,7 +108,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <hr>
 <br>
-<pre>public final class <span class="typeNameLabel">KeyHandle</span>
+<pre>@Immutable
+public final class <span class="typeNameLabel">KeyHandle</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Wraps a <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> and enforces access to the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> with <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyAccess</code></a>. Specifically, if the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> has a secret, then one can only get
  it with a <a href="../../../../../com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>SecretKeyAccess</code></a> instance.</div>
@@ -200,12 +201,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Returns <code>true</code> if the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> has a secret.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#setStatus-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-">setStatus</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status)</code>
-<div class="block">Sets the status of the key.</div>
-</td>
-</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -278,16 +273,6 @@ public static&nbsp;<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHan
 <h4>getStatus</h4>
 <pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;getStatus()</pre>
 <div class="block">Returns the status of the key. See <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a>.</div>
-</li>
-</ul>
-<a name="setStatus-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setStatus</h4>
-<pre>public&nbsp;void&nbsp;setStatus(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status)</pre>
-<div class="block">Sets the status of the key. See <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a>.</div>
 </li>
 </ul>
 <a name="getId--">
