@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
@@ -24,7 +25,6 @@ import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -289,27 +289,10 @@ public final class KeysetManager {
   }
 
   private synchronized int newKeyId() {
-    int keyId = randPositiveInt();
+    int keyId = Util.randKeyId();
     while (keyIdExists(keyId)) {
-      keyId = randPositiveInt();
+      keyId = Util.randKeyId();
     }
     return keyId;
-  }
-
-  /** @return positive random int */
-  private static int randPositiveInt() {
-    SecureRandom secureRandom = new SecureRandom();
-    byte[] rand = new byte[4];
-    int result = 0;
-    while (result == 0) {
-      secureRandom.nextBytes(rand);
-      // TODO(b/148124847): Other languages create key_ids with the MSB set, so we should here too.
-      result =
-          ((rand[0] & 0x7f) << 24)
-              | ((rand[1] & 0xff) << 16)
-              | ((rand[2] & 0xff) << 8)
-              | (rand[3] & 0xff);
-    }
-    return result;
   }
 }

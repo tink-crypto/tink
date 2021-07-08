@@ -17,6 +17,7 @@ package com.google.crypto.tink.tinkkey;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import java.security.GeneralSecurityException;
@@ -67,11 +68,16 @@ public final class KeyHandle {
 
   private final TinkKey key;
   private KeyStatusType status;
+  private final int id;
 
-  /** Constructs a KeyHandle wrapping the input TinkKey and KeyStatusType ENABLED. */
+  /**
+   * Constructs a KeyHandle wrapping the input TinkKey. The KeyStatusType is set to ENABLED and an
+   * arbitrary key ID is assigned.
+   */
   private KeyHandle(TinkKey key) {
     this.key = key;
     this.status = KeyStatusType.ENABLED;
+    this.id = Util.randKeyId();
   }
 
   /** Returns {@code true} if the underlying {@link TinkKey} has a secret. */
@@ -87,6 +93,13 @@ public final class KeyHandle {
   /** Sets the status of the key. See {@link KeyStatusType}. */
   public void setStatus(KeyStatusType status) {
     this.status = status;
+  }
+
+  /**
+   * Returns the key ID of this key. The key ID is not guaranteed to be unique among all KeyHandles.
+   */
+  public int getId() {
+    return id;
   }
 
   /**
