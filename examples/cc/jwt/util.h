@@ -17,9 +17,11 @@
 #ifndef EXAMPLES_CC_JWT_UTIL_H_
 #define EXAMPLES_CC_JWT_UTIL_H_
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
+#include "absl/strings/string_view.h"
 #include "tink/keyset_handle.h"
 
 // Helper functions for JWT Signature CLI
@@ -36,10 +38,10 @@ void WriteKeyset(const crypto::tink::KeysetHandle& keyset_handle,
 
 // Reads the specified file and returns the contents as a string.
 // In case of errors writes a log message and aborts.
-std::string Read(absl::string_view filename);
+std::string ReadFile(absl::string_view filename);
 
 // Writes the given 'output' to the specified file.
 // In case of errors writes a log message and aborts.
-void Write(absl::string_view output, absl::string_view filename);
+void WriteFile(absl::string_view output, absl::string_view filename);
 
 #endif  // EXAMPLES_CC_JWT_UTIL_H_

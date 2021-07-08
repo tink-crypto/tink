@@ -33,21 +33,22 @@
 //     output-file: name of the file for the resulting output
 //
 // sign
-//   Signs the message using the given private keyset.
+//   Generates and signs a token using the given private keyset.
 //   It requires 3 additional arguments:
 //     private-keyset-file: name of the file with the private keyset
 //     subject: subject claim to be put in the token.
 //     output-file: name of the file for the resulting output
 //
 // verify
-//   Verifies the signature of the message using the given public keyset.
+//   Verifies a token using the given public keyset.
 //   It requires 4 additional arguments:
 //     public-keyset-file: name of the file with the public keyset
 //     subject: expected subject in the token
-//     token-file: name of the file with the signature
+//     token-file: name of the file with the token
 //     output-file: name of the file for the resulting output (valid/invalid)
 
 #include <iostream>
+#include <string>
 
 #include "tink/jwt/jwt_key_templates.h"
 #include "tink/jwt/jwt_public_key_sign.h"
@@ -80,7 +81,7 @@ void PrintUsageInfo() {
 
 // Generates a new private keyset using JwtRs256_2048_F4_Template and writes it
 // to the output file.
-void GeneratePrivateKey(const std::string& output_filename) {
+void GeneratePrivateKey(absl::string_view output_filename) {
   std::clog << "Generating a new private keyset.." << std::endl;
 
   auto key_template = crypto::tink::JwtRs256_2048_F4_Template();
@@ -99,8 +100,8 @@ void GeneratePrivateKey(const std::string& output_filename) {
 
 // Extracts a public keyset associated with the given private keyset
 // and writes it to the output file.
-void ExtractPublicKey(const std::string& private_keyset_filename,
-                      const std::string& output_filename) {
+void ExtractPublicKey(absl::string_view private_keyset_filename,
+                      absl::string_view output_filename) {
   std::clog << "Extracting a public keyset associated with the private "
             << "keyset from file " << private_keyset_filename << "..."
             << std::endl;
@@ -122,10 +123,10 @@ void ExtractPublicKey(const std::string& private_keyset_filename,
   WriteKeyset(**public_keyset_handle, output_filename);
 }
 
-// Signs the message using the given private keyset
-// and writes the signature to the output file.
-void Sign(const std::string& keyset_filename, const std::string& subject,
-          const std::string& output_filename) {
+// Creates and signs a token with the given subject claim using the given
+// private keyset and writes the signature to the output file.
+void Sign(absl::string_view keyset_filename, absl::string_view subject,
+          absl::string_view output_filename) {
   std::unique_ptr<crypto::tink::KeysetHandle> keyset_handle =
       ReadKeyset(keyset_filename);
 
@@ -155,23 +156,23 @@ void Sign(const std::string& keyset_filename, const std::string& subject,
   crypto::tink::util::StatusOr<std::string> token =
       (*jwt_public_key_sign)->SignAndEncode(*raw_jwt);
   if (!token.ok()) {
-    std::clog << "Error while signing the message: "
+    std::clog << "Error while generating the token: "
               << token.status().error_message() << std::endl;
     exit(1);
   }
 
-  std::clog << "Writing the resulting signature to file " << output_filename
+  std::clog << "Writing the resulting token to file " << output_filename
             << "..." << std::endl;
 
-  Write(*token, output_filename);
+  WriteFile(*token, output_filename);
 }
 
-// Verifies the signature of the message using the given public keyset
-// and writes the result to the output file.
-void Verify(const std::string& keyset_filename,
-            const std::string& expected_subject,
-            const std::string& token_filename,
-            const std::string& output_filename) {
+// Verifies a token using the given public keyset and writes the result to the
+// output file.
+void Verify(absl::string_view keyset_filename,
+            absl::string_view expected_subject,
+            absl::string_view token_filename,
+            absl::string_view output_filename) {
   std::unique_ptr<KeysetHandle> keyset_handle = ReadKeyset(keyset_filename);
 
   crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verifier =
@@ -187,7 +188,7 @@ void Verify(const std::string& keyset_filename,
             << "' using public keyset from file " << keyset_filename << "..."
             << std::endl;
 
-  std::string token = Read(token_filename);
+  std::string token = ReadFile(token_filename);
 
   crypto::tink::util::StatusOr<JwtValidator> validator =
       crypto::tink::JwtValidatorBuilder()
@@ -215,7 +216,7 @@ void Verify(const std::string& keyset_filename,
   std::clog << "Writing the result to file " << output_filename
             << "..." << std::endl;
 
-  Write(result, output_filename);
+  WriteFile(result, output_filename);
 }
 
 int main(int argc, char** argv) {

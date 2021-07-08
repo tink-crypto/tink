@@ -18,7 +18,10 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <utility>
 
+#include "absl/strings/string_view.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
@@ -96,7 +99,7 @@ void WriteKeyset(const crypto::tink::KeysetHandle& keyset_handle,
   }
 }
 
-std::string Read(absl::string_view filename) {
+std::string ReadFile(absl::string_view filename) {
   std::ifstream input_stream;
   input_stream.open(std::string(filename), std::ifstream::in);
   if (!input_stream.is_open()) {
@@ -110,7 +113,7 @@ std::string Read(absl::string_view filename) {
   return input.str();
 }
 
-void Write(absl::string_view output, absl::string_view filename) {
+void WriteFile(absl::string_view output, absl::string_view filename) {
   std::ofstream output_stream(std::string(filename),
                               std::ofstream::out | std::ofstream::binary);
   if (!output_stream.is_open()) {
