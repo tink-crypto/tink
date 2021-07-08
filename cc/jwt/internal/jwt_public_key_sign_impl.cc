@@ -30,11 +30,11 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
     const RawJwt& token, absl::optional<absl::string_view> kid) const {
   absl::optional<std::string> type_header;
   if (token.HasTypeHeader()) {
-    util::StatusOr<std::string> type_or = token.GetTypeHeader();
-    if (!type_or.ok()) {
-      return type_or.status();
+    util::StatusOr<std::string> type = token.GetTypeHeader();
+    if (!type.ok()) {
+      return type.status();
     }
-    type_header = type_or.ValueOrDie();
+    type_header = *type;
   }
   if (custom_kid_.has_value()) {
     if (kid.has_value()) {
@@ -43,14 +43,18 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
     }
     kid = *custom_kid_;
   }
-  std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
+  util::StatusOr<std::string> encoded_header =
+      CreateHeader(algorithm_, type_header, kid);
+  if (!encoded_header.ok()) {
+    return encoded_header.status();
+  }
   util::StatusOr<std::string> payload_or = token.GetJsonPayload();
   if (!payload_or.ok()) {
     return payload_or.status();
   }
   std::string encoded_payload = EncodePayload(payload_or.ValueOrDie());
   std::string unsigned_token =
-      absl::StrCat(encoded_header, ".", encoded_payload);
+      absl::StrCat(*encoded_header, ".", encoded_payload);
   util::StatusOr<std::string> tag_or = sign_->Sign(unsigned_token);
   if (!tag_or.ok()) {
     return tag_or.status();

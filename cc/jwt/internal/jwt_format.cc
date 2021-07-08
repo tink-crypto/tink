@@ -78,9 +78,9 @@ absl::optional<uint32_t> GetKeyId(absl::string_view kid) {
   return absl::big_endian::Load32(decoded_kid.data());
 }
 
-std::string CreateHeader(absl::string_view algorithm,
-                         absl::optional<absl::string_view> type_header,
-                         absl::optional<absl::string_view> kid) {
+util::StatusOr<std::string> CreateHeader(
+    absl::string_view algorithm, absl::optional<absl::string_view> type_header,
+    absl::optional<absl::string_view> kid) {
   google::protobuf::Struct header;
   auto fields = header.mutable_fields();
   if (kid.has_value()) {
@@ -91,12 +91,12 @@ std::string CreateHeader(absl::string_view algorithm,
     (*fields)["typ"].set_string_value(std::string(type_header.value()));
   }
   (*fields)["alg"].set_string_value(std::string(algorithm));
-  util::StatusOr<std::string> json_or =
+  util::StatusOr<std::string> json_header =
       jwt_internal::ProtoStructToJsonString(header);
-  if (!json_or.ok()) {
-    // do something
+  if (!json_header.ok()) {
+    return json_header.status();
   }
-  return EncodeHeader(json_or.ValueOrDie());
+  return EncodeHeader(*json_header);
 }
 
 util::Status ValidateHeader(const google::protobuf::Struct& header,

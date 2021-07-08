@@ -37,7 +37,7 @@ absl::optional<std::string> GetKid(
     ::google::crypto::tink::OutputPrefixType output_prefix_type);
 absl::optional<uint32_t> GetKeyId(absl::string_view kid);
 
-std::string CreateHeader(absl::string_view algorithm,
+util::StatusOr<std::string> CreateHeader(absl::string_view algorithm,
                          absl::optional<absl::string_view> type_header,
                          absl::optional<absl::string_view> kid);
 util::Status ValidateHeader(const google::protobuf::Struct& header,

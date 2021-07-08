@@ -32,11 +32,11 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
     const RawJwt& token, absl::optional<absl::string_view> kid) const {
   absl::optional<std::string> type_header;
   if (token.HasTypeHeader()) {
-    util::StatusOr<std::string> type_or = token.GetTypeHeader();
-    if (!type_or.ok()) {
-      return type_or.status();
+    util::StatusOr<std::string> type = token.GetTypeHeader();
+    if (!type.ok()) {
+      return type.status();
     }
-    type_header = type_or.ValueOrDie();
+    type_header = *type;
   }
   if (custom_kid_.has_value()) {
     if (kid.has_value()) {
@@ -45,19 +45,23 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
     }
     kid = *custom_kid_;
   }
-  std::string encoded_header = CreateHeader(algorithm_, type_header, kid);
-  util::StatusOr<std::string> payload_or = token.GetJsonPayload();
-  if (!payload_or.ok()) {
-    return payload_or.status();
+  util::StatusOr<std::string> encoded_header =
+      CreateHeader(algorithm_, type_header, kid);
+  if (!encoded_header.ok()) {
+    return encoded_header.status();
   }
-  std::string encoded_payload = EncodePayload(payload_or.ValueOrDie());
+  util::StatusOr<std::string> payload = token.GetJsonPayload();
+  if (!payload.ok()) {
+    return payload.status();
+  }
+  std::string encoded_payload = EncodePayload(*payload);
   std::string unsigned_token =
-      absl::StrCat(encoded_header, ".", encoded_payload);
-  util::StatusOr<std::string> tag_or = mac_->ComputeMac(unsigned_token);
-  if (!tag_or.ok()) {
-    return tag_or.status();
+      absl::StrCat(*encoded_header, ".", encoded_payload);
+  util::StatusOr<std::string> tag = mac_->ComputeMac(unsigned_token);
+  if (!tag.ok()) {
+    return tag.status();
   }
-  std::string encoded_tag = EncodeSignature(tag_or.ValueOrDie());
+  std::string encoded_tag = EncodeSignature(*tag);
   return absl::StrCat(unsigned_token, ".", encoded_tag);
 }
 
