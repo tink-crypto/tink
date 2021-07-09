@@ -3572,6 +3572,12 @@
 <dd>
 <div class="block">A global container of key managers and catalogues.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/config/TinkFips.html#restrictToFips--">restrictToFips()</a></span> - Static method in class com.google.crypto.tink.config.<a href="com/google/crypto/tink/config/TinkFips.html" title="class in com.google.crypto.tink.config">TinkFips</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#restrictToFipsIfEmpty--">restrictToFipsIfEmpty()</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
+<dd>
+<div class="block">Tries to enable the FIPS restrictions if the Registry is empty.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html#rewind--">rewind()</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RewindableReadableByteChannel.html" title="class in com.google.crypto.tink.subtle">RewindableReadableByteChannel</a></dt>
 <dd>
 <div class="block">Rewinds this buffer to the beginning (if rewinding is still enabled).</div>
@@ -3738,6 +3744,8 @@
 <dd>
 <div class="block">Self Key tests validation helper methods.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html#setFipsRestricted--">setFipsRestricted()</a></span> - Static method in class com.google.crypto.tink.config.internal.<a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html" title="class in com.google.crypto.tink.config.internal">TinkFipsUtil</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html#setKeyStore-java.security.KeyStore-">setKeyStore(KeyStore)</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.Builder.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient.Builder</a></dt>
 <dd>
 <div class="block">This is for testing only</div>
@@ -4038,6 +4046,10 @@
 </a>
 <h2 class="title">U</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html#unsetFipsRestricted--">unsetFipsRestricted()</a></span> - Static method in class com.google.crypto.tink.config.internal.<a href="com/google/crypto/tink/config/internal/TinkFipsUtil.html" title="class in com.google.crypto.tink.config.internal">TinkFipsUtil</a></dt>
+<dd>
+<div class="block">This method is only exposed for tests and should not be used to disable the FIPS restrictions.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#unwrap-byte:A-">unwrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
 <dd>
 <div class="block">Unwraps a wrapped key.</div>

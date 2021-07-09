@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9};
+var methods = {"i0":9,"i1":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -130,6 +130,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/config/TinkFips.html#restrictToFips--">restrictToFips</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/config/TinkFips.html#useOnlyFips--">useOnlyFips</a></span>()</code>
 <div class="block">Returns true if the FIPS-mode has been enabled at build time or runtime.</div>
@@ -160,11 +164,25 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <a name="useOnlyFips--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>useOnlyFips</h4>
 <pre>public static&nbsp;boolean&nbsp;useOnlyFips()</pre>
 <div class="block">Returns true if the FIPS-mode has been enabled at build time or runtime.</div>
+</li>
+</ul>
+<a name="restrictToFips--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>restrictToFips</h4>
+<pre>public static&nbsp;void&nbsp;restrictToFips()
+                           throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
 </li>
 </ul>
 </li>
