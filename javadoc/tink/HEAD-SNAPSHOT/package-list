@@ -3,6 +3,7 @@ com.google.crypto.tink.aead
 com.google.crypto.tink.aead.subtle
 com.google.crypto.tink.annotations
 com.google.crypto.tink.config
+com.google.crypto.tink.config.internal
 com.google.crypto.tink.daead
 com.google.crypto.tink.hybrid
 com.google.crypto.tink.hybrid.subtle
