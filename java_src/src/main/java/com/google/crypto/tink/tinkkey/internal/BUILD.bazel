@@ -25,3 +25,25 @@ android_library(
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
+
+java_library(
+    name = "internal_key_handle",
+    srcs = ["InternalKeyHandle.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
+        "//src/main/java/com/google/crypto/tink/tinkkey:tink_key",
+    ],
+)
+
+android_library(
+    name = "internal_key_handle-android",
+    srcs = ["InternalKeyHandle.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/internal:key_status_type_proto_converter-android",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_handle-android",
+        "//src/main/java/com/google/crypto/tink/tinkkey:tink_key-android",
+    ],
+)

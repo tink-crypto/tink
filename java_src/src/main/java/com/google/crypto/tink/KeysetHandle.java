@@ -24,12 +24,16 @@ import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.SecretKeyAccess;
+import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A KeysetHandle provides abstracted access to {@link Keyset}, to limit the exposure of actual
@@ -60,6 +64,20 @@ public final class KeysetHandle {
   /** @return the actual keyset data. */
   Keyset getKeyset() {
     return keyset;
+  }
+
+  /** Returns the keyset data as a list of {@link KeyHandle}s. */
+  public List<KeyHandle> getKeys() {
+    ArrayList<KeyHandle> result = new ArrayList<>();
+    for (Keyset.Key key : keyset.getKeyList()) {
+      KeyData keyData = key.getKeyData();
+      result.add(
+          new InternalKeyHandle(
+              new ProtoKey(keyData, KeyTemplate.fromProto(key.getOutputPrefixType())),
+              key.getStatus(),
+              key.getKeyId()));
+    }
+    return Collections.unmodifiableList(result);
   }
 
   /**

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
@@ -45,8 +46,11 @@ import com.google.protobuf.ExtensionRegistryLite;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -89,6 +93,34 @@ public class KeysetHandleTest {
   public static void setUp() throws GeneralSecurityException {
     Config.register(TinkConfig.TINK_1_0_0);
     Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
+  }
+
+  @Test
+  public void getKeys() throws Exception {
+    KeyTemplate keyTemplate = KeyTemplates.get("AES128_EAX");
+    KeysetManager keysetManager = KeysetManager.withEmptyKeyset();
+    final int numKeys = 3;
+    for (int i = 0; i < numKeys; i++) {
+      keysetManager.add(keyTemplate);
+    }
+    KeysetHandle handle = keysetManager.getKeysetHandle();
+    Keyset keyset = handle.getKeyset();
+
+    List<KeyHandle> keysetKeys = handle.getKeys();
+
+    expect.that(keysetKeys).hasSize(numKeys);
+    Map<Integer, KeyHandle> keysetKeysMap =
+        keysetKeys.stream().collect(Collectors.toMap(KeyHandle::getId, key -> key));
+    for (Keyset.Key key : keyset.getKeyList()) {
+      expect.that(keysetKeysMap).containsKey(key.getKeyId());
+      KeyHandle keysetKey = keysetKeysMap.get(key.getKeyId());
+      expect
+          .that(KeyStatusTypeProtoConverter.toProto(keysetKey.getStatus()))
+          .isEqualTo(key.getStatus());
+      KeyData keyData =
+          ((ProtoKey) keysetKey.getKey(SecretKeyAccess.insecureSecretAccess())).getProtoKey();
+      expect.that(keyData).isEqualTo(key.getKeyData());
+    }
   }
 
   @Test

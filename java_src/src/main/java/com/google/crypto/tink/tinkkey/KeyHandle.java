@@ -29,7 +29,7 @@ import java.security.GeneralSecurityException;
  * it with a {@link SecretKeyAccess} instance.
  */
 @Immutable
-public final class KeyHandle {
+public class KeyHandle {
 
   /**
    * KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
@@ -80,6 +80,16 @@ public final class KeyHandle {
     this.key = key;
     this.status = KeyStatusType.ENABLED;
     this.id = Util.randKeyId();
+  }
+
+  /**
+   * Constructor intended for Tink internal purposes; allows one to set all the member variables of
+   * a {@link KeyHandle}.
+   */
+  protected KeyHandle(TinkKey key, KeyStatusType status, int keyId) {
+    this.key = key;
+    this.status = status;
+    this.id = keyId;
   }
 
   /** Returns {@code true} if the underlying {@link TinkKey} has a secret. */
