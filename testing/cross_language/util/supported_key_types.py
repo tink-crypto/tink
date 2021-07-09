@@ -171,15 +171,23 @@ KEY_TEMPLATE_NAMES = {
     'AesCmacPrfKey': ['AES_CMAC_PRF'],
     'HmacPrfKey': ['HMAC_PRF_SHA256', 'HMAC_PRF_SHA512'],
     'HkdfPrfKey': ['HKDF_PRF_SHA256'],
-    'JwtHmacKey': ['JWT_HS256', 'JWT_HS384', 'JWT_HS512'],
-    'JwtEcdsaPrivateKey': ['JWT_ES256', 'JWT_ES384', 'JWT_ES512'],
+    'JwtHmacKey': [
+        'JWT_HS256', 'JWT_HS256_RAW', 'JWT_HS384', 'JWT_HS384_RAW', 'JWT_HS512',
+        'JWT_HS512_RAW'
+    ],
+    'JwtEcdsaPrivateKey': [
+        'JWT_ES256', 'JWT_ES256_RAW', 'JWT_ES384', 'JWT_ES384_RAW', 'JWT_ES512',
+        'JWT_ES512_RAW'
+    ],
     'JwtRsaSsaPkcs1PrivateKey': [
-        'JWT_RS256_2048_F4', 'JWT_RS256_3072_F4', 'JWT_RS384_3072_F4',
-        'JWT_RS512_4096_F4'
+        'JWT_RS256_2048_F4', 'JWT_RS256_2048_F4_RAW', 'JWT_RS256_3072_F4',
+        'JWT_RS256_3072_F4_RAW', 'JWT_RS384_3072_F4', 'JWT_RS384_3072_F4_RAW',
+        'JWT_RS512_4096_F4', 'JWT_RS512_4096_F4_RAW'
     ],
     'JwtRsaSsaPssPrivateKey': [
-        'JWT_PS256_2048_F4', 'JWT_PS256_3072_F4', 'JWT_PS384_3072_F4',
-        'JWT_PS512_4096_F4'
+        'JWT_PS256_2048_F4', 'JWT_PS256_2048_F4_RAW', 'JWT_PS256_3072_F4',
+        'JWT_PS256_3072_F4_RAW', 'JWT_PS384_3072_F4', 'JWT_PS384_3072_F4_RAW',
+        'JWT_PS512_4096_F4', 'JWT_PS512_4096_F4_RAW'
     ],
 }
 
@@ -299,19 +307,33 @@ KEY_TEMPLATE = {
     'HKDF_PRF_SHA256':
         prf.prf_key_templates.HKDF_SHA256,
     'JWT_HS256': jwt.jwt_hs256_template(),
+    'JWT_HS256_RAW': jwt.raw_jwt_hs256_template(),
     'JWT_HS384': jwt.jwt_hs384_template(),
+    'JWT_HS384_RAW': jwt.raw_jwt_hs384_template(),
     'JWT_HS512': jwt.jwt_hs512_template(),
+    'JWT_HS512_RAW': jwt.raw_jwt_hs512_template(),
     'JWT_ES256': jwt.jwt_es256_template(),
+    'JWT_ES256_RAW': jwt.raw_jwt_es256_template(),
     'JWT_ES384': jwt.jwt_es384_template(),
+    'JWT_ES384_RAW': jwt.raw_jwt_es384_template(),
     'JWT_ES512': jwt.jwt_es512_template(),
+    'JWT_ES512_RAW': jwt.raw_jwt_es512_template(),
     'JWT_RS256_2048_F4': jwt.jwt_rs256_2048_f4_template(),
+    'JWT_RS256_2048_F4_RAW': jwt.raw_jwt_rs256_2048_f4_template(),
     'JWT_RS256_3072_F4': jwt.jwt_rs256_3072_f4_template(),
+    'JWT_RS256_3072_F4_RAW': jwt.raw_jwt_rs256_3072_f4_template(),
     'JWT_RS384_3072_F4': jwt.jwt_rs384_3072_f4_template(),
+    'JWT_RS384_3072_F4_RAW': jwt.raw_jwt_rs384_3072_f4_template(),
     'JWT_RS512_4096_F4': jwt.jwt_rs512_4096_f4_template(),
+    'JWT_RS512_4096_F4_RAW': jwt.raw_jwt_rs512_4096_f4_template(),
     'JWT_PS256_2048_F4': jwt.jwt_ps256_2048_f4_template(),
+    'JWT_PS256_2048_F4_RAW': jwt.raw_jwt_ps256_2048_f4_template(),
     'JWT_PS256_3072_F4': jwt.jwt_ps256_3072_f4_template(),
+    'JWT_PS256_3072_F4_RAW': jwt.raw_jwt_ps256_3072_f4_template(),
     'JWT_PS384_3072_F4': jwt.jwt_ps384_3072_f4_template(),
+    'JWT_PS384_3072_F4_RAW': jwt.raw_jwt_ps384_3072_f4_template(),
     'JWT_PS512_4096_F4': jwt.jwt_ps512_4096_f4_template(),
+    'JWT_PS512_4096_F4_RAW': jwt.raw_jwt_ps512_4096_f4_template(),
 }
 
 
