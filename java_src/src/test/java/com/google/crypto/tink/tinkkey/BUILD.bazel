@@ -30,7 +30,7 @@ java_test(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_templates",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
         "//src/main/java/com/google/crypto/tink/signature:ed25519_private_key_manager",
         "//src/main/java/com/google/crypto/tink/tinkkey:key_access",

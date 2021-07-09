@@ -23,7 +23,7 @@ java_test(
     srcs = ["AeadConfigTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "@maven//:com_google_truth_truth",

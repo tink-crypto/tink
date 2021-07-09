@@ -25,10 +25,9 @@ java_test(
     srcs = ["DeterministicAeadConfigTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
-        "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],
 )
