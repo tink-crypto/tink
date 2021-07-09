@@ -89,6 +89,10 @@
 <td class="colFirst"><a href="#com.google.crypto.tink.tinkkey">com.google.crypto.tink.tinkkey</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.tinkkey.internal">com.google.crypto.tink.tinkkey.internal</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -110,6 +114,21 @@
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#primaryKey--">primaryKey</a></span>()</code>
 <div class="block">Searches the keyset to find the primary key of this <code>KeysetHandle</code>, and returns the key
  wrapped in a <code>KeyHandle</code>.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../../com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a> that return types with arguments of type <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&gt;</code></td>
+<td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeysetHandle.html#getKeys--">getKeys</a></span>()</code>
+<div class="block">Returns the keyset data as a list of <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>s.</div>
 </td>
 </tr>
 </tbody>
@@ -164,6 +183,26 @@
              <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
 <div class="block">Returns a <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> instance with <code>key</code> as the underlying <a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> if the
  caller provides the correct <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyAccess</code></a> instance.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.tinkkey.internal">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a> in <a href="../../../../../../com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing subclasses, and an explanation">
+<caption><span>Subclasses of <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a> in <a href="../../../../../../com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal">InternalKeyHandle</a></span></code>
+<div class="block">Class used to expose the protected KeyHandle constructor to the rest of Tink.</div>
 </td>
 </tr>
 </tbody>

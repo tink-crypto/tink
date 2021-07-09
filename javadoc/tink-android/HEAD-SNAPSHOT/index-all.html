@@ -1576,6 +1576,10 @@
 <dd>
 <div class="block">Returns a KeysetHandle for <code>keyset</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html#fromProto-com.google.crypto.tink.proto.KeyStatusType-">fromProto(KeyStatusType)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal">KeyStatusTypeProtoConverter</a></dt>
+<dd>
+<div class="block">Converts a <a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto enum into a <code>KeyHandle.KeyStatusType</code> enum</div>
+</dd>
 </dl>
 <a name="I:G">
 <!--   -->
@@ -1782,6 +1786,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getKeyManager-java.lang.String-java.lang.Class-">getKeyManager(String, Class&lt;P&gt;)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#getKeys--">getKeys()</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Returns the keyset data as a list of <a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>s.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/CleartextKeysetHandle.html#getKeyset-com.google.crypto.tink.KeysetHandle-">getKeyset(KeysetHandle)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink">CleartextKeysetHandle</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html#getKeysetHandle--">getKeysetHandle()</a></span> - Method in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeysetManager.html" title="class in com.google.crypto.tink.integration.android">AndroidKeysetManager</a></dt>
@@ -2442,6 +2450,12 @@
 <div class="block">Converts a nonnegative integer to a byte array of a specified length
  (https://tools.ietf.org/html/rfc8017#section-4.2).</div>
 </dd>
+<dt><a href="com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal"><span class="typeNameLink">InternalKeyHandle</span></a> - Class in <a href="com/google/crypto/tink/tinkkey/internal/package-summary.html">com.google.crypto.tink.tinkkey.internal</a></dt>
+<dd>
+<div class="block">Class used to expose the protected KeyHandle constructor to the rest of Tink.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html#InternalKeyHandle-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.proto.KeyStatusType-int-">InternalKeyHandle(TinkKey, KeyStatusType, int)</a></span> - Constructor for class com.google.crypto.tink.tinkkey.internal.<a href="com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal">InternalKeyHandle</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/Bytes.html#intToByteArray-int-int-">intToByteArray(int, int)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/Bytes.html" title="class in com.google.crypto.tink.subtle">Bytes</a></dt>
 <dd>
 <div class="block">Transforms a passed value to a LSB first byte array with the size of the specified capacity</div>
@@ -2566,6 +2580,11 @@
 <dd>
 <div class="block">Wraps a <a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> and enforces access to the underlying <a href="com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> with <a href="com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyAccess</code></a>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/KeyHandle.html#KeyHandle-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-int-">KeyHandle(TinkKey, KeyHandle.KeyStatusType, int)</a></span> - Constructor for class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></dt>
+<dd>
+<div class="block">Constructor intended for Tink internal purposes; allows one to set all the member variables of
+ a <a href="com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><span class="typeNameLink">KeyHandle.KeyStatusType</span></a> - Enum in <a href="com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a></dt>
 <dd>
 <div class="block">KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
@@ -2649,6 +2668,11 @@
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">KeyStatusTypeProtoConverter</span></a> - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
+<dd>
+<div class="block">Util functions to facilitate conversion between the <code>KeyHandle.KeyStatusType</code> enum and
+ <a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto.</div>
+</dd>
 <dt><a href="com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><span class="typeNameLink">KeyTemplate</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
@@ -4020,6 +4044,10 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/signature/internal/SigUtil.html#toHashType-com.google.crypto.tink.proto.HashType-">toHashType(HashType)</a></span> - Static method in class com.google.crypto.tink.signature.internal.<a href="com/google/crypto/tink/signature/internal/SigUtil.html" title="class in com.google.crypto.tink.signature.internal">SigUtil</a></dt>
 <dd>
 <div class="block">Converts protobuf enum <code>HashType</code> to raw Java enum <code>Enums.HashType</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html#toProto-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-">toProto(KeyHandle.KeyStatusType)</a></span> - Static method in class com.google.crypto.tink.internal.<a href="com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html" title="class in com.google.crypto.tink.internal">KeyStatusTypeProtoConverter</a></dt>
+<dd>
+<div class="block">Converts a <code>KeyHandle.KeyStatusType</code> enum into a <a href="com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto enum</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#toProviderList-java.lang.String...-">toProviderList(String...)</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>

@@ -75,13 +75,13 @@ var activeTableTab = "activeTableTab";
 <li>Summary:&nbsp;</li>
 <li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
@@ -106,10 +106,14 @@ var activeTableTab = "activeTableTab";
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../../../com/google/crypto/tink/tinkkey/internal/InternalKeyHandle.html" title="class in com.google.crypto.tink.tinkkey.internal">InternalKeyHandle</a></dd>
+</dl>
 <hr>
 <br>
 <pre>@Immutable
-public final class <span class="typeNameLabel">KeyHandle</span>
+public class <span class="typeNameLabel">KeyHandle</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">Wraps a <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> and enforces access to the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> with <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyAccess</code></a>. Specifically, if the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> has a secret, then one can only get
  it with a <a href="../../../../../com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>SecretKeyAccess</code></a> instance.</div>
@@ -136,6 +140,30 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></span></code>
 <div class="block">KeyStatusType is metadata associated to a key which is only meaningful when the key is part of
  a <code>Keyset</code>.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier</th>
+<th class="colLast" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected </code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#KeyHandle-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-int-">KeyHandle</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a>&nbsp;key,
+         <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status,
+         int&nbsp;keyId)</code>
+<div class="block">Constructor intended for Tink internal purposes; allows one to set all the member variables of
+ a <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>.</div>
 </td>
 </tr>
 </table>
@@ -217,6 +245,27 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="KeyHandle-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-int-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>KeyHandle</h4>
+<pre>protected&nbsp;KeyHandle(<a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a>&nbsp;key,
+                    <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status,
+                    int&nbsp;keyId)</pre>
+<div class="block">Constructor intended for Tink internal purposes; allows one to set all the member variables of
+ a <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>.</div>
+</li>
+</ul>
+</li>
+</ul>
 <!-- ============ METHOD DETAIL ========== -->
 <ul class="blockList">
 <li class="blockList"><a name="method.detail">
@@ -371,13 +420,13 @@ public static&nbsp;<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHan
 <li>Summary:&nbsp;</li>
 <li><a href="#nested.class.summary">Nested</a>&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
-<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
 </div>

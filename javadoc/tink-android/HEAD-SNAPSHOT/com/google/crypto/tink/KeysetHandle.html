@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":9,"i3":41,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":9,"i10":9,"i11":9,"i12":10,"i13":10,"i14":10};
+var methods = {"i0":9,"i1":9,"i2":9,"i3":41,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":9,"i11":9,"i12":9,"i13":10,"i14":10,"i15":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -174,64 +174,70 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i5" class="rowColor">
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getKeys--">getKeys</a></span>()</code>
+<div class="block">Returns the keyset data as a list of <a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>s.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>com.google.crypto.tink.proto.KeysetInfo</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getKeysetInfo--">getKeysetInfo</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>&lt;P&gt;&nbsp;P</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPrimitive-java.lang.Class-">getPrimitive</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;P&gt;&nbsp;targetClassObject)</code>
 <div class="block">Returns a primitive from this keyset, using the global registry to create resources creating
  the primitive.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getPublicKeysetHandle--">getPublicKeysetHandle</a></span>()</code>
 <div class="block">If the managed keyset contains private keys, returns a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> of the public keys.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#primaryKey--">primaryKey</a></span>()</code>
 <div class="block">Searches the keyset to find the primary key of this <code>KeysetHandle</code>, and returns the key
  wrapped in a <code>KeyHandle</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#read-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-">read</a></span>(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
     <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey)</code>
 <div class="block">Tries to create a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#readNoSecret-byte:A-">readNoSecret</a></span>(byte[]&nbsp;serialized)</code>
 <div class="block">Tries to create a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a serialized keyset which contains no secret key
  material.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-">readNoSecret</a></span>(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader)</code>
 <div class="block">Tries to create a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a keyset, obtained via <code>reader</code>, which
  contains no secret key material.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#toString--">toString</a></span>()</code>
 <div class="block">Extracts and returns the string representation of the <code>KeysetInfo</code> of the managed keyset.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#write-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-">write</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
      <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey)</code>
 <div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code>.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#writeNoSecret-com.google.crypto.tink.KeysetWriter-">writeNoSecret</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;writer)</code>
 <div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
@@ -259,6 +265,16 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="getKeys--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getKeys</h4>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&gt;&nbsp;getKeys()</pre>
+<div class="block">Returns the keyset data as a list of <a href="../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>s.</div>
+</li>
+</ul>
 <a name="getKeysetInfo--">
 <!--   -->
 </a>
