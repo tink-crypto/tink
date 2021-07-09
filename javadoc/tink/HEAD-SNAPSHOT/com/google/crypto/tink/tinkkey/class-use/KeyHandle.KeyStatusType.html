@@ -82,6 +82,10 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.internal">com.google.crypto.tink.internal</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.tinkkey">com.google.crypto.tink.tinkkey</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -90,6 +94,41 @@
 </li>
 <li class="blockList">
 <ul class="blockList">
+<li class="blockList"><a name="com.google.crypto.tink.internal">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a> in <a href="../../../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a> that return <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></code></td>
+<td class="colLast"><span class="typeNameLabel">KeyStatusTypeProtoConverter.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html#fromProto-com.google.crypto.tink.proto.KeyStatusType-">fromProto</a></span>(com.google.crypto.tink.proto.KeyStatusType&nbsp;keyStatusTypeProto)</code>
+<div class="block">Converts a <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto enum into a <code>KeyHandle.KeyStatusType</code> enum</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing methods, and an explanation">
+<caption><span>Methods in <a href="../../../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a> with parameters of type <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyStatusType</code></td>
+<td class="colLast"><span class="typeNameLabel">KeyStatusTypeProtoConverter.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyStatusTypeProtoConverter.html#toProto-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-">toProto</a></span>(<a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status)</code>
+<div class="block">Converts a <code>KeyHandle.KeyStatusType</code> enum into a <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey"><code>KeyHandle.KeyStatusType</code></a> proto enum</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.tinkkey">
 <!--   -->
 </a>
@@ -118,6 +157,22 @@
 <td class="colLast"><span class="typeNameLabel">KeyHandle.KeyStatusType.</span><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html#values--">values</a></span>()</code>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing constructors, and an explanation">
+<caption><span>Constructors in <a href="../../../../../../com/google/crypto/tink/tinkkey/package-summary.html">com.google.crypto.tink.tinkkey</a> with parameters of type <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#KeyHandle-com.google.crypto.tink.tinkkey.TinkKey-com.google.crypto.tink.tinkkey.KeyHandle.KeyStatusType-int-">KeyHandle</a></span>(<a href="../../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a>&nbsp;key,
+         <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a>&nbsp;status,
+         int&nbsp;keyId)</code>
+<div class="block">Constructor intended for Tink internal purposes; allows one to set all the member variables of
+ a <a href="../../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a>.</div>
 </td>
 </tr>
 </tbody>
