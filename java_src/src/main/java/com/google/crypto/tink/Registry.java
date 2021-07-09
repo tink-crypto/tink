@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -1106,6 +1107,19 @@ public final class Registry {
       throws GeneralSecurityException, InvalidProtocolBufferException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
     return container.parseKey(keyData.getValue());
+  }
+
+  /**
+   * Tries to enable the FIPS restrictions if the Registry is empty.
+   *
+   * @throws GeneralSecurityException if any key manager has already been registered.
+   */
+  public static synchronized <P> void restrictToFipsIfEmpty() throws GeneralSecurityException {
+    if (keyManagerMap.isEmpty()) {
+      TinkFipsUtil.setFipsRestricted();
+      return;
+    }
+    throw new GeneralSecurityException("Could not enable FIPS mode as Registry is not empty.");
   }
 
   private Registry() {}

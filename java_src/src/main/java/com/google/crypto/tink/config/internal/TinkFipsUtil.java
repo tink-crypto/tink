@@ -15,11 +15,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.config.internal;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Static methods for checking if Tink was built in FIPS mode and to check for algorithm
  * compatibility.
  */
 public final class TinkFipsUtil {
+
+  // Is true if the FIPS restrictions have been enabled at runtime.
+  private static final AtomicBoolean isRestrictedToFips = new AtomicBoolean(false);
+
   /** The status of FIPS compatibility of an algorithm. */
   public enum AlgorithmFipsCompatibility {
     /** The algorithm is not FIPS compatible */
@@ -27,7 +33,7 @@ public final class TinkFipsUtil {
       @Override
       public boolean isCompatible() {
         // Non-FIPS algorithms are only allowed if Tink is not built in FIPS-only mode.
-        return !TinkFipsStatus.useOnlyFips();
+        return !useOnlyFips();
       }
     },
     /** The algorithm has a FIPS validated implementation if BoringCrypto is available. */
@@ -36,15 +42,26 @@ public final class TinkFipsUtil {
       public boolean isCompatible() {
         // If Tink is not in FIPS-only mode, then no restrictions are necessary. In FIPS-only mode
         // this returns True if BoringCrypto is available.
-        return !TinkFipsStatus.useOnlyFips() || TinkFipsStatus.fipsModuleAvailable();
+        return !useOnlyFips() || TinkFipsStatus.fipsModuleAvailable();
       }
     };
 
     public abstract boolean isCompatible();
   }
 
+  public static void setFipsRestricted() {
+    isRestrictedToFips.set(true);
+  }
+
+  /**
+   * This method is only exposed for tests and should not be used to disable the FIPS restrictions.
+   */
+  public static void unsetFipsRestricted() {
+    isRestrictedToFips.set(false);
+  }
+
   public static boolean useOnlyFips() {
-    return TinkFipsStatus.useOnlyFips();
+    return TinkFipsStatus.useOnlyFips() || isRestrictedToFips.get();
   }
 
   public static boolean fipsModuleAvailable() {

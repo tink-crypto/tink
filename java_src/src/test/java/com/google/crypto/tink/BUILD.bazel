@@ -226,6 +226,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
         "//src/main/java/com/google/crypto/tink/config:tink_config",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/mac:mac_config",
         "//src/main/java/com/google/crypto/tink/mac:mac_key_templates",
         "//src/main/java/com/google/crypto/tink/signature:signature_key_templates",

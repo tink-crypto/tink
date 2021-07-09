@@ -18,6 +18,7 @@ package com.google.crypto.tink.config;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,16 @@ public final class TinkFipsTest {
     // If the TinkFipsUtil reports that FIPS-mode is enabled, then TinkFips must report that
     // FIPS-mode is enabled.
     Assume.assumeTrue(TinkFipsUtil.useOnlyFips());
+    assertThat(TinkFips.useOnlyFips()).isTrue();
+  }
+
+  @Test
+  public void testFipsEnablingAtRuntime() throws GeneralSecurityException {
+    // If Tink has not been built in FIPS-mode, then the useOnlyFips() call should only return
+    // true after the restrictions have been enabled.
+    Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
+    assertThat(TinkFips.useOnlyFips()).isFalse();
+    TinkFips.restrictToFips();
     assertThat(TinkFips.useOnlyFips()).isTrue();
   }
 

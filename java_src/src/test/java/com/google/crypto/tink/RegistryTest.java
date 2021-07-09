@@ -20,11 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.TestUtil.assertExceptionContains;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -151,6 +153,7 @@ public class RegistryTest {
 
   @Before
   public void setUp() throws GeneralSecurityException {
+    TinkFipsUtil.unsetFipsRestricted();
     Registry.reset();
     TinkConfig.register();
     Registry.registerPrimitiveWrapper(new AeadToEncryptOnlyWrapper());
@@ -1587,6 +1590,18 @@ public class RegistryTest {
                 }
               });
         });
+  }
+
+  @Test
+  public void testFips_succeedsOnEmptyRegistry() throws Exception {
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+    assertTrue(TinkFipsUtil.useOnlyFips());
+  }
+
+  @Test
+  public void testFips_failsOnNonEmptyRegistry() throws Exception {
+    assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
   }
 
   private static class FakeAead {}

@@ -48,6 +48,7 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink:registry_cluster"
     ],
 )
 
@@ -57,5 +58,6 @@ android_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink:registry_cluster-android"
     ],
 )
