@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
@@ -61,7 +62,7 @@ public class EcdsaSignJceTest {
 
   @Test
   public void testBasic() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -84,7 +85,7 @@ public class EcdsaSignJceTest {
 
   @Test
   public void testConstructorExceptions() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -101,7 +102,7 @@ public class EcdsaSignJceTest {
 
   @Test
   public void testBitFlipAgainstSignatureInstance() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -136,7 +137,7 @@ public class EcdsaSignJceTest {
 
   @Test
   public void testFailIfFipsModuleNotAvailable() throws Exception {
-    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");

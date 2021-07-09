@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
@@ -49,7 +49,7 @@ public final class EngineFactory<T_WRAPPER extends EngineWrapper<T_ENGINE>, T_EN
   // Warning: keep this above the initialization of static providers below. or you'll get null
   // pointer errors (due to this policy not being initialized).
   static {
-    if (TinkFips.useOnlyFips()) {
+    if (TinkFipsUtil.useOnlyFips()) {
       // The only accepted provider is Conscrypt in FIPS-mode and no fallback is allowed.
       policy = toProviderList("GmsCore_OpenSSL", "AndroidOpenSSL", "Conscrypt");
       LET_FALLBACK = false;

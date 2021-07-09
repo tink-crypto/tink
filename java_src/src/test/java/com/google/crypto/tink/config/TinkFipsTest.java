@@ -17,6 +17,7 @@ package com.google.crypto.tink.config;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,37 +33,19 @@ import org.junit.runners.JUnit4;
 public final class TinkFipsTest {
 
   @Test
-  public void testFipsOnlyModeDisabledAlgorithmCompatibility() {
-    // Test behavior when FIPS-only mode is not used.
-    Assume.assumeFalse(TinkFipsStatus.useOnlyFips());
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isTrue();
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
-        .isTrue();
+  public void testFipsOnlyModeConsistentDisabled() {
+    // If the TinkFipsUtil reports that FIPS-mode is disabled, then TinkFips must report that
+    // FIPS-mode is disabled.
+    Assume.assumeFalse(TinkFipsUtil.useOnlyFips());
+    assertThat(TinkFips.useOnlyFips()).isFalse();
   }
 
   @Test
-  public void testFipsOnlyModeEnabledAlgorithmCompatibility() {
-    // Test behavior when FIPS-only mode is used.
-    Assume.assumeTrue(TinkFipsStatus.useOnlyFips());
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isFalse();
-
-    // BoringCrypto is available, therefore an algorithm which has a FIPS validated
-    // implementation is compatible.
-    Assume.assumeTrue(TinkFipsStatus.fipsModuleAvailable());
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
-        .isTrue();
+  public void testFipsOnlyModeConsistentEnabled() {
+    // If the TinkFipsUtil reports that FIPS-mode is enabled, then TinkFips must report that
+    // FIPS-mode is enabled.
+    Assume.assumeTrue(TinkFipsUtil.useOnlyFips());
+    assertThat(TinkFips.useOnlyFips()).isTrue();
   }
 
-  @Test
-  public void testFipsOnlyModeEnabledAlgorithmCompatibilityNoBoringCrypto() {
-    // Test behavior when FIPS-only mode is used.
-    Assume.assumeTrue(TinkFipsStatus.useOnlyFips());
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS.isCompatible()).isFalse();
-
-    // BoringCrypto is not available, therefore no validated implementation is available and
-    // the compatibility check must fail.
-    Assume.assumeTrue(!TinkFipsStatus.fipsModuleAvailable());
-    assertThat(TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
-        .isFalse();
-  }
 }

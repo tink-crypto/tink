@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 
 /**
@@ -38,8 +38,8 @@ import java.security.GeneralSecurityException;
  * @since 1.1.0
  */
 public final class Ed25519Verify implements PublicKeyVerify {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   public static final int PUBLIC_KEY_LEN = Field25519.FIELD_LEN;
   public static final int SIGNATURE_LEN = Field25519.FIELD_LEN * 2;

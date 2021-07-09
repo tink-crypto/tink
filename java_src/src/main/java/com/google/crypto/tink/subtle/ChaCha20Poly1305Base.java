@@ -20,7 +20,7 @@ import static com.google.crypto.tink.subtle.Poly1305.MAC_KEY_SIZE_IN_BYTES;
 import static com.google.crypto.tink.subtle.Poly1305.MAC_TAG_SIZE_IN_BYTES;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -35,8 +35,8 @@ import javax.crypto.AEADBadTagException;
  * actual_ciphertext || tag} and only decrypts the same format.
  */
 abstract class ChaCha20Poly1305Base implements Aead {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   private final ChaCha20Base chacha20;
   private final ChaCha20Base macKeyChaCha20;

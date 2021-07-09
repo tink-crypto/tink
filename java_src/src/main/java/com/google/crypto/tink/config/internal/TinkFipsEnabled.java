@@ -13,21 +13,36 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////////
-package com.google.crypto.tink.config;
+package com.google.crypto.tink.config.internal;
+
+import java.lang.reflect.Method;
+import org.conscrypt.Conscrypt;
 
 /**
  * This is a dummy class matching the file name for Java which is not used. This file is only
- * included in a build if Tink is not built in FIPS-only mode to provide the TinkFipsStatus class.
+ * included in a build if Tink is built in FIPS-only mode to provide the TinkFipsStatus class.
  */
-final class TinkFipsDisabled {}
+final class TinkFipsEnabled {}
 
 final class TinkFipsStatus {
   public static boolean useOnlyFips() {
-    return false;
+    return true;
   }
 
   public static boolean fipsModuleAvailable() {
-    return false;
+    return Conscrypt.isAvailable() && checkConscryptUsesFipsBoringSsl();
+  }
+
+  static Boolean checkConscryptUsesFipsBoringSsl() {
+    try {
+      Class<?> cls = Class.forName("org.conscrypt.Conscrypt");
+      Method isBoringSslFIPSBuild = cls.getMethod("isBoringSslFIPSBuild");
+      return (Boolean) isBoringSslFIPSBuild.invoke(null);
+    } catch (ReflectiveOperationException e) {
+      // For older versions of Conscrypt we get a NoSuchMethodException. But no matter what goes
+      // wrong, we cannot guarantee that Conscrypt uses BoringCrypto, so we will return false.
+      return false;
+    }
   }
 
   private TinkFipsStatus() {}

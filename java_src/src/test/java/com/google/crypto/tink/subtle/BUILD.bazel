@@ -29,6 +29,7 @@ java_test(
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
@@ -49,6 +50,7 @@ java_test(
     srcs = ["EcdsaSignJceTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
@@ -182,6 +184,7 @@ java_test(
     srcs = ["RsaSsaPkcs1SignJceTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
@@ -334,6 +337,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink:mac",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:prf_hmac_jce",
@@ -407,6 +411,7 @@ java_test(
     tags = ["notsan"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
@@ -459,6 +464,7 @@ java_test(
     ],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:enums",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
@@ -476,6 +482,7 @@ java_test(
     srcs = ["AesCtrJceCipherTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/subtle:aes_ctr_jce_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/testing:test_util",

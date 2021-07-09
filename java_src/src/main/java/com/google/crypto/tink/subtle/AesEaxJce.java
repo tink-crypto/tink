@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.crypto.AEADBadTagException;
@@ -49,8 +49,8 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesEaxJce implements Aead {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   private static final ThreadLocal<Cipher> localEcbCipher =
       new ThreadLocal<Cipher>() {

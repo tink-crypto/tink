@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
@@ -32,8 +32,8 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.0.0
  */
 public final class AesGcmJce implements Aead {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
 
   private static final ThreadLocal<Cipher> localCipher =
       new ThreadLocal<Cipher>() {

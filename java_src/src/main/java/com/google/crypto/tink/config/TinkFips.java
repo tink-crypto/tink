@@ -15,40 +15,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.google.crypto.tink.config;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
+
 /**
- * Static methods for checking if Tink was built in FIPS mode and to check for algorithm
- * compatibility.
+ * Static methods for checking if Tink has been built in FIPS-mode.
  */
 public final class TinkFips {
-  /** The status of FIPS compatibility of an algorithm. */
-  public enum AlgorithmFipsCompatibility {
-    /** The algorithm is not FIPS compatible */
-    ALGORITHM_NOT_FIPS {
-      @Override
-      public boolean isCompatible() {
-        // Non-FIPS algorithms are only allowed if Tink is not built in FIPS-only mode.
-        return !TinkFipsStatus.useOnlyFips();
-      }
-    },
-    /** The algorithm has a FIPS validated implementation if BoringCrypto is available. */
-    ALGORITHM_REQUIRES_BORINGCRYPTO {
-      @Override
-      public boolean isCompatible() {
-        // If Tink is not in FIPS-only mode, then no restrictions are necessary. In FIPS-only mode
-        // this returns True if BoringCrypto is available.
-        return !TinkFipsStatus.useOnlyFips() || TinkFipsStatus.fipsModuleAvailable();
-      }
-    };
-
-    public abstract boolean isCompatible();
-  }
-
+  /**
+   * Returns true if the FIPS-mode has been enabled at build time or runtime.
+   */
   public static boolean useOnlyFips() {
-    return TinkFipsStatus.useOnlyFips();
-  }
-
-  public static boolean fipsModuleAvailable() {
-    return TinkFipsStatus.fipsModuleAvailable();
+    return TinkFipsUtil.useOnlyFips();
   }
 
   private TinkFips() {}
