@@ -17,6 +17,7 @@ package com.google.crypto.tink.tinkkey;
 
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
@@ -90,6 +91,19 @@ public class KeyHandle {
     this.key = key;
     this.status = status;
     this.id = keyId;
+  }
+
+  /**
+   * Generates a new {@link KeyHandle} that contains a fresh key generated according to {@code
+   * keyTemplate}.
+   *
+   * @throws GeneralSecurityException if the key template's type URL has not been registered with
+   *     the {@link Registry}.
+   */
+  public static KeyHandle generateNew(KeyTemplate keyTemplate) throws GeneralSecurityException {
+    ProtoKey protoKey =
+        new ProtoKey(Registry.newKeyData(keyTemplate), keyTemplate.getOutputPrefixType());
+    return new KeyHandle(protoKey);
   }
 
   /** Returns {@code true} if the underlying {@link TinkKey} has a secret. */

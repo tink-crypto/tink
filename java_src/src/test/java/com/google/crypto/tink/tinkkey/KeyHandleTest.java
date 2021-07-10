@@ -18,15 +18,25 @@ package com.google.crypto.tink.tinkkey;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.common.truth.Expect;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate.OutputPrefixType;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.proto.AesEaxKey;
+import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.signature.Ed25519PrivateKeyManager;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.ExtensionRegistryLite;
 import java.security.GeneralSecurityException;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,6 +44,8 @@ import org.junit.runners.JUnit4;
 /** Tests for KeyHandle * */
 @RunWith(JUnit4.class)
 public final class KeyHandleTest {
+
+  @Rule public final Expect expect = Expect.create();
 
   @Immutable
   static final class DummyTinkKey implements TinkKey {
@@ -135,6 +147,71 @@ public final class KeyHandleTest {
     KeyHandle kh = KeyHandle.createFromKey(kd, kt.getOutputPrefixType());
 
     assertThat(kh.hasSecret()).isFalse();
+  }
+
+  @Test
+  public void generateNew_shouldWork() throws Exception {
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
+
+    KeyHandle handle = KeyHandle.generateNew(template);
+
+    ProtoKey protoKey = (ProtoKey) handle.getKey(SecretKeyAccess.insecureSecretAccess());
+    expect.that(protoKey.getOutputPrefixType()).isEqualTo(KeyTemplate.OutputPrefixType.TINK);
+    expect.that(protoKey.hasSecret()).isTrue();
+    KeyData keyData = protoKey.getProtoKey();
+    expect.that(keyData.getTypeUrl()).isEqualTo(template.getTypeUrl());
+    AesEaxKeyFormat aesEaxKeyFormat =
+        AesEaxKeyFormat.parseFrom(template.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    AesEaxKey aesEaxKey =
+        AesEaxKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    expect.that(aesEaxKey.getKeyValue().size()).isEqualTo(aesEaxKeyFormat.getKeySize());
+  }
+
+  @Test
+  public void generateNew_compareWith_createFromKeyViaProtoKey_shouldBeEqual() throws Exception {
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
+    KeyData keyData = Registry.newKeyData(template);
+    ProtoKey protoKey = new ProtoKey(keyData, template.getOutputPrefixType());
+
+    KeyHandle handle1 = KeyHandle.generateNew(template);
+    KeyHandle handle2 = KeyHandle.createFromKey(protoKey, SecretKeyAccess.insecureSecretAccess());
+
+    expect.that(handle1.getStatus()).isEqualTo(handle2.getStatus());
+    ProtoKey outputProtoKey1 = (ProtoKey) handle1.getKey(SecretKeyAccess.insecureSecretAccess());
+    ProtoKey outputProtoKey2 = (ProtoKey) handle2.getKey(SecretKeyAccess.insecureSecretAccess());
+    expect
+        .that(outputProtoKey1.getOutputPrefixType())
+        .isEqualTo(outputProtoKey2.getOutputPrefixType());
+    expect.that(handle1.hasSecret()).isEqualTo(handle2.hasSecret());
+  }
+
+  @Test
+  public void generateNew_generatesDifferentKeys() throws Exception {
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
+    Set<String> keys = new TreeSet<>();
+
+    int numKeys = 2;
+    for (int j = 0; j < numKeys; j++) {
+      KeyHandle handle = KeyHandle.generateNew(template);
+      ProtoKey protoKey = (ProtoKey) handle.getKey(SecretKeyAccess.insecureSecretAccess());
+      KeyData keyData = protoKey.getProtoKey();
+      AesEaxKey aesEaxKey =
+          AesEaxKey.parseFrom(keyData.getValue(), ExtensionRegistryLite.getEmptyRegistry());
+      keys.add(aesEaxKey.getKeyValue().toStringUtf8());
+    }
+
+    assertThat(keys).hasSize(numKeys);
+  }
+
+  @Test
+  public void generateNew_unregisteredTypeUrl_shouldThrow() throws Exception {
+    String typeUrl = "testNewKeyDataTypeUrl";
+    ByteString keyformat = ByteString.copyFromUtf8("testNewKeyDataKeyFormat");
+    com.google.crypto.tink.KeyTemplate keyTemplate =
+        com.google.crypto.tink.KeyTemplate.create(
+            typeUrl, keyformat.toByteArray(), OutputPrefixType.TINK);
+
+    assertThrows(GeneralSecurityException.class, () -> KeyHandle.generateNew(keyTemplate));
   }
 
   @Test

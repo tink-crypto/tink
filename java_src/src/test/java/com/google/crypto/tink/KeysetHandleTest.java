@@ -187,11 +187,8 @@ public class KeysetHandleTest {
 
   @Test
   public void createFromKey_shouldWork() throws Exception {
-    KeyTemplate template = AesEaxKeyManager.aes128EaxTemplate();
-    KeyHandle keyHandle =
-        KeyHandle.createFromKey(
-            new ProtoKey(Registry.newKeyData(template), template.getOutputPrefixType()),
-            SecretKeyAccess.insecureSecretAccess());
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
+    KeyHandle keyHandle = KeyHandle.generateNew(template);
     KeyAccess token = SecretKeyAccess.insecureSecretAccess();
 
     KeysetHandle handle = KeysetHandle.createFromKey(keyHandle, token);
