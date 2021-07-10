@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":41,"i1":9,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":41,"i1":9,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -199,31 +199,37 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#generateNew-com.google.crypto.tink.KeyTemplate-">generateNew</a></span>(<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)</code>
+<div class="block">Generates a new <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> that contains a fresh key generated according to <code>keyTemplate</code>.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#getId--">getId</a></span>()</code>
 <div class="block">Returns the key ID of this key.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey">TinkKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#getKey-com.google.crypto.tink.tinkkey.KeyAccess-">getKey</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
 <div class="block">Returns the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> key if <code>access</code> is a <a href="../../../../../com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey"><code>SecretKeyAccess</code></a> and
  the key has a secret, or if the key does not have a secret, otherwise throws a <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security"><code>GeneralSecurityException</code></a>.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#getKeyTemplate--">getKeyTemplate</a></span>()</code>
 <div class="block">Returns the <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> of the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a>.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.KeyStatusType.html" title="enum in com.google.crypto.tink.tinkkey">KeyHandle.KeyStatusType</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#getStatus--">getStatus</a></span>()</code>
 <div class="block">Returns the status of the key.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#hasSecret--">hasSecret</a></span>()</code>
 <div class="block">Returns <code>true</code> if the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> has a secret.</div>
@@ -302,6 +308,22 @@ public static&nbsp;<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHan
 <div class="block">Returns a <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> instance where the underlying <a href="../../../../../com/google/crypto/tink/tinkkey/TinkKey.html" title="interface in com.google.crypto.tink.tinkkey"><code>TinkKey</code></a> wraps the input
  <code>keyData</code>. The returned KeyHandle has a secret if keyData has key material of type
  UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.</div>
+</li>
+</ul>
+<a name="generateNew-com.google.crypto.tink.KeyTemplate-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>generateNew</h4>
+<pre>public static&nbsp;<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;generateNew(<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)
+                             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Generates a new <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> that contains a fresh key generated according to <code>keyTemplate</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the key template's type URL has not been registered with
+     the <a href="../../../../../com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a>.</dd>
+</dl>
 </li>
 </ul>
 <a name="hasSecret--">
