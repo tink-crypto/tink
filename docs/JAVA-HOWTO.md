@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.6.0](https://github.com/google/tink/releases/tag/v1.6.0), released
-2021-05-17.
+[1.6.1](https://github.com/google/tink/releases/tag/v1.6.1), released
+2021-07-12.
 
 In addition to the versioned releases, snapshots of Tink are regularly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -81,7 +81,7 @@ use AWS KMS, one should also add dependency on `tink-awskms`, and similarly
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-awskms</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -91,7 +91,7 @@ use AWS KMS, one should also add dependency on `tink-awskms`, and similarly
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-gcpkms</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -105,7 +105,7 @@ following configuration:
 
 ```
 dependencies {
-  implementation 'com.google.crypto.tink:tink-android:1.6.0'
+  implementation 'com.google.crypto.tink:tink-android:1.6.1'
 }
 ```
 
@@ -125,10 +125,10 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.6.0](https://google.github.io/tink/javadoc/tink/1.6.0)
+    *   [1.6.1](https://google.github.io/tink/javadoc/tink/1.6.1)
     *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.6.0](https://google.github.io/tink/javadoc/tink-android/1.6.0)
+    *   [1.6.1](https://google.github.io/tink/javadoc/tink-android/1.6.1)
     *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
