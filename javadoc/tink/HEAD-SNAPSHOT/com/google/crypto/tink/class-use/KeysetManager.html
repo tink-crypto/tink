@@ -103,12 +103,20 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">add</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle,
-   <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
-<div class="block">Adds the input <code>KeyHandle</code> to the existing keyset with <code>OutputPrefixType.TINK</code>.</div>
+<td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.tinkkey.KeyHandle-">add</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle)</code>
+<div class="block">Adds the input <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey"><code>KeyHandle</code></a> to the existing keyset.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
+<td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.tinkkey.KeyHandle-com.google.crypto.tink.tinkkey.KeyAccess-">add</a></span>(<a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a>&nbsp;keyHandle,
+   <a href="../../../../../com/google/crypto/tink/tinkkey/KeyAccess.html" title="class in com.google.crypto.tink.tinkkey">KeyAccess</a>&nbsp;access)</code>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
+<div class="block"><span class="deprecationComment">Use KeysetManager.add(KeyHandle) instead.</span></div>
+</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.proto.KeyTemplate-">add</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -117,37 +125,37 @@
 </div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#add-com.google.crypto.tink.KeyTemplate-">add</a></span>(<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block">Generates and adds a fresh key generated using <code>keyTemplate</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#delete-int-">delete</a></span>(int&nbsp;keyId)</code>
 <div class="block">Deletes the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#destroy-int-">destroy</a></span>(int&nbsp;keyId)</code>
 <div class="block">Destroys the key material associated with the <code>keyId</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#disable-int-">disable</a></span>(int&nbsp;keyId)</code>
 <div class="block">Disables the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#enable-int-">enable</a></span>(int&nbsp;keyId)</code>
 <div class="block">Enables the key with <code>keyId</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#promote-int-">promote</a></span>(int&nbsp;keyId)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -155,7 +163,7 @@
 </div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#rotate-com.google.crypto.tink.proto.KeyTemplate-">rotate</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
@@ -165,17 +173,17 @@
 </div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#setPrimary-int-">setPrimary</a></span>(int&nbsp;keyId)</code>
 <div class="block">Sets the key with <code>keyId</code> as primary.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#withEmptyKeyset--">withEmptyKeyset</a></span>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetManager.html" title="class in com.google.crypto.tink">KeysetManager</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetManager.html#withKeysetHandle-com.google.crypto.tink.KeysetHandle-">withKeysetHandle</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;val)</code>&nbsp;</td>
 </tr>
