@@ -23,7 +23,6 @@ import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
-import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.crypto.tink.tinkkey.internal.InternalKeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import com.google.protobuf.ByteString;
@@ -380,9 +379,10 @@ public final class KeysetHandle {
     int primaryKeyId = keyset.getPrimaryKeyId();
     for (Keyset.Key key : keyset.getKeyList()) {
       if (key.getKeyId() == primaryKeyId) {
-        return KeyHandle.createFromKey(
+        return new InternalKeyHandle(
             new ProtoKey(key.getKeyData(), KeyTemplate.fromProto(key.getOutputPrefixType())),
-            SecretKeyAccess.insecureSecretAccess());
+            key.getStatus(),
+            key.getKeyId());
       }
     }
     throw new GeneralSecurityException("No primary key found in keyset.");
