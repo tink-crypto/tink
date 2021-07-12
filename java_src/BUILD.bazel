@@ -13,9 +13,6 @@ exports_files(["BUILD"])
 gen_maven_jar_rules(
     name = "tink",
     doctitle = "Tink Cryptography API",
-    manifest_lines = [
-        "Automatic-Module-Name: com.google.crypto.tink",
-    ],
     root_packages = [
         "com.google.crypto.tink",
     ],
@@ -351,9 +348,6 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-awskms",
     doctitle = "Tink Cryptography API with AWS KMS",
-    manifest_lines = [
-        "Automatic-Module-Name: com.google.crypto.tink.integration.awskms",
-    ],
     root_packages = [
         "com.google.crypto.tink",
     ],
@@ -366,9 +360,6 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-gcpkms",
     doctitle = "Tink Cryptography API with Google Cloud KMS",
-    manifest_lines = [
-        "Automatic-Module-Name: com.google.crypto.tink.integration.gcpkms",
-    ],
     root_packages = [
         "com.google.crypto.tink",
     ],

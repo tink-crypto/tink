@@ -7,9 +7,6 @@ licenses(["notice"])
 gen_maven_jar_rules(
     name = "maven",
     doctitle = "Tink Cryptography API for Google Mobile Rewarded Video Ads SSV",
-    manifest_lines = [
-        "Automatic-Module-Name: com.google.crypto.tink.apps.rewardedads",
-    ],
     root_packages = ["com.google.crypto.tink.apps.rewardedads"],
     deps = ["//rewardedads/src/main/java/com/google/crypto/tink/apps/rewardedads:rewarded_ads_verifier"],
 )
