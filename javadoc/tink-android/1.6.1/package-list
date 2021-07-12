@@ -1,0 +1,17 @@
+com.google.crypto.tink
+com.google.crypto.tink.aead
+com.google.crypto.tink.aead.subtle
+com.google.crypto.tink.annotations
+com.google.crypto.tink.config
+com.google.crypto.tink.daead
+com.google.crypto.tink.hybrid
+com.google.crypto.tink.hybrid.subtle
+com.google.crypto.tink.integration.android
+com.google.crypto.tink.mac
+com.google.crypto.tink.prf
+com.google.crypto.tink.signature
+com.google.crypto.tink.signature.internal
+com.google.crypto.tink.streamingaead
+com.google.crypto.tink.subtle
+com.google.crypto.tink.subtle.prf
+com.google.crypto.tink.tinkkey
