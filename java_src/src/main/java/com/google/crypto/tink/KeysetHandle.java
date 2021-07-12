@@ -116,7 +116,7 @@ public final class KeysetHandle {
   /** Creates a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input. */
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
-    KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle, access);
+    KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle);
     km.setPrimary(km.getKeysetHandle().getKeysetInfo().getKeyInfo(0).getKeyId());
     return km.getKeysetHandle();
   }
