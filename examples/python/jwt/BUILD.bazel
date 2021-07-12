@@ -1,0 +1,57 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "jwt_test_private_keyset.json",
+    "jwt_test_public_keyset.json",
+])
+
+py_binary(
+    name = "jwt_signature",
+    srcs = ["jwt_signature.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
+sh_test(
+    name = "jwt_signature_test",
+    size = "small",
+    srcs = ["jwt_signature_test.sh"],
+    args = [
+        "$(rootpath :jwt_signature)",
+        "$(rootpath :jwt_test_private_keyset.json)",
+        "$(rootpath :jwt_test_public_keyset.json)",
+    ],
+    data = [
+        ":jwt_signature",
+        ":jwt_test_private_keyset.json",
+        ":jwt_test_public_keyset.json",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "jwt_signature_test_package",
+    size = "small",
+    srcs = ["jwt_signature_test.sh"],
+    args = [
+        "'python3 $(rootpath :jwt_signature.py)'",
+        "$(rootpath :jwt_test_private_keyset.json)",
+        "$(rootpath :jwt_test_public_keyset.json)",
+    ],
+    data = [
+        ":jwt_signature.py",
+        ":jwt_test_private_keyset.json",
+        ":jwt_test_public_keyset.json",
+    ],
+)
