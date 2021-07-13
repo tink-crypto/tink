@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKHybridEncrypt.h"
 
 #import <Foundation/Foundation.h>
@@ -36,3 +38,5 @@
 - (nullable crypto::tink::HybridEncrypt *)ccHybridEncrypt;
 
 @end
+
+#endif  // __cplusplus

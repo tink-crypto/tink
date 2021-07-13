@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKKeysetHandle.h"
 
 #include "tink/keyset_handle.h"
@@ -27,3 +29,5 @@
 - (void)setCcKeysetHandle:(std::unique_ptr<crypto::tink::KeysetHandle>)handle;
 
 @end
+
+#endif  // __cplusplus
