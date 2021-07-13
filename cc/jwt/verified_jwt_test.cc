@@ -53,112 +53,111 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
           &key_value)) {
     return util::Status(util::error::INVALID_ARGUMENT, "failed to parse key");
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac_or =
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
       subtle::HmacBoringSsl::New(
           util::Enums::ProtoToSubtle(google::crypto::tink::HashType::SHA256),
           32, util::SecretDataFromStringView(key_value));
-  if (!mac_or.ok()) {
-    return mac_or.status();
+  if (!mac.ok()) {
+    return mac.status();
   }
   std::unique_ptr<jwt_internal::JwtMacInternal> jwt_mac =
-      absl::make_unique<jwt_internal::JwtMacImpl>(
-          std::move(mac_or.ValueOrDie()), "HS256", absl::nullopt);
+      absl::make_unique<jwt_internal::JwtMacImpl>(std::move(*mac), "HS256",
+                                                  absl::nullopt);
 
-  auto compact_or = jwt_mac->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
-  if (!compact_or.ok()) {
-    return compact_or.status();
+  util::StatusOr<std::string> compact =
+      jwt_mac->ComputeMacAndEncodeWithKid(raw_jwt, "kid-123");
+  if (!compact.ok()) {
+    return compact.status();
   }
-  auto validator_builder = JwtValidatorBuilder()
-                               .IgnoreTypeHeader()
-                               .IgnoreIssuer()
-                               .IgnoreSubject()
-                               .IgnoreAudiences()
-                               .AllowMissingExpiration();
-  auto issued_at_or = raw_jwt.GetIssuedAt();
-  if (issued_at_or.ok()) {
-    validator_builder.SetFixedNow(issued_at_or.ValueOrDie());
+  JwtValidatorBuilder validator_builder = JwtValidatorBuilder()
+                                              .IgnoreTypeHeader()
+                                              .IgnoreIssuer()
+                                              .IgnoreSubject()
+                                              .IgnoreAudiences()
+                                              .AllowMissingExpiration();
+  util::StatusOr<absl::Time> issued_at = raw_jwt.GetIssuedAt();
+  if (issued_at.ok()) {
+    validator_builder.SetFixedNow(*issued_at);
   }
-  return jwt_mac->VerifyMacAndDecode(compact_or.ValueOrDie(),
-                                     validator_builder.Build().ValueOrDie());
+  util::StatusOr<JwtValidator> validator = validator_builder.Build();
+  if (!validator.ok()) {
+    return validator.status();
+  }
+  return jwt_mac->VerifyMacAndDecode(*compact, *validator);
 }
 
 TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {
-  util::StatusOr<RawJwt> raw_jwt_or = RawJwtBuilder()
+  util::StatusOr<RawJwt> raw_jwt = RawJwtBuilder()
                                           .SetTypeHeader("typeHeader")
                                           .SetIssuer("issuer")
                                           .SetSubject("subject")
                                           .SetJwtId("jwt_id")
                                           .WithoutExpiration()
                                           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<crypto::tink::VerifiedJwt> jwt =
+      CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_TRUE(jwt.HasTypeHeader());
-  EXPECT_THAT(jwt.GetTypeHeader(), IsOkAndHolds("typeHeader"));
-  EXPECT_TRUE(jwt.HasIssuer());
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
-  EXPECT_TRUE(jwt.HasSubject());
-  EXPECT_THAT(jwt.GetSubject(), IsOkAndHolds("subject"));
-  EXPECT_TRUE(jwt.HasJwtId());
-  EXPECT_THAT(jwt.GetJwtId(), IsOkAndHolds("jwt_id"));
+  EXPECT_TRUE(jwt->HasTypeHeader());
+  EXPECT_THAT(jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
+  EXPECT_TRUE(jwt->HasIssuer());
+  EXPECT_THAT(jwt->GetIssuer(), IsOkAndHolds("issuer"));
+  EXPECT_TRUE(jwt->HasSubject());
+  EXPECT_THAT(jwt->GetSubject(), IsOkAndHolds("subject"));
+  EXPECT_TRUE(jwt->HasJwtId());
+  EXPECT_THAT(jwt->GetJwtId(), IsOkAndHolds("jwt_id"));
 }
 
 TEST(VerifiedJwt, TimestampsOK) {
   absl::Time now = absl::Now();
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
           .SetIssuer("issuer")
           .SetNotBefore(now - absl::Seconds(300))
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<crypto::tink::VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_TRUE(jwt.HasNotBefore());
-  auto nbf_or = jwt.GetNotBefore();
-  ASSERT_THAT(nbf_or.status(), IsOk());
-  auto nbf = nbf_or.ValueOrDie();
-  EXPECT_LT(nbf, now - absl::Seconds(299));
-  EXPECT_GT(nbf, now - absl::Seconds(301));
+  EXPECT_TRUE(jwt->HasNotBefore());
+  util::StatusOr<absl::Time> nbf = jwt->GetNotBefore();
+  ASSERT_THAT(nbf.status(), IsOk());
+  EXPECT_LT(*nbf, now - absl::Seconds(299));
+  EXPECT_GT(*nbf, now - absl::Seconds(301));
 
-  EXPECT_TRUE(jwt.HasIssuedAt());
-  auto iat_or = jwt.GetIssuedAt();
-  ASSERT_THAT(iat_or.status(), IsOk());
-  auto iat = iat_or.ValueOrDie();
-  EXPECT_LT(iat, now + absl::Seconds(1));
-  EXPECT_GT(iat, now - absl::Seconds(1));
+  EXPECT_TRUE(jwt->HasIssuedAt());
+  util::StatusOr<absl::Time> iat = jwt->GetIssuedAt();
+  ASSERT_THAT(iat.status(), IsOk());
+  EXPECT_LT(*iat, now + absl::Seconds(1));
+  EXPECT_GT(*iat, now - absl::Seconds(1));
 
-  EXPECT_TRUE(jwt.HasExpiration());
-  auto exp_or = jwt.GetExpiration();
-  ASSERT_THAT(exp_or.status(), IsOk());
-  auto exp = exp_or.ValueOrDie();
-  EXPECT_LT(exp, now + absl::Seconds(301));
-  EXPECT_GT(exp, now + absl::Seconds(299));
+  EXPECT_TRUE(jwt->HasExpiration());
+  util::StatusOr<absl::Time> exp = jwt->GetExpiration();
+  ASSERT_THAT(exp.status(), IsOk());
+  EXPECT_LT(*exp, now + absl::Seconds(301));
+  EXPECT_GT(*exp, now + absl::Seconds(299));
 }
 
 TEST(VerifiedJwt, GetAudiencesOK) {
-  util::StatusOr<RawJwt> raw_jwt_or = RawJwtBuilder()
+  util::StatusOr<RawJwt> raw_jwt = RawJwtBuilder()
                                           .AddAudience("audience1")
                                           .AddAudience("audience2")
                                           .WithoutExpiration()
                                           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
   std::vector<std::string> expected = {"audience1", "audience2"};
-  EXPECT_TRUE(jwt.HasAudiences());
-  EXPECT_THAT(jwt.GetAudiences(), IsOkAndHolds(expected));
+  EXPECT_TRUE(jwt->HasAudiences());
+  EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
 }
 
 TEST(VerifiedJwt, GetCustomClaimOK) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
           .WithoutExpiration()
           .AddNullClaim("null_claim")
@@ -168,34 +167,33 @@ TEST(VerifiedJwt, GetCustomClaimOK) {
           .AddJsonObjectClaim("object_claim", R"({ "number": 123.456})")
           .AddJsonArrayClaim("array_claim", R"([1, "one", 1.2, true])")
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_TRUE(jwt.IsNullClaim("null_claim"));
-  EXPECT_TRUE(jwt.HasBooleanClaim("boolean_claim"));
-  EXPECT_THAT(jwt.GetBooleanClaim("boolean_claim"), IsOkAndHolds(true));
-  EXPECT_TRUE(jwt.HasNumberClaim("number_claim"));
-  EXPECT_THAT(jwt.GetNumberClaim("number_claim"), IsOkAndHolds(123.456));
-  EXPECT_TRUE(jwt.HasStringClaim("string_claim"));
-  EXPECT_THAT(jwt.GetStringClaim("string_claim"), IsOkAndHolds("a string"));
-  EXPECT_TRUE(jwt.HasJsonObjectClaim("object_claim"));
-  EXPECT_THAT(jwt.GetJsonObjectClaim("object_claim"),
+  EXPECT_TRUE(jwt->IsNullClaim("null_claim"));
+  EXPECT_TRUE(jwt->HasBooleanClaim("boolean_claim"));
+  EXPECT_THAT(jwt->GetBooleanClaim("boolean_claim"), IsOkAndHolds(true));
+  EXPECT_TRUE(jwt->HasNumberClaim("number_claim"));
+  EXPECT_THAT(jwt->GetNumberClaim("number_claim"), IsOkAndHolds(123.456));
+  EXPECT_TRUE(jwt->HasStringClaim("string_claim"));
+  EXPECT_THAT(jwt->GetStringClaim("string_claim"), IsOkAndHolds("a string"));
+  EXPECT_TRUE(jwt->HasJsonObjectClaim("object_claim"));
+  EXPECT_THAT(jwt->GetJsonObjectClaim("object_claim"),
               IsOkAndHolds(R"({"number":123.456})"));
-  EXPECT_TRUE(jwt.HasJsonArrayClaim("array_claim"));
-  EXPECT_THAT(jwt.GetJsonArrayClaim("array_claim"),
+  EXPECT_TRUE(jwt->HasJsonArrayClaim("array_claim"));
+  EXPECT_THAT(jwt->GetJsonArrayClaim("array_claim"),
               IsOkAndHolds(R"([1,"one",1.2,true])"));
 
   std::vector<std::string> expected_claim_names = {
       "object_claim", "number_claim", "boolean_claim",
       "array_claim",  "null_claim",   "string_claim"};
-  EXPECT_THAT(jwt.CustomClaimNames(),
+  EXPECT_THAT(jwt->CustomClaimNames(),
               testing::UnorderedElementsAreArray(expected_claim_names));
 }
 
 TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
           .WithoutExpiration()
           .AddNullClaim("null_claim")
@@ -203,20 +201,19 @@ TEST(VerifiedJwt, HasCustomClaimIsFalseForWrongType) {
           .AddNumberClaim("number_claim", 123.456)
           .AddStringClaim("string_claim", "a string")
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_FALSE(jwt.IsNullClaim("boolean_claim"));
-  EXPECT_FALSE(jwt.HasBooleanClaim("number_claim"));
-  EXPECT_FALSE(jwt.HasNumberClaim("string_claim"));
-  EXPECT_FALSE(jwt.HasStringClaim("null_claim"));
+  EXPECT_FALSE(jwt->IsNullClaim("boolean_claim"));
+  EXPECT_FALSE(jwt->HasBooleanClaim("number_claim"));
+  EXPECT_FALSE(jwt->HasNumberClaim("string_claim"));
+  EXPECT_FALSE(jwt->HasStringClaim("null_claim"));
 }
 
 TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
   absl::Time now = absl::Now();
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
           .SetIssuer("issuer")
           .SetSubject("subject")
@@ -225,24 +222,23 @@ TEST(VerifiedJwt, HasAlwaysReturnsFalseForRegisteredClaims) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_FALSE(jwt.HasStringClaim("iss"));
-  EXPECT_FALSE(jwt.HasStringClaim("sub"));
-  EXPECT_FALSE(jwt.HasStringClaim("jti"));
-  EXPECT_FALSE(jwt.HasNumberClaim("nbf"));
-  EXPECT_FALSE(jwt.HasNumberClaim("iat"));
-  EXPECT_FALSE(jwt.HasNumberClaim("exp"));
+  EXPECT_FALSE(jwt->HasStringClaim("iss"));
+  EXPECT_FALSE(jwt->HasStringClaim("sub"));
+  EXPECT_FALSE(jwt->HasStringClaim("jti"));
+  EXPECT_FALSE(jwt->HasNumberClaim("nbf"));
+  EXPECT_FALSE(jwt->HasNumberClaim("iat"));
+  EXPECT_FALSE(jwt->HasNumberClaim("exp"));
 
-  EXPECT_THAT(jwt.CustomClaimNames(), testing::IsEmpty());
+  EXPECT_THAT(jwt->CustomClaimNames(), testing::IsEmpty());
 }
 
 TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
   absl::Time now = absl::Now();
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
           .SetIssuer("issuer")
           .SetSubject("subject")
@@ -251,88 +247,86 @@ TEST(VerifiedJwt, GetRegisteredCustomClaimNotOK) {
           .SetIssuedAt(now)
           .SetExpiration(now + absl::Seconds(300))
           .Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_FALSE(jwt.GetStringClaim("iss").ok());
-  EXPECT_FALSE(jwt.GetStringClaim("sub").ok());
-  EXPECT_FALSE(jwt.GetStringClaim("jti").ok());
-  EXPECT_FALSE(jwt.GetNumberClaim("nbf").ok());
-  EXPECT_FALSE(jwt.GetNumberClaim("iat").ok());
-  EXPECT_FALSE(jwt.GetNumberClaim("exp").ok());
+  EXPECT_FALSE(jwt->GetStringClaim("iss").ok());
+  EXPECT_FALSE(jwt->GetStringClaim("sub").ok());
+  EXPECT_FALSE(jwt->GetStringClaim("jti").ok());
+  EXPECT_FALSE(jwt->GetNumberClaim("nbf").ok());
+  EXPECT_FALSE(jwt->GetNumberClaim("iat").ok());
+  EXPECT_FALSE(jwt->GetNumberClaim("exp").ok());
 }
 
 TEST(VerifiedJwt, EmptyTokenHasAndIsReturnsFalse) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_FALSE(jwt.HasTypeHeader());
-  EXPECT_FALSE(jwt.HasIssuer());
-  EXPECT_FALSE(jwt.HasSubject());
-  EXPECT_FALSE(jwt.HasAudiences());
-  EXPECT_FALSE(jwt.HasJwtId());
-  EXPECT_FALSE(jwt.HasExpiration());
-  EXPECT_FALSE(jwt.HasNotBefore());
-  EXPECT_FALSE(jwt.HasIssuedAt());
-  EXPECT_FALSE(jwt.IsNullClaim("null_claim"));
-  EXPECT_FALSE(jwt.HasBooleanClaim("boolean_claim"));
-  EXPECT_FALSE(jwt.HasNumberClaim("number_claim"));
-  EXPECT_FALSE(jwt.HasStringClaim("string_claim"));
-  EXPECT_FALSE(jwt.HasJsonObjectClaim("object_claim"));
-  EXPECT_FALSE(jwt.HasJsonArrayClaim("array_claim"));
+  EXPECT_FALSE(jwt->HasTypeHeader());
+  EXPECT_FALSE(jwt->HasIssuer());
+  EXPECT_FALSE(jwt->HasSubject());
+  EXPECT_FALSE(jwt->HasAudiences());
+  EXPECT_FALSE(jwt->HasJwtId());
+  EXPECT_FALSE(jwt->HasExpiration());
+  EXPECT_FALSE(jwt->HasNotBefore());
+  EXPECT_FALSE(jwt->HasIssuedAt());
+  EXPECT_FALSE(jwt->IsNullClaim("null_claim"));
+  EXPECT_FALSE(jwt->HasBooleanClaim("boolean_claim"));
+  EXPECT_FALSE(jwt->HasNumberClaim("number_claim"));
+  EXPECT_FALSE(jwt->HasStringClaim("string_claim"));
+  EXPECT_FALSE(jwt->HasJsonObjectClaim("object_claim"));
+  EXPECT_FALSE(jwt->HasJsonArrayClaim("array_claim"));
 }
 
 TEST(VerifiedJwt, EmptyTokenGetReturnsNotOK) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_FALSE(jwt.GetTypeHeader().ok());
-  EXPECT_FALSE(jwt.GetIssuer().ok());
-  EXPECT_FALSE(jwt.GetSubject().ok());
-  EXPECT_FALSE(jwt.GetAudiences().ok());
-  EXPECT_FALSE(jwt.GetJwtId().ok());
-  EXPECT_FALSE(jwt.GetExpiration().ok());
-  EXPECT_FALSE(jwt.GetNotBefore().ok());
-  EXPECT_FALSE(jwt.GetIssuedAt().ok());
-  EXPECT_FALSE(jwt.IsNullClaim("null_claim"));
-  EXPECT_FALSE(jwt.GetBooleanClaim("boolean_claim").ok());
-  EXPECT_FALSE(jwt.GetNumberClaim("number_claim").ok());
-  EXPECT_FALSE(jwt.GetStringClaim("string_claim").ok());
-  EXPECT_FALSE(jwt.GetJsonObjectClaim("object_claim").ok());
-  EXPECT_FALSE(jwt.GetJsonArrayClaim("array_claim").ok());
+  EXPECT_FALSE(jwt->GetTypeHeader().ok());
+  EXPECT_FALSE(jwt->GetIssuer().ok());
+  EXPECT_FALSE(jwt->GetSubject().ok());
+  EXPECT_FALSE(jwt->GetAudiences().ok());
+  EXPECT_FALSE(jwt->GetJwtId().ok());
+  EXPECT_FALSE(jwt->GetExpiration().ok());
+  EXPECT_FALSE(jwt->GetNotBefore().ok());
+  EXPECT_FALSE(jwt->GetIssuedAt().ok());
+  EXPECT_FALSE(jwt->IsNullClaim("null_claim"));
+  EXPECT_FALSE(jwt->GetBooleanClaim("boolean_claim").ok());
+  EXPECT_FALSE(jwt->GetNumberClaim("number_claim").ok());
+  EXPECT_FALSE(jwt->GetStringClaim("string_claim").ok());
+  EXPECT_FALSE(jwt->GetJsonObjectClaim("object_claim").ok());
+  EXPECT_FALSE(jwt->GetJsonArrayClaim("array_claim").ok());
 }
 
 TEST(VerifiedJwt, GetJsonPayload) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
 
-  EXPECT_THAT(jwt.GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"iss":"issuer"})"));
 }
 
 TEST(VerifiedJwt, MoveMakesCopy) {
-  util::StatusOr<RawJwt> raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  auto verified_jwt_or = CreateVerifiedJwt(raw_jwt_or.ValueOrDie());
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  VerifiedJwt jwt = verified_jwt_or.ValueOrDie();
-  VerifiedJwt jwt2 = std::move(jwt);
-  EXPECT_TRUE(jwt.HasIssuer());
-  EXPECT_THAT(jwt.GetIssuer(), IsOkAndHolds("issuer"));
+  ASSERT_THAT(raw_jwt.status(), IsOk());
+  util::StatusOr<VerifiedJwt> jwt = CreateVerifiedJwt(*raw_jwt);
+  ASSERT_THAT(jwt.status(), IsOk());
+  VerifiedJwt jwt1 = *jwt;
+  VerifiedJwt jwt2 = std::move(jwt1);
+  // We want that a VerifiedJwt object remains a valid object, even after
+  // std::moved has been called.
+  EXPECT_TRUE(jwt1.HasIssuer());
+  EXPECT_THAT(jwt1.GetIssuer(), IsOkAndHolds("issuer"));
   EXPECT_TRUE(jwt2.HasIssuer());
   EXPECT_THAT(jwt2.GetIssuer(), IsOkAndHolds("issuer"));
 }

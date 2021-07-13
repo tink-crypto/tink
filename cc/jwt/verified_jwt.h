@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_VERIFIED_JWT_H_
 #define TINK_JWT_VERIFIED_JWT_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
