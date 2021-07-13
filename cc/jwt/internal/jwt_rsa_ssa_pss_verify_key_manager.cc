@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_rsa_ssa_pss_verify_key_manager.h"
 
+#include <string>
+#include <utility>
+
 namespace crypto {
 namespace tink {
 namespace jwt_internal {

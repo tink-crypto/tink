@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"

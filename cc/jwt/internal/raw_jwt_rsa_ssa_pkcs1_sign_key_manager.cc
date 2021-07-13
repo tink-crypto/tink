@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 
+#include <string>
+
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h"

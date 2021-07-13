@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
