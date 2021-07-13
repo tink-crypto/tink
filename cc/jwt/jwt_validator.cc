@@ -54,20 +54,20 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
                         "token does not have an expiration set");
   }
   if (raw_jwt.HasExpiration()) {
-    auto expiration_or = raw_jwt.GetExpiration();
-    if (!expiration_or.ok()) {
-      return expiration_or.status();
+    util::StatusOr<absl::Time> expiration = raw_jwt.GetExpiration();
+    if (!expiration.ok()) {
+      return expiration.status();
     }
-    if (expiration_or.ValueOrDie() <= now - clock_skew_) {
+    if (*expiration <= now - clock_skew_) {
       return util::Status(util::error::INVALID_ARGUMENT, "token has expired");
     }
   }
   if (raw_jwt.HasNotBefore()) {
-    auto not_before_or = raw_jwt.GetNotBefore();
-    if (!not_before_or.ok()) {
-      return not_before_or.status();
+    util::StatusOr<absl::Time> not_before = raw_jwt.GetNotBefore();
+    if (!not_before.ok()) {
+      return not_before.status();
     }
-    if (not_before_or.ValueOrDie() > now + clock_skew_) {
+    if (*not_before > now + clock_skew_) {
       return util::Status(util::error::INVALID_ARGUMENT,
                         "token cannot yet be used");
     }
@@ -77,11 +77,11 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected type header");
     }
-    auto type_header_or = raw_jwt.GetTypeHeader();
-    if (!type_header_or.ok()) {
-      return type_header_or.status();
+    util::StatusOr<std::string> type_header = raw_jwt.GetTypeHeader();
+    if (!type_header.ok()) {
+      return type_header.status();
     }
-    if (expected_type_header_.value() != type_header_or.ValueOrDie()) {
+    if (expected_type_header_.value() != *type_header) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong type header");
     }
   } else {
@@ -96,11 +96,11 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected issuer");
     }
-    auto issuer_or = raw_jwt.GetIssuer();
-    if (!issuer_or.ok()) {
-      return issuer_or.status();
+    util::StatusOr<std::string> issuer = raw_jwt.GetIssuer();
+    if (!issuer.ok()) {
+      return issuer.status();
     }
-    if (expected_issuer_.value() != issuer_or.ValueOrDie()) {
+    if (expected_issuer_.value() != *issuer) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong issuer");
     }
   } else {
@@ -115,11 +115,11 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected subject");
     }
-    auto subject_or = raw_jwt.GetSubject();
-    if (!subject_or.ok()) {
-      return subject_or.status();
+    util::StatusOr<std::string> subject = raw_jwt.GetSubject();
+    if (!subject.ok()) {
+      return subject.status();
     }
-    if (expected_subject_.value() != subject_or.ValueOrDie()) {
+    if (expected_subject_.value() != *subject) {
       return util::Status(util::error::INVALID_ARGUMENT, "wrong subject");
     }
   } else {
@@ -134,13 +134,13 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "missing expected audiences");
     }
-    auto audiences_or = raw_jwt.GetAudiences();
-    if (!audiences_or.ok()) {
-      return audiences_or.status();
+    util::StatusOr<std::vector<std::string>> audiences = raw_jwt.GetAudiences();
+    if (!audiences.ok()) {
+      return audiences.status();
     }
-    std::vector<std::string> audiences = audiences_or.ValueOrDie();
-    auto it = std::find(audiences.begin(), audiences.end(), expected_audience_);
-    if (it == audiences.end()) {
+    auto it =
+        std::find(audiences->begin(), audiences->end(), expected_audience_);
+    if (it == audiences->end()) {
       return util::Status(util::error::INVALID_ARGUMENT, "audience not found");
     }
   } else {
