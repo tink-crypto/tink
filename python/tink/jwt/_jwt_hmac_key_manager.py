@@ -43,9 +43,11 @@ _ALGORITHM_STRING = {
 class _JwtHmac(_jwt_mac.JwtMacInternal):
   """Interface for authenticating and verifying JWT with JWS MAC."""
 
-  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: Text):
+  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: Text,
+               custom_kid: Optional[Text]):
     self._cc_mac = cc_mac
     self._algorithm = algorithm
+    self._custom_kid = custom_kid
 
   @core.use_tink_errors
   def _compute_mac(self, data: bytes) -> bytes:
@@ -57,12 +59,27 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
 
   def compute_mac_and_encode_with_kid(self, raw_jwt: _raw_jwt.RawJwt,
                                       kid: Optional[Text]) -> Text:
-    """Computes a MAC and encodes the token."""
+    """Computes a MAC and encodes the token.
+
+    Args:
+      raw_jwt: The RawJwt token to be MACed and encoded.
+      kid: Optional "kid" header value. It is set by the wrapper for keys with
+        output prefix TINK, and it is None for output prefix RAW.
+
+    Returns:
+      The MACed token encoded in the JWS compact serialization format.
+    Raises:
+      tink.TinkError if the operation fails.
+    """
     if raw_jwt.has_type_header():
       type_header = raw_jwt.type_header()
     else:
       type_header = None
-    # TODO(juerg): Add support for custom_kid.
+    if self._custom_kid is not None:
+      if kid is not None:
+        raise _jwt_error.JwtInvalidError(
+            'custom_kid must not be set for keys with output prefix type TINK')
+      kid = self._custom_kid
     unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
                                                    kid, raw_jwt.json_payload())
     return _jwt_format.create_signed_compact(unsigned,
@@ -100,7 +117,11 @@ class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMacInternal]):
     jwt_hmac_key = jwt_hmac_pb2.JwtHmacKey.FromString(key_data.value)
     algorithm = _ALGORITHM_STRING[jwt_hmac_key.algorithm]
     cc_mac = self._cc_key_manager.primitive(key_data.SerializeToString())
-    return _JwtHmac(cc_mac, algorithm)
+    if jwt_hmac_key.HasField('custom_kid'):
+      custom_kid = jwt_hmac_key.custom_kid.value
+    else:
+      custom_kid = None
+    return _JwtHmac(cc_mac, algorithm, custom_kid)
 
   def key_type(self) -> Text:
     return self._cc_key_manager.key_type()

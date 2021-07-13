@@ -82,7 +82,11 @@ class JwtMac(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class JwtMacInternal(object):
-  """Internal interface for authenticating and verifying JWT with JWS MAC."""
+  """Internal interface for authenticating and verifying JWT with JWS MAC.
+
+  "kid" is an optional value that is set by the wrapper for keys with output
+  prefix TINK, and it is set to None for output prefix RAW.
+  """
 
   @abc.abstractmethod
   def compute_mac_and_encode_with_kid(self, token: _raw_jwt.RawJwt,

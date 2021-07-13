@@ -17,6 +17,8 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from tink.proto import jwt_ecdsa_pb2
+from tink.proto import jwt_rsa_ssa_pkcs1_pb2
+from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
 from tink import jwt
@@ -149,6 +151,77 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
     header = _jwt_format.json_loads(json_header)
     self.assertIn('kid', header)
+
+  def test_es256_key_with_custom_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_es256_template())
+
+    # Add a custom kid to the key in keyset_handle
+    value = keyset_handle._keyset.key[0].key_data.value
+    ecdsa_key = jwt_ecdsa_pb2.JwtEcdsaPrivateKey.FromString(value)
+    ecdsa_key.public_key.custom_kid.value = 'my kid'
+    keyset_handle._keyset.key[0].key_data.value = ecdsa_key.SerializeToString()
+    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = sign.sign_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['kid'], 'my kid')
+
+    # Now, change the output prefix type to TINK. This should fail.
+    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
+    with self.assertRaises(tink.TinkError):
+      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+      tink_sign.sign_and_encode(raw_jwt)
+
+  def test_rs256_key_with_custom_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_rs256_2048_f4_template())
+
+    # Add a custom kid to the key in keyset_handle
+    value = keyset_handle._keyset.key[0].key_data.value
+    pkcs1_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(value)
+    pkcs1_key.public_key.custom_kid.value = 'my kid'
+    keyset_handle._keyset.key[0].key_data.value = pkcs1_key.SerializeToString()
+
+    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = sign.sign_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['kid'], 'my kid')
+
+    # Now, change the output prefix type to TINK. This should fail.
+    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
+    with self.assertRaises(tink.TinkError):
+      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+      tink_sign.sign_and_encode(raw_jwt)
+
+  def test_ps256_key_with_a_custom_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_ps256_2048_f4_template())
+
+    # Add a custom kid to the key in keyset_handle
+    value = keyset_handle._keyset.key[0].key_data.value
+    pss_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(value)
+    pss_key.public_key.custom_kid.value = 'my kid'
+    keyset_handle._keyset.key[0].key_data.value = pss_key.SerializeToString()
+
+    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = sign.sign_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['kid'], 'my kid')
+
+    # Now, change the output prefix type to TINK. This should fail.
+    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
+    with self.assertRaises(tink.TinkError):
+      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+      tink_sign.sign_and_encode(raw_jwt)
 
   def test_legacy_template_fails(self):
     template = _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256, tink_pb2.LEGACY)

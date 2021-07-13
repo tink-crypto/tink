@@ -127,6 +127,30 @@ class JwtMacWrapperTest(parameterized.TestCase):
     header = _jwt_format.json_loads(json_header)
     self.assertIn('kid', header)
 
+  def test_raw_output_prefix_type_encodes_a_custom_kid_header(self):
+    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_hs256_template())
+
+    # Add a custom kid to the key in keyset_handle
+    value = keyset_handle._keyset.key[0].key_data.value
+    hmac_key = jwt_hmac_pb2.JwtHmacKey.FromString(value)
+    hmac_key.custom_kid.value = 'my kid'
+    keyset_handle._keyset.key[0].key_data.value = hmac_key.SerializeToString()
+
+    jwt_mac = keyset_handle.primitive(jwt.JwtMac)
+
+    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
+    signed_compact = jwt_mac.compute_mac_and_encode(raw_jwt)
+
+    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
+    header = _jwt_format.json_loads(json_header)
+    self.assertEqual(header['kid'], 'my kid')
+
+    # Now, change the output prefix type to TINK. This should fail.
+    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
+    with self.assertRaises(tink.TinkError):
+      tink_jwt_mac = keyset_handle.primitive(jwt.JwtMac)
+      tink_jwt_mac.compute_mac_and_encode(raw_jwt)
+
   def test_legacy_key_fails(self):
     template = _create_jwt_hmac_template(jwt_hmac_pb2.HS256, 32,
                                          tink_pb2.LEGACY)

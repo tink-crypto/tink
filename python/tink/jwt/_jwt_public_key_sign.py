@@ -34,11 +34,11 @@ class JwtPublicKeySign(object):
   """
 
   @abc.abstractmethod
-  def sign_and_encode(self, token: _raw_jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
     """Computes a signature and encodes the token.
 
     Args:
-      token: The RawJwt token to be signed and encoded.
+      raw_jwt: The RawJwt token to be signed and encoded.
 
     Returns:
       The signed token encoded in the JWS compact serialization format.
@@ -50,7 +50,11 @@ class JwtPublicKeySign(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class JwtPublicKeySignInternal(object):
-  """Internal interface for creating a signed JWT."""
+  """Internal interface for creating a signed JWT.
+
+  "kid" is an optional value that is set by the wrapper for keys with output
+  prefix TINK, and it is set to None for output prefix RAW.
+  """
 
   @abc.abstractmethod
   def sign_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
