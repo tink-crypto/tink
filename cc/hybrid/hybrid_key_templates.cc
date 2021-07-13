@@ -151,6 +151,16 @@ const KeyTemplate& HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128Gcm() {
 }
 
 // static
+const KeyTemplate& HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes256Gcm() {
+  static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(
+      EllipticCurveType::CURVE25519, HashType::SHA256,
+      EcPointFormat::COMPRESSED, AeadKeyTemplates::Aes256Gcm(),
+      OutputPrefixType::TINK,
+      /* hkdf_salt= */ "");
+  return *key_template;
+}
+
+// static
 const KeyTemplate&
 HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128CtrHmacSha256() {
   static const KeyTemplate* key_template = NewEciesAeadHkdfKeyTemplate(

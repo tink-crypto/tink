@@ -131,6 +131,16 @@ class HybridKeyTemplates {
   // Returns a KeyTemplate that generates new instances of
   // EciesAeadHkdfPrivateKey with the following parameters:
   //   - KEM: ECDH over curve 25519
+  //   - DEM: AES256-GCM
+  //   - KDF: HKDF-HMAC-SHA256 with an empty salt
+  //   - EC Point Format: Compressed
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate&
+  EciesX25519HkdfHmacSha256Aes256Gcm();
+
+  // Returns a KeyTemplate that generates new instances of
+  // EciesAeadHkdfPrivateKey with the following parameters:
+  //   - KEM: ECDH over curve 25519
   //   - DEM: AES128-CTR-HMAC-SHA256 with the following parameters:
   //          * AES key size: 16 bytes
   //          * AES CTR IV size: 16 bytes
