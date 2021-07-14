@@ -97,7 +97,7 @@ def main(argv):
     blob.upload_from_string(output_data)
 
   elif FLAGS.mode == 'decrypt':
-    ciphertext = blob.download_as_string()
+    ciphertext = blob.download_as_bytes()
     with open(FLAGS.local_path, 'wb') as output_file:
       output_file.write(env_aead.decrypt(ciphertext, associated_data))
 
