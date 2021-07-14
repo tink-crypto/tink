@@ -16,6 +16,9 @@
 
 #include "tink/jwt/internal/jwt_mac_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
@@ -81,13 +84,14 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
   absl::optional<util::Status> interesting_status;
   for (const auto* mac_entry : jwt_mac_set_->get_all()) {
     JwtMacInternal& jwt_mac = mac_entry->get_primitive();
-    auto verified_jwt_or = jwt_mac.VerifyMacAndDecode(compact, validator);
-    if (verified_jwt_or.ok()) {
-      return verified_jwt_or;
-    } else if (verified_jwt_or.status().error_code() !=
+    util::StatusOr<VerifiedJwt> verified_jwt =
+        jwt_mac.VerifyMacAndDecode(compact, validator);
+    if (verified_jwt.ok()) {
+      return verified_jwt;
+    } else if (verified_jwt.status().error_code() !=
                util::error::UNAUTHENTICATED) {
       // errors that are not the result of a MAC verification
-      interesting_status = verified_jwt_or.status();
+      interesting_status = verified_jwt.status();
     }
   }
   if (interesting_status.has_value()) {
