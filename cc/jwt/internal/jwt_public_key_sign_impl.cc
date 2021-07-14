@@ -48,18 +48,18 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
   if (!encoded_header.ok()) {
     return encoded_header.status();
   }
-  util::StatusOr<std::string> payload_or = token.GetJsonPayload();
-  if (!payload_or.ok()) {
-    return payload_or.status();
+  util::StatusOr<std::string> payload = token.GetJsonPayload();
+  if (!payload.ok()) {
+    return payload.status();
   }
-  std::string encoded_payload = EncodePayload(payload_or.ValueOrDie());
+  std::string encoded_payload = EncodePayload(*payload);
   std::string unsigned_token =
       absl::StrCat(*encoded_header, ".", encoded_payload);
-  util::StatusOr<std::string> tag_or = sign_->Sign(unsigned_token);
-  if (!tag_or.ok()) {
-    return tag_or.status();
+  util::StatusOr<std::string> tag = sign_->Sign(unsigned_token);
+  if (!tag.ok()) {
+    return tag.status();
   }
-  std::string encoded_tag = EncodeSignature(tag_or.ValueOrDie());
+  std::string encoded_tag = EncodeSignature(*tag);
   return absl::StrCat(unsigned_token, ".", encoded_tag);
 }
 
