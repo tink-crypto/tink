@@ -32,6 +32,21 @@ java_test(
 )
 
 java_test(
+    name = "KmsEnvelopeAeadTest",
+    size = "small",
+    srcs = ["KmsEnvelopeAeadTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "ChaCha20Poly1305KeyManagerTest",
     size = "small",
     srcs = ["ChaCha20Poly1305KeyManagerTest.java"],
