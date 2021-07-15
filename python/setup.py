@@ -128,11 +128,14 @@ def _patch_workspace(workspace_content):
     base_path = os.environ['TINK_PYTHON_SETUPTOOLS_OVERRIDE_BASE_PATH']
     return _patch_with_local_path(workspace_content, base_path)
 
-  if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.eviron:
+  if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
     archive_filename = 'v{}.zip'.format(_TINK_VERSION)
-    return _patch_with_http_archive(workspace_content, archive_filename)
+    archive_prefix = 'tink-{}'.format(_TINK_VERSION)
+    return _patch_with_http_archive(workspace_content,
+                                    archive_filename, archive_prefix)
 
-  return _patch_with_http_archive(workspace_content, 'master.zip')
+  return _patch_with_http_archive(workspace_content,
+                                  'master.zip', 'tink-master')
 
 
 def _patch_with_local_path(workspace_content, base_path):
@@ -147,7 +150,7 @@ def _patch_with_local_path(workspace_content, base_path):
   return workspace_content
 
 
-def _patch_with_http_archive(workspace_content, filename):
+def _patch_with_http_archive(workspace_content, filename, prefix):
   """Replaces local_repository() rules with http_archive() rules."""
 
   workspace_lines = workspace_content.split('\n')
@@ -169,7 +172,7 @@ def _patch_with_http_archive(workspace_content, filename):
       local_repository(
           name = "tink_cc",
           path = "../cc",
-      ))
+      )
       ''')
 
   base_patched = textwrap.dedent(
@@ -177,20 +180,20 @@ def _patch_with_http_archive(workspace_content, filename):
       # Modified by setup.py
       http_archive(
           name = "tink_base",
-          urls = ["https://github.com/google/tink/archive/{}.zip"],
-          strip_prefix = "tink-master/",
-      ))
-      '''.format(filename))
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/",
+      )
+      '''.format(filename, prefix))
 
   cc_patched = textwrap.dedent(
       '''\
       # Modified by setup.py
       http_archive(
           name = "tink_cc",
-          urls = ["https://github.com/google/tink/archive/{}.zip"],
-          strip_prefix = "tink-master/cc",
-      ))
-      '''.format(filename))
+          urls = ["https://github.com/google/tink/archive/{}"],
+          strip_prefix = "{}/cc",
+      )
+      '''.format(filename, prefix))
 
   workspace_content = workspace_content.replace(base, base_patched)
   workspace_content = workspace_content.replace(cc, cc_patched)

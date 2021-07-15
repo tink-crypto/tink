@@ -28,7 +28,7 @@ readonly PYTHON_VERSIONS
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-readonly TINK_SRC_PATH="${PWD}/.."
+export TINK_SRC_PATH="${PWD}/.."
 readonly TINK_VERSION="$(grep ^TINK "${TINK_SRC_PATH}/tink_version.bzl" \
   | awk '{gsub(/"/, "", $3); print $3}')"
 
@@ -38,13 +38,6 @@ readonly IMAGE="${IMAGE_NAME}@${IMAGE_DIGEST}"
 
 build_linux() {
   echo "### Building Linux binary wheels ###"
-
-  if [[ -n "${KOKORO_ROOT}" ]] ; then
-    eval "$(pyenv init -)"
-    pyenv versions
-  fi
-
-  mkdir -p release
 
   # Use signatures for getting images from registry (see
   # https://docs.docker.com/engine/security/trust/content_trust/).
@@ -73,9 +66,9 @@ build_linux() {
 
   # Test install from source distribution.
   python3 --version
-  pip3 list
-  pip3 install -v "release/${sdist_filename}"
-  pip3 list
+  python3 -m pip list
+  python3 -m pip install -v "release/${sdist_filename}"
+  python3 -m pip list
   find tink/ -not -path "*cc/pybind*" -type f -name "*_test.py" -print0 \
     | xargs -0 -n1 python3
 }
@@ -83,13 +76,11 @@ build_linux() {
 build_macos() {
   echo "### Building macOS binary wheels ###"
 
-  mkdir -p release
-
   for v in "${PYTHON_VERSIONS[@]}"; do
     enable_py_version "${v}"
 
     # Build binary wheel.
-    pip3 wheel -w release .
+    python3 -m pip wheel -w release .
 
     # Test binary wheel.
     # TODO(ckl): Implement test.
@@ -108,9 +99,9 @@ enable_py_version() {
   pyenv shell "${version}"
 
   # Update environment.
-  pip3 install --upgrade pip
-  pip3 install --upgrade setuptools
-  pip3 install --upgrade wheel
+  python3 -m pip install --upgrade pip
+  python3 -m pip install --upgrade setuptools
+  python3 -m pip install --upgrade wheel
 }
 
 # setuptools does not replicate the distutils feature of explicitly setting
@@ -130,6 +121,9 @@ set_owner_within_tar() {
 }
 
 main() {
+  eval "$(pyenv init -)"
+  mkdir -p release
+
   if [[ "${PLATFORM}" == 'linux' ]]; then
     build_linux
   elif [[ "${PLATFORM}" == 'darwin' ]]; then
