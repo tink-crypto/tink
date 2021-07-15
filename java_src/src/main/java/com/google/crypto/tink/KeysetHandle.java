@@ -112,7 +112,13 @@ public final class KeysetHandle {
     return KeysetManager.withEmptyKeyset().rotate(keyTemplate.getProto()).getKeysetHandle();
   }
 
-  /** Creates a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input. */
+  /**
+   * Returns a {@code KeysetHandle} that contains the single {@code KeyHandle} passed as input.
+   *
+   * @deprecated Use {@code KeysetManager.withEmptyKeyset().add(keyHandle)
+   *     .setPrimary(keyHandle.getId()).getKeysetHandle()} instead.
+   */
+  @Deprecated
   public static final KeysetHandle createFromKey(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     KeysetManager km = KeysetManager.withEmptyKeyset().add(keyHandle);
