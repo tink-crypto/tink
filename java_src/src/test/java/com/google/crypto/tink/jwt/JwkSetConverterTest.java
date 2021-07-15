@@ -23,6 +23,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
@@ -31,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -497,6 +499,20 @@ public final class JwkSetConverterTest {
             JwkSetConverter.toKeysetHandle(psWithEmptyKid, KeyAccess.publicAccess()),
             KeyAccess.publicAccess()),
         psWithEmptyKid);
+  }
+
+  @Test
+  public void toKeysetHandleSetsKeyIdsAndPrimaryKeyId() throws Exception {
+    KeysetHandle handle =
+        JwkSetConverter.toKeysetHandle(JWK_SET_WITH_TWO_KEYS, KeyAccess.publicAccess());
+    KeysetInfo ketsetInfo = handle.getKeysetInfo();
+    assertThat(ketsetInfo.getKeyInfoCount()).isEqualTo(2);
+    HashSet<Integer> keyIdSet = new HashSet<>();
+    for (KeysetInfo.KeyInfo keyInfo : ketsetInfo.getKeyInfoList()) {
+      keyIdSet.add(keyInfo.getKeyId());
+    }
+    assertThat(keyIdSet).hasSize(2);
+    assertThat(ketsetInfo.getPrimaryKeyId()).isIn(keyIdSet);
   }
 
   @Test
