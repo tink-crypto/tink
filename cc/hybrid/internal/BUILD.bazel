@@ -1,1 +1,142 @@
+package(default_visibility = ["//:__subpackages__"])
+
 licenses(["notice"])
+
+cc_library(
+    name = "hpke_decrypt_boringssl",
+    srcs = ["hpke_decrypt_boringssl.cc"],
+    hdrs = ["hpke_decrypt_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        ":hpke_key_boringssl",
+        ":hpke_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_encrypt_boringssl",
+    srcs = ["hpke_encrypt_boringssl.cc"],
+    hdrs = ["hpke_encrypt_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        ":hpke_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_key_boringssl",
+    srcs = ["hpke_key_boringssl.cc"],
+    hdrs = ["hpke_key_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        ":hpke_util_boringssl",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_test_util",
+    srcs = ["hpke_test_util.cc"],
+    hdrs = ["hpke_test_util.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_util_boringssl",
+    srcs = ["hpke_util_boringssl.cc"],
+    hdrs = ["hpke_util_boringssl.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+# tests
+
+cc_test(
+    name = "hpke_decrypt_boringssl_test",
+    size = "small",
+    srcs = ["hpke_decrypt_boringssl_test.cc"],
+    deps = [
+        ":hpke_decrypt_boringssl",
+        ":hpke_test_util",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_encrypt_boringssl_test",
+    size = "small",
+    srcs = ["hpke_encrypt_boringssl_test.cc"],
+    deps = [
+        ":hpke_encrypt_boringssl",
+        ":hpke_test_util",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_key_boringssl_test",
+    size = "small",
+    srcs = ["hpke_key_boringssl_test.cc"],
+    deps = [
+        ":hpke_key_boringssl",
+        ":hpke_test_util",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_util_boringssl_test",
+    size = "small",
+    srcs = ["hpke_util_boringssl_test.cc"],
+    deps = [
+        ":hpke_test_util",
+        ":hpke_util_boringssl",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
