@@ -70,7 +70,7 @@ class SecretUniquePtr {
   using element_type = typename Value::element_type;
   using deleter_type = typename Value::deleter_type;
   static_assert(std::is_trivially_destructible<T>::value,
-                "SecureUniquePtr only supports trivially destructible types");
+                "SecretUniquePtr only supports trivially destructible types");
   SecretUniquePtr() {}
 
   pointer get() const { return value_.get(); }
