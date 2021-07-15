@@ -69,13 +69,14 @@ JwtPublicKeyVerifySetWrapper::VerifyAndDecode(
   absl::optional<util::Status> interesting_status;
   for (const auto* entry : jwt_verify_set_->get_all()) {
     JwtPublicKeyVerify& jwt_verify = entry->get_primitive();
-    auto verified_jwt_or = jwt_verify.VerifyAndDecode(compact, validator);
-    if (verified_jwt_or.ok()) {
-      return verified_jwt_or;
-    } else if (verified_jwt_or.status().error_code() !=
+    util::StatusOr<VerifiedJwt> verified_jwt =
+        jwt_verify.VerifyAndDecode(compact, validator);
+    if (verified_jwt.ok()) {
+      return verified_jwt;
+    } else if (verified_jwt.status().error_code() !=
                util::error::UNAUTHENTICATED) {
       // errors that are not the result of a signature verification
-      interesting_status = verified_jwt_or.status();
+      interesting_status = verified_jwt.status();
     }
   }
   if (interesting_status.has_value()) {

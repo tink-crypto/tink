@@ -14,6 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -86,118 +89,110 @@ TEST_F(JwtPublicKeyWrappersTest, WrapEmptySign) {
 TEST_F(JwtPublicKeyWrappersTest, CannotWrapPrimitivesFromNonRawOrTinkKeys) {
   KeyTemplate tink_key_template = CreateTemplate(OutputPrefixType::LEGACY);
 
-  auto handle_or = KeysetHandle::GenerateNew(tink_key_template);
-  ASSERT_THAT(handle_or.status(), IsOk());
-  auto keyset_handle = std::move(handle_or.ValueOrDie());
-  EXPECT_FALSE(keyset_handle->GetPrimitive<JwtPublicKeySign>().status().ok());
-
-  auto public_handle_or = keyset_handle->GetPublicKeysetHandle();
-  ASSERT_THAT(public_handle_or.status(), IsOk());
-  auto public_handle = std::move(public_handle_or.ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      KeysetHandle::GenerateNew(tink_key_template);
+  ASSERT_THAT(keyset_handle.status(), IsOk());
   EXPECT_FALSE(
-      public_handle->GetPrimitive<JwtPublicKeyVerify>().status().ok());
+      (*keyset_handle)->GetPrimitive<JwtPublicKeySign>().status().ok());
+
+  util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+      (*keyset_handle)->GetPublicKeysetHandle();
+  ASSERT_THAT(public_handle.status(), IsOk());
+  EXPECT_FALSE(
+      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>().status().ok());
 }
 
 TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
   KeyTemplate key_template = CreateTemplate(OutputPrefixType::RAW);
-  auto handle_or = KeysetHandle::GenerateNew(key_template);
-  ASSERT_THAT(handle_or.status(), IsOk());
-  auto jwt_sign_or = handle_or.ValueOrDie()->GetPrimitive<JwtPublicKeySign>();
-  EXPECT_THAT(jwt_sign_or.status(), IsOk());
-  std::unique_ptr<JwtPublicKeySign> jwt_sign =
-      std::move(jwt_sign_or.ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(key_template);
+  ASSERT_THAT(handle.status(), IsOk());
+  util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
+      (*handle)->GetPrimitive<JwtPublicKeySign>();
+  EXPECT_THAT(jwt_sign.status(), IsOk());
 
-  auto public_handle_or = handle_or.ValueOrDie()->GetPublicKeysetHandle();
-  EXPECT_THAT(public_handle_or.status(), IsOk());
-  auto jwt_verify_or =
-      public_handle_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-  EXPECT_THAT(jwt_verify_or.status(), IsOk());
-  std::unique_ptr<JwtPublicKeyVerify> jwt_verify =
-      std::move(jwt_verify_or.ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+      (*handle)->GetPublicKeysetHandle();
+  EXPECT_THAT(public_handle.status(), IsOk());
+  util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
+      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+  EXPECT_THAT(jwt_verify.status(), IsOk());
 
-  auto raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
 
-  util::StatusOr<std::string> compact_or = jwt_sign->SignAndEncode(raw_jwt);
-  ASSERT_THAT(compact_or.status(), IsOk());
-  std::string compact = compact_or.ValueOrDie();
+  util::StatusOr<std::string> compact = (*jwt_sign)->SignAndEncode(*raw_jwt);
+  ASSERT_THAT(compact.status(), IsOk());
 
-  JwtValidator validator = JwtValidatorBuilder()
-                               .ExpectIssuer("issuer")
-                               .AllowMissingExpiration()
-                               .Build()
-                               .ValueOrDie();
-  util::StatusOr<VerifiedJwt> verified_jwt_or =
-      jwt_verify->VerifyAndDecode(compact, validator);
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  auto verified_jwt = verified_jwt_or.ValueOrDie();
-  EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
+  util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
+                                               .ExpectIssuer("issuer")
+                                               .AllowMissingExpiration()
+                                               .Build();
+  ASSERT_THAT(validator.status(), IsOk());
+  util::StatusOr<VerifiedJwt> verified_jwt =
+      (*jwt_verify)->VerifyAndDecode(*compact, *validator);
+  ASSERT_THAT(verified_jwt.status(), IsOk());
+  EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  JwtValidator validator2 = JwtValidatorBuilder()
-                                .ExpectIssuer("unknown")
-                                .AllowMissingExpiration()
-                                .Build()
-                                .ValueOrDie();
-  util::StatusOr<VerifiedJwt> verified_jwt_or2 =
-      jwt_verify->VerifyAndDecode(compact, validator2);
-  EXPECT_FALSE(verified_jwt_or2.ok());
+  util::StatusOr<JwtValidator> validator2 = JwtValidatorBuilder()
+                                                .ExpectIssuer("unknown")
+                                                .AllowMissingExpiration()
+                                                .Build();
+  ASSERT_THAT(validator2.status(), IsOk());
+  util::StatusOr<VerifiedJwt> verified_jwt2 =
+      (*jwt_verify)->VerifyAndDecode(*compact, *validator2);
+  EXPECT_FALSE(verified_jwt2.ok());
   // Make sure the error message is interesting
-  EXPECT_THAT(verified_jwt_or2.status().error_message(), Eq("wrong issuer"));
+  EXPECT_THAT(verified_jwt2.status().error_message(), Eq("wrong issuer"));
 }
 
 TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   KeyTemplate key_template = CreateTemplate(OutputPrefixType::TINK);
-  auto handle_or = KeysetHandle::GenerateNew(key_template);
-  ASSERT_THAT(handle_or.status(), IsOk());
-  auto jwt_sign_or = handle_or.ValueOrDie()->GetPrimitive<JwtPublicKeySign>();
-  EXPECT_THAT(jwt_sign_or.status(), IsOk());
-  std::unique_ptr<JwtPublicKeySign> jwt_sign =
-      std::move(jwt_sign_or.ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      KeysetHandle::GenerateNew(key_template);
+  ASSERT_THAT(handle.status(), IsOk());
+  util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign =
+      (*handle)->GetPrimitive<JwtPublicKeySign>();
+  EXPECT_THAT(jwt_sign.status(), IsOk());
 
-  auto public_handle_or = handle_or.ValueOrDie()->GetPublicKeysetHandle();
-  EXPECT_THAT(public_handle_or.status(), IsOk());
-  auto jwt_verify_or =
-      public_handle_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-  EXPECT_THAT(jwt_verify_or.status(), IsOk());
-  std::unique_ptr<JwtPublicKeyVerify> jwt_verify =
-      std::move(jwt_verify_or.ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle =
+      (*handle)->GetPublicKeysetHandle();
+  EXPECT_THAT(public_handle.status(), IsOk());
+  util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify =
+      (*public_handle)->GetPrimitive<JwtPublicKeyVerify>();
+  EXPECT_THAT(jwt_verify.status(), IsOk());
 
-  auto raw_jwt_or =
+  util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
-  ASSERT_THAT(raw_jwt_or.status(), IsOk());
-  RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
+  ASSERT_THAT(raw_jwt.status(), IsOk());
 
-  util::StatusOr<std::string> compact_or = jwt_sign->SignAndEncode(raw_jwt);
-  ASSERT_THAT(compact_or.status(), IsOk());
-  std::string compact = compact_or.ValueOrDie();
+  util::StatusOr<std::string> compact = (*jwt_sign)->SignAndEncode(*raw_jwt);
+  ASSERT_THAT(compact.status(), IsOk());
 
-  JwtValidator validator = JwtValidatorBuilder()
-                               .ExpectIssuer("issuer")
-                               .AllowMissingExpiration()
-                               .Build()
-                               .ValueOrDie();
-  util::StatusOr<VerifiedJwt> verified_jwt_or =
-      jwt_verify->VerifyAndDecode(compact, validator);
-  ASSERT_THAT(verified_jwt_or.status(), IsOk());
-  auto verified_jwt = verified_jwt_or.ValueOrDie();
-  EXPECT_THAT(verified_jwt.GetIssuer(), test::IsOkAndHolds("issuer"));
+  util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
+                                               .ExpectIssuer("issuer")
+                                               .AllowMissingExpiration()
+                                               .Build();
+  ASSERT_THAT(validator.status(), IsOk());
+  util::StatusOr<VerifiedJwt> verified_jwt =
+      (*jwt_verify)->VerifyAndDecode(*compact, *validator);
+  ASSERT_THAT(verified_jwt.status(), IsOk());
+  EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
   // parse header to make sure that key ID is correctly encoded.
-  auto keyset_info = public_handle_or.ValueOrDie()->GetKeysetInfo();
+  google::crypto::tink::KeysetInfo keyset_info =
+      (*public_handle)->GetKeysetInfo();
   uint32_t key_id = keyset_info.key_info(0).key_id();
-  std::vector<absl::string_view> parts =
-      absl::StrSplit(compact_or.ValueOrDie(), '.');
+  std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
   ASSERT_THAT(parts.size(), Eq(3));
   std::string json_header;
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
-  auto header_or = JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header_or.status(), IsOk());
-  EXPECT_THAT(
-      GetKeyId(
-          header_or.ValueOrDie().fields().find("kid")->second.string_value()),
-      key_id);
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  ASSERT_THAT(header.status(), IsOk());
+  EXPECT_THAT(GetKeyId((*header).fields().find("kid")->second.string_value()),
+              key_id);
 }
 
 TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
@@ -208,120 +203,110 @@ TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {
     KeyTemplate key_template = CreateTemplate(prefix);
     KeysetManager manager;
 
-    auto old_id_or = manager.Add(key_template);
-    ASSERT_THAT(old_id_or.status(), IsOk());
-    uint32_t old_id = old_id_or.ValueOrDie();
-    ASSERT_THAT(manager.SetPrimary(old_id), IsOk());
+    util::StatusOr<uint32_t> old_id = manager.Add(key_template);
+    ASSERT_THAT(old_id.status(), IsOk());
+    ASSERT_THAT(manager.SetPrimary(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle1 = manager.GetKeysetHandle();
-    auto jwt_sign1_or = handle1->GetPrimitive<JwtPublicKeySign>();
-    ASSERT_THAT(jwt_sign1_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeySign> jwt_sign1 =
-        std::move(jwt_sign1_or.ValueOrDie());
-    auto public_handle1_or = handle1->GetPublicKeysetHandle();
-    EXPECT_THAT(public_handle1_or.status(), IsOk());
-    auto jwt_verify1_or =
-        public_handle1_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-    EXPECT_THAT(jwt_verify1_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeyVerify> jwt_verify1 =
-        std::move(jwt_verify1_or.ValueOrDie());
+    util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign1 =
+        handle1->GetPrimitive<JwtPublicKeySign>();
+    ASSERT_THAT(jwt_sign1.status(), IsOk());
+    util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle1 =
+        handle1->GetPublicKeysetHandle();
+    EXPECT_THAT(public_handle1.status(), IsOk());
+    util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify1 =
+        (*public_handle1)->GetPrimitive<JwtPublicKeyVerify>();
+    EXPECT_THAT(jwt_verify1.status(), IsOk());
 
-    auto new_id_or = manager.Add(key_template);
-    ASSERT_THAT(new_id_or.status(), IsOk());
-    uint32_t new_id = new_id_or.ValueOrDie();
+    util::StatusOr<uint32_t> new_id = manager.Add(key_template);
+    ASSERT_THAT(new_id.status(), IsOk());
     std::unique_ptr<KeysetHandle> handle2 = manager.GetKeysetHandle();
-    auto jwt_sign2_or = handle2->GetPrimitive<JwtPublicKeySign>();
-    ASSERT_THAT(jwt_sign2_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeySign> jwt_sign2 =
-        std::move(jwt_sign2_or.ValueOrDie());
-    auto public_handle2_or = handle2->GetPublicKeysetHandle();
-    EXPECT_THAT(public_handle2_or.status(), IsOk());
-    auto jwt_verify2_or =
-        public_handle2_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-    EXPECT_THAT(jwt_verify2_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeyVerify> jwt_verify2 =
-        std::move(jwt_verify2_or.ValueOrDie());
+    util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign2 =
+        handle2->GetPrimitive<JwtPublicKeySign>();
+    ASSERT_THAT(jwt_sign2.status(), IsOk());
+    util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle2 =
+        handle2->GetPublicKeysetHandle();
+    EXPECT_THAT(public_handle2.status(), IsOk());
+    util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify2 =
+        (*public_handle2)->GetPrimitive<JwtPublicKeyVerify>();
+    EXPECT_THAT(jwt_verify2.status(), IsOk());
 
-    ASSERT_THAT(manager.SetPrimary(new_id), IsOk());
+    ASSERT_THAT(manager.SetPrimary(*new_id), IsOk());
     std::unique_ptr<KeysetHandle> handle3 = manager.GetKeysetHandle();
-    auto jwt_sign3_or = handle3->GetPrimitive<JwtPublicKeySign>();
-    ASSERT_THAT(jwt_sign3_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeySign> jwt_sign3 =
-        std::move(jwt_sign3_or.ValueOrDie());
-    auto public_handle3_or = handle3->GetPublicKeysetHandle();
-    EXPECT_THAT(public_handle3_or.status(), IsOk());
-    auto jwt_verify3_or =
-        public_handle3_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-    EXPECT_THAT(jwt_verify3_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeyVerify> jwt_verify3 =
-        std::move(jwt_verify3_or.ValueOrDie());
+    util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign3 =
+        handle3->GetPrimitive<JwtPublicKeySign>();
+    ASSERT_THAT(jwt_sign3.status(), IsOk());
+    util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle3 =
+        handle3->GetPublicKeysetHandle();
+    EXPECT_THAT(public_handle3.status(), IsOk());
+    util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify3 =
+        (*public_handle3)->GetPrimitive<JwtPublicKeyVerify>();
+    EXPECT_THAT(jwt_verify3.status(), IsOk());
 
-    ASSERT_THAT(manager.Disable(old_id), IsOk());
+    ASSERT_THAT(manager.Disable(*old_id), IsOk());
     std::unique_ptr<KeysetHandle> handle4 = manager.GetKeysetHandle();
-    auto jwt_sign4_or = handle4->GetPrimitive<JwtPublicKeySign>();
-    ASSERT_THAT(jwt_sign4_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeySign> jwt_sign4 =
-        std::move(jwt_sign4_or.ValueOrDie());
-    auto public_handle4_or = handle4->GetPublicKeysetHandle();
-    EXPECT_THAT(public_handle4_or.status(), IsOk());
-    auto jwt_verify4_or =
-        public_handle4_or.ValueOrDie()->GetPrimitive<JwtPublicKeyVerify>();
-    EXPECT_THAT(jwt_verify4_or.status(), IsOk());
-    std::unique_ptr<JwtPublicKeyVerify> jwt_verify4 =
-        std::move(jwt_verify4_or.ValueOrDie());
+    util::StatusOr<std::unique_ptr<JwtPublicKeySign>> jwt_sign4 =
+        handle4->GetPrimitive<JwtPublicKeySign>();
+    ASSERT_THAT(jwt_sign4.status(), IsOk());
+    util::StatusOr<std::unique_ptr<KeysetHandle>> public_handle4 =
+        handle4->GetPublicKeysetHandle();
+    EXPECT_THAT(public_handle4.status(), IsOk());
+    util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> jwt_verify4 =
+        (*public_handle4)->GetPrimitive<JwtPublicKeyVerify>();
+    EXPECT_THAT(jwt_verify4.status(), IsOk());
 
-    auto raw_jwt_or =
+    util::StatusOr<RawJwt> raw_jwt =
         RawJwtBuilder().SetJwtId("id123").WithoutExpiration().Build();
-    ASSERT_THAT(raw_jwt_or.status(), IsOk());
-    RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
-    JwtValidator validator =
-        JwtValidatorBuilder().AllowMissingExpiration().Build().ValueOrDie();
+    ASSERT_THAT(raw_jwt.status(), IsOk());
+    util::StatusOr<JwtValidator> validator =
+        JwtValidatorBuilder().AllowMissingExpiration().Build();
+    ASSERT_THAT(raw_jwt.status(), IsOk());
 
-    util::StatusOr<std::string> compact1_or = jwt_sign1->SignAndEncode(raw_jwt);
-    ASSERT_THAT(compact1_or.status(), IsOk());
-    std::string compact1 = compact1_or.ValueOrDie();
+    util::StatusOr<std::string> compact1 =
+        (*jwt_sign1)->SignAndEncode(*raw_jwt);
+    ASSERT_THAT(compact1.status(), IsOk());
 
-    util::StatusOr<std::string> compact2_or = jwt_sign2->SignAndEncode(raw_jwt);
-    ASSERT_THAT(compact2_or.status(), IsOk());
-    std::string compact2 = compact2_or.ValueOrDie();
+    util::StatusOr<std::string> compact2 =
+        (*jwt_sign2)->SignAndEncode(*raw_jwt);
+    ASSERT_THAT(compact2.status(), IsOk());
 
-    util::StatusOr<std::string> compact3_or = jwt_sign3->SignAndEncode(raw_jwt);
-    ASSERT_THAT(compact3_or.status(), IsOk());
-    std::string compact3 = compact3_or.ValueOrDie();
+    util::StatusOr<std::string> compact3 =
+        (*jwt_sign3)->SignAndEncode(*raw_jwt);
+    ASSERT_THAT(compact3.status(), IsOk());
 
-    util::StatusOr<std::string> compact4_or = jwt_sign4->SignAndEncode(raw_jwt);
-    ASSERT_THAT(compact4_or.status(), IsOk());
-    std::string compact4 = compact4_or.ValueOrDie();
+    util::StatusOr<std::string> compact4 =
+        (*jwt_sign4)->SignAndEncode(*raw_jwt);
+    ASSERT_THAT(compact4.status(), IsOk());
 
-    EXPECT_THAT(jwt_verify1->VerifyAndDecode(compact1, validator).status(),
+    EXPECT_THAT((*jwt_verify1)->VerifyAndDecode(*compact1, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify2->VerifyAndDecode(compact1, validator).status(),
+    EXPECT_THAT((*jwt_verify2)->VerifyAndDecode(*compact1, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify3->VerifyAndDecode(compact1, validator).status(),
+    EXPECT_THAT((*jwt_verify3)->VerifyAndDecode(*compact1, *validator).status(),
                 IsOk());
-    EXPECT_FALSE(jwt_verify4->VerifyAndDecode(compact1, validator).ok());
+    EXPECT_FALSE((*jwt_verify4)->VerifyAndDecode(*compact1, *validator).ok());
 
-    EXPECT_THAT(jwt_verify1->VerifyAndDecode(compact2, validator).status(),
+    EXPECT_THAT((*jwt_verify1)->VerifyAndDecode(*compact2, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify2->VerifyAndDecode(compact2, validator).status(),
+    EXPECT_THAT((*jwt_verify2)->VerifyAndDecode(*compact2, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify3->VerifyAndDecode(compact2, validator).status(),
+    EXPECT_THAT((*jwt_verify3)->VerifyAndDecode(*compact2, *validator).status(),
                 IsOk());
-    EXPECT_FALSE(jwt_verify4->VerifyAndDecode(compact2, validator).ok());
+    EXPECT_FALSE((*jwt_verify4)->VerifyAndDecode(*compact2, *validator).ok());
 
-    EXPECT_FALSE(jwt_verify1->VerifyAndDecode(compact3, validator).ok());
-    EXPECT_THAT(jwt_verify2->VerifyAndDecode(compact3, validator).status(),
+    EXPECT_FALSE((*jwt_verify1)->VerifyAndDecode(*compact3, *validator).ok());
+    EXPECT_THAT((*jwt_verify2)->VerifyAndDecode(*compact3, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify3->VerifyAndDecode(compact3, validator).status(),
+    EXPECT_THAT((*jwt_verify3)->VerifyAndDecode(*compact3, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify4->VerifyAndDecode(compact3, validator).status(),
+    EXPECT_THAT((*jwt_verify4)->VerifyAndDecode(*compact3, *validator).status(),
                 IsOk());
 
-    EXPECT_FALSE(jwt_verify1->VerifyAndDecode(compact4, validator).ok());
-    EXPECT_THAT(jwt_verify2->VerifyAndDecode(compact4, validator).status(),
+    EXPECT_FALSE((*jwt_verify1)->VerifyAndDecode(*compact4, *validator).ok());
+    EXPECT_THAT((*jwt_verify2)->VerifyAndDecode(*compact4, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify3->VerifyAndDecode(compact4, validator).status(),
+    EXPECT_THAT((*jwt_verify3)->VerifyAndDecode(*compact4, *validator).status(),
                 IsOk());
-    EXPECT_THAT(jwt_verify4->VerifyAndDecode(compact4, validator).status(),
+    EXPECT_THAT((*jwt_verify4)->VerifyAndDecode(*compact4, *validator).status(),
                 IsOk());
   }
 }
