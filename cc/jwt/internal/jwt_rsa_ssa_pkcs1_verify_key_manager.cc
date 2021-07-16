@@ -30,20 +30,20 @@ using google::crypto::tink::JwtRsaSsaPkcs1PublicKey;
 StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
 JwtRsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtRsaSsaPkcs1PublicKey& jwt_rsa_ssa_pkcs1_public_key) const {
-  StatusOr<std::string> name_or =
+  StatusOr<std::string> name =
       AlgorithmName(jwt_rsa_ssa_pkcs1_public_key.algorithm());
-  if (!name_or.ok()) {
-    return name_or.status();
+  if (!name.ok()) {
+    return name.status();
   }
-  StatusOr<std::unique_ptr<PublicKeyVerify>> verify_or =
+  StatusOr<std::unique_ptr<PublicKeyVerify>> verify =
       raw_key_manager_.GetPrimitive<PublicKeyVerify>(
           jwt_rsa_ssa_pkcs1_public_key);
-  if (!verify_or.ok()) {
-    return verify_or.status();
+  if (!verify.ok()) {
+    return verify.status();
   }
   std::unique_ptr<JwtPublicKeyVerify> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
-          std::move(verify_or.ValueOrDie()), name_or.ValueOrDie());
+          *std::move(verify), *name);
   return jwt_public_key_verify;
 }
 
