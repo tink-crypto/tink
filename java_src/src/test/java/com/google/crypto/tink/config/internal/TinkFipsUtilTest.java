@@ -49,7 +49,7 @@ public final class TinkFipsUtilTest {
 
     // BoringCrypto is available, therefore an algorithm which has a FIPS validated
     // implementation is compatible.
-    Assume.assumeTrue(TinkFipsStatus.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
     assertThat(
             TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isTrue();
@@ -63,7 +63,7 @@ public final class TinkFipsUtilTest {
 
     // BoringCrypto is not available, therefore no validated implementation is available and
     // the compatibility check must fail.
-    Assume.assumeTrue(!TinkFipsStatus.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFipsUtil.fipsModuleAvailable());
     assertThat(
             TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isFalse();
@@ -79,7 +79,7 @@ public final class TinkFipsUtilTest {
 
     // BoringCrypto is available, therefore an algorithm which has a FIPS validated
     // implementation is compatible.
-    Assume.assumeTrue(TinkFipsStatus.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
     assertThat(
             TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isTrue();
@@ -95,7 +95,7 @@ public final class TinkFipsUtilTest {
 
     // BoringCrypto is not available, therefore no validated implementation is available and
     // the compatibility check must fail.
-    Assume.assumeTrue(!TinkFipsStatus.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFipsUtil.fipsModuleAvailable());
     assertThat(
             TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO.isCompatible())
         .isFalse();
