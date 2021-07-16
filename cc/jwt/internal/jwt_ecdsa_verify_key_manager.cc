@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
 
+#include <string>
+#include <utility>
 
 namespace crypto {
 namespace tink {
@@ -29,19 +31,18 @@ using google::crypto::tink::JwtEcdsaAlgorithm;
 StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
 JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
-  StatusOr<std::string> name_or =
-      AlgorithmName(jwt_ecdsa_public_key.algorithm());
-  if (!name_or.ok()) {
-    return name_or.status();
+  StatusOr<std::string> name = AlgorithmName(jwt_ecdsa_public_key.algorithm());
+  if (!name.ok()) {
+    return name.status();
   }
-  auto result =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verify =
       raw_key_manager_.GetPrimitive<PublicKeyVerify>(jwt_ecdsa_public_key);
-  if (!result.ok()) {
-    return result.status();
+  if (!verify.ok()) {
+    return verify.status();
   }
   std::unique_ptr<JwtPublicKeyVerify> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
-          std::move(result.ValueOrDie()), name_or.ValueOrDie());
+          *std::move(verify), *name);
   return jwt_public_key_verify;
 }
 

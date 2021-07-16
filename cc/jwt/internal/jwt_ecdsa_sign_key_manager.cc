@@ -34,23 +34,23 @@ using google::crypto::tink::JwtEcdsaPublicKey;
 StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
 JwtEcdsaSignKeyManager::PublicKeySignFactory::Create(
     const JwtEcdsaPrivateKey& jwt_ecdsa_private_key) const {
-  StatusOr<std::string> name_or = JwtEcdsaVerifyKeyManager::AlgorithmName(
+  StatusOr<std::string> name = JwtEcdsaVerifyKeyManager::AlgorithmName(
       jwt_ecdsa_private_key.public_key().algorithm());
-  if (!name_or.ok()) {
-    return name_or.status();
+  if (!name.ok()) {
+    return name.status();
   }
-  auto result =
+  util::StatusOr<std::unique_ptr<PublicKeySign>> sign =
       raw_key_manager_.GetPrimitive<PublicKeySign>(jwt_ecdsa_private_key);
-  if (!result.ok()) {
-    return result.status();
+  if (!sign.ok()) {
+    return sign.status();
   }
   absl::optional<absl::string_view> custom_kid = absl::nullopt;
   if (jwt_ecdsa_private_key.public_key().has_custom_kid()) {
     custom_kid = jwt_ecdsa_private_key.public_key().custom_kid().value();
   }
   std::unique_ptr<JwtPublicKeySignInternal> jwt_public_key_sign =
-      absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(
-          std::move(result.ValueOrDie()), name_or.ValueOrDie(), custom_kid);
+      absl::make_unique<jwt_internal::JwtPublicKeySignImpl>(*std::move(sign),
+                                                            *name, custom_kid);
   return jwt_public_key_sign;
 }
 
