@@ -211,3 +211,21 @@ py_test(
         "@tink_py//tink/proto:tink_py_pb2",
     ],
 )
+
+py_test(
+    name = "jwt_kid_test",
+    srcs = ["jwt_kid_test.py"],
+    deps = [
+        "//util:supported_key_types",
+        "//util:testing_servers",
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:jwt_ecdsa_py_pb2",
+        "@tink_py//tink/proto:jwt_hmac_py_pb2",
+        "@tink_py//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "@tink_py//tink/proto:jwt_rsa_ssa_pss_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+    ],
+)
