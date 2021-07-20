@@ -376,7 +376,7 @@ class RawJwtTest(absltest.TestCase):
     custom_claims['new_claim'] = 456
     my_claim['three'] = 4
     output_claim = cast(Dict[Text, Text], token.custom_claim('my_claim'))
-    output_claim['three'] = 4
+    output_claim['three'] = 4  # pytype: disable=container-type-mismatch
 
     # modifications don't affect token.
     self.assertEqual(token.audiences(), ['alice', 'bob'])
