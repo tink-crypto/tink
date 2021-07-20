@@ -138,9 +138,26 @@ public final class KeysetHandle {
    */
   public static final KeysetHandle read(KeysetReader reader, Aead masterKey)
       throws GeneralSecurityException, IOException {
+    return readWithAssociatedData(reader, masterKey, new byte[0]);
+  }
+
+  /**
+   * Tries to create a {@link KeysetHandle} from an encrypted keyset obtained via {@code reader},
+   * using the provided associated data.
+   *
+   * <p>Users that need to load cleartext keysets can use {@link CleartextKeysetHandle}.
+   *
+   * @return a new {@link KeysetHandle} from {@code encryptedKeysetProto} that was encrypted with
+   *     {@code masterKey}
+   * @throws GeneralSecurityException if cannot decrypt the keyset or it doesn't contain encrypted
+   *     key material
+   */
+  public static final KeysetHandle readWithAssociatedData(
+      KeysetReader reader, Aead masterKey, byte[] associatedData)
+      throws GeneralSecurityException, IOException {
     EncryptedKeyset encryptedKeyset = reader.readEncrypted();
     assertEnoughEncryptedKeyMaterial(encryptedKeyset);
-    return new KeysetHandle(decrypt(encryptedKeyset, masterKey));
+    return new KeysetHandle(decrypt(encryptedKeyset, masterKey, associatedData));
   }
 
   /**
@@ -194,7 +211,17 @@ public final class KeysetHandle {
   /** Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream}. */
   public void write(KeysetWriter keysetWriter, Aead masterKey)
       throws GeneralSecurityException, IOException {
-    EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey);
+    writeWithAssociatedData(keysetWriter, masterKey, new byte[0]);
+  }
+
+  /**
+   * Serializes, encrypts with {@code masterKey} and writes the keyset to {@code outputStream} using
+   * the provided associated data.
+   */
+  public void writeWithAssociatedData(
+      KeysetWriter keysetWriter, Aead masterKey, byte[] associatedData)
+      throws GeneralSecurityException, IOException {
+    EncryptedKeyset encryptedKeyset = encrypt(keyset, masterKey, associatedData);
     keysetWriter.write(encryptedKeyset);
     return;
   }
@@ -214,15 +241,14 @@ public final class KeysetHandle {
   }
 
   /** Encrypts the keyset with the {@link Aead} master key. */
-  private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey)
+  private static EncryptedKeyset encrypt(Keyset keyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
-    byte[] encryptedKeyset =
-        masterKey.encrypt(keyset.toByteArray(), /* associatedData= */ new byte[0]);
+    byte[] encryptedKeyset = masterKey.encrypt(keyset.toByteArray(), associatedData);
     // Check if we can decrypt, to detect errors
     try {
       final Keyset keyset2 =
           Keyset.parseFrom(
-              masterKey.decrypt(encryptedKeyset, /* associatedData= */ new byte[0]),
+              masterKey.decrypt(encryptedKeyset, associatedData),
               ExtensionRegistryLite.getEmptyRegistry());
       if (!keyset2.equals(keyset)) {
         throw new GeneralSecurityException("cannot encrypt keyset");
@@ -240,14 +266,13 @@ public final class KeysetHandle {
   }
 
   /** Decrypts the encrypted keyset with the {@link Aead} master key. */
-  private static Keyset decrypt(EncryptedKeyset encryptedKeyset, Aead masterKey)
+  private static Keyset decrypt(
+      EncryptedKeyset encryptedKeyset, Aead masterKey, byte[] associatedData)
       throws GeneralSecurityException {
     try {
       Keyset keyset =
           Keyset.parseFrom(
-              masterKey.decrypt(
-                  encryptedKeyset.getEncryptedKeyset().toByteArray(),
-                  /* associatedData= */ new byte[0]),
+              masterKey.decrypt(encryptedKeyset.getEncryptedKeyset().toByteArray(), associatedData),
               ExtensionRegistryLite.getEmptyRegistry());
       // check emptiness here too, in case the encrypted keys unwrapped to nothing?
       assertEnoughKeyMaterial(keyset);

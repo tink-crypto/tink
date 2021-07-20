@@ -24,7 +24,6 @@ import com.google.common.truth.Expect;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
-import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesEaxKey;
 import com.google.crypto.tink.proto.AesEaxKeyFormat;
 import com.google.crypto.tink.proto.EcdsaPrivateKey;
@@ -125,7 +124,7 @@ public class KeysetHandleTest {
 
   @Test
   public void generateNew_shouldWork() throws Exception {
-    KeyTemplate template = AesEaxKeyManager.aes128EaxTemplate();
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
 
     KeysetHandle handle = KeysetHandle.generateNew(template);
 
@@ -146,8 +145,7 @@ public class KeysetHandleTest {
 
   @Test
   public void generateNew_withProtoKeyTemplate_shouldWork() throws Exception {
-    com.google.crypto.tink.proto.KeyTemplate template =
-        AesEaxKeyManager.aes128EaxTemplate().getProto();
+    com.google.crypto.tink.proto.KeyTemplate template = KeyTemplates.get("AES128_EAX").getProto();
 
     @SuppressWarnings("deprecation") // Need to test the deprecated function
     KeysetHandle handle = KeysetHandle.generateNew(template);
@@ -169,7 +167,7 @@ public class KeysetHandleTest {
 
   @Test
   public void generateNew_generatesDifferentKeys() throws Exception {
-    KeyTemplate template = AesEaxKeyManager.aes128EaxTemplate();
+    KeyTemplate template = KeyTemplates.get("AES128_EAX");
     Set<String> keys = new TreeSet<>();
 
     int numKeys = 2;
@@ -228,10 +226,9 @@ public class KeysetHandleTest {
 
   @Test
   public void writeThenRead_returnsSameKeyset() throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(HmacKeyManager.hmacSha256Template());
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_256BITTAG"));
     Aead masterKey =
-        Registry.getPrimitive(
-            Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate()), Aead.class);
+        Registry.getPrimitive(Registry.newKeyData(KeyTemplates.get("AES128_EAX")), Aead.class);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
 
@@ -241,6 +238,39 @@ public class KeysetHandleTest {
     KeysetHandle handle2 = KeysetHandle.read(reader, masterKey);
 
     assertThat(handle.getKeyset()).isEqualTo(handle2.getKeyset());
+  }
+
+  @Test
+  public void writeThenReadWithAssociatedData_returnsSameKeyset() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_256BITTAG"));
+    Aead masterKey =
+        Registry.getPrimitive(Registry.newKeyData(KeyTemplates.get("AES128_EAX")), Aead.class);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
+
+    handle.writeWithAssociatedData(writer, masterKey, new byte[] {0x01, 0x02});
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
+    KeysetHandle handle2 =
+        KeysetHandle.readWithAssociatedData(reader, masterKey, new byte[] {0x01, 0x02});
+
+    assertThat(handle.getKeyset()).isEqualTo(handle2.getKeyset());
+  }
+
+  @Test
+  public void writeThenReadWithDifferentAssociatedData_shouldThrow() throws Exception {
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_256BITTAG"));
+    Aead masterKey =
+        Registry.getPrimitive(Registry.newKeyData(KeyTemplates.get("AES128_EAX")), Aead.class);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
+
+    handle.writeWithAssociatedData(writer, masterKey, new byte[] {0x01, 0x02});
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+    KeysetReader reader = BinaryKeysetReader.withInputStream(inputStream);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> KeysetHandle.readWithAssociatedData(reader, masterKey, new byte[] {0x01, 0x03}));
   }
 
   @Test
@@ -274,7 +304,7 @@ public class KeysetHandleTest {
   /** Tests that when encryption failed an exception is thrown. */
   @Test
   public void write_withFaultyAead_shouldThrow() throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(HmacKeyManager.hmacSha256Template());
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("HMAC_SHA256_256BITTAG"));
     TestUtil.DummyAead faultyAead = new TestUtil.DummyAead();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     KeysetWriter writer = BinaryKeysetWriter.withOutputStream(outputStream);
@@ -292,7 +322,7 @@ public class KeysetHandleTest {
 
   @Test
   public void getPrimitive_shouldWork() throws Exception {
-    KeysetHandle handle = KeysetHandle.generateNew(AesEaxKeyManager.aes128EaxTemplate());
+    KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_EAX"));
     byte[] message = Random.randBytes(20);
     byte[] aad = Random.randBytes(20);
 
@@ -305,11 +335,11 @@ public class KeysetHandleTest {
   // simply add a raw, non-primary key and encrypt directly with it.
   @Test
   public void getPrimitive_wrappingDoneCorrectly() throws Exception {
-    KeyData rawKeyData = Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate());
+    KeyData rawKeyData = Registry.newKeyData(KeyTemplates.get("AES128_EAX"));
     Keyset keyset =
         TestUtil.createKeyset(
             TestUtil.createKey(
-                Registry.newKeyData(AesEaxKeyManager.aes128EaxTemplate().getProto()),
+                Registry.newKeyData(KeyTemplates.get("AES128_EAX").getProto()),
                 42,
                 KeyStatusType.ENABLED,
                 OutputPrefixType.TINK),
@@ -429,8 +459,8 @@ public class KeysetHandleTest {
 
   @Test
   public void primaryKey_shouldWork() throws Exception {
-    KeyTemplate kt1 = AesEaxKeyManager.aes128EaxTemplate();
-    KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
+    KeyTemplate kt1 = KeyTemplates.get("AES128_EAX");
+    KeyTemplate kt2 = KeyTemplates.get("HMAC_SHA256_256BITTAG");
     KeysetHandle ksh =
         KeysetManager.withKeysetHandle(KeysetHandle.generateNew(kt1)).add(kt2).getKeysetHandle();
 
@@ -442,8 +472,8 @@ public class KeysetHandleTest {
 
   @Test
   public void primaryKey_noPrimaryPresent_shouldThrow() throws Exception {
-    KeyTemplate kt1 = AesEaxKeyManager.aes128EaxTemplate();
-    KeyTemplate kt2 = HmacKeyManager.hmacSha256Template();
+    KeyTemplate kt1 = KeyTemplates.get("AES128_EAX");
+    KeyTemplate kt2 = KeyTemplates.get("HMAC_SHA256_256BITTAG");
     KeysetHandle ksh = KeysetManager.withEmptyKeyset().add(kt1).add(kt2).getKeysetHandle();
 
     assertThrows(GeneralSecurityException.class, ksh::primaryKey);
