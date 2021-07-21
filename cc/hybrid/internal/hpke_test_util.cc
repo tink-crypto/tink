@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/internal/hpke_test_util.h"
 
+#include <string>
+
 #include "tink/util/status.h"
 #include "proto/hpke.pb.h"
 
@@ -27,6 +29,8 @@ using ::google::crypto::tink::HpkeAead;
 using ::google::crypto::tink::HpkeKdf;
 using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeParams;
+using ::google::crypto::tink::HpkePrivateKey;
+using ::google::crypto::tink::HpkePublicKey;
 
 // Test vector from Appendix A.1 of draft-irtf-cfrg-hpke-09.
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, AES-128-GCM
@@ -75,8 +79,7 @@ HpkeTestParams DefaultHpkeTestParams() {
   return HpkeTestParams(kTestX25519HkdfSha256Aes128Gcm);
 }
 
-util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
-    const HpkeParams& params) {
+util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
   if (params.kem() != HpkeKem::DHKEM_X25519_HKDF_SHA256) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
@@ -101,12 +104,32 @@ util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
   }
 }
 
-HpkeParams CreateHpkeParams(HpkeKem kem, HpkeKdf kdf, HpkeAead aead) {
+HpkeParams CreateHpkeParams(const HpkeKem& kem, const HpkeKdf& kdf,
+                            const HpkeAead& aead) {
   HpkeParams params;
   params.set_kem(kem);
   params.set_kdf(kdf);
   params.set_aead(aead);
   return params;
+}
+
+HpkePublicKey CreateHpkePublicKey(const HpkeParams& params,
+                                  const std::string& raw_key_bytes) {
+  HpkePublicKey key_proto;
+  key_proto.set_version(1);
+  key_proto.set_public_key(raw_key_bytes);
+  *key_proto.mutable_params() = params;
+  return key_proto;
+}
+
+HpkePrivateKey CreateHpkePrivateKey(const HpkeParams& params,
+                                    const std::string& raw_key_bytes) {
+  HpkePrivateKey private_key_proto;
+  private_key_proto.set_version(1);
+  private_key_proto.set_private_key(raw_key_bytes);
+  HpkePublicKey* public_key_proto = private_key_proto.mutable_public_key();
+  *public_key_proto->mutable_params() = params;
+  return private_key_proto;
 }
 
 }  // namespace internal

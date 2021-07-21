@@ -67,6 +67,35 @@ TEST_P(HpkeEncryptBoringSslTest, SetupSenderContextAndEncrypt) {
   ASSERT_THAT(ciphertext, IsOkAndHolds(params->ciphertext));
 }
 
+class HpkeEncapsulateKeyThenEncryptBoringSslTest
+    : public testing::TestWithParam<HpkeParams> {};
+
+INSTANTIATE_TEST_SUITE_P(
+    HpkeEncapsulateKeyThenEncryptBoringSslTestSuite,
+    HpkeEncapsulateKeyThenEncryptBoringSslTest,
+    Values(CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
+                            HpkeKdf::HKDF_SHA256, HpkeAead::AES_128_GCM),
+           CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
+                            HpkeKdf::HKDF_SHA256,
+                            HpkeAead::CHACHA20_POLY1305)));
+
+TEST_P(HpkeEncapsulateKeyThenEncryptBoringSslTest, EncapsulateKeyThenEncrypt) {
+  HpkeParams hpke_params = GetParam();
+  util::StatusOr<HpkeTestParams> params = CreateHpkeTestParams(hpke_params);
+  ASSERT_THAT(params.status(), IsOk());
+  util::StatusOr<std::unique_ptr<HpkeEncryptBoringSsl>> hpke_encrypt =
+      HpkeEncryptBoringSsl::NewForTesting(
+          hpke_params, params->recipient_public_key, params->application_info,
+          params->seed_for_testing);
+  ASSERT_THAT(hpke_encrypt.status(), IsOk());
+  util::StatusOr<std::string> ciphertext =
+      (*hpke_encrypt)
+          ->EncapsulateKeyThenEncrypt(params->plaintext,
+                                      params->associated_data);
+  ASSERT_THAT(ciphertext, IsOkAndHolds(absl::StrCat(params->encapsulated_key,
+                                                    params->ciphertext)));
+}
+
 class HpkeEncryptBoringSslWithBadParamTest
     : public testing::TestWithParam<HpkeParams> {};
 

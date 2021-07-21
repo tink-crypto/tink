@@ -52,14 +52,28 @@ struct HpkeTestParams {
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, AES-128-GCM.
 HpkeTestParams DefaultHpkeTestParams();
 
-// Create an HpkeTestParams struct for the specified HpkeParams protobuf.
+// Creates an HpkeTestParams struct for the specified HpkeParams protobuf.
 util::StatusOr<HpkeTestParams> CreateHpkeTestParams(
     const google::crypto::tink::HpkeParams& params);
 
 // Creates an HpkeParams protobuf from `kem`, `kdf`, and `aead`.
 google::crypto::tink::HpkeParams CreateHpkeParams(
-    google::crypto::tink::HpkeKem kem, google::crypto::tink::HpkeKdf kdf,
-    google::crypto::tink::HpkeAead aead);
+    const google::crypto::tink::HpkeKem& kem,
+    const google::crypto::tink::HpkeKdf& kdf,
+    const google::crypto::tink::HpkeAead& aead);
+
+// Creates an HpkePublicKey proto from the specified HpkeParams protobuf and
+// the `raw_key_bytes`.
+google::crypto::tink::HpkePublicKey CreateHpkePublicKey(
+    const google::crypto::tink::HpkeParams& params,
+    const std::string& raw_key_bytes);
+
+// Creates an HpkePrivateKey proto from the specified HpkeParams protobuf and
+// the `raw_key_bytes`.  Note that the key material for the embedded
+// HpkePublicKey `public_key` field will be empty.
+google::crypto::tink::HpkePrivateKey CreateHpkePrivateKey(
+    const google::crypto::tink::HpkeParams& params,
+    const std::string& raw_key_bytes);
 
 }  // namespace internal
 }  // namespace tink
