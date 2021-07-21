@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tink package."""
 from __future__ import absolute_import
 from __future__ import division
@@ -25,6 +24,7 @@ from tink import core
 
 new_keyset_handle = _keyset_handle.new_keyset_handle
 read_keyset_handle = _keyset_handle.read_keyset_handle
+read_keyset_handle_with_associated_data = _keyset_handle.read_keyset_handle_with_associated_data
 read_no_secret_keyset_handle = _keyset_handle.read_no_secret_keyset_handle
 KeysetHandle = _keyset_handle.KeysetHandle
 
