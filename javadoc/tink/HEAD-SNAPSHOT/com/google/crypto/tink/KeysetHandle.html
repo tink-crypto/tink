@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9,"i2":41,"i3":41,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":9,"i11":9,"i12":9,"i13":10,"i14":10,"i15":10};
+var methods = {"i0":9,"i1":9,"i2":41,"i3":41,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":9,"i11":9,"i12":9,"i13":9,"i14":10,"i15":10,"i16":10,"i17":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -228,22 +228,40 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i13" class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#readWithAssociatedData-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-byte:A-">readWithAssociatedData</a></span>(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
+                      <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                      byte[]&nbsp;associatedData)</code>
+<div class="block">Tries to create a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>,
+ using the provided associated data.</div>
+</td>
+</tr>
+<tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#toString--">toString</a></span>()</code>
 <div class="block">Extracts and returns the string representation of the <code>KeysetInfo</code> of the managed keyset.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#write-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-">write</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
      <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey)</code>
 <div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code>.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#writeNoSecret-com.google.crypto.tink.KeysetWriter-">writeNoSecret</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;writer)</code>
 <div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
+</td>
+</tr>
+<tr id="i17" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#writeWithAssociatedData-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-byte:A-">writeWithAssociatedData</a></span>(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
+                       <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                       byte[]&nbsp;associatedData)</code>
+<div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code> using
+ the provided associated data.</div>
 </td>
 </tr>
 </table>
@@ -370,6 +388,32 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 </dl>
 </li>
 </ul>
+<a name="readWithAssociatedData-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-byte:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>readWithAssociatedData</h4>
+<pre>public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;readWithAssociatedData(<a href="../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
+                                                        <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                                                        byte[]&nbsp;associatedData)
+                                                 throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block">Tries to create a <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>,
+ using the provided associated data.
+
+ <p>Users that need to load cleartext keysets can use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink"><code>CleartextKeysetHandle</code></a>.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>encryptedKeysetProto</code> that was encrypted with
+     <code>masterKey</code></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if cannot decrypt the keyset or it doesn't contain encrypted
+     key material</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+</dl>
+</li>
+</ul>
 <a name="readNoSecret-com.google.crypto.tink.KeysetReader-">
 <!--   -->
 </a>
@@ -425,6 +469,26 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
            throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
                   <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
 <div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="writeWithAssociatedData-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-byte:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>writeWithAssociatedData</h4>
+<pre>public&nbsp;void&nbsp;writeWithAssociatedData(<a href="../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
+                                    <a href="../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                                    byte[]&nbsp;associatedData)
+                             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a>,
+                                    <a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></pre>
+<div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code> using
+ the provided associated data.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>

@@ -140,10 +140,28 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
+<td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#readWithAssociatedData-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-byte:A-">readWithAssociatedData</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetReader.html" title="interface in com.google.crypto.tink">KeysetReader</a>&nbsp;reader,
+                      <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                      byte[]&nbsp;associatedData)</code>
+<div class="block">Tries to create a <a href="../../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>,
+ using the provided associated data.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#write-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-">write</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
      <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey)</code>
 <div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#writeWithAssociatedData-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-byte:A-">writeWithAssociatedData</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
+                       <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                       byte[]&nbsp;associatedData)</code>
+<div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code> using
+ the provided associated data.</div>
 </td>
 </tr>
 </tbody>

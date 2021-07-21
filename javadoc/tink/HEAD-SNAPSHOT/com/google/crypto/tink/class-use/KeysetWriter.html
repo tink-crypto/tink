@@ -190,6 +190,15 @@
 <div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><span class="typeNameLabel">KeysetHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/KeysetHandle.html#writeWithAssociatedData-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-byte:A-">writeWithAssociatedData</a></span>(<a href="../../../../../com/google/crypto/tink/KeysetWriter.html" title="interface in com.google.crypto.tink">KeysetWriter</a>&nbsp;keysetWriter,
+                       <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a>&nbsp;masterKey,
+                       byte[]&nbsp;associatedData)</code>
+<div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code> using
+ the provided associated data.</div>
+</td>
+</tr>
 </tbody>
 </table>
 </li>
