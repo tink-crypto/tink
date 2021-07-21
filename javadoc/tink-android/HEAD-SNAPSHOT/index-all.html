@@ -3439,6 +3439,11 @@
 <div class="block">Tries to create a <a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from a serialized keyset which contains no secret key
  material.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#readWithAssociatedData-com.google.crypto.tink.KeysetReader-com.google.crypto.tink.Aead-byte:A-">readWithAssociatedData(KeysetReader, Aead, byte[])</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Tries to create a <a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from an encrypted keyset obtained via <code>reader</code>,
+ using the provided associated data.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
 <dd>
 <div class="block">Tries to register with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all instances of <a href="com/google/crypto/tink/Catalogue.html" title="interface in com.google.crypto.tink"><code>Catalogue</code></a> and <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> needed to
@@ -4521,6 +4526,11 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#writeNoSecret-com.google.crypto.tink.KeysetWriter-">writeNoSecret(KeysetWriter)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
 <dd>
 <div class="block">Tries to write to <code>writer</code> this keyset which must not contain any secret key material.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeysetHandle.html#writeWithAssociatedData-com.google.crypto.tink.KeysetWriter-com.google.crypto.tink.Aead-byte:A-">writeWithAssociatedData(KeysetWriter, Aead, byte[])</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></dt>
+<dd>
+<div class="block">Serializes, encrypts with <code>masterKey</code> and writes the keyset to <code>outputStream</code> using
+ the provided associated data.</div>
 </dd>
 </dl>
 <a name="I:X">
