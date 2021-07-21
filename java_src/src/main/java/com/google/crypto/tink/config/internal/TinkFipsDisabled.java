@@ -26,5 +26,9 @@ final class TinkFipsStatus {
     return false;
   }
 
+  public static boolean fipsModuleAvailable() {
+    return false;
+  }
+
   private TinkFipsStatus() {}
 }
