@@ -16,8 +16,11 @@
 #include "tink/keyset_handle.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
 #include "tink/keyset_reader.h"
@@ -30,33 +33,35 @@
 using google::crypto::tink::EncryptedKeyset;
 using google::crypto::tink::KeyData;
 using google::crypto::tink::Keyset;
-using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::KeysetInfo;
-
+using google::crypto::tink::KeyTemplate;
 
 namespace crypto {
 namespace tink {
 
 namespace {
 
-util::StatusOr<std::unique_ptr<EncryptedKeyset>>
-Encrypt(const Keyset& keyset, const Aead& master_key_aead) {
-  auto encrypt_result = master_key_aead.Encrypt(
-          keyset.SerializeAsString(), /* associated_data= */ "");
+util::StatusOr<std::unique_ptr<EncryptedKeyset>> Encrypt(
+    const Keyset& keyset, const Aead& master_key_aead,
+    absl::string_view associated_data) {
+  auto encrypt_result =
+      master_key_aead.Encrypt(keyset.SerializeAsString(), associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   auto enc_keyset = absl::make_unique<EncryptedKeyset>();
   enc_keyset->set_encrypted_keyset(encrypt_result.ValueOrDie());
   return std::move(enc_keyset);
 }
 
-util::StatusOr<std::unique_ptr<Keyset>>
-Decrypt(const EncryptedKeyset& enc_keyset, const Aead& master_key_aead) {
-  auto decrypt_result = master_key_aead.Decrypt(
-          enc_keyset.encrypted_keyset(), /* associated_data= */ "");
+util::StatusOr<std::unique_ptr<Keyset>> Decrypt(
+    const EncryptedKeyset& enc_keyset, const Aead& master_key_aead,
+    absl::string_view associated_data) {
+  auto decrypt_result =
+      master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), associated_data);
   if (!decrypt_result.ok()) return decrypt_result.status();
   auto keyset = absl::make_unique<Keyset>();
   if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
         "Could not parse the decrypted data as a Keyset-proto.");
   }
   return std::move(keyset);
@@ -81,6 +86,14 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
 // static
 util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
     std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead) {
+  return ReadWithAssociatedData(std::move(reader), master_key_aead, "");
+}
+
+// static
+util::StatusOr<std::unique_ptr<KeysetHandle>>
+KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
+                                     const Aead& master_key_aead,
+                                     absl::string_view associated_data) {
   auto enc_keyset_result = reader->ReadEncrypted();
   if (!enc_keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
@@ -88,8 +101,8 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::Read(
                      enc_keyset_result.status().error_message());
   }
 
-  auto keyset_result =
-      Decrypt(*enc_keyset_result.ValueOrDie(), master_key_aead);
+  auto keyset_result = Decrypt(*enc_keyset_result.ValueOrDie(), master_key_aead,
+                               associated_data);
   if (!keyset_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Error decrypting encrypted keyset: %s",
@@ -116,17 +129,23 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
 
 util::Status KeysetHandle::Write(KeysetWriter* writer,
                                  const Aead& master_key_aead) const {
+  return WriteWithAssociatedData(writer, master_key_aead, "");
+}
+
+util::Status KeysetHandle::WriteWithAssociatedData(
+    KeysetWriter* writer, const Aead& master_key_aead,
+    absl::string_view associated_data) const {
   if (writer == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Writer must be non-null");
   }
-  auto encrypt_result = Encrypt(get_keyset(), master_key_aead);
+  auto encrypt_result = Encrypt(get_keyset(), master_key_aead, associated_data);
   if (!encrypt_result.ok()) {
     return ToStatusF(util::error::INVALID_ARGUMENT,
                      "Encryption of the keyset failed: %s",
                      encrypt_result.status().error_message());
   }
-  return writer->Write(*(encrypt_result.ValueOrDie().get()));
+  return writer->Write(*(encrypt_result.ValueOrDie()));
 }
 
 util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
@@ -155,7 +174,8 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::GenerateNew(
 util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
     const Keyset::Key& key) {
   if (key.key_data().key_material_type() != KeyData::ASYMMETRIC_PRIVATE) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
         "Key material is not of type KeyData::ASYMMETRIC_PRIVATE");
   }
   auto key_data_result = Registry::GetPublicKeyData(key.key_data().type_url(),
@@ -181,8 +201,8 @@ KeysetHandle::GetPublicKeysetHandle() const {
 }
 
 crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
-    const google::crypto::tink::KeyTemplate& key_template,
-    bool as_primary, Keyset* keyset) {
+    const google::crypto::tink::KeyTemplate& key_template, bool as_primary,
+    Keyset* keyset) {
   if (key_template.output_prefix_type() ==
       google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX) {
     return util::Status(util::error::INVALID_ARGUMENT,
@@ -207,15 +227,12 @@ KeysetInfo KeysetHandle::GetKeysetInfo() const {
   return KeysetInfoFromKeyset(get_keyset());
 }
 
-KeysetHandle::KeysetHandle(Keyset keyset)
-    : keyset_(std::move(keyset)) {}
+KeysetHandle::KeysetHandle(Keyset keyset) : keyset_(std::move(keyset)) {}
 
 KeysetHandle::KeysetHandle(std::unique_ptr<Keyset> keyset)
     : keyset_(std::move(*keyset)) {}
 
-const Keyset& KeysetHandle::get_keyset() const {
-  return keyset_;
-}
+const Keyset& KeysetHandle::get_keyset() const { return keyset_; }
 
 }  // namespace tink
 }  // namespace crypto

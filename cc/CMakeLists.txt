@@ -436,6 +436,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     absl::base
     absl::memory
+    absl::strings
 )
 
 tink_cc_library(

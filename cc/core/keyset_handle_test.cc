@@ -14,8 +14,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/core/key_manager_impl.h"
 #include "tink/keyset_handle.h"
+
+#include <memory>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"
@@ -23,8 +26,10 @@
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
+#include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config/tink_config.h"
+#include "tink/core/key_manager_impl.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
@@ -53,6 +58,7 @@ using google::crypto::tink::Keyset;
 using google::crypto::tink::KeyStatusType;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
+using ::testing::Not;
 
 namespace {
 
@@ -244,6 +250,116 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeyset_Json) {
   auto encrypted_keyset = std::move(read_encrypted_result.ValueOrDie());
   auto decrypt_result = aead.Decrypt(encrypted_keyset->encrypted_keyset(),
                                      /* associated_data= */ "");
+  EXPECT_TRUE(decrypt_result.status().ok()) << decrypt_result.status();
+  auto decrypted = decrypt_result.ValueOrDie();
+  EXPECT_EQ(decrypted, keyset.SerializeAsString());
+
+  // Try writing to a null-writer.
+  status = keyset_handle->Write(nullptr, aead);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+}
+
+TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataGoodKeyset) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+
+  DummyAead aead("dummy aead 42");
+  std::string keyset_ciphertext =
+      aead.Encrypt(keyset.SerializeAsString(), "aad").ValueOrDie();
+  EncryptedKeyset encrypted_keyset;
+  encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
+  std::unique_ptr<KeysetReader> reader =
+      std::move(BinaryKeysetReader::New(encrypted_keyset.SerializeAsString())
+                    .ValueOrDie());
+  util::StatusOr<std::unique_ptr<KeysetHandle>> result =
+      KeysetHandle::ReadWithAssociatedData(std::move(reader), aead, "aad");
+  EXPECT_THAT(result.status(), IsOk());
+  auto handle = std::move(result.ValueOrDie());
+  EXPECT_EQ(keyset.SerializeAsString(),
+            TestKeysetHandle::GetKeyset(*handle).SerializeAsString());
+}
+
+TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataWrongAad) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  DummyAead aead("dummy aead 42");
+  std::string keyset_ciphertext =
+      aead.Encrypt(keyset.SerializeAsString(), "aad").ValueOrDie();
+  EncryptedKeyset encrypted_keyset;
+  encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
+  auto reader =
+      std::move(BinaryKeysetReader::New(encrypted_keyset.SerializeAsString())
+                    .ValueOrDie());
+  auto result = KeysetHandle::ReadWithAssociatedData(std::move(reader), aead,
+                                                     "different");
+  EXPECT_THAT(result.status(), Not(IsOk()));
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+}
+
+TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataEmptyAad) {
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  DummyAead aead("dummy aead 42");
+  std::string keyset_ciphertext =
+      aead.Encrypt(keyset.SerializeAsString(), "aad").ValueOrDie();
+  EncryptedKeyset encrypted_keyset;
+  encrypted_keyset.set_encrypted_keyset(keyset_ciphertext);
+  auto reader =
+      std::move(BinaryKeysetReader::New(encrypted_keyset.SerializeAsString())
+                    .ValueOrDie());
+  auto result = KeysetHandle::Read(std::move(reader), aead);
+  EXPECT_THAT(result.status(), Not(IsOk()));
+  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+}
+
+TEST_F(KeysetHandleTest, WriteEncryptedKeysetWithAssociatedData) {
+  // Prepare a valid keyset handle
+  Keyset keyset;
+  Keyset::Key key;
+  AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
+             KeyData::SYMMETRIC, &keyset);
+  AddRawKey("some other key type", 711, key, KeyStatusType::ENABLED,
+            KeyData::SYMMETRIC, &keyset);
+  keyset.set_primary_key_id(42);
+  auto reader = std::move(
+      BinaryKeysetReader::New(keyset.SerializeAsString()).ValueOrDie());
+  auto keyset_handle =
+      std::move(CleartextKeysetHandle::Read(std::move(reader)).ValueOrDie());
+
+  // Prepare a keyset writer.
+  DummyAead aead("dummy aead 42");
+  std::stringbuf buffer;
+  std::unique_ptr<std::ostream> destination_stream(new std::ostream(&buffer));
+  auto writer = std::move(
+      BinaryKeysetWriter::New(std::move(destination_stream)).ValueOrDie());
+
+  // Write the keyset handle and check the result.
+  auto status =
+      keyset_handle->WriteWithAssociatedData(writer.get(), aead, "aad");
+  EXPECT_TRUE(status.ok()) << status;
+  auto reader_result = BinaryKeysetReader::New(buffer.str());
+  EXPECT_TRUE(reader_result.ok()) << reader_result.status();
+  auto read_encrypted_result = reader_result.ValueOrDie()->ReadEncrypted();
+  EXPECT_TRUE(read_encrypted_result.ok()) << read_encrypted_result.status();
+  auto encrypted_keyset = std::move(read_encrypted_result.ValueOrDie());
+  auto decrypt_result =
+      aead.Decrypt(encrypted_keyset->encrypted_keyset(), "aad");
   EXPECT_TRUE(decrypt_result.status().ok()) << decrypt_result.status();
   auto decrypted = decrypt_result.ValueOrDie();
   EXPECT_EQ(decrypted, keyset.SerializeAsString());

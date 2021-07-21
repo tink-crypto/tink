@@ -17,6 +17,8 @@
 #ifndef TINK_KEYSET_HANDLE_H_
 #define TINK_KEYSET_HANDLE_H_
 
+#include <string>
+
 #include "absl/base/attributes.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
@@ -40,6 +42,13 @@ class KeysetHandle {
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>> Read(
       std::unique_ptr<KeysetReader> reader, const Aead& master_key_aead);
 
+  // Creates a KeysetHandle from an encrypted keyset obtained via |reader|
+  // using |master_key_aead| to decrypt the keyset, expecting |associated_data|.
+  static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
+  ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
+                         const Aead& master_key_aead,
+                         absl::string_view associated_data);
+
   // Creates a KeysetHandle from a keyset which contains no secret key material.
   // This can be used to load public keysets or envelope encryption keysets.
   static crypto::tink::util::StatusOr<std::unique_ptr<KeysetHandle>>
@@ -55,6 +64,13 @@ class KeysetHandle {
   // which must be non-null.
   crypto::tink::util::Status Write(KeysetWriter* writer,
                                    const Aead& master_key_aead) const;
+
+  // Encrypts the underlying keyset with the provided |master_key_aead|, using
+  // |associated_data|. and writes the resulting EncryptedKeyset to the given
+  // |writer|, which must be non-null.
+  crypto::tink::util::Status WriteWithAssociatedData(
+      KeysetWriter* writer, const Aead& master_key_aead,
+      absl::string_view associated_data) const;
 
   // Returns KeysetInfo, a "safe" Keyset that doesn't contain any actual
   // key material, thus can be used for logging or monitoring.
