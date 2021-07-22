@@ -56,11 +56,6 @@ class HpkeEncryptBoringSsl {
       absl::string_view seed_for_testing);
 
   // Performs an AEAD encryption of `plaintext` with `associated_data`.
-  // Returns an error if encryption fails.  Otherwise, returns the ciphertext.
-  util::StatusOr<std::string> Encrypt(absl::string_view plaintext,
-                                      absl::string_view associated_data);
-
-  // Performs an AEAD encryption of `plaintext` with `associated_data`.
   // Returns an error if encryption fails.  Otherwise, returns the ciphertext
   // appended to the encapsulated key.
   util::StatusOr<std::string> EncapsulateKeyThenEncrypt(

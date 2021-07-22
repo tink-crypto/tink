@@ -124,24 +124,6 @@ util::Status HpkeEncryptBoringSsl::InitForTesting(
   return util::OkStatus();
 }
 
-util::StatusOr<std::string> HpkeEncryptBoringSsl::Encrypt(
-    absl::string_view plaintext, absl::string_view associated_data) {
-  std::vector<uint8_t> ciphertext(plaintext.size() +
-                                  EVP_HPKE_CTX_max_overhead(sender_ctx_.get()));
-  size_t ciphertext_size;
-  if (!EVP_HPKE_CTX_seal(
-          sender_ctx_.get(), ciphertext.data(), &ciphertext_size,
-          ciphertext.size(),
-          reinterpret_cast<const uint8_t *>(plaintext.data()), plaintext.size(),
-          reinterpret_cast<const uint8_t *>(associated_data.data()),
-          associated_data.size())) {
-    return util::Status(util::error::UNKNOWN,
-                        "BoringSSL HPKE encryption failed.");
-  }
-  return std::string(reinterpret_cast<const char *>(ciphertext.data()),
-                     ciphertext_size);
-}
-
 util::StatusOr<std::string> HpkeEncryptBoringSsl::EncapsulateKeyThenEncrypt(
     absl::string_view plaintext, absl::string_view associated_data) {
   size_t enc_size = encapsulated_key_.size();
