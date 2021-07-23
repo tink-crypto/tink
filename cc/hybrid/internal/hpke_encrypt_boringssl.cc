@@ -25,6 +25,7 @@
 #include "openssl/err.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_util_boringssl.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -127,22 +128,23 @@ util::Status HpkeEncryptBoringSsl::InitForTesting(
 util::StatusOr<std::string> HpkeEncryptBoringSsl::EncapsulateKeyThenEncrypt(
     absl::string_view plaintext, absl::string_view associated_data) {
   size_t enc_size = encapsulated_key_.size();
-  std::vector<uint8_t> ciphertext(enc_size + plaintext.size() +
-                                  EVP_HPKE_CTX_max_overhead(sender_ctx_.get()));
+  std::string ciphertext(encapsulated_key_);
+  subtle::ResizeStringUninitialized(
+      &ciphertext, enc_size + plaintext.size() +
+                       EVP_HPKE_CTX_max_overhead(sender_ctx_.get()));
   absl::c_copy(encapsulated_key_, ciphertext.begin());
   size_t max_out_len = ciphertext.size() - enc_size;
   size_t ciphertext_size;
   if (!EVP_HPKE_CTX_seal(
-          sender_ctx_.get(), &ciphertext[enc_size], &ciphertext_size,
-          max_out_len, reinterpret_cast<const uint8_t *>(plaintext.data()),
-          plaintext.size(),
+          sender_ctx_.get(), reinterpret_cast<uint8_t *>(&ciphertext[enc_size]),
+          &ciphertext_size, max_out_len,
+          reinterpret_cast<const uint8_t *>(plaintext.data()), plaintext.size(),
           reinterpret_cast<const uint8_t *>(associated_data.data()),
           associated_data.size())) {
     return util::Status(util::error::UNKNOWN,
                         "BoringSSL HPKE encryption failed.");
   }
-  return std::string(reinterpret_cast<const char *>(ciphertext.data()),
-                     enc_size + ciphertext_size);
+  return ciphertext;
 }
 
 }  // namespace internal

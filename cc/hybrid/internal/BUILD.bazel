@@ -32,6 +32,7 @@ cc_library(
     deps = [
         ":hpke_key_boringssl",
         ":hpke_util_boringssl",
+        "//subtle:subtle_util",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -66,6 +67,7 @@ cc_library(
     include_prefix = "tink/hybrid/internal",
     deps = [
         ":hpke_util_boringssl",
+        "//subtle:subtle_util",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",

@@ -24,6 +24,7 @@
 #include "openssl/err.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_util_boringssl.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -84,11 +85,12 @@ util::Status HpkeDecryptBoringSsl::Init(const HpkeParams& params,
 
 util::StatusOr<std::string> HpkeDecryptBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) {
-  std::vector<uint8_t> plaintext(ciphertext.size());
+  std::string plaintext;
+  subtle::ResizeStringUninitialized(&plaintext, ciphertext.size());
   size_t plaintext_size;
   if (!EVP_HPKE_CTX_open(
-          recipient_ctx_.get(), plaintext.data(), &plaintext_size,
-          plaintext.size(),
+          recipient_ctx_.get(), reinterpret_cast<uint8_t *>(&plaintext[0]),
+          &plaintext_size, plaintext.size(),
           reinterpret_cast<const uint8_t *>(ciphertext.data()),
           ciphertext.size(),
           reinterpret_cast<const uint8_t *>(associated_data.data()),
@@ -96,8 +98,8 @@ util::StatusOr<std::string> HpkeDecryptBoringSsl::Decrypt(
     return util::Status(util::error::UNKNOWN,
                         "BoringSSL HPKE decryption failed.");
   }
-  return std::string(reinterpret_cast<const char *>(plaintext.data()),
-                     plaintext_size);
+  subtle::ResizeStringUninitialized(&plaintext, plaintext_size);
+  return plaintext;
 }
 
 }  // namespace internal

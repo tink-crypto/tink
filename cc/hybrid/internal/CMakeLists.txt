@@ -28,6 +28,7 @@ tink_cc_library(
     tink::hybrid::internal::hpke_key_boringssl
     tink::hybrid::internal::hpke_util_boringssl
     tink::proto::hpke_cc_proto
+    tink::subtle::subtle_util
     tink::util::status
     tink::util::statusor
 )
@@ -57,6 +58,7 @@ tink_cc_library(
     crypto
     tink::hybrid::internal::hpke_util_boringssl
     tink::proto::hpke_cc_proto
+    tink::subtle::subtle_util
     tink::util::status
     tink::util::statusor
 )
