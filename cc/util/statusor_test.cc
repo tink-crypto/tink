@@ -196,6 +196,11 @@ TEST(StatusOrTest, OperatorArrow) {
   EXPECT_EQ(std::string("hello"), lvalue->c_str());
 }
 
+TEST(StatusOr, ElementType) {
+  static_assert(std::is_same<absl::StatusOr<int>::value_type, int>(), "");
+  static_assert(std::is_same<absl::StatusOr<char>::value_type, char>(), "");
+}
+
 }  // namespace
 
 }  // namespace util

@@ -38,6 +38,13 @@ class ABSL_MUST_USE_RESULT StatusOr;
 template <typename T>
 class StatusOr {
  public:
+  // StatusOr<T>::value_type
+  //
+  // This instance data provides a generic `value_type` member for use within
+  // generic programming. This usage is analogous to that of
+  // `optional::value_type` in the case of `std::optional`.
+  using value_type = T;
+
   using type = T;
   // Has status UNKNOWN.
   inline StatusOr();
