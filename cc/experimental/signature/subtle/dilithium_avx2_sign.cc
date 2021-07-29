@@ -39,21 +39,21 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
-    util::StatusOr<DilithiumKey> dilithium_key) {
+    DilithiumPrivateKey private_key) {
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Sign>();
   if (!status.ok()) return status;
 
-  if ((*dilithium_key).SeedsAndMatrix().size() !=
+  if (private_key.GetKeyData().size() !=
       PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         absl::StrFormat("Invalid private key size (%d). "
                         "The only valid size is %d.",
-                        (*dilithium_key).SeedsAndMatrix().size(),
+                        private_key.GetKeyData().size(),
                         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES));
   }
 
-  return {absl::WrapUnique(new DilithiumAvx2Sign(std::move(*dilithium_key)))};
+  return {absl::WrapUnique(new DilithiumAvx2Sign(std::move(private_key)))};
 }
 
 util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
@@ -65,7 +65,7 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
           reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(
-              dilithium_key_.SeedsAndMatrix().data())) != 0) {
+              private_key_.GetKeyData().data())) != 0) {
     return util::Status(util::error::INTERNAL, "Signing failed.");
   }
 

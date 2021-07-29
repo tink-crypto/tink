@@ -40,6 +40,8 @@ namespace subtle {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::StatusIs;
+using crypto::tink::util::Status;
 
 class DilithiumAvx2SignTest : public ::testing::Test {};
 
@@ -53,10 +55,10 @@ TEST_F(DilithiumAvx2SignTest, InvalidPrivateKeys) {
       // Valid key size.
       continue;
     }
-    util::SecretData seeds_and_matrix(keysize, 'x');
-    EXPECT_FALSE(DilithiumAvx2Sign::New(
-                     DilithiumKey::FromSeedsAndMatrix(seeds_and_matrix))
-                     .ok());
+    util::SecretData key_data(keysize, 'x');
+    EXPECT_FALSE(
+        DilithiumAvx2Sign::New(*DilithiumPrivateKey::NewPrivateKey(key_data))
+            .ok());
   }
 }
 
@@ -65,19 +67,15 @@ TEST_F(DilithiumAvx2SignTest, SignatureLength) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
-  uint8_t pk[PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES];
+  // Generate key pair.
+  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
+      DilithiumPrivateKey::GenerateKeyPair();
 
-  ASSERT_EQ(PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(pk, sk), 0);
-
-  util::SecretData seeds_and_matrix = util::SecretDataFromStringView(
-      absl::string_view(reinterpret_cast<char *>(sk),
-                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES));
+  ASSERT_THAT(key_pair.status(), IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
-      DilithiumAvx2Sign::New(
-          DilithiumKey::FromSeedsAndMatrix(seeds_and_matrix));
+      DilithiumAvx2Sign::New((*key_pair).first);
   ASSERT_THAT(signer.status(), IsOk());
 
   // Sign a message.
@@ -95,24 +93,19 @@ TEST_F(DilithiumAvx2SignTest, Determinism) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
-  uint8_t pk[PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES];
+  // Generate key pair.
+  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
+      DilithiumPrivateKey::GenerateKeyPair();
 
-  ASSERT_EQ(PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(pk, sk), 0);
-
-  util::SecretData seeds_and_matrix = util::SecretDataFromStringView(
-      absl::string_view(reinterpret_cast<char *>(sk),
-                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES));
+  ASSERT_THAT(key_pair.status(), IsOk());
 
   // Create two signers based on same private key.
   util::StatusOr<std::unique_ptr<PublicKeySign>> first_signer =
-      DilithiumAvx2Sign::New(
-          DilithiumKey::FromSeedsAndMatrix(seeds_and_matrix));
+      DilithiumAvx2Sign::New((*key_pair).first);
   ASSERT_THAT(first_signer.status(), IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> second_signer =
-      DilithiumAvx2Sign::New(
-          DilithiumKey::FromSeedsAndMatrix(seeds_and_matrix));
+      DilithiumAvx2Sign::New((*key_pair).first);
   ASSERT_THAT(second_signer.status(), IsOk());
 
   // Sign the same message twice, using the same private key.
@@ -134,6 +127,22 @@ TEST_F(DilithiumAvx2SignTest, Determinism) {
 
   // Check if signatures are equal.
   EXPECT_EQ(*first_signature, *second_signature);
+}
+
+TEST_F(DilithiumAvx2SignTest, FipsMode) {
+  if (!IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Test assumes kOnlyUseFips.";
+  }
+
+  // Generate key pair.
+  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
+      DilithiumPrivateKey::GenerateKeyPair();
+
+  ASSERT_THAT(key_pair.status(), IsOk());
+
+  // Create a new signer.
+  EXPECT_THAT(DilithiumAvx2Sign::New((*key_pair).first).status(),
+              StatusIs(util::error::INTERNAL));
 }
 
 }  // namespace

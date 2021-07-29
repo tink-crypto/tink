@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "tink/util/secret_data.h"
@@ -28,21 +29,48 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-class DilithiumKey {
+// Dilithium public key representation.
+class DilithiumPublicKey {
  public:
-  DilithiumKey(const DilithiumKey& other) = default;
-  DilithiumKey& operator=(const DilithiumKey& other) = default;
+  // Creates a new DilithiumPublicKey from key_data. Should only be called with
+  // the result of a previous call to GetKeyData().
+  static util::StatusOr<DilithiumPublicKey> NewPublicKey(
+      std::string_view key_data);
 
-  static util::StatusOr<DilithiumKey> FromSeedsAndMatrix(
-      util::SecretData seeds_and_matrix);
+  DilithiumPublicKey(const DilithiumPublicKey& other) = default;
+  DilithiumPublicKey& operator=(const DilithiumPublicKey& other) = default;
 
-  const util::SecretData& SeedsAndMatrix() const;
+  const std::string& GetKeyData() const;
 
  private:
-  explicit DilithiumKey(util::SecretData seeds_and_matrix)
-      : seeds_and_matrix_(std::move(seeds_and_matrix)) {}
+  explicit DilithiumPublicKey(absl::string_view key_data)
+      : key_data_(std::move(key_data)) {}
 
-  const util::SecretData seeds_and_matrix_;
+  const std::string key_data_;
+};
+
+// Dilithium private key representation.
+class DilithiumPrivateKey {
+ public:
+  // Creates a new DilithiumPrivateKey from key_data. Should only be called with
+  // the result of a previous call to GetKeyData().
+  static util::StatusOr<DilithiumPrivateKey> NewPrivateKey(
+      util::SecretData key_data);
+
+  // Generates a new dilithium key pair.
+  static util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>>
+  GenerateKeyPair();
+
+  DilithiumPrivateKey(const DilithiumPrivateKey& other) = default;
+  DilithiumPrivateKey& operator=(const DilithiumPrivateKey& other) = default;
+
+  const util::SecretData& GetKeyData() const;
+
+ private:
+  explicit DilithiumPrivateKey(util::SecretData key_data)
+      : key_data_(std::move(key_data)) {}
+
+  const util::SecretData key_data_;
 };
 
 }  // namespace subtle
