@@ -92,6 +92,63 @@ cc_library(
 )
 
 cc_library(
+    name = "hpke_key_manager_util",
+    srcs = ["hpke_key_manager_util.cc"],
+    hdrs = ["hpke_key_manager_util.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        "//util:status",
+        "//util:validation",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_private_key_manager",
+    srcs = ["hpke_private_key_manager.cc"],
+    hdrs = ["hpke_private_key_manager.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        ":hpke_decrypt",
+        ":hpke_key_manager_util",
+        "//:core/key_type_manager",
+        "//:core/private_key_type_manager",
+        "//:hybrid_decrypt",
+        "//:key_manager",
+        "//subtle:subtle_util_boringssl",
+        "//util:constants",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@tink_cc//proto:hpke_cc_proto",
+        "@tink_cc//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "hpke_public_key_manager",
+    srcs = ["hpke_public_key_manager.cc"],
+    hdrs = ["hpke_public_key_manager.h"],
+    include_prefix = "tink/hybrid/internal",
+    deps = [
+        ":hpke_encrypt",
+        ":hpke_key_manager_util",
+        "//:core/key_type_manager",
+        "//:hybrid_encrypt",
+        "//:key_manager",
+        "//util:constants",
+        "//util:errors",
+        "//util:protobuf_helper",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//proto:hpke_cc_proto",
+        "@tink_cc//proto:tink_cc_proto",
+    ],
+)
+
+cc_library(
     name = "hpke_test_util",
     srcs = ["hpke_test_util.cc"],
     hdrs = ["hpke_test_util.h"],
@@ -201,6 +258,54 @@ cc_test(
         "//util:test_util",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_key_manager_util_test",
+    size = "small",
+    srcs = ["hpke_key_manager_util_test.cc"],
+    deps = [
+        ":hpke_key_manager_util",
+        ":hpke_test_util",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_private_key_manager_test",
+    size = "small",
+    srcs = ["hpke_private_key_manager_test.cc"],
+    deps = [
+        ":hpke_encrypt",
+        ":hpke_private_key_manager",
+        "//:hybrid_encrypt",
+        "//subtle:hybrid_test_util",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//proto:hpke_cc_proto",
+        "@tink_cc//proto:tink_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "hpke_public_key_manager_test",
+    size = "small",
+    srcs = ["hpke_public_key_manager_test.cc"],
+    deps = [
+        ":hpke_public_key_manager",
+        ":hpke_test_util",
+        "//util:test_matchers",
+        "//util:test_util",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//proto:hpke_cc_proto",
     ],

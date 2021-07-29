@@ -116,7 +116,7 @@ HpkeParams CreateHpkeParams(const HpkeKem& kem, const HpkeKdf& kdf,
 HpkePublicKey CreateHpkePublicKey(const HpkeParams& params,
                                   const std::string& raw_key_bytes) {
   HpkePublicKey key_proto;
-  key_proto.set_version(1);
+  key_proto.set_version(0);
   key_proto.set_public_key(raw_key_bytes);
   *key_proto.mutable_params() = params;
   return key_proto;
@@ -125,7 +125,7 @@ HpkePublicKey CreateHpkePublicKey(const HpkeParams& params,
 HpkePrivateKey CreateHpkePrivateKey(const HpkeParams& params,
                                     const std::string& raw_key_bytes) {
   HpkePrivateKey private_key_proto;
-  private_key_proto.set_version(1);
+  private_key_proto.set_version(0);
   private_key_proto.set_private_key(raw_key_bytes);
   HpkePublicKey* public_key_proto = private_key_proto.mutable_public_key();
   *public_key_proto->mutable_params() = params;
