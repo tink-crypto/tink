@@ -223,6 +223,8 @@ public class PaymentMethodTokenRecipientTest {
       "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEU8E6JppGKFG40r5dDU1idHRN52NuwsemFzXZh1oUqh3bGUPgPioH+RoW"
           + "nmVSUQz1WfM2426w9f0GADuXzpUkcw==";
 
+  private static final String ALTERNATE_CONTEXT_INFO = "custom-context-info";
+
   private static final class MyPaymentMethodTokenRecipientKem
       implements PaymentMethodTokenRecipientKem {
     private final ECPrivateKey privateKey;
@@ -1379,6 +1381,24 @@ public class PaymentMethodTokenRecipientTest {
       fail("Expected GeneralSecurityException");
     } catch (GeneralSecurityException e) {
       assertEquals("expired intermediateSigningKey", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testShouldFailIfDecryptingWithDifferentContextInfoECV1() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+            new PaymentMethodTokenRecipient.Builder()
+                    .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+                    .recipientId(RECIPIENT_ID)
+                    .contextInfo(ALTERNATE_CONTEXT_INFO)
+                    .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+                    .build();
+
+    try {
+      recipient.unseal(CIPHERTEXT_EC_V1);
+      fail("Expected GeneralSecurityException");
+    } catch (GeneralSecurityException e) {
+      assertEquals("cannot decrypt", e.getMessage());
     }
   }
 

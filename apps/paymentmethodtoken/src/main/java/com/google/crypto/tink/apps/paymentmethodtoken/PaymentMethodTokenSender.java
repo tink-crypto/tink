@@ -68,6 +68,7 @@ public final class PaymentMethodTokenSender {
   private final String senderIntermediateCert;
   private final String senderId;
   private final String recipientId;
+  private final byte[] contextInfo;
 
   private HybridEncrypt hybridEncrypter;
 
@@ -105,6 +106,7 @@ public final class PaymentMethodTokenSender {
     }
     this.recipientId = builder.recipientId;
     this.senderIntermediateCert = builder.senderIntermediateCert;
+    this.contextInfo = builder.contextInfo;
   }
 
   /**
@@ -120,6 +122,7 @@ public final class PaymentMethodTokenSender {
     private ECPrivateKey senderIntermediateSigningKey = null;
     private String senderIntermediateCert = null;
     private ECPublicKey recipientPublicKey = null;
+    private byte[] contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
 
     public Builder() {}
 
@@ -138,6 +141,11 @@ public final class PaymentMethodTokenSender {
     /** Sets the recipient Id. */
     public Builder recipientId(String val) {
       recipientId = val;
+      return this;
+    }
+
+    public Builder contextInfo(String val) {
+      contextInfo = val.getBytes(UTF_8);
       return this;
     }
 
@@ -238,8 +246,7 @@ public final class PaymentMethodTokenSender {
     String signedMessage =
         protocolVersionConfig.isEncryptionRequired
             ? new String(
-                hybridEncrypter.encrypt(
-                    message.getBytes(UTF_8), PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1),
+                hybridEncrypter.encrypt(message.getBytes(UTF_8), contextInfo),
                 UTF_8)
             : message;
     return signV1OrV2(signedMessage);

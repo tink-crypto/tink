@@ -163,6 +163,8 @@ public class PaymentMethodTokenSenderTest {
 
   private static final String RECIPIENT_ID = "someRecipient";
 
+  private static final String ALTERNATE_CONTEXT_INFO = "custom-context-info";
+
   @Test
   public void testECV1WithPrecomputedKeys() throws Exception {
     PaymentMethodTokenSender sender =
@@ -302,6 +304,28 @@ public class PaymentMethodTokenSenderTest {
             .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
             .recipientId(RECIPIENT_ID)
             .build();
+
+    String plaintext = "blah";
+    assertEquals(plaintext, recipient.unseal(sender.seal(plaintext)));
+  }
+
+  @Test
+  public void testECV1WithCustomContextInfo() throws Exception {
+    PaymentMethodTokenSender sender =
+            new PaymentMethodTokenSender.Builder()
+                    .senderSigningKey(GOOGLE_SIGNING_EC_V1_PRIVATE_KEY_PKCS8_BASE64)
+                    .recipientId(RECIPIENT_ID)
+                    .contextInfo(ALTERNATE_CONTEXT_INFO)
+                    .rawUncompressedRecipientPublicKey(MERCHANT_PUBLIC_KEY_BASE64)
+                    .build();
+
+    PaymentMethodTokenRecipient recipient =
+            new PaymentMethodTokenRecipient.Builder()
+                    .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+                    .recipientId(RECIPIENT_ID)
+                    .contextInfo(ALTERNATE_CONTEXT_INFO)
+                    .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+                    .build();
 
     String plaintext = "blah";
     assertEquals(plaintext, recipient.unseal(sender.seal(plaintext)));

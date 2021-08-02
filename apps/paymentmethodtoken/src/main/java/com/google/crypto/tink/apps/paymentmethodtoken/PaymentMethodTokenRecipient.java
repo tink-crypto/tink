@@ -88,6 +88,7 @@ public final class PaymentMethodTokenRecipient {
   private final List<HybridDecrypt> hybridDecrypters = new ArrayList<>();
   private final String senderId;
   private final String recipientId;
+  private final byte[] contextInfo;
 
   PaymentMethodTokenRecipient(
       String protocolVersion,
@@ -95,7 +96,8 @@ public final class PaymentMethodTokenRecipient {
       String senderId,
       List<ECPrivateKey> recipientPrivateKeys,
       List<PaymentMethodTokenRecipientKem> recipientKems,
-      String recipientId)
+      String recipientId,
+      byte[] contextInfo)
       throws GeneralSecurityException {
     if (!protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1)
         && !protocolVersion.equals(PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V2)
@@ -139,6 +141,7 @@ public final class PaymentMethodTokenRecipient {
       throw new IllegalArgumentException("must set recipient Id using Builder.recipientId");
     }
     this.recipientId = recipientId;
+    this.contextInfo = contextInfo;
   }
 
   private PaymentMethodTokenRecipient(Builder builder) throws GeneralSecurityException {
@@ -148,7 +151,8 @@ public final class PaymentMethodTokenRecipient {
         builder.senderId,
         builder.recipientPrivateKeys,
         builder.recipientKems,
-        builder.recipientId);
+        builder.recipientId,
+        builder.contextInfo);
   }
 
   /**
@@ -160,6 +164,7 @@ public final class PaymentMethodTokenRecipient {
     private String protocolVersion = PaymentMethodTokenConstants.PROTOCOL_VERSION_EC_V1;
     private String senderId = PaymentMethodTokenConstants.GOOGLE_SENDER_ID;
     private String recipientId = null;
+    private byte[] contextInfo = PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1;
     private final List<SenderVerifyingKeysProvider> senderVerifyingKeysProviders =
         new ArrayList<SenderVerifyingKeysProvider>();
     private final List<ECPrivateKey> recipientPrivateKeys = new ArrayList<ECPrivateKey>();
@@ -182,6 +187,12 @@ public final class PaymentMethodTokenRecipient {
     /** Sets the recipient Id. */
     public Builder recipientId(String val) {
       recipientId = val;
+      return this;
+    }
+
+    /** Sets the context info. */
+    public Builder contextInfo(String val) {
+      contextInfo = val.getBytes(UTF_8);
       return this;
     }
 
@@ -466,8 +477,7 @@ public final class PaymentMethodTokenRecipient {
     for (HybridDecrypt hybridDecrypter : hybridDecrypters) {
       try {
         byte[] cleartext =
-            hybridDecrypter.decrypt(
-                ciphertext.getBytes(UTF_8), PaymentMethodTokenConstants.GOOGLE_CONTEXT_INFO_ECV1);
+            hybridDecrypter.decrypt(ciphertext.getBytes(UTF_8), contextInfo);
         return new String(cleartext, UTF_8);
       } catch (GeneralSecurityException e) {
         // ignored, try again
