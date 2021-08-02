@@ -40,9 +40,9 @@ class HpkeKeyBoringSsl {
       const google::crypto::tink::HpkeKem& kem,
       absl::string_view recipient_private_key);
 
-  // HpkeKeyBoringSsl objects are movable, but not copyable.
-  HpkeKeyBoringSsl(HpkeKeyBoringSsl&& other) = default;
-  HpkeKeyBoringSsl& operator=(HpkeKeyBoringSsl&& other) = default;
+  // HpkeKeyBoringSsl objects are neither movable, nor copyable.
+  HpkeKeyBoringSsl(HpkeKeyBoringSsl&& other) = delete;
+  HpkeKeyBoringSsl& operator=(HpkeKeyBoringSsl&& other) = delete;
   HpkeKeyBoringSsl(const HpkeKeyBoringSsl&) = delete;
   HpkeKeyBoringSsl& operator=(const HpkeKeyBoringSsl&) = delete;
 
