@@ -101,7 +101,7 @@ tink_cc_library(
     tink::hybrid::internal::hpke_key_manager_util
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
-    tink::subtle::subtle_util_boringssl
+    tink::subtle_util_boringssl
     tink::util::constants
     tink::util::status
     tink::util::statusor
@@ -124,7 +124,7 @@ tink_cc_library(
     tink::hybrid::internal::hpke_key_manager_util
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
-    tink::subtle::subtle_util_boringssl
+    tink::subtle_util_boringssl
     tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
@@ -177,8 +177,8 @@ tink_cc_test(
   SRCS hpke_decrypt_test.cc
   DEPS
     absl::strings
-    tink::hybrid::internal::hpke_decrypt
-    tink::hybrid::internal::hpke_encrypt
+    tink::hybrid::hpke_decrypt
+    tink::hybrid::hpke_encrypt
     tink::hybrid::internal::hpke_test_util
     tink::proto::hpke_cc_proto
     tink::util::status
@@ -205,7 +205,7 @@ tink_cc_test(
   SRCS hpke_encrypt_test.cc
   DEPS
     absl::strings
-    tink::hybrid::internal::hpke_encrypt
+    tink::hybrid::hpke_encrypt
     tink::hybrid::internal::hpke_test_util
     tink::proto::hpke_cc_proto
     tink::util::status
