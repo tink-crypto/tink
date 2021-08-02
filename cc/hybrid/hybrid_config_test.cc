@@ -17,6 +17,8 @@
 #include "tink/hybrid/hybrid_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -25,6 +27,8 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_key_templates.h"
+#include "tink/hybrid/internal/hpke_private_key_manager.h"
+#include "tink/hybrid/internal/hpke_public_key_manager.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/keyset_handle.h"
@@ -60,6 +64,12 @@ TEST_F(HybridConfigTest, Basic) {
                   EciesAeadHkdfPublicKeyManager().get_key_type())
                   .status(),
               StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
+                  internal::HpkePrivateKeyManager().get_key_type()).status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
+                  internal::HpkePublicKeyManager().get_key_type()).status(),
+              StatusIs(util::error::NOT_FOUND));
   EXPECT_THAT(HybridConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
@@ -68,6 +78,12 @@ TEST_F(HybridConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
                   EciesAeadHkdfPublicKeyManager().get_key_type())
                   .status(),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
+                  internal::HpkePrivateKeyManager().get_key_type()).status(),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
+                  internal::HpkePublicKeyManager().get_key_type()).status(),
               IsOk());
 }
 
@@ -171,6 +187,12 @@ TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
       HybridKeyTemplates::EciesX25519HkdfHmacSha256Aes128Gcm());
   non_fips_key_templates.push_back(
       HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm());
+  non_fips_key_templates.push_back(
+      HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305());
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
