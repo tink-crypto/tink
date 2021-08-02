@@ -1,5 +1,7 @@
 tink_module(hybrid)
 
+add_subdirectory(internal)
+
 tink_cc_library(
   NAME hybrid_config
   SRCS
@@ -10,6 +12,8 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
+    tink::hybrid::internal::hpke_private_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
     tink::core::registry
     tink::config::config_util
     tink::config::tink_fips
@@ -98,6 +102,7 @@ tink_cc_library(
     tink::daead::deterministic_aead_key_templates
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
     absl::strings
 )
@@ -222,6 +227,8 @@ tink_cc_test(
   DEPS
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
+    tink::hybrid::internal::hpke_private_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
     tink::config::tink_fips
     tink::core::config
     tink::core::hybrid_decrypt
@@ -301,10 +308,12 @@ tink_cc_test(
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
+    tink::hybrid::internal::hpke_private_key_manager
     tink::aead::aead_key_templates
     tink::daead::deterministic_aead_key_templates
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
+    tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
     tink::util::test_matchers
 )
