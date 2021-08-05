@@ -34,6 +34,17 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME cached_dek_aead_cc_proto
+  SRCS cached_dek_aead.proto
+)
+
+tink_cc_proto(
+  NAME cached_dek_envelope_cc_proto
+  SRCS cached_dek_envelope.proto
+  DEPS tink::proto::tink_cc_proto
+)
+
+tink_cc_proto(
   NAME ecdsa_cc_proto
   SRCS ecdsa.proto
   DEPS tink::proto::common_cc_proto
