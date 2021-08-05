@@ -30,44 +30,47 @@ namespace tink {
 namespace subtle {
 
 // Dilithium public key representation.
-class DilithiumPublicKey {
+class DilithiumPublicKeyPqclean {
  public:
-  // Creates a new DilithiumPublicKey from key_data. Should only be called with
-  // the result of a previous call to GetKeyData().
-  static util::StatusOr<DilithiumPublicKey> NewPublicKey(
+  // Creates a new DilithiumPublicKeyPqclean from key_data. Should only be
+  // called with the result of a previous call to GetKeyData().
+  static util::StatusOr<DilithiumPublicKeyPqclean> NewPublicKey(
       std::string_view key_data);
 
-  DilithiumPublicKey(const DilithiumPublicKey& other) = default;
-  DilithiumPublicKey& operator=(const DilithiumPublicKey& other) = default;
+  DilithiumPublicKeyPqclean(const DilithiumPublicKeyPqclean& other) = default;
+  DilithiumPublicKeyPqclean& operator=(const DilithiumPublicKeyPqclean& other) =
+      default;
 
   const std::string& GetKeyData() const;
 
  private:
-  explicit DilithiumPublicKey(absl::string_view key_data)
+  explicit DilithiumPublicKeyPqclean(absl::string_view key_data)
       : key_data_(std::move(key_data)) {}
 
   const std::string key_data_;
 };
 
 // Dilithium private key representation.
-class DilithiumPrivateKey {
+class DilithiumPrivateKeyPqclean {
  public:
-  // Creates a new DilithiumPrivateKey from key_data. Should only be called with
-  // the result of a previous call to GetKeyData().
-  static util::StatusOr<DilithiumPrivateKey> NewPrivateKey(
+  // Creates a new DilithiumPrivateKeyPqclean from key_data. Should only be
+  // called with the result of a previous call to GetKeyData().
+  static util::StatusOr<DilithiumPrivateKeyPqclean> NewPrivateKey(
       util::SecretData key_data);
 
   // Generates a new dilithium key pair.
-  static util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>>
+  static util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
   GenerateKeyPair();
 
-  DilithiumPrivateKey(const DilithiumPrivateKey& other) = default;
-  DilithiumPrivateKey& operator=(const DilithiumPrivateKey& other) = default;
+  DilithiumPrivateKeyPqclean(const DilithiumPrivateKeyPqclean& other) = default;
+  DilithiumPrivateKeyPqclean& operator=(
+      const DilithiumPrivateKeyPqclean& other) = default;
 
   const util::SecretData& GetKeyData() const;
 
  private:
-  explicit DilithiumPrivateKey(util::SecretData key_data)
+  explicit DilithiumPrivateKeyPqclean(util::SecretData key_data)
       : key_data_(std::move(key_data)) {}
 
   const util::SecretData key_data_;

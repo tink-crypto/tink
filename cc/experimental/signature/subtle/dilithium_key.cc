@@ -32,14 +32,14 @@ namespace tink {
 namespace subtle {
 
 // static
-util::StatusOr<DilithiumPrivateKey> DilithiumPrivateKey::NewPrivateKey(
-    util::SecretData key_data) {
-  return DilithiumPrivateKey(key_data);
+util::StatusOr<DilithiumPrivateKeyPqclean>
+DilithiumPrivateKeyPqclean::NewPrivateKey(util::SecretData key_data) {
+  return DilithiumPrivateKeyPqclean(key_data);
 }
 
 // static
-util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>>
-DilithiumPrivateKey::GenerateKeyPair() {
+util::StatusOr<std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+DilithiumPrivateKeyPqclean::GenerateKeyPair() {
   std::string public_key;
   public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
 
@@ -53,25 +53,27 @@ DilithiumPrivateKey::GenerateKeyPair() {
   util::SecretData private_key_data =
       util::SecretDataFromStringView(private_key);
 
-  util::StatusOr<DilithiumPrivateKey> dilithium_private_key =
-      DilithiumPrivateKey::NewPrivateKey(std::move(private_key_data));
-  util::StatusOr<DilithiumPublicKey> dilithium_public_key =
-      DilithiumPublicKey::NewPublicKey(public_key);
+  util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
+      DilithiumPrivateKeyPqclean::NewPrivateKey(std::move(private_key_data));
+  util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
+      DilithiumPublicKeyPqclean::NewPublicKey(public_key);
 
   return std::make_pair(*dilithium_private_key, *dilithium_public_key);
 }
 
-const util::SecretData& DilithiumPrivateKey::GetKeyData() const {
+const util::SecretData& DilithiumPrivateKeyPqclean::GetKeyData() const {
   return key_data_;
 }
 
 // static
-util::StatusOr<DilithiumPublicKey> DilithiumPublicKey::NewPublicKey(
-    absl::string_view key_data) {
-  return DilithiumPublicKey(key_data);
+util::StatusOr<DilithiumPublicKeyPqclean>
+DilithiumPublicKeyPqclean::NewPublicKey(absl::string_view key_data) {
+  return DilithiumPublicKeyPqclean(key_data);
 }
 
-const std::string& DilithiumPublicKey::GetKeyData() const { return key_data_; }
+const std::string& DilithiumPublicKeyPqclean::GetKeyData() const {
+  return key_data_;
+}
 
 }  // namespace subtle
 }  // namespace tink

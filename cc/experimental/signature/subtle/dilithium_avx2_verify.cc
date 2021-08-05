@@ -38,7 +38,7 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeyVerify>> DilithiumAvx2Verify::New(
-    DilithiumPublicKey public_key) {
+    DilithiumPublicKeyPqclean public_key) {
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Verify>();
   if (!status.ok()) return status;
 

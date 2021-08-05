@@ -36,7 +36,7 @@ namespace subtle {
 class DilithiumAvx2Sign : public PublicKeySign {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> New(
-      DilithiumPrivateKey private_key);
+      DilithiumPrivateKeyPqclean private_key);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(
@@ -48,10 +48,10 @@ class DilithiumAvx2Sign : public PublicKeySign {
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  explicit DilithiumAvx2Sign(DilithiumPrivateKey private_key)
+  explicit DilithiumAvx2Sign(DilithiumPrivateKeyPqclean private_key)
       : private_key_(std::move(private_key)) {}
 
-  const DilithiumPrivateKey private_key_;
+  const DilithiumPrivateKeyPqclean private_key_;
 };
 
 }  // namespace subtle

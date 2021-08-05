@@ -55,7 +55,7 @@ TEST_F(DilithiumAvx2VerifyTest, InvalidPublicKeys) {
   // Null public key.
   const absl::string_view null_public_key;
   EXPECT_FALSE(DilithiumAvx2Verify::New(
-                   *DilithiumPublicKey::NewPublicKey(null_public_key))
+                   *DilithiumPublicKeyPqclean::NewPublicKey(null_public_key))
                    .ok());
 
   for (int keysize = 0; keysize < 1312; keysize++) {
@@ -65,7 +65,8 @@ TEST_F(DilithiumAvx2VerifyTest, InvalidPublicKeys) {
     }
     std::string key(keysize, 'x');
     EXPECT_FALSE(
-        DilithiumAvx2Verify::New(*DilithiumPublicKey::NewPublicKey(key)).ok());
+        DilithiumAvx2Verify::New(*DilithiumPublicKeyPqclean::NewPublicKey(key))
+            .ok());
   }
 }
 
@@ -75,8 +76,9 @@ TEST_F(DilithiumAvx2VerifyTest, BasicSignVerify) {
   }
 
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -106,8 +108,9 @@ TEST_F(DilithiumAvx2VerifyTest, FailsWithWrongMessage) {
   }
 
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -137,8 +140,9 @@ TEST_F(DilithiumAvx2VerifyTest, FailsWithWrongSignature) {
   }
 
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -169,8 +173,9 @@ TEST_F(DilithiumAvx2VerifyTest, FailsWithByteFlipped) {
   }
 
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -203,8 +208,9 @@ TEST_F(DilithiumAvx2VerifyTest, FipsMode) {
   }
 
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -618,7 +624,7 @@ TEST_F(DilithiumAvx2VerifyTest, Vectors) {
     // Create a new verifier.
     absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
         DilithiumAvx2Verify::New(
-            *DilithiumPublicKey::NewPublicKey(v.public_key));
+            *DilithiumPublicKeyPqclean::NewPublicKey(v.public_key));
     ASSERT_THAT(verifier.status(), IsOk());
 
     // Verify signature.

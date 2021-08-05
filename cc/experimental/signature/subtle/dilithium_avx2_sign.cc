@@ -39,7 +39,7 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
-    DilithiumPrivateKey private_key) {
+    DilithiumPrivateKeyPqclean private_key) {
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Sign>();
   if (!status.ok()) return status;
 

@@ -41,8 +41,9 @@ class DilithiumKeyTest : public ::testing::Test {};
 
 TEST_F(DilithiumKeyTest, KeysLength) {
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -55,8 +56,9 @@ TEST_F(DilithiumKeyTest, KeysLength) {
 
 TEST_F(DilithiumKeyTest, DifferentContent) {
   // Generate key pair.
-  util::StatusOr<std::pair<DilithiumPrivateKey, DilithiumPublicKey>> key_pair =
-      DilithiumPrivateKey::GenerateKeyPair();
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
