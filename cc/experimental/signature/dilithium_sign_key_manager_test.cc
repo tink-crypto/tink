@@ -36,13 +36,13 @@ extern "C" {
 namespace crypto {
 namespace tink {
 
+using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::DilithiumKeyFormat;
 using ::google::crypto::tink::DilithiumPrivateKey;
 using ::google::crypto::tink::DilithiumPublicKey;
 using ::google::crypto::tink::KeyData;
-using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
 using ::testing::Eq;
 using ::testing::Not;
 using ::testing::SizeIs;

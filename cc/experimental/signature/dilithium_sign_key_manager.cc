@@ -37,12 +37,12 @@ extern "C" {
 namespace crypto {
 namespace tink {
 
+using ::crypto::tink::subtle::DilithiumPrivateKeyPqclean;
+using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::DilithiumKeyFormat;
 using ::google::crypto::tink::DilithiumPrivateKey;
-using ::crypto::tink::subtle::DilithiumPrivateKeyPqclean;
-using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
 
 StatusOr<DilithiumPrivateKey> DilithiumSignKeyManager::CreateKey(
     const DilithiumKeyFormat& key_format) const {
