@@ -45,8 +45,6 @@ using SecretData = std::vector<uint8_t, internal::SanitizingAllocator<uint8_t>>;
 
 // Stores secret (sensitive) object and makes sure it's marked as such and
 // destroyed in a safe way.
-// The object needs to be trivially destructible (to make sure it does not
-// allocate memory internally).
 // SecretUniquePtr MUST be constructed using MakeSecretUniquePtr function.
 // Generally SecretUniquePtr should be used iff SecretData is unsuitable.
 //
@@ -60,6 +58,11 @@ using SecretData = std::vector<uint8_t, internal::SanitizingAllocator<uint8_t>>;
 //  private:
 //   util::SecretUniquePtr<AES_KEY> key_ = util::MakeSecretUniquePtr<AES_KEY>();
 // }
+//
+// NOTE: SecretUniquePtr<T> will only protect the data which is stored in the
+// memory which a T object takes on the stack. In particular, std::string and
+// std::vector SHOULD NOT be used as arguments of T: they allocate memory
+// on the heap, and hence the data stored in them will NOT be protected.
 template <typename T>
 class SecretUniquePtr {
  private:
@@ -69,8 +72,7 @@ class SecretUniquePtr {
   using pointer = typename Value::pointer;
   using element_type = typename Value::element_type;
   using deleter_type = typename Value::deleter_type;
-  static_assert(std::is_trivially_destructible<T>::value,
-                "SecretUniquePtr only supports trivially destructible types");
+
   SecretUniquePtr() {}
 
   pointer get() const { return value_.get(); }
