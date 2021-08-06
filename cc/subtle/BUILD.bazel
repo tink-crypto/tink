@@ -27,6 +27,7 @@ cc_library(
         ":hmac_boringssl",
         ":random",
         "//:aead",
+        "//:deterministic_aead",
         "//:hybrid_decrypt",
         "//:hybrid_encrypt",
         "//:mac",
@@ -38,6 +39,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 

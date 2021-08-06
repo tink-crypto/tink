@@ -6,6 +6,7 @@ add_subdirectory(mac)
 set(TINK_SUBTLE_PUBLIC_APIS
   common_enums.h
   aes_gcm_boringssl.h
+  aes_siv_boringssl.h
   encrypt_then_authenticate.h
   hmac_boringssl.h
   hkdf.h
@@ -18,12 +19,14 @@ tink_cc_library(
   SRCS ${TINK_SUBTLE_PUBLIC_APIS}
   DEPS
     tink::subtle::aes_gcm_boringssl
+    tink::subtle::aes_siv_boringssl
     tink::subtle::common_enums
     tink::subtle::encrypt_then_authenticate
     tink::subtle::hkdf
     tink::subtle::hmac_boringssl
     tink::subtle::random
     tink::core::aead
+    tink::core::deterministic_aead
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::mac
@@ -35,6 +38,7 @@ tink_cc_library(
     crypto
     absl::base
     absl::core_headers
+    absl::span
     absl::strings
   PUBLIC
 )
