@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 
 #include <string>
 #include <utility>

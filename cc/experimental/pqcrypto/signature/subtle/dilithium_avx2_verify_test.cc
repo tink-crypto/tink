@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/signature/subtle/dilithium_avx2_verify.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
 
 #include <string>
 #include <utility>
@@ -24,7 +24,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
-#include "tink/experimental/signature/subtle/dilithium_avx2_sign.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_sign.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/secret_data.h"

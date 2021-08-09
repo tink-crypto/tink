@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
-#define TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
+#ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
+#define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
 
 #include <memory>
 #include <string>
 #include <utility>
 
-#include "tink/experimental/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"
@@ -58,5 +58,5 @@ class DilithiumAvx2Sign : public PublicKeySign {
 }  // namespace tink
 }  // namespace crypto
 
-// TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
+// TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_SIGN_H_
 #endif

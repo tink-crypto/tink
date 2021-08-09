@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/signature/subtle/dilithium_avx2_sign.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_sign.h"
 
 #include <string>
 #include <utility>

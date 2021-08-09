@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/signature/subtle/dilithium_avx2_verify.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
 
 #include <algorithm>
 #include <cstddef>

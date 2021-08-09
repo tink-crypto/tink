@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/experimental/signature/dilithium_sign_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "tink/experimental/signature/subtle/dilithium_avx2_sign.h"
-#include "tink/experimental/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_sign.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"

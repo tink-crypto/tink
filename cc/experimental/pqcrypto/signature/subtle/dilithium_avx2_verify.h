@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
-#define TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
+#ifndef TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
+#define TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
 
 #include <memory>
 #include <string>
 
 #include "absl/strings/string_view.h"
-#include "tink/experimental/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
@@ -53,5 +53,5 @@ class DilithiumAvx2Verify : public PublicKeyVerify {
 }  // namespace tink
 }  // namespace crypto
 
-// TINK_EXPERIMENTAL_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
+// TINK_EXPERIMENTAL_PQCRYPTO_SIGNATURE_SUBTLE_DILITHIUM_AVX2_VERIFY_H_
 #endif
