@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,34 +14,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid/hybrid_config.h"
+#include "tink/hybrid/hpke_config.h"
 
-#include "absl/memory/memory.h"
 #include "tink/aead/aead_config.h"
-#include "tink/config/config_util.h"
 #include "tink/config/tink_fips.h"
-#include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
-#include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
+#include "tink/hybrid/internal/hpke_private_key_manager.h"
+#include "tink/hybrid/internal/hpke_public_key_manager.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
-#include "proto/config.pb.h"
-
-using google::crypto::tink::RegistryConfig;
 
 namespace crypto {
 namespace tink {
 
-// static
-const RegistryConfig& HybridConfig::Latest() {
-  static const RegistryConfig* config = new RegistryConfig();
-  return *config;
-}
-
-// static
-util::Status HybridConfig::Register() {
-  auto status = AeadConfig::Register();
+util::Status RegisterHpke() {
+  util::Status status = AeadConfig::Register();
 
   // Register primitive wrappers.
   status = Registry::RegisterPrimitiveWrapper(
@@ -51,21 +39,19 @@ util::Status HybridConfig::Register() {
       absl::make_unique<HybridDecryptWrapper>());
   if (!status.ok()) return status;
 
-  // Currently there are no hybrid encryption key managers which only use
-  // FIPS-validated implementations, therefore none will be registered in
-  // FIPS only mode.
+  // Currently there are no HPKE key managers which only use FIPS-validated
+  // implementations, therefore none will be registered in FIPS-only mode.
   if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 
-  // Register non-FIPS key managers.
+  // Register non-FIPS HPKE key managers.
   status = Registry::RegisterAsymmetricKeyManagers(
-      absl::make_unique<EciesAeadHkdfPrivateKeyManager>(),
-      absl::make_unique<EciesAeadHkdfPublicKeyManager>(), true);
-  if (!status.ok()) return status;
-
-  return util::OkStatus();
+      absl::make_unique<internal::HpkePrivateKeyManager>(),
+      absl::make_unique<internal::HpkePublicKeyManager>(), true);
+  return status;
 }
 
 }  // namespace tink
 }  // namespace crypto
+

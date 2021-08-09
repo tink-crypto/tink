@@ -7,6 +7,9 @@ cc_library(
     srcs = ["hpke_decrypt.cc"],
     hdrs = ["hpke_decrypt.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     visibility = [
         "//:__subpackages__",
         "//objc:__subpackages__",
@@ -29,6 +32,9 @@ cc_library(
     srcs = ["hpke_decrypt_boringssl.cc"],
     hdrs = ["hpke_decrypt_boringssl.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_key_boringssl",
         ":hpke_util_boringssl",
@@ -46,6 +52,9 @@ cc_library(
     srcs = ["hpke_encrypt.cc"],
     hdrs = ["hpke_encrypt.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     visibility = [
         "//:__subpackages__",
         "//objc:__subpackages__",
@@ -65,6 +74,9 @@ cc_library(
     srcs = ["hpke_encrypt_boringssl.cc"],
     hdrs = ["hpke_encrypt_boringssl.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_util_boringssl",
         "//subtle:subtle_util",
@@ -82,6 +94,9 @@ cc_library(
     srcs = ["hpke_key_boringssl.cc"],
     hdrs = ["hpke_key_boringssl.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_util_boringssl",
         "//util:status",
@@ -108,6 +123,9 @@ cc_library(
     srcs = ["hpke_private_key_manager.cc"],
     hdrs = ["hpke_private_key_manager.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_decrypt",
         ":hpke_key_manager_util",
@@ -130,6 +148,9 @@ cc_library(
     srcs = ["hpke_public_key_manager.cc"],
     hdrs = ["hpke_public_key_manager.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_encrypt",
         ":hpke_key_manager_util",
@@ -166,6 +187,9 @@ cc_library(
     srcs = ["hpke_util_boringssl.cc"],
     hdrs = ["hpke_util_boringssl.h"],
     include_prefix = "tink/hybrid/internal",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         "//util:status",
         "//util:statusor",
@@ -181,6 +205,9 @@ cc_test(
     name = "hpke_decrypt_boringssl_test",
     size = "small",
     srcs = ["hpke_decrypt_boringssl_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_decrypt_boringssl",
         ":hpke_test_util",
@@ -199,6 +226,9 @@ cc_test(
     size = "small",
     srcs = ["hpke_decrypt_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_decrypt",
         ":hpke_encrypt",
@@ -216,6 +246,9 @@ cc_test(
     name = "hpke_encrypt_boringssl_test",
     size = "small",
     srcs = ["hpke_encrypt_boringssl_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_encrypt_boringssl",
         ":hpke_test_util",
@@ -234,6 +267,9 @@ cc_test(
     size = "small",
     srcs = ["hpke_encrypt_test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_encrypt",
         ":hpke_test_util",
@@ -250,6 +286,9 @@ cc_test(
     name = "hpke_key_boringssl_test",
     size = "small",
     srcs = ["hpke_key_boringssl_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_key_boringssl",
         ":hpke_test_util",
@@ -282,6 +321,9 @@ cc_test(
     name = "hpke_private_key_manager_test",
     size = "small",
     srcs = ["hpke_private_key_manager_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_encrypt",
         ":hpke_private_key_manager",
@@ -301,6 +343,9 @@ cc_test(
     name = "hpke_public_key_manager_test",
     size = "small",
     srcs = ["hpke_public_key_manager_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_public_key_manager",
         ":hpke_test_util",
@@ -315,6 +360,9 @@ cc_test(
     name = "hpke_util_boringssl_test",
     size = "small",
     srcs = ["hpke_util_boringssl_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
     deps = [
         ":hpke_test_util",
         ":hpke_util_boringssl",

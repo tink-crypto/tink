@@ -12,8 +12,6 @@ tink_cc_library(
     tink::hybrid::ecies_aead_hkdf_public_key_manager
     tink::hybrid::hybrid_decrypt_wrapper
     tink::hybrid::hybrid_encrypt_wrapper
-    tink::hybrid::internal::hpke_private_key_manager
-    tink::hybrid::internal::hpke_public_key_manager
     tink::core::registry
     tink::config::config_util
     tink::config::tink_fips
@@ -22,6 +20,22 @@ tink_cc_library(
     tink::proto::config_cc_proto
     absl::base
     absl::memory
+)
+
+tink_cc_library(
+  NAME hpke_config
+  SRCS
+    hpke_config.cc
+    hpke_config.h
+  DEPS
+    tink::aead::aead_config
+    tink::config::tink_fips
+    tink::core::registry
+    tink::hybrid::hybrid_decrypt_wrapper
+    tink::hybrid::hybrid_encrypt_wrapper
+    tink::hybrid::internal::hpke_private_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
+    tink::util::status
 )
 
 tink_cc_library(
@@ -227,14 +241,31 @@ tink_cc_test(
   DEPS
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
-    tink::hybrid::internal::hpke_private_key_manager
-    tink::hybrid::internal::hpke_public_key_manager
     tink::config::tink_fips
     tink::core::config
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
     tink::core::keyset_handle
     tink::core::registry
+    tink::util::status
+    tink::util::test_matchers
+    tink::util::test_util
+)
+
+tink_cc_test(
+  NAME hpke_config_test
+  SRCS hpke_config_test.cc
+  DEPS
+    tink::config::tink_fips
+    tink::core::config
+    tink::core::hybrid_decrypt
+    tink::core::hybrid_encrypt
+    tink::core::keyset_handle
+    tink::core::registry
+    tink::hybrid::hpke_config
+    tink::hybrid::hybrid_key_templates
+    tink::hybrid::internal::hpke_private_key_manager
+    tink::hybrid::internal::hpke_public_key_manager
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util

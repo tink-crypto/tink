@@ -17,12 +17,34 @@ cc_library(
         "//aead:aead_config",
         "//config:config_util",
         "//config:tink_fips",
-        "//hybrid/internal:hpke_private_key_manager",
-        "//hybrid/internal:hpke_public_key_manager",
         "//proto:config_cc_proto",
         "//util:status",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "hpke_config",
+    srcs = ["hpke_config.cc"],
+    hdrs = ["hpke_config.h"],
+    include_prefix = "tink/hybrid",
+    tags = [
+        "requires_boringcrypto_update",
+    ],
+    visibility = [
+        "//:__subpackages__",
+        "//objc:__subpackages__",
+    ],
+    deps = [
+        "//:registry",
+        "//aead:aead_config",
+        "//config:tink_fips",
+        "//hybrid:hybrid_decrypt_wrapper",
+        "//hybrid:hybrid_encrypt_wrapper",
+        "//hybrid/internal:hpke_private_key_manager",
+        "//hybrid/internal:hpke_public_key_manager",
+        "//util:status",
     ],
 )
 
@@ -262,6 +284,29 @@ cc_test(
         "//:keyset_handle",
         "//:registry",
         "//config:tink_fips",
+        "//util:status",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hpke_config_test",
+    size = "small",
+    srcs = ["hpke_config_test.cc"],
+    tags = [
+        "requires_boringcrypto_update",
+    ],
+    deps = [
+        ":hpke_config",
+        "//:config",
+        "//:hybrid_decrypt",
+        "//:hybrid_encrypt",
+        "//:keyset_handle",
+        "//:registry",
+        "//config:tink_fips",
+        "//hybrid:hybrid_key_templates",
         "//hybrid/internal:hpke_private_key_manager",
         "//hybrid/internal:hpke_public_key_manager",
         "//util:status",
