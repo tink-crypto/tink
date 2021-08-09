@@ -287,7 +287,7 @@ public final class AndroidKeysetManager {
         return read();
       } catch (FileNotFoundException ex) {
         // Not found, handle below.
-        Log.i(TAG, "keyset not found, will generate a new one", ex);
+        Log.i(TAG, String.format("keyset not found, will generate a new one. %s", ex.getMessage()));
       }
 
       // Not found.
