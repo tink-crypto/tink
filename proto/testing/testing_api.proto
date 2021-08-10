@@ -17,6 +17,7 @@ package tink_testing_api;
 
 option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/testing/testing_api_go_proto";
 
 // Service providing metadata about the server.
 service Metadata {
