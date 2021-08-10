@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.AesEaxKeyManager;
+import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.mac.MacConfig;
@@ -60,6 +61,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1602,6 +1604,28 @@ public class RegistryTest {
   @Test
   public void testFips_failsOnNonEmptyRegistry() throws Exception {
     assertThrows(GeneralSecurityException.class, Registry::restrictToFipsIfEmpty);
+  }
+
+  @Test
+  public void testFips_registerNonFipsKeyTypeManagerFails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerKeyManager(new TestKeyTypeManager(), true));
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyTypeManagerSucceeds() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+    AesGcmKeyManager.register(true);
   }
 
   private static class FakeAead {}

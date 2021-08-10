@@ -20,6 +20,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;
@@ -299,6 +300,11 @@ public final class HmacKeyManager extends KeyTypeManager<HmacKey> {
   public static final KeyTemplate hmacSha512Template() {
     return createTemplate(64, 64, HashType.SHA512);
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 
   /**
    * @return a {@link KeyTemplate} containing a {@link HmacKeyFormat} with some specified

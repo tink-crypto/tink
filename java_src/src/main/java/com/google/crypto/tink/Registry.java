@@ -514,6 +514,7 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    // TODO(kste): Do not allow registering for key types when in FIPS-mode.
     String typeUrl = manager.getKeyType();
     // Use an empty key format because old-style key managers don't export their key formats
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), Collections.emptyMap(), newKeyAllowed);
@@ -536,6 +537,8 @@ public final class Registry {
    *     class of {@code manager}, or the registration tries to re-enable the generation of new
    *     keys.
    * @throws GeneralSecurityException if there's an existing key template.
+   * @throws GeneralSecurityException if the key manager is not compatible with the restrictions in
+   *     FIPS-mode.
    */
   public static synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
       final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
@@ -549,6 +552,15 @@ public final class Registry {
         manager.getClass(),
         newKeyAllowed ? manager.keyFactory().keyFormats() : Collections.emptyMap(),
         newKeyAllowed);
+
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus = manager.fipsStatus();
+
+    if (!fipsStatus.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + manager.getClass()
+              + " as it is not FIPS compatible.");
+    }
 
     if (!keyManagerMap.containsKey(typeUrl)) {
       keyManagerMap.put(typeUrl, createContainerFor(manager));
@@ -598,6 +610,8 @@ public final class Registry {
     if (privateTypeUrl.equals(publicTypeUrl)) {
       throw new GeneralSecurityException("Private and public key type must be different.");
     }
+
+    // TODO(kste): Check for FIPS restrictions
 
     if (keyManagerMap.containsKey(privateTypeUrl)) {
       Class<?> existingPublicKeyManagerClass =

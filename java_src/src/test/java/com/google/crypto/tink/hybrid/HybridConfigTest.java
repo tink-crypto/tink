@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.FixMethodOrder;
@@ -89,6 +90,7 @@ public class HybridConfigTest {
   @Test
   public void testFipsRegisterNonFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register Hybrid key manager
     HybridConfig.register();
