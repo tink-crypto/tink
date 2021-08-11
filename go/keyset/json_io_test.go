@@ -248,3 +248,21 @@ func TestJSONIOEncrypted(t *testing.T) {
 		t.Errorf("written encryped keyset %q doesn't match read encryped keyset %q", kse1, kse2)
 	}
 }
+
+func TestReadWriteCompactJsonKeyset(t *testing.T) {
+	compactJSONKeyset := `{"primaryKeyId":42,"key":[{"keyData":{"typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey","value":"a2V5X3ZhbHVlOiJceDExXHhhMnY/XHgwYj5UXHhkZU5QXHgwODM8XHhjYl0wIg==","keyMaterialType":"SYMMETRIC"},"status":"ENABLED","keyId":42,"outputPrefixType":"TINK"},{"keyData":{"typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey","value":"cGFyYW1zOntoYXNoOlNIQTUxMiAgdGFnX3NpemU6MzJ9ICBrZXlfdmFsdWU6Ilx4YTTdl1ZceGYzXHgxMlx4ZjdceGI2Nlx4YjdceGEyXHhjY1x4ZTd9XHgwN3tceGZlNzFceGJjIg==","keyMaterialType":"SYMMETRIC"},"status":"ENABLED","keyId":711,"outputPrefixType":"RAW"}]}`
+	r := keyset.NewJSONReader(bytes.NewBufferString(compactJSONKeyset))
+	k, err := r.Read()
+	if err != nil {
+		t.Fatalf("cannot read keyset: %v", err)
+	}
+	output := &bytes.Buffer{}
+	w := keyset.NewJSONWriter(output)
+	err = w.Write(k)
+	if err != nil {
+		t.Fatalf("cannot read keyset: %v", err)
+	}
+	if output.String() != compactJSONKeyset {
+		t.Fatalf("output of w.Write(k) is not equal, got %s, want %s", output.String(), compactJSONKeyset)
+	}
+}
