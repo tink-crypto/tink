@@ -43,6 +43,7 @@ import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import com.google.crypto.tink.subtle.AesEaxJce;
 import com.google.crypto.tink.subtle.AesGcmJce;
@@ -1626,6 +1627,30 @@ public class RegistryTest {
     Registry.reset();
     Registry.restrictToFipsIfEmpty();
     AesGcmKeyManager.register(true);
+  }
+
+  @Test
+  public void testFips_registerNonFipsKeyTypeManagerAsymmetricFails() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.registerAsymmetricKeyManagers(
+        new TestPrivateKeyTypeManager(), new TestPublicKeyTypeManager(), false));
+  }
+
+
+  @Test
+  public void testFips_registerFipsKeyTypeManagerAsymmetricSucceeds() throws Exception {
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
+
+    Registry.reset();
+    Registry.restrictToFipsIfEmpty();
+
+    EcdsaSignKeyManager.registerPair(true);
   }
 
   private static class FakeAead {}

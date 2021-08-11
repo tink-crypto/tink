@@ -611,7 +611,23 @@ public final class Registry {
       throw new GeneralSecurityException("Private and public key type must be different.");
     }
 
-    // TODO(kste): Check for FIPS restrictions
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPrivateKey =
+        privateKeyTypeManager.fipsStatus();
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPublicKey = publicKeyTypeManager.fipsStatus();
+
+    if (!fipsStatusPrivateKey.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + privateKeyTypeManager.getClass()
+              + " as it is not FIPS compatible.");
+    }
+
+    if (!fipsStatusPublicKey.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + publicKeyTypeManager.getClass()
+              + " as it is not FIPS compatible.");
+    }
 
     if (keyManagerMap.containsKey(privateTypeUrl)) {
       Class<?> existingPublicKeyManagerClass =

@@ -23,6 +23,7 @@ import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.FixMethodOrder;
@@ -101,6 +102,7 @@ public class SignatureConfigTest {
   @Test
   public void testFipsRegisterFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register AEAD key manager
     SignatureConfig.register();
@@ -128,6 +130,7 @@ public class SignatureConfigTest {
   @Test
   public void testFipsRegisterNonFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register signature key manager
     SignatureConfig.register();
