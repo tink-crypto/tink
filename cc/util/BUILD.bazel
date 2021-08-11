@@ -30,6 +30,7 @@ cc_library(
     hdrs = ["secret_data_internal.h"],
     include_prefix = "tink/util",
     deps = [
+        "@boringssl//:crypto",
         "@com_google_absl//absl/base:core_headers",
     ],
 )
@@ -118,9 +119,9 @@ cc_test(
         ":status",
         ":statusor",
         ":test_matchers",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

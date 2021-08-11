@@ -379,6 +379,7 @@ tink_cc_library(
     secret_data_internal.h
   DEPS
     absl::base
+    crypto
 )
 
 tink_cc_library(

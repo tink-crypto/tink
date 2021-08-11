@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "absl/base/attributes.h"
+#include "openssl/mem.h"
 
 namespace crypto {
 namespace tink {
@@ -28,11 +29,8 @@ namespace util {
 namespace internal {
 
 // placeholder for sanitization_functions, please ignore
-inline void SafeZeroMemory(char* ptr, std::size_t size) {
-  volatile char* vptr = ptr;
-  while (size--) {
-    *vptr++ = 0;
-  }
+inline void SafeZeroMemory(void* ptr, std::size_t size) {
+  OPENSSL_cleanse(ptr, size);
 }
 
 template <typename T>
@@ -49,7 +47,7 @@ struct SanitizingAllocator {
   }
 
   void deallocate(T* ptr, std::size_t n) noexcept {
-    SafeZeroMemory(reinterpret_cast<char*>(ptr), n * sizeof(T));
+    SafeZeroMemory(ptr, n * sizeof(T));
     std::allocator<T>().deallocate(ptr, n);
   }
 
@@ -71,7 +69,7 @@ struct SanitizingAllocator<void> {
   ABSL_MUST_USE_RESULT void* allocate(std::size_t n) { return std::malloc(n); }
 
   void deallocate(void* ptr, std::size_t n) noexcept {
-    SafeZeroMemory(reinterpret_cast<char*>(ptr), n);
+    SafeZeroMemory(ptr, n);
     std::free(ptr);
   }
 
