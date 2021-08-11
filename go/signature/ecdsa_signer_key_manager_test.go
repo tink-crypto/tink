@@ -267,12 +267,8 @@ func TestPublicKeyDataWithInvalidInput(t *testing.T) {
 	if _, err := pkm.PublicKeyData(serializedKey); err == nil {
 		t.Errorf("expect an error when input is a modified serialized key")
 	}
-	// nil
-	if _, err := pkm.PublicKeyData(nil); err == nil {
-		t.Errorf("expect an error when input is nil")
-	}
-	// empty slice
-	if _, err := pkm.PublicKeyData([]byte{}); err == nil {
+	// invalid with a single byte
+	if _, err := pkm.PublicKeyData([]byte{42}); err == nil {
 		t.Errorf("expect an error when input is an empty slice")
 	}
 }
