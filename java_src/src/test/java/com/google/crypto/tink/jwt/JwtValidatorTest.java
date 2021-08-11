@@ -155,6 +155,63 @@ public final class JwtValidatorTest {
   }
 
   @Test
+  public void validate_tokenWithIssuedAt() throws Exception {
+    Clock clock1 = Clock.systemUTC();
+    RawJwt tokenWithIssuedAtInTheFuture =
+        RawJwt.newBuilder()
+            .setIssuedAt(clock1.instant().plus(Duration.ofMinutes(1)))
+            .withoutExpiration()
+            .build();
+    RawJwt tokenWithIssuedAtInThePast =
+        RawJwt.newBuilder()
+            .setIssuedAt(clock1.instant().minus(Duration.ofMinutes(1)))
+            .withoutExpiration()
+            .build();
+    RawJwt tokenWithoutIssuedAt = RawJwt.newBuilder().withoutExpiration().build();
+
+    JwtValidator validator =
+        JwtValidator.newBuilder().allowMissingExpiration().build();
+    validator.validate(tokenWithIssuedAtInTheFuture);
+    validator.validate(tokenWithIssuedAtInThePast);
+    validator.validate(tokenWithoutIssuedAt);
+
+    JwtValidator issuedAtValidator =
+        JwtValidator.newBuilder()
+            .allowMissingExpiration()
+            .expectIssuedInThePast()
+            .build();
+    assertThrows(
+        JwtInvalidException.class, () -> issuedAtValidator.validate(tokenWithIssuedAtInTheFuture));
+    issuedAtValidator.validate(tokenWithIssuedAtInThePast);
+    assertThrows(JwtInvalidException.class, () -> issuedAtValidator.validate(tokenWithoutIssuedAt));
+  }
+
+  @Test
+  public void validate_tokenWithIssuedAtInTheFuture_clockSkew() throws Exception {
+    Clock clock1 = Clock.systemUTC();
+    RawJwt tokenOneMinuteInTheFuture =
+        RawJwt.newBuilder()
+            .setIssuedAt(clock1.instant().plus(Duration.ofMinutes(1)))
+            .withoutExpiration()
+            .build();
+    JwtValidator validatorWithoutClockSkew =
+        JwtValidator.newBuilder()
+            .allowMissingExpiration()
+            .expectIssuedInThePast()
+            .build();
+    assertThrows(
+        JwtInvalidException.class,
+        () -> validatorWithoutClockSkew.validate(tokenOneMinuteInTheFuture));
+    JwtValidator validatorWithOneMinuteClockSkew =
+        JwtValidator.newBuilder()
+            .allowMissingExpiration()
+            .expectIssuedInThePast()
+            .setClockSkew(Duration.ofMinutes(1))
+            .build();
+    validatorWithOneMinuteClockSkew.validate(tokenOneMinuteInTheFuture);
+  }
+
+  @Test
   public void byDefaultRejectTokensWithoutExpiration() throws Exception {
     RawJwt tokenWithoutExpiration =
         RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();

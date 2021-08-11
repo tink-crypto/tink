@@ -36,6 +36,7 @@ public final class JwtValidator {
   private final Optional<String> expectedAudience;
   private final boolean ignoreAudiences;
   private final boolean allowMissingExpiration;
+  private final boolean expectIssuedInThePast;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -52,6 +53,7 @@ public final class JwtValidator {
     this.expectedAudience = builder.expectedAudience;
     this.ignoreAudiences = builder.ignoreAudiences;
     this.allowMissingExpiration = builder.allowMissingExpiration;
+    this.expectIssuedInThePast = builder.expectIssuedInThePast;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
@@ -81,6 +83,7 @@ public final class JwtValidator {
     private Optional<String> expectedAudience;
     private boolean ignoreAudiences;
     private boolean allowMissingExpiration;
+    private boolean expectIssuedInThePast;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
@@ -94,6 +97,7 @@ public final class JwtValidator {
       this.expectedAudience = Optional.empty();
       this.ignoreAudiences = false;
       this.allowMissingExpiration = false;
+      this.expectIssuedInThePast = false;
     }
 
     /**
@@ -189,6 +193,12 @@ public final class JwtValidator {
     /** Lets the validator ignore the {@code aud} claim. */
     public Builder ignoreAudiences() {
       this.ignoreAudiences = true;
+      return this;
+    }
+
+    /** Checks that the {@code iat} claim is in the past.*/
+    public Builder expectIssuedInThePast() {
+      this.expectIssuedInThePast = true;
       return this;
     }
 
@@ -333,6 +343,17 @@ public final class JwtValidator {
     // If not_before = now.plus(clockSkew), then the token is fine.
     if (target.hasNotBefore() && target.getNotBefore().isAfter(now.plus(this.clockSkew))) {
       throw new JwtInvalidException("token cannot be used before " + target.getNotBefore());
+    }
+
+    // If issued_at = now.plus(clockSkew), then the token is fine.
+    if (this.expectIssuedInThePast) {
+      if (!target.hasIssuedAt()) {
+        throw new JwtInvalidException("token does not have an iat claim");
+      }
+      if (target.getIssuedAt().isAfter(now.plus(this.clockSkew))) {
+        throw new JwtInvalidException(
+            "token has a invalid iat claim in the future: " + target.getIssuedAt());
+      }
     }
   }
 }
