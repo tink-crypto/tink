@@ -132,6 +132,51 @@ class JwtValidatorTest(absltest.TestCase):
         allow_missing_expiration=True, clock_skew=datetime.timedelta(minutes=2))
     _jwt_validator.validate(validator, token)
 
+  def test_validate_issued_at(self):
+    in_one_minute = (datetime.datetime.now(tz=datetime.timezone.utc)
+                     + datetime.timedelta(minutes=1))
+    one_minute_ago = (datetime.datetime.now(tz=datetime.timezone.utc)
+                      - datetime.timedelta(minutes=1))
+    token_with_issued_at_in_the_future = jwt.new_raw_jwt(
+        issued_at=in_one_minute, without_expiration=True)
+    token_with_issued_at_in_the_past = jwt.new_raw_jwt(
+        issued_at=one_minute_ago, without_expiration=True)
+    token_without_issued_at = jwt.new_raw_jwt(without_expiration=True)
+
+    validator = jwt.new_validator(allow_missing_expiration=True)
+    _jwt_validator.validate(validator, token_with_issued_at_in_the_future)
+    _jwt_validator.validate(validator, token_with_issued_at_in_the_past)
+    _jwt_validator.validate(validator, token_without_issued_at)
+
+    issued_at_validator = jwt.new_validator(
+        expect_issued_in_the_past=True, allow_missing_expiration=True)
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(issued_at_validator,
+                              token_with_issued_at_in_the_future)
+    _jwt_validator.validate(issued_at_validator,
+                            token_with_issued_at_in_the_past)
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(issued_at_validator, token_without_issued_at)
+
+  def test_validate_issued_at_with_clock_skew(self):
+    in_one_minute = (datetime.datetime.now(tz=datetime.timezone.utc)
+                     + datetime.timedelta(minutes=1))
+    token_one_minute_in_the_future = jwt.new_raw_jwt(
+        issued_at=in_one_minute, without_expiration=True)
+
+    validator_without_clock_skew = jwt.new_validator(
+        expect_issued_in_the_past=True, allow_missing_expiration=True)
+    with self.assertRaises(jwt.JwtInvalidError):
+      _jwt_validator.validate(validator_without_clock_skew,
+                              token_one_minute_in_the_future)
+
+    validator_with_clock_skew = jwt.new_validator(
+        expect_issued_in_the_past=True,
+        allow_missing_expiration=True,
+        clock_skew=datetime.timedelta(minutes=2))
+    _jwt_validator.validate(validator_with_clock_skew,
+                            token_one_minute_in_the_future)
+
   def test_requires_type_header_but_no_type_header_set_fails(self):
     token = jwt.new_raw_jwt(without_expiration=True)
     validator = jwt.new_validator(

@@ -45,6 +45,7 @@ class JwtValidator(object):
                ignore_subject: bool,
                ignore_audiences: bool,
                allow_missing_expiration: bool,
+               expect_issued_in_the_past: bool,
                clock_skew: Optional[datetime.timedelta],
                fixed_now: Optional[datetime.datetime]) -> None:
     if expected_type_header and ignore_type_header:
@@ -68,6 +69,7 @@ class JwtValidator(object):
     self._ignore_subject = ignore_subject
     self._ignore_audiences = ignore_audiences
     self._allow_missing_expiration = allow_missing_expiration
+    self._expect_issued_in_the_past = expect_issued_in_the_past
     if clock_skew:
       if clock_skew > _MAX_CLOCK_SKEW:
         raise ValueError('clock skew too large, max is 10 minutes')
@@ -117,6 +119,9 @@ class JwtValidator(object):
   def allow_missing_expiration(self) -> bool:
     return self._allow_missing_expiration
 
+  def expect_issued_in_the_past(self) -> bool:
+    return self._expect_issued_in_the_past
+
   def clock_skew(self) -> datetime.timedelta:
     return self._clock_skew
 
@@ -153,6 +158,13 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
       raw_jwt.not_before() > now + validator.clock_skew()):
     raise _jwt_error.JwtInvalidError('token cannot be used before %s' %
                                      raw_jwt.not_before())
+  if validator.expect_issued_in_the_past():
+    if not raw_jwt.has_issued_at():
+      raise _jwt_error.JwtInvalidError('token is missing iat claim')
+    if raw_jwt.issued_at() > now + validator.clock_skew():
+      raise _jwt_error.JwtInvalidError(
+          'token has a invalid iat claim in the future: %s' %
+          raw_jwt.issued_at())
   if validator.has_expected_type_header():
     if not raw_jwt.has_type_header():
       raise _jwt_error.JwtInvalidError(

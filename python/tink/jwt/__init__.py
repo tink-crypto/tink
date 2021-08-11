@@ -79,6 +79,7 @@ def new_validator(
     ignore_subject: bool = False,
     ignore_audiences: bool = False,
     allow_missing_expiration: bool = False,
+    expect_issued_in_the_past: bool = False,
     clock_skew: Optional[datetime.timedelta] = None,
     fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
   """Creates a new JwtValidator."""
@@ -92,6 +93,7 @@ def new_validator(
       ignore_subject=ignore_subject,
       ignore_audiences=ignore_audiences,
       allow_missing_expiration=allow_missing_expiration,
+      expect_issued_in_the_past=expect_issued_in_the_past,
       clock_skew=clock_skew,
       fixed_now=fixed_now)
 
