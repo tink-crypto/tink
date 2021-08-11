@@ -184,6 +184,7 @@ def validator_from_proto(
       ignore_subject=proto_validator.ignore_subject,
       ignore_audiences=proto_validator.ignore_audience,
       allow_missing_expiration=proto_validator.allow_missing_expiration,
+      expect_issued_in_the_past=proto_validator.expect_issued_in_the_past,
       fixed_now=fixed_now,
       clock_skew=clock_skew)
 

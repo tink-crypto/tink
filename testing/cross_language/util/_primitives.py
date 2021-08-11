@@ -465,6 +465,8 @@ def jwt_validator_to_proto(
   proto_validator.ignore_audience = validator.ignore_audiences()
   proto_validator.allow_missing_expiration = validator.allow_missing_expiration(
   )
+  proto_validator.expect_issued_in_the_past = (
+      validator.expect_issued_in_the_past())
   proto_validator.clock_skew.seconds = validator.clock_skew().seconds
   if validator.has_fixed_now():
     seconds, nanos = split_datetime(validator.fixed_now())

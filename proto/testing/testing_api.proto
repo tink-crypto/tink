@@ -414,6 +414,7 @@ message JwtValidator {
   bool ignore_subject = 10;
   bool ignore_audience = 11;
   bool allow_missing_expiration = 12;
+  bool expect_issued_in_the_past = 13;
   Timestamp now = 5;
   Duration clock_skew = 6;
 }

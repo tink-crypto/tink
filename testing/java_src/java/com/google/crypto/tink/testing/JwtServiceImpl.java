@@ -272,6 +272,9 @@ public final class JwtServiceImpl extends JwtImplBase {
     if (validator.getAllowMissingExpiration()) {
       validatorBuilder.allowMissingExpiration();
     }
+    if (validator.getExpectIssuedInThePast()) {
+      validatorBuilder.expectIssuedInThePast();
+    }
     if (validator.hasNow()) {
       Instant now = timestampToInstant(validator.getNow());
       validatorBuilder.setClock(Clock.fixed(now, ZoneOffset.UTC));

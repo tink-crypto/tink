@@ -289,7 +289,7 @@ class JwtTest(parameterized.TestCase):
         clock_skew=datetime.timedelta(seconds=3))
     jwt_mac.verify_mac_and_decode(token, validator_ok_with_clockskew)
 
-    # 3 seconds too early with 2 seconds clock skew is fine.
+    # 3 seconds too early with 2 seconds clock skew is not yet valid.
     validator_too_early_with_clockskew = jwt.new_validator(
         allow_missing_expiration=True,
         fixed_now=datetime.datetime.fromtimestamp(1231, datetime.timezone.utc),
@@ -314,6 +314,52 @@ class JwtTest(parameterized.TestCase):
         fixed_now=datetime.datetime.fromtimestamp(1235.5,
                                                   datetime.timezone.utc))
     jwt_mac.verify_mac_and_decode(token, validator_after)
+
+  @parameterized.parameters(SUPPORTED_LANGUAGES)
+  def test_verify_issued_at(self, lang):
+    if lang == 'cc':
+      # TODO(juerg): Add support in cc
+      return
+    token = generate_token('{"alg":"HS256"}', '{"jti":"123", "iat":1234}')
+    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
+
+    # same time as issued-at fine.
+    validator_same_time = jwt.new_validator(
+        expect_issued_in_the_past=True,
+        allow_missing_expiration=True,
+        fixed_now=datetime.datetime.fromtimestamp(1234, datetime.timezone.utc))
+    jwt_mac.verify_mac_and_decode(token, validator_same_time)
+
+    # one second before is not yet valid
+    validator_before = jwt.new_validator(
+        expect_issued_in_the_past=True,
+        allow_missing_expiration=True,
+        fixed_now=datetime.datetime.fromtimestamp(1233, datetime.timezone.utc))
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, validator_before)
+
+    # ten second before but without expect_issued_in_the_past is fine
+    validator_without_iat_validation = jwt.new_validator(
+        allow_missing_expiration=True,
+        fixed_now=datetime.datetime.fromtimestamp(1224, datetime.timezone.utc))
+    jwt_mac.verify_mac_and_decode(token, validator_without_iat_validation)
+
+    # 3 seconds too early with 3 seconds clock skew is fine
+    validator_ok_with_clockskew = jwt.new_validator(
+        expect_issued_in_the_past=True,
+        allow_missing_expiration=True,
+        fixed_now=datetime.datetime.fromtimestamp(1231, datetime.timezone.utc),
+        clock_skew=datetime.timedelta(seconds=3))
+    jwt_mac.verify_mac_and_decode(token, validator_ok_with_clockskew)
+
+    # 3 seconds too early with 2 seconds clock skew is not yet valid.
+    validator_too_early_with_clockskew = jwt.new_validator(
+        expect_issued_in_the_past=True,
+        allow_missing_expiration=True,
+        fixed_now=datetime.datetime.fromtimestamp(1231, datetime.timezone.utc),
+        clock_skew=datetime.timedelta(seconds=2))
+    with self.assertRaises(tink.TinkError):
+      jwt_mac.verify_mac_and_decode(token, validator_too_early_with_clockskew)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_issuer(self, lang):
