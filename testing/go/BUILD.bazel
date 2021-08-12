@@ -30,7 +30,7 @@ go_library(
     importpath = "github.com/google/tink/testing/go/services",
     deps = [
         ":testing_api_go_grpc",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
         "@tink_go//hybrid:go_default_library",
@@ -51,7 +51,7 @@ go_test(
     deps = [
         ":services",
         ":testing_api_go_grpc",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
         "@tink_go//aead:go_default_library",
         "@tink_go//daead:go_default_library",
         "@tink_go//hybrid:go_default_library",

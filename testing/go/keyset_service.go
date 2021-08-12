@@ -26,7 +26,7 @@ import (
 	pb "github.com/google/tink/proto/testing/testing_api_go_grpc"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // KeysetService implements the Keyset testing service.

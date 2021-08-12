@@ -19,7 +19,7 @@ package signature
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/subtle"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"

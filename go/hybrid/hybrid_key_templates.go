@@ -17,7 +17,7 @@
 package hybrid
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	eciespb "github.com/google/tink/go/proto/ecies_aead_hkdf_go_proto"

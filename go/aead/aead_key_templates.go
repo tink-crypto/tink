@@ -17,7 +17,7 @@
 package aead
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	ctrpb "github.com/google/tink/go/proto/aes_ctr_go_proto"
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_aead_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"

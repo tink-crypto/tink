@@ -23,7 +23,7 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/subtle"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"

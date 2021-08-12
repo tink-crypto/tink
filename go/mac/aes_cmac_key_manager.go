@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/random"
@@ -56,7 +56,7 @@ func (km *aescmacKeyManager) Primitive(serializedKey []byte) (interface{}, error
 	if err := km.validateKey(key); err != nil {
 		return nil, err
 	}
-	cmac, err := subtle.NewAESCMAC( key.KeyValue, key.Params.TagSize)
+	cmac, err := subtle.NewAESCMAC(key.KeyValue, key.Params.TagSize)
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/google/tink/go/core/primitiveset"
 	"github.com/google/tink/go/core/registry"
@@ -123,7 +124,11 @@ func (h *Handle) Public() (*Handle, error) {
 // String returns a string representation of the managed keyset.
 // The result does not contain any sensitive key material.
 func (h *Handle) String() string {
-	return proto.CompactTextString(getKeysetInfo(h.ks))
+	c, err := prototext.MarshalOptions{}.Marshal(getKeysetInfo(h.ks))
+	if err != nil {
+		return ""
+	}
+	return string(c)
 }
 
 // KeysetInfo returns KeysetInfo representation of the managed keyset.

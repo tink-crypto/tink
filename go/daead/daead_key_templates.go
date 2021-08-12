@@ -17,7 +17,7 @@
 package daead
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )

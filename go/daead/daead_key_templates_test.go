@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testutil"

@@ -22,7 +22,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
@@ -63,7 +63,7 @@ func KeyTemplateProto(dir string, name string) (*tinkpb.KeyTemplate, error) {
 		return nil, err
 	}
 	template := &tinkpb.KeyTemplate{}
-	err = proto.UnmarshalText(string(data), template)
+	err = prototext.Unmarshal(data, template)
 	if err != nil {
 		return nil, err
 	}

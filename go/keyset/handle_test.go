@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
@@ -224,7 +224,7 @@ func TestKeysetHandleString(t *testing.T) {
 	if err != nil {
 		t.Fatalf("testkeyset.Read failed: %v", err)
 	}
-	expected := `primary_key_id:42 key_info:<type_url:"type.googleapis.com/google.crypto.tink.AesGcmKey" status:ENABLED key_id:42 output_prefix_type:TINK > key_info:<type_url:"type.googleapis.com/google.crypto.tink.AesEaxKey" status:ENABLED key_id:711 output_prefix_type:RAW > `
+	expected := `primary_key_id:42 key_info:{type_url:"type.googleapis.com/google.crypto.tink.AesGcmKey" status:ENABLED key_id:42 output_prefix_type:TINK} key_info:{type_url:"type.googleapis.com/google.crypto.tink.AesEaxKey" status:ENABLED key_id:711 output_prefix_type:RAW}`
 	if handle.String() != expected {
 		t.Fatalf("output is not equal, got %s, want %s", handle.String(), expected)
 	}
