@@ -38,6 +38,7 @@ JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
   ignore_subject_ = builder.ignore_subject_;
   ignore_audiences_ = builder.ignore_audiences_;
   allow_missing_expiration_ = builder.allow_missing_expiration_;
+  expect_issued_in_the_past_ = builder.expect_issued_in_the_past_;
   clock_skew_ = builder.clock_skew_;
   fixed_now_ = builder.fixed_now_;
 }
@@ -70,6 +71,16 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
     if (*not_before > now + clock_skew_) {
       return util::Status(util::error::INVALID_ARGUMENT,
                         "token cannot yet be used");
+    }
+  }
+  if (expect_issued_in_the_past_) {
+    util::StatusOr<absl::Time> issued_at = raw_jwt.GetIssuedAt();
+    if (!issued_at.ok()) {
+      return issued_at.status();
+    }
+    if (*issued_at > now + clock_skew_) {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                        "token has an invalid iat claim in the future");
     }
   }
   if (expected_type_header_.has_value()) {
@@ -159,6 +170,7 @@ JwtValidatorBuilder::JwtValidatorBuilder() {
   ignore_subject_ = false;
   ignore_audiences_ = false;
   allow_missing_expiration_ = false;
+  expect_issued_in_the_past_ = false;
   clock_skew_ = absl::ZeroDuration();
 }
 
@@ -208,6 +220,11 @@ JwtValidatorBuilder& JwtValidatorBuilder::IgnoreAudiences() {
 
 JwtValidatorBuilder& JwtValidatorBuilder::AllowMissingExpiration() {
   allow_missing_expiration_ = true;
+  return *this;
+}
+
+JwtValidatorBuilder& JwtValidatorBuilder::ExpectIssuedInThePast() {
+  expect_issued_in_the_past_ = true;
   return *this;
 }
 

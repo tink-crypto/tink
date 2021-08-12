@@ -317,9 +317,6 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_issued_at(self, lang):
-    if lang == 'cc':
-      # TODO(juerg): Add support in cc
-      return
     token = generate_token('{"alg":"HS256"}', '{"jti":"123", "iat":1234}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
 

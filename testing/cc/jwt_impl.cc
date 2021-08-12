@@ -196,6 +196,9 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
   if (validator_proto.allow_missing_expiration()) {
     builder.AllowMissingExpiration();
   }
+  if (validator_proto.expect_issued_in_the_past()) {
+    builder.ExpectIssuedInThePast();
+  }
   if (validator_proto.has_now()) {
     builder.SetFixedNow(TimestampToTime(validator_proto.now()));
   }

@@ -143,6 +143,70 @@ TEST(JwtValidator, NotBeforeInTheNearFutureWithClockSkewOK) {
   EXPECT_THAT(validator_or.ValueOrDie().Validate(jwt), IsOk());
 }
 
+TEST(JwtValidator, IssuedAt) {
+  absl::Time now = absl::Now();
+  util::StatusOr<RawJwt> tokenIssuedInTheFuture = RawJwtBuilder()
+                                   .SetIssuedAt(now + absl::Seconds(100))
+                                   .WithoutExpiration()
+                                   .Build();
+  ASSERT_THAT(tokenIssuedInTheFuture.status(), IsOk());
+  util::StatusOr<RawJwt> tokenIssuedInThePast = RawJwtBuilder()
+                                   .SetIssuedAt(now - absl::Seconds(100))
+                                   .WithoutExpiration()
+                                   .Build();
+  ASSERT_THAT(tokenIssuedInThePast.status(), IsOk());
+  util::StatusOr<RawJwt> tokenWithoutIssuedAt = RawJwtBuilder()
+                                   .WithoutExpiration()
+                                   .Build();
+  ASSERT_THAT(tokenWithoutIssuedAt.status(), IsOk());
+
+  util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
+                                                  .AllowMissingExpiration()
+                                                  .Build();
+  ASSERT_THAT(validator.status(), IsOk());
+  EXPECT_THAT(validator->Validate(*tokenIssuedInTheFuture), IsOk());
+  EXPECT_THAT(validator->Validate(*tokenIssuedInThePast), IsOk());
+  EXPECT_THAT(validator->Validate(*tokenWithoutIssuedAt), IsOk());
+
+  util::StatusOr<JwtValidator> issued_at_validator =
+      JwtValidatorBuilder()
+          .ExpectIssuedInThePast()
+          .AllowMissingExpiration()
+          .Build();
+  ASSERT_THAT(issued_at_validator.status(), IsOk());
+  EXPECT_FALSE(issued_at_validator->Validate(*tokenIssuedInTheFuture).ok());
+  EXPECT_THAT(issued_at_validator->Validate(*tokenIssuedInThePast), IsOk());
+  EXPECT_FALSE(issued_at_validator->Validate(*tokenWithoutIssuedAt).ok());
+}
+
+TEST(JwtValidator, IssuedAtWithClockSkew) {
+  absl::Time now = absl::Now();
+  util::StatusOr<RawJwt> tokenOneMinuteInTheFuture = RawJwtBuilder()
+                                   .SetIssuedAt(now + absl::Minutes(1))
+                                   .WithoutExpiration()
+                                   .Build();
+  ASSERT_THAT(tokenOneMinuteInTheFuture.status(), IsOk());
+
+  util::StatusOr<JwtValidator> validator_without_clock_skew =
+      JwtValidatorBuilder()
+          .ExpectIssuedInThePast()
+          .AllowMissingExpiration()
+          .Build();
+  ASSERT_THAT(validator_without_clock_skew.status(), IsOk());
+  EXPECT_FALSE(
+      validator_without_clock_skew->Validate(*tokenOneMinuteInTheFuture).ok());
+
+  util::StatusOr<JwtValidator> validator_with_clock_skew =
+      JwtValidatorBuilder()
+          .ExpectIssuedInThePast()
+          .AllowMissingExpiration()
+          .SetClockSkew(absl::Minutes(2))
+          .Build();
+  ASSERT_THAT(validator_with_clock_skew.status(), IsOk());
+  EXPECT_THAT(validator_with_clock_skew->Validate(*tokenOneMinuteInTheFuture),
+              IsOk());
+}
+
 TEST(JwtValidator, RequiresTypeHeaderButNotTypHeaderNotOK) {
   util::StatusOr<RawJwt> jwt_or = RawJwtBuilder().WithoutExpiration().Build();
   ASSERT_THAT(jwt_or.status(), IsOk());
