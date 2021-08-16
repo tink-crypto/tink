@@ -160,7 +160,7 @@ describe('ecdsa public key manager test', function() {
     const manager = new EcdsaPublicKeyManager();
     const key = await createKey();
     const x = key.getX();
-    key.setX(new Uint8Array(0));
+    key.setX(new Uint8Array([0]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -170,7 +170,7 @@ describe('ecdsa public key manager test', function() {
     }
 
     key.setX(x);
-    key.setY(new Uint8Array(0));
+    key.setY(new Uint8Array([0]));
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');

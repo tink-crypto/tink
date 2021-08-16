@@ -42,7 +42,7 @@ export function validatePublicKey(
     throw new SecurityException('Invalid public key - missing params.');
   }
   validateParams(params);
-  if (!key.getX() || !key.getY()) {
+  if (!key.getX_asU8().length || !key.getY_asU8().length) {
     throw new SecurityException(
         'Invalid public key - missing value of X or Y.');
   }
