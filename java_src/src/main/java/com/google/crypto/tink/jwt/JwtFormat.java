@@ -115,23 +115,16 @@ final class JwtFormat {
   static void validateHeader(String expectedAlgorithm, JsonObject parsedHeader)
       throws InvalidAlgorithmParameterException, JwtInvalidException {
     validateAlgorithm(expectedAlgorithm);
-    if (!parsedHeader.has(JwtNames.HEADER_ALGORITHM)) {
-      throw new JwtInvalidException("missing algorithm in header");
+    String algorithm = getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
+    if (!algorithm.equals(expectedAlgorithm)) {
+      throw new InvalidAlgorithmParameterException(
+          String.format(
+              "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
     }
-    for (String name : parsedHeader.keySet()) {
-      if (name.equals(JwtNames.HEADER_ALGORITHM)) {
-        String algorithm = getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
-        if (!algorithm.equals(expectedAlgorithm)) {
-          throw new InvalidAlgorithmParameterException(
-              String.format(
-                  "invalid algorithm; expected %s, got %s", expectedAlgorithm, algorithm));
-        }
-      } else if (name.equals(JwtNames.HEADER_CRITICAL)) {
-        throw new JwtInvalidException(
-            "all tokens with crit headers are rejected");
-      }
-      // Ignore all other headers
+    if (parsedHeader.has(JwtNames.HEADER_CRITICAL)) {
+      throw new JwtInvalidException("all tokens with crit headers are rejected");
     }
+    // Ignore all other headers
   }
 
   static Optional<String> getTypeHeader(JsonObject header) throws JwtInvalidException {
