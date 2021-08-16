@@ -66,7 +66,8 @@ final class JwtFormat {
   }
 
   static byte[] strictUrlSafeDecode(String encodedData) throws JwtInvalidException {
-    for (char c : encodedData.toCharArray()) {
+    for (int i = 0; i < encodedData.length(); i++) {
+      char c = encodedData.charAt(i);
       if (!isValidUrlsafeBase64Char(c)) {
         throw new JwtInvalidException("invalid encoding");
       }
@@ -226,7 +227,8 @@ final class JwtFormat {
   }
 
   static void validateASCII(String data) throws JwtInvalidException {
-    for (char c : data.toCharArray()) {
+    for (int i = 0; i < data.length(); i++) {
+      char c = data.charAt(i);
       if ((c & 0x80) > 0) {
         throw new JwtInvalidException("Non ascii character");
       }
