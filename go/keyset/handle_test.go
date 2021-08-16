@@ -17,7 +17,6 @@
 package keyset_test
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 
@@ -215,17 +214,5 @@ func TestKeysetInfo(t *testing.T) {
 	info := kh.KeysetInfo()
 	if info.PrimaryKeyId != info.KeyInfo[0].KeyId {
 		t.Errorf("Expected primary key id: %d, but got: %d", info.KeyInfo[0].KeyId, info.PrimaryKeyId)
-	}
-}
-
-func TestKeysetHandleString(t *testing.T) {
-	jsonKeyset := `{"primaryKeyId":42,"key":[{"keyData":{"typeUrl":"type.googleapis.com/google.crypto.tink.AesGcmKey","value":"a2V5X3ZhbHVlOiJceDExXHhhMnY/XHgwYj5UXHhkZU5QXHgwODM8XHhjYl0wIg==","keyMaterialType":"SYMMETRIC"},"status":"ENABLED","keyId":42,"outputPrefixType":"TINK"},{"keyData":{"typeUrl":"type.googleapis.com/google.crypto.tink.AesEaxKey","value":"cGFyYW1zOntoYXNoOlNIQTUxMiAgdGFnX3NpemU6MzJ9ICBrZXlfdmFsdWU6Ilx4YTTdl1ZceGYzXHgxMlx4ZjdceGI2Nlx4YjdceGEyXHhjY1x4ZTd9XHgwN3tceGZlNzFceGJjIg==","keyMaterialType":"SYMMETRIC"},"status":"ENABLED","keyId":711,"outputPrefixType":"RAW"}]}`
-	handle, err := testkeyset.Read(keyset.NewJSONReader(bytes.NewBufferString(jsonKeyset)))
-	if err != nil {
-		t.Fatalf("testkeyset.Read failed: %v", err)
-	}
-	expected := `primary_key_id:42 key_info:{type_url:"type.googleapis.com/google.crypto.tink.AesGcmKey" status:ENABLED key_id:42 output_prefix_type:TINK} key_info:{type_url:"type.googleapis.com/google.crypto.tink.AesEaxKey" status:ENABLED key_id:711 output_prefix_type:RAW}`
-	if handle.String() != expected {
-		t.Fatalf("output is not equal, got %s, want %s", handle.String(), expected)
 	}
 }
