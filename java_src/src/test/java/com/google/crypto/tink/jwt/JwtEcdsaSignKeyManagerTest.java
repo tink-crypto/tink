@@ -453,7 +453,7 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtPublicKeyVerify verifierWithKid =
-        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+        handleWithKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Both the verifiers accept signedCompactWithKid.
     assertThat(verifier.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
