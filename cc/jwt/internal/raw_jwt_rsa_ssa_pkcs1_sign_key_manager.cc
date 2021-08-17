@@ -43,6 +43,7 @@ using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
 using google::crypto::tink::JwtRsaSsaPkcs1KeyFormat;
 using google::crypto::tink::JwtRsaSsaPkcs1PrivateKey;
+using ::google::crypto::tink::JwtRsaSsaPkcs1PublicKey;
 
 namespace {
 JwtRsaSsaPkcs1PrivateKey RsaPrivateKeySubtleToProto(
@@ -55,7 +56,7 @@ JwtRsaSsaPkcs1PrivateKey RsaPrivateKeySubtleToProto(
   key_proto.set_dp(std::string(util::SecretDataAsStringView(private_key.dp)));
   key_proto.set_dq(std::string(util::SecretDataAsStringView(private_key.dq)));
   key_proto.set_crt(std::string(util::SecretDataAsStringView(private_key.crt)));
-  auto* public_key_proto = key_proto.mutable_public_key();
+  JwtRsaSsaPkcs1PublicKey* public_key_proto = key_proto.mutable_public_key();
   public_key_proto->set_version(
       RawJwtRsaSsaPkcs1SignKeyManager().get_version());
   public_key_proto->set_n(private_key.n);
@@ -81,19 +82,20 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
 
 StatusOr<JwtRsaSsaPkcs1PrivateKey> RawJwtRsaSsaPkcs1SignKeyManager::CreateKey(
     const JwtRsaSsaPkcs1KeyFormat& jwt_rsa_ssa_pkcs1_key_format) const {
-  auto e = subtle::SubtleUtilBoringSSL::str2bn(
-      jwt_rsa_ssa_pkcs1_key_format.public_exponent());
+  util::StatusOr<bssl::UniquePtr<BIGNUM>> e =
+      subtle::SubtleUtilBoringSSL::str2bn(
+          jwt_rsa_ssa_pkcs1_key_format.public_exponent());
   if (!e.ok()) return e.status();
 
   subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key;
   subtle::SubtleUtilBoringSSL::RsaPublicKey public_key;
   util::Status status = subtle::SubtleUtilBoringSSL::GetNewRsaKeyPair(
-      jwt_rsa_ssa_pkcs1_key_format.modulus_size_in_bits(), e.ValueOrDie().get(),
+      jwt_rsa_ssa_pkcs1_key_format.modulus_size_in_bits(), e->get(),
       &private_key, &public_key);
   if (!status.ok()) return status;
 
   JwtRsaSsaPkcs1PrivateKey key_proto = RsaPrivateKeySubtleToProto(private_key);
-  auto* public_key_proto = key_proto.mutable_public_key();
+  JwtRsaSsaPkcs1PublicKey* public_key_proto = key_proto.mutable_public_key();
   public_key_proto->set_algorithm(jwt_rsa_ssa_pkcs1_key_format.algorithm());
 
   return key_proto;
@@ -102,24 +104,27 @@ StatusOr<JwtRsaSsaPkcs1PrivateKey> RawJwtRsaSsaPkcs1SignKeyManager::CreateKey(
 StatusOr<std::unique_ptr<PublicKeySign>>
 RawJwtRsaSsaPkcs1SignKeyManager::PublicKeySignFactory::Create(
     const JwtRsaSsaPkcs1PrivateKey& private_key) const {
-  auto key = RsaPrivateKeyProtoToSubtle(private_key);
-  auto hash_or = RawJwtRsaSsaPkcs1VerifyKeyManager::HashForPkcs1Algorithm(
-      private_key.public_key().algorithm());
-  if (!hash_or.ok()) {
-    return hash_or.status();
+  subtle::SubtleUtilBoringSSL::RsaPrivateKey key =
+      RsaPrivateKeyProtoToSubtle(private_key);
+  util::StatusOr<google::crypto::tink::HashType> hash =
+      RawJwtRsaSsaPkcs1VerifyKeyManager::HashForPkcs1Algorithm(
+          private_key.public_key().algorithm());
+  if (!hash.ok()) {
+    return hash.status();
   }
   subtle::SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
-  params.hash_type = Enums::ProtoToSubtle(hash_or.ValueOrDie());
-  auto signer = subtle::RsaSsaPkcs1SignBoringSsl::New(key, params);
+  params.hash_type = Enums::ProtoToSubtle(*hash);
+  util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
+      subtle::RsaSsaPkcs1SignBoringSsl::New(key, params);
   if (!signer.ok()) return signer.status();
   // To check that the key is correct, we sign a test message with private key
   // and verify with public key.
-  auto verifier =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(
           private_key.public_key());
   if (!verifier.ok()) return verifier.status();
-  auto sign_verify_result =
-      SignAndVerify(signer.ValueOrDie().get(), verifier.ValueOrDie().get());
+  util::Status sign_verify_result =
+      SignAndVerify(signer->get(), verifier->get());
   if (!sign_verify_result.ok()) {
     return util::Status(util::error::INTERNAL,
                         "security bug: signing with private key followed by "
@@ -137,11 +142,13 @@ Status RawJwtRsaSsaPkcs1SignKeyManager::ValidateKey(
 
 Status RawJwtRsaSsaPkcs1SignKeyManager::ValidateKeyFormat(
     const JwtRsaSsaPkcs1KeyFormat& key_format) const {
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      key_format.modulus_size_in_bits());
+  util::Status modulus_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
+          key_format.modulus_size_in_bits());
   if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key_format.public_exponent());
+  util::Status exponent_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
+          key_format.public_exponent());
   if (!exponent_status.ok()) return exponent_status;
   return RawJwtRsaSsaPkcs1VerifyKeyManager().ValidateAlgorithm(
       key_format.algorithm());

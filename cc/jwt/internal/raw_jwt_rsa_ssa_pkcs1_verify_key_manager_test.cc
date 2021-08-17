@@ -130,36 +130,36 @@ TEST(RawJwtRsaSsaPkcs1VerifyKeyManagerTest, KeyFormatWithSmallModulusInvalid) {
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  JwtRsaSsaPkcs1PrivateKey private_key = private_key_or.ValueOrDie();
-  JwtRsaSsaPkcs1PublicKey public_key =
-      RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).ValueOrDie();
+  ASSERT_THAT(private_key.status(), IsOk());
+  StatusOr<JwtRsaSsaPkcs1PublicKey> public_key =
+      RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(*private_key);
+  ASSERT_THAT(public_key.status(), IsOk());
 
   subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
-  private_key_subtle.n = private_key.public_key().n();
-  private_key_subtle.e = private_key.public_key().e();
-  private_key_subtle.d = util::SecretDataFromStringView(private_key.d());
-  private_key_subtle.p = util::SecretDataFromStringView(private_key.p());
-  private_key_subtle.q = util::SecretDataFromStringView(private_key.q());
-  private_key_subtle.dp = util::SecretDataFromStringView(private_key.dp());
-  private_key_subtle.dq = util::SecretDataFromStringView(private_key.dq());
-  private_key_subtle.crt = util::SecretDataFromStringView(private_key.crt());
+  private_key_subtle.n = private_key->public_key().n();
+  private_key_subtle.e = private_key->public_key().e();
+  private_key_subtle.d = util::SecretDataFromStringView(private_key->d());
+  private_key_subtle.p = util::SecretDataFromStringView(private_key->p());
+  private_key_subtle.q = util::SecretDataFromStringView(private_key->q());
+  private_key_subtle.dp = util::SecretDataFromStringView(private_key->dp());
+  private_key_subtle.dq = util::SecretDataFromStringView(private_key->dq());
+  private_key_subtle.crt = util::SecretDataFromStringView(private_key->crt());
 
-  auto direct_signer_or = subtle::RsaSsaPkcs1SignBoringSsl::New(
-      private_key_subtle, {crypto::tink::subtle::HashType::SHA256});
+  util::StatusOr<std::unique_ptr<PublicKeySign>> direct_signer =
+      subtle::RsaSsaPkcs1SignBoringSsl::New(
+          private_key_subtle, {crypto::tink::subtle::HashType::SHA256});
 
-  auto verifier_or =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(
-          public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+          *public_key);
+  ASSERT_THAT(verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
 TEST(RawJwtRsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
@@ -205,12 +205,12 @@ TEST(RawJwtRsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
   key.set_version(0);
   key.set_n(nist_test_vector.n);
   key.set_e(nist_test_vector.e);
-  auto result =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtRsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
-  EXPECT_THAT(result.status(), IsOk());
-  EXPECT_THAT(result.ValueOrDie()->Verify(nist_test_vector.signature,
-                                          nist_test_vector.message),
-              IsOk());
+  EXPECT_THAT(verifier.status(), IsOk());
+  EXPECT_THAT(
+      (*verifier)->Verify(nist_test_vector.signature, nist_test_vector.message),
+      IsOk());
 }
 
 }  // namespace

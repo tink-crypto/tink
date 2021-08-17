@@ -48,31 +48,34 @@ RawJwtRsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
   rsa_pub_key.n = jwt_rsa_ssa_pkcs1_public_key.n();
   rsa_pub_key.e = jwt_rsa_ssa_pkcs1_public_key.e();
 
-  auto hash_or = RawJwtRsaSsaPkcs1VerifyKeyManager::HashForPkcs1Algorithm(
-      jwt_rsa_ssa_pkcs1_public_key.algorithm());
-  if (!hash_or.ok()) {
-    return hash_or.status();
+  util::StatusOr<google::crypto::tink::HashType> hash =
+      RawJwtRsaSsaPkcs1VerifyKeyManager::HashForPkcs1Algorithm(
+          jwt_rsa_ssa_pkcs1_public_key.algorithm());
+  if (!hash.ok()) {
+    return hash.status();
   }
   subtle::SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
-  params.hash_type = Enums::ProtoToSubtle(hash_or.ValueOrDie());
+  params.hash_type = Enums::ProtoToSubtle(*hash);
 
-  auto rsa_ssa_pkcs1_result =
+  util::StatusOr<std::unique_ptr<subtle::RsaSsaPkcs1VerifyBoringSsl>> verify =
       subtle::RsaSsaPkcs1VerifyBoringSsl::New(rsa_pub_key, params);
-  if (!rsa_ssa_pkcs1_result.ok()) return rsa_ssa_pkcs1_result.status();
-  return {std::move(rsa_ssa_pkcs1_result.ValueOrDie())};
+  if (!verify.ok()) return verify.status();
+  return {std::move(*verify)};
 }
 
 Status RawJwtRsaSsaPkcs1VerifyKeyManager::ValidateKey(
     const JwtRsaSsaPkcs1PublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
+  util::StatusOr<bssl::UniquePtr<BIGNUM>> n =
+      subtle::SubtleUtilBoringSSL::str2bn(key.n());
+  if (!n.ok()) return n.status();
+  util::Status modulus_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
+          BN_num_bits(n->get()));
   if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key.e());
+  util::Status exponent_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(key.e());
   if (!exponent_status.ok()) return exponent_status;
   return ValidateAlgorithm(key.algorithm());
 }

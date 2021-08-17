@@ -38,6 +38,7 @@ namespace crypto {
 namespace tink {
 namespace {
 
+using ::crypto::tink::subtle::RsaSsaPkcs1VerifyBoringSsl;
 using ::crypto::tink::subtle::SubtleUtilBoringSSL;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
@@ -157,39 +158,36 @@ void CheckNewKey(const JwtRsaSsaPkcs1PrivateKey& private_key,
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateRs256Key) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(
-                  private_key_or.ValueOrDie()),
+  ASSERT_THAT(private_key.status(), IsOk());
+  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(*private_key, key_format);
 }
 
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateSmallRs256Key) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
 
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(
-                  private_key_or.ValueOrDie()),
+  ASSERT_THAT(private_key.status(), IsOk());
+  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(*private_key, key_format);
 }
 
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateKeyLargeRs512Key) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS512, 4096, RSA_F4);
 
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> private_key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(private_key_or.status(), IsOk());
-  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(
-                  private_key_or.ValueOrDie()),
+  ASSERT_THAT(private_key.status(), IsOk());
+  EXPECT_THAT(RawJwtRsaSsaPkcs1SignKeyManager().ValidateKey(*private_key),
               IsOk());
-  CheckNewKey(private_key_or.ValueOrDie(), key_format);
+  CheckNewKey(*private_key, key_format);
 }
 
 // Check that in a bunch of CreateKey calls all generated primes are distinct.
@@ -200,11 +198,11 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
   int num_generated_keys = 5;
   for (int i = 0; i < num_generated_keys; ++i) {
-    StatusOr<JwtRsaSsaPkcs1PrivateKey> key_or =
+    StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
         RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-    ASSERT_THAT(key_or.status(), IsOk());
-    keys.insert(key_or.ValueOrDie().p());
-    keys.insert(key_or.ValueOrDie().q());
+    ASSERT_THAT(key.status(), IsOk());
+    keys.insert(key->p());
+    keys.insert(key->q());
   }
   EXPECT_THAT(keys, SizeIs(2 * num_generated_keys));
 }
@@ -212,42 +210,39 @@ TEST(JwtRsaSsaPkcs1SignKeyManagerTest, CreateKeyAlwaysNewRsaPair) {
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, GetPublicKey) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 2048, RSA_F4);
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  StatusOr<JwtRsaSsaPkcs1PublicKey> public_key_or =
-      RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(key_or.ValueOrDie());
-  ASSERT_THAT(public_key_or.status(), IsOk());
-  EXPECT_THAT(public_key_or.ValueOrDie().version(),
-              Eq(key_or.ValueOrDie().public_key().version()));
-  EXPECT_THAT(public_key_or.ValueOrDie().algorithm(),
-              Eq(key_or.ValueOrDie().public_key().algorithm()));
-  EXPECT_THAT(public_key_or.ValueOrDie().n(),
-              Eq(key_or.ValueOrDie().public_key().n()));
-  EXPECT_THAT(public_key_or.ValueOrDie().e(),
-              Eq(key_or.ValueOrDie().public_key().e()));
+  ASSERT_THAT(key.status(), IsOk());
+  StatusOr<JwtRsaSsaPkcs1PublicKey> public_key =
+      RawJwtRsaSsaPkcs1SignKeyManager().GetPublicKey(*key);
+  ASSERT_THAT(public_key.status(), IsOk());
+  EXPECT_THAT(public_key->version(), Eq(key->public_key().version()));
+  EXPECT_THAT(public_key->algorithm(), Eq(key->public_key().algorithm()));
+  EXPECT_THAT(public_key->n(), Eq(key->public_key().n()));
+  EXPECT_THAT(public_key->e(), Eq(key->public_key().e()));
 }
 
 TEST(JwtRsaSsaPkcs1SignKeyManagerTest, Create) {
   JwtRsaSsaPkcs1KeyFormat key_format =
       CreateKeyFormat(JwtRsaSsaPkcs1Algorithm::RS256, 3072, RSA_F4);
-  StatusOr<JwtRsaSsaPkcs1PrivateKey> key_or =
+  StatusOr<JwtRsaSsaPkcs1PrivateKey> key =
       RawJwtRsaSsaPkcs1SignKeyManager().CreateKey(key_format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  JwtRsaSsaPkcs1PrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key.status(), IsOk());
 
-  auto signer_or =
-      RawJwtRsaSsaPkcs1SignKeyManager().GetPrimitive<PublicKeySign>(key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
+      RawJwtRsaSsaPkcs1SignKeyManager().GetPrimitive<PublicKeySign>(*key);
+  ASSERT_THAT(signer.status(), IsOk());
 
-  auto direct_verifier_or = subtle::RsaSsaPkcs1VerifyBoringSsl::New(
-      {key.public_key().n(), key.public_key().e()}, {subtle::HashType::SHA256});
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>> direct_verifier =
+      subtle::RsaSsaPkcs1VerifyBoringSsl::New(
+          {key->public_key().n(), key->public_key().e()},
+          {subtle::HashType::SHA256});
+  ASSERT_THAT(direct_verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-              IsOk());
+  util::StatusOr<std::string> sig = (*signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*direct_verifier)->Verify(*sig, message), IsOk());
 }
 
 }  // namespace
