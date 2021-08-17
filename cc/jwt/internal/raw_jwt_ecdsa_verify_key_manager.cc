@@ -46,22 +46,24 @@ StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
       const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
   subtle::SubtleUtilBoringSSL::EcKey ec_key;
-  auto curve_or = CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
-  if (!curve_or.ok()) {
-    return curve_or.status();
+  util::StatusOr<google::crypto::tink::EllipticCurveType> curve =
+      CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
+  if (!curve.ok()) {
+    return curve.status();
   }
-  ec_key.curve = Enums::ProtoToSubtle(curve_or.ValueOrDie());
+  ec_key.curve = Enums::ProtoToSubtle(*curve);
   ec_key.pub_x = jwt_ecdsa_public_key.x();
   ec_key.pub_y = jwt_ecdsa_public_key.y();
-  auto hash_type_or = HashForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
-  if (!hash_type_or.ok()) {
-    return hash_type_or.status();
+  util::StatusOr<google::crypto::tink::HashType> hash_type =
+      HashForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
+  if (!hash_type.ok()) {
+    return hash_type.status();
   }
   auto result = subtle::EcdsaVerifyBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(hash_type_or.ValueOrDie()),
+      ec_key, Enums::ProtoToSubtle(*hash_type),
       subtle::EcdsaSignatureEncoding::IEEE_P1363);
   if (!result.ok()) return result.status();
-  return {std::move(result.ValueOrDie())};
+  return {*std::move(result)};
 }
 
 StatusOr<EllipticCurveType>

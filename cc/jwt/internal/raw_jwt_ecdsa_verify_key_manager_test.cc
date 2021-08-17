@@ -104,49 +104,48 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   ec_key.pub_y = public_key.y();
   ec_key.priv = util::SecretDataFromStringView(private_key.key_value());
 
-  auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(HashType::SHA256),
-      subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<subtle::EcdsaSignBoringSsl>> direct_signer =
+      subtle::EcdsaSignBoringSsl::New(
+          ec_key, Enums::ProtoToSubtle(HashType::SHA256),
+          subtle::EcdsaSignatureEncoding::IEEE_P1363);
+  ASSERT_THAT(direct_signer.status(), IsOk());
 
-  auto verifier_or =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       RawJwtEcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  ASSERT_THAT(verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      IsOk());
+  util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*verifier)->Verify(*sig, message), IsOk());
 }
 
 TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   JwtEcdsaPrivateKey private_key = CreateValidEs256PrivateKey();
   // Note: we create a new key in the next line.
-  JwtEcdsaPublicKey public_key = RawJwtEcdsaSignKeyManager()
-                                     .GetPublicKey(CreateValidEs256PrivateKey())
-                                     .ValueOrDie();
+  util::StatusOr<JwtEcdsaPublicKey> public_key =
+      RawJwtEcdsaSignKeyManager().GetPublicKey(CreateValidEs256PrivateKey());
 
   subtle::SubtleUtilBoringSSL::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
-  ec_key.pub_x = public_key.x();
-  ec_key.pub_y = public_key.y();
+  ec_key.pub_x = public_key->x();
+  ec_key.pub_y = public_key->y();
   ec_key.priv = util::SecretDataFromStringView(private_key.key_value());
 
-  auto direct_signer_or = subtle::EcdsaSignBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(HashType::SHA256),
-      subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_signer_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<subtle::EcdsaSignBoringSsl>> direct_signer =
+      subtle::EcdsaSignBoringSsl::New(
+          ec_key, Enums::ProtoToSubtle(HashType::SHA256),
+          subtle::EcdsaSignatureEncoding::IEEE_P1363);
+  ASSERT_THAT(direct_signer.status(), IsOk());
 
-  auto verifier_or =
-      RawJwtEcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(public_key);
-  ASSERT_THAT(verifier_or.status(), IsOk());
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
+      RawJwtEcdsaVerifyKeyManager().GetPrimitive<PublicKeyVerify>(*public_key);
+  ASSERT_THAT(verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-      Not(IsOk()));
+  util::StatusOr<std::string> sig = (*direct_signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*verifier)->Verify(*sig, message), Not(IsOk()));
 }
 
 }  // namespace
