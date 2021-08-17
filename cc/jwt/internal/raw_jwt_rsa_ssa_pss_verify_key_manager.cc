@@ -35,12 +35,13 @@
 namespace crypto {
 namespace tink {
 
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::JwtRsaSsaPssAlgorithm;
-using google::crypto::tink::JwtRsaSsaPssPublicKey;
-using google::crypto::tink::HashType;
+using ::crypto::tink::subtle::RsaSsaPssVerifyBoringSsl;
+using ::crypto::tink::util::Enums;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
+using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
+using ::google::crypto::tink::HashType;
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
@@ -53,32 +54,34 @@ RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
   if (!hash_or.ok()) {
     return hash_or.status();
   }
-  StatusOr<int> salt_length_or = SaltLengthForPssAlgorithm(algorithm);
-  if (!salt_length_or.ok()) {
-    return salt_length_or.status();
+  StatusOr<int> salt_length = SaltLengthForPssAlgorithm(algorithm);
+  if (!salt_length.ok()) {
+    return salt_length.status();
   }
   subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
   params.sig_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
   params.mgf1_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
-  params.salt_length = salt_length_or.ValueOrDie();
+  params.salt_length = *salt_length;
 
-  auto rsa_ssa_pss_result =
+  util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verify =
       subtle::RsaSsaPssVerifyBoringSsl::New(rsa_pub_key, params);
-  if (!rsa_ssa_pss_result.ok()) return rsa_ssa_pss_result.status();
-  return {std::move(rsa_ssa_pss_result).ValueOrDie()};
+  if (!verify.ok()) return verify.status();
+  return {*std::move(verify)};
 }
 
 Status RawJwtRsaSsaPssVerifyKeyManager::ValidateKey(
     const JwtRsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
+  util::StatusOr<bssl::UniquePtr<BIGNUM>> n =
+      subtle::SubtleUtilBoringSSL::str2bn(key.n());
+  if (!n.ok()) return n.status();
+  util::Status modulus_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
+          BN_num_bits(n->get()));
   if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key.e());
+  util::Status exponent_status =
+      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(key.e());
   if (!exponent_status.ok()) return exponent_status;
   return ValidateAlgorithm(key.algorithm());
 }
