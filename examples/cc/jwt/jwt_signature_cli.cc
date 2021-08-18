@@ -36,14 +36,14 @@
 //   Generates and signs a token using the given private keyset.
 //   It requires 3 additional arguments:
 //     private-keyset-file: name of the file with the private keyset
-//     subject: subject claim to be put in the token.
+//     audience: audience claim to be put in the token.
 //     output-file: name of the file for the resulting output
 //
 // verify
 //   Verifies a token using the given public keyset.
 //   It requires 4 additional arguments:
 //     public-keyset-file: name of the file with the public keyset
-//     subject: expected subject in the token
+//     audience: expected audience in the token
 //     token-file: name of the file with the token
 //     output-file: name of the file for the resulting output (valid/invalid)
 
@@ -74,8 +74,8 @@ void PrintUsageInfo() {
             << "and, depending on the operation, arguments are:\n"
             << "  gen-private-key: output-file\n"
             << "  get-public-key: private-keyset-file output-file\n"
-            << "  sign: private-keyset-file subject output-file\n"
-            << "  verify: public-keyset-file subject token-file "
+            << "  sign: private-keyset-file audience output-file\n"
+            << "  verify: public-keyset-file audience token-file "
             << "output-file" << std::endl;
 }
 
@@ -123,9 +123,9 @@ void ExtractPublicKey(absl::string_view private_keyset_filename,
   WriteKeyset(**public_keyset_handle, output_filename);
 }
 
-// Creates and signs a token with the given subject claim using the given
+// Creates and signs a token with the given audience claim using the given
 // private keyset and writes the signature to the output file.
-void Sign(absl::string_view keyset_filename, absl::string_view subject,
+void Sign(absl::string_view keyset_filename, absl::string_view audience,
           absl::string_view output_filename) {
   std::unique_ptr<crypto::tink::KeysetHandle> keyset_handle =
       ReadKeyset(keyset_filename);
@@ -138,13 +138,13 @@ void Sign(absl::string_view keyset_filename, absl::string_view subject,
     exit(1);
   }
 
-  std::clog << "Generating a token with subject '" << subject
+  std::clog << "Generating a token with audience '" << audience
             << "' using private keyset from file " << keyset_filename << "..."
             << std::endl;
 
   crypto::tink::util::StatusOr<RawJwt> raw_jwt =
       RawJwtBuilder()
-          .SetSubject(subject)
+          .AddAudience(audience)
           .SetExpiration(absl::Now() + absl::Seconds(100))
           .Build();
   if (!raw_jwt.ok()) {
@@ -170,7 +170,7 @@ void Sign(absl::string_view keyset_filename, absl::string_view subject,
 // Verifies a token using the given public keyset and writes the result to the
 // output file.
 void Verify(absl::string_view keyset_filename,
-            absl::string_view expected_subject,
+            absl::string_view expected_audience,
             absl::string_view token_filename,
             absl::string_view output_filename) {
   std::unique_ptr<KeysetHandle> keyset_handle = ReadKeyset(keyset_filename);
@@ -184,7 +184,7 @@ void Verify(absl::string_view keyset_filename,
   }
 
   std::clog << "Verifying token from file " << token_filename
-            << " with expected subject '" << expected_subject
+            << " with expected audience '" << expected_audience
             << "' using public keyset from file " << keyset_filename << "..."
             << std::endl;
 
@@ -192,7 +192,7 @@ void Verify(absl::string_view keyset_filename,
 
   crypto::tink::util::StatusOr<JwtValidator> validator =
       crypto::tink::JwtValidatorBuilder()
-          .ExpectSubject(expected_subject)
+          .ExpectAudience(expected_audience)
           .Build();
   if (!validator.ok()) {
     std::clog << "Building validator failed: "
@@ -260,10 +260,10 @@ int main(int argc, char** argv) {
     }
 
     std::string keyset_filename = argv[2];
-    std::string subject = argv[3];
+    std::string audience = argv[3];
     std::string output_filename = argv[4];
 
-    Sign(keyset_filename, subject, output_filename);
+    Sign(keyset_filename, audience, output_filename);
   } else if (operation == "verify") {
     if (argc != 6) {
       PrintUsageInfo();
@@ -271,11 +271,11 @@ int main(int argc, char** argv) {
     }
 
     std::string keyset_filename = argv[2];
-    std::string subject = argv[3];
+    std::string audience = argv[3];
     std::string token_filename = argv[4];
     std::string output_filename = argv[5];
 
-    Verify(keyset_filename, subject, token_filename, output_filename);
+    Verify(keyset_filename, audience, token_filename, output_filename);
   } else {
     std::clog << "Unknown operation. Supported operations are: "
               << "gen-private-key get-public-key sign verify" << std::endl;

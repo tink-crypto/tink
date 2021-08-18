@@ -53,10 +53,10 @@ $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
 
 #### Sign the message.
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE subject $TOKEN_FILE || exit 1
+$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE audience $TOKEN_FILE || exit 1
 
 #### Verify the signature.
-$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE subject $TOKEN_FILE $RESULT_FILE || exit 1
+$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE audience $TOKEN_FILE $RESULT_FILE || exit 1
 
 #### Check that the signature is valid.
 RESULT=$(<$RESULT_FILE)
@@ -81,21 +81,21 @@ echo "+++ Starting test $test_name..."
 $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI gen-private-key $OTHER_PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI get-public-key $OTHER_PRIVATE_KEYSET_FILE $OTHER_PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE subject $TOKEN_FILE || exit 1
-$SIGNATURE_CLI verify $OTHER_PUBLIC_KEYSET_FILE subject $TOKEN_FILE $RESULT_FILE || exit 1
+$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE audience $TOKEN_FILE || exit 1
+$SIGNATURE_CLI verify $OTHER_PUBLIC_KEYSET_FILE audience $TOKEN_FILE $RESULT_FILE || exit 1
 
 RESULT=$(<$RESULT_FILE)
 assert_equal "invalid" "$RESULT"
 
 #############################################################################
-#### Verification fails because the subject is wrong.
+#### Verification fails because the audience is wrong.
 test_name="verify_with_different_message"
 echo "+++ Starting test $test_name..."
 
 $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE subject $TOKEN_FILE || exit 1
-$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE other_subject $TOKEN_FILE $RESULT_FILE || exit 1
+$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE audience $TOKEN_FILE || exit 1
+$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE other_audience $TOKEN_FILE $RESULT_FILE || exit 1
 
 RESULT=$(<$RESULT_FILE)
 assert_equal "invalid" "$RESULT"
@@ -107,7 +107,7 @@ echo "+++ Starting test $test_name..."
 
 $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE subject $INVALID_TOKEN_FILE $RESULT_FILE || exit 1
+$SIGNATURE_CLI verify $PUBLIC_KEYSET_FILE audience $INVALID_TOKEN_FILE $RESULT_FILE || exit 1
 
 RESULT=$(<$RESULT_FILE)
 assert_equal "invalid" "$RESULT"
@@ -119,7 +119,7 @@ echo "+++ Starting test $test_name..."
 
 $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
 $SIGNATURE_CLI get-public-key $PRIVATE_KEYSET_FILE $PUBLIC_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PUBLIC_KEYSET_FILE subject $TOKEN_FILE
+$SIGNATURE_CLI sign $PUBLIC_KEYSET_FILE audience $TOKEN_FILE
 
 EXIT_VALUE="$?"
 assert_equal 1 "$EXIT_VALUE"
@@ -130,8 +130,8 @@ test_name="verify_with_wrong_key"
 echo "+++ Starting test $test_name..."
 
 $SIGNATURE_CLI gen-private-key $PRIVATE_KEYSET_FILE || exit 1
-$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE subject $TOKEN_FILE || exit 1
-$SIGNATURE_CLI verify $PRIVATE_KEYSET_FILE subject $TOKEN_FILE $RESULT_FILE
+$SIGNATURE_CLI sign $PRIVATE_KEYSET_FILE audience $TOKEN_FILE || exit 1
+$SIGNATURE_CLI verify $PRIVATE_KEYSET_FILE audience $TOKEN_FILE $RESULT_FILE
 
 EXIT_VALUE="$?"
 assert_equal 1 "$EXIT_VALUE"
