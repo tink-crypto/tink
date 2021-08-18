@@ -22,13 +22,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A read-only implementation of <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a>
- * (JWT).
+ * A decoded and verified <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT).
  *
- * <p>A new instance of this class is returned as the result of a sucessfully verification of a JWT.
- * @see {@link JwsMac#verifyMac}
+ * <p>A new instance of this class is returned as the result of a sucessfully verification of a
+ * MACed or signed compact JWT.
  *
- * It contains the payload of the token, but no header information (typ, cty, alg and kid).
+ * <p>It gives read-only access all payload claims and a subset of the headers. It does not contain
+ * any headers that depend on the key, such as "alg" or "kid". These headers are checked when the
+ * signature is verified and should not be read by the user. This ensures that the key can be
+ * changed without any changes to the user code.
  */
 @Immutable
 public final class VerifiedJwt {

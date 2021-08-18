@@ -46,10 +46,13 @@ def _validate_custom_claim_name(name: Text) -> None:
 
 
 class RawJwt(object):
-  """A raw JSON Web Token (JWT).
+  """An unencoded and unsigned JSON Web Token (JWT).
 
-  It can be signed to obtain a compact JWT. It is also used as a parse token
-  that has not yet been verified.
+  It contains all payload claims and a subset of the headers. It does not
+  contain any headers that depend on the key, such as "alg" or "kid", because
+  these headers are chosen when the token is signed and encoded, and should not
+  be chosen by the user. This ensures that the key can be changed without any
+  changes to the user code.
   """
 
   def __new__(cls):

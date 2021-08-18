@@ -39,11 +39,16 @@ class JwtPublicKeyVerifyImpl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// A read-only JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
+// A decoded and verified JSON Web Token (JWT).
 //
 // A new instance of this class is returned as the result of a sucessfully
-// verification of a JWT. It contains the payload of the token, but no header
-// information (typ, cty, alg and kid).
+// verification of a MACed or signed compact JWT.
+//
+// It gives read-only access all payload claims and a subset of the headers. It
+// does not contain any headers that depend on the key, such as "alg" or "kid".
+// These headers are checked when the signature is verified and should not be
+// read by the user. This ensures that the key can be changed without any
+// changes to the user code.
 class VerifiedJwt {
  public:
   // VerifiedJwt objects are copiable and implicitly movable.
