@@ -44,7 +44,7 @@ import java.util.List;
  * <ul>
  *   <li>mode: either 'sign' or 'verify'.
  *   <li>key-file: Read the key material from this file.
- *   <li>subject: The subject claim to be used in the token
+ *   <li>audience: The audience claim to be used in the token
  *   <li>token-file: name of the file containing the signed JWT.
  */
 public final class JwtSignatureExample {
@@ -52,7 +52,7 @@ public final class JwtSignatureExample {
     if (args.length != 4) {
       System.err.printf("Expected 4 parameters, got %d\n", args.length);
       System.err.println(
-          "Usage: java JwtSignatureExample sign/verify key-file subject token-file");
+          "Usage: java JwtSignatureExample sign/verify key-file audience token-file");
       System.exit(1);
     }
 
@@ -62,7 +62,7 @@ public final class JwtSignatureExample {
       System.exit(1);
     }
     File keyFile = new File(args[1]);
-    String subject = args[2];
+    String audience = args[2];
     File tokenFile = new File(args[3]);
 
     // Register all JWT signature key types with the Tink runtime.
@@ -89,7 +89,7 @@ public final class JwtSignatureExample {
 
       // Use the primitive to sign a token that expires in 100 seconds.
       RawJwt rawJwt = RawJwt.newBuilder()
-          .setSubject(subject)
+          .addAudience(audience)
           .setExpiration(Instant.now().plusSeconds(100))
           .build();
       String signedToken = signer.signAndEncode(rawJwt);
@@ -117,7 +117,7 @@ public final class JwtSignatureExample {
 
     // Use the primitive to verify a token.
     try {
-      JwtValidator validator = JwtValidator.newBuilder().expectSubject(subject).build();
+      JwtValidator validator = JwtValidator.newBuilder().expectAudience(audience).build();
       VerifiedJwt verifiedJwt = verifier.verifyAndDecode(signedToken, validator);
       long seconds = ChronoUnit.SECONDS.between(Instant.now(), verifiedJwt.getExpiration());
       System.out.println("Token is valid and expires in " + seconds + " seconds.");

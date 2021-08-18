@@ -26,7 +26,7 @@ bazel build ...
 touch token_file.txt
 
 ./bazel-bin/jwt/jwt_signature_example sign \
-    ./signature/jwt_test_private_keyset.json testSubject token_file.txt
+    ./signature/jwt_test_private_keyset.json example_audience token_file.txt
 ./bazel-bin/jwt_/jwt_signature_example verify \
-    ./signature/jwt_test_public_keyset.json testSubject token_file.txt
+    ./signature/jwt_test_public_keyset.json example_audience token_file.txt
 ```

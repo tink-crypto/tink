@@ -45,10 +45,10 @@ test_name="normal_signing_and_verification"
 echo "+++ Starting test $test_name..."
 
 ##### Run signing
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE example_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE example_audience $SIGNED_TOKEN_FILE
 
 ##### Run verification
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC example_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC example_audience $SIGNED_TOKEN_FILE
 
 if [[ $TEST_STATUS -eq 0 ]]; then
   echo "+++ Success: JWT is valid."
@@ -66,7 +66,7 @@ echo "+++ Starting test $test_name..."
 echo "ABCABCABCD" > $SIGNED_TOKEN_FILE
 
 ##### Run verification.
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC example_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC example_audience $SIGNED_TOKEN_FILE
 
 if [[ $TEST_STATUS -ne 0 ]]; then
   echo "+++ Success: JWT verification failed for invalid signature."
@@ -82,15 +82,15 @@ test_name="signature_verification_fails_with_incorrect_data"
 echo "+++ Starting test $test_name..."
 
 ##### Run signing
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE example_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PRIVATE example_audience $SIGNED_TOKEN_FILE
 
 ##### Run verification.
-test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC unknown_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI verify $KEYSET_FILE_PUBLIC unknown_audience $SIGNED_TOKEN_FILE
 
 if [[ $TEST_STATUS -ne 0 ]]; then
-  echo "+++ Success: JWT verification failed for invalid subject."
+  echo "+++ Success: JWT verification failed for invalid audience."
 else
-  echo "--- Failure: JWT verification passed for an invalid subject."
+  echo "--- Failure: JWT verification passed for an invalid audience."
   exit 1
 fi
 
@@ -101,7 +101,7 @@ test_name="singing_fails_with_a_wrong_keyset"
 echo "+++ Starting test $test_name..."
 
 ##### Run computation.
-test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PUBLIC example_subject $SIGNED_TOKEN_FILE
+test_command $FILE_SIGN_CLI sign $KEYSET_FILE_PUBLIC example_audience $SIGNED_TOKEN_FILE
 
 if [[ $TEST_STATUS -ne 0 ]]; then
   echo "+++ Success: JWT computation failed with public keyset."
