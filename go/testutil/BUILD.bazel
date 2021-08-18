@@ -28,6 +28,7 @@ go_library(
         "//proto:aes_ctr_hmac_streaming_go_proto",
         "//proto:aes_gcm_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
+        "//proto:aes_gcm_siv_go_proto",
         "//proto:aes_siv_go_proto",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",

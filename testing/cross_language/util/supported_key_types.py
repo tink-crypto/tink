@@ -90,7 +90,7 @@ _FAKE_KMS_KEY_URI = (
 SUPPORTED_LANGUAGES = {
     'AesEaxKey': ['cc', 'java', 'python'],
     'AesGcmKey': ['cc', 'java', 'go', 'python'],
-    'AesGcmSivKey': ['cc', 'python'],
+    'AesGcmSivKey': ['cc', 'go', 'python'],
     'AesCtrHmacAeadKey': ['cc', 'java', 'go', 'python'],
     'ChaCha20Poly1305Key': ['java', 'go'],
     'XChaCha20Poly1305Key': ['cc', 'java', 'go', 'python'],

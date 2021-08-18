@@ -44,4 +44,8 @@ func init() {
 	if err := registry.RegisterKeyManager(newKMSEnvelopeAEADKeyManager()); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
+
+	if err := registry.RegisterKeyManager(new(aesGCMSIVKeyManager)); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
 }
