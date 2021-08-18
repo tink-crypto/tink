@@ -548,23 +548,16 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
-  @Test
-  public void signAndVerifyWithCustomKid() throws Exception {
-    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-
-    // Create a new handle with the "kid" value set.
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+  /* Create a new keyset handle with the "custom_kid" value set. */
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
+      throws Exception {
+    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
     JwtRsaSsaPkcs1PrivateKey privateKey =
         JwtRsaSsaPkcs1PrivateKey.parseFrom(
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
         privateKey.getPublicKey().toBuilder()
-            .setCustomKid(
-                CustomKid.newBuilder()
-                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
-                    .build())
+            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
             .build();
     JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
         privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
@@ -573,8 +566,16 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
             .setValue(privateKeyWithKid.toByteString())
             .build();
     Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+  }
+
+  @Test
+  public void signAndVerifyWithCustomKid() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
-        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
 
@@ -587,22 +588,22 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-    JwtPublicKeyVerify verifier =
-        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtPublicKeyVerify verifierWithoutKid =
+        handleWithoutKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtPublicKeyVerify verifierWithKid =
         handleWithKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Both the verifiers accept signedCompactWithKid.
-    assertThat(verifier.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
 
-    JwtPublicKeySign signerWithoutKid = handle.getPrimitive(JwtPublicKeySign.class);
+    JwtPublicKeySign signerWithoutKid = handleWithoutKid.getPrimitive(JwtPublicKeySign.class);
     String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
 
     // Both the verifiers accept signedCompactWithoutKid.
-    assertThat(verifier.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
@@ -612,29 +613,9 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   public void signWithTinkKeyAndCustomKid_fails() throws Exception {
     assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-
-    // Create a new handle with the "kid" value set.
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtRsaSsaPkcs1PrivateKey privateKey =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(
-                CustomKid.newBuilder()
-                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
-                    .build())
-            .build();
-    JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
-            .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
-        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();

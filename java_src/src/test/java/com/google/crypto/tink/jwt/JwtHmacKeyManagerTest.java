@@ -697,31 +697,32 @@ public class JwtHmacKeyManagerTest {
     assertThat(token.getBooleanClaim("http://example.com/is_root")).isTrue();
   }
 
-  @Test
-  public void macWithCustomKid() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-
-    // Create a new handle with the "kid" value set.
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+  /* Create a new keyset handle with the "custom_kid" value set. */
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
+      throws Exception {
+    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
     JwtHmacKey hmacKey =
         JwtHmacKey.parseFrom(
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     JwtHmacKey hmacKeyWithKid =
         hmacKey.toBuilder()
-            .setCustomKid(
-                CustomKid.newBuilder()
-                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
-                    .build())
+            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
             .build();
     KeyData keyDataWithKid =
         keyset.getKey(0).getKeyData().toBuilder().setValue(hmacKeyWithKid.toByteString()).build();
     Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+  }
+
+  @Test
+  public void macWithCustomKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
-        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
-    JwtMac jwtMacWithoutKid = handle.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithoutKid = handleWithoutKid.getPrimitive(JwtMac.class);
 
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
