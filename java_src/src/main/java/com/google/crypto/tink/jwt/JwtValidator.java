@@ -31,8 +31,6 @@ public final class JwtValidator {
   private final boolean ignoreTypeHeader;
   private final Optional<String> expectedIssuer;
   private final boolean ignoreIssuer;
-  private final Optional<String> expectedSubject;
-  private final boolean ignoreSubject;
   private final Optional<String> expectedAudience;
   private final boolean ignoreAudiences;
   private final boolean allowMissingExpiration;
@@ -48,8 +46,6 @@ public final class JwtValidator {
     this.ignoreTypeHeader = builder.ignoreTypeHeader;
     this.expectedIssuer = builder.expectedIssuer;
     this.ignoreIssuer = builder.ignoreIssuer;
-    this.expectedSubject = builder.expectedSubject;
-    this.ignoreSubject = builder.ignoreSubject;
     this.expectedAudience = builder.expectedAudience;
     this.ignoreAudiences = builder.ignoreAudiences;
     this.allowMissingExpiration = builder.allowMissingExpiration;
@@ -61,8 +57,8 @@ public final class JwtValidator {
   /**
    * Returns a new JwtValidator.Builder.
    *
-   * <p>By default, the JwtValidator requires that a token has a valid expiration claim, no issuer,
-   * no subject, and no audience claim. This can be changed using the expect...(),  ignore...() and
+   * <p>By default, the JwtValidator requires that a token has a valid expiration claim, no issuer
+   * and no audience claim. This can be changed using the expect...(),  ignore...() and
    * allowMissingExpiration() methods.
    *
    * <p>If present, the JwtValidator also validates the not-before claim. The validation time can
@@ -78,8 +74,6 @@ public final class JwtValidator {
     private boolean ignoreTypeHeader;
     private Optional<String> expectedIssuer;
     private boolean ignoreIssuer;
-    private Optional<String> expectedSubject;
-    private boolean ignoreSubject;
     private Optional<String> expectedAudience;
     private boolean ignoreAudiences;
     private boolean allowMissingExpiration;
@@ -92,8 +86,6 @@ public final class JwtValidator {
       this.ignoreTypeHeader = false;
       this.expectedIssuer = Optional.empty();
       this.ignoreIssuer = false;
-      this.expectedSubject = Optional.empty();
-      this.ignoreSubject = false;
       this.expectedAudience = Optional.empty();
       this.ignoreAudiences = false;
       this.allowMissingExpiration = false;
@@ -148,30 +140,17 @@ public final class JwtValidator {
       return this;
     }
 
-    /**
-     * Sets the expected subject claim of the token. When this is set, all tokens with missing or
-     * different {@code sub} claims are rejected. When this is not set, all token that have a {@code
-     * sub} claim are rejected. So this must be set for token that have a {@code sub} claim.
-     *
-     * <p>If you want to ignore this claim or if you want to validate it yourself, use
-     * ignoreSubject().
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
-     */
+    /** Deprecated. It does not do anything and will soon be removed. */
+    @Deprecated
     public Builder expectSubject(String value) {
-      if (value == null) {
-        throw new NullPointerException("subject cannot be null");
-      }
-      this.expectedSubject = Optional.of(value);
       return this;
     }
 
-    /** Lets the validator ignore the {@code sub} claim. */
+    /** Deprecated. It does not do anything and will soon be removed. */
+    @Deprecated
     public Builder ignoreSubject() {
-      this.ignoreSubject = true;
       return this;
     }
-
     /**
      * Sets the expected audience. When this is set, all tokens that do not contain this audience in
      * their {@code aud} claims are rejected. When this is not set, all token that have {@code aud}
@@ -246,10 +225,6 @@ public final class JwtValidator {
         throw new IllegalArgumentException(
             "ignoreIssuer() and expectedIssuer() cannot be used together.");
       }
-      if (this.ignoreSubject && this.expectedSubject.isPresent()) {
-        throw new IllegalArgumentException(
-            "ignoreSubject() and expectedSubject() cannot be used together.");
-      }
       if (this.ignoreAudiences && this.expectedAudience.isPresent()) {
         throw new IllegalArgumentException(
             "ignoreAudiences() and expectedAudience() cannot be used together.");
@@ -296,22 +271,6 @@ public final class JwtValidator {
     } else {
       if (target.hasIssuer() && !this.ignoreIssuer) {
         throw new JwtInvalidException("invalid JWT; token has issuer set, but validator not.");
-      }
-    }
-    if (this.expectedSubject.isPresent()) {
-      if (!target.hasSubject()) {
-        throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected subject %s.", this.expectedSubject.get()));
-      }
-      if (!target.getSubject().equals(this.expectedSubject.get())) {
-        throw new JwtInvalidException(
-            String.format(
-                "invalid JWT; expected subject %s, but got %s",
-                this.expectedSubject.get(), target.getSubject()));
-      }
-    } else {
-      if (target.hasSubject() && !this.ignoreSubject) {
-        throw new JwtInvalidException("invalid JWT; token has subject set, but validator not.");
       }
     }
     if (this.expectedAudience.isPresent()) {

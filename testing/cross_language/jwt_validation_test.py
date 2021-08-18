@@ -444,50 +444,6 @@ class JwtTest(parameterized.TestCase):
       jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_verify_subject(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"sub":"joe"}')
-    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-
-    validator_with_correct_subject = jwt.new_validator(
-        expected_subject='joe', allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, validator_with_correct_subject)
-
-    validator_without_subject = jwt.new_validator(
-        allow_missing_expiration=True)
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, validator_without_subject)
-
-    validator_that_ignores_subject = jwt.new_validator(
-        ignore_subject=True, allow_missing_expiration=True)
-    jwt_mac.verify_mac_and_decode(token, validator_that_ignores_subject)
-
-    validator_with_wrong_subject = jwt.new_validator(
-        expected_subject='Joe', allow_missing_expiration=True)
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_subject)
-
-    validator_with_wrong_subject2 = jwt.new_validator(
-        expected_subject='joe ', allow_missing_expiration=True)
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, validator_with_wrong_subject2)
-
-  @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_verify_empty_string_subject(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"sub":""}')
-    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-    jwt_mac.verify_mac_and_decode(
-        token,
-        jwt.new_validator(expected_subject='', allow_missing_expiration=True))
-
-  @parameterized.parameters(SUPPORTED_LANGUAGES)
-  def test_verify_subject_with_wrong_type(self, lang):
-    token = generate_token('{"alg":"HS256"}', '{"sub":123}')
-    jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
-
-    with self.assertRaises(tink.TinkError):
-      jwt_mac.verify_mac_and_decode(token, EMPTY_VALIDATOR)
-
-  @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_audience(self, lang):
     token = generate_token('{"alg":"HS256"}', '{"aud":["joe", "jane"]}')
     jwt_mac = testing_servers.jwt_mac(lang, KEYSET)
