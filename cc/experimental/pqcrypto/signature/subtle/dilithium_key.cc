@@ -20,11 +20,14 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/str_format.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
 }
 
 namespace crypto {
@@ -39,16 +42,49 @@ DilithiumPrivateKeyPqclean::NewPrivateKey(util::SecretData key_data) {
 
 // static
 util::StatusOr<std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-DilithiumPrivateKeyPqclean::GenerateKeyPair() {
+DilithiumPrivateKeyPqclean::GenerateKeyPair(uint32 private_key_size) {
   std::string public_key;
-  public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
-
   std::string private_key;
-  private_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
+  private_key.resize(private_key_size);
 
-  PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
-      reinterpret_cast<uint8_t*>(public_key.data()),
-      reinterpret_cast<uint8_t*>(private_key.data()));
+  // Check if the key_size parameter is correct.
+  switch (private_key_size) {
+    // Dilithium2.
+    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
+      public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
+      PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
+          reinterpret_cast<uint8_t*>(public_key.data()),
+          reinterpret_cast<uint8_t*>(private_key.data()));
+      break;
+    }
+    // Dilithium3.
+    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
+      public_key.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES);
+      PQCLEAN_DILITHIUM3_AVX2_crypto_sign_keypair(
+          reinterpret_cast<uint8_t*>(public_key.data()),
+          reinterpret_cast<uint8_t*>(private_key.data()));
+      break;
+    }
+    // Dilithium5.
+    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+      public_key.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES);
+      PQCLEAN_DILITHIUM5_AVX2_crypto_sign_keypair(
+          reinterpret_cast<uint8_t*>(public_key.data()),
+          reinterpret_cast<uint8_t*>(private_key.data()));
+      break;
+    }
+    // Invalid key size.
+    default: {
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrFormat("Invalid private key size (%d). "
+                          "The only valid sizes are %d, %d, %d.",
+                          private_key_size,
+                          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES));
+    }
+  }
 
   util::SecretData private_key_data =
       util::SecretDataFromStringView(private_key);

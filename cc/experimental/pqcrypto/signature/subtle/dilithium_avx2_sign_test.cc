@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "testing/base/public/googletest.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
@@ -31,7 +32,9 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
 }
 
 namespace crypto {
@@ -39,22 +42,32 @@ namespace tink {
 namespace subtle {
 namespace {
 
+struct DilithiumTestCase {
+  std::string test_name;
+  int key_size = 0;
+  int signature_length = 0;
+};
+
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using crypto::tink::util::Status;
 
-class DilithiumAvx2SignTest : public ::testing::Test {};
+using DilithiumAvx2SignTest = testing::TestWithParam<DilithiumTestCase>;
 
-TEST_F(DilithiumAvx2SignTest, InvalidPrivateKeys) {
+TEST(DilithiumAvx2SignTest, InvalidPrivateKeys) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
-  for (int keysize = 0; keysize < 2528; keysize++) {
-    if (keysize == PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES) {
+  for (int keysize = 0;
+       keysize <= PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES; keysize++) {
+    if (keysize == PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES ||
+        keysize == PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES ||
+        keysize == PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
       // Valid key size.
       continue;
     }
+
     util::SecretData key_data(keysize, 'x');
     EXPECT_FALSE(DilithiumAvx2Sign::New(
                      *DilithiumPrivateKeyPqclean::NewPrivateKey(key_data))
@@ -62,21 +75,24 @@ TEST_F(DilithiumAvx2SignTest, InvalidPrivateKeys) {
   }
 }
 
-TEST_F(DilithiumAvx2SignTest, SignatureLength) {
+TEST_P(DilithiumAvx2SignTest, SignatureLength) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
+  const DilithiumTestCase& test_case = GetParam();
+
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair =
+          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
   // Create a new signer.
   util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
-      DilithiumAvx2Sign::New((*key_pair).first);
+      DilithiumAvx2Sign::New(key_pair->first);
   ASSERT_THAT(signer.status(), IsOk());
 
   // Sign a message.
@@ -86,28 +102,31 @@ TEST_F(DilithiumAvx2SignTest, SignatureLength) {
 
   // Check signature size.
   EXPECT_NE(*signature, message);
-  EXPECT_EQ((*signature).size(), PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES);
+  EXPECT_EQ((*signature).size(), test_case.signature_length);
 }
 
-TEST_F(DilithiumAvx2SignTest, Determinism) {
+TEST_P(DilithiumAvx2SignTest, Determinism) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips is false.";
   }
 
+  const DilithiumTestCase& test_case = GetParam();
+
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair =
+          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
   // Create two signers based on same private key.
   util::StatusOr<std::unique_ptr<PublicKeySign>> first_signer =
-      DilithiumAvx2Sign::New((*key_pair).first);
+      DilithiumAvx2Sign::New(key_pair->first);
   ASSERT_THAT(first_signer.status(), IsOk());
 
   util::StatusOr<std::unique_ptr<PublicKeySign>> second_signer =
-      DilithiumAvx2Sign::New((*key_pair).first);
+      DilithiumAvx2Sign::New(key_pair->first);
   ASSERT_THAT(second_signer.status(), IsOk());
 
   // Sign the same message twice, using the same private key.
@@ -122,31 +141,48 @@ TEST_F(DilithiumAvx2SignTest, Determinism) {
 
   // Check signatures size.
   EXPECT_NE(*first_signature, message);
-  EXPECT_EQ((*first_signature).size(), PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES);
+  EXPECT_EQ((*first_signature).size(), test_case.signature_length);
 
   EXPECT_NE(*second_signature, message);
-  EXPECT_EQ((*second_signature).size(), PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES);
+  EXPECT_EQ((*second_signature).size(), test_case.signature_length);
 
   // Check if signatures are equal.
   EXPECT_EQ(*first_signature, *second_signature);
 }
 
-TEST_F(DilithiumAvx2SignTest, FipsMode) {
+TEST_P(DilithiumAvx2SignTest, FipsMode) {
   if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips.";
   }
 
+  const DilithiumTestCase& test_case = GetParam();
+
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair =
+          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
   // Create a new signer.
-  EXPECT_THAT(DilithiumAvx2Sign::New((*key_pair).first).status(),
+  EXPECT_THAT(DilithiumAvx2Sign::New(key_pair->first).status(),
               StatusIs(util::error::INTERNAL));
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    DilithiumAvx2SignTests, DilithiumAvx2SignTest,
+    testing::ValuesIn<DilithiumTestCase>({
+        {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES},
+        {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES},
+        {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES},
+    }),
+    [](const testing::TestParamInfo<DilithiumAvx2SignTest::ParamType>& info) {
+      return info.param.test_name;
+    });
 
 }  // namespace
 }  // namespace subtle

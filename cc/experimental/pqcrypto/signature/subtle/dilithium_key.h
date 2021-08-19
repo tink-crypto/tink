@@ -58,10 +58,14 @@ class DilithiumPrivateKeyPqclean {
   static util::StatusOr<DilithiumPrivateKeyPqclean> NewPrivateKey(
       util::SecretData key_data);
 
-  // Generates a new dilithium key pair.
+  // Generates a new dilithium key pair (different key sizes based on version).
+  // Possible values for the private key size are:
+  // 2528 - Dilithium2
+  // 4000 - Dilithium3
+  // 4864 - Dilithium5
   static util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-  GenerateKeyPair();
+  GenerateKeyPair(uint32 key_size);
 
   DilithiumPrivateKeyPqclean(const DilithiumPrivateKeyPqclean& other) = default;
   DilithiumPrivateKeyPqclean& operator=(

@@ -30,7 +30,9 @@
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
 }
 
 namespace crypto {
@@ -43,14 +45,19 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Sign>();
   if (!status.ok()) return status;
 
-  if (private_key.GetKeyData().size() !=
-      PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES) {
+  uint32 key_size = private_key.GetKeyData().size();
+
+  if (key_size != PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         absl::StrFormat("Invalid private key size (%d). "
-                        "The only valid size is %d.",
+                        "The only valid sizes are %d, %d, %d.",
                         private_key.GetKeyData().size(),
-                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES));
+                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+                        PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+                        PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES));
   }
 
   return {absl::WrapUnique(new DilithiumAvx2Sign(std::move(private_key)))};
@@ -58,15 +65,46 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
 
 util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
     absl::string_view data) const {
-  std::string signature(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
   size_t sig_length;
+  uint32 key_size = private_key_.GetKeyData().size();
+  std::string signature;
 
-  if (PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
-          reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
-          reinterpret_cast<const uint8_t *>(data.data()), data.size(),
-          reinterpret_cast<const uint8_t *>(
-              private_key_.GetKeyData().data())) != 0) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+  switch (key_size) {
+    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
+      signature.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
+      if (PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data())) != 0) {
+        return util::Status(util::error::INTERNAL, "Signing failed.");
+      }
+      break;
+    }
+    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
+      signature.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES, '0');
+      if (PQCLEAN_DILITHIUM3_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data())) != 0) {
+        return util::Status(util::error::INTERNAL, "Signing failed.");
+      }
+      break;
+    }
+    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+      signature.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES, '0');
+      if (PQCLEAN_DILITHIUM5_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data())) != 0) {
+        return util::Status(util::error::INTERNAL, "Signing failed.");
+      }
+      break;
+    }
+    default:
+      return util::Status(util::error::INTERNAL, "Invalid keysize.");
   }
 
   return signature;

@@ -31,7 +31,7 @@
 #include "tink/util/validation.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
 }
 
 namespace crypto {
@@ -48,7 +48,8 @@ StatusOr<DilithiumPrivateKey> DilithiumSignKeyManager::CreateKey(
     const DilithiumKeyFormat& key_format) const {
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
 
   DilithiumPrivateKey dilithium_sk;
   dilithium_sk.set_version(get_version());

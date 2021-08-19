@@ -27,7 +27,9 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
 }
 
 namespace crypto {
@@ -39,26 +41,60 @@ using ::crypto::tink::test::IsOk;
 
 class DilithiumKeyTest : public ::testing::Test {};
 
-TEST_F(DilithiumKeyTest, KeysLength) {
+TEST_F(DilithiumKeyTest, Dilithium2KeysLength) {
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
   // Check keys size.
-  EXPECT_EQ(((*key_pair).first).GetKeyData().size(),
+  EXPECT_EQ((key_pair->first).GetKeyData().size(),
             PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
-  EXPECT_EQ(((*key_pair).second).GetKeyData().size(),
+  EXPECT_EQ((key_pair->second).GetKeyData().size(),
             PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
+}
+
+TEST_F(DilithiumKeyTest, Dilithium3KeysLength) {
+  // Generate key pair.
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES);
+
+  ASSERT_THAT(key_pair.status(), IsOk());
+
+  // Check keys size.
+  EXPECT_EQ((key_pair->first).GetKeyData().size(),
+            PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES);
+  EXPECT_EQ((key_pair->second).GetKeyData().size(),
+            PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES);
+}
+
+TEST_F(DilithiumKeyTest, Dilithium5KeysLength) {
+  // Generate key pair.
+  util::StatusOr<
+      std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES);
+
+  ASSERT_THAT(key_pair.status(), IsOk());
+
+  // Check keys size.
+  EXPECT_EQ((key_pair->first).GetKeyData().size(),
+            PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES);
+  EXPECT_EQ((key_pair->second).GetKeyData().size(),
+            PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES);
 }
 
 TEST_F(DilithiumKeyTest, DifferentContent) {
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
