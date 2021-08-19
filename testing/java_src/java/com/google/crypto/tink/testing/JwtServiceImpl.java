@@ -251,9 +251,6 @@ public final class JwtServiceImpl extends JwtImplBase {
     if (validator.hasExpectedIssuer()) {
       validatorBuilder.expectIssuer(validator.getExpectedIssuer().getValue());
     }
-    if (validator.hasExpectedSubject()) {
-      validatorBuilder.expectSubject(validator.getExpectedSubject().getValue());
-    }
     if (validator.hasExpectedAudience()) {
       validatorBuilder.expectAudience(validator.getExpectedAudience().getValue());
     }
@@ -262,9 +259,6 @@ public final class JwtServiceImpl extends JwtImplBase {
     }
     if (validator.getIgnoreIssuer()) {
       validatorBuilder.ignoreIssuer();
-    }
-    if (validator.getIgnoreSubject()) {
-      validatorBuilder.ignoreSubject();
     }
     if (validator.getIgnoreAudience()) {
       validatorBuilder.ignoreAudiences();

@@ -341,63 +341,6 @@ public final class JwtValidatorTest {
     validator.validate(tokenWithoutIssuer);
   }
 
-  @Test
-  public void requireSubjectButNoSubjectInToken_success() throws Exception {
-    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
-    JwtValidator validator =
-        JwtValidator.newBuilder().allowMissingExpiration().expectSubject("123").build();
-    // this is not validated anymore
-    validator.validate(token);
-  }
-  @Test
-  public void wrongSubjectInToken_success() throws Exception {
-    RawJwt token =
-        RawJwt.newBuilder().setSubject("blah").withoutExpiration().build();
-    JwtValidator validator =
-        JwtValidator.newBuilder().allowMissingExpiration().expectSubject("123").build();
-
-    // this is not validated anymore
-    validator.validate(token);
-  }
-
-  @Test
-  public void correctSubjectInToken_success() throws Exception {
-    RawJwt unverified =
-        RawJwt.newBuilder().setSubject("123").withoutExpiration().build();
-    JwtValidator validator =
-        JwtValidator.newBuilder().allowMissingExpiration().expectSubject("123").build();
-    VerifiedJwt token = validator.validate(unverified);
-
-    assertThat(token.getSubject()).isEqualTo("123");
-  }
-
-  @Test
-  public void noSubject_success() throws Exception {
-    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-
-    RawJwt tokenWithoutSubject = RawJwt.newBuilder().withoutExpiration().build();
-    validator.validate(tokenWithoutSubject);
-  }
-
-  @Test
-  public void subjectInTokenButNoSubjectSetInValidator_success() throws Exception {
-    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-
-    RawJwt tokenWithSubject = RawJwt.newBuilder().setSubject("subject").withoutExpiration().build();
-    // this is not validated anymore
-    validator.validate(tokenWithSubject);
-  }
-
-  @Test
-  public void ignoreSubjectSkipsValidationOfSubject() throws Exception {
-    JwtValidator validator =
-        JwtValidator.newBuilder().allowMissingExpiration().ignoreSubject().build();
-
-    RawJwt tokenWithSubject = RawJwt.newBuilder().setSubject("subject").withoutExpiration().build();
-    validator.validate(tokenWithSubject);
-    RawJwt tokenWithoutSubject = RawJwt.newBuilder().withoutExpiration().build();
-    validator.validate(tokenWithoutSubject);
-  }
 
   @Test
   public void requireAudienceButNoAudienceInToken_shouldThrow() throws Exception {

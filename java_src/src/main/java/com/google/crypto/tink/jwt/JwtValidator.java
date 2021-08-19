@@ -140,17 +140,6 @@ public final class JwtValidator {
       return this;
     }
 
-    /** Deprecated. It does not do anything and will soon be removed. */
-    @Deprecated
-    public Builder expectSubject(String value) {
-      return this;
-    }
-
-    /** Deprecated. It does not do anything and will soon be removed. */
-    @Deprecated
-    public Builder ignoreSubject() {
-      return this;
-    }
     /**
      * Sets the expected audience. When this is set, all tokens that do not contain this audience in
      * their {@code aud} claims are rejected. When this is not set, all token that have {@code aud}
