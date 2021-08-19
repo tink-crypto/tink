@@ -720,30 +720,48 @@ public class JwtHmacKeyManagerTest {
     KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
         withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-
-    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
     JwtMac jwtMacWithoutKid = handleWithoutKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
+    String compactWithoutKid = jwtMacWithoutKid.computeMacAndEncode(rawToken);
 
-    // Verify that the kid is set in the header
-    String jsonHeader = JwtFormat.splitSignedCompact(compactWithKid).header;
-    String kid = JsonUtil.parseJson(jsonHeader).get("kid").getAsString();
+    // Verify the kid in the header
+    String jsonHeaderWithKid = JwtFormat.splitSignedCompact(compactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeaderWithKid).get("kid").getAsString();
     assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(compactWithoutKid).header;
+    assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
 
-    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-    // Both JwtMacs must accept compactWithKid.
+    // Kid is currently ignored, so all verifiers accept both tokens
     assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
 
-    String compactWithoutKid = jwtMacWithoutKid.computeMacAndEncode(rawToken);
-    // Both JwtMacs must accept signedCompactWithoutKid.
     assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+  }
+
+  @Test
+  public void macWithWrongCustomKid() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid = withCustomKid(handleWithoutKid, "kid");
+    KeysetHandle handleWithWrongKid = withCustomKid(handleWithoutKid, "wrong kid");
+    JwtMac jwtMacWithKid = handleWithKid.getPrimitive(JwtMac.class);
+    JwtMac jwtMacWithWrongKid = handleWithWrongKid.getPrimitive(JwtMac.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
+
+    // Kid is currently ignored, so all verifiers accept both tokens
+    assertThat(jwtMacWithWrongKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
   }
 

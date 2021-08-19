@@ -441,14 +441,17 @@ public class JwtEcdsaSignKeyManagerTest {
         withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-
+    JwtPublicKeySign signerWithoutKid = handleWithoutKid.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+    String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
 
-    // Verify that the kid is set in the header
-    String jsonHeader = JwtFormat.splitSignedCompact(signedCompactWithKid).header;
-    String kid = JsonUtil.parseJson(jsonHeader).get("kid").getAsString();
+    // Verify the kid in the header
+    String jsonHeaderWithKid = JwtFormat.splitSignedCompact(signedCompactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeaderWithKid).get("kid").getAsString();
     assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(signedCompactWithoutKid).header;
+    assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
 
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     JwtPublicKeyVerify verifierWithoutKid =
@@ -456,19 +459,37 @@ public class JwtEcdsaSignKeyManagerTest {
     JwtPublicKeyVerify verifierWithKid =
         handleWithKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
-    // Both the verifiers accept signedCompactWithKid.
+    // Kid is currently ignored, so all verifiers accept both tokens
     assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
 
-    JwtPublicKeySign signerWithoutKid = handleWithoutKid.getPrimitive(JwtPublicKeySign.class);
-    String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
-
-    // Both the verifiers accept signedCompactWithoutKid.
     assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
+        .isEqualTo("jwtId");
+  }
+
+  @Test
+  public void signAndVerifyWithWrongCustomKid() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+
+    KeyTemplate template = KeyTemplates.get("JWT_ES256_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid = withCustomKid(handleWithoutKid, "kid");
+    KeysetHandle handleWithWrongKid = withCustomKid(handleWithoutKid, "wrong kid");
+
+    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    JwtPublicKeyVerify verifierWithWrongKid =
+        handleWithWrongKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    // Kid is currently ignored, so all verifiers accept both tokens
+    assertThat(verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
   }
 
