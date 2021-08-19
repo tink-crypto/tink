@@ -50,11 +50,9 @@ class JwtValidator {
   friend class JwtValidatorBuilder;
   absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
-  absl::optional<std::string> expected_subject_;
   absl::optional<std::string> expected_audience_;
   bool ignore_type_header_;
   bool ignore_issuer_;
-  bool ignore_subject_;
   bool ignore_audiences_;
   bool allow_missing_expiration_;
   bool expect_issued_in_the_past_;
@@ -74,12 +72,10 @@ class JwtValidatorBuilder {
 
   JwtValidatorBuilder& ExpectTypeHeader(absl::string_view expected_type_header);
   JwtValidatorBuilder& ExpectIssuer(absl::string_view expected_issuer);
-  JwtValidatorBuilder& ExpectSubject(absl::string_view expected_subject);
   JwtValidatorBuilder& ExpectAudience(absl::string_view expected_audience);
 
   JwtValidatorBuilder& IgnoreTypeHeader();
   JwtValidatorBuilder& IgnoreIssuer();
-  JwtValidatorBuilder& IgnoreSubject();
   JwtValidatorBuilder& IgnoreAudiences();
 
   JwtValidatorBuilder& AllowMissingExpiration();
@@ -94,11 +90,9 @@ class JwtValidatorBuilder {
   friend class JwtValidator;
   absl::optional<std::string> expected_type_header_;
   absl::optional<std::string> expected_issuer_;
-  absl::optional<std::string> expected_subject_;
   absl::optional<std::string> expected_audience_;
   bool ignore_type_header_;
   bool ignore_issuer_;
-  bool ignore_subject_;
   bool ignore_audiences_;
   bool allow_missing_expiration_;
   bool expect_issued_in_the_past_;

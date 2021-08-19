@@ -72,7 +72,6 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   JwtValidatorBuilder validator_builder = JwtValidatorBuilder()
                                               .IgnoreTypeHeader()
                                               .IgnoreIssuer()
-                                              .IgnoreSubject()
                                               .IgnoreAudiences()
                                               .AllowMissingExpiration();
   util::StatusOr<absl::Time> issued_at = raw_jwt.GetIssuedAt();

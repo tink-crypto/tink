@@ -175,9 +175,6 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
   if (validator_proto.has_expected_issuer()) {
     builder.ExpectIssuer(validator_proto.expected_issuer().value());
   }
-  if (validator_proto.has_expected_subject()) {
-    builder.ExpectSubject(validator_proto.expected_subject().value());
-  }
   if (validator_proto.has_expected_audience()) {
     builder.ExpectAudience(validator_proto.expected_audience().value());
   }
@@ -186,9 +183,6 @@ crypto::tink::util::StatusOr<crypto::tink::JwtValidator> JwtValidatorFromProto(
   }
   if (validator_proto.ignore_issuer()) {
     builder.IgnoreIssuer();
-  }
-  if (validator_proto.ignore_subject()) {
-    builder.IgnoreSubject();
   }
   if (validator_proto.ignore_audience()) {
     builder.IgnoreAudiences();

@@ -31,11 +31,9 @@ static constexpr absl::Duration kJwtMaxClockSkew = absl::Minutes(10);
 JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
   expected_type_header_ = builder.expected_type_header_;
   expected_issuer_ = builder.expected_issuer_;
-  expected_subject_ = builder.expected_subject_;
   expected_audience_ = builder.expected_audience_;
   ignore_type_header_ = builder.ignore_type_header_;
   ignore_issuer_ = builder.ignore_issuer_;
-  ignore_subject_ = builder.ignore_subject_;
   ignore_audiences_ = builder.ignore_audiences_;
   allow_missing_expiration_ = builder.allow_missing_expiration_;
   expect_issued_in_the_past_ = builder.expect_issued_in_the_past_;
@@ -121,25 +119,6 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
           "invalid JWT; token has issuer set, but validator not");
     }
   }
-  if (expected_subject_.has_value()) {
-    if (!raw_jwt.HasSubject()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          "missing expected subject");
-    }
-    util::StatusOr<std::string> subject = raw_jwt.GetSubject();
-    if (!subject.ok()) {
-      return subject.status();
-    }
-    if (expected_subject_.value() != *subject) {
-      return util::Status(util::error::INVALID_ARGUMENT, "wrong subject");
-    }
-  } else {
-    if (raw_jwt.HasSubject() && !ignore_subject_) {
-      return util::Status(
-          util::error::INVALID_ARGUMENT,
-          "invalid JWT; token has subject set, but validator not");
-    }
-  }
   if (expected_audience_.has_value()) {
     if (!raw_jwt.HasAudiences()) {
       return util::Status(util::error::INVALID_ARGUMENT,
@@ -167,7 +146,6 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
 JwtValidatorBuilder::JwtValidatorBuilder() {
   ignore_type_header_ = false;
   ignore_issuer_ = false;
-  ignore_subject_ = false;
   ignore_audiences_ = false;
   allow_missing_expiration_ = false;
   expect_issued_in_the_past_ = false;
@@ -186,12 +164,6 @@ JwtValidatorBuilder& JwtValidatorBuilder::ExpectIssuer(
   return *this;
 }
 
-JwtValidatorBuilder& JwtValidatorBuilder::ExpectSubject(
-    absl::string_view subject) {
-  expected_subject_ = std::string(subject);
-  return *this;
-}
-
 JwtValidatorBuilder& JwtValidatorBuilder::ExpectAudience(
     absl::string_view audience) {
   expected_audience_ = std::string(audience);
@@ -205,11 +177,6 @@ JwtValidatorBuilder& JwtValidatorBuilder::IgnoreTypeHeader() {
 
 JwtValidatorBuilder& JwtValidatorBuilder::IgnoreIssuer() {
   ignore_issuer_ = true;
-  return *this;
-}
-
-JwtValidatorBuilder& JwtValidatorBuilder::IgnoreSubject() {
-  ignore_subject_ = true;
   return *this;
 }
 
@@ -249,11 +216,6 @@ util::StatusOr<JwtValidator> JwtValidatorBuilder::Build() {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         "IgnoreIssuer() and ExpectedIssuer() cannot be used together");
-  }
-  if (expected_subject_.has_value() && ignore_subject_) {
-    return util::Status(
-        util::error::INVALID_ARGUMENT,
-        "IgnoreSubject() and ExpectSubject() cannot be used together");
   }
   if (expected_audience_.has_value() && ignore_audiences_) {
     return util::Status(
