@@ -40,7 +40,7 @@ flags.DEFINE_enum('mode', None, ['sign', 'verify'],
                   'The operation to perform.')
 flags.DEFINE_string('keyset_path', None,
                     'Path to the keyset used for the JWT signature operation.')
-flags.DEFINE_string('subject', None, 'Subject to be used in the token')
+flags.DEFINE_string('audience', None, 'Audience to be used in the token')
 flags.DEFINE_string('token_path', None, 'Path to the signature file.')
 
 
@@ -74,7 +74,8 @@ def main(argv):
 
     # Create token
     raw_jwt = jwt.new_raw_jwt(
-        subject=FLAGS.subject, expiration=now + datetime.timedelta(seconds=100))
+        audiences=[FLAGS.audience],
+        expiration=now + datetime.timedelta(seconds=100))
     token = jwt_sign.sign_and_encode(raw_jwt)
     with open(FLAGS.token_path, 'wt') as token_file:
       token_file.write(token)
@@ -91,7 +92,7 @@ def main(argv):
   # Verify token
   with open(FLAGS.token_path, 'rt') as token_file:
     token = token_file.read()
-  validator = jwt.new_validator(expected_subject=FLAGS.subject)
+  validator = jwt.new_validator(expected_audience=FLAGS.audience)
   try:
     verified_jwt = jwt_verify.verify_and_decode(token, validator)
     expires_in = verified_jwt.expiration() - now
@@ -103,7 +104,8 @@ def main(argv):
 
 
 if __name__ == '__main__':
-  flags.mark_flags_as_required(['mode', 'keyset_path', 'subject', 'token_path'])
+  flags.mark_flags_as_required(
+      ['mode', 'keyset_path', 'audience', 'token_path'])
   app.run(main)
 
 # [END python-jwt-signature-example]

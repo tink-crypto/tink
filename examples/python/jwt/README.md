@@ -33,7 +33,7 @@ $ touch token_file.txt
 
 $ ./bazel-bin/jwt/jwt_signature --mode sign \
     --keyset_path ./jwt/jwt_test_private_keyset.json \
-    --subject "subject" --token_path token_file.txt
+    --audience "audience" --token_path token_file.txt
 ```
 
 Verify a JWT:
@@ -41,5 +41,5 @@ Verify a JWT:
 ```shell
 $ ./bazel-bin/jwt/jwt_signature --mode verify \
     --keyset_path ./jwt/jwt_test_public_keyset.json \
-    --subject "subject" --token_path token_file.txt
+    --audience "audience" --token_path token_file.txt
 ```

@@ -23,7 +23,7 @@ CLI="$1"
 PRIVATE_KEYSET_PATH="$2"
 PUBLIC_KEYSET_PATH="$3"
 
-SUBJECT="subject"
+AUDIENCE="audience"
 TOKEN_PATH="${TEST_TMPDIR}/token.txt"
 
 #############################################################################
@@ -52,12 +52,12 @@ print_test "normal_signing_and_verification"
 # Run signing
 test_command ${CLI} --mode sign \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" --token_path "${TOKEN_PATH}"
 
 # Run verification
 test_command ${CLI} --mode verify \
   --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS == 0 )); then
   echo "+++ Success: Signature is valid."
@@ -77,7 +77,7 @@ echo "ABCABCABCD" > $TOKEN_PATH
 # Run verification.
 test_command ${CLI} --mode verify \
   --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature verification failed for invalid signature."
@@ -89,17 +89,17 @@ fi
 
 #############################################################################
 
-print_test "signature_verification_fails_with_incorrect_subject"
+print_test "signature_verification_fails_with_incorrect_audience"
 
 # Run signing
 test_command ${CLI} --mode sign \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" --token_path "${TOKEN_PATH}"
 
 # Run verification.
 test_command ${CLI} --mode verify \
   --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "invalid subject" --token_path "${TOKEN_PATH}"
+  --audience "invalid audience" --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature verification failed for invalid signature."
@@ -116,7 +116,7 @@ print_test "singing_fails_with_a_wrong_keyset"
 # Run computation.
 test_command ${CLI} --mode verify \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS != 0 )); then
   echo "+++ Success: Signature computation failed with public keyset."
