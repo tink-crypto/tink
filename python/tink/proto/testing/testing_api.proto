@@ -35,6 +35,8 @@ message ServerInfoResponse {
 
 // Service for Keyset operations.
 service Keyset {
+  // Generates a key template from a key template name.
+  rpc GetTemplate(KeysetTemplateRequest) returns (KeysetTemplateResponse) {}
   // Generates a new keyset from a template.
   rpc Generate(KeysetGenerateRequest) returns (KeysetGenerateResponse) {}
   // Generates a public-key keyset from a private-key keyset.
@@ -43,6 +45,17 @@ service Keyset {
   rpc ToJson(KeysetToJsonRequest) returns (KeysetToJsonResponse) {}
   // Converts a Keyset from Json to Binary Format
   rpc FromJson(KeysetFromJsonRequest) returns (KeysetFromJsonResponse) {}
+}
+
+message KeysetTemplateRequest {
+  string template_name = 1;  // template name used by Tinkey
+}
+
+message KeysetTemplateResponse {
+  oneof result {
+    bytes key_template = 1;  // serialized google.crypto.tink.KeyTemplate.
+    string err = 2;
+  }
 }
 
 message KeysetGenerateRequest {

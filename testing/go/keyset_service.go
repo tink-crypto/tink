@@ -33,6 +33,11 @@ import (
 type KeysetService struct {
 }
 
+func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateRequest) (*pb.KeysetTemplateResponse, error) {
+	return &pb.KeysetTemplateResponse{
+		Result: &pb.KeysetTemplateResponse_Err{"not implemented"}}, nil
+}
+
 func (s *KeysetService) Generate(ctx context.Context, req *pb.KeysetGenerateRequest) (*pb.KeysetGenerateResponse, error) {
 	template := &tinkpb.KeyTemplate{}
 	err := proto.Unmarshal(req.Template, template)
