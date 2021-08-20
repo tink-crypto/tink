@@ -64,9 +64,10 @@ func (km *Manager) Rotate(kt *tinkpb.KeyTemplate) error {
 
 // Add generates and adds a fresh key using the given key template.
 // the key is enabled on creation, but not set to primary.
-func (km *Manager) Add(kt *tinkpb.KeyTemplate) error {
-	_, err := km.add(kt)
-	return err
+// It returns the ID of the new key
+func (km *Manager) Add(kt *tinkpb.KeyTemplate) (uint32, error) {
+	keyID, err := km.add(kt)
+	return keyID, err
 }
 
 // add will generate and add a fresh key generated with the given key template
