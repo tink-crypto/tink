@@ -266,6 +266,16 @@ java_lite_proto_library(
 )
 
 java_proto_library(
+    name = "cached_dek_envelope_java_proto",
+    deps = ["@tink_base//proto:cached_dek_envelope_proto"],
+)
+
+java_lite_proto_library(
+    name = "cached_dek_envelope_java_proto_lite",
+    deps = ["@tink_base//proto:cached_dek_envelope_proto"],
+)
+
+java_proto_library(
     name = "ecies_aead_hkdf_java_proto",
     deps = ["@tink_base//proto:ecies_aead_hkdf_proto"],
 )
