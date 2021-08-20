@@ -169,8 +169,8 @@ KEY_TEMPLATE_NAMES = {
         'RSA_SSA_PSS_4096_SHA512_SHA512_64_F4'
     ],
     'AesCmacPrfKey': ['AES_CMAC_PRF'],
-    'HmacPrfKey': ['HMAC_PRF_SHA256', 'HMAC_PRF_SHA512'],
-    'HkdfPrfKey': ['HKDF_PRF_SHA256'],
+    'HmacPrfKey': ['HMAC_SHA256_PRF', 'HMAC_SHA512_PRF'],
+    'HkdfPrfKey': ['HKDF_SHA256_PRF'],
     'JwtHmacKey': [
         'JWT_HS256', 'JWT_HS256_RAW', 'JWT_HS384', 'JWT_HS384_RAW', 'JWT_HS512',
         'JWT_HS512_RAW'
@@ -300,11 +300,11 @@ KEY_TEMPLATE = {
         signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
     'AES_CMAC_PRF':
         prf.prf_key_templates.AES_CMAC,
-    'HMAC_PRF_SHA256':
+    'HMAC_SHA256_PRF':
         prf.prf_key_templates.HMAC_SHA256,
-    'HMAC_PRF_SHA512':
+    'HMAC_SHA512_PRF':
         prf.prf_key_templates.HMAC_SHA512,
-    'HKDF_PRF_SHA256':
+    'HKDF_SHA256_PRF':
         prf.prf_key_templates.HKDF_SHA256,
     'JWT_HS256': jwt.jwt_hs256_template(),
     'JWT_HS256_RAW': jwt.raw_jwt_hs256_template(),

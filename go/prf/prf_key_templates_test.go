@@ -33,11 +33,11 @@ func TestKeyTemplates(t *testing.T) {
 		name     string
 		template *tinkpb.KeyTemplate
 	}{
-		{name: "HMAC_PRF_SHA256",
+		{name: "HMAC_SHA256_PRF",
 			template: prf.HMACSHA256PRFKeyTemplate()},
-		{name: "HMAC_PRF_SHA512",
+		{name: "HMAC_SHA512_PRF",
 			template: prf.HMACSHA512PRFKeyTemplate()},
-		{name: "HKDF_PRF_SHA256",
+		{name: "HKDF_SHA256_PRF",
 			template: prf.HKDFSHA256PRFKeyTemplate()},
 		{name: "AES_CMAC_PRF",
 			template: prf.AESCMACPRFKeyTemplate()},
