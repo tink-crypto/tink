@@ -91,7 +91,7 @@ func TestKeysetManagerFull(t *testing.T) {
 	// test a full keyset manager cycle: add, get info, set primary
 	ksm := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	err := ksm.Add(kt)
+	_, err := ksm.Add(kt)
 	if err != nil {
 		t.Errorf("expected no error but got %s", err)
 	}
@@ -131,7 +131,7 @@ func TestKeysetManagerWithNilKeysetTemplate(t *testing.T) {
 	if err == nil {
 		t.Errorf("ksm1.Rotate succeeded, but want error")
 	}
-	err = ksm1.Add(nil)
+	_, err = ksm1.Add(nil)
 	if err == nil {
 		t.Errorf("ksm1.Add succeeded, but want error")
 	}
@@ -140,7 +140,7 @@ func TestKeysetManagerWithNilKeysetTemplate(t *testing.T) {
 func TestKeysetManagerAdd(t *testing.T) {
 	ksm1 := keyset.NewManager()
 	kt := mac.HMACSHA256Tag128KeyTemplate()
-	err := ksm1.Add(kt)
+	keyID, err := ksm1.Add(kt)
 	if err != nil {
 		t.Errorf("expected no error but got %s", err)
 	}
@@ -152,6 +152,9 @@ func TestKeysetManagerAdd(t *testing.T) {
 	if len(ks.Key) != 1 {
 		t.Errorf("expected one key but got %d", len(ks.Key))
 		t.Fail()
+	}
+	if ks.Key[0].KeyId != keyID {
+		t.Errorf("expected added keyID to be %d but got %d", keyID, ks.Key[0].KeyId)
 	}
 	if ks.Key[0].Status != tinkpb.KeyStatusType_ENABLED {
 		t.Errorf("expected key to be enabled but got %s", ks.Key[0].Status.String())
@@ -168,7 +171,7 @@ func TestKeysetManagerAddWithBadTemplate(t *testing.T) {
 		TypeUrl:          "invalid type",
 		OutputPrefixType: tinkpb.OutputPrefixType_TINK,
 	}
-	err := ksm1.Add(kt)
+	_, err := ksm1.Add(kt)
 	if err == nil {
 		t.Errorf("ksm1.Add succeeded, want error")
 	}
@@ -606,7 +609,7 @@ func TestKeysetManagerDeleteWithMissingKey(t *testing.T) {
 func TestKeysetManagerWithEmptyManager(t *testing.T) {
 	// all ops with empty manager should fail
 	ksm1 := &keyset.Manager{}
-	err := ksm1.Add(mac.HMACSHA256Tag128KeyTemplate())
+	_, err := ksm1.Add(mac.HMACSHA256Tag128KeyTemplate())
 	if err == nil {
 		t.Errorf("ksm1.Add succeeded on empty manager, want error")
 	}
