@@ -25,13 +25,16 @@ class JwtValidator(object):
   """A JwtValidator defines how JSON Web Tokens (JWTs) should be validated.
 
     By default, the JwtValidator requires that a token has a valid expiration
-    claim, no issuer, no subject, and no audience claim. This can be changed
-    using the expect_... and  ignore_... arguments.
+    claim, no issuer and no audience claim. This can be changed using the
+    expect_... and  ignore_... arguments.
 
     If present, the JwtValidator also validates the not-before claim. The
     validation time can be changed using the fixed_now parameter. clock_skew can
     be set to allow a small leeway (not more than 10 minutes) to account for
     clock skew.
+
+    Note that expected_subject and ignore_subject are deprecated. They don't
+    have any effect anymore and will be removed soon.
   """
 
   def __init__(self,
@@ -191,19 +194,6 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     if raw_jwt.has_issuer() and not validator.ignore_issuer():
       raise _jwt_error.JwtInvalidError(
           'invalid JWT; token has issuer set, but validator not.')
-  if validator.has_expected_subject():
-    if not raw_jwt.has_subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; missing expected subject %s.' %
-          validator.expected_subject())
-    if validator.expected_subject() != raw_jwt.subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; expected subject %s, but got %s' %
-          (validator.expected_subject(), raw_jwt.subject()))
-  else:
-    if raw_jwt.has_subject() and not validator.ignore_subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; token has subject set, but validator not.')
   if validator.has_expected_audience():
     if (not raw_jwt.has_audiences() or
         validator.expected_audience() not in raw_jwt.audiences()):

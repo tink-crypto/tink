@@ -249,22 +249,23 @@ class JwtValidatorTest(absltest.TestCase):
         issuer='issuer', without_expiration=True)
     _jwt_validator.validate(validator, token_with_issuer)
 
-  def test_requires_subject_but_no_subject_set_fails(self):
+  def test_expected_subject_but_no_subject_set_success(self):
     token = jwt.new_raw_jwt(without_expiration=True)
+    # expected_subject is ignored and will be removed soon.
     validator = jwt.new_validator(
         expected_subject='subject', allow_missing_expiration=True)
-    with self.assertRaises(jwt.JwtInvalidError):
-      _jwt_validator.validate(validator, token)
+    _jwt_validator.validate(validator, token)
 
   def test_invalid_subject_fails(self):
     token = jwt.new_raw_jwt(subject='unknown', without_expiration=True)
+    # expected_subject is ignored and will be removed soon
     validator = jwt.new_validator(
         expected_subject='subject', allow_missing_expiration=True)
-    with self.assertRaises(jwt.JwtInvalidError):
-      _jwt_validator.validate(validator, token)
+    _jwt_validator.validate(validator, token)
 
   def test_correct_subject_success(self):
     token = jwt.new_raw_jwt(subject='subject', without_expiration=True)
+    # expected_subject is ignored and will be removed soon
     validator = jwt.new_validator(
         expected_subject='subject', allow_missing_expiration=True)
     _jwt_validator.validate(validator, token)
@@ -273,8 +274,8 @@ class JwtValidatorTest(absltest.TestCase):
     validator = jwt.new_validator(allow_missing_expiration=True)
     token_with_subject = jwt.new_raw_jwt(
         subject='subject', without_expiration=True)
-    with self.assertRaises(jwt.JwtInvalidError):
-      _jwt_validator.validate(validator, token_with_subject)
+    # subject is not validated anymore
+    _jwt_validator.validate(validator, token_with_subject)
 
   def test_ignore_subject_success(self):
     validator = jwt.new_validator(
@@ -353,14 +354,6 @@ class JwtValidatorTest(absltest.TestCase):
     not_before = fixed_now - datetime.timedelta(minutes=1)
     token = jwt.new_raw_jwt(expiration=expiration, not_before=not_before)
     _jwt_validator.validate(validator, token)
-
-  def test_validators_with_expected_and_ignored_fail(self):
-    with self.assertRaises(ValueError):
-      jwt.new_validator(expected_issuer='a', ignore_issuer=True)
-    with self.assertRaises(ValueError):
-      jwt.new_validator(expected_subject='a', ignore_subject=True)
-    with self.assertRaises(ValueError):
-      jwt.new_validator(expected_audience='a', ignore_audiences=True)
 
   def test_invalid_clock_skew_fail(self):
     with self.assertRaises(ValueError):
