@@ -217,8 +217,13 @@ class RawJwt(object):
     return raw_jwt
 
   @classmethod
-  def from_json(cls, type_header: Optional[Text], payload: Text) -> 'RawJwt':
+  def _from_json(cls, type_header: Optional[Text], payload: Text) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
     raw_jwt.__init__(type_header, _jwt_format.json_loads(payload))
     return raw_jwt
+
+
+def raw_jwt_from_json(type_header: Optional[Text], payload: Text) -> RawJwt:
+  """Internal function used to verify JWT token."""
+  return RawJwt._from_json(type_header, payload)  # pylint: disable=protected-access
