@@ -16,8 +16,9 @@
 from absl.testing import absltest
 import grpc
 
-from proto.testing import testing_api_pb2
 from tink import jwt
+
+from proto.testing import testing_api_pb2
 import jwt_service
 import services
 

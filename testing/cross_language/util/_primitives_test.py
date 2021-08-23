@@ -16,8 +16,9 @@
 import datetime
 from absl.testing import absltest
 
-from proto.testing import testing_api_pb2
 from tink import jwt
+
+from proto.testing import testing_api_pb2
 from util import _primitives
 
 

@@ -36,7 +36,7 @@ from tink.proto import common_pb2
 from tink.proto import hmac_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
-from tink import jwt
+from google3.third_party.tink.python.tink import jwt
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']

@@ -20,6 +20,7 @@ from typing import List, Text
 from tink import aead
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature
@@ -27,7 +28,6 @@ from tink import streaming_aead
 
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
-from tink import jwt
 
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']

@@ -30,7 +30,7 @@ from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 
-from tink import jwt
+from google3.third_party.tink.python.tink import jwt
 from util import supported_key_types
 from util import testing_servers
 

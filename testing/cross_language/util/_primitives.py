@@ -27,6 +27,7 @@ import tink
 from tink import aead
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature as tink_signature
@@ -35,8 +36,6 @@ from tink import streaming_aead
 from tink.proto import tink_pb2
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
-
-from tink import jwt
 
 
 def new_keyset(stub: testing_api_pb2_grpc.KeysetStub,

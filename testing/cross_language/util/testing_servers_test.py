@@ -23,12 +23,12 @@ import tink
 from tink import aead
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from tink import jwt
 from util import testing_servers
 
 _SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE

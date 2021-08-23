@@ -26,6 +26,7 @@ import grpc
 from tink import aead
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature
@@ -33,7 +34,6 @@ from tink import streaming_aead
 
 from proto.testing import testing_api_pb2_grpc
 
-from tink import jwt
 from tink.testing import fake_kms
 
 import jwt_service

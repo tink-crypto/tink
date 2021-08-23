@@ -23,7 +23,7 @@ from absl.testing import parameterized
 
 import tink
 
-from tink import jwt
+from google3.third_party.tink.python.tink import jwt
 from util import supported_key_types
 from util import testing_servers
 

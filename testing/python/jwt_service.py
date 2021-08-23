@@ -30,7 +30,7 @@ from tink import cleartext_keyset_handle
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
 
-from tink import jwt
+from google3.third_party.tink.python.tink import jwt
 
 
 def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:
