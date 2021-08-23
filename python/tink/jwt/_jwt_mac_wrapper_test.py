@@ -20,6 +20,7 @@ from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 import tink
 from tink import jwt
+from tink.jwt import _json_util
 from tink.jwt import _jwt_format
 from tink.testing import keyset_builder
 
@@ -124,7 +125,7 @@ class JwtMacWrapperTest(parameterized.TestCase):
     signed_compact = jwt_mac.compute_mac_and_encode(raw_jwt)
 
     _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _jwt_format.json_loads(json_header)
+    header = _json_util.json_loads(json_header)
     self.assertIn('kid', header)
 
   def test_raw_output_prefix_type_encodes_a_custom_kid_header(self):
@@ -142,7 +143,7 @@ class JwtMacWrapperTest(parameterized.TestCase):
     signed_compact = jwt_mac.compute_mac_and_encode(raw_jwt)
 
     _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _jwt_format.json_loads(json_header)
+    header = _json_util.json_loads(json_header)
     self.assertEqual(header['kid'], 'my kid')
 
     # Now, change the output prefix type to TINK. This should fail.

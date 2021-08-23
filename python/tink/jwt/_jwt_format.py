@@ -15,11 +15,11 @@
 
 import base64
 import binascii
-import json
 import struct
 from typing import Any, Optional, Text, Tuple
 
 from tink.proto import tink_pb2
+from tink.jwt import _json_util
 from tink.jwt import _jwt_error
 
 _VALID_ALGORITHMS = frozenset({
@@ -59,39 +59,6 @@ def _base64_decode(encoded_data: bytes) -> bytes:
   except binascii.Error:
     # Throws when the length of encoded_data is (4*i + 1) for some i
     raise _jwt_error.JwtInvalidError('invalid token')
-
-
-def json_dumps(json_data: Any) -> Text:
-  return json.dumps(json_data, separators=(',', ':'))
-
-
-def validate_all_strings(json_data: Any):
-  """Recursivly visits all strings and raises UnicodeEncodeError if invalid."""
-  if isinstance(json_data, str):
-    # We use encode('utf8') to validate that the string is valid.
-    json_data.encode('utf8')
-  if isinstance(json_data, list):
-    for item in json_data:
-      validate_all_strings(item)
-  if isinstance(json_data, dict):
-    for key, value in json_data.items():
-      key.encode('utf8')
-      validate_all_strings(value)
-
-
-def json_loads(json_text: Text) -> Any:
-  """Does the same as json.loads, but with some additinal validation."""
-  try:
-    json_data = json.loads(json_text)
-    validate_all_strings(json_data)
-    return json_data
-  except json.decoder.JSONDecodeError:
-    raise _jwt_error.JwtInvalidError('Failed to parse JSON string')
-  except RecursionError:
-    raise _jwt_error.JwtInvalidError(
-        'Failed to parse JSON string, too many recursions')
-  except UnicodeEncodeError:
-    raise _jwt_error.JwtInvalidError('invalid character')
 
 
 def _validate_algorithm(algorithm: Text) -> None:
@@ -148,7 +115,7 @@ def create_header(algorithm: Text, type_header: Optional[Text],
   header['alg'] = algorithm
   if type_header:
     header['typ'] = type_header
-  return encode_header(json_dumps(header))
+  return encode_header(_json_util.json_dumps(header))
 
 
 def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[Text]:

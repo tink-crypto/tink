@@ -26,6 +26,7 @@ from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 from tink import core
 from tink.cc.pybind import tink_bindings
+from tink.jwt import _json_util
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_format
 from tink.jwt import _jwt_public_key_sign
@@ -120,7 +121,7 @@ class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, signature = parts
     self._verify(signature, unsigned_compact)
-    header = _jwt_format.json_loads(json_header)
+    header = _json_util.json_loads(json_header)
     _jwt_format.validate_header(header, self._algorithm)
     raw_jwt = _raw_jwt.raw_jwt_from_json(
         _jwt_format.get_type_header(header), json_payload)

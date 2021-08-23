@@ -19,8 +19,8 @@ import json
 from typing import cast, Mapping, Set, List, Dict, Optional, Text, Union, Any
 
 from tink import core
+from tink.jwt import _json_util
 from tink.jwt import _jwt_error
-from tink.jwt import _jwt_format
 
 _REGISTERED_NAMES = frozenset({'iss', 'sub', 'jti', 'aud', 'exp', 'nbf', 'iat'})
 
@@ -163,7 +163,7 @@ class RawJwt(object):
 
   def json_payload(self) -> Text:
     """Returns the payload encoded as JSON string."""
-    return _jwt_format.json_dumps(self._payload)
+    return _json_util.json_dumps(self._payload)
 
   @classmethod
   def create(cls,
@@ -220,7 +220,7 @@ class RawJwt(object):
   def _from_json(cls, type_header: Optional[Text], payload: Text) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
-    raw_jwt.__init__(type_header, _jwt_format.json_loads(payload))
+    raw_jwt.__init__(type_header, _json_util.json_loads(payload))
     return raw_jwt
 
 
