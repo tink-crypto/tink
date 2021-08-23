@@ -22,26 +22,51 @@
 #include "proto/tink.pb.h"
 #include "proto/tink.proto.h"
 
+extern "C" {
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+}
+
 namespace crypto {
 namespace tink {
 namespace {
 
+using google::crypto::tink::DilithiumKeyFormat;
 using google::crypto::tink::DilithiumPrivateKey;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 
-KeyTemplate* NewDilithiumKeyTemplate() {
+KeyTemplate* NewDilithiumKeyTemplate(int32 key_size) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       absl::StrCat(kTypeGoogleapisCom, DilithiumPrivateKey().GetTypeName()));
   key_template->set_output_prefix_type(OutputPrefixType::TINK);
+
+  DilithiumKeyFormat key_format;
+  key_format.set_key_size(key_size);
+  key_format.SerializeToString(key_template->mutable_value());
+
   return key_template;
 }
 
 }  // anonymous namespace
 
-const google::crypto::tink::KeyTemplate& DilithiumKeyTemplate() {
-  static const KeyTemplate* key_template = NewDilithiumKeyTemplate();
+const google::crypto::tink::KeyTemplate& Dilithium2KeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
+  return *key_template;
+}
+
+const google::crypto::tink::KeyTemplate& Dilithium3KeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES);
+  return *key_template;
+}
+
+const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES);
   return *key_template;
 }
 

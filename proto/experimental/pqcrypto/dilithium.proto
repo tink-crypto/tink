@@ -21,6 +21,8 @@ package google.crypto.tink;
 // See https://pq-crystals.org/dilithium/data/dilithium-specification-round3.pdf
 message DilithiumKeyFormat {
   uint32 version = 1;
+  int32 key_size = 2;
+
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.DilithiumPublicKey

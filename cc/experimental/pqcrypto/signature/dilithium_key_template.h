@@ -23,7 +23,11 @@ namespace crypto {
 namespace tink {
 
 // Returns a KeyTemplate that generates new instances of DilithiumPrivateKey.
-const google::crypto::tink::KeyTemplate& DilithiumKeyTemplate();
+const google::crypto::tink::KeyTemplate& Dilithium2KeyTemplate();
+
+const google::crypto::tink::KeyTemplate& Dilithium3KeyTemplate();
+
+const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate();
 
 }  // namespace tink
 }  // namespace crypto

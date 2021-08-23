@@ -38,6 +38,7 @@ extern "C" {
 
 namespace crypto {
 namespace tink {
+namespace {
 
 using ::crypto::tink::subtle::DilithiumPrivateKeyPqclean;
 using ::crypto::tink::test::IsOk;
@@ -49,16 +50,26 @@ using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Not;
 
-namespace {
+struct DilithiumTestCase {
+  std::string test_name;
+  int private_key_size = 0;
+  int public_key_size = 0;
+};
+
+using DilithiumVerifyKeyManagerTest = testing::TestWithParam<DilithiumTestCase>;
 
 // Helper function that returns a valid dilithium private key.
-StatusOr<DilithiumPrivateKey> CreateValidPrivateKey() {
-  return DilithiumSignKeyManager().CreateKey(DilithiumKeyFormat());
+StatusOr<DilithiumPrivateKey> CreateValidPrivateKey(int32 private_key_size) {
+  DilithiumKeyFormat key_format;
+  key_format.set_key_size(private_key_size);
+
+  return DilithiumSignKeyManager().CreateKey(key_format);
 }
 
 // Helper function that returns a valid dilithium public key.
-StatusOr<DilithiumPublicKey> CreateValidPublicKey() {
-  StatusOr<DilithiumPrivateKey> private_key = CreateValidPrivateKey();
+StatusOr<DilithiumPublicKey> CreateValidPublicKey(int32 private_key_size) {
+  StatusOr<DilithiumPrivateKey> private_key =
+      CreateValidPrivateKey(private_key_size);
 
   if (!private_key.ok()) return private_key.status();
   return DilithiumSignKeyManager().GetPublicKey(*private_key);
@@ -77,15 +88,21 @@ TEST(DilithiumVerifyKeyManagerTest, ValidateEmptyKey) {
               Not(IsOk()));
 }
 
-TEST(DilithiumVerifyKeyManagerTest, PublicKeyValid) {
-  StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey();
+TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyValid) {
+  const DilithiumTestCase& test_case = GetParam();
+
+  StatusOr<DilithiumPublicKey> public_key =
+      CreateValidPublicKey(test_case.private_key_size);
   ASSERT_THAT(public_key.status(), IsOk());
 
   EXPECT_THAT(DilithiumVerifyKeyManager().ValidateKey(*public_key), IsOk());
 }
 
-TEST(DilithiumVerifyKeyManagerTest, PublicKeyWrongVersion) {
-  StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey();
+TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyWrongVersion) {
+  const DilithiumTestCase& test_case = GetParam();
+
+  StatusOr<DilithiumPublicKey> public_key =
+      CreateValidPublicKey(test_case.private_key_size);
   ASSERT_THAT(public_key.status(), IsOk());
 
   public_key->set_version(1);
@@ -93,8 +110,11 @@ TEST(DilithiumVerifyKeyManagerTest, PublicKeyWrongVersion) {
               Not(IsOk()));
 }
 
-TEST(DilithiumVerifyKeyManagerTest, PublicKeyWrongKeyLength) {
-  StatusOr<DilithiumPublicKey> public_key = CreateValidPublicKey();
+TEST_P(DilithiumVerifyKeyManagerTest, PublicKeyWrongKeyLength) {
+  const DilithiumTestCase& test_case = GetParam();
+
+  StatusOr<DilithiumPublicKey> public_key =
+      CreateValidPublicKey(test_case.private_key_size);
   ASSERT_THAT(public_key.status(), IsOk());
 
   for (int keysize = 0; keysize < PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES;
@@ -105,8 +125,11 @@ TEST(DilithiumVerifyKeyManagerTest, PublicKeyWrongKeyLength) {
   }
 }
 
-TEST(DilithiumVerifyKeyManagerTest, Create) {
-  StatusOr<DilithiumPrivateKey> private_key = CreateValidPrivateKey();
+TEST_P(DilithiumVerifyKeyManagerTest, Create) {
+  const DilithiumTestCase& test_case = GetParam();
+
+  StatusOr<DilithiumPrivateKey> private_key =
+      CreateValidPrivateKey(test_case.private_key_size);
   ASSERT_THAT(private_key.status(), IsOk());
 
   StatusOr<DilithiumPublicKey> public_key =
@@ -132,12 +155,16 @@ TEST(DilithiumVerifyKeyManagerTest, Create) {
   EXPECT_THAT((*verifier)->Verify(*signature, message), IsOk());
 }
 
-TEST(DilithiumVerifyKeyManagerTest, CreateDifferentPublicKey) {
-  StatusOr<DilithiumPrivateKey> private_key = CreateValidPrivateKey();
+TEST_P(DilithiumVerifyKeyManagerTest, CreateDifferentPublicKey) {
+  const DilithiumTestCase& test_case = GetParam();
+
+  StatusOr<DilithiumPrivateKey> private_key =
+      CreateValidPrivateKey(test_case.private_key_size);
   ASSERT_THAT(private_key.status(), IsOk());
 
   // Create a new public key derived from a diffferent private key.
-  StatusOr<DilithiumPrivateKey> new_private_key = CreateValidPrivateKey();
+  StatusOr<DilithiumPrivateKey> new_private_key =
+      CreateValidPrivateKey(test_case.private_key_size);
   ASSERT_THAT(new_private_key.status(), IsOk());
   StatusOr<DilithiumPublicKey> public_key =
       DilithiumSignKeyManager().GetPublicKey(*new_private_key);
@@ -161,6 +188,19 @@ TEST(DilithiumVerifyKeyManagerTest, CreateDifferentPublicKey) {
   ASSERT_THAT(signature.status(), IsOk());
   EXPECT_THAT((*verifier)->Verify(*signature, message), Not(IsOk()));
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    DilithiumVerifyKeyManagerTests, DilithiumVerifyKeyManagerTest,
+    testing::ValuesIn<DilithiumTestCase>({
+        {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES},
+        {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES},
+        {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES},
+    }),
+    [](const testing::TestParamInfo<DilithiumVerifyKeyManagerTest::ParamType>&
+           info) { return info.param.test_name; });
 
 }  // namespace
 

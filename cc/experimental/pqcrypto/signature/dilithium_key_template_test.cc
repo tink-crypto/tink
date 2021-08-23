@@ -24,6 +24,13 @@
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
 #include "tink/util/test_matchers.h"
 #include "proto/tink.pb.h"
+#include "proto/tink.proto.h"
+
+extern "C" {
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+}
 
 namespace crypto {
 namespace tink {
@@ -35,45 +42,66 @@ using ::google::crypto::tink::DilithiumPrivateKey;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 
-TEST(DilithiumKeyTemplateTest, CheckInitialization) {
+struct DilithiumKeyTemplateTestCase {
+  std::string test_name;
+  int32 key_size;
+  KeyTemplate key_template;
+};
+
+using DilithiumKeyTemplateTest =
+    testing::TestWithParam<DilithiumKeyTemplateTestCase>;
+
+TEST_P(DilithiumKeyTemplateTest, CheckDilithiumInitialization) {
   std::string type_url =
       "type.googleapis.com/google.crypto.tink.DilithiumPrivateKey";
-  const KeyTemplate& key_template = DilithiumKeyTemplate();
+  const KeyTemplate& key_template = GetParam().key_template;
 
   EXPECT_EQ(type_url, key_template.type_url());
   EXPECT_EQ(OutputPrefixType::TINK, key_template.output_prefix_type());
 }
 
-TEST(DilithiumKeyTemplateTest, ValidateKeyFormat) {
-  const KeyTemplate& key_template = DilithiumKeyTemplate();
+TEST_P(DilithiumKeyTemplateTest, ValidateKeyFormat) {
+  const DilithiumKeyTemplateTestCase& test_case = GetParam();
   DilithiumKeyFormat key_format;
-  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+
+  key_format.set_key_size(test_case.key_size);
   EXPECT_THAT(DilithiumSignKeyManager().ValidateKeyFormat(key_format), IsOk());
+  EXPECT_TRUE(key_format.ParseFromString(test_case.key_template.value()));
 }
 
-TEST(DilithiumKeyTemplateTest, SameReference) {
-  const KeyTemplate& key_template = DilithiumKeyTemplate();
-  const KeyTemplate& key_template_2 = DilithiumKeyTemplate();
+TEST_P(DilithiumKeyTemplateTest, SameReference) {
+  const KeyTemplate& key_template = GetParam().key_template;
+  const KeyTemplate& key_template_2 = GetParam().key_template;
 
   EXPECT_EQ(&key_template, &key_template_2);
 }
 
-TEST(DilithiumKeyTemplateTest, KeyManagerCompatibility) {
-  const KeyTemplate& key_template = DilithiumKeyTemplate();
-
+TEST_P(DilithiumKeyTemplateTest, KeyManagerCompatibility) {
   DilithiumSignKeyManager sign_key_manager;
   DilithiumVerifyKeyManager verify_key_manager;
   std::unique_ptr<KeyManager<PublicKeySign>> key_manager =
       internal::MakePrivateKeyManager<PublicKeySign>(&sign_key_manager,
                                                      &verify_key_manager);
-  EXPECT_EQ(key_manager->get_key_type(), key_template.type_url());
-
   DilithiumKeyFormat key_format;
-  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
-  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
+  const DilithiumKeyTemplateTestCase& test_case = GetParam();
+
+  key_format.set_key_size(test_case.key_size);
+  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result2 =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result.status(), IsOk());
+  EXPECT_THAT(new_key_result2.status(), IsOk());
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    DilithiumKeyTemplateTests, DilithiumKeyTemplateTest,
+    testing::ValuesIn<DilithiumKeyTemplateTestCase>(
+        {{"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+          Dilithium2KeyTemplate()},
+         {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+          Dilithium2KeyTemplate()},
+         {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+          Dilithium2KeyTemplate()}}),
+    [](const testing::TestParamInfo<DilithiumKeyTemplateTest::ParamType>&
+           info) { return info.param.test_name; });
 
 }  // namespace
 }  // namespace tink

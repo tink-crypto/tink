@@ -61,9 +61,13 @@ Status DilithiumVerifyKeyManager::ValidateKey(
   if (!status.ok()) return status;
 
   if (key.key_value().length() !=
-      PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES) {
+          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES &&
+      key.key_value().length() !=
+          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES &&
+      key.key_value().length() !=
+          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES) {
     return Status(util::error::INVALID_ARGUMENT,
-                  "The dilithium avx2 public key must be 1312-bytes long.");
+                  "Invalid dilithium public key size.");
   }
   return Status::OK;
 }
