@@ -70,6 +70,12 @@ class TestingServersTest(parameterized.TestCase):
     testing_servers.stop()
     super(TestingServersTest, cls).tearDownClass()
 
+  @parameterized.parameters(['java', 'python'])
+  def test_get_template(self, lang):
+    template = testing_servers.key_template(lang, 'AES128_GCM')
+    self.assertEqual(template.type_url,
+                     'type.googleapis.com/google.crypto.tink.AesGcmKey')
+
   @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):
     keyset = testing_servers.new_keyset(lang,

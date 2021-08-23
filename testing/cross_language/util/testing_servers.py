@@ -248,10 +248,16 @@ def stop() -> None:
   _ts.stop()
 
 
-def new_keyset(lang: Text, key_template: tink_pb2.KeyTemplate) -> bytes:
+def key_template(lang: Text, template_name: Text) -> tink_pb2.KeyTemplate:
+  """Returns the key template of template_name, implemented in lang."""
+  global _ts
+  return _primitives.key_template(_ts.keyset_stub(lang), template_name)
+
+
+def new_keyset(lang: Text, template: tink_pb2.KeyTemplate) -> bytes:
   """Returns a new KeysetHandle, implemented in lang."""
   global _ts
-  return _primitives.new_keyset(_ts.keyset_stub(lang), key_template)
+  return _primitives.new_keyset(_ts.keyset_stub(lang), template)
 
 
 def public_keyset(lang: Text, private_keyset: bytes) -> bytes:

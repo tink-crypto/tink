@@ -38,10 +38,19 @@ from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
 
 
+def key_template(stub: testing_api_pb2_grpc.KeysetStub,
+                 template_name: Text) -> tink_pb2.KeyTemplate:
+  request = testing_api_pb2.KeysetTemplateRequest(template_name=template_name)
+  response = stub.GetTemplate(request)
+  if response.err:
+    raise tink.TinkError(response.err)
+  return tink_pb2.KeyTemplate.FromString(response.key_template)
+
+
 def new_keyset(stub: testing_api_pb2_grpc.KeysetStub,
-               key_template: tink_pb2.KeyTemplate) -> bytes:
+               template: tink_pb2.KeyTemplate) -> bytes:
   gen_request = testing_api_pb2.KeysetGenerateRequest(
-      template=key_template.SerializeToString())
+      template=template.SerializeToString())
   gen_response = stub.Generate(gen_request)
   if gen_response.err:
     raise tink.TinkError(gen_response.err)

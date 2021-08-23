@@ -26,6 +26,7 @@ py_library(
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
         "@tink_py//tink/mac",
         "@tink_py//tink/prf",
         "@tink_py//tink/signature",
