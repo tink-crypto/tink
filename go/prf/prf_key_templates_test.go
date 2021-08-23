@@ -37,7 +37,7 @@ func TestKeyTemplates(t *testing.T) {
 			template: prf.HMACSHA256PRFKeyTemplate()},
 		{name: "HMAC_SHA512_PRF",
 			template: prf.HMACSHA512PRFKeyTemplate()},
-		{name: "HKDF_SHA256_PRF",
+		{name: "HKDF_SHA256",
 			template: prf.HKDFSHA256PRFKeyTemplate()},
 		{name: "AES_CMAC_PRF",
 			template: prf.AESCMACPRFKeyTemplate()},

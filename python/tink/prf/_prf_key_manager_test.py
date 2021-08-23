@@ -39,7 +39,7 @@ class PrfKeyManagerTest(parameterized.TestCase):
       ('AES_CMAC_PRF', prf.prf_key_templates.AES_CMAC),
       ('HMAC_SHA256_PRF', prf.prf_key_templates.HMAC_SHA256),
       ('HMAC_SHA512_PRF', prf.prf_key_templates.HMAC_SHA512),
-      ('HKDF_SHA256_PRF', prf.prf_key_templates.HKDF_SHA256)
+      ('HKDF_SHA256', prf.prf_key_templates.HKDF_SHA256)
   ])
   def test_template(self, template_name, template):
     self.assertEqual(template,
