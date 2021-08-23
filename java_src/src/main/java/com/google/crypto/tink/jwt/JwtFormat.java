@@ -113,7 +113,38 @@ final class JwtFormat {
     return Base64.urlSafeEncode(header.toString().getBytes(UTF_8));
   }
 
-  static void validateHeader(String expectedAlgorithm, JsonObject parsedHeader)
+  private static void validateKidInHeader(String expectedKid, JsonObject parsedHeader)
+      throws JwtInvalidException {
+    String kid = getStringHeader(parsedHeader, JwtNames.HEADER_KEY_ID);
+    if (!kid.equals(expectedKid)) {
+      throw new JwtInvalidException("invalid kid in header");
+    }
+  }
+
+  /**
+   * Validates the parsed header.
+   *
+   * @deprecated Use validateHeader(expectedAlgorithm, tinkKid, customKid, parsedHeader) instead.
+   */
+  @Deprecated
+  static void validateHeader(
+      String expectedAlgorithm,
+      JsonObject parsedHeader)
+      throws InvalidAlgorithmParameterException, JwtInvalidException {
+    validateHeader(expectedAlgorithm, Optional.empty(), Optional.empty(), parsedHeader);
+  }
+
+  /**
+   * Validates the parsed header.
+   *
+   * tinkKid should only be set for keys with output prefix type TINK. customKid should only
+   * be set for keys with output prefix type RAW. They should not be set at the same time.
+   */
+  static void validateHeader(
+      String expectedAlgorithm,
+      Optional<String> tinkKid,
+      Optional<String> customKid,
+      JsonObject parsedHeader)
       throws InvalidAlgorithmParameterException, JwtInvalidException {
     validateAlgorithm(expectedAlgorithm);
     String algorithm = getStringHeader(parsedHeader, JwtNames.HEADER_ALGORITHM);
@@ -124,6 +155,21 @@ final class JwtFormat {
     }
     if (parsedHeader.has(JwtNames.HEADER_CRITICAL)) {
       throw new JwtInvalidException("all tokens with crit headers are rejected");
+    }
+    if (tinkKid.isPresent() && customKid.isPresent()) {
+      throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+    }
+    boolean headerHasKid = parsedHeader.has(JwtNames.HEADER_KEY_ID);
+    if (tinkKid.isPresent()) {
+      if (!headerHasKid) {
+        // for output prefix type TINK, the kid header is required.
+        throw new JwtInvalidException("missing kid in header");
+      }
+      validateKidInHeader(tinkKid.get(), parsedHeader);
+    }
+    if (customKid.isPresent() && headerHasKid) {
+      // for output prefix type RAW, the kid header is not required, even if custom kid is set.
+      validateKidInHeader(customKid.get(), parsedHeader);
     }
     // Ignore all other headers
   }
