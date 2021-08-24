@@ -224,6 +224,31 @@ class RawJwt(object):
     return raw_jwt
 
 
+def new_raw_jwt(*,
+                type_header: Optional[Text] = None,
+                issuer: Optional[Text] = None,
+                subject: Optional[Text] = None,
+                audiences: Optional[List[Text]] = None,
+                jwt_id: Optional[Text] = None,
+                expiration: Optional[datetime.datetime] = None,
+                without_expiration: bool = False,
+                not_before: Optional[datetime.datetime] = None,
+                issued_at: Optional[datetime.datetime] = None,
+                custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
+  """Creates a new RawJwt."""
+  return RawJwt.create(
+      type_header=type_header,
+      issuer=issuer,
+      subject=subject,
+      audiences=audiences,
+      jwt_id=jwt_id,
+      expiration=expiration,
+      without_expiration=without_expiration,
+      not_before=not_before,
+      issued_at=issued_at,
+      custom_claims=custom_claims)
+
+
 def raw_jwt_from_json(type_header: Optional[Text], payload: Text) -> RawJwt:
   """Internal function used to verify JWT token."""
   return RawJwt._from_json(type_header, payload)  # pylint: disable=protected-access

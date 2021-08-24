@@ -42,61 +42,8 @@ JwtMac = _jwt_mac.JwtMac
 JwtPublicKeySign = _jwt_public_key_sign.JwtPublicKeySign
 JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
-
-def new_raw_jwt(*,
-                type_header: Optional[Text] = None,
-                issuer: Optional[Text] = None,
-                subject: Optional[Text] = None,
-                audiences: Optional[List[Text]] = None,
-                jwt_id: Optional[Text] = None,
-                expiration: Optional[datetime.datetime] = None,
-                without_expiration: bool = False,
-                not_before: Optional[datetime.datetime] = None,
-                issued_at: Optional[datetime.datetime] = None,
-                custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
-  """Creates a new RawJwt."""
-  return _raw_jwt.RawJwt.create(
-      type_header=type_header,
-      issuer=issuer,
-      subject=subject,
-      audiences=audiences,
-      jwt_id=jwt_id,
-      expiration=expiration,
-      without_expiration=without_expiration,
-      not_before=not_before,
-      issued_at=issued_at,
-      custom_claims=custom_claims)
-
-
-def new_validator(
-    *,
-    expected_type_header: Optional[Text] = None,
-    expected_issuer: Optional[Text] = None,
-    expected_subject: Optional[Text] = None,
-    expected_audience: Optional[Text] = None,
-    ignore_type_header: bool = False,
-    ignore_issuer: bool = False,
-    ignore_subject: bool = False,
-    ignore_audiences: bool = False,
-    allow_missing_expiration: bool = False,
-    expect_issued_in_the_past: bool = False,
-    clock_skew: Optional[datetime.timedelta] = None,
-    fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
-  """Creates a new JwtValidator."""
-  return JwtValidator(
-      expected_type_header=expected_type_header,
-      expected_issuer=expected_issuer,
-      expected_subject=expected_subject,
-      expected_audience=expected_audience,
-      ignore_type_header=ignore_type_header,
-      ignore_issuer=ignore_issuer,
-      ignore_subject=ignore_subject,
-      ignore_audiences=ignore_audiences,
-      allow_missing_expiration=allow_missing_expiration,
-      expect_issued_in_the_past=expect_issued_in_the_past,
-      clock_skew=clock_skew,
-      fixed_now=fixed_now)
-
+new_raw_jwt = _raw_jwt.new_raw_jwt
+new_validator = _jwt_validator.new_validator
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
 raw_jwt_hs256_template = _jwt_key_templates.raw_jwt_hs256_template

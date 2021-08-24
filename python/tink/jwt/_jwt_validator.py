@@ -135,6 +135,36 @@ class JwtValidator(object):
     return self._fixed_now
 
 
+def new_validator(
+    *,
+    expected_type_header: Optional[Text] = None,
+    expected_issuer: Optional[Text] = None,
+    expected_subject: Optional[Text] = None,
+    expected_audience: Optional[Text] = None,
+    ignore_type_header: bool = False,
+    ignore_issuer: bool = False,
+    ignore_subject: bool = False,
+    ignore_audiences: bool = False,
+    allow_missing_expiration: bool = False,
+    expect_issued_in_the_past: bool = False,
+    clock_skew: Optional[datetime.timedelta] = None,
+    fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
+  """Creates a new JwtValidator."""
+  return JwtValidator(
+      expected_type_header=expected_type_header,
+      expected_issuer=expected_issuer,
+      expected_subject=expected_subject,
+      expected_audience=expected_audience,
+      ignore_type_header=ignore_type_header,
+      ignore_issuer=ignore_issuer,
+      ignore_subject=ignore_subject,
+      ignore_audiences=ignore_audiences,
+      allow_missing_expiration=allow_missing_expiration,
+      expect_issued_in_the_past=expect_issued_in_the_past,
+      clock_skew=clock_skew,
+      fixed_now=fixed_now)
+
+
 def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
   """Validates a jwt.RawJwt and raises JwtInvalidError if it is invalid.
 
