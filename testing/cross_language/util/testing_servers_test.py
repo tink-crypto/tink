@@ -70,7 +70,7 @@ class TestingServersTest(parameterized.TestCase):
     testing_servers.stop()
     super(TestingServersTest, cls).tearDownClass()
 
-  @parameterized.parameters(['java', 'python'])
+  @parameterized.parameters(['java', 'go', 'python'])
   def test_get_template(self, lang):
     template = testing_servers.key_template(lang, 'AES128_GCM')
     self.assertEqual(template.type_url,
