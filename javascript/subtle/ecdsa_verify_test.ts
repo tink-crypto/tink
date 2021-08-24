@@ -185,7 +185,7 @@ async function runWycheproofTest(
   } catch (e) {
     if (test['result'] === 'valid') {
       return 'valid signature rejected on test ' + test['tcId'] +
-          ': unexpected exception \"' + e.toString() + '\".\n';
+          ': unexpected exception "' + String(e) + '".\n';
     }
   }
   // If the test passes return an empty string.

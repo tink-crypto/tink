@@ -370,13 +370,13 @@ async function runWycheproofTest(test: {
       }
       const sharedSecretHex = Bytes.toHex(sharedSecret);
       if (sharedSecretHex !== test['shared']) {
-        return 'Fail on test ' + test['tcId'] + ': unexpected result was \"' +
-            sharedSecretHex + '\".\n';
+        return 'Fail on test ' + test['tcId'] + ': unexpected result was "' +
+            sharedSecretHex + '".\n';
       }
     } catch (e) {
       if (test['result'] === 'valid') {
-        return 'Fail on test ' + test['tcId'] + ': unexpected exception \"' +
-            e.toString() + '\".\n';
+        return 'Fail on test ' + test['tcId'] + ': unexpected exception "' +
+            e.toString() + '".\n';
       }
     }
   } catch (e) {
@@ -387,8 +387,8 @@ async function runWycheproofTest(test: {
         return '';
       }
       return 'Fail on test ' + test['tcId'] +
-          ': unexpected exception trying to import private key \"' +
-          e.toString() + '\".\n';
+          ': unexpected exception trying to import private key "' +
+          e.toString() + '".\n';
     }
   }
   // If the test passes return an empty string.
