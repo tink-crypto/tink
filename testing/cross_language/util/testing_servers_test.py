@@ -196,7 +196,6 @@ class TestingServersTest(parameterized.TestCase):
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience1',
         fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
@@ -233,7 +232,6 @@ class TestingServersTest(parameterized.TestCase):
     compact = signer.sign_and_encode(token)
     validator = jwt.new_validator(
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience1',
         fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)

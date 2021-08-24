@@ -32,20 +32,15 @@ class JwtValidator(object):
     validation time can be changed using the fixed_now parameter. clock_skew can
     be set to allow a small leeway (not more than 10 minutes) to account for
     clock skew.
-
-    Note that expected_subject and ignore_subject are deprecated. They don't
-    have any effect anymore and will be removed soon.
   """
 
   def __init__(self,
                *,
                expected_type_header: Optional[Text],
                expected_issuer: Optional[Text],
-               expected_subject: Optional[Text],
                expected_audience: Optional[Text],
                ignore_type_header: bool,
                ignore_issuer: bool,
-               ignore_subject: bool,
                ignore_audiences: bool,
                allow_missing_expiration: bool,
                expect_issued_in_the_past: bool,
@@ -57,19 +52,14 @@ class JwtValidator(object):
     if expected_issuer and ignore_issuer:
       raise ValueError(
           'expected_issuer and ignore_issuer cannot be used together')
-    if expected_subject and ignore_subject:
-      raise ValueError(
-          'expected_subject and ignore_subject cannot be used together')
     if expected_audience and ignore_audiences:
       raise ValueError(
           'expected_audience and ignore_audiences cannot be used together')
     self._expected_type_header = expected_type_header
     self._expected_issuer = expected_issuer
-    self._expected_subject = expected_subject
     self._expected_audience = expected_audience
     self._ignore_type_header = ignore_type_header
     self._ignore_issuer = ignore_issuer
-    self._ignore_subject = ignore_subject
     self._ignore_audiences = ignore_audiences
     self._allow_missing_expiration = allow_missing_expiration
     self._expect_issued_in_the_past = expect_issued_in_the_past
@@ -95,12 +85,6 @@ class JwtValidator(object):
   def expected_issuer(self) -> Text:
     return self._expected_issuer
 
-  def has_expected_subject(self) -> bool:
-    return self._expected_subject is not None
-
-  def expected_subject(self) -> Text:
-    return self._expected_subject
-
   def has_expected_audience(self) -> bool:
     return self._expected_audience is not None
 
@@ -112,9 +96,6 @@ class JwtValidator(object):
 
   def ignore_issuer(self) -> bool:
     return self._ignore_issuer
-
-  def ignore_subject(self) -> bool:
-    return self._ignore_subject
 
   def ignore_audiences(self) -> bool:
     return self._ignore_audiences
@@ -139,11 +120,9 @@ def new_validator(
     *,
     expected_type_header: Optional[Text] = None,
     expected_issuer: Optional[Text] = None,
-    expected_subject: Optional[Text] = None,
     expected_audience: Optional[Text] = None,
     ignore_type_header: bool = False,
     ignore_issuer: bool = False,
-    ignore_subject: bool = False,
     ignore_audiences: bool = False,
     allow_missing_expiration: bool = False,
     expect_issued_in_the_past: bool = False,
@@ -153,11 +132,9 @@ def new_validator(
   return JwtValidator(
       expected_type_header=expected_type_header,
       expected_issuer=expected_issuer,
-      expected_subject=expected_subject,
       expected_audience=expected_audience,
       ignore_type_header=ignore_type_header,
       ignore_issuer=ignore_issuer,
-      ignore_subject=ignore_subject,
       ignore_audiences=ignore_audiences,
       allow_missing_expiration=allow_missing_expiration,
       expect_issued_in_the_past=expect_issued_in_the_past,

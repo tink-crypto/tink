@@ -108,7 +108,6 @@ class PrimitivesTest(absltest.TestCase):
     validator = jwt.new_validator(
         expected_type_header='type_header',
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience',
         clock_skew=datetime.timedelta(seconds=123),
         fixed_now=now)
@@ -116,7 +115,6 @@ class PrimitivesTest(absltest.TestCase):
     expected = testing_api_pb2.JwtValidator()
     expected.expected_type_header.value = 'type_header'
     expected.expected_issuer.value = 'issuer'
-    expected.expected_subject.value = 'subject'
     expected.expected_audience.value = 'audience'
     expected.clock_skew.seconds = 123
     expected.now.seconds = 1234567

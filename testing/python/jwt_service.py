@@ -27,10 +27,10 @@ import grpc
 import tink
 from tink import cleartext_keyset_handle
 
+from tink import jwt
+
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
-
-from google3.third_party.tink.python.tink import jwt
 
 
 def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:
@@ -162,9 +162,6 @@ def validator_from_proto(
   expected_issuer = None
   if proto_validator.HasField('expected_issuer'):
     expected_issuer = proto_validator.expected_issuer.value
-  expected_subject = None
-  if proto_validator.HasField('expected_subject'):
-    expected_subject = proto_validator.expected_subject.value
   expected_audience = None
   if proto_validator.HasField('expected_audience'):
     expected_audience = proto_validator.expected_audience.value
@@ -177,11 +174,9 @@ def validator_from_proto(
   return jwt.new_validator(
       expected_type_header=expected_type_header,
       expected_issuer=expected_issuer,
-      expected_subject=expected_subject,
       expected_audience=expected_audience,
       ignore_type_header=proto_validator.ignore_type_header,
       ignore_issuer=proto_validator.ignore_issuer,
-      ignore_subject=proto_validator.ignore_subject,
       ignore_audiences=proto_validator.ignore_audience,
       allow_missing_expiration=proto_validator.allow_missing_expiration,
       expect_issued_in_the_past=proto_validator.expect_issued_in_the_past,

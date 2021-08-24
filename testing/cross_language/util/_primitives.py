@@ -463,13 +463,10 @@ def jwt_validator_to_proto(
     )
   if validator.has_expected_issuer():
     proto_validator.expected_issuer.value = validator.expected_issuer()
-  if validator.has_expected_subject():
-    proto_validator.expected_subject.value = validator.expected_subject()
   if validator.has_expected_audience():
     proto_validator.expected_audience.value = validator.expected_audience()
   proto_validator.ignore_type_header = validator.ignore_type_header()
   proto_validator.ignore_issuer = validator.ignore_issuer()
-  proto_validator.ignore_subject = validator.ignore_subject()
   proto_validator.ignore_audience = validator.ignore_audiences()
   proto_validator.allow_missing_expiration = validator.allow_missing_expiration(
   )

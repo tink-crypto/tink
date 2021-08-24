@@ -90,7 +90,6 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
         compact,
         jwt.new_validator(
             expected_issuer='issuer',
-            expected_subject='subject',
             allow_missing_expiration=True))
     self.assertEqual(output_token.issuer(), token.issuer())
     self.assertEqual(output_token.subject(), token.subject())
@@ -131,7 +130,6 @@ class JwtKeyTemplatesTest(parameterized.TestCase):
         compact,
         jwt.new_validator(
             expected_issuer='issuer',
-            expected_subject='subject',
             allow_missing_expiration=True))
     self.assertEqual(verified_jwt.issuer(), 'issuer')
     self.assertEqual(verified_jwt.subject(), 'subject')

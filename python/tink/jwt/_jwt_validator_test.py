@@ -27,7 +27,6 @@ class JwtValidatorTest(absltest.TestCase):
     validator = jwt.new_validator(
         expected_type_header='type_header',
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience',
         fixed_now=fixed_now,
         clock_skew=clock_skew)
@@ -35,13 +34,10 @@ class JwtValidatorTest(absltest.TestCase):
     self.assertEqual(validator.expected_type_header(), 'type_header')
     self.assertTrue(validator.has_expected_issuer())
     self.assertEqual(validator.expected_issuer(), 'issuer')
-    self.assertTrue(validator.has_expected_subject())
-    self.assertEqual(validator.expected_subject(), 'subject')
     self.assertTrue(validator.has_expected_audience())
     self.assertEqual(validator.expected_audience(), 'audience')
     self.assertFalse(validator.allow_missing_expiration())
     self.assertFalse(validator.ignore_issuer())
-    self.assertFalse(validator.ignore_subject())
     self.assertFalse(validator.ignore_audiences())
     self.assertTrue(validator.has_fixed_now())
     self.assertEqual(validator.fixed_now(), fixed_now)
@@ -52,19 +48,16 @@ class JwtValidatorTest(absltest.TestCase):
         allow_missing_expiration=True,
         ignore_type_header=True,
         ignore_issuer=True,
-        ignore_subject=True,
         ignore_audiences=True)
     self.assertTrue(validator.allow_missing_expiration())
     self.assertTrue(validator.ignore_type_header())
     self.assertTrue(validator.ignore_issuer())
-    self.assertTrue(validator.ignore_subject())
     self.assertTrue(validator.ignore_audiences())
 
   def test_empty_validator_getters(self):
     validator = jwt.new_validator()
     self.assertFalse(validator.has_expected_type_header())
     self.assertFalse(validator.has_expected_issuer())
-    self.assertFalse(validator.has_expected_subject())
     self.assertFalse(validator.has_expected_audience())
     self.assertFalse(validator.has_fixed_now())
     self.assertFalse(validator.clock_skew(), datetime.timedelta())
@@ -248,43 +241,6 @@ class JwtValidatorTest(absltest.TestCase):
     token_with_issuer = jwt.new_raw_jwt(
         issuer='issuer', without_expiration=True)
     _jwt_validator.validate(validator, token_with_issuer)
-
-  def test_expected_subject_but_no_subject_set_success(self):
-    token = jwt.new_raw_jwt(without_expiration=True)
-    # expected_subject is ignored and will be removed soon.
-    validator = jwt.new_validator(
-        expected_subject='subject', allow_missing_expiration=True)
-    _jwt_validator.validate(validator, token)
-
-  def test_invalid_subject_fails(self):
-    token = jwt.new_raw_jwt(subject='unknown', without_expiration=True)
-    # expected_subject is ignored and will be removed soon
-    validator = jwt.new_validator(
-        expected_subject='subject', allow_missing_expiration=True)
-    _jwt_validator.validate(validator, token)
-
-  def test_correct_subject_success(self):
-    token = jwt.new_raw_jwt(subject='subject', without_expiration=True)
-    # expected_subject is ignored and will be removed soon
-    validator = jwt.new_validator(
-        expected_subject='subject', allow_missing_expiration=True)
-    _jwt_validator.validate(validator, token)
-
-  def test_subject_in_token_but_not_in_validator_fails(self):
-    validator = jwt.new_validator(allow_missing_expiration=True)
-    token_with_subject = jwt.new_raw_jwt(
-        subject='subject', without_expiration=True)
-    # subject is not validated anymore
-    _jwt_validator.validate(validator, token_with_subject)
-
-  def test_ignore_subject_success(self):
-    validator = jwt.new_validator(
-        ignore_subject=True, allow_missing_expiration=True)
-    token_without_subject = jwt.new_raw_jwt(without_expiration=True)
-    _jwt_validator.validate(validator, token_without_subject)
-    token_with_subject = jwt.new_raw_jwt(
-        subject='subject', without_expiration=True)
-    _jwt_validator.validate(validator, token_with_subject)
 
   def test_requires_audience_but_no_audience_set_fails(self):
     token = jwt.new_raw_jwt(without_expiration=True)
