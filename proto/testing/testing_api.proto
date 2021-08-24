@@ -352,9 +352,7 @@ service Jwt {
 }
 
 //  Used to represent the JSON null value.
-enum NullValue {
-  NULL_VALUE = 0;
-}
+enum NullValue { NULL_VALUE = 0; }
 
 // TODO(b/179867503): Remove these copies of Timestamp, Duration and StringValue
 
@@ -420,11 +418,9 @@ message JwtToken {
 message JwtValidator {
   StringValue expected_type_header = 7;
   StringValue expected_issuer = 1;
-  StringValue expected_subject = 2;
   StringValue expected_audience = 3;
   bool ignore_type_header = 8;
   bool ignore_issuer = 9;
-  bool ignore_subject = 10;
   bool ignore_audience = 11;
   bool allow_missing_expiration = 12;
   bool expect_issued_in_the_past = 13;
