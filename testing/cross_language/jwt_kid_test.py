@@ -17,20 +17,18 @@
 
 import base64
 import json
-from typing import Text, Optional
+from typing import Optional, Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
+from tink import jwt
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
-
-from google3.third_party.tink.python.tink import jwt
 from util import supported_key_types
 from util import testing_servers
 
