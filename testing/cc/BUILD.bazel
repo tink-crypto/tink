@@ -41,12 +41,21 @@ cc_library(
     deps = [
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:binary_keyset_writer",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:json_keyset_reader",
         "@tink_cc//:json_keyset_writer",
         "@tink_cc//:keyset_handle",
+        "@tink_cc//aead:aead_key_templates",
+        "@tink_cc//daead:deterministic_aead_key_templates",
+        "@tink_cc//hybrid:hybrid_key_templates",
+        "@tink_cc//jwt:jwt_key_templates",
+        "@tink_cc//mac:mac_key_templates",
+        "@tink_cc//prf:prf_key_templates",
+        "@tink_cc//signature:signature_key_templates",
+        "@tink_cc//streamingaead:streaming_aead_key_templates",
     ],
 )
 
