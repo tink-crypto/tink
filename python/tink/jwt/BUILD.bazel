@@ -149,6 +149,7 @@ py_library(
     deps = [
         ":_json_util",
         ":_jwt_error",
+        ":_raw_jwt",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -161,6 +162,7 @@ py_test(
         ":_json_util",
         ":_jwt_error",
         ":_jwt_format",
+        ":_raw_jwt",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
     ],

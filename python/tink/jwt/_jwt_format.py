@@ -21,6 +21,7 @@ from typing import Any, Optional, Text, Tuple
 from tink.proto import tink_pb2
 from tink.jwt import _json_util
 from tink.jwt import _jwt_error
+from tink.jwt import _raw_jwt
 
 _VALID_ALGORITHMS = frozenset({
     'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
@@ -175,11 +176,13 @@ def get_type_header(header: Any) -> Optional[Text]:
   return header.get('typ', None)
 
 
-# TODO(juerg): Refactor this to create_unsigned_compact(algorithm, kid, raw_jwt)
-def create_unsigned_compact(algorithm: Text, typ_header: Optional[Text],
-                            kid: Optional[Text], json_payload: Text) -> bytes:
-  header = create_header(algorithm, typ_header, kid)
-  return header + b'.' + encode_payload(json_payload)
+def create_unsigned_compact(algorithm: Text, kid: Optional[Text],
+                            raw_jwt: _raw_jwt.RawJwt) -> bytes:
+  if raw_jwt.has_type_header():
+    header = create_header(algorithm, raw_jwt.type_header(), kid)
+  else:
+    header = create_header(algorithm, None, kid)
+  return header + b'.' + encode_payload(raw_jwt.json_payload())
 
 
 def create_signed_compact(unsigned_compact: bytes, signature: bytes) -> Text:

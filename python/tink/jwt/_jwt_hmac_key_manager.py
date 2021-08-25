@@ -72,17 +72,13 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
     Raises:
       tink.TinkError if the operation fails.
     """
-    if raw_jwt.has_type_header():
-      type_header = raw_jwt.type_header()
-    else:
-      type_header = None
     if self._custom_kid is not None:
       if kid is not None:
         raise _jwt_error.JwtInvalidError(
             'custom_kid must not be set for keys with output prefix type TINK')
       kid = self._custom_kid
-    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
-                                                   kid, raw_jwt.json_payload())
+    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, kid,
+                                                   raw_jwt)
     return _jwt_format.create_signed_compact(unsigned,
                                              self._compute_mac(unsigned))
 

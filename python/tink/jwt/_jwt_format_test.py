@@ -19,6 +19,7 @@ from tink.proto import tink_pb2
 from tink.jwt import _json_util
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_format
+from tink.jwt import _raw_jwt
 
 
 class JwtFormatTest(parameterized.TestCase):
@@ -224,9 +225,9 @@ class JwtFormatTest(parameterized.TestCase):
       _jwt_format.encode_payload('{"iss":"\uD834"}')
 
   def test_create_unsigned_compact_success(self):
+    raw_jwt = _raw_jwt.raw_jwt_from_json(None, '{"iss":"joe"}')
     self.assertEqual(
-        _jwt_format.create_unsigned_compact('RS256', None, None,
-                                            '{"iss":"joe"}'),
+        _jwt_format.create_unsigned_compact('RS256', None, raw_jwt),
         b'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ')
 
   def test_encode_decode_signature_success(self):
@@ -240,11 +241,11 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(_jwt_format.decode_signature(encoded), signature)
 
   def test_signed_compact_create_split(self):
-    payload = '{"iss":"joe"}'
+    raw_jwt = _raw_jwt.raw_jwt_from_json('JWT', '{"iss":"joe"}')
     signature = _jwt_format.decode_signature(
         b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     unsigned_compact = _jwt_format.create_unsigned_compact(
-        'RS256', 'JWT', None, payload)
+        'RS256', None, raw_jwt)
     signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
                                                        signature)
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
@@ -260,15 +261,15 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(hdr, '{"alg":"RS256","typ":"JWT"}')
     header = _json_util.json_loads(hdr)
     _jwt_format.validate_header(header, 'RS256')
-    self.assertEqual(pay, payload)
+    self.assertEqual(pay, '{"iss":"joe"}')
     self.assertEqual(_jwt_format.get_type_header(header), 'JWT')
 
   def test_signed_compact_create_split_with_kid(self):
-    payload = '{"iss":"joe"}'
+    raw_jwt = _raw_jwt.raw_jwt_from_json(None, '{"iss":"joe"}')
     signature = _jwt_format.decode_signature(
         b'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     unsigned_compact = _jwt_format.create_unsigned_compact(
-        'RS256', None, 'AZxkm2U', payload)
+        'RS256', 'AZxkm2U', raw_jwt)
     signed_compact = _jwt_format.create_signed_compact(unsigned_compact,
                                                        signature)
     un_comp, hdr, pay, sig = _jwt_format.split_signed_compact(signed_compact)
@@ -285,7 +286,7 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(hdr, '{"kid":"AZxkm2U","alg":"RS256"}')
     header = _json_util.json_loads(hdr)
     _jwt_format.validate_header(header, 'RS256')
-    self.assertEqual(pay, payload)
+    self.assertEqual(pay, '{"iss":"joe"}')
     self.assertIsNone(_jwt_format.get_type_header(header))
 
   def test_split_empty_signed_compact(self):
