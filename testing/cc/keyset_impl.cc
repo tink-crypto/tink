@@ -87,8 +87,6 @@ KeysetImpl::KeysetImpl() {
               EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
   key_templates_["ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305"] = crypto::
       tink::HybridKeyTemplates::EciesX25519HkdfHmacSha256XChaCha20Poly1305();
-  key_templates_["ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV"] = crypto::tink::
-      HybridKeyTemplates::EciesX25519HkdfHmacSha256DeterministicAesSiv();
   key_templates_["AES_CMAC"] = crypto::tink::MacKeyTemplates::AesCmac();
   key_templates_["HMAC_SHA256_128BITTAG"] =
       crypto::tink::MacKeyTemplates::HmacSha256HalfSizeTag();
