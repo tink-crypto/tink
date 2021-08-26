@@ -107,7 +107,8 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-      JwtFormat.validateHeader(algorithm, parsedHeader);
+      // TODO(juerg): Add kid validation.
+      JwtFormat.validateHeader(algorithm, Optional.empty(), Optional.empty(), parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }

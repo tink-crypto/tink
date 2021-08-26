@@ -32,6 +32,7 @@ import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.ECPublicKey;
+import java.util.Optional;
 
 /**
  * This key manager produces new instances of {@code JwtEcdsaVerify}. It doesn't support key
@@ -74,13 +75,13 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
   }
 
   private static class JwtPublicKeyVerifyFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerify, JwtEcdsaPublicKey> {
+      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtEcdsaPublicKey> {
     public JwtPublicKeyVerifyFactory() {
-      super(JwtPublicKeyVerify.class);
+      super(JwtPublicKeyVerifyInternal.class);
     }
 
     @Override
-    public JwtPublicKeyVerify getPrimitive(JwtEcdsaPublicKey keyProto)
+    public JwtPublicKeyVerifyInternal getPrimitive(JwtEcdsaPublicKey keyProto)
         throws GeneralSecurityException {
       // This will throw an exception is protocol is invalid
       EllipticCurves.CurveType curve = getCurve(keyProto.getAlgorithm());
@@ -90,15 +91,20 @@ class JwtEcdsaVerifyKeyManager extends KeyTypeManager<JwtEcdsaPublicKey> {
       Enums.HashType hash = hashForEcdsaAlgorithm(keyProto.getAlgorithm());
       final EcdsaVerifyJce verifier = new EcdsaVerifyJce(publicKey, hash, EcdsaEncoding.IEEE_P1363);
       final String algorithmName = keyProto.getAlgorithm().name();
+      final Optional<String> customKidFromEcdsaPublicKey =
+          keyProto.hasCustomKid()
+              ? Optional.of(keyProto.getCustomKid().getValue())
+              : Optional.empty();
 
-      return new JwtPublicKeyVerify() {
+      return new JwtPublicKeyVerifyInternal() {
         @Override
-        public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
+        public VerifiedJwt verifyAndDecodeWithKid(
+            String compact, JwtValidator validator, Optional<String> kid)
             throws GeneralSecurityException {
           JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
           verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
           JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-          JwtFormat.validateHeader(algorithmName, parsedHeader);
+          JwtFormat.validateHeader(algorithmName, kid, customKidFromEcdsaPublicKey, parsedHeader);
           RawJwt token =
               RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
           return validator.validate(token);
