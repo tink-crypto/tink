@@ -44,7 +44,7 @@ not equal, the function tries to output a meaningfull error message.
 
 # Placeholder for import for type annotations
 
-from typing import Text, Any
+from typing import Optional, Text, Any
 
 from google.protobuf import text_encoding
 from tink.proto import aes_cmac_pb2
@@ -238,8 +238,12 @@ def text_format(msg) -> Text:
   return _text_format_message(msg, '', False)
 
 
-def assert_tink_proto_equal(self, a: message.Message,
-                            b: message.Message) -> None:
+def assert_tink_proto_equal(self,
+                            a: message.Message,
+                            b: message.Message,
+                            msg: Optional[Text] = None) -> None:
   """Fails with a useful error if a and b aren't equal."""
   self.assertMultiLineEqual(
-      _text_format_message(a, '', True), _text_format_message(b, '', True))
+      _text_format_message(a, '', True),
+      _text_format_message(b, '', True),
+      msg=msg)
