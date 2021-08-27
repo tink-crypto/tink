@@ -345,13 +345,19 @@ _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
 
 
 def _supported_languages_by_template(
-    template_name: Text, template: tink_pb2.KeyTemplate) -> List[Text]:
+    template_name: Text, key_type: Text) -> List[Text]:
   if template_name in _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME:
     return _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[template_name]
-  return SUPPORTED_LANGUAGES[KEY_TYPE_FROM_URL[template.type_url]]
+  return SUPPORTED_LANGUAGES[key_type]
+
+
+def _all_key_template_names_with_key_type():
+  for key_type, template_names in KEY_TEMPLATE_NAMES.items():
+    for template_name in template_names:
+      yield (template_name, key_type)
 
 
 SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
     name: _supported_languages_by_template(name, template)
-    for name, template in KEY_TEMPLATE.items()
+    for name, template in _all_key_template_names_with_key_type()
 }
