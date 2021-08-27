@@ -43,11 +43,23 @@ def tearDownModule():
   testing_servers.stop()
 
 
-# To test all implementations of AEAD, we simply try all availalble default key
-# templates.
-# Note that in order to test keys not covered by key templates, the parameter
-# function would need to be rewritten to yield keyset instead of key template
-# names.
+# Fake KMS keys are base64-encoded keysets. Each server must register a
+# fake KmsClient that can handle these keys.
+_FAKE_KMS_KEY_URI = (
+    'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRv'
+    'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
+
+
+# maps from key_template_name to (key_template, key_type)
+_ADDITIONAL_KEY_TEMPLATES = {
+    'FAKE_KMS_AEAD': (
+        aead.aead_key_templates.create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
+        'KmsAeadKey'),
+    'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
+        (aead.aead_key_templates.create_kms_envelope_aead_key_template(
+            _FAKE_KMS_KEY_URI,
+            aead.aead_key_templates.AES128_GCM), 'KmsEnvelopeAeadKey')
+}
 
 
 def all_aead_key_template_names() -> Iterable[Text]:
@@ -55,16 +67,24 @@ def all_aead_key_template_names() -> Iterable[Text]:
   for key_type in supported_key_types.AEAD_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
+  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+    yield key_template_name
 
 
 class AeadPythonTest(parameterized.TestCase):
 
   @parameterized.parameters(all_aead_key_template_names())
   def test_encrypt_decrypt(self, key_template_name):
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-        key_template_name]
+    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+      key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[
+          key_template_name]
+      supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
+    else:
+      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+      supported_langs = (
+          supported_key_types
+          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     supported_aeads = [

@@ -79,13 +79,6 @@ ALL_KEY_TYPES = (
     PRF_KEY_TYPES + JWT_MAC_KEY_TYPES + JWT_SIGNATURE_KEY_TYPES)
 
 
-# Fake KMS keys are base64-encoded keysets. Each server must register a
-# fake KmsClient that can handle these keys.
-_FAKE_KMS_KEY_URI = (
-    'fake-kms://CM2b3_MDElQKSAowdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUuY3J5cHRv'
-    'LnRpbmsuQWVzR2NtS2V5EhIaEIK75t5L-adlUwVhWvRuWUwYARABGM2b3_MDIAE')
-
-
 # All languages that are supported by a KeyType
 SUPPORTED_LANGUAGES = {
     'AesEaxKey': ['cc', 'java', 'python'],
@@ -127,8 +120,8 @@ KEY_TEMPLATE_NAMES = {
     'AesCtrHmacAeadKey': ['AES128_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256'],
     'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
     'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
-    'KmsAeadKey': ['FAKE_KMS_AEAD'],
-    'KmsEnvelopeAeadKey': ['FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM'],
+    'KmsAeadKey': [],
+    'KmsEnvelopeAeadKey': [],
     'AesSivKey': ['AES256_SIV'],
     'AesCtrHmacStreamingKey': [
         'AES128_CTR_HMAC_SHA256_4KB',
@@ -216,11 +209,6 @@ KEY_TEMPLATE = {
             output_prefix_type=tink_pb2.TINK),
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
-    'FAKE_KMS_AEAD':
-        aead.aead_key_templates.create_kms_aead_key_template(_FAKE_KMS_KEY_URI),
-    'FAKE_KMS_ENVELOPE_AEAD_WITH_AES128_GCM':
-        aead.aead_key_templates.create_kms_envelope_aead_key_template(
-            _FAKE_KMS_KEY_URI, aead.aead_key_templates.AES128_GCM),
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
     'AES128_CTR_HMAC_SHA256_4KB':

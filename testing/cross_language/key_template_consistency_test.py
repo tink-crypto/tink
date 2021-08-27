@@ -29,9 +29,6 @@ from util import testing_servers
 def all_template_names() -> Iterable[Text]:
   for names in supported_key_types.KEY_TEMPLATE_NAMES.values():
     for name in names:
-      # The KMS templates are currently not supported in these tests.
-      if name.startswith('FAKE_KMS_'):
-        continue
       yield name
 
 
