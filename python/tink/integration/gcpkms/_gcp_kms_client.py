@@ -33,7 +33,7 @@ class GcpKmsClient(object):
   def __init__(self, key_uri: Text, credentials_path: Text):
     """Creates a new GcpKmsClient that is bound to the key specified in 'key_uri'.
 
-    Uses the specifed credentials when communicating with the KMS. Either of
+    Uses the specified credentials when communicating with the KMS. Either of
     arguments can be empty.
 
     If 'key_uri' is empty, then the client is not bound to any particular key.

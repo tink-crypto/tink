@@ -52,7 +52,7 @@ def _base64_decode(encoded_data: bytes) -> bytes:
     if not _is_valid_urlsafe_base64_char(c):
       raise _jwt_error.JwtInvalidError('invalid token')
   # base64.urlsafe_b64decode requires padding, but does not mind too much
-  # padding. So we simply add the maximum ammount of padding needed.
+  # padding. So we simply add the maximum amount of padding needed.
   padded_encoded_data = encoded_data + b'==='
   try:
     return base64.urlsafe_b64decode(padded_encoded_data)
@@ -66,7 +66,7 @@ def json_dumps(json_data: Any) -> Text:
 
 
 def validate_all_strings(json_data: Any):
-  """Recursivly visits all strings and raises UnicodeEncodeError if invalid."""
+  """Recursively visits all strings and raises UnicodeEncodeError if invalid."""
   if isinstance(json_data, str):
     # We use encode('utf8') to validate that the string is valid.
     json_data.encode('utf8')

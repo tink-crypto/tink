@@ -8,7 +8,7 @@ implement. Other features may be added by code contributors.
 In the following list, features are bundled together by milestone and and then
 by the language implementation they're associated with.
 
-Each feature is prefixed with a priority level. The defintion of the priority
+Each feature is prefixed with a priority level. The definition of the priority
 levels are are:
 
 *   **P0**:  The feature will block the milestone. We will delay the milestone

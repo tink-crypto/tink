@@ -34,17 +34,17 @@ from google.protobuf import text_format
 
 
 def tink_root_path() -> Text:
-  """Returns the path to the Tink root directory used for the test enviroment.
+  """Returns the path to the Tink root directory used for the test environment.
 
      The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
-     is used the path is derived from the Bazel enviroment variables. If that
+     is used the path is derived from the Bazel environment variables. If that
      does not work, it generates the root path relative to the __file__ path.
   """
   root_paths = []
   if 'TINK_SRC_PATH' in os.environ:
     root_paths.append(os.environ['TINK_SRC_PATH'])
   if 'TEST_SRCDIR' in os.environ:
-    # Bazel enviroment
+    # Bazel environment
     root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
     root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
                                    'google3/third_party/tink'))
