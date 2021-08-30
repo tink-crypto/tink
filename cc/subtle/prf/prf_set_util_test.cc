@@ -36,16 +36,12 @@ namespace subtle {
 namespace {
 
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
 using ::testing::_;
 using ::testing::AnyNumber;
-using ::testing::Contains;
 using ::testing::DefaultValue;
 using ::testing::Eq;
-using ::testing::Gt;
 using ::testing::NiceMock;
 using ::testing::Not;
-using ::testing::Pair;
 using ::testing::Return;
 using ::testing::StrEq;
 

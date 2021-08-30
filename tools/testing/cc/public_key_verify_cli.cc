@@ -20,7 +20,6 @@
 #include "tink/util/status.h"
 #include "testing/cc/cli_util.h"
 
-using crypto::tink::PublicKeyVerifyFactory;
 using crypto::tink::KeysetHandle;
 
 // A command-line utility for testing PublicKeyVerify-primitives.

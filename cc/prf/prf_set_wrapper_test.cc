@@ -35,14 +35,10 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
-using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeysetInfo;
 using ::google::crypto::tink::KeyStatusType;
 using ::testing::Key;
-using ::testing::NiceMock;
 using ::testing::Not;
-using ::testing::Return;
-using ::testing::ReturnRef;
 using ::testing::StrEq;
 using ::testing::UnorderedElementsAre;
 

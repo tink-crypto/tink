@@ -19,7 +19,6 @@
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
-using google::crypto::tink::Keyset;
 using google::crypto::tink::OutputPrefixType;
 
 namespace crypto {

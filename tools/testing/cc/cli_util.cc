@@ -40,7 +40,6 @@
 using crypto::tink::BinaryKeysetReader;
 using crypto::tink::BinaryKeysetWriter;
 using crypto::tink::CleartextKeysetHandle;
-using crypto::tink::Config;
 using crypto::tink::InputStream;
 using crypto::tink::JsonKeysetReader;
 using crypto::tink::JsonKeysetWriter;
