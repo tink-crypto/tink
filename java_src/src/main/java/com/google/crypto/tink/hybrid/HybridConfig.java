@@ -108,4 +108,6 @@ public final class HybridConfig {
 
     EciesAeadHkdfPrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
   }
+
+  private HybridConfig() {}
 }

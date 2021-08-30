@@ -50,4 +50,6 @@ public final class AeadFactory {
     Registry.registerPrimitiveWrapper(new AeadWrapper());
     return keysetHandle.getPrimitive(Aead.class);
   }
+
+  private AeadFactory() {}
 }

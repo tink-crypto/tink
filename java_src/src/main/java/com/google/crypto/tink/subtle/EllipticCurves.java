@@ -963,4 +963,6 @@ public final class EllipticCurves {
       throw new GeneralSecurityException(ex.toString());
     }
   }
+
+  private EllipticCurves() {}
 }

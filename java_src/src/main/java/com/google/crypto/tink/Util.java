@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
-class Util {
+final class Util {
   public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /** @return a KeysetInfo-proto from a {@code keyset} protobuf. */
@@ -118,4 +118,6 @@ class Util {
     }
     return result.toByteArray();
   }
+
+  private Util() {}
 }

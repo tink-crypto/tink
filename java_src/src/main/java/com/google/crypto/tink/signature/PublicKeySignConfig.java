@@ -49,4 +49,6 @@ public final class PublicKeySignConfig {
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Config.register(SignatureConfig.TINK_1_0_0);
   }
+
+  private PublicKeySignConfig() {}
 }

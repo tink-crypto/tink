@@ -91,7 +91,7 @@ import java.util.List;
 import javax.crypto.Cipher;
 
 /** Test helpers. */
-public class TestUtil {
+public final class TestUtil {
   /** A place holder to keep mutated bytes and its description. */
   public static class BytesMutation {
     public byte[] value;
@@ -858,4 +858,6 @@ public class TestUtil {
                   | ((1 & toUnsignedInt(ref[(i == 0 ? string.length : i) - 1])) << 7));
     }
   }
+
+  private TestUtil() {}
 }

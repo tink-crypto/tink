@@ -50,4 +50,6 @@ public final class PublicKeySignFactory {
     Registry.registerPrimitiveWrapper(new PublicKeySignWrapper());
     return keysetHandle.getPrimitive(PublicKeySign.class);
   }
+
+  private PublicKeySignFactory() {}
 }

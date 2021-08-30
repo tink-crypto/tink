@@ -78,4 +78,6 @@ public final class CleartextKeysetHandle {
   public static void write(KeysetHandle handle, KeysetWriter keysetWriter) throws IOException {
     keysetWriter.write(handle.getKeyset());
   }
+
+  private CleartextKeysetHandle() {}
 }

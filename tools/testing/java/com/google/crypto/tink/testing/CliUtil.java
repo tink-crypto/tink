@@ -36,10 +36,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
-/**
- * Helper function for CLI applications.
- */
-public class CliUtil {
+/** Helper function for CLI applications. */
+public final class CliUtil {
   public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /**
@@ -106,4 +104,6 @@ public class CliUtil {
     outputStream.write(output);
     outputStream.close();
   }
+
+  private CliUtil() {}
 }

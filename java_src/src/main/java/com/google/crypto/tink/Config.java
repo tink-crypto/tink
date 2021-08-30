@@ -112,4 +112,6 @@ public final class Config {
       throw new GeneralSecurityException("Missing catalogue_name.");
     }
   }
+
+  private Config() {}
 }

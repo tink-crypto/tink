@@ -120,4 +120,6 @@ public final class X25519 {
     base[0] = 9;
     return computeSharedSecret(privateKey, base);
   }
+
+  private X25519() {}
 }

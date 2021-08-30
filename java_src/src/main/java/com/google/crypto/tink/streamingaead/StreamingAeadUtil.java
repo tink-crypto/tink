@@ -19,7 +19,7 @@ package com.google.crypto.tink.streamingaead;
 import com.google.crypto.tink.proto.HashType;
 import java.security.NoSuchAlgorithmException;
 
-class StreamingAeadUtil {
+final class StreamingAeadUtil {
   /**
    * Returns the HMAC algorithm name corresponding to a hash type.
    *
@@ -42,4 +42,6 @@ class StreamingAeadUtil {
         throw new NoSuchAlgorithmException("hash unsupported for HMAC: " + hash);
     }
   }
+
+  private StreamingAeadUtil() {}
 }

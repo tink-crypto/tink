@@ -356,4 +356,6 @@ public final class SignatureKeyTemplates {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
+
+  private SignatureKeyTemplates() {}
 }

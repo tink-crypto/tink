@@ -47,4 +47,6 @@ public final class StreamingAeadFactory {
     Registry.registerPrimitiveWrapper(new StreamingAeadWrapper());
     return keysetHandle.getPrimitive(StreamingAead.class);
   }
+
+  private StreamingAeadFactory() {}
 }
