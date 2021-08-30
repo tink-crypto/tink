@@ -124,19 +124,6 @@ final class JwtFormat {
   /**
    * Validates the parsed header.
    *
-   * @deprecated Use validateHeader(expectedAlgorithm, tinkKid, customKid, parsedHeader) instead.
-   */
-  @Deprecated
-  static void validateHeader(
-      String expectedAlgorithm,
-      JsonObject parsedHeader)
-      throws InvalidAlgorithmParameterException, JwtInvalidException {
-    validateHeader(expectedAlgorithm, Optional.empty(), Optional.empty(), parsedHeader);
-  }
-
-  /**
-   * Validates the parsed header.
-   *
    * tinkKid should only be set for keys with output prefix type TINK. customKid should only
    * be set for keys with output prefix type RAW. They should not be set at the same time.
    */
