@@ -41,7 +41,7 @@ JwtValidator::JwtValidator(const JwtValidatorBuilder& builder) {
   fixed_now_ = builder.fixed_now_;
 }
 
-util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
+util::Status JwtValidator::ValidateTimestamps(RawJwt const& raw_jwt) const {
   absl::Time now;
   if (fixed_now_.has_value()) {
     now = fixed_now_.value();
@@ -81,6 +81,10 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
                         "token has an invalid iat claim in the future");
     }
   }
+  return util::OkStatus();
+}
+
+util::Status JwtValidator::ValidateTypeHeader(RawJwt const& raw_jwt) const {
   if (expected_type_header_.has_value()) {
     if (!raw_jwt.HasTypeHeader()) {
       return util::Status(util::error::INVALID_ARGUMENT,
@@ -100,6 +104,10 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
           "invalid JWT; token has type header set, but validator not");
     }
   }
+  return util::OkStatus();
+}
+
+util::Status JwtValidator::ValidateIssuer(RawJwt const& raw_jwt) const {
   if (expected_issuer_.has_value()){
     if (!raw_jwt.HasIssuer()) {
       return util::Status(util::error::INVALID_ARGUMENT,
@@ -119,6 +127,10 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
           "invalid JWT; token has issuer set, but validator not");
     }
   }
+  return util::OkStatus();
+}
+
+util::Status JwtValidator::ValidateAudiences(RawJwt const& raw_jwt) const {
   if (expected_audience_.has_value()) {
     if (!raw_jwt.HasAudiences()) {
       return util::Status(util::error::INVALID_ARGUMENT,
@@ -139,6 +151,27 @@ util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
           util::error::INVALID_ARGUMENT,
           "invalid JWT; token has audience set, but validator not");
     }
+  }
+  return util::OkStatus();
+}
+
+util::Status JwtValidator::Validate(RawJwt const& raw_jwt) const {
+  util::Status status;
+  status = ValidateTimestamps(raw_jwt);
+  if (!status.ok()) {
+    return status;
+  }
+  status = ValidateTypeHeader(raw_jwt);
+  if (!status.ok()) {
+    return status;
+  }
+  status = ValidateIssuer(raw_jwt);
+  if (!status.ok()) {
+    return status;
+  }
+  status = ValidateAudiences(raw_jwt);
+  if (!status.ok()) {
+    return status;
   }
   return util::OkStatus();
 }

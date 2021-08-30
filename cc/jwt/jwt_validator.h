@@ -46,6 +46,10 @@ class JwtValidator {
   util::Status Validate(crypto::tink::RawJwt const& raw_jwt) const;
 
  private:
+  util::Status ValidateTimestamps(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateTypeHeader(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateIssuer(crypto::tink::RawJwt const& raw_jwt) const;
+  util::Status ValidateAudiences(crypto::tink::RawJwt const& raw_jwt) const;
   explicit JwtValidator(const JwtValidatorBuilder& builder);
   friend class JwtValidatorBuilder;
   absl::optional<std::string> expected_type_header_;
