@@ -26,7 +26,6 @@ from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from tink.proto import common_pb2
 from tink.proto import tink_pb2
 
 # All languages supported by cross-language tests.
@@ -112,7 +111,8 @@ KEY_TYPE_FROM_URL = {
     'type.googleapis.com/google.crypto.tink.' + key_type: key_type
     for key_type in ALL_KEY_TYPES}
 
-# For each KeyType, a list of all KeyTemplate Names that must be supported.
+# For each KeyType, a list of Tinkey KeyTemplate names.
+# TODO(juerg): Add missing key template names, and remove deprecated names.
 KEY_TEMPLATE_NAMES = {
     'AesEaxKey': ['AES128_EAX', 'AES256_EAX'],
     'AesGcmKey': ['AES128_GCM', 'AES256_GCM'],
@@ -140,8 +140,6 @@ KEY_TEMPLATE_NAMES = {
         'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM',
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
         'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
-        'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305',
-        'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV'
     ],
     'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
@@ -238,18 +236,6 @@ KEY_TEMPLATE = {
     'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
         hybrid.hybrid_key_templates
         .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
-    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305':
-        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-            curve_type=common_pb2.NIST_P256,
-            ec_point_format=common_pb2.UNCOMPRESSED,
-            hash_type=common_pb2.SHA256,
-            dem_key_template=aead.aead_key_templates.XCHACHA20_POLY1305),
-    'ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV':
-        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-            curve_type=common_pb2.NIST_P256,
-            ec_point_format=common_pb2.COMPRESSED,
-            hash_type=common_pb2.SHA256,
-            dem_key_template=daead.deterministic_aead_key_templates.AES256_SIV),
     'AES_CMAC':
         mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':
@@ -328,7 +314,7 @@ KEY_TEMPLATE = {
 # Key template names for which the list of supported languages is different from
 # the list of supported languages of the whole key type.
 _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
-    'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305': ['cc', 'python'],
+    # currently empty.
 }
 
 

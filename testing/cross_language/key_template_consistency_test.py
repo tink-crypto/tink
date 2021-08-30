@@ -34,14 +34,6 @@ def all_template_names() -> Iterable[Text]:
 
 # These key templates are not defined in these languages.
 UNDEFINED_TEMPLATES = [
-    # ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV is not defined in any language.
-    ('ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV', 'cc'),
-    ('ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV', 'java'),
-    ('ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV', 'python'),
-    ('ECIES_P256_HKDF_HMAC_SHA256_AES256_SIV', 'go'),
-    # ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305 is not defined in any lang.
-    ('ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305', 'cc'),
-    ('ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305', 'python'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'cc'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'java'),
     ('ECDSA_P384_SHA384_IEEE_P1363', 'go'),
