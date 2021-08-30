@@ -222,13 +222,7 @@ public final class JwtValidator {
     }
   }
 
-  /**
-   * Validates that all claims in this validator are also present in {@code target}.
-   * @throws JwtInvalidException when {@code target} contains an invalid claim or header
-   */
-  VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
-    validateTimestampClaims(target);
-
+  private void validateTypeHeader(RawJwt target) throws JwtInvalidException {
     if (this.expectedTypeHeader.isPresent()) {
       if (!target.hasTypeHeader()) {
         throw new JwtInvalidException(
@@ -246,6 +240,9 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has type header set, but validator not.");
       }
     }
+  }
+
+  private void validateIssuer(RawJwt target) throws JwtInvalidException {
     if (this.expectedIssuer.isPresent()) {
       if (!target.hasIssuer()) {
         throw new JwtInvalidException(
@@ -262,6 +259,9 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has issuer set, but validator not.");
       }
     }
+  }
+
+  private void validateAudiences(RawJwt target) throws JwtInvalidException {
     if (this.expectedAudience.isPresent()) {
       if (!target.hasAudiences() || !target.getAudiences().contains(this.expectedAudience.get())) {
         throw new JwtInvalidException(
@@ -273,6 +273,17 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has audience set, but validator not.");
       }
     }
+  }
+
+  /**
+   * Validates that all claims in this validator are also present in {@code target}.
+   * @throws JwtInvalidException when {@code target} contains an invalid claim or header
+   */
+  VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
+    validateTimestampClaims(target);
+    validateTypeHeader(target);
+    validateIssuer(target);
+    validateAudiences(target);
     return new VerifiedJwt(target);
   }
 
