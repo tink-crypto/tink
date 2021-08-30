@@ -21,6 +21,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/match.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -34,7 +35,7 @@ namespace {
 
 bool is_eof(const util::Status& status) {
   return status.error_code() == util::error::UNKNOWN &&
-         status.error_message().find("EOFError") != std::string::npos;
+         absl::StrContains(status.error_message(), "EOFError");
 }
 
 }  // namespace
