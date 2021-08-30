@@ -164,8 +164,8 @@ class Status {
   }
   const std::string& error_message() const { return message_; }
 
-  bool operator==(const Status& x) const;
-  bool operator!=(const Status& x) const;
+  bool operator==(const Status& other) const;
+  bool operator!=(const Status& other) const;
 
   // NoOp
   void IgnoreError() const {
