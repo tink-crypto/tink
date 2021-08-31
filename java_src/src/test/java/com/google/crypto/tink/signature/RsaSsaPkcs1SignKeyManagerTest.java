@@ -91,26 +91,26 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_Sha512Allowed() throws Exception {
+  public void validateKeyFormat_sha512Allowed() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA512, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha384Allowed() throws Exception {
+  public void validateKeyFormat_sha384Allowed() throws Exception {
     // TODO(b/140410067): Check if SHA384 should be allowed.
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA384, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha1Disallowed() throws Exception {
+  public void validateKeyFormat_sha1Disallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA1, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
-  public void validateKeyFormat_UnknownHashDisallowed() throws Exception {
+  public void validateKeyFormat_unknownHashDisallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format =
         createKeyFormat(HashType.UNKNOWN_HASH, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));

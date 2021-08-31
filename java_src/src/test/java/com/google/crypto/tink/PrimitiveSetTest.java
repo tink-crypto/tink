@@ -257,7 +257,7 @@ public class PrimitiveSetTest {
   }
 
   @Test
-  public void testAddPrimive_WithDisabledKey_shouldFail() throws Exception {
+  public void testAddPrimive_withDisabledKey_shouldFail() throws Exception {
     PrimitiveSet<Mac> pset = PrimitiveSet.newPrimitiveSet(Mac.class);
     Key key1 =
         Key.newBuilder()

@@ -37,7 +37,7 @@ public final class PemKeyTypeTest {
   public void setUp() {}
 
   @Test
-  public void readKey_RsaPublicKey_shouldWork() throws Exception {
+  public void readKey_rsaPublicKey_shouldWork() throws Exception {
     String pem =
         "-----BEGIN PUBLIC KEY-----\n"
             + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv90Xf/NN1lRGBofJQzJf\n"
@@ -58,7 +58,7 @@ public final class PemKeyTypeTest {
   }
 
   @Test
-  public void readKey_RsaPrivateKey_shouldWork() throws Exception {
+  public void readKey_rsaPrivateKey_shouldWork() throws Exception {
     String pem =
         "-----BEGIN PRIVATE KEY-----\n"
             + "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC8Bn6pA4wksGPK\n"
@@ -98,7 +98,7 @@ public final class PemKeyTypeTest {
   }
 
   @Test
-  public void readKey_EcPublicKey_shouldWork() throws Exception {
+  public void readKey_ecPublicKey_shouldWork() throws Exception {
     String pem =
         "-----BEGIN PUBLIC KEY-----\n"
             + "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BiT5K5pivl4Qfrt9hRhRREMUzj/\n"
@@ -111,7 +111,7 @@ public final class PemKeyTypeTest {
   }
 
   @Test
-  public void readKey_EcPrivateKey_shouldWork() throws Exception {
+  public void readKey_ecPrivateKey_shouldWork() throws Exception {
     String pem =
         "-----BEGIN PRIVATE KEY-----\n"
             + "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQghpeIjMYdV40aVFTt\n"
@@ -169,7 +169,7 @@ public final class PemKeyTypeTest {
   }
 
   @Test
-  public void readKey_withBEGIN_RSA_PUBLIC_KEY_shouldWork() throws Exception {
+  public void readKey_withBeginRsaPublicKey_shouldWork() throws Exception {
     String pem =
         "-----BEGIN RSA PUBLIC KEY-----\n"
             + "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv90Xf/NN1lRGBofJQzJf\n"

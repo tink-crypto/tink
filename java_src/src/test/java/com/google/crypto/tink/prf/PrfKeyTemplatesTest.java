@@ -30,14 +30,14 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public final class PrfKeyTemplatesTest {
   @Test
-  public void testHKDF_SHA256() throws Exception {
+  public void hkdfSha256() throws Exception {
     assertThat(PrfKeyTemplates.HKDF_SHA256.getTypeUrl())
         .isEqualTo(new HkdfPrfKeyManager().getKeyType());
     assertThat(PrfKeyTemplates.HKDF_SHA256.getOutputPrefixType()).isEqualTo(OutputPrefixType.RAW);
   }
 
   @Test
-  public void testHKDF_SHA256_worksWithKeyManager() throws Exception {
+  public void hkdfSha256_worksWithKeyManager() throws Exception {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.parseFrom(
             PrfKeyTemplates.HKDF_SHA256.getValue(), ExtensionRegistryLite.getEmptyRegistry());
@@ -45,7 +45,7 @@ public final class PrfKeyTemplatesTest {
   }
 
   @Test
-  public void testHKDF_SHA256_values() throws Exception {
+  public void hkdfSha256Values() throws Exception {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.parseFrom(
             PrfKeyTemplates.HKDF_SHA256.getValue(), ExtensionRegistryLite.getEmptyRegistry());

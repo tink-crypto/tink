@@ -31,7 +31,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class MacKeyTemplatesTest {
   @Test
-  public void testHMAC_SHA256_128BITTAG() throws Exception {
+  public void hmacSha256_128BitTag() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -44,7 +44,7 @@ public class MacKeyTemplatesTest {
   }
 
   @Test
-  public void testHMAC_SHA256_256BITTAG() throws Exception {
+  public void hmacSha256_256BitTag() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_256BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -57,7 +57,7 @@ public class MacKeyTemplatesTest {
   }
 
   @Test
-  public void testHMAC_SHA512_256BITTAG() throws Exception {
+  public void hmacSha512_256BitTag() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_256BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -70,7 +70,7 @@ public class MacKeyTemplatesTest {
   }
 
   @Test
-  public void testHMAC_SHA512_512BITTAG() throws Exception {
+  public void hmacSha512_512BitTag() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA512_512BITTAG;
     assertEquals(new HmacKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
