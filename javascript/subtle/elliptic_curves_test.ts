@@ -26,9 +26,9 @@ describe('elliptic curves test', function() {
     const aliceKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const bobKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const sharedSecret1 = await EllipticCurves.computeEcdhSharedSecret(
-        aliceKeyPair.privateKey, bobKeyPair.publicKey);
+        aliceKeyPair.privateKey!, bobKeyPair.publicKey!);
     const sharedSecret2 = await EllipticCurves.computeEcdhSharedSecret(
-        bobKeyPair.privateKey, aliceKeyPair.publicKey);
+        bobKeyPair.privateKey!, aliceKeyPair.publicKey!);
     expect(Bytes.toHex(sharedSecret2)).toBe(Bytes.toHex(sharedSecret1));
   });
 
@@ -54,8 +54,8 @@ describe('elliptic curves test', function() {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
-      expect(keyPair.privateKey != null).toBe(true);
-      expect(keyPair.publicKey != null).toBe(true);
+      expect(keyPair.privateKey! != null).toBe(true);
+      expect(keyPair.publicKey! != null).toBe(true);
     }
   });
 
@@ -69,8 +69,8 @@ describe('elliptic curves test', function() {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
-      expect(keyPair.privateKey != null).toBe(true);
-      expect(keyPair.publicKey != null).toBe(true);
+      expect(keyPair.privateKey! != null).toBe(true);
+      expect(keyPair.publicKey! != null).toBe(true);
     }
   });
 
@@ -86,13 +86,13 @@ describe('elliptic curves test', function() {
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
 
-      const publicKey = keyPair.publicKey;
+      const publicKey = keyPair.publicKey!;
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDH', publicCryptoKey);
       expect(importedPublicKey).toEqual(publicKey);
 
-      const privateKey = keyPair.privateKey;
+      const privateKey = keyPair.privateKey!;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDH', privateCryptoKey);
@@ -112,13 +112,13 @@ describe('elliptic curves test', function() {
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
 
-      const publicKey = keyPair.publicKey;
+      const publicKey = keyPair.publicKey!;
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDSA', publicCryptoKey);
       expect(importedPublicKey).toEqual(publicKey);
 
-      const privateKey = keyPair.privateKey;
+      const privateKey = keyPair.privateKey!;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDSA', privateCryptoKey);

@@ -22,7 +22,7 @@ describe('ecdsa sign test', function() {
   it('sign', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await fromJsonWebKey(
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
       const signature = await signer.sign(data);
@@ -33,7 +33,7 @@ describe('ecdsa sign test', function() {
               name: 'SHA-256',
             },
           },
-          keyPair.publicKey, signature, data);
+          keyPair.publicKey!, signature, data);
       expect(isValid).toBe(true);
     }
   });
@@ -41,7 +41,7 @@ describe('ecdsa sign test', function() {
   it('sign with der encoding', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await fromJsonWebKey(
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256',
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256',
         EllipticCurves.EcdsaSignatureEncodingType.DER);
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
@@ -54,7 +54,7 @@ describe('ecdsa sign test', function() {
               name: 'SHA-256',
             },
           },
-          keyPair.publicKey, signature, data);
+          keyPair.publicKey!, signature, data);
       expect(isValid).toBe(false);
       // Convert the signature to IEEE encoding.
       signature = EllipticCurves.ecdsaDer2Ieee(signature, 64);
@@ -65,7 +65,7 @@ describe('ecdsa sign test', function() {
               name: 'SHA-256',
             },
           },
-          keyPair.publicKey, signature, data);
+          keyPair.publicKey!, signature, data);
       expect(isValid).toBe(true);
     }
   });
@@ -73,7 +73,7 @@ describe('ecdsa sign test', function() {
   it('sign always generate new signatures', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
     const signer = await fromJsonWebKey(
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
     const signatures = new Set();
     for (let i = 0; i < 100; i++) {
       const data = Random.randBytes(i);
@@ -87,7 +87,7 @@ describe('ecdsa sign test', function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
       await fromJsonWebKey(
-          await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-1');
+          await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-1');
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -99,7 +99,7 @@ describe('ecdsa sign test', function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-384');
       await fromJsonWebKey(
-          await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
+          await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -110,7 +110,7 @@ describe('ecdsa sign test', function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-521');
       await fromJsonWebKey(
-          await EllipticCurves.exportCryptoKey(keyPair.privateKey), 'SHA-256');
+          await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
       fail('Should throw an exception.');
     } catch (e) {
       expect(e.toString())
@@ -122,7 +122,7 @@ describe('ecdsa sign test', function() {
   it('constructor with invalid curve', async function() {
     try {
       const keyPair = await EllipticCurves.generateKeyPair('ECDSA', 'P-256');
-      const jwk = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+      const jwk = await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
       jwk.crv = 'blah';
       await fromJsonWebKey(jwk, 'SHA-256');
       fail('Should throw an exception.');

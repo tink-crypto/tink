@@ -48,9 +48,9 @@ class EciesAeadHkdfPrivateKeyFactory implements KeyManager.PrivateKeyFactory {
     const curveName = EllipticCurves.curveToString(curveTypeSubtle);
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
     const jsonPublicKey =
-        await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+        await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     const jsonPrivateKey =
-        await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     return EciesAeadHkdfPrivateKeyFactory.jsonToProtoKey(
         jsonPrivateKey, jsonPublicKey, params);
   }

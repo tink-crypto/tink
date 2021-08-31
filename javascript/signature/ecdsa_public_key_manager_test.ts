@@ -321,7 +321,7 @@ async function createKey(
           .setVersion(0)
           .setParams(createParams(opt_curveType, opt_hashType, opt_encoding));
   const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
-  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   key.setX(
       Bytes.fromBase64(assertExists(publicKey['x']), /* opt_webSafe = */ true));
   key.setY(

@@ -350,7 +350,7 @@ async function createKey(
 
 
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   key.setX(
       Bytes.fromBase64(assertExists(publicKey['x']), /* opt_webSafe = */ true));
   key.setY(

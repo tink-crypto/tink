@@ -12,7 +12,7 @@ import * as Random from './random';
 describe('ecies hkdf kem sender test', function() {
   it('encapsulate, always generate random key', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     const sender = await fromJsonWebKey(publicKey);
     const keySizeInBytes = 32;
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -33,7 +33,7 @@ describe('ecies hkdf kem sender test', function() {
 
   it('encapsulate, non integer key size', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
     const sender = await fromJsonWebKey(publicKey);
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
     const hkdfHash = 'SHA-256';
@@ -58,7 +58,8 @@ describe('ecies hkdf kem sender test', function() {
   it('new instance, invalid parameters', async function() {
     // Test fromJsonWebKey with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    const privateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     try {
       await fromJsonWebKey(privateKey);
       fail('An exception should be thrown.');
@@ -72,7 +73,8 @@ describe('ecies hkdf kem sender test', function() {
                  EllipticCurves.CurveType.P521]) {
       const crvString = EllipticCurves.curveToString(curve);
       const keyPair = await EllipticCurves.generateKeyPair('ECDH', crvString);
-      const publicJwk = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+      const publicJwk =
+          await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
       // Change the 'x' value to make the public key invalid. Either getting new
       // recipient with corrupted public key or trying to encapsulate with this
       // recipient should fail.
@@ -97,7 +99,7 @@ describe('ecies hkdf kem sender test', function() {
     // Test constructor with public key instead private key.
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     try {
-      new EciesHkdfKemSender(keyPair.privateKey);
+      new EciesHkdfKemSender(keyPair.privateKey!);
       fail('An exception should be thrown.');
     } catch (e) {
       expect(e.toString())
