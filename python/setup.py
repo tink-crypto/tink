@@ -13,11 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Setup for Tink package with pip."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
-from distutils import spawn
 import glob
 import os
 import posixpath
@@ -25,10 +21,13 @@ import re
 import shutil
 import subprocess
 import textwrap
-
 import setuptools
-from setuptools.command import build_ext
 
+from setuptools.command import build_ext
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from distutils import spawn
 
 _PROJECT_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,7 +67,14 @@ def _get_protoc_command():
   raise FileNotFoundError('Could not find protoc executable. Please install '
                           'protoc to compile the Tink Python package.')
 
-
+def _parse_requirements(filename):
+  with open(os.path.join(_PROJECT_BASE_DIR, filename)) as f:
+    return [
+        line.rstrip()
+        for line in f
+        if not (line.isspace() or line.startswith('#'))
+    ]
+  
 def _generate_proto(protoc, source):
   """Invokes the Protocol Compiler to generate a _pb2.py."""
 
@@ -87,13 +93,7 @@ def _generate_proto(protoc, source):
   subprocess.run(args=protoc_args, check=True)
 
 
-def _parse_requirements(filename):
-  with open(os.path.join(_PROJECT_BASE_DIR, filename)) as f:
-    return [
-        line.rstrip()
-        for line in f
-        if not (line.isspace() or line.startswith('#'))
-    ]
+
 
 
 def _patch_workspace(workspace_content):
@@ -215,7 +215,10 @@ class BazelExtension(setuptools.Extension):
 
 
 class BuildBazelExtension(build_ext.build_ext):
+  
+  
   """A command that runs Bazel to build a C/C++ extension."""
+  
 
   def __init__(self, dist):
     super(BuildBazelExtension, self).__init__(dist)
