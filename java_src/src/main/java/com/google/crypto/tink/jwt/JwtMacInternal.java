@@ -29,6 +29,6 @@ interface JwtMacInternal {
       throws GeneralSecurityException;
 
   /** Decodes and verifies a JWT in the JWS compact serialization format. */
-  VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
-      throws GeneralSecurityException;
+  VerifiedJwt verifyMacAndDecodeWithKid(
+      String compact, JwtValidator validator, Optional<String> kid) throws GeneralSecurityException;
 }

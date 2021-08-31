@@ -571,8 +571,8 @@ public class JwtHmacKeyManagerTest {
   }
 
   @Test
-  public void createSignVerify_withDifferentHeaders() throws Exception {
-    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+  public void createSignVerifyRaw_withDifferentHeaders() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtHmacKey keyProto =
@@ -618,13 +618,78 @@ public class JwtHmacKeyManagerTest {
         GeneralSecurityException.class,
         () -> primitive.verifyMacAndDecode(badAlgoSignedCompact, validator));
 
+    // for raw keys without customKid, the validation should work even if a "kid" header is present.
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(
+        rawPrimitive, headerWithUnknownKid, payload);
+    primitive.verifyMacAndDecode(tokenWithUnknownKid, validator);
+  }
+
+  @Test
+  public void createSignVerifyTink_withDifferentHeaders() throws Exception {
+    KeyTemplate template = KeyTemplates.get("JWT_HS256");
+    KeysetHandle handle = KeysetHandle.generateNew(template);
+    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtHmacKey keyProto =
+        JwtHmacKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    byte[] keyValue = keyProto.getKeyValue().toByteArray();
+    SecretKeySpec keySpec = new SecretKeySpec(keyValue, "HMAC");
+    PrfHmacJce prf = new PrfHmacJce("HMACSHA256", keySpec);
+    PrfMac rawPrimitive = new PrfMac(prf, prf.getMaxOutputLength());
+    JwtMac primitive = handle.getPrimitive(JwtMac.class);
+    String kid =
+        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+
+    JsonObject payload = new JsonObject();
+    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+
+    // Normal, valid signed compact.
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    normalHeader.addProperty("kid", kid);
+    String normalToken = generateSignedCompact(rawPrimitive, normalHeader, payload);
+    primitive.verifyMacAndDecode(normalToken, validator);
+
+    // valid token, with "typ" set in the header
+    JsonObject headerWithTyp = new JsonObject();
+    headerWithTyp.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithTyp.addProperty("typ", "typeHeader");
+    headerWithTyp.addProperty("kid", kid);
+    String tokenWithTyp = generateSignedCompact(rawPrimitive, headerWithTyp, payload);
+    primitive.verifyMacAndDecode(
+        tokenWithTyp,
+        JwtValidator.newBuilder().expectTypeHeader("typeHeader").allowMissingExpiration().build());
+
+    // invalid token without algorithm
+    JsonObject headerWithoutAlg = new JsonObject();
+    headerWithoutAlg.addProperty("kid", kid);
+    String tokenWithoutAlg = generateSignedCompact(rawPrimitive, headerWithoutAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithoutAlg, validator));
+
+    // invalid token with a valid but incorrect algorithm in the header
+    JsonObject headerWithBadAlg = new JsonObject();
+    headerWithBadAlg.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    headerWithBadAlg.addProperty("kid", kid);
+    String tokenWithBadAlg = generateSignedCompact(rawPrimitive, headerWithBadAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithBadAlg, validator));
+
     // token with an unknown "kid" in the header is valid
-    JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
-    unknownKidHeader.addProperty("kid", "unknown");
-    String unknownKidSignedCompact = generateSignedCompact(
-        rawPrimitive, unknownKidHeader, payload);
-    primitive.verifyMacAndDecode(unknownKidSignedCompact, validator);
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(
+        rawPrimitive, headerWithUnknownKid, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> primitive.verifyMacAndDecode(tokenWithUnknownKid, validator));
   }
 
   private static KeysetHandle getRfc7515ExampleKeysetHandle() throws Exception {
@@ -735,7 +800,7 @@ public class JwtHmacKeyManagerTest {
     String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(compactWithoutKid).header;
     assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
 
-    // Kid is currently ignored, so all verifiers accept both tokens
+    // Even if custom_kid is set, we don't require a "kid" in the header.
     assertThat(jwtMacWithKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(jwtMacWithoutKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
@@ -760,9 +825,9 @@ public class JwtHmacKeyManagerTest {
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String compactWithKid = jwtMacWithKid.computeMacAndEncode(rawToken);
 
-    // Kid is currently ignored, so all verifiers accept both tokens
-    assertThat(jwtMacWithWrongKid.verifyMacAndDecode(compactWithKid, validator).getJwtId())
-        .isEqualTo("jwtId");
+    assertThrows(
+        JwtInvalidException.class,
+        () -> jwtMacWithWrongKid.verifyMacAndDecode(compactWithKid, validator));
   }
 
   @Test
