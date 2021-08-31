@@ -42,6 +42,10 @@ util::StatusOr<std::string> CreateHeader(absl::string_view algorithm,
                          absl::optional<absl::string_view> kid);
 util::Status ValidateHeader(const google::protobuf::Struct& header,
                             absl::string_view algorithm);
+util::Status ValidateHeader(const google::protobuf::Struct& header,
+                            absl::string_view algorithm,
+                            absl::optional<absl::string_view> tink_kid,
+                            absl::optional<absl::string_view> custom_kid);
 absl::optional<std::string> GetTypeHeader(
     const google::protobuf::Struct& header);
 
