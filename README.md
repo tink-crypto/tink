@@ -40,7 +40,7 @@ To get a quick overview of Tink design please take a look at
 presented at [Real World Crypto 2019](https://rwc.iacr.org/2019/).
 
 [devs_are_users_too_slides]: https://www.usenix.org/sites/default/files/conference/protected-files/hotsec15_slides_green.pdf
-[tink_talk_slides]: g3doc/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf
+[tink_talk_slides]: docs/Tink-a_cryptographic_library--RealWorldCrypto2019.pdf
 [tink_talk_recording]: https://www.youtube.com/watch?v=pqev9r3rUJs&t=9665
 
 ## Current status
