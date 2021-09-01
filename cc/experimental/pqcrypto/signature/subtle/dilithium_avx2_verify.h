@@ -43,10 +43,10 @@ class DilithiumAvx2Verify : public PublicKeyVerify {
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  DilithiumPublicKeyPqclean public_key_;
-
   explicit DilithiumAvx2Verify(DilithiumPublicKeyPqclean public_key)
       : public_key_(public_key) {}
+
+  DilithiumPublicKeyPqclean public_key_;
 };
 
 }  // namespace subtle

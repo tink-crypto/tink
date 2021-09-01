@@ -26,13 +26,17 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/statusor.h"
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -45,7 +49,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Sign>();
   if (!status.ok()) return status;
 
-  uint32 key_size = private_key.GetKeyData().size();
+  int32_t key_size = private_key.GetKeyData().size();
 
   if (key_size != PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES &&
       key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
@@ -66,45 +70,87 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
 util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
     absl::string_view data) const {
   size_t sig_length;
-  uint32 key_size = private_key_.GetKeyData().size();
+  int32_t key_size = private_key_.GetKeyData().size();
   std::string signature;
+  int result = 1;
 
   switch (key_size) {
     case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
-      signature.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
-      if (PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
+      switch (private_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+          signature.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
-                  private_key_.GetKeyData().data())) != 0) {
-        return util::Status(util::error::INTERNAL, "Signing failed.");
+                  private_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          signature.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data()));
+
+          break;
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
-      signature.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES, '0');
-      if (PQCLEAN_DILITHIUM3_AVX2_crypto_sign_signature(
+      switch (private_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+          signature.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
-                  private_key_.GetKeyData().data())) != 0) {
-        return util::Status(util::error::INTERNAL, "Signing failed.");
+                  private_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          signature.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM3_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data()));
+          break;
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
-      signature.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES, '0');
-      if (PQCLEAN_DILITHIUM5_AVX2_crypto_sign_signature(
+      switch (private_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+          signature.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
               reinterpret_cast<const uint8_t *>(data.data()), data.size(),
               reinterpret_cast<const uint8_t *>(
-                  private_key_.GetKeyData().data())) != 0) {
-        return util::Status(util::error::INTERNAL, "Signing failed.");
+                  private_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          signature.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES, '0');
+          result = PQCLEAN_DILITHIUM5_AVX2_crypto_sign_signature(
+              reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
+              reinterpret_cast<const uint8_t *>(data.data()), data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  private_key_.GetKeyData().data()));
+          break;
+        }
       }
       break;
     }
     default:
       return util::Status(util::error::INTERNAL, "Invalid keysize.");
+  }
+
+  if (result != 0) {
+    return util::Status(util::error::INTERNAL, "Signing failed.");
   }
 
   return signature;

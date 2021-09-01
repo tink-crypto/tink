@@ -167,7 +167,8 @@ TEST_P(DilithiumSignKeyManagerTest, Create) {
 
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
       DilithiumPublicKeyPqclean::NewPublicKey(
-          private_key->public_key().key_value());
+          private_key->public_key().key_value(),
+          subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
 
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       subtle::DilithiumAvx2Verify::New(*dilithium_public_key);
@@ -195,7 +196,9 @@ TEST_P(DilithiumSignKeyManagerTest, CreateDifferentKey) {
 
   std::string bad_public_key_data(test_case.public_key_size, '@');
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
-      DilithiumPublicKeyPqclean::NewPublicKey(bad_public_key_data);
+      DilithiumPublicKeyPqclean::NewPublicKey(
+          bad_public_key_data,
+          subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
   util::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
       subtle::DilithiumAvx2Verify::New(*dilithium_public_key);
   ASSERT_THAT(verifier.status(), IsOk());

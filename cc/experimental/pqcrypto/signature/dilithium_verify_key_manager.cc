@@ -48,7 +48,9 @@ StatusOr<std::unique_ptr<PublicKeyVerify>>
 DilithiumVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const DilithiumPublicKey& public_key) const {
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
-      DilithiumPublicKeyPqclean::NewPublicKey(public_key.key_value());
+      DilithiumPublicKeyPqclean::NewPublicKey(
+          public_key.key_value(),
+          subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
 
   if (!dilithium_public_key.ok()) return dilithium_public_key.status();
 

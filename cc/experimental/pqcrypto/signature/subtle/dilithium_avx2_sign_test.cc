@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/secret_data.h"
@@ -33,8 +34,11 @@
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -44,8 +48,9 @@ namespace {
 
 struct DilithiumTestCase {
   std::string test_name;
-  int key_size = 0;
-  int signature_length = 0;
+  int32_t key_size;
+  int32_t signature_length;
+  DilithiumSeedExpansion seed_expansion;
 };
 
 using ::crypto::tink::test::IsOk;
@@ -69,9 +74,11 @@ TEST(DilithiumAvx2SignTest, InvalidPrivateKeys) {
     }
 
     util::SecretData key_data(keysize, 'x');
-    EXPECT_FALSE(DilithiumAvx2Sign::New(
-                     *DilithiumPrivateKeyPqclean::NewPrivateKey(key_data))
-                     .ok());
+    EXPECT_FALSE(
+        DilithiumAvx2Sign::New(
+            *DilithiumPrivateKeyPqclean::NewPrivateKey(
+                key_data, DilithiumSeedExpansion::SHAKE_SEED_EXPANSION))
+            .ok());
   }
 }
 
@@ -85,8 +92,8 @@ TEST_P(DilithiumAvx2SignTest, SignatureLength) {
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair =
-          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          test_case.key_size, test_case.seed_expansion);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -115,8 +122,8 @@ TEST_P(DilithiumAvx2SignTest, Determinism) {
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair =
-          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          test_case.key_size, test_case.seed_expansion);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -160,8 +167,8 @@ TEST_P(DilithiumAvx2SignTest, FipsMode) {
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair =
-          DilithiumPrivateKeyPqclean::GenerateKeyPair(test_case.key_size);
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          test_case.key_size, test_case.seed_expansion);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -174,11 +181,23 @@ INSTANTIATE_TEST_SUITE_P(
     DilithiumAvx2SignTests, DilithiumAvx2SignTest,
     testing::ValuesIn<DilithiumTestCase>({
         {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES},
+         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
         {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES},
+         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
         {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
-         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES},
+         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES,
+         DilithiumSeedExpansion::AES_SEED_EXPANSION},
     }),
     [](const testing::TestParamInfo<DilithiumAvx2SignTest::ParamType>& info) {
       return info.param.test_name;
