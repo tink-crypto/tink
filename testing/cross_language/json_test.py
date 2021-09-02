@@ -14,6 +14,7 @@
 """Cross-language tests for JSON serialization."""
 
 # Placeholder for import for type annotations
+
 from typing import Iterable, Text
 
 from absl.testing import absltest
@@ -96,7 +97,7 @@ class JsonTest(parameterized.TestCase):
     supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
         key_template_name]
     self.assertNotEmpty(supported_langs)
-    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    key_template = testing_servers.key_template('java', key_template_name)
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
     for to_lang in supported_langs:

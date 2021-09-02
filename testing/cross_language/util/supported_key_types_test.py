@@ -33,11 +33,6 @@ class SupportedKeyTypesTest(absltest.TestCase):
         list(supported_key_types.KEY_TEMPLATE_NAMES.keys()),
         supported_key_types.ALL_KEY_TYPES)
 
-  def test_all_key_templates_present(self):
-    self.assertEqual(
-        list(all_key_template_names()),
-        list(supported_key_types.KEY_TEMPLATE.keys()))
-
   def test_supported_lang_by_template_name_all_present(self):
     self.assertEqual(
         list(all_key_template_names()),

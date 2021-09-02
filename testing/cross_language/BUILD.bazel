@@ -64,7 +64,6 @@ py_test(
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
-        "@tink_py//tink:tink_python",
     ],
 )
 
@@ -109,7 +108,6 @@ py_test(
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
         "@tink_py//tink/daead",
-        "@tink_py//tink/proto:tink_py_pb2",
         "@tink_py//tink/testing:keyset_builder",
     ],
 )
@@ -219,7 +217,6 @@ py_test(
     name = "jwt_kid_test",
     srcs = ["jwt_kid_test.py"],
     deps = [
-        "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
         "@tink_py//tink:tink_python",
