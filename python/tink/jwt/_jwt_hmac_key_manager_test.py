@@ -188,17 +188,17 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
 
   @parameterized.named_parameters([
       ('modified_signature',
-       'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
-       'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-       'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXi'),
+       ('eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
+        'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+        'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXi')),
       ('modified_payload',
-       'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOj'
-       'EzMDA4MTkzODEsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-       'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'),
+       ('eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLCJleHAiOj'
+        'EzMDA4MTkzODEsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+        'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')),
       ('modified_header',
-       'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
-       'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-       'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'),
+       ('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH'
+        'AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+        'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')),
       ('extra .', 'eyJhbGciOiJIUzI1NiJ9.e30.abc.'),
       ('invalid_header_encoding', 'eyJhbGciOiJIUzI1NiJ9?.e30.abc'),
       ('invalid_payload_encoding', 'eyJhbGciOiJIUzI1NiJ9.e30?.abc'),
