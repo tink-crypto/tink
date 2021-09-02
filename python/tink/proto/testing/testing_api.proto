@@ -349,6 +349,10 @@ service Jwt {
   rpc PublicKeySignAndEncode(JwtSignRequest) returns (JwtSignResponse) {}
   // Verifies the validity of the signed compact JWT token
   rpc PublicKeyVerifyAndDecode(JwtVerifyRequest) returns (JwtVerifyResponse) {}
+  // Converts a Keyset from Tink Binary to JWK Set Format
+  rpc ToJwkSet(JwtToJwkSetRequest) returns (JwtToJwkSetResponse) {}
+  // Converts a Keyset from JWK Set to Tink Binary Format
+  rpc FromJwkSet(JwtFromJwkSetRequest) returns (JwtFromJwkSetResponse) {}
 }
 
 //  Used to represent the JSON null value.
@@ -449,6 +453,28 @@ message JwtVerifyRequest {
 message JwtVerifyResponse {
   oneof result {
     JwtToken verified_jwt = 1;
+    string err = 2;
+  }
+}
+
+message JwtToJwkSetRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message JwtToJwkSetResponse {
+  oneof result {
+    string jwk_set = 1;
+    string err = 2;
+  }
+}
+
+message JwtFromJwkSetRequest {
+  string jwk_set = 1;
+}
+
+message JwtFromJwkSetResponse {
+  oneof result {
+    bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
   }
 }
