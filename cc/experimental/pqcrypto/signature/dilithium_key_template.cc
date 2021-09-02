@@ -33,18 +33,23 @@ namespace tink {
 namespace {
 
 using google::crypto::tink::DilithiumKeyFormat;
+using google::crypto::tink::DilithiumParams;
 using google::crypto::tink::DilithiumPrivateKey;
+using google::crypto::tink::DilithiumSeedExpansion;
 using google::crypto::tink::KeyTemplate;
 using google::crypto::tink::OutputPrefixType;
 
-KeyTemplate* NewDilithiumKeyTemplate(int32 key_size) {
+KeyTemplate* NewDilithiumKeyTemplate(int32 key_size,
+                                     DilithiumSeedExpansion seed_expansion) {
   KeyTemplate* key_template = new KeyTemplate;
   key_template->set_type_url(
       absl::StrCat(kTypeGoogleapisCom, DilithiumPrivateKey().GetTypeName()));
   key_template->set_output_prefix_type(OutputPrefixType::TINK);
 
   DilithiumKeyFormat key_format;
-  key_format.set_key_size(key_size);
+  DilithiumParams* params = key_format.mutable_params();
+  params->set_key_size(key_size);
+  params->set_seed_expansion(seed_expansion);
   key_format.SerializeToString(key_template->mutable_value());
 
   return key_template;
@@ -54,19 +59,22 @@ KeyTemplate* NewDilithiumKeyTemplate(int32 key_size) {
 
 const google::crypto::tink::KeyTemplate& Dilithium2KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium3KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES);
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 
 const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate() {
   static const KeyTemplate* key_template =
-      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES);
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   return *key_template;
 }
 

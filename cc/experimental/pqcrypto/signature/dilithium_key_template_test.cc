@@ -38,13 +38,16 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::DilithiumKeyFormat;
+using ::google::crypto::tink::DilithiumParams;
 using ::google::crypto::tink::DilithiumPrivateKey;
+using ::google::crypto::tink::DilithiumSeedExpansion;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 
 struct DilithiumKeyTemplateTestCase {
   std::string test_name;
   int32 key_size;
+  DilithiumSeedExpansion seed_expansion;
   KeyTemplate key_template;
 };
 
@@ -64,7 +67,10 @@ TEST_P(DilithiumKeyTemplateTest, ValidateKeyFormat) {
   const DilithiumKeyTemplateTestCase& test_case = GetParam();
   DilithiumKeyFormat key_format;
 
-  key_format.set_key_size(test_case.key_size);
+  DilithiumParams* params = key_format.mutable_params();
+  params->set_key_size(test_case.key_size);
+  params->set_seed_expansion(test_case.seed_expansion);
+
   EXPECT_THAT(DilithiumSignKeyManager().ValidateKeyFormat(key_format), IsOk());
   EXPECT_TRUE(key_format.ParseFromString(test_case.key_template.value()));
 }
@@ -85,7 +91,10 @@ TEST_P(DilithiumKeyTemplateTest, KeyManagerCompatibility) {
   DilithiumKeyFormat key_format;
   const DilithiumKeyTemplateTestCase& test_case = GetParam();
 
-  key_format.set_key_size(test_case.key_size);
+  DilithiumParams* params = key_format.mutable_params();
+  params->set_key_size(test_case.key_size);
+  params->set_seed_expansion(test_case.seed_expansion);
+
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result2 =
       key_manager->get_key_factory().NewKey(key_format);
   EXPECT_THAT(new_key_result2.status(), IsOk());
@@ -95,10 +104,13 @@ INSTANTIATE_TEST_SUITE_P(
     DilithiumKeyTemplateTests, DilithiumKeyTemplateTest,
     testing::ValuesIn<DilithiumKeyTemplateTestCase>(
         {{"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium2KeyTemplate()},
          {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium2KeyTemplate()},
          {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
           Dilithium2KeyTemplate()}}),
     [](const testing::TestParamInfo<DilithiumKeyTemplateTest::ParamType>&
            info) { return info.param.test_name; });

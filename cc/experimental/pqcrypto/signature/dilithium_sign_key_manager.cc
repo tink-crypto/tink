@@ -19,8 +19,10 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_sign.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/util/enums.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
@@ -41,6 +43,7 @@ namespace tink {
 
 using ::crypto::tink::subtle::DilithiumPrivateKeyPqclean;
 using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
+using ::crypto::tink::util::EnumsPqcrypto;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::DilithiumKeyFormat;
@@ -58,8 +61,8 @@ StatusOr<DilithiumPrivateKey> DilithiumSignKeyManager::CreateKey(
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
-          key_format.key_size(),
-          subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
+          key_format.params().key_size(),
+          EnumsPqcrypto::ProtoToSubtle(key_format.params().seed_expansion()));
   if (!key_pair.status().ok()) {
     return key_pair.status();
   }
@@ -67,6 +70,7 @@ StatusOr<DilithiumPrivateKey> DilithiumSignKeyManager::CreateKey(
   dilithium_sk.set_key_value(
       util::SecretDataAsStringView(key_pair->first.GetKeyData()));
   dilithium_pk->set_key_value(key_pair->second.GetKeyData());
+  *(dilithium_pk->mutable_params()) = key_format.params();
 
   return dilithium_sk;
 }
@@ -79,7 +83,8 @@ DilithiumSignKeyManager::PublicKeySignFactory::Create(
 
   util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
       DilithiumPrivateKeyPqclean::NewPrivateKey(
-          sk_data, subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
+          sk_data, EnumsPqcrypto::ProtoToSubtle(
+                       private_key.public_key().params().seed_expansion()));
 
   if (!dilithium_private_key.ok()) return dilithium_private_key.status();
 
@@ -105,7 +110,11 @@ Status DilithiumSignKeyManager::ValidateKey(
 
 Status DilithiumSignKeyManager::ValidateKeyFormat(
     const DilithiumKeyFormat& key_format) const {
-  return util::OkStatus();
+  if (!key_format.has_params()) {
+    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+  }
+
+  return DilithiumVerifyKeyManager().ValidateParams(key_format.params());
 }
 
 }  // namespace tink

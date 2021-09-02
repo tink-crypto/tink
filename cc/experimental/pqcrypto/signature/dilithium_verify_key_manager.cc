@@ -21,6 +21,7 @@
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/util/enums.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
@@ -42,7 +43,10 @@ namespace tink {
 using ::crypto::tink::subtle::DilithiumPublicKeyPqclean;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::DilithiumParams;
 using ::google::crypto::tink::DilithiumPublicKey;
+using ::google::crypto::tink::DilithiumSeedExpansion;
+using ::crypto::tink::util::EnumsPqcrypto;
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 DilithiumVerifyKeyManager::PublicKeyVerifyFactory::Create(
@@ -50,7 +54,7 @@ DilithiumVerifyKeyManager::PublicKeyVerifyFactory::Create(
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
       DilithiumPublicKeyPqclean::NewPublicKey(
           public_key.key_value(),
-          subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
+          EnumsPqcrypto::ProtoToSubtle(public_key.params().seed_expansion()));
 
   if (!dilithium_public_key.ok()) return dilithium_public_key.status();
 
@@ -71,6 +75,32 @@ Status DilithiumVerifyKeyManager::ValidateKey(
     return Status(util::error::INVALID_ARGUMENT,
                   "Invalid dilithium public key size.");
   }
+  return Status::OK;
+}
+
+Status DilithiumVerifyKeyManager::ValidateParams(
+    const DilithiumParams& params) const {
+  switch (params.seed_expansion()) {
+    case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE:
+    case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+      break;
+    }
+    default: {
+      return Status(util::error::INVALID_ARGUMENT, "Invalid seed expansion");
+    }
+  }
+
+  switch (params.key_size()) {
+    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES:
+    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES:
+    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+      break;
+    }
+    default: {
+      return Status(util::error::INVALID_ARGUMENT, "Invalid key size.");
+    }
+  }
+
   return Status::OK;
 }
 
