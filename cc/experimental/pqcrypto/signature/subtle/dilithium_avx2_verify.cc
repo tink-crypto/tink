@@ -73,7 +73,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
   switch (key_size) {
     case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES: {
       switch (public_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           result = PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -83,7 +83,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
 
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           result = PQCLEAN_DILITHIUM2_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -92,12 +92,15 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                   public_key_.GetKeyData().data()));
           break;
         }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES: {
       switch (public_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           result = PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -106,7 +109,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                   public_key_.GetKeyData().data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           result = PQCLEAN_DILITHIUM3_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -115,12 +118,15 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                   public_key_.GetKeyData().data()));
           break;
         }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES: {
       switch (public_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           result = PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -129,7 +135,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                   public_key_.GetKeyData().data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           result = PQCLEAN_DILITHIUM5_AVX2_crypto_sign_verify(
               reinterpret_cast<const uint8_t *>(signature.data()),
               signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
@@ -137,6 +143,9 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
               reinterpret_cast<const uint8_t *>(
                   public_key_.GetKeyData().data()));
           break;
+        }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
         }
       }
       break;

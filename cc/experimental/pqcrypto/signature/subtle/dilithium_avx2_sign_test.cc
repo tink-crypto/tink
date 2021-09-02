@@ -77,7 +77,7 @@ TEST(DilithiumAvx2SignTest, InvalidPrivateKeys) {
     EXPECT_FALSE(
         DilithiumAvx2Sign::New(
             *DilithiumPrivateKeyPqclean::NewPrivateKey(
-                key_data, DilithiumSeedExpansion::SHAKE_SEED_EXPANSION))
+                key_data, DilithiumSeedExpansion::SEED_EXPANSION_SHAKE))
             .ok());
   }
 }
@@ -182,22 +182,22 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn<DilithiumTestCase>({
         {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
         {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
         {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
          PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
     }),
     [](const testing::TestParamInfo<DilithiumAvx2SignTest::ParamType>& info) {
       return info.param.test_name;

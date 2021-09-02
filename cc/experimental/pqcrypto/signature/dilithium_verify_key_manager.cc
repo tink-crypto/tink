@@ -50,7 +50,7 @@ DilithiumVerifyKeyManager::PublicKeyVerifyFactory::Create(
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
       DilithiumPublicKeyPqclean::NewPublicKey(
           public_key.key_value(),
-          subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
+          subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
 
   if (!dilithium_public_key.ok()) return dilithium_public_key.status();
 

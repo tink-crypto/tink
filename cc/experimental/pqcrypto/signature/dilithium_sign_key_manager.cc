@@ -59,7 +59,7 @@ StatusOr<DilithiumPrivateKey> DilithiumSignKeyManager::CreateKey(
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
       key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
           key_format.key_size(),
-          subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
+          subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
   if (!key_pair.status().ok()) {
     return key_pair.status();
   }
@@ -79,7 +79,7 @@ DilithiumSignKeyManager::PublicKeySignFactory::Create(
 
   util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
       DilithiumPrivateKeyPqclean::NewPrivateKey(
-          sk_data, subtle::DilithiumSeedExpansion::SHAKE_SEED_EXPANSION);
+          sk_data, subtle::DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
 
   if (!dilithium_private_key.ok()) return dilithium_private_key.status();
 

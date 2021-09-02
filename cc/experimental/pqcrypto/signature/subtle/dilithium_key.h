@@ -30,9 +30,11 @@ namespace tink {
 namespace subtle {
 
 enum class DilithiumSeedExpansion {
-  SHAKE_SEED_EXPANSION = 0,
-  AES_SEED_EXPANSION = 1,
+  SEED_EXPANSION_UNKNOWN = 0,
+  SEED_EXPANSION_SHAKE = 1,
+  SEED_EXPANSION_AES = 2,
 };
+
 
 // Dilithium public key representation.
 class DilithiumPublicKeyPqclean {

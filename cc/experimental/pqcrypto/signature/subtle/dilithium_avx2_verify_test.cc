@@ -70,7 +70,7 @@ TEST(DilithiumAvx2VerifyTest, InvalidPublicKeys) {
   EXPECT_FALSE(
       DilithiumAvx2Verify::New(
           *DilithiumPublicKeyPqclean::NewPublicKey(
-              null_public_key, DilithiumSeedExpansion::SHAKE_SEED_EXPANSION))
+              null_public_key, DilithiumSeedExpansion::SEED_EXPANSION_SHAKE))
           .ok());
 
   for (int keysize = 0; keysize < PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES;
@@ -84,7 +84,7 @@ TEST(DilithiumAvx2VerifyTest, InvalidPublicKeys) {
     std::string key(keysize, 'x');
     EXPECT_FALSE(DilithiumAvx2Verify::New(
                      *DilithiumPublicKeyPqclean::NewPublicKey(
-                         key, DilithiumSeedExpansion::SHAKE_SEED_EXPANSION))
+                         key, DilithiumSeedExpansion::SEED_EXPANSION_SHAKE))
                      .ok());
   }
 }
@@ -862,7 +862,7 @@ TEST(DilithiumAvx2VerifyTest, Vectors) {
     // Create a new verifier.
     absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
         DilithiumAvx2Verify::New(*DilithiumPublicKeyPqclean::NewPublicKey(
-            v.public_key, DilithiumSeedExpansion::SHAKE_SEED_EXPANSION));
+            v.public_key, DilithiumSeedExpansion::SEED_EXPANSION_SHAKE));
     ASSERT_THAT(verifier.status(), IsOk());
 
     // Verify signature.
@@ -1418,7 +1418,7 @@ TEST(DilithiumAvx2VerifyTest, AesVectors) {
     // Create a new verifier.
     absl::StatusOr<std::unique_ptr<PublicKeyVerify>> verifier =
         DilithiumAvx2Verify::New(*DilithiumPublicKeyPqclean::NewPublicKey(
-            v.public_key, DilithiumSeedExpansion::AES_SEED_EXPANSION));
+            v.public_key, DilithiumSeedExpansion::SEED_EXPANSION_AES));
     ASSERT_THAT(verifier.status(), IsOk());
 
     // Verify signature.
@@ -1431,17 +1431,17 @@ INSTANTIATE_TEST_SUITE_P(
     DilithiumAvx2VerifyTests, DilithiumAvx2VerifyTest,
     testing::ValuesIn<DilithiumTestCase>({
         {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::SHAKE_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
         {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
         {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
         {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
-         DilithiumSeedExpansion::AES_SEED_EXPANSION},
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
     }),
     [](const testing::TestParamInfo<DilithiumAvx2VerifyTest::ParamType>& info) {
       return info.param.test_name;

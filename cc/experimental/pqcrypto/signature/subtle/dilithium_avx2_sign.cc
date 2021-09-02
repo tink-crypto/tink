@@ -77,7 +77,7 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
   switch (key_size) {
     case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           signature.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -86,7 +86,7 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
                   private_key_.GetKeyData().data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           signature.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM2_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -96,12 +96,15 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
 
           break;
         }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           signature.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -110,7 +113,7 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
                   private_key_.GetKeyData().data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           signature.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM3_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -119,12 +122,15 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
                   private_key_.GetKeyData().data()));
           break;
         }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+        }
       }
       break;
     }
     case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (private_key_.GetSeedExpansion()) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           signature.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -133,7 +139,7 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
                   private_key_.GetKeyData().data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           signature.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_BYTES, '0');
           result = PQCLEAN_DILITHIUM5_AVX2_crypto_sign_signature(
               reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
@@ -141,6 +147,9 @@ util::StatusOr<std::string> DilithiumAvx2Sign::Sign(
               reinterpret_cast<const uint8_t *>(
                   private_key_.GetKeyData().data()));
           break;
+        }
+        default: {
+          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
         }
       }
       break;

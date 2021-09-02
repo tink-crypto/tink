@@ -57,19 +57,23 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
     // Dilithium2.
     case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           public_key.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
+        }
+        default: {
+          return util::Status(util::error::INVALID_ARGUMENT,
+                              "Invalid seed expansion");
         }
       }
       break;
@@ -77,19 +81,23 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
     // Dilithium3.
     case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           public_key.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           public_key.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM3_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
+        }
+        default: {
+          return util::Status(util::error::INVALID_ARGUMENT,
+                              "Invalid seed expansion");
         }
       }
       break;
@@ -97,19 +105,23 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
     // Dilithium5.
     case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
       switch (seed_expansion) {
-        case DilithiumSeedExpansion::AES_SEED_EXPANSION: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
           public_key.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
         }
-        default: {
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
           public_key.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES);
           PQCLEAN_DILITHIUM5_AVX2_crypto_sign_keypair(
               reinterpret_cast<uint8_t*>(public_key.data()),
               reinterpret_cast<uint8_t*>(private_key.data()));
           break;
+        }
+        default: {
+          return util::Status(util::error::INVALID_ARGUMENT,
+                              "Invalid seed expansion");
         }
       }
       break;
