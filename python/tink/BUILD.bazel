@@ -145,7 +145,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/core",
-        "//third_party/py/typing",
     ],
 )
 
