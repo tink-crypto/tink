@@ -25,18 +25,14 @@
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
-// Definitions of the three possible sphincs key sizes.
-#define SPHINCSKEYSIZE64 64
-#define SPHINCSKEYSIZE96 96
-#define SPHINCSKEYSIZE128 128
-
 namespace crypto {
 namespace tink {
 namespace subtle {
 
 crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
-    SphincsParams params) {
-  util::Status key_size_status = ValidateKeySize(params.private_key_size);
+    SphincsParamsPqclean params) {
+  util::Status key_size_status =
+      ValidatePrivateKeySize(params.private_key_size);
   if (!key_size_status.ok()) {
     return key_size_status;
   }
@@ -65,35 +61,51 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
   util::SecretData private_key_data =
       util::SecretDataFromStringView(private_key);
 
-  SphincsKeyPair key_pair(SphincsPrivateKeyPqclean{private_key_data},
-                          SphincsPublicKeyPqclean{public_key});
+  SphincsKeyPair key_pair(SphincsPrivateKeyPqclean{private_key_data, params},
+                          SphincsPublicKeyPqclean{public_key, params});
 
   return key_pair;
 }
 
-crypto::tink::util::Status ValidateKeySize(int32 key_size) {
+crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size) {
   switch (key_size) {
-    case SPHINCSKEYSIZE64:
-    case SPHINCSKEYSIZE96:
-    case SPHINCSKEYSIZE128:
+    case kSphincsPrivateKeySize64:
+    case kSphincsPrivateKeySize96:
+    case kSphincsPrivateKeySize128:
       return util::Status::OK;
     default:
       return util::Status(
           util::error::INVALID_ARGUMENT,
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d, %d.",
-                          key_size, SPHINCSKEYSIZE64, SPHINCSKEYSIZE96,
-                          SPHINCSKEYSIZE128));
+                          key_size, kSphincsPrivateKeySize64,
+                          kSphincsPrivateKeySize96, kSphincsPrivateKeySize128));
+  }
+}
+
+crypto::tink::util::Status ValidatePublicKeySize(int32 key_size) {
+  switch (key_size) {
+    case kSphincsPublicKeySize32:
+    case kSphincsPublicKeySize48:
+    case kSphincsPublicKeySize64:
+      return util::Status::OK;
+    default:
+      return util::Status(
+          util::error::INVALID_ARGUMENT,
+          absl::StrFormat("Invalid private key size (%d). "
+                          "The only valid sizes are %d, %d, %d.",
+                          key_size, kSphincsPublicKeySize32,
+                          kSphincsPublicKeySize48, kSphincsPublicKeySize64));
   }
 }
 
 crypto::tink::util::StatusOr<int32> SphincsKeySizeToIndex(int32 key_size) {
   switch (key_size) {
-    case SPHINCSKEYSIZE64:
+    case kSphincsPrivateKeySize64:
       return 0;
-    case SPHINCSKEYSIZE96:
+    case kSphincsPrivateKeySize96:
       return 1;
-    case SPHINCSKEYSIZE128:
+    case kSphincsPrivateKeySize128:
       return 2;
     default:
       return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");

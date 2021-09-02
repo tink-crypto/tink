@@ -29,6 +29,16 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
+// The three possible sphincs private key sizes.
+const int kSphincsPrivateKeySize64 = 64;
+const int kSphincsPrivateKeySize96 = 96;
+const int kSphincsPrivateKeySize128 = 128;
+
+// The three possible sphincs public key sizes.
+const int kSphincsPublicKeySize32 = 32;
+const int kSphincsPublicKeySize48 = 48;
+const int kSphincsPublicKeySize64 = 64;
+
 enum SphincsHashType {
   HARAKA = 0,
   SHA256 = 1,
@@ -45,78 +55,79 @@ enum SphincsSignatureLengthType {
   S = 1,
 };
 
+struct SphincsParamsPqclean {
+  SphincsHashType hash_type;
+  SphincsVariant variant;
+  SphincsSignatureLengthType sig_length_type;
+  int32 private_key_size;
+};
+
+// Representation of the Sphincs private key.
 class SphincsPrivateKeyPqclean {
  public:
-  explicit SphincsPrivateKeyPqclean(util::SecretData key_data)
-      : private_key_data_(std::move(key_data)) {}
+  explicit SphincsPrivateKeyPqclean(util::SecretData key_data,
+                                    SphincsParamsPqclean params)
+      : private_key_data_(std::move(key_data)), params_(std::move(params)) {}
 
   SphincsPrivateKeyPqclean(const SphincsPrivateKeyPqclean& other) = default;
   SphincsPrivateKeyPqclean& operator=(const SphincsPrivateKeyPqclean& other) =
       default;
 
-  const util::SecretData& Get() const { return private_key_data_; }
+  const util::SecretData& GetKey() const { return private_key_data_; }
+  const SphincsParamsPqclean& GetParams() const { return params_; }
 
  private:
   const util::SecretData private_key_data_;
+  const SphincsParamsPqclean params_;
 };
 
+// Representation of the Sphincs public key.
 class SphincsPublicKeyPqclean {
  public:
-  explicit SphincsPublicKeyPqclean(std::string key_data)
-      : public_key_data_(std::move(key_data)) {}
+  SphincsPublicKeyPqclean(std::string key_data, SphincsParamsPqclean params)
+      : public_key_data_(std::move(key_data)), params_(std::move(params)) {}
 
   SphincsPublicKeyPqclean(const SphincsPublicKeyPqclean& other) = default;
   SphincsPublicKeyPqclean& operator=(const SphincsPublicKeyPqclean& other) =
       default;
 
-  const std::string& Get() const { return public_key_data_; }
+  const std::string& GetKey() const { return public_key_data_; }
+  const SphincsParamsPqclean& GetParams() const { return params_; }
 
  private:
   const std::string public_key_data_;
+  const SphincsParamsPqclean params_;
 };
 
 class SphincsKeyPair {
  public:
   SphincsKeyPair(SphincsPrivateKeyPqclean private_key,
                  SphincsPublicKeyPqclean public_key)
-      : private_key_(private_key), public_key_(public_key) {}
+      : private_key_(std::move(private_key)),
+        public_key_(std::move(public_key)) {}
 
   SphincsKeyPair(const SphincsKeyPair& other) = default;
-  SphincsKeyPair& operator=(const SphincsKeyPair& other) =
-      default;
+  SphincsKeyPair& operator=(const SphincsKeyPair& other) = default;
 
   const SphincsPrivateKeyPqclean& GetPrivateKey() const { return private_key_; }
   const SphincsPublicKeyPqclean& GetPublicKey() const { return public_key_; }
 
  private:
-  SphincsPrivateKeyPqclean private_key_;
-  SphincsPublicKeyPqclean public_key_;
-};
-
-struct SphincsParams {
-  SphincsHashType hash_type;
-  SphincsVariant variant;
-  SphincsSignatureLengthType sig_length_type;
-  int32 private_key_size;
-
-  SphincsParams(SphincsHashType hash_type_, SphincsVariant variant_,
-                int32 private_key_size_,
-                SphincsSignatureLengthType sig_length_type_) {
-    hash_type = hash_type_;
-    variant = variant_;
-    private_key_size = private_key_size_;
-    sig_length_type = sig_length_type_;
-  }
+  const SphincsPrivateKeyPqclean private_key_;
+  const SphincsPublicKeyPqclean public_key_;
 };
 
 // This is an utility function that generates a new Sphincs key pair based on
 // Sphincs specific parameters. This function is expected to be called from
 // a key manager class.
 crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
-    SphincsParams params);
+    SphincsParamsPqclean params);
 
-// Validates whether 'key_size' is safe to use for sphincs signature.
-crypto::tink::util::Status ValidateKeySize(int32 key_size);
+// Validates whether the private key size is safe to use for sphincs signature.
+crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size);
+
+// Validates whether the public key size is safe to use for sphincs signature.
+crypto::tink::util::Status ValidatePublicKeySize(int32 key_size);
 
 // Convert the sphincs private key size to the appropiate index in the
 // pqclean functions array.
