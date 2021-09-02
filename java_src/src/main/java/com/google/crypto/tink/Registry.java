@@ -1144,7 +1144,7 @@ public final class Registry {
    *
    * @throws GeneralSecurityException if any key manager has already been registered.
    */
-  public static synchronized <P> void restrictToFipsIfEmpty() throws GeneralSecurityException {
+  public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
     if (keyManagerMap.isEmpty()) {
       TinkFipsUtil.setFipsRestricted();
       return;
