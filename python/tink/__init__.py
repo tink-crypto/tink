@@ -37,3 +37,7 @@ JsonKeysetWriter = _keyset_writer.JsonKeysetWriter
 BinaryKeysetWriter = _keyset_writer.BinaryKeysetWriter
 
 TinkError = core.TinkError
+
+KeyAccess = core.KeyAccess
+PUBLIC_KEY_ACCESS_TOKEN = _keyset_handle.PUBLIC_KEY_ACCESS_TOKEN
+has_secret_key_access = _keyset_handle.has_secret_key_access

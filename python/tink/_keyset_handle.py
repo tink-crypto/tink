@@ -28,10 +28,24 @@ from tink import _keyset_reader
 from tink import _keyset_writer
 from tink import aead
 from tink import core
+from tink import secret_key_access
 
 P = TypeVar('P')
 
 MAX_INT32 = 2147483647  # = 2^31 - 1
+
+
+class PublicKeyAccess(core.KeyAccess):
+  pass
+
+
+# KeyAccess token that gives access to public keys.
+PUBLIC_KEY_ACCESS_TOKEN = PublicKeyAccess()
+
+
+def has_secret_key_access(token: core.KeyAccess) -> bool:
+  """Returns True if token is secret_key_access.TOKEN, and False otherwise."""
+  return isinstance(token, secret_key_access.SecretKeyAccess)
 
 
 class KeysetHandle(object):

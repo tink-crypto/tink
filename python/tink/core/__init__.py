@@ -43,3 +43,9 @@ PrimitiveSet = _primitive_set.PrimitiveSet
 PrimitiveWrapper = _primitive_wrapper.PrimitiveWrapper
 
 crypto_format = _crypto_format
+
+
+class KeyAccess(object):
+  """Base class for access tokens for Tink Keys."""
+  pass
+
