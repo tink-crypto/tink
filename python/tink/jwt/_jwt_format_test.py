@@ -31,8 +31,8 @@ class JwtFormatTest(parameterized.TestCase):
         97, 108, 103, 34, 58, 34, 72, 83, 50, 53, 54, 34, 125
     ])
     encoded_header = b'eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9'
-    self.assertEqual(_jwt_format._base64_encode(header), encoded_header)
-    self.assertEqual(_jwt_format._base64_decode(encoded_header), header)
+    self.assertEqual(_jwt_format.base64_encode(header), encoded_header)
+    self.assertEqual(_jwt_format.base64_decode(encoded_header), header)
 
   def test_base64_encode_decode_payload_fixed_data(self):
     # Example from https://tools.ietf.org/html/rfc7519#section-3.1
@@ -45,29 +45,29 @@ class JwtFormatTest(parameterized.TestCase):
     ])
     encoded_payload = (b'eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0'
                        b'dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ')
-    self.assertEqual(_jwt_format._base64_encode(payload), encoded_payload)
-    self.assertEqual(_jwt_format._base64_decode(encoded_payload), payload)
+    self.assertEqual(_jwt_format.base64_encode(payload), encoded_payload)
+    self.assertEqual(_jwt_format.base64_decode(encoded_payload), payload)
 
   def test_base64_decode_bad_format_raises_jwt_invalid_error(self):
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b'aeyJh')
+      _jwt_format.base64_decode(b'aeyJh')
 
   def test_base64_decode_fails_with_unknown_chars(self):
     self.assertNotEmpty(
-        _jwt_format._base64_decode(
+        _jwt_format.base64_decode(
             b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-')
     )
-    self.assertEqual(_jwt_format._base64_decode(b''), b'')
+    self.assertEqual(_jwt_format.base64_decode(b''), b'')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b'[')
+      _jwt_format.base64_decode(b'[')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b'@')
+      _jwt_format.base64_decode(b'@')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b'/')
+      _jwt_format.base64_decode(b'/')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b':')
+      _jwt_format.base64_decode(b':')
     with self.assertRaises(_jwt_error.JwtInvalidError):
-      _jwt_format._base64_decode(b'{')
+      _jwt_format.base64_decode(b'{')
 
   def test_decode_encode_header_hs256(self):
     # Example from https://tools.ietf.org/html/rfc7515#appendix-A.1
@@ -96,8 +96,7 @@ class JwtFormatTest(parameterized.TestCase):
     self.assertEqual(json_header, '{ "alg": "RS256"} ')
 
   def test_decode_header_with_invalid_utf8(self):
-    encoded_header = _jwt_format._base64_encode(
-        b'{"alg":"RS256", "bad":"\xc2"}')
+    encoded_header = _jwt_format.base64_encode(b'{"alg":"RS256", "bad":"\xc2"}')
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.decode_header(encoded_header)
 
@@ -340,8 +339,7 @@ class JwtFormatTest(parameterized.TestCase):
       _jwt_format.split_signed_compact('e30.e30.YWJj\ud83c')
 
   def test_split_signed_compact_with_invalid_utf8_in_header(self):
-    encoded_header = _jwt_format._base64_encode(
-        b'{"alg":"RS256", "bad":"\xc2"}')
+    encoded_header = _jwt_format.base64_encode(b'{"alg":"RS256", "bad":"\xc2"}')
     token = (encoded_header + b'.e30.YWJj').decode('utf8')
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.split_signed_compact(token)

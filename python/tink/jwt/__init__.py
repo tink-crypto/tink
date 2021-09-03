@@ -20,6 +20,7 @@ from __future__ import print_function
 import datetime
 from typing import Dict, List, Mapping, Optional, Text, Union, cast
 
+from tink.jwt import _jwk_set_converter
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_hmac_key_manager
 from tink.jwt import _jwt_key_templates
@@ -44,6 +45,8 @@ JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
 new_raw_jwt = _raw_jwt.new_raw_jwt
 new_validator = _jwt_validator.new_validator
+
+jwk_set_from_keyset_handle = _jwk_set_converter.from_keyset_handle
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
 raw_jwt_hs256_template = _jwt_key_templates.raw_jwt_hs256_template

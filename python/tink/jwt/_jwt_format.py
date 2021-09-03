@@ -29,7 +29,7 @@ _VALID_ALGORITHMS = frozenset({
 })
 
 
-def _base64_encode(data: bytes) -> bytes:
+def base64_encode(data: bytes) -> bytes:
   """Does a URL-safe base64 encoding without padding."""
   return base64.urlsafe_b64encode(data).rstrip(b'=')
 
@@ -46,12 +46,12 @@ def _is_valid_urlsafe_base64_char(c: int) -> bool:
   return False
 
 
-def _base64_decode(encoded_data: bytes) -> bytes:
+def base64_decode(encoded_data: bytes) -> bytes:
   """Does a URL-safe base64 decoding without padding."""
   # base64.urlsafe_b64decode ignores all non-base64 chars. We don't want that.
   for c in encoded_data:
     if not _is_valid_urlsafe_base64_char(c):
-      raise _jwt_error.JwtInvalidError('invalid token')
+      raise _jwt_error.JwtInvalidError('invalid base64 encoding')
   # base64.urlsafe_b64decode requires padding, but does not mind too much
   # padding. So we simply add the maximum ammount of padding needed.
   padded_encoded_data = encoded_data + b'==='
@@ -59,7 +59,7 @@ def _base64_decode(encoded_data: bytes) -> bytes:
     return base64.urlsafe_b64decode(padded_encoded_data)
   except binascii.Error:
     # Throws when the length of encoded_data is (4*i + 1) for some i
-    raise _jwt_error.JwtInvalidError('invalid token')
+    raise _jwt_error.JwtInvalidError('invalid base64 encoding')
 
 
 def _validate_algorithm(algorithm: Text) -> None:
@@ -69,14 +69,14 @@ def _validate_algorithm(algorithm: Text) -> None:
 
 def encode_header(json_header: Text) -> bytes:
   try:
-    return _base64_encode(json_header.encode('utf8'))
+    return base64_encode(json_header.encode('utf8'))
   except UnicodeEncodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def decode_header(encoded_header: bytes) -> Text:
   try:
-    return _base64_decode(encoded_header).decode('utf8')
+    return base64_decode(encoded_header).decode('utf8')
   except UnicodeDecodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
@@ -84,7 +84,7 @@ def decode_header(encoded_header: bytes) -> Text:
 def encode_payload(json_payload: Text) -> bytes:
   """Encodes the payload into compact form."""
   try:
-    return _base64_encode(json_payload.encode('utf8'))
+    return base64_encode(json_payload.encode('utf8'))
   except UnicodeEncodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
@@ -92,19 +92,19 @@ def encode_payload(json_payload: Text) -> bytes:
 def decode_payload(encoded_payload: bytes) -> Text:
   """Decodes the payload from compact form."""
   try:
-    return _base64_decode(encoded_payload).decode('utf8')
+    return base64_decode(encoded_payload).decode('utf8')
   except UnicodeDecodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
 
 def encode_signature(signature: bytes) -> bytes:
   """Encodes the signature."""
-  return _base64_encode(signature)
+  return base64_encode(signature)
 
 
 def decode_signature(encoded_signature: bytes) -> bytes:
   """Decodes the signature."""
-  return _base64_decode(encoded_signature)
+  return base64_decode(encoded_signature)
 
 
 def create_header(algorithm: Text, type_header: Optional[Text],
@@ -126,7 +126,7 @@ def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[Text]:
   if prefix == tink_pb2.TINK:
     if key_id < 0 or key_id > 2**32:
       raise _jwt_error.JwtInvalidError('invalid key_id')
-    return _base64_encode(struct.pack('>L', key_id)).decode('utf8')
+    return base64_encode(struct.pack('>L', key_id)).decode('utf8')
   raise _jwt_error.JwtInvalidError('unexpected output prefix type')
 
 
