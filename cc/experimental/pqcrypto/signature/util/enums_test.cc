@@ -64,6 +64,107 @@ TEST_F(EnumsTest, DilithiumSeedExpansion) {
   EXPECT_EQ(3, count);
 }
 
+TEST_F(EnumsTest, SphincsHashType) {
+  EXPECT_EQ(pb::SphincsHashType::HARAKA,
+            EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::HARAKA));
+  EXPECT_EQ(pb::SphincsHashType::SHA256,
+            EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::SHA256));
+  EXPECT_EQ(pb::SphincsHashType::SHAKE256,
+            EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::SHAKE256));
+  EXPECT_EQ(
+      pb::SphincsHashType::UNKNOWN_HASH_TYPE,
+      EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType::UNKNOWN_HASH_TYPE));
+
+  EXPECT_EQ(subtle::SphincsHashType::HARAKA,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::HARAKA));
+  EXPECT_EQ(subtle::SphincsHashType::SHA256,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::SHA256));
+  EXPECT_EQ(subtle::SphincsHashType::SHAKE256,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::SHAKE256));
+  EXPECT_EQ(
+      subtle::SphincsHashType::UNKNOWN_HASH_TYPE,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType::UNKNOWN_HASH_TYPE));
+
+  // Check that enum conversion covers the entire range of the proto-enum.
+  int count = 0;
+  for (int int_type = static_cast<int>(pb::SphincsHashType_MIN);
+       int_type <= static_cast<int>(pb::SphincsHashType_MAX); int_type++) {
+    if (pb::SphincsHashType_IsValid(int_type)) {
+      pb::SphincsHashType type = static_cast<pb::SphincsHashType>(int_type);
+      EXPECT_EQ(type, EnumsPqcrypto::SubtleToProto(
+                          EnumsPqcrypto::ProtoToSubtle(type)));
+      count++;
+    }
+  }
+  EXPECT_EQ(4, count);
+}
+
+TEST_F(EnumsTest, SphincsVariant) {
+  EXPECT_EQ(pb::SphincsVariant::ROBUST,
+            EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::ROBUST));
+  EXPECT_EQ(pb::SphincsVariant::SIMPLE,
+            EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::SIMPLE));
+  EXPECT_EQ(
+      pb::SphincsVariant::UNKNOWN_VARIANT,
+      EnumsPqcrypto::SubtleToProto(subtle::SphincsVariant::UNKNOWN_VARIANT));
+
+  EXPECT_EQ(subtle::SphincsVariant::ROBUST,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::ROBUST));
+  EXPECT_EQ(subtle::SphincsVariant::SIMPLE,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::SIMPLE));
+  EXPECT_EQ(subtle::SphincsVariant::UNKNOWN_VARIANT,
+            EnumsPqcrypto::ProtoToSubtle(pb::SphincsVariant::UNKNOWN_VARIANT));
+
+  // Check that enum conversion covers the entire range of the proto-enum.
+  int count = 0;
+  for (int int_type = static_cast<int>(pb::SphincsVariant_MIN);
+       int_type <= static_cast<int>(pb::SphincsVariant_MAX); int_type++) {
+    if (pb::SphincsVariant_IsValid(int_type)) {
+      pb::SphincsVariant type = static_cast<pb::SphincsVariant>(int_type);
+      EXPECT_EQ(type, EnumsPqcrypto::SubtleToProto(
+                          EnumsPqcrypto::ProtoToSubtle(type)));
+      count++;
+    }
+  }
+  EXPECT_EQ(3, count);
+}
+
+TEST_F(EnumsTest, SphincsSignatureType) {
+  EXPECT_EQ(
+      pb::SphincsSignatureType::FAST_SIGNING,
+      EnumsPqcrypto::SubtleToProto(subtle::SphincsSignatureType::FAST_SIGNING));
+  EXPECT_EQ(pb::SphincsSignatureType::SMALL_SIGNATURE,
+            EnumsPqcrypto::SubtleToProto(
+                subtle::SphincsSignatureType::SMALL_SIGNATURE));
+  EXPECT_EQ(pb::SphincsSignatureType::UNKNOWN_SIG_TYPE,
+            EnumsPqcrypto::SubtleToProto(
+                subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE));
+
+  EXPECT_EQ(
+      subtle::SphincsSignatureType::FAST_SIGNING,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsSignatureType::FAST_SIGNING));
+  EXPECT_EQ(
+      subtle::SphincsSignatureType::SMALL_SIGNATURE,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsSignatureType::SMALL_SIGNATURE));
+  EXPECT_EQ(
+      subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE,
+      EnumsPqcrypto::ProtoToSubtle(pb::SphincsSignatureType::UNKNOWN_SIG_TYPE));
+
+  // Check that enum conversion covers the entire range of the proto-enum.
+  int count = 0;
+  for (int int_type = static_cast<int>(pb::SphincsSignatureType_MIN);
+       int_type <= static_cast<int>(pb::SphincsSignatureType_MAX); int_type++) {
+    if (pb::SphincsSignatureType_IsValid(int_type)) {
+      pb::SphincsSignatureType type =
+          static_cast<pb::SphincsSignatureType>(int_type);
+      EXPECT_EQ(type, EnumsPqcrypto::SubtleToProto(
+                          EnumsPqcrypto::ProtoToSubtle(type)));
+      count++;
+    }
+  }
+  EXPECT_EQ(3, count);
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

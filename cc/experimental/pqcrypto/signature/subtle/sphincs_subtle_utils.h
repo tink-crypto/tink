@@ -43,22 +43,25 @@ enum SphincsHashType {
   HARAKA = 0,
   SHA256 = 1,
   SHAKE256 = 2,
+  UNKNOWN_HASH_TYPE = 3,
 };
 
 enum SphincsVariant {
   ROBUST = 0,
   SIMPLE = 1,
+  UNKNOWN_VARIANT = 3,
 };
 
-enum SphincsSignatureLengthType {
-  F = 0,
-  S = 1,
+enum SphincsSignatureType {
+  FAST_SIGNING = 0,
+  SMALL_SIGNATURE = 1,
+  UNKNOWN_SIG_TYPE = 3,
 };
 
 struct SphincsParamsPqclean {
   SphincsHashType hash_type;
   SphincsVariant variant;
-  SphincsSignatureLengthType sig_length_type;
+  SphincsSignatureType sig_length_type;
   int32 private_key_size;
 };
 
@@ -128,6 +131,10 @@ crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size);
 
 // Validates whether the public key size is safe to use for sphincs signature.
 crypto::tink::util::Status ValidatePublicKeySize(int32 key_size);
+
+// Validates whether the parameters are safe to use for sphincs signature.
+crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params);
+
 
 // Convert the sphincs private key size to the appropiate index in the
 // pqclean functions array.

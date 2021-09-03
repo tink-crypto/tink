@@ -19,8 +19,10 @@
 
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
+#include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
 #include "tink/util/statusor.h"
 #include "proto/experimental/pqcrypto/dilithium.pb.h"
+#include "proto/experimental/pqcrypto/sphincs.pb.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -37,6 +39,27 @@ class EnumsPqcrypto {
 
   static crypto::tink::subtle::DilithiumSeedExpansion ProtoToSubtle(
       google::crypto::tink::DilithiumSeedExpansion expansion);
+
+  // SphincsHashType.
+  static google::crypto::tink::SphincsHashType SubtleToProto(
+      crypto::tink::subtle::SphincsHashType type);
+
+  static crypto::tink::subtle::SphincsHashType ProtoToSubtle(
+      google::crypto::tink::SphincsHashType type);
+
+  // SphincsVariant.
+  static google::crypto::tink::SphincsVariant SubtleToProto(
+      crypto::tink::subtle::SphincsVariant variant);
+
+  static crypto::tink::subtle::SphincsVariant ProtoToSubtle(
+      google::crypto::tink::SphincsVariant variant);
+
+  // SphincsSignatureType.
+  static google::crypto::tink::SphincsSignatureType SubtleToProto(
+      crypto::tink::subtle::SphincsSignatureType type);
+
+  static crypto::tink::subtle::SphincsSignatureType ProtoToSubtle(
+      google::crypto::tink::SphincsSignatureType type);
 };
 
 }  // namespace util

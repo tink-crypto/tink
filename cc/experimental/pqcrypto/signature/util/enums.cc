@@ -48,6 +48,86 @@ subtle::DilithiumSeedExpansion EnumsPqcrypto::ProtoToSubtle(
   }
 }
 
+// static
+pb::SphincsHashType EnumsPqcrypto::SubtleToProto(subtle::SphincsHashType type) {
+  switch (type) {
+    case subtle::SphincsHashType::HARAKA:
+      return pb::SphincsHashType::HARAKA;
+    case subtle::SphincsHashType::SHA256:
+      return pb::SphincsHashType::SHA256;
+    case subtle::SphincsHashType::SHAKE256:
+      return pb::SphincsHashType::SHAKE256;
+    default:
+      return pb::SphincsHashType::UNKNOWN_HASH_TYPE;
+  }
+}
+
+// static
+subtle::SphincsHashType EnumsPqcrypto::ProtoToSubtle(pb::SphincsHashType type) {
+  switch (type) {
+    case pb::SphincsHashType::HARAKA:
+      return subtle::SphincsHashType::HARAKA;
+    case pb::SphincsHashType::SHA256:
+      return subtle::SphincsHashType::SHA256;
+    case pb::SphincsHashType::SHAKE256:
+      return subtle::SphincsHashType::SHAKE256;
+    default:
+      return subtle::SphincsHashType::UNKNOWN_HASH_TYPE;
+  }
+}
+
+// static
+pb::SphincsVariant EnumsPqcrypto::SubtleToProto(
+    subtle::SphincsVariant variant) {
+  switch (variant) {
+    case subtle::SphincsVariant::ROBUST:
+      return pb::SphincsVariant::ROBUST;
+    case subtle::SphincsVariant::SIMPLE:
+      return pb::SphincsVariant::SIMPLE;
+    default:
+      return pb::SphincsVariant::UNKNOWN_VARIANT;
+  }
+}
+
+// static
+subtle::SphincsVariant EnumsPqcrypto::ProtoToSubtle(
+    pb::SphincsVariant variant) {
+  switch (variant) {
+    case pb::SphincsVariant::ROBUST:
+      return subtle::SphincsVariant::ROBUST;
+    case pb::SphincsVariant::SIMPLE:
+      return subtle::SphincsVariant::SIMPLE;
+    default:
+      return subtle::SphincsVariant::UNKNOWN_VARIANT;
+  }
+}
+
+// static
+pb::SphincsSignatureType EnumsPqcrypto::SubtleToProto(
+    subtle::SphincsSignatureType type) {
+  switch (type) {
+    case subtle::SphincsSignatureType::FAST_SIGNING:
+      return pb::SphincsSignatureType::FAST_SIGNING;
+    case subtle::SphincsSignatureType::SMALL_SIGNATURE:
+      return pb::SphincsSignatureType::SMALL_SIGNATURE;
+    default:
+      return pb::SphincsSignatureType::UNKNOWN_SIG_TYPE;
+  }
+}
+
+// static
+subtle::SphincsSignatureType EnumsPqcrypto::ProtoToSubtle(
+    pb::SphincsSignatureType type) {
+  switch (type) {
+    case pb::SphincsSignatureType::FAST_SIGNING:
+      return subtle::SphincsSignatureType::FAST_SIGNING;
+    case pb::SphincsSignatureType::SMALL_SIGNATURE:
+      return subtle::SphincsSignatureType::SMALL_SIGNATURE;
+    default:
+      return subtle::SphincsSignatureType::UNKNOWN_SIG_TYPE;
+  }
+}
+
 }  // namespace util
 }  // namespace tink
 }  // namespace crypto

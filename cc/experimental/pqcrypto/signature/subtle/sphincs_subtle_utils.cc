@@ -23,6 +23,7 @@
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -31,16 +32,16 @@ namespace subtle {
 
 crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
     SphincsParamsPqclean params) {
-  util::Status key_size_status =
-      ValidatePrivateKeySize(params.private_key_size);
-  if (!key_size_status.ok()) {
-    return key_size_status;
+  // Check if parameters are valid.
+  util::Status valid_parameters = ValidateParams(params);
+  if (!valid_parameters.ok()) {
+    return valid_parameters;
   }
 
-  util::StatusOr<int32> key_size_index_or =
+  util::StatusOr<int32> key_size_index =
       SphincsKeySizeToIndex(params.private_key_size);
-  if (!key_size_index_or.ok()) {
-    return key_size_index_or.status();
+  if (!key_size_index.ok()) {
+    return key_size_index.status();
   }
 
   std::string public_key;
@@ -48,8 +49,8 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
   private_key.resize(params.private_key_size);
 
   const SphincsHelperPqclean &sphincs_helper_pqclean =
-      GetSphincsHelperPqclean(params.hash_type, params.variant,
-                              *key_size_index_or, params.sig_length_type);
+      GetSphincsHelperPqclean(params.hash_type, params.variant, *key_size_index,
+                              params.sig_length_type);
   public_key.resize(sphincs_helper_pqclean.GetPublicKeySize());
 
   if (0 != sphincs_helper_pqclean.Keygen(
@@ -110,6 +111,42 @@ crypto::tink::util::StatusOr<int32> SphincsKeySizeToIndex(int32 key_size) {
     default:
       return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
   }
+}
+
+crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params) {
+  switch (params.hash_type) {
+    case SphincsHashType::HARAKA:
+    case SphincsHashType::SHA256:
+    case SphincsHashType::SHAKE256: {
+      break;
+    }
+    default: {
+      return util::Status(util::error::INVALID_ARGUMENT, "Invalid hash type");
+    }
+  }
+
+  switch (params.variant) {
+    case SphincsVariant::ROBUST:
+    case SphincsVariant::SIMPLE: {
+      break;
+    }
+    default: {
+      return util::Status(util::error::INVALID_ARGUMENT, "Invalid variant");
+    }
+  }
+
+  switch (params.sig_length_type) {
+    case SphincsSignatureType::FAST_SIGNING:
+    case SphincsSignatureType::SMALL_SIGNATURE: {
+      break;
+    }
+    default: {
+      return util::Status(util::error::INVALID_ARGUMENT,
+                          "Invalid signature type");
+    }
+  }
+
+  return ValidatePrivateKeySize(params.private_key_size);
 }
 
 }  // namespace subtle

@@ -41,6 +41,11 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> SphincsSign::New(
     return key_size;
   }
 
+  util::Status valid_parameters = ValidateParams(key.GetParams());
+  if (!valid_parameters.ok()) {
+    return valid_parameters;
+  }
+
   return {absl::WrapUnique(new SphincsSign(std::move(key)))};
 }
 

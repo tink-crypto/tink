@@ -41,6 +41,11 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> SphincsVerify::New(
     return key_size;
   }
 
+  util::Status valid_parameters = ValidateParams(public_key.GetParams());
+  if (!valid_parameters.ok()) {
+    return valid_parameters;
+  }
+
   return {absl::WrapUnique<SphincsVerify>(
       new SphincsVerify(std::move(public_key)))};
 }
