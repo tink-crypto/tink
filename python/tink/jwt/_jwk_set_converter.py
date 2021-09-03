@@ -23,19 +23,26 @@ import json
 from typing import Dict, List, Optional, Text, Union
 
 from tink.proto import jwt_ecdsa_pb2
+from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import tink_pb2
 import tink
 from tink.jwt import _jwt_format
 
-_JWT_ECDSA_PRIVATE_KEY_TYPE = (
-    'type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey')
 _JWT_ECDSA_PUBLIC_KEY_TYPE = (
     'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')
+_JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE = (
+    'type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey')
 
-_ECDSA_ALGORITHM_TEXTS = {
-    jwt_ecdsa_pb2.ES256: 'ES256',
-    jwt_ecdsa_pb2.ES384: 'ES384',
-    jwt_ecdsa_pb2.ES512: 'ES512'
+_ECDSA_PARAMS = {
+    jwt_ecdsa_pb2.ES256: ('ES256', 'P-256'),
+    jwt_ecdsa_pb2.ES384: ('ES384', 'P-384'),
+    jwt_ecdsa_pb2.ES512: ('ES512', 'P-521')
+}
+
+_RSA_SSA_PKCS1_PARAMS = {
+    jwt_rsa_ssa_pkcs1_pb2.RS256: 'RS256',
+    jwt_rsa_ssa_pkcs1_pb2.RS384: 'RS384',
+    jwt_rsa_ssa_pkcs1_pb2.RS512: 'RS512'
 }
 
 
@@ -84,8 +91,10 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
       raise tink.TinkError('unsupported output prefix type')
     if key.key_data.type_url == _JWT_ECDSA_PUBLIC_KEY_TYPE:
       keys.append(_convert_jwt_ecdsa_key(key))
+    elif key.key_data.type_url == _JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE:
+      keys.append(_convert_jwt_rsa_ssa_pkcs1_key(key))
     else:
-      raise tink.TinkError('unknown key type')
+      raise tink.TinkError('unknown key type: %s' % key.key_data.type_url)
   return json.dumps({'keys': keys}, separators=(',', ':'))
 
 
@@ -94,17 +103,9 @@ def _convert_jwt_ecdsa_key(
   """Converts a JwtEcdsaPublicKey into a JWK."""
   ecdsa_public_key = jwt_ecdsa_pb2.JwtEcdsaPublicKey.FromString(
       key.key_data.value)
-  if ecdsa_public_key.algorithm == jwt_ecdsa_pb2.ES256:
-    alg = 'ES256'
-    crv = 'P-256'
-  elif ecdsa_public_key.algorithm == jwt_ecdsa_pb2.ES384:
-    alg = 'ES384'
-    crv = 'P-384'
-  elif ecdsa_public_key.algorithm == jwt_ecdsa_pb2.ES512:
-    alg = 'ES512'
-    crv = 'P-521'
-  else:
+  if ecdsa_public_key.algorithm not in _ECDSA_PARAMS:
     raise tink.TinkError('unknown ecdsa algorithm')
+  alg, crv = _ECDSA_PARAMS[ecdsa_public_key.algorithm]
   output = {
       'kty': 'EC',
       'crv': crv,
@@ -119,4 +120,28 @@ def _convert_jwt_ecdsa_key(
     output['kid'] = kid
   elif ecdsa_public_key.HasField('custom_kid'):
     output['kid'] = ecdsa_public_key.custom_kid.value
+  return output
+
+
+def _convert_jwt_rsa_ssa_pkcs1_key(
+    key: tink_pb2.Keyset.Key) -> Dict[Text, Union[Text, List[Text]]]:
+  """Converts a JwtRsaSsaPkcs1PublicKey into a JWK."""
+  public_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PublicKey.FromString(
+      key.key_data.value)
+  if public_key.algorithm not in _RSA_SSA_PKCS1_PARAMS:
+    raise tink.TinkError('unknown RSA SSA PKCS1 algorithm')
+  alg = _RSA_SSA_PKCS1_PARAMS[public_key.algorithm]
+  output = {
+      'kty': 'RSA',
+      'n': _base64_encode(public_key.n),
+      'e': _base64_encode(public_key.e),
+      'use': 'sig',
+      'alg': alg,
+      'key_ops': ['verify'],
+  }
+  kid = _jwt_format.get_kid(key.key_id, key.output_prefix_type)
+  if kid:
+    output['kid'] = kid
+  elif public_key.HasField('custom_kid'):
+    output['kid'] = public_key.custom_kid.value
   return output
