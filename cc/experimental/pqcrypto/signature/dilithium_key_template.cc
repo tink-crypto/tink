@@ -26,6 +26,9 @@ extern "C" {
 #include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -75,6 +78,27 @@ const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate() {
   static const KeyTemplate* key_template =
       NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
                               DilithiumSeedExpansion::SEED_EXPANSION_SHAKE);
+  return *key_template;
+}
+
+const google::crypto::tink::KeyTemplate& Dilithium2AesKeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_AES);
+  return *key_template;
+}
+
+const google::crypto::tink::KeyTemplate& Dilithium3AesKeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_AES);
+  return *key_template;
+}
+
+const google::crypto::tink::KeyTemplate& Dilithium5AesKeyTemplate() {
+  static const KeyTemplate* key_template =
+      NewDilithiumKeyTemplate(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+                              DilithiumSeedExpansion::SEED_EXPANSION_AES);
   return *key_template;
 }
 

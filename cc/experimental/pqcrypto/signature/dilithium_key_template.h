@@ -29,6 +29,12 @@ const google::crypto::tink::KeyTemplate& Dilithium3KeyTemplate();
 
 const google::crypto::tink::KeyTemplate& Dilithium5KeyTemplate();
 
+const google::crypto::tink::KeyTemplate& Dilithium2AesKeyTemplate();
+
+const google::crypto::tink::KeyTemplate& Dilithium3AesKeyTemplate();
+
+const google::crypto::tink::KeyTemplate& Dilithium5AesKeyTemplate();
+
 }  // namespace tink
 }  // namespace crypto
 

@@ -28,8 +28,11 @@
 
 extern "C" {
 #include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
 #include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -95,9 +98,9 @@ TEST_P(DilithiumKeyTemplateTest, KeyManagerCompatibility) {
   params->set_key_size(test_case.key_size);
   params->set_seed_expansion(test_case.seed_expansion);
 
-  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result2 =
+  util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> new_key_result =
       key_manager->get_key_factory().NewKey(key_format);
-  EXPECT_THAT(new_key_result2.status(), IsOk());
+  EXPECT_THAT(new_key_result.status(), IsOk());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -108,10 +111,19 @@ INSTANTIATE_TEST_SUITE_P(
           Dilithium2KeyTemplate()},
          {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
-          Dilithium2KeyTemplate()},
+          Dilithium3KeyTemplate()},
          {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
           DilithiumSeedExpansion::SEED_EXPANSION_SHAKE,
-          Dilithium2KeyTemplate()}}),
+          Dilithium5KeyTemplate()},
+         {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_AES,
+          Dilithium2AesKeyTemplate()},
+         {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_AES,
+          Dilithium3AesKeyTemplate()},
+         {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+          DilithiumSeedExpansion::SEED_EXPANSION_AES,
+          Dilithium5AesKeyTemplate()}}),
     [](const testing::TestParamInfo<DilithiumKeyTemplateTest::ParamType>&
            info) { return info.param.test_name; });
 
