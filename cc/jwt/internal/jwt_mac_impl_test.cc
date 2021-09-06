@@ -56,15 +56,15 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
           &key_value)) {
     return util::Status(util::error::INVALID_ARGUMENT, "failed to parse key");
   }
-  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac_or =
+  crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
       subtle::HmacBoringSsl::New(
           util::Enums::ProtoToSubtle(google::crypto::tink::HashType::SHA256),
           32, util::SecretDataFromStringView(key_value));
-  if (!mac_or.ok()) {
-    return mac_or.status();
+  if (!mac.ok()) {
+    return mac.status();
   }
-  std::unique_ptr<JwtMacInternal> jwt_mac = absl::make_unique<JwtMacImpl>(
-      std::move(mac_or.ValueOrDie()), "HS256", absl::nullopt);
+  std::unique_ptr<JwtMacInternal> jwt_mac =
+      absl::make_unique<JwtMacImpl>(*std::move(mac), "HS256", absl::nullopt);
   return jwt_mac;
 }
 
@@ -142,7 +142,7 @@ TEST(JwtMacImplTest, CreateAndValidateTokenWithKid) {
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   ASSERT_THAT(header.status(), IsOk());
-  EXPECT_THAT((*header).fields().find("kid")->second.string_value(),
+  EXPECT_THAT(header->fields().find("kid")->second.string_value(),
               Eq("kid-123"));
 }
 
