@@ -40,40 +40,21 @@ def tearDownModule():
   testing_servers.stop()
 
 
-# maps from key_template_name to (key_template, key_type)
-_ADDITIONAL_KEY_TEMPLATES = {
-    # TODO(b/140101381): Remove this entry, once 'ECDSA_P384_SHA384'
-    # is supported in Java.
-    'ECDSA_P384_SHA384': (signature.signature_key_templates.ECDSA_P384_SHA384,
-                          'EcdsaPrivateKey'),
-    'ECDSA_P384_SHA384_IEEE_P1363':
-        (signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
-         'EcdsaPrivateKey'),
-}
-
-
 def all_signature_private_key_template_names() -> Iterable[Text]:
   """Yields all Signature private key template names."""
   for key_type in supported_key_types.SIGNATURE_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
 
 
 class SignatureTest(parameterized.TestCase):
 
   @parameterized.parameters(all_signature_private_key_template_names())
   def test_sign_verify(self, key_template_name):
-    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-      key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[key_template_name]
-      supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
-    else:
-      key_template = testing_servers.key_template('java', key_template_name)
-      supported_langs = (
-          supported_key_types
-          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the private keyset.
     private_keyset = testing_servers.new_keyset(supported_langs[0],
                                                 key_template)

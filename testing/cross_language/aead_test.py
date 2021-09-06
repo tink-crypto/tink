@@ -80,7 +80,7 @@ class AeadPythonTest(parameterized.TestCase):
           key_template_name]
       supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
     else:
-      key_template = testing_servers.key_template('java', key_template_name)
+      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
       supported_langs = (
           supported_key_types
           .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])

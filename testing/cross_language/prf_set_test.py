@@ -51,7 +51,7 @@ def all_prf_key_template_names_with_some_output_length():
 def gen_keyset(key_template_name: Text) -> bytes:
   builder = keyset_builder.new_keyset_builder()
   primary_key_id = builder.add_new_key(
-      testing_servers.key_template('java', key_template_name))
+      supported_key_types.KEY_TEMPLATE[key_template_name])
   builder.set_primary_key(primary_key_id)
   return builder.keyset()
 

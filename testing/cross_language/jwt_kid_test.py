@@ -29,6 +29,7 @@ from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
+from util import supported_key_types
 from util import testing_servers
 
 SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE['jwt']
@@ -58,7 +59,7 @@ def decode_kid(compact: Text) -> Optional[Text]:
 
 def generate_jwt_mac_keyset_with_custom_kid(
     template_name: Text, custom_kid: Text) -> tink_pb2.Keyset:
-  key_template = testing_servers.key_template('java', template_name)
+  key_template = supported_key_types.KEY_TEMPLATE[template_name]
   keyset_handle = tink.new_keyset_handle(key_template)
   # parse key_data.value, set custom_kid and serialize
   key_data_value = keyset_handle._keyset.key[0].key_data.value
@@ -74,7 +75,7 @@ def generate_jwt_mac_keyset_with_custom_kid(
 
 def generate_jwt_signature_keyset_with_custom_kid(
     template_name: Text, custom_kid: Text) -> tink_pb2.Keyset:
-  key_template = testing_servers.key_template('java', template_name)
+  key_template = supported_key_types.KEY_TEMPLATE[template_name]
   keyset_handle = tink.new_keyset_handle(key_template)
   # parse key_data.value, set custom_kid and serialize
   key_data_value = keyset_handle._keyset.key[0].key_data.value
@@ -104,7 +105,7 @@ class JwtKidTest(parameterized.TestCase):
 
   @parameterized.parameters(['JWT_HS256'])
   def test_jwt_mac_sets_kid_for_tink_templates(self, template_name):
-    key_template = testing_servers.key_template('java', template_name)
+    key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
@@ -114,7 +115,7 @@ class JwtKidTest(parameterized.TestCase):
 
   @parameterized.parameters(['JWT_HS256_RAW'])
   def test_jwt_mac_does_not_sets_kid_for_raw_templates(self, template_name):
-    key_template = testing_servers.key_template('java', template_name)
+    key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
@@ -125,7 +126,7 @@ class JwtKidTest(parameterized.TestCase):
   @parameterized.parameters(
       ['JWT_ES256', 'JWT_RS256_2048_F4', 'JWT_PS256_2048_F4'])
   def test_jwt_public_key_sign_sets_kid_for_tink_templates(self, template_name):
-    key_template = testing_servers.key_template('java', template_name)
+    key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:
@@ -137,7 +138,7 @@ class JwtKidTest(parameterized.TestCase):
       ['JWT_ES256_RAW', 'JWT_RS256_2048_F4_RAW', 'JWT_PS256_2048_F4_RAW'])
   def test_jwt_public_key_sign_does_not_sets_kid_for_raw_templates(
       self, template_name):
-    key_template = testing_servers.key_template('java', template_name)
+    key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
     for lang in SUPPORTED_LANGUAGES:

@@ -17,6 +17,17 @@
 
 from typing import List, Text
 
+from tink import aead
+from tink import daead
+from tink import hybrid
+from tink import jwt
+from tink import mac
+from tink import prf
+from tink import signature
+from tink import streaming_aead
+
+from tink.proto import tink_pb2
+
 # All languages supported by cross-language tests.
 ALL_LANGUAGES = ['cc', 'java', 'go', 'python']
 
@@ -136,9 +147,9 @@ KEY_TEMPLATE_NAMES = {
         'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
     ],
     'EcdsaPrivateKey': [
-        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P521',
+        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P384_SHA384', 'ECDSA_P521',
         'ECDSA_P256_IEEE_P1363', 'ECDSA_P384_IEEE_P1363',
-        'ECDSA_P521_IEEE_P1363'
+        'ECDSA_P384_SHA384_IEEE_P1363', 'ECDSA_P521_IEEE_P1363'
     ],
     'Ed25519PrivateKey': ['ED25519'],
     'RsaSsaPkcs1PrivateKey': [
@@ -170,6 +181,135 @@ KEY_TEMPLATE_NAMES = {
         'JWT_PS512_4096_F4', 'JWT_PS512_4096_F4_RAW'
     ],
 }
+
+# KeyTemplate (as Protobuf) for each KeyTemplate name.
+KEY_TEMPLATE = {
+    'AES128_EAX':
+        aead.aead_key_templates.AES128_EAX,
+    'AES256_EAX':
+        aead.aead_key_templates.AES256_EAX,
+    'AES128_GCM':
+        aead.aead_key_templates.AES128_GCM,
+    'AES256_GCM':
+        aead.aead_key_templates.AES256_GCM,
+    'AES128_GCM_SIV':
+        aead.aead_key_templates.AES128_GCM_SIV,
+    'AES256_GCM_SIV':
+        aead.aead_key_templates.AES256_GCM_SIV,
+    'AES128_CTR_HMAC_SHA256':
+        aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+    'AES256_CTR_HMAC_SHA256':
+        aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+    'CHACHA20_POLY1305':
+        tink_pb2.KeyTemplate(
+            type_url=('type.googleapis.com/google.crypto.tink.' +
+                      'ChaCha20Poly1305Key'),
+            output_prefix_type=tink_pb2.TINK),
+    'XCHACHA20_POLY1305':
+        aead.aead_key_templates.XCHACHA20_POLY1305,
+    'AES256_SIV':
+        daead.deterministic_aead_key_templates.AES256_SIV,
+    'AES128_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB,
+    'AES128_CTR_HMAC_SHA256_1MB':
+        streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_1MB,
+    'AES256_CTR_HMAC_SHA256_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB,
+    'AES256_CTR_HMAC_SHA256_1MB':
+        streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB,
+    'AES128_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB,
+    'AES128_GCM_HKDF_1MB':
+        streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_1MB,
+    'AES256_GCM_HKDF_4KB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB,
+    'AES256_GCM_HKDF_1MB':
+        streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB,
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM':
+        hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM,
+    'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM,
+    'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
+        hybrid.hybrid_key_templates
+        .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'AES_CMAC':
+        mac.mac_key_templates.AES_CMAC,
+    'HMAC_SHA256_128BITTAG':
+        mac.mac_key_templates.HMAC_SHA256_128BITTAG,
+    'HMAC_SHA256_256BITTAG':
+        mac.mac_key_templates.HMAC_SHA256_256BITTAG,
+    'HMAC_SHA512_256BITTAG':
+        mac.mac_key_templates.HMAC_SHA512_256BITTAG,
+    'HMAC_SHA512_512BITTAG':
+        mac.mac_key_templates.HMAC_SHA512_512BITTAG,
+    'ECDSA_P256':
+        signature.signature_key_templates.ECDSA_P256,
+    'ECDSA_P384':
+        signature.signature_key_templates.ECDSA_P384,
+    'ECDSA_P384_SHA384':
+        signature.signature_key_templates.ECDSA_P384_SHA384,
+    'ECDSA_P521':
+        signature.signature_key_templates.ECDSA_P521,
+    'ECDSA_P256_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
+    'ECDSA_P384_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
+    'ECDSA_P384_SHA384_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
+    'ECDSA_P521_IEEE_P1363':
+        signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
+    'ED25519':
+        signature.signature_key_templates.ED25519,
+    'RSA_SSA_PKCS1_3072_SHA256_F4':
+        signature.signature_key_templates.RSA_SSA_PKCS1_3072_SHA256_F4,
+    'RSA_SSA_PKCS1_4096_SHA512_F4':
+        signature.signature_key_templates.RSA_SSA_PKCS1_4096_SHA512_F4,
+    'RSA_SSA_PSS_3072_SHA256_SHA256_32_F4':
+        signature.signature_key_templates.RSA_SSA_PSS_3072_SHA256_SHA256_32_F4,
+    'RSA_SSA_PSS_4096_SHA512_SHA512_64_F4':
+        signature.signature_key_templates.RSA_SSA_PSS_4096_SHA512_SHA512_64_F4,
+    'AES_CMAC_PRF':
+        prf.prf_key_templates.AES_CMAC,
+    'HMAC_SHA256_PRF':
+        prf.prf_key_templates.HMAC_SHA256,
+    'HMAC_SHA512_PRF':
+        prf.prf_key_templates.HMAC_SHA512,
+    'HKDF_SHA256':
+        prf.prf_key_templates.HKDF_SHA256,
+    'JWT_HS256': jwt.jwt_hs256_template(),
+    'JWT_HS256_RAW': jwt.raw_jwt_hs256_template(),
+    'JWT_HS384': jwt.jwt_hs384_template(),
+    'JWT_HS384_RAW': jwt.raw_jwt_hs384_template(),
+    'JWT_HS512': jwt.jwt_hs512_template(),
+    'JWT_HS512_RAW': jwt.raw_jwt_hs512_template(),
+    'JWT_ES256': jwt.jwt_es256_template(),
+    'JWT_ES256_RAW': jwt.raw_jwt_es256_template(),
+    'JWT_ES384': jwt.jwt_es384_template(),
+    'JWT_ES384_RAW': jwt.raw_jwt_es384_template(),
+    'JWT_ES512': jwt.jwt_es512_template(),
+    'JWT_ES512_RAW': jwt.raw_jwt_es512_template(),
+    'JWT_RS256_2048_F4': jwt.jwt_rs256_2048_f4_template(),
+    'JWT_RS256_2048_F4_RAW': jwt.raw_jwt_rs256_2048_f4_template(),
+    'JWT_RS256_3072_F4': jwt.jwt_rs256_3072_f4_template(),
+    'JWT_RS256_3072_F4_RAW': jwt.raw_jwt_rs256_3072_f4_template(),
+    'JWT_RS384_3072_F4': jwt.jwt_rs384_3072_f4_template(),
+    'JWT_RS384_3072_F4_RAW': jwt.raw_jwt_rs384_3072_f4_template(),
+    'JWT_RS512_4096_F4': jwt.jwt_rs512_4096_f4_template(),
+    'JWT_RS512_4096_F4_RAW': jwt.raw_jwt_rs512_4096_f4_template(),
+    'JWT_PS256_2048_F4': jwt.jwt_ps256_2048_f4_template(),
+    'JWT_PS256_2048_F4_RAW': jwt.raw_jwt_ps256_2048_f4_template(),
+    'JWT_PS256_3072_F4': jwt.jwt_ps256_3072_f4_template(),
+    'JWT_PS256_3072_F4_RAW': jwt.raw_jwt_ps256_3072_f4_template(),
+    'JWT_PS384_3072_F4': jwt.jwt_ps384_3072_f4_template(),
+    'JWT_PS384_3072_F4_RAW': jwt.raw_jwt_ps384_3072_f4_template(),
+    'JWT_PS512_4096_F4': jwt.jwt_ps512_4096_f4_template(),
+    'JWT_PS512_4096_F4_RAW': jwt.raw_jwt_ps512_4096_f4_template(),
+}
+
 
 # Key template names for which the list of supported languages is different from
 # the list of supported languages of the whole key type.

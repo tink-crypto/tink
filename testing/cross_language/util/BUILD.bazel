@@ -18,6 +18,18 @@ py_library(
     name = "supported_key_types",
     testonly = 1,
     srcs = ["supported_key_types.py"],
+    deps = [
+        "@tink_py//tink/aead",
+        "@tink_py//tink/daead",
+        "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
+        "@tink_py//tink/mac",
+        "@tink_py//tink/prf",
+        "@tink_py//tink/proto:common_py_pb2",
+        "@tink_py//tink/proto:tink_py_pb2",
+        "@tink_py//tink/signature",
+        "@tink_py//tink/streaming_aead",
+    ],
 )
 
 py_test(
