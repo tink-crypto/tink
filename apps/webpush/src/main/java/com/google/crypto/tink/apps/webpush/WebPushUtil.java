@@ -21,7 +21,7 @@ import com.google.crypto.tink.subtle.Hkdf;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
-class WebPushUtil {
+final class WebPushUtil {
   public static byte[] computeIkm(
       final byte[] ecdhSecret,
       final byte[] authSecret,
@@ -56,4 +56,6 @@ class WebPushUtil {
         WebPushConstants.NONCE_INFO,
         WebPushConstants.NONCE_SIZE);
   }
+
+  private WebPushUtil() {}
 }

@@ -95,4 +95,6 @@ public final class KmsClients {
     }
     return Collections.unmodifiableList(clients);
   }
+
+  private KmsClients() {}
 }
