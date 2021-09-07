@@ -222,6 +222,152 @@ PS256_KEYSET = (
     '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
     '},"status":"ENABLED","keyId":1508587714,"outputPrefixType":"RAW"}]}')
 
+PS256_JWK_SET = (
+    '{"keys":[{"kty":"RSA",'
+    '"n":"AI-xLndp-RtdarHbY6YBlo1uHACmpUhNWrZu3fgqfG4kV_cG5iyUTFL6Dto-0qfUs8dUz'
+    'JpLGNlIH_-_jb_X2O7wW5sTogUFU74pFp9BYD8IRU108_vX4RozOhOrHUjlM4zOp7D7pSqjkPA'
+    'HnfkyyJYL8LkkxeAeXekJGVgcpquzMur1fnqc1p6C6VQ8wh4fnN-a_NT8q4-rYkz0MzyzdosXm'
+    'p3JTI8fHXjcJWpN78AXTA4MEOt61QqNnlg0vwWCuKxttpbkkw1X0FR1NTV5cFxJ2_3jjRUhemW'
+    'w-iVxTE97h0-KJEzq1-Cnd-LLWzyFLWRVMt14knghrYIQVyzH_4Htdd0PVgyfkTdV2uL4ByQjt'
+    'PlTvnALoFZIrvVILDz_KP6-7QNmj_z7PBB2GtSGmYO-b56zGT77Ex-1htko0oFvRiy7GzSSxRa'
+    'ixTMD7mT3vAW4L4pj3UrV2rF_zzegyyqCtj2k9CPoiyvZkYtWeDoxW5fSgGV1xJYQEE86xCNmn'
+    'Q",'
+    '"e":"AQAB","use":"sig","alg":"PS256","key_ops":["verify"]}]}')
+
+PS256_KEYSET_TINK = (
+    '{"primaryKeyId":1508587714,"key":[{"keyData":{'
+    '"typeUrl":"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey",'
+    '"value":"EAEagQMAj7Eud2n5G11qsdtjpgGWjW4cAKalSE1atm7d+Cp8biRX9wbmLJRMUvoO2'
+    'j7Sp9Szx1TMmksY2Ugf/7+Nv9fY7vBbmxOiBQVTvikWn0FgPwhFTXTz+9fhGjM6E6sdSOUzjM6'
+    'nsPulKqOQ8Aed+TLIlgvwuSTF4B5d6QkZWBymq7My6vV+epzWnoLpVDzCHh+c35r81Pyrj6tiT'
+    'PQzPLN2ixeanclMjx8deNwlak3vwBdMDgwQ63rVCo2eWDS/BYK4rG22luSTDVfQVHU1NXlwXEn'
+    'b/eONFSF6ZbD6JXFMT3uHT4okTOrX4Kd34stbPIUtZFUy3XiSeCGtghBXLMf/ge113Q9WDJ+RN'
+    '1Xa4vgHJCO0+VO+cAugVkiu9UgsPP8o/r7tA2aP/Ps8EHYa1IaZg75vnrMZPvsTH7WG2SjSgW9'
+    'GLLsbNJLFFqLFMwPuZPe8BbgvimPdStXasX/PN6DLKoK2PaT0I+iLK9mRi1Z4OjFbl9KAZXXEl'
+    'hAQTzrEI2adIgMBAAE=",'
+    '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
+    '},"status":"ENABLED","keyId":1508587714,"outputPrefixType":"TINK"}]}')
+
+PS256_JWK_SET_KID = (
+    '{"keys":[{"kty":"RSA",'
+    '"n":"AI-xLndp-RtdarHbY6YBlo1uHACmpUhNWrZu3fgqfG4kV_cG5iyUTFL6Dto-0qfUs8dUz'
+    'JpLGNlIH_-_jb_X2O7wW5sTogUFU74pFp9BYD8IRU108_vX4RozOhOrHUjlM4zOp7D7pSqjkPA'
+    'HnfkyyJYL8LkkxeAeXekJGVgcpquzMur1fnqc1p6C6VQ8wh4fnN-a_NT8q4-rYkz0MzyzdosXm'
+    'p3JTI8fHXjcJWpN78AXTA4MEOt61QqNnlg0vwWCuKxttpbkkw1X0FR1NTV5cFxJ2_3jjRUhemW'
+    'w-iVxTE97h0-KJEzq1-Cnd-LLWzyFLWRVMt14knghrYIQVyzH_4Htdd0PVgyfkTdV2uL4ByQjt'
+    'PlTvnALoFZIrvVILDz_KP6-7QNmj_z7PBB2GtSGmYO-b56zGT77Ex-1htko0oFvRiy7GzSSxRa'
+    'ixTMD7mT3vAW4L4pj3UrV2rF_zzegyyqCtj2k9CPoiyvZkYtWeDoxW5fSgGV1xJYQEE86xCNmn'
+    'Q",'
+    '"e":"AQAB","use":"sig","alg":"PS256","key_ops":["verify"],'
+    '"kid":"Wes4wg"}]}')
+
+PS384_KEYSET = (
+    '{"primaryKeyId":1042230435,"key":[{"keyData":{'
+    '"typeUrl":"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey",'
+    '"value":"EAIagQMAv6a0OergWYmY1k6l6vx6Of5+RxCeeQ9jMTXQyvO0GCgMDExxtqVS8S25e'
+    'hZ5LNDIiGjhE3v2++D7QEjnzOC5UqI1ZwPxUBSrOaf5oDbJ9vBc2c7wDyJhRV8UobQSpzunD4k'
+    'XypVhytjwRdiP61vG0C/eL0x+LijtM/XVee1Y+5mWrypVrB6EHKtdkMx2WIYNpsFOForFrr6Jz'
+    'LbWfDRWoqbCXKYivnw+CSE38ddW1XsrAT76E2Vf+womuwyBbkjLaiWvNxNFBTap2IaBLKAni6x'
+    '7pqYCeu1n9eMUi41oz9QM8xfOvpH+wubc2PjwyTsb1FDTLnhV36tQLTVGdQdCDMF2Z8Agrnio3'
+    'n1SFjSbYgFyVtpCwFKM2Z0zfO7k9jVbYYkzglzkJfp/lQrsuWqe4CVJjFE1H4BxcU7L0j8755k'
+    'GJI08h1b7LPgqJcPgtHjcqbxHFU2yOf7mNGlW7YTnoQBO0StzQUk7kEw3X0+niEwX/L8j'
+    'qW4YMbxrGdAfkTnPIgMBAAE=",'
+    '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
+    '},"status":"ENABLED","keyId":1042230435,"outputPrefixType":"RAW"}]}')
+
+PS384_JWK_SET = (
+    '{"keys":[{"kty":"RSA",'
+    '"n":"AL-mtDnq4FmJmNZOper8ejn-fkcQnnkPYzE10MrztBgoDAxMcbalUvEtuXoWeSzQyIho4'
+    'RN79vvg-0BI58zguVKiNWcD8VAUqzmn-aA2yfbwXNnO8A8iYUVfFKG0Eqc7pw-JF8qVYcrY8EX'
+    'Yj-tbxtAv3i9Mfi4o7TP11XntWPuZlq8qVawehByrXZDMdliGDabBThaKxa6-icy21nw0VqKmw'
+    'lymIr58PgkhN_HXVtV7KwE--hNlX_sKJrsMgW5Iy2olrzcTRQU2qdiGgSygJ4use6amAnrtZ_X'
+    'jFIuNaM_UDPMXzr6R_sLm3Nj48Mk7G9RQ0y54Vd-rUC01RnUHQgzBdmfAIK54qN59UhY0m2IBc'
+    'lbaQsBSjNmdM3zu5PY1W2GJM4Jc5CX6f5UK7LlqnuAlSYxRNR-AcXFOy9I_O-eZBiSNPIdW-yz'
+    '4KiXD4LR43Km8RxVNsjn-5jRpVu2E56EATtErc0FJO5BMN19Pp4hMF_y_I6luGDG8axnQH5E5z'
+    'w",'
+    '"e":"AQAB","use":"sig","alg":"PS384","key_ops":["verify"]}]}')
+
+PS512_KEYSET = (
+    '{"primaryKeyId":257081135,"key":[{"keyData":{'
+    '"typeUrl":"type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey",'
+    '"value":"EAMagQQAnOUQvBwNRgeI3zlzIhVo4NzFVCsQn9hd2EIclz6cWBRMFr4EX5lXLK0St'
+    'SIB7EQP4ciHa+vr59sOgMFMC2kiXRUXNtl99QhGwH0YjbWeDC50PKEAjH1hhhPgSw2dFcUVs4j'
+    'bScDrwNn1sQ8rkgSNczvQNpV1MtBhS/CC1PxVF88JaejG2zr+unoFlw7xnqxBWMzNrMHZHwqga'
+    '2vL3inSbvA/RGQjnE2DzQSwZkXthGSwYBjOYbGawMN4onkAx/myHMyTg/TLAqG9GUyB0DVelvV'
+    'oGZG/QJBY2Fp2FlpOQRKeBr6pC7Lk8zZL4GJk264KoOpG8v1t7PveN+STIdTE2D548K+GDOvsv'
+    'rO4ZhofS/iqN9xLucuU1HkqKUqyLvMxsWum8Zhp7zinFdBnDOgeheOHUgN/iwjupk6u1Svt+RW'
+    'NJsfb2l0jrvzf0cRMbPeLZRmpDwBxBvXWo61u6uaBEVb+ooZ6K5+hx3Rld7wXktjYIZzHqUr39'
+    'P5yTw28b8Y2dPFWR4vwr2/0zBxcDmTRRtQ7vPOtZPD0/LVIXkgbBiLILpycnucWt9Lq9Hc62KF'
+    'iTQOAuuOxz7ObBegXjnFupiZZ9PyzO5WgT9lRpH7U7tzGLAjV+AUpjH6HA1o6bRLKOHFBPS+I9'
+    'IqAYb/RpF6M/6hCmC2Rz64yYzR3y4vHKGMiAwEAAQ==",'
+    '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
+    '},"status":"ENABLED","keyId":257081135,"outputPrefixType":"RAW"}]}')
+
+PS512_JWK_SET = (
+    '{"keys":[{"kty":"RSA",'
+    '"n":"AJzlELwcDUYHiN85cyIVaODcxVQrEJ_YXdhCHJc-nFgUTBa-BF-ZVyytErUiAexED-HIh'
+    '2vr6-fbDoDBTAtpIl0VFzbZffUIRsB9GI21ngwudDyhAIx9YYYT4EsNnRXFFbOI20nA68DZ9bE'
+    'PK5IEjXM70DaVdTLQYUvwgtT8VRfPCWnoxts6_rp6BZcO8Z6sQVjMzazB2R8KoGtry94p0m7wP'
+    '0RkI5xNg80EsGZF7YRksGAYzmGxmsDDeKJ5AMf5shzMk4P0ywKhvRlMgdA1Xpb1aBmRv0CQWNh'
+    'adhZaTkESnga-qQuy5PM2S-BiZNuuCqDqRvL9bez73jfkkyHUxNg-ePCvhgzr7L6zuGYaH0v4q'
+    'jfcS7nLlNR5KilKsi7zMbFrpvGYae84pxXQZwzoHoXjh1IDf4sI7qZOrtUr7fkVjSbH29pdI67'
+    '839HETGz3i2UZqQ8AcQb11qOtburmgRFW_qKGeiufocd0ZXe8F5LY2CGcx6lK9_T-ck8NvG_GN'
+    'nTxVkeL8K9v9MwcXA5k0UbUO7zzrWTw9Py1SF5IGwYiyC6cnJ7nFrfS6vR3OtihYk0DgLrjsc-'
+    'zmwXoF45xbqYmWfT8szuVoE_ZUaR-1O7cxiwI1fgFKYx-hwNaOm0SyjhxQT0viPSKgGG_0aRej'
+    'P-oQpgtkc-uMmM0d8uLxyhj",'
+    '"e":"AQAB","use":"sig","alg":"PS512","key_ops":["verify"]}]}')
+
+HS256_KEYSET = """
+    {
+      "primaryKeyId": 872908418,
+      "key": [
+        {
+          "keyData": {
+            "typeUrl": "type.googleapis.com/google.crypto.tink.JwtHmacKey",
+            "value": "GiA2qUishZ7cDwH/j2a9xcqqusSg1jKRnPux6XRxc5rvdRAB",
+            "keyMaterialType": "SYMMETRIC"
+          },
+          "status": "ENABLED",
+          "keyId": 872908418,
+          "outputPrefixType": "TINK"
+        }
+      ]
+    }"""
+
+KEYSET_WITH_TWO_KEYS = (
+    '{"primaryKeyId":282600252,"key":['
+    '{"keyData":{'
+    '"typeUrl":"type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",'
+    '"value":"EAEaIBDPI66hjLHvjxmUJ2nyHIBDmdOtQ4gPsvWgYYgZ0gygIiBTEK0rTACpAb97m'
+    '+mvtJKAk0'
+    'q3mHjPcUZm0C4EueDW4Q==",'
+    '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
+    '},"status":"ENABLED","keyId":282600252,"outputPrefixType":"RAW"},'
+    '{"keyData":{'
+    '"typeUrl":"type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey"'
+    ',"value":"EAEagQIAkspk37lGBqXmPPq2CL5KdDeRx7xFiTadpL3jc4nXaqftCtpM6qExfrc2'
+    'JLaIsnwpwfGMClfe/alIs2GrT9fpM8oDeCccvC39DzZhsSFnAELggi3hnWNKRLfSV0UJzBI+5h'
+    'Z6ifUsv8W8mSHKlsVMmvOfC2P5+l72qTwN6Le3hy6CxFp5s9pw011B7J3PU65sty6GI9sehB2B'
+    '/n7nfiWw9YN5++pfwyoitzoMoVKOOpj7fFq88f8ArpC7kR1SBTe20Bt1AmpZDT2Dmfmlb/Q1UF'
+    'jj/F3C77NCNQ344ZcAEI42HY+uighy5GdKQRHMoTT1OzyDG90ABjggQqDGW+zXzyIDAQAB",'
+    '"keyMaterialType":"ASYMMETRIC_PUBLIC"'
+    '},"status":"ENABLED","keyId":482168993,"outputPrefixType":"RAW"}]}')
+
+JWK_SET_WITH_TWO_KEYS = (
+    '{"keys":[{'
+    '"kty":"EC",'
+    '"crv":"P-256",'
+    '"x":"EM8jrqGMse-PGZQnafIcgEOZ061DiA-y9aBhiBnSDKA",'
+    '"y":"UxCtK0wAqQG_e5vpr7SSgJNKt5h4z3FGZtAuBLng1uE",'
+    '"use":"sig","alg":"ES256","key_ops":["verify"]},'
+    '{"kty":"RSA",'
+    '"n":"AJLKZN-5Rgal5jz6tgi-SnQ3kce8RYk2naS943OJ12qn7QraTOqhMX63NiS2iLJ8KcHxj'
+    'ApX3v2pSLNhq0_X6TPKA3gnHLwt_Q82YbEhZwBC4IIt4Z1jSkS30ldFCcwSPuYWeon1LL_FvJk'
+    'hypbFTJrznwtj-fpe9qk8Dei3t4cugsRaebPacNNdQeydz1OubLcuhiPbHoQdgf5-534lsPWDe'
+    'fvqX8MqIrc6DKFSjjqY-3xavPH_AK6Qu5EdUgU3ttAbdQJqWQ09g5n5pW_0NVBY4_xdwu-zQjU'
+    'N-OGXABCONh2ProoIcuRnSkERzKE09Ts8gxvdAAY4IEKgxlvs188",'
+    '"e":"AQAB","use":"sig","alg":"RS256","key_ops":["verify"]}]}')
+
 
 class JwkSetConverterTest(parameterized.TestCase):
 
@@ -234,7 +380,12 @@ class JwkSetConverterTest(parameterized.TestCase):
       ('RS256_RAW', RS256_KEYSET, RS256_JWK_SET),
       ('RS384_RAW', RS384_KEYSET, RS384_JWK_SET),
       ('RS512_RAW', RS512_KEYSET, RS512_JWK_SET),
-      ('RS256_TINK', RS256_KEYSET_TINK, RS256_JWK_SET_KID)
+      ('RS256_TINK', RS256_KEYSET_TINK, RS256_JWK_SET_KID),
+      ('PS256_RAW', PS256_KEYSET, PS256_JWK_SET),
+      ('PS384_RAW', PS384_KEYSET, PS384_JWK_SET),
+      ('PS512_RAW', PS512_KEYSET, PS512_JWK_SET),
+      ('PS256_TINK', PS256_KEYSET_TINK, PS256_JWK_SET_KID),
+      ('TWO_KEYS', KEYSET_WITH_TWO_KEYS, JWK_SET_WITH_TWO_KEYS)
   ])
   def test_convert_from_jwt_key(self, tink_keyset, expected_jwk_set):
     reader = tink.JsonKeysetReader(tink_keyset)
@@ -271,8 +422,8 @@ class JwkSetConverterTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_keyset_handle(keyset_handle)
 
-  def test_from_ps256_keyset_fails(self):
-    reader = tink.JsonKeysetReader(PS256_KEYSET)
+  def test_from_hs256_keyset_fails(self):
+    reader = tink.JsonKeysetReader(HS256_KEYSET)
     keyset_handle = cleartext_keyset_handle.read(reader)
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_keyset_handle(keyset_handle)

@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Text, Union
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
+from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
 from tink.jwt import _jwt_format
@@ -32,6 +33,8 @@ _JWT_ECDSA_PUBLIC_KEY_TYPE = (
     'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')
 _JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE = (
     'type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PublicKey')
+_JWT_RSA_SSA_PSS_PUBLIC_KEY_TYPE = (
+    'type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPublicKey')
 
 _ECDSA_PARAMS = {
     jwt_ecdsa_pb2.ES256: ('ES256', 'P-256'),
@@ -43,6 +46,12 @@ _RSA_SSA_PKCS1_PARAMS = {
     jwt_rsa_ssa_pkcs1_pb2.RS256: 'RS256',
     jwt_rsa_ssa_pkcs1_pb2.RS384: 'RS384',
     jwt_rsa_ssa_pkcs1_pb2.RS512: 'RS512'
+}
+
+_RSA_SSA_PSS_PARAMS = {
+    jwt_rsa_ssa_pss_pb2.PS256: 'PS256',
+    jwt_rsa_ssa_pss_pb2.PS384: 'PS384',
+    jwt_rsa_ssa_pss_pb2.PS512: 'PS512'
 }
 
 
@@ -61,8 +70,8 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
   Keys with output prefix type "TINK" will include the encoded key ID as "kid"
   value. Keys with output prefix type "RAW" will not have a "kid" value set.
 
-  Currently, only public keys for algorithms ES256, ES384 and ES512 are
-  supported.
+  Currently, public keys for algorithms ES256, ES384, ES512, RS256, RS384,
+  RS512, PS256, PS384 and PS512 supported.
 
   Args:
     keyset_handle: A Tink KeysetHandle that contains JWT Keys.
@@ -93,6 +102,8 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
       keys.append(_convert_jwt_ecdsa_key(key))
     elif key.key_data.type_url == _JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE:
       keys.append(_convert_jwt_rsa_ssa_pkcs1_key(key))
+    elif key.key_data.type_url == _JWT_RSA_SSA_PSS_PUBLIC_KEY_TYPE:
+      keys.append(_convert_jwt_rsa_ssa_pss_key(key))
     else:
       raise tink.TinkError('unknown key type: %s' % key.key_data.type_url)
   return json.dumps({'keys': keys}, separators=(',', ':'))
@@ -131,6 +142,30 @@ def _convert_jwt_rsa_ssa_pkcs1_key(
   if public_key.algorithm not in _RSA_SSA_PKCS1_PARAMS:
     raise tink.TinkError('unknown RSA SSA PKCS1 algorithm')
   alg = _RSA_SSA_PKCS1_PARAMS[public_key.algorithm]
+  output = {
+      'kty': 'RSA',
+      'n': _base64_encode(public_key.n),
+      'e': _base64_encode(public_key.e),
+      'use': 'sig',
+      'alg': alg,
+      'key_ops': ['verify'],
+  }
+  kid = _jwt_format.get_kid(key.key_id, key.output_prefix_type)
+  if kid:
+    output['kid'] = kid
+  elif public_key.HasField('custom_kid'):
+    output['kid'] = public_key.custom_kid.value
+  return output
+
+
+def _convert_jwt_rsa_ssa_pss_key(
+    key: tink_pb2.Keyset.Key) -> Dict[Text, Union[Text, List[Text]]]:
+  """Converts a JwtRsaSsaPssPublicKey into a JWK."""
+  public_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey.FromString(
+      key.key_data.value)
+  if public_key.algorithm not in _RSA_SSA_PSS_PARAMS:
+    raise tink.TinkError('unknown RSA SSA PSS algorithm')
+  alg = _RSA_SSA_PSS_PARAMS[public_key.algorithm]
   output = {
       'kty': 'RSA',
       'n': _base64_encode(public_key.n),

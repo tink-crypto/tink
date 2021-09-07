@@ -344,6 +344,7 @@ py_library(
         "//tink:tink_python",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
