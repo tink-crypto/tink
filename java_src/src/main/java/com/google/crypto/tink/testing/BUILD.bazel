@@ -155,17 +155,6 @@ java_library(
 )
 
 java_library(
-    name = "testdata",
-    srcs = ["Testdata.java"],
-    deps = [
-        "//proto:tink_java_proto",
-        "@com_google_protobuf//:protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_library(
     name = "fake_kms_client",
     srcs = ["FakeKmsClient.java"],
     deps = [
