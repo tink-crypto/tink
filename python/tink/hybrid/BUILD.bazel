@@ -93,6 +93,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink/aead",
+        "//tink/daead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
@@ -113,6 +114,5 @@ py_test(
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )

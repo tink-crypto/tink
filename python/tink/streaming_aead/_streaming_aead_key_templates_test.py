@@ -24,32 +24,9 @@ from tink.proto import aes_gcm_hkdf_streaming_pb2
 from tink.proto import common_pb2
 from tink.proto import tink_pb2
 from tink import streaming_aead
-from tink.testing import helper
 
 
 class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
-
-  @parameterized.parameters([
-      ('AES128_GCM_HKDF_4KB',
-       streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_4KB),
-      ('AES128_GCM_HKDF_1MB',
-       streaming_aead.streaming_aead_key_templates.AES128_GCM_HKDF_1MB),
-      ('AES256_GCM_HKDF_4KB',
-       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_4KB),
-      ('AES256_GCM_HKDF_1MB',
-       streaming_aead.streaming_aead_key_templates.AES256_GCM_HKDF_1MB),
-      ('AES128_CTR_HMAC_SHA256_4KB',
-       streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_4KB),
-      ('AES128_CTR_HMAC_SHA256_1MB',
-       streaming_aead.streaming_aead_key_templates.AES128_CTR_HMAC_SHA256_1MB),
-      ('AES256_CTR_HMAC_SHA256_4KB',
-       streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_4KB),
-      ('AES256_CTR_HMAC_SHA256_1MB',
-       streaming_aead.streaming_aead_key_templates.AES256_CTR_HMAC_SHA256_1MB),
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(
-        template, helper.template_from_testdata(template_name, 'streamingaead'))
 
   def test_create_aes_gcm_hkdf_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

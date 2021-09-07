@@ -23,17 +23,9 @@ from absl.testing import parameterized
 from tink.proto import aes_siv_pb2
 from tink.proto import tink_pb2
 from tink import daead
-from tink.testing import helper
 
 
 class DeterministicAeadKeyTemplatesTest(parameterized.TestCase):
-
-  @parameterized.parameters([
-      ('AES256_SIV', daead.deterministic_aead_key_templates.AES256_SIV),
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(template,
-                     helper.template_from_testdata(template_name, 'daead'))
 
   def test_create_aes_siv_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

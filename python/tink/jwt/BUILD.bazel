@@ -112,7 +112,6 @@ py_test(
     deps = [
         ":jwt",
         requirement("absl-py"),
-        "//tink/testing:helper",
     ],
 )
 

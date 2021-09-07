@@ -140,7 +140,6 @@ py_test(
         "//tink/proto:aes_gcm_hkdf_streaming_py_pb2",
         "//tink/proto:common_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 

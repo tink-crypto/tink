@@ -25,28 +25,9 @@ from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import tink_pb2
 from tink import aead
 from tink import hybrid
-from tink.testing import helper
 
 
 class HybridKeyTemplatesTest(parameterized.TestCase):
-
-  @parameterized.parameters([
-      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM',
-       hybrid.hybrid_key_templates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM),
-      ('ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM',
-       hybrid.hybrid_key_templates
-       .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM),
-      ('ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
-       hybrid.hybrid_key_templates
-       .ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256),
-      ('ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
-       hybrid.hybrid_key_templates
-       .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256)
-
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(template,
-                     helper.template_from_testdata(template_name, 'hybrid'))
 
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

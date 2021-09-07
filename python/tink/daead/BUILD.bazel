@@ -73,7 +73,6 @@ py_test(
         requirement("absl-py"),
         "//tink/proto:aes_siv_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 
