@@ -18,3 +18,11 @@ tink_cc_library(
     absl::strings
     absl::cord
 )
+
+tink_cc_library(
+  NAME zero_copy_aead
+  SRCS zero_copy_aead.h
+  DEPS
+    tink::util::statusor
+    absl::strings
+)

@@ -20,6 +20,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "zero_copy_aead",
+    hdrs = ["zero_copy_aead.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_test(
     name = "cord_aes_gcm_boringssl_test",
     size = "small",
