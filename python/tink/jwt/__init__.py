@@ -47,6 +47,7 @@ new_raw_jwt = _raw_jwt.new_raw_jwt
 new_validator = _jwt_validator.new_validator
 
 jwk_set_from_keyset_handle = _jwk_set_converter.from_keyset_handle
+jwk_set_to_keyset_handle = _jwk_set_converter.to_keyset_handle
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
 raw_jwt_hs256_template = _jwt_key_templates.raw_jwt_hs256_template

@@ -20,6 +20,8 @@ from __future__ import print_function
 
 import io
 import json
+import random
+
 from typing import Dict, List, Optional, Text, Union
 
 from tink.proto import jwt_ecdsa_pb2
@@ -27,6 +29,7 @@ from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
+from tink import cleartext_keyset_handle
 from tink.jwt import _jwt_format
 
 _JWT_ECDSA_PUBLIC_KEY_TYPE = (
@@ -40,6 +43,10 @@ _ECDSA_PARAMS = {
     jwt_ecdsa_pb2.ES256: ('ES256', 'P-256'),
     jwt_ecdsa_pb2.ES384: ('ES384', 'P-384'),
     jwt_ecdsa_pb2.ES512: ('ES512', 'P-521')
+}
+
+_ECDSA_NAME_TO_ALGORITHM = {
+    alg_name: algorithm for algorithm, (alg_name, _) in _ECDSA_PARAMS.items()
 }
 
 _RSA_SSA_PKCS1_PARAMS = {
@@ -57,6 +64,10 @@ _RSA_SSA_PSS_PARAMS = {
 
 def _base64_encode(data: bytes) -> Text:
   return _jwt_format.base64_encode(data).decode('utf8')
+
+
+def _base64_decode(data: Text) -> bytes:
+  return _jwt_format.base64_decode(data.encode('utf8'))
 
 
 def from_keyset_handle(keyset_handle: tink.KeysetHandle,
@@ -180,3 +191,94 @@ def _convert_jwt_rsa_ssa_pss_key(
   elif public_key.HasField('custom_kid'):
     output['kid'] = public_key.custom_kid.value
   return output
+
+
+def _generate_unused_key_id(keyset: tink_pb2.Keyset) -> int:
+  while True:
+    key_id = random.randint(1, 2147483647)
+    if key_id not in {key.key_id for key in keyset.key}:
+      return key_id
+
+
+def to_keyset_handle(
+    jwk_set: Text,
+    key_access: Optional[tink.KeyAccess] = None) -> tink.KeysetHandle:
+  """Converts a Json Web Key (JWK) set into a Tink KeysetHandle with JWT keys.
+
+  JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
+
+  All keys are converted into Tink keys with output prefix type "RAW".
+
+  Currently, only public keys for algorithms ES256, ES384 and ES512 are
+  supported.
+
+  Args:
+    jwk_set: A JWK set, which is a JSON encoded string.
+    key_access: An optional KeyAccess object. Currently not needed.
+
+  Returns:
+    A tink.KeysetHandle.
+
+  Raises:
+    TinkError if the key cannot be converted.
+  """
+  _ = key_access
+  keys_dict = json.loads(jwk_set)
+  if 'keys' not in keys_dict:
+    raise tink.TinkError('invalid JWK set: keys not found')
+  proto_keyset = tink_pb2.Keyset()
+  for key in keys_dict['keys']:
+    if 'alg' not in key:
+      raise tink.TinkError('invalid JWK: alg not found')
+    alg = key['alg']
+    if alg.startswith('ES'):
+      proto_key = _convert_to_ecdsa_key(key)
+    else:
+      raise tink.TinkError('unknown alg')
+    new_id = _generate_unused_key_id(proto_keyset)
+    proto_key.key_id = new_id
+    proto_keyset.key.append(proto_key)
+    # JWK sets do not really have a primary key (see RFC 7517, Section 5.1).
+    # To verify signature, it also does not matter which key is primary. We
+    # simply set it to the last key.
+    proto_keyset.primary_key_id = new_id
+  return cleartext_keyset_handle.from_keyset(proto_keyset)
+
+
+def _validate_use_and_key_ops(key: Dict[Text, Union[Text, List[Text]]]):
+  """Checks that 'key_ops' and 'use' have the right values if present."""
+  if 'key_ops' in key:
+    key_ops = key['key_ops']
+    if len(key_ops) != 1 or key_ops[0] != 'verify':
+      raise tink.TinkError('invalid key_ops')
+  if 'use' in key and key['use'] != 'sig':
+    raise tink.TinkError('invalid use')
+
+
+def _convert_to_ecdsa_key(
+    key: Dict[Text, Union[Text, List[Text]]]) -> tink_pb2.Keyset.Key:
+  """Converts a EC Json Web Key (JWK) into a tink_pb2.Keyset.Key."""
+  ecdsa_public_key = jwt_ecdsa_pb2.JwtEcdsaPublicKey()
+  algorithm = _ECDSA_NAME_TO_ALGORITHM.get(key['alg'], None)
+  if not algorithm:
+    raise tink.TinkError('unknown ECDSA algorithm')
+  if key.get('kty', None) != 'EC':
+    raise tink.TinkError('invalid kty')
+  _, crv = _ECDSA_PARAMS[algorithm]
+  if key.get('crv', None) != crv:
+    raise tink.TinkError('invalid crv')
+  _validate_use_and_key_ops(key)
+  if 'd' in key:
+    raise tink.TinkError('cannot convert private ECDSA key')
+  ecdsa_public_key.algorithm = algorithm
+  ecdsa_public_key.x = _base64_decode(key['x'])
+  ecdsa_public_key.y = _base64_decode(key['y'])
+  if 'kid' in key:
+    ecdsa_public_key.custom_kid.value = key['kid']
+  proto_key = tink_pb2.Keyset.Key()
+  proto_key.key_data.type_url = _JWT_ECDSA_PUBLIC_KEY_TYPE
+  proto_key.key_data.value = ecdsa_public_key.SerializeToString()
+  proto_key.key_data.key_material_type = tink_pb2.KeyData.ASYMMETRIC_PUBLIC
+  proto_key.output_prefix_type = tink_pb2.RAW
+  proto_key.status = tink_pb2.ENABLED
+  return proto_key

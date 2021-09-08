@@ -16,6 +16,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from tink.proto import tink_pb2
 import tink
 from tink import cleartext_keyset_handle
 from tink import jwt
@@ -393,6 +394,24 @@ class JwkSetConverterTest(parameterized.TestCase):
     jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
     self.assertEqual(jwk_set, expected_jwk_set)
 
+  @parameterized.named_parameters([('ES256_RAW', ES256_JWK_SET),
+                                   ('ES384_RAW', ES384_JWK_SET),
+                                   ('ES512_RAW', ES512_JWK_SET),
+                                   ('ES256_TINK', ES256_JWK_SET_KID)])
+  def test_convert_jwk_set_to_keyset_handle_and_back(self, jwk_set):
+    keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
+    self.assertEqual(output_jwk_set, jwk_set)
+    # check that all keys are raw.
+    for key in keyset_handle._keyset.key:
+      self.assertEqual(key.output_prefix_type, tink_pb2.RAW)
+
+  def test_es_conserves_empty_kid(self):
+    jwk_set_with_empty_kid = ES256_JWK_SET_KID.replace('"ENgjPA"', '""')
+    keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set_with_empty_kid)
+    output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
+    self.assertEqual(output_jwk_set, jwk_set_with_empty_kid)
+
   def test_primary_key_id_missing_success(self):
     keyset = ES256_KEYSET.replace('"primaryKeyId":282600252,', '')
     reader = tink.JsonKeysetReader(keyset)
@@ -402,7 +421,8 @@ class JwkSetConverterTest(parameterized.TestCase):
 
   @parameterized.named_parameters([
       ('ES256_RAW', ES256_KEYSET),
-      ('RS256_RAW', RS256_KEYSET)
+      ('RS256_RAW', RS256_KEYSET),
+      ('PS256_RAW', PS256_KEYSET)
   ])
   def test_from_legacy_ecdsa_keyset_fails(self, keyset):
     legacy_keyset = keyset.replace('RAW', 'LEGACY')
@@ -433,6 +453,186 @@ class JwkSetConverterTest(parameterized.TestCase):
     keyset_handle = cleartext_keyset_handle.read(reader)
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_from_keyset_handle(keyset_handle)
+
+  def test_ecdsa_without_use_or_key_ops_to_keyset_handle_success(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256"
+        }]}"""
+    # ignore returned value, we only test that it worked.
+    jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_private_key_to_keyset_handle_fails(self):
+    # Example from https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.2
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+           "y":"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+           "d":"870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE",
+           "alg":"ES256"
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_unknown_field_to_keyset_handle_success(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "unknown":1234,
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_without_alg_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_without_kty_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_without_crv_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_small_x_primitive_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"AAAwOQ",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtPublicKeyVerify)
+
+  def test_ecdsa_key_with_small_y_primitive_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"AAAwOQ",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtPublicKeyVerify)
+
+  def test_ecdsa_key_with_invalid_kty_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"RSA",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_invalid_crv_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-384",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_invalid_use_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"invalid",
+           "key_ops":["verify"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_invalid_key_ops_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":["invalid"]
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
+  def test_ecdsa_key_with_string_key_ops_to_keyset_handle_fails(self):
+    jwk_set = """{"keys":[
+        {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"KUPydf4k4cS5EGS82npjEUxKIiBfUGP3wlN49A2GxTY",
+           "y":"b22m_Y4sT-jUJSxBVqjrW_DxWyBLopxYHTuFVfx70ZI",
+           "alg":"ES256",
+           "use":"sig",
+           "key_ops":"verify"
+        }]}"""
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+
 
 if __name__ == '__main__':
   absltest.main()
