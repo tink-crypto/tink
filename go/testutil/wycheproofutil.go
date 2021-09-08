@@ -22,11 +22,22 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 const (
 	wycheproofDir = "wycheproof/testvectors"
 )
+
+// SkipTestIfTestSrcDirIsNotSet skips the test if TEST_SRCDIR is not set.
+// This is necessary when not using Blaze/Bazel, as we don't have a solution for referencing non-Go
+// resources that are external to the repository with Go tooling.
+func SkipTestIfTestSrcDirIsNotSet(t *testing.T) {
+	t.Helper()
+	if _, ok := os.LookupEnv("TEST_SRCDIR"); !ok {
+		t.Skip("TEST_SRCDIR not found")
+	}
+}
 
 // WycheproofSuite represents the common elements of the top level
 // object in a Wycheproof json file. Implementations should embed

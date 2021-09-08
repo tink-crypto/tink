@@ -20,14 +20,11 @@ import (
 	"bytes"
 	"testing"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
-	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestKeyTemplates(t *testing.T) {
-	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	var testCases = []struct {
 		name     string
 		template *tinkpb.KeyTemplate
@@ -39,14 +36,6 @@ func TestKeyTemplates(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("hybrid", tc.name)
-			if err != nil {
-				t.Fatalf("testutil.KeyTemplateProto('hybrid', tc.name) failed: %s", err)
-			}
-			if !proto.Equal(want, tc.template) {
-				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
-			}
-
 			privateHandle, err := keyset.NewHandle(tc.template)
 			if err != nil {
 				t.Fatalf("keyset.NewHandle(tc.template) failed: %s", err)

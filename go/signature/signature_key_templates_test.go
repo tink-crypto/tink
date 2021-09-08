@@ -20,15 +20,12 @@ import (
 	"fmt"
 	"testing"
 
-	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature"
-	"github.com/google/tink/go/testutil"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
 func TestKeyTemplates(t *testing.T) {
-	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	var testCases = []struct {
 		name     string
 		template *tinkpb.KeyTemplate
@@ -39,46 +36,15 @@ func TestKeyTemplates(t *testing.T) {
 			template: signature.ECDSAP384KeyTemplate()},
 		{name: "ECDSA_P521",
 			template: signature.ECDSAP521KeyTemplate()},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("signature", tc.name)
-			if err != nil {
-				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
-			}
-			if !proto.Equal(want, tc.template) {
-				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
-			}
-			if err := testSignVerify(tc.template); err != nil {
-				t.Errorf("%v", err)
-			}
-		})
-	}
-}
-
-func TestKeyWithoutPrefixTemplates(t *testing.T) {
-	testutil.SkipTestIfTestSrcDirIsNotSet(t)
-	var testCases = []struct {
-		name     string
-		template *tinkpb.KeyTemplate
-	}{
-		{name: "ECDSA_P256",
+		{name: "ECDSA_P256_NO_PREFIX",
 			template: signature.ECDSAP256KeyWithoutPrefixTemplate()},
-		{name: "ECDSA_P384",
+		{name: "ECDSA_P384_NO_PREFIX",
 			template: signature.ECDSAP384KeyWithoutPrefixTemplate()},
-		{name: "ECDSA_P521",
+		{name: "ECDSA_P521_NO_PREFIX",
 			template: signature.ECDSAP521KeyWithoutPrefixTemplate()},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			want, err := testutil.KeyTemplateProto("signature", tc.name)
-			if err != nil {
-				t.Fatalf("testutil.KeyTemplateProto('signature', tc.name) failed: %s", err)
-			}
-			want.OutputPrefixType = tinkpb.OutputPrefixType_RAW
-			if !proto.Equal(want, tc.template) {
-				t.Errorf("template %s is not equal to '%s'", tc.name, tc.template)
-			}
 			if err := testSignVerify(tc.template); err != nil {
 				t.Errorf("%v", err)
 			}
