@@ -26,7 +26,6 @@ py_test(
     srcs = ["helper_test.py"],
     data = [
         "@tink_base//testdata:credentials",
-        "@tink_base//testdata/templates",
     ],
     srcs_version = "PY3",
     deps = [

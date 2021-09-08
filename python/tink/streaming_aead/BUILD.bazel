@@ -129,9 +129,6 @@ py_test(
     name = "_streaming_aead_key_templates_test",
     timeout = "short",
     srcs = ["_streaming_aead_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":streaming_aead",

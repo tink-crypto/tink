@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from typing import Text, Mapping, Optional
+from typing import Text, Mapping
 
 from tink.proto import tink_pb2
 from tink import aead
@@ -30,7 +30,6 @@ from tink import hybrid
 from tink import mac
 from tink import prf
 from tink import signature as pk_signature
-from google.protobuf import text_format
 
 
 def tink_root_path() -> Text:
@@ -54,20 +53,6 @@ def tink_root_path() -> Text:
       return root_path
   raise ValueError('Could not find path to Tink root directory. Make sure that '
                    'TINK_SRC_PATH is set.')
-
-
-def template_from_testdata(
-    template_name: Text,
-    dir_name: Optional[Text] = None) -> tink_pb2.KeyTemplate:
-  """Reads a template from the testdata."""
-  if dir_name:
-    path = os.path.join(tink_root_path(), 'testdata/templates', dir_name,
-                        template_name)
-  else:
-    path = os.path.join(tink_root_path(), 'testdata/templates', template_name)
-  with open(path, mode='rt') as f:
-    data = f.read()
-  return text_format.Parse(data, tink_pb2.KeyTemplate())
 
 
 def fake_key(value: bytes = b'fakevalue',

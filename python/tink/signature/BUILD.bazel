@@ -102,9 +102,6 @@ py_library(
 py_test(
     name = "_signature_key_templates_test",
     srcs = ["_signature_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":signature",

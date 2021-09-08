@@ -1,7 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.AesCmacPrfKey"
-# value: [type.googleapis.com/google.crypto.tink.AesCmacPrfKeyFormat] {
-#   version: 0
-#   key_size: 32
-# }
-value: "\010 "
-output_prefix_type: RAW

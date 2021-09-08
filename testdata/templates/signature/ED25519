@@ -1,2 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.Ed25519PrivateKey"
-output_prefix_type: TINK

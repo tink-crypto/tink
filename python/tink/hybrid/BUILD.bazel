@@ -103,9 +103,6 @@ py_library(
 py_test(
     name = "_hybrid_key_templates_test",
     srcs = ["_hybrid_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":hybrid",

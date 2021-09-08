@@ -33,11 +33,6 @@ class HelperTest(absltest.TestCase):
       credential_json = f.read()
     self.assertNotEmpty(credential_json)
 
-  def test_template_from_testdata(self):
-    template = helper.template_from_testdata('AES128_GCM', 'aead')
-    self.assertEqual(template.type_url,
-                     'type.googleapis.com/google.crypto.tink.AesGcmKey')
-
   def test_fake_mac_success(self):
     mac = helper.FakeMac('Name')
     mac_value = mac.compute_mac(b'data')
