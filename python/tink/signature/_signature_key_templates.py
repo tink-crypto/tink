@@ -56,10 +56,12 @@ def _num_to_bytes(n: int) -> bytes:
   return bytes(octets[::-1])
 
 
-def create_ecdsa_key_template(hash_type: common_pb2.HashType,
-                              curve: common_pb2.EllipticCurveType,
-                              encoding: ecdsa_pb2.EcdsaSignatureEncoding
-                             ) -> tink_pb2.KeyTemplate:
+def create_ecdsa_key_template(
+    hash_type: common_pb2.HashType,
+    curve: common_pb2.EllipticCurveType,
+    encoding: ecdsa_pb2.EcdsaSignatureEncoding,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
   """Creates a KeyTemplate containing an EcdsaKeyFormat."""
   params = ecdsa_pb2.EcdsaParams(
       hash_type=hash_type, curve=curve, encoding=encoding)
@@ -67,7 +69,7 @@ def create_ecdsa_key_template(hash_type: common_pb2.HashType,
   key_template = tink_pb2.KeyTemplate(
       value=key_format.SerializeToString(),
       type_url=_ECDSA_KEY_TYPE_URL,
-      output_prefix_type=tink_pb2.TINK)
+      output_prefix_type=output_prefix_type)
 
   return key_template
 
@@ -112,22 +114,37 @@ def create_rsa_ssa_pss_key_template(sig_hash: common_pb2.HashType,
 
 ECDSA_P256 = create_ecdsa_key_template(common_pb2.SHA256, common_pb2.NIST_P256,
                                        ecdsa_pb2.DER)
+ECDSA_P256_RAW = create_ecdsa_key_template(common_pb2.SHA256,
+                                           common_pb2.NIST_P256,
+                                           ecdsa_pb2.IEEE_P1363, tink_pb2.RAW)
+# TODO(b/140101381): This template is confusing and will be removed.
 ECDSA_P384 = create_ecdsa_key_template(common_pb2.SHA512, common_pb2.NIST_P384,
                                        ecdsa_pb2.DER)
 ECDSA_P384_SHA384 = create_ecdsa_key_template(common_pb2.SHA384,
                                               common_pb2.NIST_P384,
                                               ecdsa_pb2.DER)
+ECDSA_P384_SHA512 = create_ecdsa_key_template(common_pb2.SHA512,
+                                              common_pb2.NIST_P384,
+                                              ecdsa_pb2.DER)
 ECDSA_P521 = create_ecdsa_key_template(common_pb2.SHA512, common_pb2.NIST_P521,
                                        ecdsa_pb2.DER)
 
+# Deprecated. This key template does not make sense because IEEE P1363 mandates
+# a raw signature.
 ECDSA_P256_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA256,
                                                   common_pb2.NIST_P256,
                                                   ecdsa_pb2.IEEE_P1363)
+# Deprecated. This key template does not make sense because IEEE P1363 mandates
+# a raw signature.
 ECDSA_P384_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA512,
                                                   common_pb2.NIST_P384,
                                                   ecdsa_pb2.IEEE_P1363)
+# Deprecated. This key template does not make sense because IEEE P1363 mandates
+# a raw signature.
 ECDSA_P384_SHA384_IEEE_P1363 = create_ecdsa_key_template(
     common_pb2.SHA384, common_pb2.NIST_P384, ecdsa_pb2.IEEE_P1363)
+# Deprecated. This key template does not make sense because IEEE P1363 mandates
+# a raw signature.
 ECDSA_P521_IEEE_P1363 = create_ecdsa_key_template(common_pb2.SHA512,
                                                   common_pb2.NIST_P521,
                                                   ecdsa_pb2.IEEE_P1363)

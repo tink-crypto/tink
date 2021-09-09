@@ -44,10 +44,24 @@ func ECDSAP256KeyTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-256
 //   - Signature encoding: DER
 //   - Output prefix type: RAW
+// Note that this template uses a different encoding than ESDSA_P256_RAW in Tinkey.
 func ECDSAP256KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256,
 		ecdsapb.EcdsaSignatureEncoding_DER,
+		tinkpb.OutputPrefixType_RAW)
+}
+
+// ECDSAP256RawKeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following
+// parameters:
+//   - Hash function: SHA256
+//   - Curve: NIST P-256
+//   - Signature encoding: IEEE_P1363
+//   - Output prefix type: RAW
+func ECDSAP256RawKeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA256,
+		commonpb.EllipticCurveType_NIST_P256,
+		ecdsapb.EcdsaSignatureEncoding_IEEE_P1363,
 		tinkpb.OutputPrefixType_RAW)
 }
 
@@ -56,7 +70,32 @@ func ECDSAP256KeyWithoutPrefixTemplate() *tinkpb.KeyTemplate {
 //   - Curve: NIST P-384
 //   - Signature encoding: DER
 //   - Output prefix type: TINK
+// DEPRECATED. Use ECDSAP384SHA384KeyTemplate() or ECDSAP384SHA512KeyTemplate() instead.
 func ECDSAP384KeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
+		commonpb.EllipticCurveType_NIST_P384,
+		ecdsapb.EcdsaSignatureEncoding_DER,
+		tinkpb.OutputPrefixType_TINK)
+}
+
+// ECDSAP384SHA384KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
+//   - Hash function: SHA384
+//   - Curve: NIST P-384
+//   - Signature encoding: DER
+//   - Output prefix type: TINK
+func ECDSAP384SHA384KeyTemplate() *tinkpb.KeyTemplate {
+	return createECDSAKeyTemplate(commonpb.HashType_SHA384,
+		commonpb.EllipticCurveType_NIST_P384,
+		ecdsapb.EcdsaSignatureEncoding_DER,
+		tinkpb.OutputPrefixType_TINK)
+}
+
+// ECDSAP384SHA512KeyTemplate is a KeyTemplate that generates a new ECDSA private key with the following parameters:
+//   - Hash function: SHA512
+//   - Curve: NIST P-384
+//   - Signature encoding: DER
+//   - Output prefix type: TINK
+func ECDSAP384SHA512KeyTemplate() *tinkpb.KeyTemplate {
 	return createECDSAKeyTemplate(commonpb.HashType_SHA512,
 		commonpb.EllipticCurveType_NIST_P384,
 		ecdsapb.EcdsaSignatureEncoding_DER,

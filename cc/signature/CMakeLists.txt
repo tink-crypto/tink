@@ -83,6 +83,7 @@ tink_cc_library(
     tink::proto::rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
     crypto
+    absl::core_headers
     absl::memory
     absl::strings
 )

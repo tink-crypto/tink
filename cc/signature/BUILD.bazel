@@ -90,6 +90,7 @@ cc_library(
         "//subtle:subtle_util_boringssl",
         "//util:constants",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
     ],

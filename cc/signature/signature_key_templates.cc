@@ -48,11 +48,11 @@ using google::crypto::tink::RsaSsaPssPrivateKey;
 
 std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
     HashType hash_type, EllipticCurveType curve_type,
-    EcdsaSignatureEncoding encoding) {
+    EcdsaSignatureEncoding encoding, OutputPrefixType output_prefix_type) {
   auto key_template = absl::make_unique<KeyTemplate>();
   key_template->set_type_url(
       absl::StrCat(kTypeGoogleapisCom, EcdsaPrivateKey().GetTypeName()));
-  key_template->set_output_prefix_type(OutputPrefixType::TINK);
+  key_template->set_output_prefix_type(output_prefix_type);
   EcdsaKeyFormat key_format;
   auto params = key_format.mutable_params();
   params->set_hash_type(hash_type);
@@ -60,6 +60,13 @@ std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
   params->set_encoding(encoding);
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
+}
+
+std::unique_ptr<KeyTemplate> NewEcdsaKeyTemplate(
+    HashType hash_type, EllipticCurveType curve_type,
+    EcdsaSignatureEncoding encoding) {
+  return NewEcdsaKeyTemplate(hash_type, curve_type, encoding,
+                             OutputPrefixType::TINK);
 }
 
 std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
@@ -117,8 +124,27 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP256() {
   return *key_template;
 }
 
+// Deprecated, use EcdsaP384Sha384() or EcdsaP384Sha512() instead.
 // static
 const KeyTemplate& SignatureKeyTemplates::EcdsaP384() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P384,
+                          EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP384Sha384() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA384, EllipticCurveType::NIST_P384,
+                          EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP384Sha512() {
   static const KeyTemplate* key_template =
       NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P384,
                           EcdsaSignatureEncoding::DER)
@@ -131,6 +157,16 @@ const KeyTemplate& SignatureKeyTemplates::EcdsaP521() {
   static const KeyTemplate* key_template =
       NewEcdsaKeyTemplate(HashType::SHA512, EllipticCurveType::NIST_P521,
                           EcdsaSignatureEncoding::DER)
+          .release();
+  return *key_template;
+}
+
+// static
+const KeyTemplate& SignatureKeyTemplates::EcdsaP256Raw() {
+  static const KeyTemplate* key_template =
+      NewEcdsaKeyTemplate(HashType::SHA256, EllipticCurveType::NIST_P256,
+                          EcdsaSignatureEncoding::IEEE_P1363,
+                          OutputPrefixType::RAW)
           .release();
   return *key_template;
 }

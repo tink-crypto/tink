@@ -96,8 +96,14 @@ KeysetImpl::KeysetImpl() {
       crypto::tink::MacKeyTemplates::HmacSha512();
   key_templates_["ECDSA_P256"] =
       crypto::tink::SignatureKeyTemplates::EcdsaP256();
+  key_templates_["ECDSA_P256_RAW"] =
+      crypto::tink::SignatureKeyTemplates::EcdsaP256Raw();
   key_templates_["ECDSA_P384"] =
       crypto::tink::SignatureKeyTemplates::EcdsaP384();
+  key_templates_["ECDSA_P384_SHA384"] =
+      crypto::tink::SignatureKeyTemplates::EcdsaP384Sha384();
+  key_templates_["ECDSA_P384_SHA512"] =
+      crypto::tink::SignatureKeyTemplates::EcdsaP384Sha512();
   key_templates_["ECDSA_P521"] =
       crypto::tink::SignatureKeyTemplates::EcdsaP521();
   key_templates_["ECDSA_P256_IEEE_P1363"] =

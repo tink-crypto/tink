@@ -147,9 +147,10 @@ KEY_TEMPLATE_NAMES = {
         'HMAC_SHA512_256BITTAG', 'HMAC_SHA512_512BITTAG'
     ],
     'EcdsaPrivateKey': [
-        'ECDSA_P256', 'ECDSA_P384', 'ECDSA_P384_SHA384', 'ECDSA_P521',
-        'ECDSA_P256_IEEE_P1363', 'ECDSA_P384_IEEE_P1363',
-        'ECDSA_P384_SHA384_IEEE_P1363', 'ECDSA_P521_IEEE_P1363'
+        'ECDSA_P256', 'ECDSA_P256_RAW', 'ECDSA_P384', 'ECDSA_P384_SHA384',
+        'ECDSA_P384_SHA512', 'ECDSA_P521', 'ECDSA_P256_IEEE_P1363',
+        'ECDSA_P384_IEEE_P1363', 'ECDSA_P384_SHA384_IEEE_P1363',
+        'ECDSA_P521_IEEE_P1363'
     ],
     'Ed25519PrivateKey': ['ED25519'],
     'RsaSsaPkcs1PrivateKey': [
@@ -248,10 +249,14 @@ KEY_TEMPLATE = {
         mac.mac_key_templates.HMAC_SHA512_512BITTAG,
     'ECDSA_P256':
         signature.signature_key_templates.ECDSA_P256,
+    'ECDSA_P256_RAW':
+        signature.signature_key_templates.ECDSA_P256_RAW,
     'ECDSA_P384':
         signature.signature_key_templates.ECDSA_P384,
     'ECDSA_P384_SHA384':
         signature.signature_key_templates.ECDSA_P384_SHA384,
+    'ECDSA_P384_SHA512':
+        signature.signature_key_templates.ECDSA_P384_SHA512,
     'ECDSA_P521':
         signature.signature_key_templates.ECDSA_P521,
     'ECDSA_P256_IEEE_P1363':
@@ -280,34 +285,62 @@ KEY_TEMPLATE = {
         prf.prf_key_templates.HMAC_SHA512,
     'HKDF_SHA256':
         prf.prf_key_templates.HKDF_SHA256,
-    'JWT_HS256': jwt.jwt_hs256_template(),
-    'JWT_HS256_RAW': jwt.raw_jwt_hs256_template(),
-    'JWT_HS384': jwt.jwt_hs384_template(),
-    'JWT_HS384_RAW': jwt.raw_jwt_hs384_template(),
-    'JWT_HS512': jwt.jwt_hs512_template(),
-    'JWT_HS512_RAW': jwt.raw_jwt_hs512_template(),
-    'JWT_ES256': jwt.jwt_es256_template(),
-    'JWT_ES256_RAW': jwt.raw_jwt_es256_template(),
-    'JWT_ES384': jwt.jwt_es384_template(),
-    'JWT_ES384_RAW': jwt.raw_jwt_es384_template(),
-    'JWT_ES512': jwt.jwt_es512_template(),
-    'JWT_ES512_RAW': jwt.raw_jwt_es512_template(),
-    'JWT_RS256_2048_F4': jwt.jwt_rs256_2048_f4_template(),
-    'JWT_RS256_2048_F4_RAW': jwt.raw_jwt_rs256_2048_f4_template(),
-    'JWT_RS256_3072_F4': jwt.jwt_rs256_3072_f4_template(),
-    'JWT_RS256_3072_F4_RAW': jwt.raw_jwt_rs256_3072_f4_template(),
-    'JWT_RS384_3072_F4': jwt.jwt_rs384_3072_f4_template(),
-    'JWT_RS384_3072_F4_RAW': jwt.raw_jwt_rs384_3072_f4_template(),
-    'JWT_RS512_4096_F4': jwt.jwt_rs512_4096_f4_template(),
-    'JWT_RS512_4096_F4_RAW': jwt.raw_jwt_rs512_4096_f4_template(),
-    'JWT_PS256_2048_F4': jwt.jwt_ps256_2048_f4_template(),
-    'JWT_PS256_2048_F4_RAW': jwt.raw_jwt_ps256_2048_f4_template(),
-    'JWT_PS256_3072_F4': jwt.jwt_ps256_3072_f4_template(),
-    'JWT_PS256_3072_F4_RAW': jwt.raw_jwt_ps256_3072_f4_template(),
-    'JWT_PS384_3072_F4': jwt.jwt_ps384_3072_f4_template(),
-    'JWT_PS384_3072_F4_RAW': jwt.raw_jwt_ps384_3072_f4_template(),
-    'JWT_PS512_4096_F4': jwt.jwt_ps512_4096_f4_template(),
-    'JWT_PS512_4096_F4_RAW': jwt.raw_jwt_ps512_4096_f4_template(),
+    'JWT_HS256':
+        jwt.jwt_hs256_template(),
+    'JWT_HS256_RAW':
+        jwt.raw_jwt_hs256_template(),
+    'JWT_HS384':
+        jwt.jwt_hs384_template(),
+    'JWT_HS384_RAW':
+        jwt.raw_jwt_hs384_template(),
+    'JWT_HS512':
+        jwt.jwt_hs512_template(),
+    'JWT_HS512_RAW':
+        jwt.raw_jwt_hs512_template(),
+    'JWT_ES256':
+        jwt.jwt_es256_template(),
+    'JWT_ES256_RAW':
+        jwt.raw_jwt_es256_template(),
+    'JWT_ES384':
+        jwt.jwt_es384_template(),
+    'JWT_ES384_RAW':
+        jwt.raw_jwt_es384_template(),
+    'JWT_ES512':
+        jwt.jwt_es512_template(),
+    'JWT_ES512_RAW':
+        jwt.raw_jwt_es512_template(),
+    'JWT_RS256_2048_F4':
+        jwt.jwt_rs256_2048_f4_template(),
+    'JWT_RS256_2048_F4_RAW':
+        jwt.raw_jwt_rs256_2048_f4_template(),
+    'JWT_RS256_3072_F4':
+        jwt.jwt_rs256_3072_f4_template(),
+    'JWT_RS256_3072_F4_RAW':
+        jwt.raw_jwt_rs256_3072_f4_template(),
+    'JWT_RS384_3072_F4':
+        jwt.jwt_rs384_3072_f4_template(),
+    'JWT_RS384_3072_F4_RAW':
+        jwt.raw_jwt_rs384_3072_f4_template(),
+    'JWT_RS512_4096_F4':
+        jwt.jwt_rs512_4096_f4_template(),
+    'JWT_RS512_4096_F4_RAW':
+        jwt.raw_jwt_rs512_4096_f4_template(),
+    'JWT_PS256_2048_F4':
+        jwt.jwt_ps256_2048_f4_template(),
+    'JWT_PS256_2048_F4_RAW':
+        jwt.raw_jwt_ps256_2048_f4_template(),
+    'JWT_PS256_3072_F4':
+        jwt.jwt_ps256_3072_f4_template(),
+    'JWT_PS256_3072_F4_RAW':
+        jwt.raw_jwt_ps256_3072_f4_template(),
+    'JWT_PS384_3072_F4':
+        jwt.jwt_ps384_3072_f4_template(),
+    'JWT_PS384_3072_F4_RAW':
+        jwt.raw_jwt_ps384_3072_f4_template(),
+    'JWT_PS512_4096_F4':
+        jwt.jwt_ps512_4096_f4_template(),
+    'JWT_PS512_4096_F4_RAW':
+        jwt.raw_jwt_ps512_4096_f4_template(),
 }
 
 
