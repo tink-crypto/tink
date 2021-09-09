@@ -26,9 +26,9 @@ tink_cc_deps_init()
 
 http_archive(
     name = "rules_proto_grpc",
-    urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/archive/2.0.0.zip"],
-    sha256 = "ccd12e138f7b4464a85a98978352cbd7427a914bdf3830982826857e36e7b011",
-    strip_prefix = "rules_proto_grpc-2.0.0",
+    urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/archive/3.1.1.tar.gz"],
+    sha256 = "7954abbb6898830cd10ac9714fbcacf092299fda00ed2baf781172f545120419",
+    strip_prefix = "rules_proto_grpc-3.1.1",
 )
 
 load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_toolchains", "rules_proto_grpc_repos")
