@@ -21,6 +21,8 @@
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
 #include "tink/registry.h"
 #include "tink/signature/public_key_sign_wrapper.h"
 #include "tink/signature/public_key_verify_wrapper.h"
@@ -47,6 +49,11 @@ util::Status PqSignatureConfigRegister() {
   status = Registry::RegisterAsymmetricKeyManagers(
       absl::make_unique<DilithiumSignKeyManager>(),
       absl::make_unique<DilithiumVerifyKeyManager>(), true);
+
+  // Sphincs
+  status = Registry::RegisterAsymmetricKeyManagers(
+      absl::make_unique<SphincsSignKeyManager>(),
+      absl::make_unique<SphincsVerifyKeyManager>(), true);
   return status;
 }
 

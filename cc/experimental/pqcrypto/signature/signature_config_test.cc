@@ -21,19 +21,18 @@
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace {
 
-using ::crypto::tink::test::DummyPublicKeySign;
-using ::crypto::tink::test::DummyPublicKeyVerify;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
@@ -41,14 +40,6 @@ class PcqSignatureConfigTest : public ::testing::Test {
  protected:
   void SetUp() override { Registry::Reset(); }
 };
-
-TEST_F(PcqSignatureConfigTest, CheckStatus) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP() << "Not supported if FIPS-mode is used";
-  }
-
-  EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
-}
 
 TEST_F(PcqSignatureConfigTest, CheckDilithium) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
@@ -74,73 +65,27 @@ TEST_F(PcqSignatureConfigTest, CheckDilithium) {
               IsOk());
 }
 
-// Tests that the PublicKeySignWrapper has been properly registered and we
-// can wrap primitives.
-TEST_F(PcqSignatureConfigTest, PublicKeySignWrapperRegistered) {
+TEST_F(PcqSignatureConfigTest, CheckSphincs) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP() << "Not supported if FIPS-mode is used";
   }
 
-  ASSERT_THAT(PqSignatureConfigRegister(), IsOk());
-
-  google::crypto::tink::KeysetInfo::KeyInfo key_info;
-  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key_info.set_key_id(1234);
-  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
-
-  auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeySign>>();
-  auto add_primitive = primitive_set->AddPrimitive(
-      absl::make_unique<DummyPublicKeySign>("dummy"), key_info);
-  ASSERT_THAT(add_primitive.status(), IsOk());
-  ASSERT_THAT(primitive_set->set_primary(*add_primitive), IsOk());
-
-  util::StatusOr<std::unique_ptr<crypto::tink::PublicKeySign>> wrapped =
-      Registry::Wrap(std::move(primitive_set));
-  ASSERT_THAT(wrapped.status(), IsOk());
-
-  util::StatusOr<std::string> signature_result = (*wrapped)->Sign("message");
-  ASSERT_THAT(signature_result.status(), IsOk());
-
-  util::StatusOr<std::string> prefix = CryptoFormat::GetOutputPrefix(key_info);
-  ASSERT_THAT(prefix.status(), IsOk());
-  util::StatusOr<std::string> signature =
-      DummyPublicKeySign("dummy").Sign("message");
-  ASSERT_THAT(signature.status(), IsOk());
-
-  EXPECT_EQ(*signature_result, absl::StrCat(*prefix, *signature));
-}
-
-// Tests that the PublicKeyVerifyWrapper has been properly registered and we
-// can wrap primitives.
-TEST_F(PcqSignatureConfigTest, PublicKeyVerifyWrapperRegistered) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP() << "Not supported if FIPS-mode is used";
-  }
-
-  ASSERT_THAT(PqSignatureConfigRegister(), IsOk());
-
-  google::crypto::tink::KeysetInfo::KeyInfo key_info;
-  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
-  key_info.set_key_id(1234);
-  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
-
-  auto primitive_set = absl::make_unique<PrimitiveSet<PublicKeyVerify>>();
-  auto add_primitive = primitive_set->AddPrimitive(
-      absl::make_unique<DummyPublicKeyVerify>("dummy"), key_info);
-  ASSERT_THAT(add_primitive.status(), IsOk());
-  ASSERT_THAT(primitive_set->set_primary(*add_primitive), IsOk());
-
-  util::StatusOr<std::unique_ptr<crypto::tink::PublicKeyVerify>> wrapped =
-      Registry::Wrap(std::move(primitive_set));
-  ASSERT_THAT(wrapped.status(), IsOk());
-
-  util::StatusOr<std::string> prefix = CryptoFormat::GetOutputPrefix(key_info);
-  ASSERT_THAT(prefix.status(), IsOk());
-  util::StatusOr<std::string> signature =
-      DummyPublicKeySign("dummy").Sign("message");
-  ASSERT_THAT(signature.status(), IsOk());
-
-  ASSERT_THAT((*wrapped)->Verify(absl::StrCat(*prefix, *signature), "message"),
+  EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
+                  SphincsSignKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
+                  SphincsVerifyKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
+  EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
+                  SphincsSignKeyManager().get_key_type())
+                  .status(),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
+                  SphincsVerifyKeyManager().get_key_type())
+                  .status(),
               IsOk());
 }
 
