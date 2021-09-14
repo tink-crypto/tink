@@ -401,7 +401,11 @@ class JwkSetConverterTest(parameterized.TestCase):
                                    ('RS256_RAW', RS256_JWK_SET),
                                    ('RS384_RAW', RS384_JWK_SET),
                                    ('RS512_RAW', RS512_JWK_SET),
-                                   ('RS256_TINK', RS256_JWK_SET_KID)])
+                                   ('RS256_TINK', RS256_JWK_SET_KID),
+                                   ('PS256_RAW', RS256_JWK_SET),
+                                   ('PS384_RAW', RS384_JWK_SET),
+                                   ('PS512_RAW', RS512_JWK_SET),
+                                   ('PS256_TINK', RS256_JWK_SET_KID)])
   def test_convert_jwk_set_to_keyset_handle_and_back(self, jwk_set):
     keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
     output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
@@ -437,7 +441,8 @@ class JwkSetConverterTest(parameterized.TestCase):
 
   @parameterized.named_parameters([
       ('ES256_RAW', ES256_KEYSET),
-      ('RS256_RAW', RS256_KEYSET)
+      ('RS256_RAW', RS256_KEYSET),
+      ('PS256_RAW', RS256_KEYSET)
   ])
   def test_from_crunchy_ecdsa_keyset_fails(self, keyset):
     crunchy_keyset = keyset.replace('RAW', 'CRUNCHY')
@@ -637,19 +642,33 @@ class JwkSetConverterTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
-  def test_rsa_without_use_and_key_ops_to_keyset_handle_success(self):
+  def test_rsa_ssa_pkcs1_without_use_and_key_ops_to_keyset_handle_success(self):
     jwk_set = RS256_JWK_SET.replace(',"use":"sig"',
                                     '').replace(',"key_ops":["verify"]', '')
     keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
     output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
     self.assertEqual(output_jwk_set, RS256_JWK_SET)
 
-  def test_rsa_with_unknown_property_keyset_handle_success(self):
+  def test_rsa_ssa_pss_without_use_and_key_ops_to_keyset_handle_success(self):
+    jwk_set = PS256_JWK_SET.replace(',"use":"sig"',
+                                    '').replace(',"key_ops":["verify"]', '')
+    keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
+    self.assertEqual(output_jwk_set, PS256_JWK_SET)
+
+  def test_rsa_ssa_pkcs1_with_unknown_property_keyset_handle_success(self):
     jwk_set = RS256_JWK_SET.replace(',"use":"sig"',
                                     ',"use":"sig","unknown":1234')
     keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
     output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
     self.assertEqual(output_jwk_set, RS256_JWK_SET)
+
+  def test_rsa_ssa_pss_with_unknown_property_keyset_handle_success(self):
+    jwk_set = PS256_JWK_SET.replace(',"use":"sig"',
+                                    ',"use":"sig","unknown":1234')
+    keyset_handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    output_jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
+    self.assertEqual(output_jwk_set, PS256_JWK_SET)
 
   def test_rsa_private_key_to_keyset_handle_fails(self):
     # Example from https://datatracker.ietf.org/doc/html/rfc7517#appendix-A.2
@@ -691,6 +710,11 @@ class JwkSetConverterTest(parameterized.TestCase):
      }"""
     # remove spaces and line breaks
     jwk_set = jwk_set.replace(' ', '').replace('\n', '')
+    # PKCS1
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
@@ -701,6 +725,11 @@ class JwkSetConverterTest(parameterized.TestCase):
 
   def test_rsa_without_kty_fails(self):
     jwk_set = RS256_JWK_SET.replace('"kty":"RSA",', '')
+    # PKCS1
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
@@ -712,32 +741,57 @@ class JwkSetConverterTest(parameterized.TestCase):
         "use":"sig",
         "alg":"RS256",
         "key_ops":["verify"]}]}"""
+    # PKCS1
+    handle = jwt.jwk_set_to_keyset_handle(jwk_set)
+    with self.assertRaises(tink.TinkError):
+      handle.primitive(jwt.JwtPublicKeyVerify)
+    # test PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     handle = jwt.jwk_set_to_keyset_handle(jwk_set)
     with self.assertRaises(tink.TinkError):
       handle.primitive(jwt.JwtPublicKeyVerify)
 
   def test_rsa_with_invalid_kty_fails(self):
     jwk_set = RS256_JWK_SET.replace('"kty":"RSA"', '"kty":"EC"')
+    # PKCS1
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
   def test_rsa_with_invalid_use_fails(self):
     jwk_set = RS256_JWK_SET.replace('"use":"sig"', '"use":"invalid"')
+    # PKCS1
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
   def test_rsa_with_invalid_key_ops_fails(self):
     jwk_set = RS256_JWK_SET.replace('"key_ops":["verify"]',
                                     '"key_ops":["invalid"]')
+    # PKCS1
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
   def test_rsa_with_string_key_ops_fails(self):
     jwk_set = RS256_JWK_SET.replace('"key_ops":["verify"]',
                                     '"key_ops":"verify"')
+    # PKCS1
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
-
+    # PSS
+    jwk_set = jwk_set.replace('"alg":"RS256"', '"alg":"PS256"')
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle(jwk_set)
 
 if __name__ == '__main__':
   absltest.main()

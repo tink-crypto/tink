@@ -66,6 +66,11 @@ _RSA_SSA_PSS_PARAMS = {
     jwt_rsa_ssa_pss_pb2.PS512: 'PS512'
 }
 
+_RSA_SSA_PSS_NAME_TO_ALGORITHM = {
+    alg_name: algorithm
+    for algorithm, alg_name in _RSA_SSA_PSS_PARAMS.items()
+}
+
 
 def _base64_encode(data: bytes) -> Text:
   return _jwt_format.base64_encode(data).decode('utf8')
@@ -240,6 +245,8 @@ def to_keyset_handle(
       proto_key = _convert_to_ecdsa_key(key)
     elif alg.startswith('RS'):
       proto_key = _convert_to_rsa_ssa_pkcs1_key(key)
+    elif alg.startswith('PS'):
+      proto_key = _convert_to_rsa_ssa_pss_key(key)
     else:
       raise tink.TinkError('unknown alg')
     new_id = _generate_unused_key_id(proto_keyset)
@@ -311,6 +318,33 @@ def _convert_to_rsa_ssa_pkcs1_key(
     public_key.custom_kid.value = key['kid']
   proto_key = tink_pb2.Keyset.Key()
   proto_key.key_data.type_url = _JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE
+  proto_key.key_data.value = public_key.SerializeToString()
+  proto_key.key_data.key_material_type = tink_pb2.KeyData.ASYMMETRIC_PUBLIC
+  proto_key.output_prefix_type = tink_pb2.RAW
+  proto_key.status = tink_pb2.ENABLED
+  return proto_key
+
+
+def _convert_to_rsa_ssa_pss_key(
+    key: Dict[Text, Union[Text, List[Text]]]) -> tink_pb2.Keyset.Key:
+  """Converts a JWK into a JwtEcdsaPublicKey."""
+  public_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey()
+  algorithm = _RSA_SSA_PSS_NAME_TO_ALGORITHM.get(key['alg'], None)
+  if not algorithm:
+    raise tink.TinkError('unknown RSA SSA PSS algorithm')
+  if key.get('kty', None) != 'RSA':
+    raise tink.TinkError('invalid kty')
+  _validate_use_and_key_ops(key)
+  if ('p' in key or 'q' in key or 'dp' in key or 'dq' in key or 'd' in key or
+      'qi' in key):
+    raise tink.TinkError('importing RSA private keys is not implemented')
+  public_key.algorithm = algorithm
+  public_key.n = _base64_decode(key['n'])
+  public_key.e = _base64_decode(key['e'])
+  if 'kid' in key:
+    public_key.custom_kid.value = key['kid']
+  proto_key = tink_pb2.Keyset.Key()
+  proto_key.key_data.type_url = _JWT_RSA_SSA_PSS_PUBLIC_KEY_TYPE
   proto_key.key_data.value = public_key.SerializeToString()
   proto_key.key_data.key_material_type = tink_pb2.KeyData.ASYMMETRIC_PUBLIC
   proto_key.output_prefix_type = tink_pb2.RAW
