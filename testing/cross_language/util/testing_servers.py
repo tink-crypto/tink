@@ -276,6 +276,16 @@ def keyset_from_json(lang: Text, json_keyset: Text) -> bytes:
   return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
 
 
+def jwk_set_to_keyset(lang: Text, jwk_set: Text) -> bytes:
+  global _ts
+  return _primitives.jwk_set_to_keyset(_ts.jwt_stub(lang), jwk_set)
+
+
+def jwk_set_from_keyset(lang: Text, keyset: bytes) -> Text:
+  global _ts
+  return _primitives.jwk_set_from_keyset(_ts.jwt_stub(lang), keyset)
+
+
 def aead(lang: Text, keyset: bytes) -> _primitives.Aead:
   """Returns an AEAD primitive, implemented in lang."""
   global _ts
