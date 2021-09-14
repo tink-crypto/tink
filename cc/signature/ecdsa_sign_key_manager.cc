@@ -79,13 +79,13 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
   // will result in the same keys being generated.
   int random_bytes_used = 0;
   switch (ecdsa_key_format.params().curve()) {
-    case subtle::EllipticCurveType::NIST_P256:
+    case google::crypto::tink::EllipticCurveType::NIST_P256:
       random_bytes_used = 16;
       break;
-    case subtle::EllipticCurveType::NIST_P384:
+    case google::crypto::tink::EllipticCurveType::NIST_P384:
       random_bytes_used = 24;
       break;
-    case subtle::EllipticCurveType::NIST_P521:
+    case google::crypto::tink::EllipticCurveType::NIST_P521:
       random_bytes_used = 32;
       break;
     default:
