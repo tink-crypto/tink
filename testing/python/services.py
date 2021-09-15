@@ -41,22 +41,40 @@ from tink.testing import bytes_io
 _KEY_TEMPLATE = {
     'AES128_EAX':
         aead.aead_key_templates.AES128_EAX,
+    'AES128_EAX_RAW':
+        aead.aead_key_templates.AES128_EAX_RAW,
     'AES256_EAX':
         aead.aead_key_templates.AES256_EAX,
+    'AES256_EAX_RAW':
+        aead.aead_key_templates.AES256_EAX_RAW,
     'AES128_GCM':
         aead.aead_key_templates.AES128_GCM,
+    'AES128_GCM_RAW':
+        aead.aead_key_templates.AES128_GCM_RAW,
     'AES256_GCM':
         aead.aead_key_templates.AES256_GCM,
+    'AES256_GCM_RAW':
+        aead.aead_key_templates.AES256_GCM_RAW,
     'AES128_GCM_SIV':
         aead.aead_key_templates.AES128_GCM_SIV,
+    'AES128_GCM_SIV_RAW':
+        aead.aead_key_templates.AES128_GCM_SIV_RAW,
     'AES256_GCM_SIV':
         aead.aead_key_templates.AES256_GCM_SIV,
+    'AES256_GCM_SIV_RAW':
+        aead.aead_key_templates.AES256_GCM_SIV_RAW,
     'AES128_CTR_HMAC_SHA256':
         aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+    'AES128_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES128_CTR_HMAC_SHA256_RAW,
     'AES256_CTR_HMAC_SHA256':
         aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+    'AES256_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES256_CTR_HMAC_SHA256_RAW,
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
+    'XCHACHA20_POLY1305_RAW':
+        aead.aead_key_templates.XCHACHA20_POLY1305_RAW,
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
     'AES128_CTR_HMAC_SHA256_4KB':

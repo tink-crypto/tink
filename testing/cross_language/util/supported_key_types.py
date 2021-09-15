@@ -114,12 +114,22 @@ KEY_TYPE_FROM_URL = {
 # For each KeyType, a list of Tinkey KeyTemplate names.
 # TODO(juerg): Add missing key template names, and remove deprecated names.
 KEY_TEMPLATE_NAMES = {
-    'AesEaxKey': ['AES128_EAX', 'AES256_EAX'],
-    'AesGcmKey': ['AES128_GCM', 'AES256_GCM'],
-    'AesGcmSivKey': ['AES128_GCM_SIV', 'AES256_GCM_SIV'],
-    'AesCtrHmacAeadKey': ['AES128_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256'],
-    'ChaCha20Poly1305Key': ['CHACHA20_POLY1305'],
-    'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305'],
+    'AesEaxKey': [
+        'AES128_EAX', 'AES128_EAX_RAW', 'AES256_EAX', 'AES256_EAX_RAW'
+    ],
+    'AesGcmKey': [
+        'AES128_GCM', 'AES128_GCM_RAW', 'AES256_GCM', 'AES256_GCM_RAW'
+    ],
+    'AesGcmSivKey': [
+        'AES128_GCM_SIV', 'AES128_GCM_SIV_RAW', 'AES256_GCM_SIV',
+        'AES256_GCM_SIV_RAW'
+    ],
+    'AesCtrHmacAeadKey': [
+        'AES128_CTR_HMAC_SHA256', 'AES128_CTR_HMAC_SHA256_RAW',
+        'AES256_CTR_HMAC_SHA256', 'AES256_CTR_HMAC_SHA256_RAW'
+    ],
+    'ChaCha20Poly1305Key': ['CHACHA20_POLY1305', 'CHACHA20_POLY1305_RAW'],
+    'XChaCha20Poly1305Key': ['XCHACHA20_POLY1305', 'XCHACHA20_POLY1305_RAW'],
     'KmsAeadKey': [],
     'KmsEnvelopeAeadKey': [],
     'AesSivKey': ['AES256_SIV'],
@@ -187,27 +197,50 @@ KEY_TEMPLATE_NAMES = {
 KEY_TEMPLATE = {
     'AES128_EAX':
         aead.aead_key_templates.AES128_EAX,
+    'AES128_EAX_RAW':
+        aead.aead_key_templates.AES128_EAX_RAW,
     'AES256_EAX':
         aead.aead_key_templates.AES256_EAX,
+    'AES256_EAX_RAW':
+        aead.aead_key_templates.AES256_EAX_RAW,
     'AES128_GCM':
         aead.aead_key_templates.AES128_GCM,
+    'AES128_GCM_RAW':
+        aead.aead_key_templates.AES128_GCM_RAW,
     'AES256_GCM':
         aead.aead_key_templates.AES256_GCM,
+    'AES256_GCM_RAW':
+        aead.aead_key_templates.AES256_GCM_RAW,
     'AES128_GCM_SIV':
         aead.aead_key_templates.AES128_GCM_SIV,
+    'AES128_GCM_SIV_RAW':
+        aead.aead_key_templates.AES128_GCM_SIV_RAW,
     'AES256_GCM_SIV':
         aead.aead_key_templates.AES256_GCM_SIV,
+    'AES256_GCM_SIV_RAW':
+        aead.aead_key_templates.AES256_GCM_SIV_RAW,
     'AES128_CTR_HMAC_SHA256':
         aead.aead_key_templates.AES128_CTR_HMAC_SHA256,
+    'AES128_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES128_CTR_HMAC_SHA256_RAW,
     'AES256_CTR_HMAC_SHA256':
         aead.aead_key_templates.AES256_CTR_HMAC_SHA256,
+    'AES256_CTR_HMAC_SHA256_RAW':
+        aead.aead_key_templates.AES256_CTR_HMAC_SHA256_RAW,
     'CHACHA20_POLY1305':
         tink_pb2.KeyTemplate(
             type_url=('type.googleapis.com/google.crypto.tink.' +
                       'ChaCha20Poly1305Key'),
             output_prefix_type=tink_pb2.TINK),
+    'CHACHA20_POLY1305_RAW':
+        tink_pb2.KeyTemplate(
+            type_url=('type.googleapis.com/google.crypto.tink.' +
+                      'ChaCha20Poly1305Key'),
+            output_prefix_type=tink_pb2.RAW),
     'XCHACHA20_POLY1305':
         aead.aead_key_templates.XCHACHA20_POLY1305,
+    'XCHACHA20_POLY1305_RAW':
+        aead.aead_key_templates.XCHACHA20_POLY1305_RAW,
     'AES256_SIV':
         daead.deterministic_aead_key_templates.AES256_SIV,
     'AES128_CTR_HMAC_SHA256_4KB':

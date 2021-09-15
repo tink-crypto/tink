@@ -47,6 +47,21 @@ UNDEFINED_TEMPLATES = [
     ('ECDSA_P521_IEEE_P1363', 'go'),
     ('AES128_GCM_SIV', 'go'),
     ('AES256_GCM_SIV', 'go'),
+    ('AES128_EAX_RAW', 'cc'),
+    ('AES256_EAX_RAW', 'cc'),
+    ('AES128_GCM_SIV_RAW', 'cc'),
+    ('AES256_GCM_SIV_RAW', 'cc'),
+    ('AES128_GCM_SIV_RAW', 'go'),
+    ('AES256_GCM_SIV_RAW', 'go'),
+    ('AES128_GCM_RAW', 'cc'),
+    ('AES128_GCM_RAW', 'go'),
+    ('AES128_CTR_HMAC_SHA256_RAW', 'cc'),
+    ('AES256_CTR_HMAC_SHA256_RAW', 'cc'),
+    ('AES128_CTR_HMAC_SHA256_RAW', 'go'),
+    ('AES256_CTR_HMAC_SHA256_RAW', 'go'),
+    ('CHACHA20_POLY1305_RAW', 'go'),
+    ('XCHACHA20_POLY1305_RAW', 'cc'),
+    ('XCHACHA20_POLY1305_RAW', 'go'),
 ]
 
 

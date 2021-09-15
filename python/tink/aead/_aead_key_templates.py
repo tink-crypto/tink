@@ -50,8 +50,11 @@ _KMS_ENVELOPE_AEAD_KEY_TYPE_URL = (
     'type.googleapis.com/google.crypto.tink.KmsEnvelopeAeadKey')
 
 
-def create_aes_eax_key_template(key_size: int,
-                                iv_size: int) -> tink_pb2.KeyTemplate:
+def create_aes_eax_key_template(
+    key_size: int,
+    iv_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
   """Creates an AES EAX KeyTemplate, and fills in its values."""
   key_format = aes_eax_pb2.AesEaxKeyFormat()
   key_format.params.iv_size = iv_size
@@ -59,35 +62,46 @@ def create_aes_eax_key_template(key_size: int,
   key_template = tink_pb2.KeyTemplate()
   key_template.value = key_format.SerializeToString()
   key_template.type_url = _AES_EAX_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template.output_prefix_type = output_prefix_type
   return key_template
 
 
-def create_aes_gcm_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+def create_aes_gcm_key_template(
+    key_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
   """Creates an AES GCM KeyTemplate, and fills in its values."""
   key_format = aes_gcm_pb2.AesGcmKeyFormat()
   key_format.key_size = key_size
   key_template = tink_pb2.KeyTemplate()
   key_template.value = key_format.SerializeToString()
   key_template.type_url = _AES_GCM_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template.output_prefix_type = output_prefix_type
   return key_template
 
 
-def create_aes_gcm_siv_key_template(key_size: int) -> tink_pb2.KeyTemplate:
+def create_aes_gcm_siv_key_template(
+    key_size: int,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
   """Creates an AES GCM SIV KeyTemplate, and fills in its values."""
   key_format = aes_gcm_siv_pb2.AesGcmSivKeyFormat()
   key_format.key_size = key_size
   key_template = tink_pb2.KeyTemplate()
   key_template.value = key_format.SerializeToString()
   key_template.type_url = _AES_GCM_SIV_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template.output_prefix_type = output_prefix_type
   return key_template
 
 
 def create_aes_ctr_hmac_aead_key_template(
-    aes_key_size: int, iv_size: int, hmac_key_size: int, tag_size: int,
-    hash_type: common_pb2.HashType) -> tink_pb2.KeyTemplate:
+    aes_key_size: int,
+    iv_size: int,
+    hmac_key_size: int,
+    tag_size: int,
+    hash_type: common_pb2.HashType,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.KeyTemplate:
   """Creates an AES CTR HMAC AEAD KeyTemplate, and fills in its values."""
   key_format = aes_ctr_hmac_aead_pb2.AesCtrHmacAeadKeyFormat()
   key_format.aes_ctr_key_format.params.iv_size = iv_size
@@ -98,7 +112,7 @@ def create_aes_ctr_hmac_aead_key_template(
   key_template = tink_pb2.KeyTemplate()
   key_template.value = key_format.SerializeToString()
   key_template.type_url = _AES_CTR_HMAC_AEAD_KEY_TYPE_URL
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template.output_prefix_type = output_prefix_type
   return key_template
 
 
@@ -150,23 +164,51 @@ def create_kms_envelope_aead_key_template(
 
 
 AES128_EAX = create_aes_eax_key_template(key_size=16, iv_size=16)
+AES128_EAX_RAW = create_aes_eax_key_template(
+    key_size=16, iv_size=16, output_prefix_type=tink_pb2.RAW)
 AES256_EAX = create_aes_eax_key_template(key_size=32, iv_size=16)
+AES256_EAX_RAW = create_aes_eax_key_template(
+    key_size=32, iv_size=16, output_prefix_type=tink_pb2.RAW)
 AES128_GCM = create_aes_gcm_key_template(key_size=16)
+AES128_GCM_RAW = create_aes_gcm_key_template(
+    key_size=16, output_prefix_type=tink_pb2.RAW)
 AES256_GCM = create_aes_gcm_key_template(key_size=32)
+AES256_GCM_RAW = create_aes_gcm_key_template(
+    key_size=32, output_prefix_type=tink_pb2.RAW)
 AES128_GCM_SIV = create_aes_gcm_siv_key_template(key_size=16)
+AES128_GCM_SIV_RAW = create_aes_gcm_siv_key_template(
+    key_size=16, output_prefix_type=tink_pb2.RAW)
 AES256_GCM_SIV = create_aes_gcm_siv_key_template(key_size=32)
+AES256_GCM_SIV_RAW = create_aes_gcm_siv_key_template(
+    key_size=32, output_prefix_type=tink_pb2.RAW)
 AES128_CTR_HMAC_SHA256 = create_aes_ctr_hmac_aead_key_template(
     aes_key_size=16,
     iv_size=16,
     hmac_key_size=32,
     tag_size=16,
     hash_type=common_pb2.SHA256)
+AES128_CTR_HMAC_SHA256_RAW = create_aes_ctr_hmac_aead_key_template(
+    aes_key_size=16,
+    iv_size=16,
+    hmac_key_size=32,
+    tag_size=16,
+    hash_type=common_pb2.SHA256,
+    output_prefix_type=tink_pb2.RAW)
 AES256_CTR_HMAC_SHA256 = create_aes_ctr_hmac_aead_key_template(
     aes_key_size=32,
     iv_size=16,
     hmac_key_size=32,
     tag_size=32,
     hash_type=common_pb2.SHA256)
+AES256_CTR_HMAC_SHA256_RAW = create_aes_ctr_hmac_aead_key_template(
+    aes_key_size=32,
+    iv_size=16,
+    hmac_key_size=32,
+    tag_size=32,
+    hash_type=common_pb2.SHA256,
+    output_prefix_type=tink_pb2.RAW)
 XCHACHA20_POLY1305 = tink_pb2.KeyTemplate(
     type_url=_XCHACHA20_POLY1305_KEY_TYPE_URL,
     output_prefix_type=tink_pb2.TINK)
+XCHACHA20_POLY1305_RAW = tink_pb2.KeyTemplate(
+    type_url=_XCHACHA20_POLY1305_KEY_TYPE_URL, output_prefix_type=tink_pb2.RAW)

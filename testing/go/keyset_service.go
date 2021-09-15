@@ -46,6 +46,7 @@ func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateR
 		s.Templates = map[string]*tinkpb.KeyTemplate{
 			"AES128_GCM":                                         aead.AES128GCMKeyTemplate(),
 			"AES256_GCM":                                         aead.AES256GCMKeyTemplate(),
+			"AES256_GCM_RAW":                                     aead.AES256GCMNoPrefixKeyTemplate(),
 			"AES128_CTR_HMAC_SHA256":                             aead.AES128CTRHMACSHA256KeyTemplate(),
 			"AES256_CTR_HMAC_SHA256":                             aead.AES256CTRHMACSHA256KeyTemplate(),
 			"CHACHA20_POLY1305":                                  aead.ChaCha20Poly1305KeyTemplate(),
