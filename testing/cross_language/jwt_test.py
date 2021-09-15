@@ -145,6 +145,34 @@ class JwtTest(parameterized.TestCase):
           (signer.lang, key_template_name)):
         _ = signer.sign_and_encode(raw_jwt)
 
+  @parameterized.parameters(all_jwt_signature_key_template_names())
+  def test_jwt_public_key_sign_export_import_verify(self, key_template_name):
+    supported_langs = ['java', 'python']
+    self.assertNotEmpty(supported_langs)
+    key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+    # Take the first supported language to generate the private keyset.
+    private_keyset = testing_servers.new_keyset(supported_langs[0],
+                                                key_template)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    raw_jwt = jwt.new_raw_jwt(
+        issuer='issuer', expiration=now + datetime.timedelta(seconds=100))
+    validator = jwt.new_validator(expected_issuer='issuer', fixed_now=now)
+
+    for lang1 in supported_langs:
+      # in lang1: sign token and export public keyset to a JWK set
+      signer = testing_servers.jwt_public_key_sign(lang1, private_keyset)
+      compact = signer.sign_and_encode(raw_jwt)
+      public_keyset = testing_servers.public_keyset(lang1, private_keyset)
+      public_jwk_set = testing_servers.jwk_set_from_keyset(
+          lang1, public_keyset)
+      for lang2 in supported_langs:
+        # in lang2: import the public JWK set and verify the token
+        public_keyset = testing_servers.jwk_set_to_keyset(
+            lang2, public_jwk_set)
+        verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
+        verified_jwt = verifier.verify_and_decode(compact, validator)
+        self.assertEqual(verified_jwt.issuer(), 'issuer')
+
 
 if __name__ == '__main__':
   absltest.main()
