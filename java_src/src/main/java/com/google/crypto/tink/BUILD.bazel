@@ -92,6 +92,13 @@ java_library(
 )
 
 java_library(
+    name = "kms_clients_test_util",
+    testonly = 1,
+    srcs = ["KmsClientsTestUtil.java"],
+    deps = [":kms_clients"],
+)
+
+java_library(
     name = "keyset_writer",
     srcs = ["KeysetWriter.java"],
     deps = ["//proto:tink_java_proto"],

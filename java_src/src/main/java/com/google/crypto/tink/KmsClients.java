@@ -86,6 +86,10 @@ public final class KmsClients {
     throw new GeneralSecurityException("No KMS client does support: " + keyUri);
   }
 
+  static void reset() {
+    clients.clear();
+  }
+
   private static List<KmsClient> loadAutoKmsClients() {
     List<KmsClient> clients = new ArrayList<KmsClient>();
     ServiceLoader<KmsClient> clientLoader = ServiceLoader.load(KmsClient.class);
