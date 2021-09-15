@@ -1,0 +1,75 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "hpke_kem",
+    srcs = ["HpkeKem.java"],
+    deps = [
+        ":hpke_kem_encap_output",
+    ],
+)
+
+java_library(
+    name = "hpke_kem_encap_output",
+    srcs = ["HpkeKemEncapOutput.java"],
+)
+
+java_library(
+    name = "hpke_util",
+    srcs = ["HpkeUtil.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+    ],
+)
+
+java_library(
+    name = "x25519_hkdf_hpke_kem",
+    srcs = ["X25519HkdfHpkeKem.java"],
+    deps = [
+        ":hpke_kem",
+        ":hpke_kem_encap_output",
+        ":hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+    ],
+)
+
+# Android libraries
+
+android_library(
+    name = "hpke_kem-android",
+    srcs = ["HpkeKem.java"],
+    deps = [
+        ":hpke_kem_encap_output-android",
+    ]
+)
+
+android_library(
+    name = "hpke_kem_encap_output-android",
+    srcs = ["HpkeKemEncapOutput.java"],
+)
+
+android_library(
+    name = "hpke_util-android",
+    srcs = ["HpkeUtil.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+    ],
+)
+
+android_library(
+    name = "x25519_hkdf_hpke_kem-android",
+    srcs = ["X25519HkdfHpkeKem.java"],
+    deps = [
+        ":hpke_kem-android",
+        ":hpke_kem_encap_output-android",
+        ":hpke_util-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hkdf",
+        "//src/main/java/com/google/crypto/tink/subtle:x25519",
+    ],
+)

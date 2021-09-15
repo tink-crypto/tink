@@ -171,3 +171,11 @@ java_library(
         "//src/main/java/com/google/crypto/tink/subtle:validators",
     ],
 )
+
+java_library(
+    name = "hpke_test_util",
+    srcs = ["HpkeTestUtil.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+    ],
+)
