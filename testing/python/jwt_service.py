@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import datetime
+import io
 import json
 
 from typing import Text, Tuple
@@ -247,3 +248,28 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
           verified_jwt=verifiedjwt_to_proto(verified_jwt))
     except tink.TinkError as e:
       return testing_api_pb2.JwtVerifyResponse(err=str(e))
+
+  def ToJwkSet(
+      self, request: testing_api_pb2.JwtToJwkSetRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.JwtToJwkSetResponse:
+    """Converts a Tink Keyset with JWT keys into a JWK set."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      jwk_set = jwt.jwk_set_from_keyset_handle(keyset_handle)
+      return testing_api_pb2.JwtToJwkSetResponse(jwk_set=jwk_set)
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtToJwkSetResponse(err=str(e))
+
+  def FromJwkSet(
+      self, request: testing_api_pb2.JwtFromJwkSetRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.JwtFromJwkSetResponse:
+    """Converts a JWK set into a Tink Keyset."""
+    try:
+      keyset_handle = jwt.jwk_set_to_keyset_handle(request.jwk_set)
+      keyset = io.BytesIO()
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(keyset), keyset_handle)
+      return testing_api_pb2.JwtFromJwkSetResponse(keyset=keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtFromJwkSetResponse(err=str(e))

@@ -793,5 +793,9 @@ class JwkSetConverterTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt.jwk_set_to_keyset_handle(jwk_set)
 
+  def test_jwk_set_to_keyset_handle_with_invalid_json_raises_tink_error(self):
+    with self.assertRaises(tink.TinkError):
+      jwt.jwk_set_to_keyset_handle('invalid')
+
 if __name__ == '__main__':
   absltest.main()

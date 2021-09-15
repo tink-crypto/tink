@@ -233,7 +233,10 @@ def to_keyset_handle(
     TinkError if the key cannot be converted.
   """
   _ = key_access
-  keys_dict = json.loads(jwk_set)
+  try:
+    keys_dict = json.loads(jwk_set)
+  except json.decoder.JSONDecodeError as e:
+    raise tink.TinkError('error parsing JWK set: %s' % e.msg)
   if 'keys' not in keys_dict:
     raise tink.TinkError('invalid JWK set: keys not found')
   proto_keyset = tink_pb2.Keyset()
