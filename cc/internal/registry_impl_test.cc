@@ -1883,8 +1883,17 @@ class DelegatingKeyTypeManager
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 };
 
+class RegistryImplTest : public ::testing::Test {
+ protected:
+  void TearDown() override {
+    // Calling RestrictToFipsIfEmpty() may call SetFipsRestricted(), which
+    // set a global variable to true. We have to reset that after the test.
+    UnSetFipsRestricted();
+  }
+};
+
 // Check that we can call the registry again from within NewKeyData
-TEST(RegistryImplTest, CanDelegateCreateKey) {
+TEST_F(RegistryImplTest, CanDelegateCreateKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1913,7 +1922,7 @@ TEST(RegistryImplTest, CanDelegateCreateKey) {
 }
 
 // Check that we can call the registry again from within NewKeyData
-TEST(RegistryImplTest, CanDelegateDeriveKey) {
+TEST_F(RegistryImplTest, CanDelegateDeriveKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1941,7 +1950,7 @@ TEST(RegistryImplTest, CanDelegateDeriveKey) {
       StatusIs(util::error::DEADLINE_EXCEEDED, HasSubstr("DeriveKey worked")));
 }
 
-TEST(RegistryImplTest, CanDelegateGetPublicKey) {
+TEST_F(RegistryImplTest, CanDelegateGetPublicKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1970,12 +1979,12 @@ TEST(RegistryImplTest, CanDelegateGetPublicKey) {
                        HasSubstr("GetPublicKey worked")));
 }
 
-TEST(RegistryImplTest, FipsSucceedsOnEmptyRegistry) {
+TEST_F(RegistryImplTest, FipsSucceedsOnEmptyRegistry) {
   RegistryImpl registry_impl;
   EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
 }
 
-TEST(RegistryImplTest, FipsFailsIfNotEmpty) {
+TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
   if (!FIPS_mode()) {
     GTEST_SKIP() << "Not supported when BoringSSL is not built in FIPS-mode.";
   }
