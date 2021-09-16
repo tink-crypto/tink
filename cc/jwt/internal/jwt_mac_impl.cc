@@ -65,8 +65,9 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
   return absl::StrCat(unsigned_token, ".", encoded_tag);
 }
 
-util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecode(
-    absl::string_view compact, const JwtValidator& validator) const {
+util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecodeWithKid(
+    absl::string_view compact, const JwtValidator& validator,
+    absl::optional<absl::string_view> kid) const {
   std::size_t mac_pos = compact.find_last_of('.');
   if (mac_pos == absl::string_view::npos) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid token");
@@ -97,7 +98,8 @@ util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecode(
   if (!header.ok()) {
     return header.status();
   }
-  util::Status validate_header_result = ValidateHeader(*header, algorithm_);
+  util::Status validate_header_result =
+      ValidateHeader(*header, algorithm_, kid, custom_kid_);
   if (!validate_header_result.ok()) {
     return validate_header_result;
   }

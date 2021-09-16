@@ -222,6 +222,7 @@ cc_test(
         ":jwt_format",
         ":jwt_hmac_key_manager",
         ":jwt_mac_wrapper",
+        "//:cleartext_keyset_handle",
         "//:keyset_manager",
         "//:primitive_set",
         "//proto:jwt_hmac_cc_proto",

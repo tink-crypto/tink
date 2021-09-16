@@ -74,8 +74,9 @@ util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
 util::StatusOr<std::string> JwtMacSetWrapper::ComputeMacAndEncode(
     const crypto::tink::RawJwt& token) const {
   auto primary = jwt_mac_set_->get_primary();
-  return primary->get_primitive().ComputeMacAndEncodeWithKid(
-      token, GetKid(primary->get_key_id(), primary->get_output_prefix_type()));
+  absl::optional<std::string> kid =
+      GetKid(primary->get_key_id(), primary->get_output_prefix_type());
+  return primary->get_primitive().ComputeMacAndEncodeWithKid(token, kid);
 }
 
 util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
@@ -84,8 +85,10 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
   absl::optional<util::Status> interesting_status;
   for (const auto* mac_entry : jwt_mac_set_->get_all()) {
     JwtMacInternal& jwt_mac = mac_entry->get_primitive();
+    absl::optional<std::string> kid =
+        GetKid(mac_entry->get_key_id(), mac_entry->get_output_prefix_type());
     util::StatusOr<VerifiedJwt> verified_jwt =
-        jwt_mac.VerifyMacAndDecode(compact, validator);
+        jwt_mac.VerifyMacAndDecodeWithKid(compact, validator, kid);
     if (verified_jwt.ok()) {
       return verified_jwt;
     } else if (verified_jwt.status().error_code() !=

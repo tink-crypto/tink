@@ -82,7 +82,7 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
   if (!validator.ok()) {
     return validator.status();
   }
-  return jwt_mac->VerifyMacAndDecode(*compact, *validator);
+  return jwt_mac->VerifyMacAndDecodeWithKid(*compact, *validator, "kid-123");
 }
 
 TEST(VerifiedJwt, GetTypeIssuerSubjectJwtIdOK) {

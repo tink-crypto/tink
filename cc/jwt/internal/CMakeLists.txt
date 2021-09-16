@@ -201,6 +201,7 @@ tink_cc_test(
   DEPS
     tink::jwt::internal::jwt_hmac_key_manager
     tink::jwt::internal::jwt_mac_wrapper
+    tink::core::cleartext_keyset_handle
     tink::core::keyset_manager
     tink::core::primitive_set
     tink::proto::jwt_hmac_cc_proto

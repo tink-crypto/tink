@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/strings/str_split.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_hmac_key_manager.h"
@@ -42,8 +43,12 @@ namespace tink {
 namespace jwt_internal {
 namespace {
 
+using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
+using ::google::crypto::tink::Keyset;
 using ::testing::Eq;
+using ::testing::Not;
 
 KeyTemplate createTemplate(OutputPrefixType output_prefix) {
   KeyTemplate key_template;
@@ -55,6 +60,22 @@ KeyTemplate createTemplate(OutputPrefixType output_prefix) {
   key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.SerializeToString(key_template.mutable_value());
   return key_template;
+}
+
+std::unique_ptr<KeysetHandle> KeysetHandleWithNewKeyId(
+    const KeysetHandle& keyset_handle) {
+  Keyset keyset(CleartextKeysetHandle::GetKeyset(keyset_handle));
+  uint32_t new_key_id = keyset.mutable_key(0)->key_id() ^ 0xdeadbeef;
+  keyset.mutable_key(0)->set_key_id(new_key_id);
+  keyset.set_primary_key_id(new_key_id);
+  return CleartextKeysetHandle::GetKeysetHandle(keyset);
+}
+
+std::unique_ptr<KeysetHandle> KeysetHandleWithTinkPrefix(
+    const KeysetHandle& keyset_handle) {
+  Keyset keyset(CleartextKeysetHandle::GetKeyset(keyset_handle));
+  keyset.mutable_key(0)->set_output_prefix_type(OutputPrefixType::TINK);
+  return CleartextKeysetHandle::GetKeysetHandle(keyset);
 }
 
 class JwtMacWrapperTest : public ::testing::Test {
@@ -117,7 +138,7 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   util::StatusOr<VerifiedJwt> verified_jwt =
       (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
   ASSERT_THAT(verified_jwt.status(), IsOk());
-  EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
+  EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("issuer"));
 
   util::StatusOr<JwtValidator> validator2 = JwtValidatorBuilder()
                                                 .ExpectIssuer("unknown")
@@ -129,6 +150,19 @@ TEST_F(JwtMacWrapperTest, GenerateRawComputeVerifySuccess) {
   EXPECT_FALSE(verified_jwt2.ok());
   // Make sure the error message is interesting
   EXPECT_THAT(verified_jwt2.status().error_message(), Eq("wrong issuer"));
+
+  // Raw primitives don't add a kid header, Tink primitives require a kid
+  // header to be set. Thefore, changing the output prefix to TINK makes the
+  // validation fail.
+  std::unique_ptr<KeysetHandle> tink_keyset_handle =
+      KeysetHandleWithTinkPrefix(**keyset_handle);
+  util::StatusOr<std::unique_ptr<JwtMac>> tink_jwt_mac =
+      tink_keyset_handle->GetPrimitive<JwtMac>();
+  ASSERT_THAT(tink_jwt_mac.status(), IsOk());
+
+  EXPECT_THAT(
+      (*tink_jwt_mac)->VerifyMacAndDecode(*compact, *validator).status(),
+      Not(IsOk()));
 }
 
 TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
@@ -158,7 +192,7 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   ASSERT_THAT(verified_jwt.status(), IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  // parse header to make sure that key ID is correctly encoded.
+  // Parse header to make sure that key ID is correctly encoded.
   google::crypto::tink::KeysetInfo keyset_info =
       (*keyset_handle)->GetKeysetInfo();
   uint32_t key_id = keyset_info.key_info(0).key_id();
@@ -171,6 +205,18 @@ TEST_F(JwtMacWrapperTest, GenerateTinkComputeVerifySuccess) {
   ASSERT_THAT(header.status(), IsOk());
   EXPECT_THAT(GetKeyId((*header).fields().find("kid")->second.string_value()),
               key_id);
+
+  // For Tink primitives, the kid must be correctly set and is verified.
+  // Therefore, changing the key_id makes the validation fail.
+  std::unique_ptr<KeysetHandle> keyset_handle_with_new_key_id =
+      KeysetHandleWithNewKeyId(**keyset_handle);
+  util::StatusOr<std::unique_ptr<JwtMac>> jwt_mac_with_new_key_id =
+      keyset_handle_with_new_key_id->GetPrimitive<JwtMac>();
+  ASSERT_THAT(jwt_mac_with_new_key_id.status(), IsOk());
+
+  util::StatusOr<VerifiedJwt> verified_jwt_2 =
+      (*jwt_mac_with_new_key_id)->VerifyMacAndDecode(*compact, *validator);
+  EXPECT_FALSE(verified_jwt_2.ok());
 }
 
 TEST_F(JwtMacWrapperTest, KeyRotation) {

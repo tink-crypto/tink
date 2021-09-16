@@ -29,19 +29,21 @@ namespace tink {
 namespace jwt_internal {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Interface for authenticating and verifying JWT with JWS MAC.
+// Internal Interface for authenticating and verifying JWT with JWS MAC.
 //
 // Sees RFC 7519 and RFC 7515. Security guarantees: similar to MAC.
 class JwtMacInternal {
  public:
   // Computes a MAC and encodes the raw JWT token and the MAC in the JWS compact
   // serialization format.
+  //
+  // When the `kid` parameter has a value, the token will have a kid header.
   virtual crypto::tink::util::StatusOr<std::string> ComputeMacAndEncodeWithKid(
       const RawJwt& token, absl::optional<absl::string_view> kid) const = 0;
 
   // Verifies and decodes a JWT token in the JWS compact serialization format.
   //
-  // The JWT is validated against the rules in validator. That is, every claim
+  // The JWT is validated against the rules in `validator`. That is, every claim
   // in validator must also be present in the JWT. For example, if validator
   // contains an issuer (iss) claim, the JWT must contain an identical claim.
   // The JWT can contain claims that are NOT in the validator. However, if the
@@ -52,8 +54,14 @@ class JwtMacInternal {
   // (iat) or not_before (nbf), they will also be validated. validator allows to
   // set a clock skew, to deal with small clock differences among different
   // machines.
-  virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyMacAndDecode(
-      absl::string_view compact, const JwtValidator& validator) const = 0;
+  //
+  // When the `kid` parameter has a value, then only token with the correct kid
+  // header are valid. When the `kid` parameter does not have a value the kid
+  // header in the token is ignored. The `kid` parameter is set by the primitive
+  // wrapper based on the output prefix type and the key id.
+  virtual crypto::tink::util::StatusOr<VerifiedJwt> VerifyMacAndDecodeWithKid(
+      absl::string_view compact, const JwtValidator& validator,
+      absl::optional<absl::string_view> kid) const = 0;
 
   virtual ~JwtMacInternal() {}
 };
