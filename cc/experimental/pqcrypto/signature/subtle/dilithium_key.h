@@ -35,7 +35,6 @@ enum class DilithiumSeedExpansion {
   SEED_EXPANSION_AES = 2,
 };
 
-
 // Dilithium public key representation.
 class DilithiumPublicKeyPqclean {
  public:
@@ -54,7 +53,7 @@ class DilithiumPublicKeyPqclean {
  private:
   DilithiumPublicKeyPqclean(absl::string_view key_data,
                             DilithiumSeedExpansion seed_expansion)
-      : key_data_(std::move(key_data)), seed_expansion_(seed_expansion) {}
+      : key_data_(key_data), seed_expansion_(seed_expansion) {}
 
   const std::string key_data_;
   const DilithiumSeedExpansion seed_expansion_;
