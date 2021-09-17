@@ -347,7 +347,8 @@ public class EcdsaSignKeyManagerTest {
     factory.validateKeyFormat(
         factory.keyFormats().get("ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX").keyFormat);
 
-    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA384").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA512").keyFormat);
     factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_IEEE_P1363").keyFormat);
 
     factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521").keyFormat);

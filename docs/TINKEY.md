@@ -69,7 +69,7 @@ tinkey create-keyset --key-template ECDSA_P256 --out private-keyset.cfg
 -   Add a new key to a keyset
 
 ```shell
-tinkey add-key --key-template ECDSA_P384 --in private-keyset.cfg \
+tinkey add-key --key-template ECDSA_P512 --in private-keyset.cfg \
 --out private-keyset.cfg
 ```
 

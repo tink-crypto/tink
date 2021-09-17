@@ -65,11 +65,10 @@ class PublicKeySignKeyManagerTest(parameterized.TestCase):
 
   @parameterized.parameters([
       signature.signature_key_templates.ECDSA_P256,
-      signature.signature_key_templates.ECDSA_P384,
       signature.signature_key_templates.ECDSA_P384_SHA384,
+      signature.signature_key_templates.ECDSA_P384_SHA512,
       signature.signature_key_templates.ECDSA_P521,
       signature.signature_key_templates.ECDSA_P256_IEEE_P1363,
-      signature.signature_key_templates.ECDSA_P384_IEEE_P1363,
       signature.signature_key_templates.ECDSA_P384_SHA384_IEEE_P1363,
       signature.signature_key_templates.ECDSA_P521_IEEE_P1363,
       signature.signature_key_templates.ED25519,
