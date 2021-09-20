@@ -20,7 +20,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "openssl/crypto.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -39,9 +38,15 @@ namespace {
 using ::crypto::tink::test::DummyAead;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::google::crypto::tink::KeysetInfo;
+using ::google::crypto::tink::KeyStatusType;
+using ::google::crypto::tink::KeyTemplate;
+using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;
+using ::testing::Not;
+using ::testing::Test;
 
-class AeadConfigTest : public ::testing::Test {
+class AeadConfigTest : public Test {
  protected:
   void SetUp() override { Registry::Reset(); }
 };
@@ -66,34 +71,32 @@ TEST_F(AeadConfigTest, WrappersRegistered) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  ASSERT_TRUE(AeadConfig::Register().ok());
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
 
-  google::crypto::tink::KeysetInfo::KeyInfo key_info;
-  key_info.set_status(google::crypto::tink::KeyStatusType::ENABLED);
+  KeysetInfo::KeyInfo key_info;
+  key_info.set_status(KeyStatusType::ENABLED);
   key_info.set_key_id(1234);
-  key_info.set_output_prefix_type(google::crypto::tink::OutputPrefixType::RAW);
+  key_info.set_output_prefix_type(OutputPrefixType::RAW);
   auto primitive_set = absl::make_unique<PrimitiveSet<Aead>>();
-  ASSERT_THAT(
-      primitive_set->set_primary(
-          primitive_set
-              ->AddPrimitive(absl::make_unique<DummyAead>("dummy"), key_info)
-              .ValueOrDie()),
-      IsOk());
+  ASSERT_THAT(primitive_set->set_primary(*primitive_set->AddPrimitive(
+                  absl::make_unique<DummyAead>("dummy"), key_info)),
+              IsOk());
 
-  auto primitive_result = Registry::Wrap(std::move(primitive_set));
+  util::StatusOr<std::unique_ptr<Aead>> primitive_result =
+      Registry::Wrap(std::move(primitive_set));
 
-  ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();
-  auto encryption_result = primitive_result.ValueOrDie()->Encrypt("secret", "");
-  ASSERT_TRUE(encryption_result.ok());
+  ASSERT_THAT(primitive_result.status(), IsOk());
+  util::StatusOr<std::string> encryption_result =
+      (*primitive_result)->Encrypt("secret", "");
+  ASSERT_THAT(encryption_result.status(), IsOk());
 
-  auto decryption_result =
-      DummyAead("dummy").Decrypt(encryption_result.ValueOrDie(), "");
-  ASSERT_TRUE(decryption_result.status().ok());
-  EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
+  util::StatusOr<std::string> decryption_result =
+      DummyAead("dummy").Decrypt(*encryption_result, "");
+  ASSERT_THAT(decryption_result.status(), IsOk());
+  EXPECT_THAT(*decryption_result, Eq("secret"));
 
-  decryption_result =
-      DummyAead("dummy").Decrypt(encryption_result.ValueOrDie(), "wrog");
-  EXPECT_FALSE(decryption_result.status().ok());
+  decryption_result = DummyAead("dummy").Decrypt(*encryption_result, "wrong");
+  EXPECT_THAT(decryption_result.status(), Not(IsOk()));
 }
 
 // FIPS-only mode tests
@@ -102,14 +105,13 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
     GTEST_SKIP() << "Only supported in FIPS-only mode with BoringCrypto.";
   }
 
-  EXPECT_THAT(AeadConfig::Register(), IsOk());
+  ASSERT_THAT(AeadConfig::Register(), IsOk());
 
-  std::list<google::crypto::tink::KeyTemplate> non_fips_key_templates;
-  non_fips_key_templates.push_back(AeadKeyTemplates::Aes128Eax());
-  non_fips_key_templates.push_back(AeadKeyTemplates::Aes256Eax());
-  non_fips_key_templates.push_back(AeadKeyTemplates::Aes128GcmSiv());
-  non_fips_key_templates.push_back(AeadKeyTemplates::Aes256GcmSiv());
-  non_fips_key_templates.push_back(AeadKeyTemplates::XChaCha20Poly1305());
+  std::list<KeyTemplate> non_fips_key_templates = {
+      AeadKeyTemplates::Aes128Eax(),         AeadKeyTemplates::Aes256Eax(),
+      AeadKeyTemplates::Aes128GcmSiv(),      AeadKeyTemplates::Aes256GcmSiv(),
+      AeadKeyTemplates::XChaCha20Poly1305(),
+  };
 
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
@@ -125,11 +127,12 @@ TEST_F(AeadConfigTest, RegisterFipsValidTemplates) {
 
   EXPECT_THAT(AeadConfig::Register(), IsOk());
 
-  std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
-  fips_key_templates.push_back(AeadKeyTemplates::Aes128Gcm());
-  fips_key_templates.push_back(AeadKeyTemplates::Aes256Gcm());
-  fips_key_templates.push_back(AeadKeyTemplates::Aes128CtrHmacSha256());
-  fips_key_templates.push_back(AeadKeyTemplates::Aes256CtrHmacSha256());
+  std::list<KeyTemplate> fips_key_templates = {
+      AeadKeyTemplates::Aes128Gcm(),
+      AeadKeyTemplates::Aes256Gcm(),
+      AeadKeyTemplates::Aes128CtrHmacSha256(),
+      AeadKeyTemplates::Aes256CtrHmacSha256(),
+  };
 
   for (auto key_template : fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
