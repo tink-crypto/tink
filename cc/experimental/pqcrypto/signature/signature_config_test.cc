@@ -23,6 +23,8 @@
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/falcon_sign_key_manager.h"
+#include "tink/experimental/pqcrypto/signature/falcon_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/registry.h"
@@ -85,6 +87,30 @@ TEST_F(PcqSignatureConfigTest, CheckSphincs) {
               IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   SphincsVerifyKeyManager().get_key_type())
+                  .status(),
+              IsOk());
+}
+
+TEST_F(PcqSignatureConfigTest, CheckFalcon) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
+    GTEST_SKIP() << "Not supported if FIPS-mode is used";
+  }
+
+  EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
+                  FalconSignKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
+                  FalconVerifyKeyManager().get_key_type())
+                  .status(),
+              StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
+  EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
+                  FalconSignKeyManager().get_key_type())
+                  .status(),
+              IsOk());
+  EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
+                  FalconVerifyKeyManager().get_key_type())
                   .status(),
               IsOk());
 }
