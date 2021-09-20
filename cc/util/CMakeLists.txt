@@ -458,6 +458,16 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME status_test
+  SRCS
+    status_test.cc
+  DEPS
+    tink::util::status
+    gmock
+    absl::status
+)
+
+tink_cc_test(
   NAME statusor_test
   SRCS
     statusor_test.cc

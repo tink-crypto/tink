@@ -144,6 +144,8 @@ class Status {
   // Make a Status from the specified error and message.
   Status(::crypto::tink::util::error::Code error,
          const std::string& error_message);
+  // Abseil-compatible constructor from an error and a message
+  Status(absl::StatusCode code, absl::string_view error_message);
 
   Status& operator=(const Status& other);
 
@@ -156,13 +158,25 @@ class Status {
   bool ok() const {
     return code_ == ::crypto::tink::util::error::OK;
   }
+  ABSL_DEPRECATED("This method is being deprecated. Prefer using "
+                  "its absl-compatible version code() instead.")
   int error_code() const {
     return code_;
   }
   ::crypto::tink::util::error::Code CanonicalCode() const {
     return code_;
   }
+  ABSL_DEPRECATED("This method is being deprecated. Prefer using "
+                  "its absl-compatible version message() instead.")
   const std::string& error_message() const { return message_; }
+
+  // Abseil-compatible accessors
+  absl::StatusCode code() const {
+    return static_cast<absl::StatusCode>(code_);
+  }
+  absl::string_view message() const {
+    return message_;
+  }
 
   bool operator==(const Status& other) const;
   bool operator!=(const Status& other) const;

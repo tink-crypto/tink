@@ -72,6 +72,14 @@ Status::Status(::crypto::tink::util::error::Code error,
   }
 }
 
+Status::Status(absl::StatusCode code, absl::string_view error_message)
+    : code_(static_cast<crypto::tink::util::error::Code>(code)),
+      message_(error_message) {
+  if (code_ == ::crypto::tink::util::error::OK) {
+    message_.clear();
+  }
+}
+
 Status& Status::operator=(const Status& other) {
   code_ = other.code_;
   message_ = other.message_;
