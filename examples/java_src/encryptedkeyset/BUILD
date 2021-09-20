@@ -38,6 +38,7 @@ sh_test(
     tags = [
         "manual",
         "notap",
-        "tink_guitar",
+        # TODO(b/191644120): reintroduce this once the service account keys are updated.
+        # "tink_guitar",
     ],
 )
