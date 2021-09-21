@@ -150,8 +150,11 @@ class Status {
   Status& operator=(const Status& other);
 
   // Some pre-defined Status objects
+  ABSL_DEPRECATED("Use OkStatus() instead.")
   static const Status& OK;  // Identical to 0-arg constructor
+  ABSL_DEPRECATED("Use Status(absl::StatusCode::kCancelled, "") instead.")
   static const Status& CANCELLED;
+  ABSL_DEPRECATED("Use Status(absl::StatusCode::kUnknown, "") instead.")
   static const Status& UNKNOWN;
 
   // Accessors
