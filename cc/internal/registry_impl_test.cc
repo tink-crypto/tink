@@ -104,12 +104,14 @@ class TestKeyFactory : public KeyFactory {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       const MessageLite& key_format) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot produce a key");
   }
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       absl::string_view serialized_key_format) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot produce a key");
   }
 
   util::StatusOr<std::unique_ptr<KeyData>> NewKeyData(
@@ -137,7 +139,8 @@ class TestAeadKeyManager : public KeyManager<Aead> {
 
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const MessageLite& key) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot construct an aead");
   }
 
 
