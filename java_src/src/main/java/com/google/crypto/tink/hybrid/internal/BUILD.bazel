@@ -26,8 +26,8 @@ java_library(
 )
 
 java_library(
-    name = "x25519_hkdf_hpke_kem",
-    srcs = ["X25519HkdfHpkeKem.java"],
+    name = "x25519_hpke_kem",
+    srcs = ["X25519HpkeKem.java"],
     deps = [
         ":hpke_kem",
         ":hpke_kem_encap_output",
@@ -62,8 +62,8 @@ android_library(
 )
 
 android_library(
-    name = "x25519_hkdf_hpke_kem-android",
-    srcs = ["X25519HkdfHpkeKem.java"],
+    name = "x25519_hpke_kem-android",
+    srcs = ["X25519HpkeKem.java"],
     deps = [
         ":hpke_kem-android",
         ":hpke_kem_encap_output-android",

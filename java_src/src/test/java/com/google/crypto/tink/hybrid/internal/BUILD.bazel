@@ -3,12 +3,12 @@ licenses(["notice"])
 package(default_testonly = 1)
 
 java_test(
-    name = "X25519HkdfHpkeKemTest",
+    name = "X25519HpkeKemTest",
     size = "small",
-    srcs = ["X25519HkdfHpkeKemTest.java"],
+    srcs = ["X25519HpkeKemTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",
-        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hkdf_hpke_kem",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
         "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

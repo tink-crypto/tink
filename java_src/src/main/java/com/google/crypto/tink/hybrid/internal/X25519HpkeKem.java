@@ -22,14 +22,14 @@ import com.google.crypto.tink.subtle.X25519;
 import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 
-/** Diffie-Hellman-based HPKE KEM variant with X25519 and HKDF. */
-public final class X25519HkdfHpkeKem implements HpkeKem {
+/** Diffie-Hellman-based X25519 HPKE KEM variant. */
+public final class X25519HpkeKem implements HpkeKem {
   private static final byte[] X25519_HKDF_SHA256_KEM_ID = HpkeUtil.intToByteArray(2, 0x20);
 
   private final String macAlgorithm;
 
   /** Construct X25519-HKDF HPKE KEM using {@code macAlgorithm}. */
-  public X25519HkdfHpkeKem(String macAlgorithm) {
+  public X25519HpkeKem(String macAlgorithm) {
     this.macAlgorithm = macAlgorithm;
   }
 
