@@ -161,16 +161,15 @@ class Status {
   bool ok() const {
     return code_ == ::crypto::tink::util::error::OK;
   }
-  ABSL_DEPRECATED("This method is being deprecated. Prefer using "
-                  "its absl-compatible version code() instead.")
+  ABSL_DEPRECATED("Use its absl-compatible version code() instead.")
   int error_code() const {
     return code_;
   }
+  ABSL_DEPRECATED("Use its absl-compatible version code() instead.")
   ::crypto::tink::util::error::Code CanonicalCode() const {
     return code_;
   }
-  ABSL_DEPRECATED("This method is being deprecated. Prefer using "
-                  "its absl-compatible version message() instead.")
+  ABSL_DEPRECATED("Use its absl-compatible version message() instead.")
   const std::string& error_message() const { return message_; }
 
   // Abseil-compatible accessors
