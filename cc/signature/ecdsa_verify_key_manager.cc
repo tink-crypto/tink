@@ -91,7 +91,7 @@ Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
       return Status(util::error::INVALID_ARGUMENT,
                     "Unsupported elliptic curve");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status EcdsaVerifyKeyManager::ValidateKey(const EcdsaPublicKey& key) const {

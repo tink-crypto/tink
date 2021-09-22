@@ -54,7 +54,7 @@ util::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON EncryptedKeyset");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
@@ -66,7 +66,7 @@ util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeysetInfo");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
@@ -81,7 +81,7 @@ util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeyInfo");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>>
@@ -146,7 +146,7 @@ util::Status ValidateKeyset(const rapidjson::Document& json_doc) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON Keyset");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKey(const rapidjson::Value& json_value) {
@@ -161,7 +161,7 @@ util::Status ValidateKey(const rapidjson::Value& json_value) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON Key");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeyData(const rapidjson::Value& json_value) {
@@ -174,7 +174,7 @@ util::Status ValidateKeyData(const rapidjson::Value& json_value) {
     return util::Status(util::error::INVALID_ARGUMENT,
                             "Invalid JSON KeyData");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::unique_ptr<KeyData>>

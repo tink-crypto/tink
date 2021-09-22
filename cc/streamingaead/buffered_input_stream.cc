@@ -44,7 +44,7 @@ BufferedInputStream::BufferedInputStream(
   after_rewind_ = false;
   rewinding_enabled_ = true;
   direct_access_ = false;
-  status_ = Status::OK;
+  status_ = util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> BufferedInputStream::Next(const void** data) {

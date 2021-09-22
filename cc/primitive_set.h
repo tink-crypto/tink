@@ -157,7 +157,7 @@ class PrimitiveSet {
     }
 
     primary_ = primary;
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   // Returns the entry with the primary primitive.

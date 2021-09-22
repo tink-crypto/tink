@@ -44,7 +44,7 @@ util::Status Validate(
         "Invalid Cecpq2AeadHkdfPublicKeyInternal: has KEM unexpected field.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace

@@ -78,7 +78,7 @@ Status ReadAndVerifyFragment(RandomAccessStream* ras, int pos, int count,
                      std::string(buf->get_mem_block(), exp_size), "] while [",
                      full_contents.substr(pos, exp_size), "] were expected."));
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace

@@ -49,7 +49,7 @@ Status Validate(PrimitiveSet<StreamingAead>* primitives) {
                   "primitive set has no raw primitives");
   }
   // TODO(b/129044084)
-  return Status::OK;
+  return util::OkStatus();
 }
 
 class StreamingAeadSetWrapper: public StreamingAead {

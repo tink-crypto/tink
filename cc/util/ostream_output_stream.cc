@@ -41,7 +41,7 @@ OstreamOutputStream::OstreamOutputStream(std::unique_ptr<std::ostream> output,
   buffer_ = nullptr;
   position_ = 0;
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> OstreamOutputStream::Next(void** data) {
@@ -124,7 +124,7 @@ Status OstreamOutputStream::Close() {
     return status_;
   }
   status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
-  return Status::OK;
+  return OkStatus();
 }
 
 int64_t OstreamOutputStream::Position() const {

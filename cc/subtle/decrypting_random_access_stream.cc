@@ -225,7 +225,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
         segment_nr, is_last_segment, pt_segment);
     if (dec_status.ok()) {
       return is_last_segment ?
-          Status(util::error::OUT_OF_RANGE, "EOF") : Status::OK;
+          Status(util::error::OUT_OF_RANGE, "EOF") : util::OkStatus();
     }
     return dec_status;
   }
@@ -288,7 +288,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
       return status;
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 StatusOr<int64_t> DecryptingRandomAccessStream::size() {

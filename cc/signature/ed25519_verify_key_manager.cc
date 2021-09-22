@@ -48,7 +48,7 @@ Status Ed25519VerifyKeyManager::ValidateKey(const Ed25519PublicKey& key) const {
     return Status(util::error::INVALID_ARGUMENT,
                   "The ED25519 public key must be 32-bytes long.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

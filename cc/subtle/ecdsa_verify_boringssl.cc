@@ -109,7 +109,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
                         "Signature is not valid.");
   }
   // signature is valid
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle

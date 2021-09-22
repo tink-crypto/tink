@@ -1349,11 +1349,11 @@ class TestPrivateKeyTypeManager
   uint32_t get_version() const override { return 0; }
   crypto::tink::util::Status ValidateKey(
       const EcdsaPrivateKey& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   crypto::tink::util::Status ValidateKeyFormat(
       const EcdsaKeyFormat& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   const std::string& get_key_type() const override { return kKeyType; }
@@ -1413,7 +1413,7 @@ class TestPublicKeyTypeManager
   uint32_t get_version() const override { return 0; }
   crypto::tink::util::Status ValidateKey(
       const EcdsaPublicKey& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   const std::string& get_key_type() const override { return kKeyType; }

@@ -41,7 +41,7 @@ util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "public_key_verify_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class PublicKeyVerifySetWrapper : public PublicKeyVerify {
@@ -89,7 +89,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
       auto verify_result =
           public_key_verify.Verify(raw_signature, view_on_data_or_legacy_data);
       if (verify_result.ok()) {
-        return util::Status::OK;
+        return util::OkStatus();
       } else {
         // LOG that a matching key didn't verify the signature.
       }
@@ -104,7 +104,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
       auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {
-        return util::Status::OK;
+        return util::OkStatus();
       }
     }
   }

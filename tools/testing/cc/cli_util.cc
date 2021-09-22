@@ -210,7 +210,7 @@ Status CliUtil::InitGcp() {
     return Status(crypto::tink::util::error::INTERNAL,
                   "Failed to add KMS client.");
   }
-  return Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 // static

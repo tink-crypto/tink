@@ -82,7 +82,7 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
   }
   status = dest_buffer->set_size(read_count);
   if (!status.ok()) return status;
-  return Status::OK;
+  return util::OkStatus();
 }
 
 FileRandomAccessStream::~FileRandomAccessStream() {

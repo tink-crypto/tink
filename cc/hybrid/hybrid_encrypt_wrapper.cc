@@ -37,7 +37,7 @@ util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "hybrid_encrypt_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 

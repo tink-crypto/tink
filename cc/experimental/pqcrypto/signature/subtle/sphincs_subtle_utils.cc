@@ -73,7 +73,7 @@ crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size) {
     case kSphincsPrivateKeySize64:
     case kSphincsPrivateKeySize96:
     case kSphincsPrivateKeySize128:
-      return util::Status::OK;
+      return util::OkStatus();
     default:
       return util::Status(
           util::error::INVALID_ARGUMENT,
@@ -89,7 +89,7 @@ crypto::tink::util::Status ValidatePublicKeySize(int32 key_size) {
     case kSphincsPublicKeySize32:
     case kSphincsPublicKeySize48:
     case kSphincsPublicKeySize64:
-      return util::Status::OK;
+      return util::OkStatus();
     default:
       return util::Status(
           util::error::INVALID_ARGUMENT,

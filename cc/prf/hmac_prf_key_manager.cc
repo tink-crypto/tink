@@ -98,7 +98,7 @@ Status HmacPrfKeyManager::ValidateParams(const HmacPrfParams& params) const {
                      "Invalid HmacParams: HashType '%s' not supported.",
                      Enums::HashName(params.hash()));
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

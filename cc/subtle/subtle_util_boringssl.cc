@@ -570,7 +570,7 @@ util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
     case HashType::SHA256: /* fall through */
     case HashType::SHA384:
     case HashType::SHA512:
-      return util::Status::OK;
+      return util::OkStatus();
     case HashType::SHA1: /* fall through */
     case HashType::SHA224:
       return util::Status(util::error::INVALID_ARGUMENT,
@@ -601,7 +601,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
                                      " only modulus size 3072 is supported "));
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 // static
@@ -622,7 +622,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
         "Public exponent must be greater than 65536.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 // static

@@ -50,7 +50,7 @@ class OwningBuffer : public Buffer {
                     "new_size must satisfy 0 <= new_size <= allocated_size()");
     }
     size_ = new_size;
-    return Status::OK;
+    return OkStatus();
   }
 
   ~OwningBuffer() override {}
@@ -87,7 +87,7 @@ class NonOwningBuffer : public Buffer {
                     "new_size must satisfy 0 <= new_size <= allocated_size()");
     }
     size_ = new_size;
-    return Status::OK;
+    return OkStatus();
   }
 
   ~NonOwningBuffer() override {}

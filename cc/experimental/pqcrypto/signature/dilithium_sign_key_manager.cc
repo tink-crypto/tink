@@ -105,7 +105,7 @@ Status DilithiumSignKeyManager::ValidateKey(
                   "Invalid dilithium private key size.");
   }
 
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status DilithiumSignKeyManager::ValidateKeyFormat(

@@ -45,7 +45,7 @@ util::Status WriteToStream(OutputStream* output_stream,
   if (available_space > available_bytes) {
     output_stream->BackUp(available_space - available_bytes);
   }
-  return close_stream ? output_stream->Close() : util::Status::OK;
+  return close_stream ? output_stream->Close() : util::OkStatus();
 }
 
 util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
@@ -58,7 +58,7 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
     auto next_result = input_stream->Next(&buffer);
     if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
     auto read_bytes = next_result.ValueOrDie();
@@ -67,7 +67,7 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
           std::string(reinterpret_cast<const char*>(buffer), read_bytes));
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace test

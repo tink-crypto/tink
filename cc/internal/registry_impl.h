@@ -445,7 +445,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         std::forward_as_tuple(std::move(entry), std::type_index(typeid(P)),
                               typeid(P).name()));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class P>
@@ -494,7 +494,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyManager(
         std::piecewise_construct, std::forward_as_tuple(type_url),
         std::forward_as_tuple(owned_manager.release(), new_key_allowed));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class KeyProto, class KeyFormatProto, class PrimitiveList>
@@ -533,7 +533,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
         std::piecewise_construct, std::forward_as_tuple(type_url),
         std::forward_as_tuple(owned_manager.release(), new_key_allowed));
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class PrivateKeyProto, class KeyFormatProto, class PublicKeyProto,
@@ -684,13 +684,13 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
           crypto::tink::util::error::ALREADY_EXISTS,
           "A wrapper named for this primitive has already been added.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   primitive_to_wrapper_.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(std::type_index(typeid(Q))),
       std::forward_as_tuple(std::move(entry)));
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 template <class P>

@@ -74,13 +74,13 @@ class XChaCha20Poly1305KeyManager
           absl::StrCat("Invalid XChaCha20Poly1305Key: key_value has ", key_size,
                        " bytes; supported size: ", kKeySizeInBytes, " bytes."));
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::Status ValidateKeyFormat(
       const google::crypto::tink::XChaCha20Poly1305KeyFormat& key_format)
       const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::StatusOr<google::crypto::tink::XChaCha20Poly1305Key>

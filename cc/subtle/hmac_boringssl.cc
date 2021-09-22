@@ -103,7 +103,7 @@ util::Status HmacBoringSsl::VerifyMac(
   if (CRYPTO_memcmp(buf, mac.data(), tag_size_) != 0) {
     return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle

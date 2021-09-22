@@ -70,7 +70,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
   if (read_bytes > needed_bytes) {
     input_stream->BackUp(read_bytes - needed_bytes);
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace
@@ -106,7 +106,7 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
   dec_stream->read_last_segment_ = false;
   dec_stream->count_backedup_ = first_segment_size;
   dec_stream->pt_buffer_offset_ = 0;
-  dec_stream->status_ = Status::OK;
+  dec_stream->status_ = util::OkStatus();
   return {std::move(dec_stream)};
 }
 

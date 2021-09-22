@@ -693,12 +693,12 @@ class DummyKeysetWriter : public KeysetWriter {
 
   crypto::tink::util::Status Write(
       const google::crypto::tink::Keyset& keyset) override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::Status Write(
       const google::crypto::tink::EncryptedKeyset& encrypted_keyset) override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
  private:

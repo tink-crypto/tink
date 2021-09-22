@@ -39,7 +39,7 @@ util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "public_key_sign_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class PublicKeySignSetWrapper : public PublicKeySign {

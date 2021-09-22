@@ -63,7 +63,7 @@ class DummyRandomAccessStream : public RandomAccessStream {
       if (!status.ok()) return status;
       std::memset(dest_buffer->get_mem_block(), 'h', count);
     }
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
   crypto::tink::util::StatusOr<int64_t> size() override { return size_; }
@@ -122,7 +122,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
   contents->clear();
   auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
   int64_t position = 0;
-  auto status = util::Status::OK;
+  auto status = util::OkStatus();
   while (status.ok()) {
     status = ra_stream->PRead(position, chunk_size, buffer.get());
     contents->append(buffer->get_mem_block(), buffer->size());

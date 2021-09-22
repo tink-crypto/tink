@@ -61,7 +61,7 @@ util::Status Validate(PrimitiveSet<Prf>* prf_set) {
                           "PrfSet should only be used with prefix type RAW");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace

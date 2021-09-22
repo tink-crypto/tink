@@ -75,7 +75,7 @@ Status DilithiumVerifyKeyManager::ValidateKey(
     return Status(util::error::INVALID_ARGUMENT,
                   "Invalid dilithium public key size.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status DilithiumVerifyKeyManager::ValidateParams(
@@ -101,7 +101,7 @@ Status DilithiumVerifyKeyManager::ValidateParams(
     }
   }
 
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

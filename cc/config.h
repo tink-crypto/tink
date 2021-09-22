@@ -104,7 +104,7 @@ crypto::tink::util::Status Config::Register(
                      "RegisterPrimitiveWrapper directly."));
   }
   if (!status.ok()) return status;
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

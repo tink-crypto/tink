@@ -107,7 +107,7 @@ Status HmacKeyManager::ValidateParams(const HmacParams& params) const {
           params.tag_size(), Enums::HashName(params.hash()));
     }
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status HmacKeyManager::ValidateKey(const HmacKey& key) const {

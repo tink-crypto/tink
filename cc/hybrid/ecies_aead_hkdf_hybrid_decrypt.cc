@@ -56,7 +56,7 @@ util::Status Validate(const EciesAeadHkdfPrivateKey& key) {
         util::error::INVALID_ARGUMENT,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 }  // namespace
 

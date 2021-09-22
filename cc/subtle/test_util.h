@@ -113,7 +113,7 @@ class DummyStreamSegmentEncrypter : public StreamSegmentEncrypter {
         is_last_segment ? kLastSegment : kNotLastSegment;
     generated_output_size_ += ciphertext_buffer->size();
     IncSegmentNumber();
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
   const std::vector<uint8_t>& get_header() const override {
@@ -176,7 +176,7 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
       return util::Status(util::error::INVALID_ARGUMENT,
                           "Invalid stream header");
     }
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
   int get_header_size() const override {
@@ -209,7 +209,7 @@ class DummyStreamSegmentDecrypter : public StreamSegmentDecrypter {
     plaintext_buffer->resize(pt_size);
     memcpy(plaintext_buffer->data(), ciphertext.data(), pt_size);
     generated_output_size_ += pt_size;
-    return util::Status::OK;
+    return util::OkStatus();
   }
 
 

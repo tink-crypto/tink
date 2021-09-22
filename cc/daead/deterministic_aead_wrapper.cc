@@ -36,7 +36,7 @@ util::Status Validate(PrimitiveSet<DeterministicAead>* daead_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "daead_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class  DeterministicAeadSetWrapper : public DeterministicAead {

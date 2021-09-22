@@ -79,7 +79,7 @@ util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Signature is not valid.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle

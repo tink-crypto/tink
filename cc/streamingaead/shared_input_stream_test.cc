@@ -67,7 +67,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
     auto next_result = input_stream->Next(&buffer);
     if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
     auto read_bytes = next_result.ValueOrDie();
@@ -79,7 +79,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       if (bytes_to_read == 0) input_stream->BackUp(read_bytes - used_bytes);
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 TEST(SharedInputStreamTest, BasicOperations) {

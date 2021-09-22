@@ -93,7 +93,7 @@ util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "hybrid_decrypt_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace

@@ -68,7 +68,7 @@ util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> JwtMacSetWrapper::ComputeMacAndEncode(

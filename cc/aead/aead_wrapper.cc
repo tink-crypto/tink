@@ -36,7 +36,7 @@ util::Status Validate(PrimitiveSet<Aead>* aead_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "aead_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class AeadSetWrapper : public Aead {

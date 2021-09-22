@@ -62,7 +62,7 @@ Status Cecpq2AeadHkdfPublicKeyManager::ValidateParams(
   if (params.kem_params().ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
     return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status Cecpq2AeadHkdfPublicKeyManager::ValidateKey(

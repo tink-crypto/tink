@@ -62,7 +62,7 @@ FileInputStream::FileInputStream(int file_descriptor, int buffer_size) :
   position_ = 0;
   buffer_ = absl::make_unique<uint8_t[]>(buffer_size_);
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {

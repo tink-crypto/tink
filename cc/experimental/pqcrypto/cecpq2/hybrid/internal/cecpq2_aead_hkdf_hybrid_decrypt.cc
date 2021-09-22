@@ -59,7 +59,7 @@ util::Status Validate(
     }
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 }  // namespace
 

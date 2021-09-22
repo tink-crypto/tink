@@ -92,12 +92,12 @@ Status RawJwtRsaSsaPssVerifyKeyManager::ValidateAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS256:
     case JwtRsaSsaPssAlgorithm::PS384:
     case JwtRsaSsaPssAlgorithm::PS512:
-      return Status::OK;
+      return util::OkStatus();
     default:
       return Status(util::error::INVALID_ARGUMENT,
                     "Unsupported RSA SSA PSS Algorithm");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 StatusOr<HashType> RawJwtRsaSsaPssVerifyKeyManager::HashForPssAlgorithm(

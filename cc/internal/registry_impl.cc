@@ -75,7 +75,7 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
   auto it = type_url_to_info_.find(type_url);
 
   if (it == type_url_to_info_.end()) {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   if (it->second.key_manager_type_index() != key_manager_type_index) {
     return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
@@ -88,7 +88,7 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
                      "with forbidden new key operation.",
                      type_url);
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<google::crypto::tink::KeyData>

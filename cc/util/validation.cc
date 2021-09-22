@@ -33,7 +33,7 @@ util::Status ValidateAesKeySize(uint32_t key_size) {
                      "AES key has %d bytes; supported sizes: 16 or 32 bytes.",
                      key_size);
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKey(const Keyset::Key& key) {
@@ -52,7 +52,7 @@ util::Status ValidateKey(const Keyset::Key& key) {
     return ToStatusF(util::error::INVALID_ARGUMENT, "key %d has unknown status",
                      key.key_id());
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeyset(const Keyset& keyset) {
@@ -107,7 +107,7 @@ util::Status ValidateKeyset(const Keyset& keyset) {
                         "keyset doesn't contain a valid primary key");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
@@ -117,7 +117,7 @@ util::Status ValidateVersion(uint32_t candidate, uint32_t max_expected) {
                      "only keys with version in range [0..%d] are supported.",
                      candidate, max_expected);
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

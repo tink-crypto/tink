@@ -56,7 +56,7 @@ crypto::tink::util::Status Config::Validate(const KeyTypeEntry& entry) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Missing catalogue_name.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 // static
@@ -75,7 +75,7 @@ util::Status Config::Register(
   if (!status.ok()) return status;
   status = StreamingAeadConfig::Register();
   if (!status.ok()) return status;
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

@@ -43,7 +43,7 @@ util::Status WriteProto(const portable_proto::MessageLite& proto,
     return util::Status(util::error::UNKNOWN,
                         "Error writing to the destination stream.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace

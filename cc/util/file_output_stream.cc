@@ -64,7 +64,7 @@ FileOutputStream::FileOutputStream(int file_descriptor, int buffer_size) :
   buffer_ = nullptr;
   position_ = 0;
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> FileOutputStream::Next(void** data) {
@@ -158,7 +158,7 @@ Status FileOutputStream::Close() {
     return status_;
   }
   status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
-  return Status::OK;
+  return OkStatus();
 }
 
 int64_t FileOutputStream::Position() const {

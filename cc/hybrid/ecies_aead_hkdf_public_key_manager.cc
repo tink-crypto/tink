@@ -62,7 +62,7 @@ Status EciesAeadHkdfPublicKeyManager::ValidateParams(
   if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
     return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status EciesAeadHkdfPublicKeyManager::ValidateKey(

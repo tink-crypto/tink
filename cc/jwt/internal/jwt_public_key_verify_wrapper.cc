@@ -62,7 +62,7 @@ util::Status Validate(
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<crypto::tink::VerifiedJwt>

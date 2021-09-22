@@ -57,7 +57,7 @@ util::Status WriteToStream(const std::vector<uint8_t>& contents,
   if (available_space > available_bytes) {
     output_stream->BackUp(available_space - available_bytes);
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace
@@ -93,7 +93,7 @@ StatusOr<std::unique_ptr<OutputStream>> StreamingAeadEncryptingStream::New(
   enc_stream->is_first_segment_ = true;
   enc_stream->count_backedup_ = first_segment_size;
   enc_stream->pt_buffer_offset_ = 0;
-  enc_stream->status_ = Status::OK;
+  enc_stream->status_ = util::OkStatus();
   return {std::move(enc_stream)};
 }
 

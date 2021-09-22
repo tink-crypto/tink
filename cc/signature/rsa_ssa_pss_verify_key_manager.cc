@@ -101,7 +101,7 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "salt length is negative");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

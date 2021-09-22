@@ -78,7 +78,7 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
           "potentially unencrypted source.");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace

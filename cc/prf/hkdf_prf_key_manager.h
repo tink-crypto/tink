@@ -139,7 +139,7 @@ class HkdfPrfKeyManager
           util::error::INVALID_ARGUMENT,
           "Invalid HkdfPrfKey: key_value is too short.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::Status ValidateParams(
@@ -151,7 +151,7 @@ class HkdfPrfKeyManager
           util::error::INVALID_ARGUMENT,
           "Invalid HkdfPrfKey: unsupported hash.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   // We use a somewhat larger minimum key size than usual, because PRFs might be

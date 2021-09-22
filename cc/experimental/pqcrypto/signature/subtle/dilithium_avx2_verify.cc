@@ -159,7 +159,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                         "Signature is not valid.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle

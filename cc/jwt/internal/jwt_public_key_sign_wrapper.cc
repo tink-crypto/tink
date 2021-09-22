@@ -61,7 +61,7 @@ util::Status Validate(PrimitiveSet<JwtPublicKeySignInternal>* jwt_sign_set) {
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> JwtPublicKeySignSetWrapper::SignAndEncode(

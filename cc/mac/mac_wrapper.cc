@@ -57,7 +57,7 @@ util::Status Validate(PrimitiveSet<Mac>* mac_set) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "mac_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> MacSetWrapper::ComputeMac(

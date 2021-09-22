@@ -52,12 +52,12 @@ Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
     case JwtHmacAlgorithm::HS256:
     case JwtHmacAlgorithm::HS384:
     case JwtHmacAlgorithm::HS512:
-      return Status::OK;
+      return util::OkStatus();
     default:
       return Status(util::error::INVALID_ARGUMENT,
                     "Unsupported algorithm.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace
