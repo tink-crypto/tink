@@ -257,6 +257,7 @@ py_test(
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
         "//tink:tink_python",
+        "//tink:cleartext_keyset_handle",
         "//tink/testing:keyset_builder",
     ],
 )
