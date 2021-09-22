@@ -501,7 +501,7 @@ tink_cc_library(
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
     tink::core::public_key_verify
-    tink::jwt::jwt_public_key_verify
+    tink::jwt::internal::jwt_public_key_verify_internal
     tink::jwt::jwt_validator
     tink::jwt::raw_jwt
     tink::jwt::verified_jwt
@@ -556,7 +556,7 @@ tink_cc_library(
     tink::jwt::internal::jwt_public_key_verify_impl
     tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
     tink::core::key_type_manager
-    tink::jwt::jwt_public_key_verify
+    tink::jwt::internal::jwt_public_key_verify_internal
     tink::util::status
     tink::util::statusor
     tink::proto::jwt_ecdsa_cc_proto
@@ -598,7 +598,9 @@ tink_cc_library(
   DEPS
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::jwt::internal::jwt_format
     tink::jwt::jwt_public_key_verify
+    tink::jwt::internal::jwt_public_key_verify_internal
     tink::util::status
     tink::util::statusor
 )
@@ -613,6 +615,7 @@ tink_cc_test(
     tink::jwt::internal::jwt_public_key_verify_wrapper
     tink::core::keyset_manager
     tink::core::primitive_set
+    tink::core::cleartext_keyset_handle
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::tink_cc_proto
     tink::util::status
@@ -648,7 +651,7 @@ tink_cc_library(
     tink::jwt::internal::jwt_public_key_verify_impl
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
     tink::core::key_type_manager
-    tink::jwt::jwt_public_key_verify
+    tink::jwt::internal::jwt_public_key_verify_internal
     tink::util::status
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
@@ -696,7 +699,7 @@ tink_cc_library(
     tink::jwt::internal::jwt_public_key_verify_impl
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
     tink::core::key_type_manager
-    tink::jwt::jwt_public_key_verify
+    tink::jwt::internal::jwt_public_key_verify_internal
     tink::util::status
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pss_cc_proto
@@ -736,6 +739,18 @@ tink_cc_library(
     jwt_mac_internal.h
   DEPS
     tink::jwt::raw_jwt
+    tink::util::status
+    tink::util::statusor
+    absl::strings
+)
+
+tink_cc_library(
+  NAME jwt_public_key_verify_internal
+  SRCS
+    jwt_public_key_verify_internal.h
+  DEPS
+    tink::jwt::jwt_validator
+    tink::jwt::verified_jwt
     tink::util::status
     tink::util::statusor
     absl::strings

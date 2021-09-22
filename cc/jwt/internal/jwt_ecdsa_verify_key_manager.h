@@ -21,8 +21,8 @@
 #include "absl/memory/memory.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_public_key_verify_impl.h"
+#include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
-#include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/jwt_ecdsa.pb.h"
@@ -31,15 +31,16 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-
 class JwtEcdsaVerifyKeyManager
     : public KeyTypeManager<google::crypto::tink::JwtEcdsaPublicKey, void,
-                            List<JwtPublicKeyVerify>> {
+                            List<JwtPublicKeyVerifyInternal>> {
  public:
-  class PublicKeyVerifyFactory : public PrimitiveFactory<JwtPublicKeyVerify> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> Create(
-        const google::crypto::tink::JwtEcdsaPublicKey& jwt_ecdsa_public_key)
+  class PublicKeyVerifyFactory
+      : public PrimitiveFactory<JwtPublicKeyVerifyInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>>
+    Create(const google::crypto::tink::JwtEcdsaPublicKey& jwt_ecdsa_public_key)
         const override;
+
    private:
     const RawJwtEcdsaVerifyKeyManager raw_key_manager_;
   };

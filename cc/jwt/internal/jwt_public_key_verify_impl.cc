@@ -28,8 +28,9 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
-    absl::string_view compact, const JwtValidator& validator) const {
+util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecodeWithKid(
+    absl::string_view compact, const JwtValidator& validator,
+    absl::optional<absl::string_view> kid) const {
   // TODO(juerg): Refactor this code into a util function.
   std::size_t signature_pos = compact.find_last_of('.');
   if (signature_pos == absl::string_view::npos) {
@@ -61,7 +62,8 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecode(
   if (!header.ok()) {
     return header.status();
   }
-  util::Status validate_header_result = ValidateHeader(*header, algorithm_);
+  util::Status validate_header_result =
+      ValidateHeader(*header, algorithm_, kid, custom_kid_);
   if (!validate_header_result.ok()) {
     return validate_header_result;
   }

@@ -50,6 +50,9 @@ class JwtPublicKeySignImpl : public JwtPublicKeySignInternal {
  private:
   std::unique_ptr<crypto::tink::PublicKeySign> sign_;
   std::string algorithm_;
+  // custom_kid may be set when a key is converted from another format, for
+  // example JWK. It does not have any relation to the key id. It can only be
+  // set for keys with output prefix RAW.
   absl::optional<std::string> custom_kid_;
 };
 

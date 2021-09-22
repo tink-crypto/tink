@@ -27,8 +27,7 @@ using crypto::tink::util::StatusOr;
 using google::crypto::tink::JwtEcdsaPublicKey;
 using google::crypto::tink::JwtEcdsaAlgorithm;
 
-
-StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
+StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>>
 JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
   StatusOr<std::string> name = AlgorithmName(jwt_ecdsa_public_key.algorithm());
@@ -40,9 +39,13 @@ JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
   if (!verify.ok()) {
     return verify.status();
   }
-  std::unique_ptr<JwtPublicKeyVerify> jwt_public_key_verify =
+  absl::optional<absl::string_view> custom_kid = absl::nullopt;
+  if (jwt_ecdsa_public_key.has_custom_kid()) {
+    custom_kid = jwt_ecdsa_public_key.custom_kid().value();
+  }
+  std::unique_ptr<JwtPublicKeyVerifyInternal> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
-          *std::move(verify), *name);
+          *std::move(verify), *name, custom_kid);
   return jwt_public_key_verify;
 }
 
