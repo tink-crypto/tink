@@ -160,7 +160,15 @@ def split_signed_compact(
   return (unsigned_compact, json_header, json_payload, signature_or_mac)
 
 
-def validate_header(header: Any, algorithm: Text) -> None:
+def _validate_kid_header(header: Any, kid: Text) -> None:
+  if header['kid'] != kid:
+    raise _jwt_error.JwtInvalidError('invalid kid header')
+
+
+def validate_header(header: Any,
+                    algorithm: Text,
+                    tink_kid: Optional[Text] = None,
+                    custom_kid: Optional[Text] = None) -> None:
   """Parses the header and validates its values."""
   _validate_algorithm(algorithm)
   hdr_algorithm = header.get('alg', '')
@@ -170,6 +178,15 @@ def validate_header(header: Any, algorithm: Text) -> None:
   if 'crit' in header:
     raise _jwt_error.JwtInvalidError(
         'all tokens with crit headers are rejected')
+  if tink_kid is not None and custom_kid is not None:
+    raise _jwt_error.JwtInvalidError('custom_kid can only be set for RAW keys')
+  if tink_kid is not None:
+    if 'kid' not in header:
+      # for output prefix type TINK, the kid header is required
+      raise _jwt_error.JwtInvalidError('missing kid in header')
+    _validate_kid_header(header, tink_kid)
+  if custom_kid is not None and 'kid' in header:
+    _validate_kid_header(header, custom_kid)
 
 
 def get_type_header(header: Any) -> Optional[Text]:

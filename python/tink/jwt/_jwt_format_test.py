@@ -173,6 +173,35 @@ class JwtFormatTest(parameterized.TestCase):
     with self.assertRaises(_jwt_error.JwtInvalidError):
       _jwt_format.validate_header(header, 'HS256')
 
+  def test_validate_header_with_kid_success(self):
+    json_header = '{"kid":"GsapRA","alg":"HS256"}'
+    header = _json_util.json_loads(json_header)
+    _jwt_format.validate_header(header, 'HS256')
+    _jwt_format.validate_header(header, 'HS256', tink_kid='GsapRA')
+    _jwt_format.validate_header(header, 'HS256', custom_kid='GsapRA')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      # fails because tink_kid and custom_kid must not be set at the same time.
+      _jwt_format.validate_header(
+          header, 'HS256', tink_kid='GsapRA', custom_kid='GsapRA')
+
+  def test_validate_header_with_other_kid_fails(self):
+    json_header = '{"kid":"GsapRA","alg":"HS256"}'
+    header = _json_util.json_loads(json_header)
+    _jwt_format.validate_header(header, 'HS256')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.validate_header(header, 'HS256', tink_kid='otherKid')
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      _jwt_format.validate_header(header, 'HS256', custom_kid='otherKid')
+
+  def test_validate_header_with_missing_kid_missing(self):
+    json_header = '{"alg":"HS256"}'
+    header = _json_util.json_loads(json_header)
+    with self.assertRaises(_jwt_error.JwtInvalidError):
+      # if tink_kid is set, a kid header is required.
+      _jwt_format.validate_header(header, 'HS256', tink_kid='GsapRA')
+    # if custom_kid is set, a kid header is *not* required.
+    _jwt_format.validate_header(header, 'HS256', custom_kid='GsapRA')
+
   def test_get_kid_success(self):
     key_id = 0x1ac6a944
     self.assertEqual(_jwt_format.get_kid(key_id, tink_pb2.TINK), 'GsapRA')
