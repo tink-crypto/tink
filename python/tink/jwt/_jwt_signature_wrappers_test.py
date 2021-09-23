@@ -13,6 +13,10 @@
 # limitations under the License.
 """Tests for tink.python.tink.jwt._jwt_signature_wrappers_test."""
 
+import io
+
+from typing import Text
+
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -21,6 +25,7 @@ from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
 import tink
+from tink import cleartext_keyset_handle
 from tink import jwt
 from tink.jwt import _json_util
 from tink.jwt import _jwt_format
@@ -28,27 +33,65 @@ from tink.jwt import _jwt_format
 from tink.testing import keyset_builder
 
 
+LONG_CUSTOM_KID = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
+
+
 def setUpModule():
   jwt.register_jwt_signature()
 
 
-def _create_jwt_ecdsa_template(
-    algorithm: jwt_ecdsa_pb2.JwtEcdsaAlgorithm,
-    output_prefix_type: tink_pb2.OutputPrefixType) -> tink_pb2.KeyTemplate:
-  key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(algorithm=algorithm)
-  return tink_pb2.KeyTemplate(
-      type_url='type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey',
-      value=key_format.SerializeToString(),
-      output_prefix_type=output_prefix_type)
+def _change_key_id(keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
+  """Changes the key id of the first key and makes it primary."""
+  buffer = io.BytesIO()
+  cleartext_keyset_handle.write(
+      tink.BinaryKeysetWriter(buffer), keyset_handle)
+  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  # XOR the key id with an arbitrary 32-bit string to get a new key id.
+  new_key_id = keyset.key[0].key_id ^ 0xdeadbeef
+  keyset.key[0].key_id = new_key_id
+  keyset.primary_key_id = new_key_id
+  return cleartext_keyset_handle.from_keyset(keyset)
 
 
-def jwt_es256_tink_template():
-  return _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256, tink_pb2.TINK)
+def _change_output_prefix_to_tink(
+    keyset_handle: tink.KeysetHandle) -> tink.KeysetHandle:
+  """Changes the output prefix type of the first key to TINK."""
+  buffer = io.BytesIO()
+  cleartext_keyset_handle.write(
+      tink.BinaryKeysetWriter(buffer), keyset_handle)
+  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  keyset.key[0].output_prefix_type = tink_pb2.TINK
+  return cleartext_keyset_handle.from_keyset(keyset)
+
+
+def _set_custom_kid(keyset_handle: tink.KeysetHandle,
+                    custom_kid: Text) -> tink.KeysetHandle:
+  """Sets the custom_kid field of the first key."""
+  buffer = io.BytesIO()
+  cleartext_keyset_handle.write(
+      tink.BinaryKeysetWriter(buffer), keyset_handle)
+  keyset = tink_pb2.Keyset.FromString(buffer.getvalue())
+  if keyset.key[0].key_data.type_url.endswith('JwtEcdsaPrivateKey'):
+    jwt_ecdsa_key = jwt_ecdsa_pb2.JwtEcdsaPrivateKey.FromString(
+        keyset.key[0].key_data.value)
+    jwt_ecdsa_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = jwt_ecdsa_key.SerializeToString()
+  elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPkcs1PrivateKey'):
+    rsa_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
+        keyset.key[0].key_data.value)
+    rsa_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+  elif keyset.key[0].key_data.type_url.endswith('JwtRsaSsaPssPrivateKey'):
+    rsa_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(
+        keyset.key[0].key_data.value)
+    rsa_key.public_key.custom_kid.value = custom_kid
+    keyset.key[0].key_data.value = rsa_key.SerializeToString()
+  else:
+    raise tink.TinkError('unknown key type')
+  return cleartext_keyset_handle.from_keyset(keyset)
 
 
 class JwtSignatureWrapperTest(parameterized.TestCase):
-
-  # TODO(juerg): Add tests with TINK templates
 
   def test_interesting_error(self):
     private_handle = tink.new_keyset_handle(jwt.jwt_es256_template())
@@ -63,14 +106,12 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
           expected_issuer='unknown', allow_missing_expiration=True))
 
   @parameterized.parameters([
+      (jwt.raw_jwt_es256_template(), jwt.raw_jwt_es256_template()),
+      (jwt.raw_jwt_es256_template(), jwt.jwt_es256_template()),
+      (jwt.jwt_es256_template(), jwt.raw_jwt_es256_template()),
       (jwt.jwt_es256_template(), jwt.jwt_es256_template()),
-      (jwt.jwt_es256_template(), jwt_es256_tink_template()),
-      (jwt_es256_tink_template, jwt.jwt_es256_template()),
-      (jwt_es256_tink_template(), jwt_es256_tink_template()),
   ])
   def test_key_rotation(self, old_key_tmpl, new_key_tmpl):
-    old_key_tmpl = jwt.jwt_es256_template()
-    new_key_tmpl = jwt.jwt_es384_template()
     builder = keyset_builder.new_keyset_builder()
     older_key_id = builder.add_new_key(old_key_tmpl)
 
@@ -143,90 +184,99 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     self.assertEqual(
         verify4.verify_and_decode(compact4, validator).issuer(), 'a')
 
-  def test_tink_output_prefix_type_encodes_a_kid_header(self):
-    keyset_handle = tink.new_keyset_handle(jwt_es256_tink_template())
-    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+  def test_only_tink_output_prefix_type_encodes_a_kid_header(self):
+    handle = tink.new_keyset_handle(jwt.raw_jwt_es256_template())
+    sign = handle.primitive(jwt.JwtPublicKeySign)
+    verify = handle.public_keyset_handle().primitive(jwt.JwtPublicKeyVerify)
+
+    tink_handle = _change_output_prefix_to_tink(handle)
+    tink_sign = tink_handle.primitive(jwt.JwtPublicKeySign)
+    tink_verify = tink_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
 
     raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
-    signed_compact = sign.sign_and_encode(raw_jwt)
 
-    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _json_util.json_loads(json_header)
-    self.assertIn('kid', header)
+    token = sign.sign_and_encode(raw_jwt)
+    token_with_kid = tink_sign.sign_and_encode(raw_jwt)
 
-  def test_es256_key_with_custom_kid_header(self):
-    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_es256_template())
+    _, header, _, _ = _jwt_format.split_signed_compact(token)
+    self.assertNotIn('kid', _json_util.json_loads(header))
 
-    # Add a custom kid to the key in keyset_handle
-    value = keyset_handle._keyset.key[0].key_data.value
-    ecdsa_key = jwt_ecdsa_pb2.JwtEcdsaPrivateKey.FromString(value)
-    ecdsa_key.public_key.custom_kid.value = 'my kid'
-    keyset_handle._keyset.key[0].key_data.value = ecdsa_key.SerializeToString()
-    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
+    _, header_with_kid, _, _ = _jwt_format.split_signed_compact(token_with_kid)
+    self.assertIn('kid', _json_util.json_loads(header_with_kid))
 
+    validator = jwt.new_validator(
+        expected_issuer='issuer', allow_missing_expiration=True)
+
+    verify.verify_and_decode(token, validator)
+    tink_verify.verify_and_decode(token_with_kid, validator)
+
+    other_handle = _change_key_id(tink_handle)
+    other_verify = other_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
+
+    # The kid header is currently ignored in the validation.
+    verify.verify_and_decode(token_with_kid, validator)
+    # TODO(juerg): Add check that these fail.
+    tink_verify.verify_and_decode(token, validator)
+    other_verify.verify_and_decode(token_with_kid, validator)
+
+  @parameterized.named_parameters([
+      ('JWT_ES256_RAW', jwt.raw_jwt_es256_template()),
+      ('JWT_RS256_RAW', jwt.raw_jwt_rs256_2048_f4_template()),
+      ('JWT_PS256_RAW', jwt.raw_jwt_ps256_3072_f4_template()),
+  ])
+  def test_raw_key_with_custom_kid_header(self, template):
+    # normal key with output prefix RAW
+    handle = tink.new_keyset_handle(template)
     raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
-    signed_compact = sign.sign_and_encode(raw_jwt)
+    validator = jwt.new_validator(
+        expected_issuer='issuer', allow_missing_expiration=True)
 
-    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _json_util.json_loads(json_header)
-    self.assertEqual(header['kid'], 'my kid')
+    sign = handle.primitive(jwt.JwtPublicKeySign)
+    token = sign.sign_and_encode(raw_jwt)
+    verify = handle.public_keyset_handle().primitive(jwt.JwtPublicKeyVerify)
+    verify.verify_and_decode(token, validator)
 
-    # Now, change the output prefix type to TINK. This should fail.
-    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
+    _, json_header, _, _ = _jwt_format.split_signed_compact(token)
+    self.assertNotIn('kid', _json_util.json_loads(json_header))
+
+    # key with a custom_kid set
+    custom_kid_handle = _set_custom_kid(handle, custom_kid=LONG_CUSTOM_KID)
+    custom_kid_sign = custom_kid_handle.primitive(jwt.JwtPublicKeySign)
+    token_with_kid = custom_kid_sign.sign_and_encode(raw_jwt)
+    custom_kid_verify = custom_kid_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
+    custom_kid_verify.verify_and_decode(token_with_kid, validator)
+
+    _, header_with_kid, _, _ = _jwt_format.split_signed_compact(token_with_kid)
+    self.assertEqual(_json_util.json_loads(header_with_kid)['kid'],
+                     LONG_CUSTOM_KID)
+
+    # The kid header is currently ignored.
+    custom_kid_verify.verify_and_decode(token, validator)
+    verify.verify_and_decode(token_with_kid, validator)
+
+    # key with a different custom_kid set
+    other_handle = _set_custom_kid(handle, custom_kid='other kid')
+    other_verify = other_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
+    # The kid header is currently ignored.
+    other_verify.verify_and_decode(token_with_kid, validator)
+
+    tink_handle = _change_output_prefix_to_tink(custom_kid_handle)
+    tink_sign = tink_handle.primitive(jwt.JwtPublicKeySign)
+    tink_verify = tink_handle.public_keyset_handle().primitive(
+        jwt.JwtPublicKeyVerify)
+    # having custom_kid set with output prefix TINK is not allowed
     with self.assertRaises(tink.TinkError):
-      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
       tink_sign.sign_and_encode(raw_jwt)
-
-  def test_rs256_key_with_custom_kid_header(self):
-    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_rs256_2048_f4_template())
-
-    # Add a custom kid to the key in keyset_handle
-    value = keyset_handle._keyset.key[0].key_data.value
-    pkcs1_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(value)
-    pkcs1_key.public_key.custom_kid.value = 'my kid'
-    keyset_handle._keyset.key[0].key_data.value = pkcs1_key.SerializeToString()
-
-    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
-
-    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
-    signed_compact = sign.sign_and_encode(raw_jwt)
-
-    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _json_util.json_loads(json_header)
-    self.assertEqual(header['kid'], 'my kid')
-
-    # Now, change the output prefix type to TINK. This should fail.
-    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
-    with self.assertRaises(tink.TinkError):
-      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
-      tink_sign.sign_and_encode(raw_jwt)
-
-  def test_ps256_key_with_a_custom_kid_header(self):
-    keyset_handle = tink.new_keyset_handle(jwt.raw_jwt_ps256_2048_f4_template())
-
-    # Add a custom kid to the key in keyset_handle
-    value = keyset_handle._keyset.key[0].key_data.value
-    pss_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(value)
-    pss_key.public_key.custom_kid.value = 'my kid'
-    keyset_handle._keyset.key[0].key_data.value = pss_key.SerializeToString()
-
-    sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
-
-    raw_jwt = jwt.new_raw_jwt(issuer='issuer', without_expiration=True)
-    signed_compact = sign.sign_and_encode(raw_jwt)
-
-    _, json_header, _, _ = _jwt_format.split_signed_compact(signed_compact)
-    header = _json_util.json_loads(json_header)
-    self.assertEqual(header['kid'], 'my kid')
-
-    # Now, change the output prefix type to TINK. This should fail.
-    keyset_handle._keyset.key[0].output_prefix_type = tink_pb2.TINK
-    with self.assertRaises(tink.TinkError):
-      tink_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
-      tink_sign.sign_and_encode(raw_jwt)
+    # This is currently not checked in the verification.
+    tink_verify.verify_and_decode(token, validator)
+    tink_verify.verify_and_decode(token_with_kid, validator)
 
   def test_legacy_template_fails(self):
-    template = _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256, tink_pb2.LEGACY)
+    template = keyset_builder.legacy_template(jwt.jwt_es256_template())
     builder = keyset_builder.new_keyset_builder()
     key_id = builder.add_new_key(template)
     builder.set_primary_key(key_id)
@@ -238,8 +288,7 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
 
   def test_legacy_non_primary_key_fails(self):
     builder = keyset_builder.new_keyset_builder()
-    old_template = _create_jwt_ecdsa_template(jwt_ecdsa_pb2.ES256,
-                                              tink_pb2.LEGACY)
+    old_template = keyset_builder.legacy_template(jwt.jwt_es256_template())
     _ = builder.add_new_key(old_template)
     current_key_id = builder.add_new_key(jwt.jwt_es256_template())
     builder.set_primary_key(current_key_id)

@@ -218,7 +218,6 @@ py_test(
     srcs = ["_jwt_hmac_key_manager_test.py"],
     python_version = "PY3",
     deps = [
-        ":_json_util",
         ":_jwt_format",
         ":_jwt_hmac_key_manager",
         ":_jwt_mac",
@@ -329,6 +328,7 @@ py_test(
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
         "//tink:tink_python",
+        "//tink:cleartext_keyset_handle",
         "//tink/testing:keyset_builder",
     ],
 )
