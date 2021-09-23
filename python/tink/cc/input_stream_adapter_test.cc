@@ -53,7 +53,7 @@ TEST(InputStreamAdapterTest, ReadEOFError) {
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
   EXPECT_EQ(read_result.ValueOrDie(), data);
   read_result = adapter->Read(10);
-  EXPECT_EQ(read_result.status().error_code(), util::error::OUT_OF_RANGE);
+  EXPECT_EQ(read_result.status().code(), absl::StatusCode::kOutOfRange);
 }
 
 TEST(InputStreamAdapterTest, MultipleRead) {
@@ -100,7 +100,7 @@ TEST(InputStreamAdapterTest, ReadMoreThanAvailable) {
 TEST(InputStreamAdapterTest, ReadFromEmptyStream) {
   auto adapter = GetInputStreamAdapter(-1, "");
   auto read_result = adapter->Read(10);
-  EXPECT_EQ(read_result.status().error_code(), util::error::OUT_OF_RANGE);
+  EXPECT_EQ(read_result.status().code(), absl::StatusCode::kOutOfRange);
 }
 
 }  // namespace

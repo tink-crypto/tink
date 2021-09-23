@@ -99,8 +99,8 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestNewUnimplementedCurve) {
   }
   auto status_or_recipient_kem =
       EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType::UNKNOWN_CURVE, {});
-  EXPECT_EQ(status_or_recipient_kem.status().error_code(),
-            util::error::UNIMPLEMENTED);
+  EXPECT_EQ(status_or_recipient_kem.status().code(),
+            absl::StatusCode::kUnimplemented);
 }
 
 class EciesHkdfNistPCurveRecipientKemBoringSslTest : public ::testing::Test {};
@@ -124,8 +124,8 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewInvalidCurve) {
       EllipticCurveType::CURVE25519,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
-  EXPECT_EQ(status_or_recipient_kem.status().error_code(),
-            util::error::UNIMPLEMENTED);
+  EXPECT_EQ(status_or_recipient_kem.status().code(),
+            absl::StatusCode::kUnimplemented);
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewEmptyPrivateKey) {
@@ -134,8 +134,8 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewEmptyPrivateKey) {
   }
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, {});
-  EXPECT_EQ(status_or_recipient_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_recipient_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
@@ -181,8 +181,8 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewInvalidCurve) {
       EllipticCurveType::NIST_P256,
       util::SecretDataFromStringView(
           test::HexDecodeOrDie(kX25519PrivateKeyHex)));
-  EXPECT_EQ(status_or_recipient_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_recipient_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewShortKey) {
@@ -194,8 +194,8 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewShortKey) {
   private_key.resize(private_key.size() / 2);
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, private_key);
-  EXPECT_EQ(status_or_recipient_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_recipient_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 // Tests for FIPS only mode

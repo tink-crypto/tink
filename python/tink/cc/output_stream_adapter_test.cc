@@ -71,7 +71,7 @@ TEST(OutputStreamAdapterTest, WriteAfterClose) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   ASSERT_TRUE(adapter->Close().ok());
   auto status = adapter->Write("something").status();
-  EXPECT_EQ(status.error_code(), util::error::FAILED_PRECONDITION);
+  EXPECT_EQ(status.code(), absl::StatusCode::kFailedPrecondition);
   EXPECT_THAT(status.error_message(), testing::HasSubstr("Stream closed"));
 }
 

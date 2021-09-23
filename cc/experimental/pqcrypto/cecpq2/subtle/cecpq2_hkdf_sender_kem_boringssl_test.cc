@@ -45,7 +45,7 @@ namespace {
 
 // This test evaluates the creation of a Cecpq2HkdfSenderKemBoringSsl instance
 // with an unknown curve type parameter. It should fail with an
-// util::error::UNIMPLEMENTED error.
+// absl::StatusCode::kUnimplemented error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
@@ -65,12 +65,13 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
 
   // The instance creation above should fail with an unimplemented algorithm
   // error given the UNKNOWN_CURVE parameter
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 // This test evaluates the case where an unsupported curve (NIST_P256) is
-// specified. This test should fail with an util::error::UNIMPLEMENTED error.
+// specified. This test should fail with an absl::StatusCode::kUnimplemented
+// error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
@@ -89,8 +90,8 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
 
   // This test should fail with an unimplemented algorithm error
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 // This test checks that an error is triggered if an output key lenth smaller
