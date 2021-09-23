@@ -63,7 +63,7 @@ TEST(SharedRandomAccessStreamTest, ReadingStreams) {
     std::string stream_contents;
     auto status = ReadAll(&shared_stream, 1 + (stream_size / 10),
                           &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
     EXPECT_EQ("EOF", status.error_message());
     EXPECT_EQ(file_contents, stream_contents);
     EXPECT_EQ(stream_size, shared_stream.size().ValueOrDie());

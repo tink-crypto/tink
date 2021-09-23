@@ -118,7 +118,7 @@ TEST(StreamingAeadSetWrapperTest, WrapNullptr) {
   StreamingAeadWrapper wrapper;
   auto result = wrapper.Wrap(nullptr);
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INTERNAL, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInternal, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                       result.status().error_message());
 }
@@ -127,7 +127,7 @@ TEST(StreamingAeadSetWrapperTest, WrapEmpty) {
   StreamingAeadWrapper wrapper;
   auto result = wrapper.Wrap(absl::make_unique<PrimitiveSet<StreamingAead>>());
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                       result.status().error_message());
 }

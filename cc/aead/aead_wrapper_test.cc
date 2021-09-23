@@ -39,7 +39,7 @@ TEST(AeadSetWrapperTest, WrapNullptr) {
   AeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(nullptr);
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(util::error::INTERNAL, aead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInternal, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                       aead_result.status().error_message());
 }
@@ -48,7 +48,7 @@ TEST(AeadSetWrapperTest, WrapEmpty) {
   AeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(absl::make_unique<PrimitiveSet<Aead>>());
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                       aead_result.status().error_message());
 }
@@ -113,8 +113,7 @@ TEST(AeadSetWrapperTest, Basic) {
 
   decrypt_result = aead->Decrypt("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                       decrypt_result.status().error_message());
 }

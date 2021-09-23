@@ -52,7 +52,7 @@ TEST_F(MacFactoryTest, testBasic) {
   auto mac_result =
       MacFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(mac_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
                       mac_result.status().error_message());
 }
@@ -112,13 +112,13 @@ TEST_F(MacFactoryTest, testPrimitive) {
 
   status = mac->VerifyMac(mac_value, "bad data for mac");
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
                       status.error_message());
 
   status = mac->VerifyMac("some bad mac value", data);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
                       status.error_message());
 

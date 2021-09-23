@@ -148,7 +148,7 @@ TEST(StreamingMacImplTest, ComputeCloseTwiceError) {
   // Try closing the stream again.
   auto reclose_status = output_stream->Close();
   EXPECT_FALSE(reclose_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, reclose_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, reclose_status.code());
 }
 
 TEST(StreamingMacImplTest, VerifyEmptyMac) {
@@ -249,7 +249,7 @@ TEST(StreamingMacImplTest, VerifyCloseTwiceError) {
   // Try closing the stream again.
   auto reclose_status = output_stream->Close();
   EXPECT_FALSE(reclose_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, reclose_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, reclose_status.code());
 }
 
 }  // namespace

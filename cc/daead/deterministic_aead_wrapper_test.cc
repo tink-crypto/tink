@@ -47,7 +47,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     auto daead_result =
         DeterministicAeadWrapper().Wrap(nullptr);
     EXPECT_FALSE(daead_result.ok());
-    EXPECT_EQ(util::error::INTERNAL, daead_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal, daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                         daead_result.status().error_message());
   }
@@ -58,8 +58,8 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     auto daead_result =
         DeterministicAeadWrapper().Wrap(std::move(daead_set));
     EXPECT_FALSE(daead_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              daead_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                         daead_result.status().error_message());
   }
@@ -127,8 +127,8 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     decrypt_result =
         daead->DecryptDeterministically("some bad ciphertext", aad);
     EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              decrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                         decrypt_result.status().error_message());
   }

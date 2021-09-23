@@ -65,7 +65,7 @@ TEST_F(CleartextKeysetHandleTest, testRead) {
         BinaryKeysetReader::New("invalid serialized keyset").ValueOrDie());
     auto result = CleartextKeysetHandle::Read(std::move(reader));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 }
 

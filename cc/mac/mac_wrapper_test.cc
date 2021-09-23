@@ -39,7 +39,7 @@ namespace {
 TEST(MacWrapperTest, WrapNullptr) {
   auto mac_result = MacWrapper().Wrap(nullptr);
   EXPECT_FALSE(mac_result.ok());
-  EXPECT_EQ(util::error::INTERNAL, mac_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInternal, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
                       mac_result.status().error_message());
 }
@@ -48,7 +48,7 @@ TEST(MacWrapperTest, WrapEmpty) {
   std::unique_ptr<PrimitiveSet<Mac>> mac_set(new PrimitiveSet<Mac>());
   auto mac_result = MacWrapper().Wrap(std::move(mac_set));
   EXPECT_FALSE(mac_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
                       mac_result.status().error_message());
 }
@@ -107,7 +107,7 @@ TEST(MacWrapperTest, Basic) {
 
   status = mac->VerifyMac("some bad mac", data);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
                       status.error_message());
 }
@@ -146,7 +146,7 @@ TEST(MacWrapperTest, testLegacyAuthentication) {
   std::string raw_mac_value = mac_value.substr(CryptoFormat::kNonRawPrefixSize);
   status = raw_mac->VerifyMac(raw_mac_value, data);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 
   // Verify on raw Mac-primitive using legacy-formatted data.
   std::string legacy_data = data;

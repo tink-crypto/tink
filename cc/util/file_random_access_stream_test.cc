@@ -44,7 +44,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, int chunk_size,
     position = contents->size();
     status = ra_stream->PRead(position, chunk_size, buffer.get());
   }
-  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
     EXPECT_EQ(0, buffer->size());
   }
   return status;
@@ -86,7 +86,7 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
     std::string stream_contents;
     auto status = ReadAll(ra_stream.get(), 1 + (stream_size / 10),
                           &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
     EXPECT_EQ("EOF", status.error_message());
     EXPECT_EQ(file_contents, stream_contents);
     EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
@@ -152,7 +152,7 @@ TEST(FileRandomAccessStreamTest, NegativeReadPosition) {
                                 " position = ", position));
 
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
     }
   }
 }
@@ -170,7 +170,7 @@ TEST(FileRandomAccessStreamTest, NotPositiveReadCount) {
       SCOPED_TRACE(absl::StrCat("stream_size = ", stream_size,
                                 " count = ", count));
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
     }
   }
 }
@@ -189,7 +189,7 @@ TEST(FileRandomAccessStreamTest, ReadPositionAfterEof) {
                                 " position = ", position));
 
       auto status = ra_stream->PRead(position, count, buffer.get());
-      EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
+      EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
       EXPECT_EQ(0, buffer->size());
     }
   }

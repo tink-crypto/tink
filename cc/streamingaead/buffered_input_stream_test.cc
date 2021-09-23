@@ -163,7 +163,7 @@ TEST(BufferedInputStreamTest, SingleBackup) {
         buf_stream->BackUp(input_size);
         EXPECT_EQ(pos, buf_stream->Position());
       } else {
-        EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
       }
 
       // Read the rest of the input.
@@ -195,7 +195,7 @@ TEST(BufferedInputStreamTest, SingleBackup) {
         buf_stream->BackUp(input_size);
         EXPECT_EQ(pos, buf_stream->Position());
       } else {
-        EXPECT_EQ(util::error::OUT_OF_RANGE, next_result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kOutOfRange, next_result.status().code());
       }
 
       // Read the rest of the input.

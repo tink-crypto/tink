@@ -46,7 +46,7 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
   { // pk_verify_set is nullptr.
     auto pk_verify_result = PublicKeyVerifyWrapper().Wrap(nullptr);
     EXPECT_FALSE(pk_verify_result.ok());
-    EXPECT_EQ(util::error::INTERNAL, pk_verify_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal, pk_verify_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
         pk_verify_result.status().error_message());
   }
@@ -57,8 +57,8 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     auto pk_verify_result =
         PublicKeyVerifyWrapper().Wrap(std::move(pk_verify_set));
     EXPECT_FALSE(pk_verify_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-        pk_verify_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+        pk_verify_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
         pk_verify_result.status().error_message());
   }

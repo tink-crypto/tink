@@ -111,7 +111,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongKeySize) {
         params.ciphertext_segment_size = ct_segment_size;
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
         EXPECT_THAT(result.status().error_message(),
                     HasSubstr("must have 16 or 32 bytes"));
       }
@@ -132,7 +132,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongSaltSize) {
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
       EXPECT_THAT(result.status().error_message(),
                   HasSubstr("same size as the key"));
     }
@@ -152,7 +152,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextOffset) {
       params.ciphertext_segment_size = 128;
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
       EXPECT_THAT(result.status().error_message(),
                   HasSubstr("must be non-negative"));
     }
@@ -181,8 +181,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         if (ct_segment_size < min_ct_segment_size) {
           EXPECT_FALSE(result.ok());
-          EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                    result.status().error_code());
+          EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
           EXPECT_THAT(result.status().error_message(), HasSubstr("too small"));
         } else {
           EXPECT_TRUE(result.ok()) << result.status();

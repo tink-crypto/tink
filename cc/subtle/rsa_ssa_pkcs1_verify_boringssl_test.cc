@@ -114,7 +114,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
   {  // Small modulus.
     auto result = RsaSsaPkcs1VerifyBoringSsl::New(small_pub_key, nist_params);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "only modulus size >= 2048-bit is supported",
                         result.status().error_message());
@@ -124,7 +124,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
     auto result =
         RsaSsaPkcs1VerifyBoringSsl::New(nist_pub_key, sha1_hash_params);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "SHA1 is not safe for digital signature",
                         result.status().error_message());

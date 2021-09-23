@@ -138,8 +138,8 @@ TEST_F(JsonKeysetWriterTest, testWriterCreation) {
     std::unique_ptr<std::ostream> null_stream(nullptr);
     auto writer_result = JsonKeysetWriter::New(std::move(null_stream));
     EXPECT_FALSE(writer_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              writer_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              writer_result.status().code());
   }
 
   {  // Stream with good keyset.
@@ -230,12 +230,12 @@ TEST_F(JsonKeysetWriterTest, testDestinationStreamErrors) {
   {  // Write keyset.
     auto status = writer->Write(keyset_);
     EXPECT_FALSE(status.ok()) << status;
-    EXPECT_EQ(util::error::UNKNOWN, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
   }
   {  // Write encrypted keyset.
     auto status = writer->Write(encrypted_keyset_);
     EXPECT_FALSE(status.ok()) << status;
-    EXPECT_EQ(util::error::UNKNOWN, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
   }
 }
 

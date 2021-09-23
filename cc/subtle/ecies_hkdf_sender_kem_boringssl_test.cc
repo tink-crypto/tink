@@ -114,8 +114,8 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestNewUnknownCurve) {
   }
   auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
       EllipticCurveType::UNKNOWN_CURVE, "", "");
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 class EciesHkdfNistPCurveSendKemBoringSslTest : public ::testing::Test {};
@@ -143,8 +143,8 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNewInvalidCurve) {
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
       EllipticCurveType::CURVE25519, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::UNIMPLEMENTED);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kUnimplemented);
 }
 
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestGenerateKey) {
@@ -195,8 +195,8 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewInvalidCurve) {
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       EllipticCurveType::NIST_P256, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
@@ -210,8 +210,8 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
   test_key.pub_x.resize(test_key.pub_x.size() / 2);
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       curve, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
@@ -225,8 +225,8 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
   test_key.pub_y = test_key.pub_x;
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       curve, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
@@ -268,8 +268,8 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKeyUncompressed) {
   auto status_or_kem_key =
       sender_kem->GenerateKey(HashType::SHA256, "hkdf_salt", "hkdf_info", 32,
                               EcPointFormat::UNCOMPRESSED);
-  EXPECT_EQ(status_or_kem_key.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_kem_key.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 // Tests for FIPS only mode

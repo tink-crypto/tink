@@ -84,7 +84,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testBasic) {
               std::vector<uint8_t> pt;
               auto status = dec->DecryptSegment(pt, 42, false, nullptr);
               EXPECT_FALSE(status.ok());
-              EXPECT_EQ(util::error::FAILED_PRECONDITION, status.error_code());
+              EXPECT_EQ(absl::StatusCode::kFailedPrecondition, status.code());
               EXPECT_PRED_FORMAT2(testing::IsSubstring, "not initialized",
                                   status.error_message());
 
@@ -163,7 +163,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongDerivedKeySize) {
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be 16 or 32",
                             result.status().error_message());
       }
@@ -189,7 +189,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongIkmSize) {
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
                             result.status().error_message());
       }
@@ -214,7 +214,7 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextOffset) {
         params.associated_data = "associated data";
         auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
         EXPECT_FALSE(result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-negative",
                             result.status().error_message());
       }
@@ -247,8 +247,8 @@ TEST(AesGcmHkdfStreamSegmentDecrypterTest, testWrongCiphertextSegmentSize) {
           auto result = AesGcmHkdfStreamSegmentDecrypter::New(params);
           if (ct_segment_size < min_ct_segment_size) {
             EXPECT_FALSE(result.ok());
-            EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                      result.status().error_code());
+            EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+                      result.status().code());
             EXPECT_PRED_FORMAT2(testing::IsSubstring, "too small",
                                 result.status().error_message());
           } else {

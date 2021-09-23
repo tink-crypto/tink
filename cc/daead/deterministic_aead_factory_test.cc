@@ -48,7 +48,7 @@ TEST_F(DeterministicAeadFactoryTest, testBasic) {
   auto daead_result = DeterministicAeadFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(daead_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, daead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, daead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
                       daead_result.status().error_message());
 }
@@ -109,8 +109,8 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
 
   decrypt_result = daead->DecryptDeterministically("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+            decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
                       decrypt_result.status().error_message());
 

@@ -190,7 +190,7 @@ TEST(DecryptingRandomAccessStreamTest, TooManySegments) {
   auto dec_stream = std::move(dec_stream_result.ValueOrDie());
 
   auto result = dec_stream->size();
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_THAT(result.status().error_message(), HasSubstr("too many segments"));
 }
 

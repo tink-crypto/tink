@@ -136,8 +136,8 @@ class EciesAeadHkdfHybridDecryptTest : public ::testing::Test {
         auto decrypt_result =
             hybrid_decrypt->Decrypt(Random::GetRandomBytes(16), context_info);
         EXPECT_FALSE(decrypt_result.ok());
-        EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                  decrypt_result.status().error_code());
+        EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+                  decrypt_result.status().code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext too short",
                             decrypt_result.status().error_message());
       }
@@ -161,7 +161,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EciesAeadHkdfPrivateKey recipient_key;
     auto result = EciesAeadHkdfHybridDecrypt::New(recipient_key);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
                         result.status().error_message());
   }
@@ -173,7 +173,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     recipient_key.mutable_public_key()->set_y("some y bytes");
     auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
                         result.status().error_message());
   }
@@ -187,7 +187,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     recipient_key.mutable_public_key()->mutable_params();
     auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::UNIMPLEMENTED, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kUnimplemented, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
                         result.status().error_message());
   }
@@ -208,7 +208,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     aead_dem->set_type_url("some.type.url/that.is.not.supported");
     auto result(EciesAeadHkdfHybridDecrypt::New(recipient_key));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported DEM",
                         result.status().error_message());
   }
@@ -226,7 +226,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testGettingHybridEncryptWithoutManager) {
   // Try to get a HybridEncrypt primitive without DEM key manager.
   auto bad_result(EciesAeadHkdfHybridDecrypt::New(ecies_key));
   EXPECT_FALSE(bad_result.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, bad_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, bad_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
                       bad_result.status().error_message());
 }

@@ -64,8 +64,8 @@ TEST_F(PublicKeyVerifyFactoryTest, testBasic) {
   auto public_key_verify_result = PublicKeyVerifyFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(public_key_verify_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-      public_key_verify_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+      public_key_verify_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
       public_key_verify_result.status().error_message());
 }
