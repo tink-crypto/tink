@@ -82,15 +82,19 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
     return _jwt_format.create_signed_compact(unsigned,
                                              self._compute_mac(unsigned))
 
-  def verify_mac_and_decode(
-      self, compact: Text,
-      validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
+  def verify_mac_and_decode_with_kid(
+      self, compact: Text, validator: _jwt_validator.JwtValidator,
+      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token."""
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, mac = parts
     self._verify_mac(mac, unsigned_compact)
     header = _json_util.json_loads(json_header)
-    _jwt_format.validate_header(header, self._algorithm)
+    _jwt_format.validate_header(
+        header=header,
+        algorithm=self._algorithm,
+        tink_kid=kid,
+        custom_kid=self._custom_kid)
     raw_jwt = _raw_jwt.raw_jwt_from_json(
         _jwt_format.get_type_header(header), json_payload)
     _jwt_validator.validate(validator, raw_jwt)

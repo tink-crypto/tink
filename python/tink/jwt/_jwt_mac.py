@@ -85,7 +85,7 @@ class JwtMacInternal(object):
   """Internal interface for authenticating and verifying JWT with JWS MAC.
 
   "kid" is an optional value that is set by the wrapper for keys with output
-  prefix TINK, and it is set to None for output prefix RAW.
+  prefix TINK. It is set to None for output prefix RAW.
   """
 
   @abc.abstractmethod
@@ -94,7 +94,7 @@ class JwtMacInternal(object):
     raise NotImplementedError()
 
   @abc.abstractmethod
-  def verify_mac_and_decode(
-      self, compact: Text,
-      validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
+  def verify_mac_and_decode_with_kid(
+      self, compact: Text, validator: _jwt_validator.JwtValidator,
+      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
     raise NotImplementedError()

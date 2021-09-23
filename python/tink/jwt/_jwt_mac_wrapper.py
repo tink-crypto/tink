@@ -69,7 +69,9 @@ class _WrappedJwtMac(_jwt_mac.JwtMac):
     for entries in self._primitive_set.all():
       for entry in entries:
         try:
-          return entry.primitive.verify_mac_and_decode(compact, validator)
+          kid = _jwt_format.get_kid(entry.key_id, entry.output_prefix_type)
+          return entry.primitive.verify_mac_and_decode_with_kid(
+              compact, validator, kid)
         except core.TinkError as e:
           if isinstance(e, _jwt_error.JwtInvalidError):
             interesting_error = e
