@@ -36,11 +36,6 @@ const (
 // It generates new KMSEnvelopeAEADKey keys and produces new instances of KMSEnvelopeAEAD subtle.
 type kmsEnvelopeAEADKeyManager struct{}
 
-// newKMSEnvelopeAEADKeyManager creates a new aesGcmKeyManager.
-func newKMSEnvelopeAEADKeyManager() *kmsEnvelopeAEADKeyManager {
-	return new(kmsEnvelopeAEADKeyManager)
-}
-
 // Primitive creates an KMSEnvelopeAEAD subtle for the given serialized KMSEnvelopeAEADKey proto.
 func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

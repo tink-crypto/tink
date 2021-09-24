@@ -47,11 +47,6 @@ var errInvalidAESCTRHMACAEADKeyFormat = fmt.Errorf("aes_ctr_hmac_aead_key_manage
 // It generates new AESCTRHMACAEADKey keys and produces new instances of EncryptThenAuthenticate subtle.
 type aesCTRHMACAEADKeyManager struct{}
 
-// newAESCTRHMACAEADKeyManager creates a new aesCTRHMACAEADKeyManager.
-func newAESCTRHMACAEADKeyManager() *aesCTRHMACAEADKeyManager {
-	return new(aesCTRHMACAEADKeyManager)
-}
-
 // Primitive creates an AEAD for the given serialized AESCTRHMACAEADKey proto.
 func (km *aesCTRHMACAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

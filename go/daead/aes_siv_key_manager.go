@@ -37,11 +37,6 @@ const (
 // It generates new AesSivKey keys and produces new instances of AESSIV subtle.
 type aesSIVKeyManager struct{}
 
-// newAESSIVKeyManager creates a new aesSIVKeyManager.
-func newAESSIVKeyManager() *aesSIVKeyManager {
-	return new(aesSIVKeyManager)
-}
-
 // Primitive creates an AESSIV subtle for the given serialized AesSivKey proto.
 func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

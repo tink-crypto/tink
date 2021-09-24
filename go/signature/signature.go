@@ -28,18 +28,18 @@ import (
 
 func init() {
 	// ECDSA
-	if err := registry.RegisterKeyManager(newECDSASignerKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(ecdsaSignerKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newECDSAVerifierKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(ecdsaVerifierKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
 
 	// ED25519
-	if err := registry.RegisterKeyManager(newED25519SignerKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(ed25519SignerKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newED25519VerifierKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(ed25519VerifierKeyManager)); err != nil {
 		panic(fmt.Sprintf("signature.init() failed: %v", err))
 	}
 }

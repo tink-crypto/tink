@@ -43,11 +43,6 @@ var errInvalidED25519SignKeyFormat = errors.New("ed25519_signer_key_manager: inv
 // It generates new ED25519PrivateKeys and produces new instances of ED25519Sign subtle.
 type ed25519SignerKeyManager struct{}
 
-// newED25519SignerKeyManager creates a new ed25519SignerKeyManager.
-func newED25519SignerKeyManager() *ed25519SignerKeyManager {
-	return new(ed25519SignerKeyManager)
-}
-
 // Primitive creates an ED25519Sign subtle for the given serialized ED25519PrivateKey proto.
 func (km *ed25519SignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

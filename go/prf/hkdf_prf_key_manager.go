@@ -40,11 +40,6 @@ var errInvalidHKDFPRFKeyFormat = errors.New("hkdf_prf_key_manager: invalid key f
 // hkdfprfKeyManager generates new HKDF PRF keys and produces new instances of HKDF.
 type hkdfprfKeyManager struct{}
 
-// newHKDFPRFKeyManager returns a new hkdfprfKeyManager.
-func newHKDFPRFKeyManager() *hkdfprfKeyManager {
-	return new(hkdfprfKeyManager)
-}
-
 // Primitive constructs a HKDF instance for the given serialized HKDFKey.
 func (km *hkdfprfKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

@@ -44,11 +44,6 @@ type aesGCMKeyManager struct{}
 // Assert that aesGCMKeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*aesGCMKeyManager)(nil)
 
-// newAESGCMKeyManager creates a new aesGcmKeyManager.
-func newAESGCMKeyManager() *aesGCMKeyManager {
-	return new(aesGCMKeyManager)
-}
-
 // Primitive creates an AESGCM subtle for the given serialized AESGCMKey proto.
 func (km *aesGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

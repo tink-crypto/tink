@@ -44,11 +44,6 @@ var errInvalidECDSASignKeyFormat = errors.New("ecdsa_signer_key_manager: invalid
 // It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
 type ecdsaSignerKeyManager struct{}
 
-// newECDSASignerKeyManager creates a new ecdsaSignerKeyManager.
-func newECDSASignerKeyManager() *ecdsaSignerKeyManager {
-	return new(ecdsaSignerKeyManager)
-}
-
 // Primitive creates an ECDSASign subtle for the given serialized ECDSAPrivateKey proto.
 func (km *ecdsaSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

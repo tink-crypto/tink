@@ -45,11 +45,6 @@ type xChaCha20Poly1305KeyManager struct{}
 // Assert that xChaCha20Poly1305KeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*xChaCha20Poly1305KeyManager)(nil)
 
-// newXChaCha20Poly1305KeyManager creates a new xChaCha20Poly1305KeyManager.
-func newXChaCha20Poly1305KeyManager() *xChaCha20Poly1305KeyManager {
-	return new(xChaCha20Poly1305KeyManager)
-}
-
 // Primitive creates an XChaCha20Poly1305 subtle for the given serialized XChaCha20Poly1305Key proto.
 func (km *xChaCha20Poly1305KeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

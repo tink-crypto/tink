@@ -40,11 +40,6 @@ var errED25519VerifierNotImplemented = fmt.Errorf("ed25519_verifier_key_manager:
 // It doesn't support key generation.
 type ed25519VerifierKeyManager struct{}
 
-// newED25519VerifierKeyManager creates a new ed25519VerifierKeyManager.
-func newED25519VerifierKeyManager() *ed25519VerifierKeyManager {
-	return new(ed25519VerifierKeyManager)
-}
-
 // Primitive creates an ED25519Verifier subtle for the given serialized ED25519PublicKey proto.
 func (km *ed25519VerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

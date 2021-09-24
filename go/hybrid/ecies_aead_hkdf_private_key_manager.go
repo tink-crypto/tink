@@ -45,11 +45,6 @@ type eciesAEADHKDFPrivateKeyKeyManager struct{}
 // Assert that eciesAEADHKDFPrivateKeyKeyManager implements the PrivateKeyManager interface.
 var _ registry.PrivateKeyManager = (*eciesAEADHKDFPrivateKeyKeyManager)(nil)
 
-// newECIESAEADHKDFPrivateKeyKeyManager creates a new aesGcmKeyManager.
-func newECIESAEADHKDFPrivateKeyKeyManager() *eciesAEADHKDFPrivateKeyKeyManager {
-	return new(eciesAEADHKDFPrivateKeyKeyManager)
-}
-
 // Primitive creates an ECIESAEADHKDFPrivateKey subtle for the given serialized ECIESAEADHKDFPrivateKey proto.
 func (km *eciesAEADHKDFPrivateKeyKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

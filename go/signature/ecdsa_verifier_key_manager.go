@@ -39,11 +39,6 @@ var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not
 // It doesn't support key generation.
 type ecdsaVerifierKeyManager struct{}
 
-// newECDSAVerifierKeyManager creates a new ecdsaVerifierKeyManager.
-func newECDSAVerifierKeyManager() *ecdsaVerifierKeyManager {
-	return new(ecdsaVerifierKeyManager)
-}
-
 // Primitive creates an ECDSAVerifier subtle for the given serialized ECDSAPublicKey proto.
 func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {
 	if len(serializedKey) == 0 {

@@ -28,10 +28,10 @@ import (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(newHMACKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(hmacKeyManager)); err != nil {
 		panic(fmt.Sprintf("mac.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newAESCMACKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(aescmacKeyManager)); err != nil {
 		panic(fmt.Sprintf("mac.init() failed: %v", err))
 	}
 }
