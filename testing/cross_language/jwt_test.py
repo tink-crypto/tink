@@ -16,6 +16,7 @@
 # Placeholder for import for type annotations
 
 import datetime
+import json
 from typing import Iterable, Text
 
 from absl.testing import absltest
@@ -173,6 +174,38 @@ class JwtTest(parameterized.TestCase):
         verified_jwt = verifier.verify_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
 
+        # Additional tests for the "kid" property of the JWK and the "kid"
+        # header of the token. Either of them may be missing, but they must not
+        # have different values.
+        jwks = json.loads(public_jwk_set)
+        has_kid = 'kid' in jwks['keys'][0]
+        if has_kid:
+          # Change the "kid" property of the JWK.
+          jwks['keys'][0]['kid'] = 'unknown kid'
+          public_keyset = testing_servers.jwk_set_to_keyset(
+              lang2, json.dumps(jwks))
+          verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
+          with self.assertRaises(
+              tink.TinkError,
+              msg='%s accepts tokens with an incorrect kid unexpectedly' %
+              lang2):
+            verifier.verify_and_decode(compact, validator)
+
+          # Remove the "kid" property of the JWK.
+          del jwks['keys'][0]['kid']
+          public_keyset = testing_servers.jwk_set_to_keyset(
+              lang2, json.dumps(jwks))
+          verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
+          verified_jwt = verifier.verify_and_decode(compact, validator)
+          self.assertEqual(verified_jwt.issuer(), 'issuer')
+        else:
+          # Add a "kid" property of the JWK.
+          jwks['keys'][0]['kid'] = 'unknown kid'
+          public_keyset = testing_servers.jwk_set_to_keyset(
+              lang2, json.dumps(jwks))
+          verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
+          verified_jwt = verifier.verify_and_decode(compact, validator)
+          self.assertEqual(verified_jwt.issuer(), 'issuer')
 
 if __name__ == '__main__':
   absltest.main()
