@@ -31,12 +31,6 @@ def setUpModule():
 
 class JwtKeyTemplatesTest(parameterized.TestCase):
 
-  @parameterized.named_parameters(('0', 0, b'\x00'), ('256', 256, b'\x01\x00'),
-                                  ('65537', 65537, b'\x01\x00\x01'))
-  def test_num_to_bytes(self, number, expected):
-    self.assertEqual(jwt._jwt_key_templates._num_to_bytes(number),
-                     expected)
-
   @parameterized.named_parameters([
       ('JWT_HS256', jwt.jwt_hs256_template()),
       ('JWT_HS256_RAW', jwt.raw_jwt_hs256_template()),

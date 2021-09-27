@@ -91,21 +91,7 @@ py_library(
     srcs = ["_signature_key_templates.py"],
     srcs_version = "PY3",
     deps = [
-        "//tink/proto:common_py_pb2",
-        "//tink/proto:ecdsa_py_pb2",
-        "//tink/proto:rsa_ssa_pkcs1_py_pb2",
-        "//tink/proto:rsa_ssa_pss_py_pb2",
-        "//tink/proto:tink_py_pb2",
-    ],
-)
-
-py_test(
-    name = "_signature_key_templates_test",
-    srcs = ["_signature_key_templates_test.py"],
-    srcs_version = "PY3",
-    deps = [
-        ":signature",
-        requirement("absl-py"),
+        "//tink/internal:big_integer_util",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:rsa_ssa_pkcs1_py_pb2",

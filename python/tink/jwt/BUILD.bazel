@@ -94,6 +94,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink:tink_python",
+        "//tink/internal:big_integer_util",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
@@ -255,8 +256,8 @@ py_test(
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
-        "//tink:tink_python",
         "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
         "//tink/testing:keyset_builder",
     ],
 )
@@ -327,8 +328,8 @@ py_test(
         "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
-        "//tink:tink_python",
         "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
         "//tink/testing:keyset_builder",
     ],
 )

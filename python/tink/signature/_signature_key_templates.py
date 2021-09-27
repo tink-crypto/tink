@@ -31,6 +31,8 @@ from tink.proto import ecdsa_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2
 from tink.proto import rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
+from tink.internal import big_integer_util
+
 
 _prefix = 'type.googleapis.com/google.crypto.tink.'
 _ECDSA_KEY_TYPE_URL = _prefix + 'EcdsaPrivateKey'
@@ -38,22 +40,6 @@ _ED25519_KEY_TYPE_URL = _prefix + 'Ed25519PrivateKey'
 _RSA_PKCS1_KEY_TYPE_URL = _prefix + 'RsaSsaPkcs1PrivateKey'
 _RSA_PSS_KEY_TYPE_URL = _prefix + 'RsaSsaPssPrivateKey'
 _RSA_F4 = 65537
-
-
-def _num_to_bytes(n: int) -> bytes:
-  """Converts a number to bytes."""
-  if n < 0:
-    raise OverflowError("number can't be negative")
-
-  if n == 0:
-    return b'\x00'
-
-  octets = bytearray()
-  while n:
-    octets.append(n % 256)
-    n //= 256
-
-  return bytes(octets[::-1])
 
 
 def create_ecdsa_key_template(
@@ -83,7 +69,7 @@ def create_rsa_ssa_pkcs1_key_template(hash_type: common_pb2.HashType,
   key_format = rsa_ssa_pkcs1_pb2.RsaSsaPkcs1KeyFormat(
       params=params,
       modulus_size_in_bits=modulus_size,
-      public_exponent=_num_to_bytes(public_exponent))
+      public_exponent=big_integer_util.num_to_bytes(public_exponent))
   key_template = tink_pb2.KeyTemplate(
       value=key_format.SerializeToString(),
       type_url=_RSA_PKCS1_KEY_TYPE_URL,
@@ -103,7 +89,7 @@ def create_rsa_ssa_pss_key_template(sig_hash: common_pb2.HashType,
   key_format = rsa_ssa_pss_pb2.RsaSsaPssKeyFormat(
       params=params,
       modulus_size_in_bits=modulus_size,
-      public_exponent=_num_to_bytes(public_exponent))
+      public_exponent=big_integer_util.num_to_bytes(public_exponent))
   key_template = tink_pb2.KeyTemplate(
       value=key_format.SerializeToString(),
       type_url=_RSA_PSS_KEY_TYPE_URL,
