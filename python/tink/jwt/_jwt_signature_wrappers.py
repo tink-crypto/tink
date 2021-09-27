@@ -69,7 +69,6 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
 
 
 def _validate_primitive_set(pset: core.PrimitiveSet):
-  # TODO(juerg): also validate that there is a primary
   for entries in pset.all():
     for entry in entries:
       if (entry.output_prefix_type != tink_pb2.RAW and

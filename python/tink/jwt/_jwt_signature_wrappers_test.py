@@ -304,5 +304,12 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       handle.public_keyset_handle().primitive(jwt.JwtPublicKeyVerify)
 
+  def test_jwt_mac_from_keyset_without_primary_fails(self):
+    builder = keyset_builder.new_keyset_builder()
+    builder.add_new_key(jwt.jwt_es256_template())
+    with self.assertRaises(tink.TinkError):
+      builder.keyset_handle()
+
+
 if __name__ == '__main__':
   absltest.main()
