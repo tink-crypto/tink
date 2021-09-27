@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import abc
 
-from typing import Text
+from typing import Optional, Text
 
 import six
 
@@ -62,4 +62,19 @@ class JwtPublicKeyVerify(object):
     Raises:
       tink.TinkError if the operation fails.
     """
+    raise NotImplementedError()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class JwtPublicKeyVerifyInternal(object):
+  """Internal interface for creating a signed JWT.
+
+  "kid" is an optional value that is set by the wrapper for keys with output
+  prefix TINK. It is set to None for output prefix RAW.
+  """
+
+  @abc.abstractmethod
+  def verify_and_decode_with_kid(
+      self, compact: Text, validator: _jwt_validator.JwtValidator,
+      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
     raise NotImplementedError()

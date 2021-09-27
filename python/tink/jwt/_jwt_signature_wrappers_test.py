@@ -215,11 +215,13 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     other_verify = other_handle.public_keyset_handle().primitive(
         jwt.JwtPublicKeyVerify)
 
-    # The kid header is currently ignored in the validation.
     verify.verify_and_decode(token_with_kid, validator)
-    # TODO(juerg): Add check that these fail.
-    tink_verify.verify_and_decode(token, validator)
-    other_verify.verify_and_decode(token_with_kid, validator)
+    # For output prefix type TINK, the kid header is required.
+    with self.assertRaises(tink.TinkError):
+      tink_verify.verify_and_decode(token, validator)
+    # This should fail because value of the kid header is wrong.
+    with self.assertRaises(tink.TinkError):
+      other_verify.verify_and_decode(token_with_kid, validator)
 
   @parameterized.named_parameters([
       ('JWT_ES256_RAW', jwt.raw_jwt_es256_template()),
@@ -253,27 +255,31 @@ class JwtSignatureWrapperTest(parameterized.TestCase):
     self.assertEqual(_json_util.json_loads(header_with_kid)['kid'],
                      LONG_CUSTOM_KID)
 
-    # The kid header is currently ignored.
+    # The primitive with a custom_kid set accepts tokens without kid header.
     custom_kid_verify.verify_and_decode(token, validator)
+
+    # The primitive without a custom_kid set ignores the kid header.
     verify.verify_and_decode(token_with_kid, validator)
 
     # key with a different custom_kid set
     other_handle = _set_custom_kid(handle, custom_kid='other kid')
     other_verify = other_handle.public_keyset_handle().primitive(
         jwt.JwtPublicKeyVerify)
-    # The kid header is currently ignored.
-    other_verify.verify_and_decode(token_with_kid, validator)
+    # Fails because the kid value do not match.
+    with self.assertRaises(tink.TinkError):
+      other_verify.verify_and_decode(token_with_kid, validator)
 
     tink_handle = _change_output_prefix_to_tink(custom_kid_handle)
     tink_sign = tink_handle.primitive(jwt.JwtPublicKeySign)
     tink_verify = tink_handle.public_keyset_handle().primitive(
         jwt.JwtPublicKeyVerify)
-    # having custom_kid set with output prefix TINK is not allowed
+    # Having custom_kid set with output prefix TINK is not allowed.
     with self.assertRaises(tink.TinkError):
       tink_sign.sign_and_encode(raw_jwt)
-    # This is currently not checked in the verification.
-    tink_verify.verify_and_decode(token, validator)
-    tink_verify.verify_and_decode(token_with_kid, validator)
+    with self.assertRaises(tink.TinkError):
+      tink_verify.verify_and_decode(token, validator)
+    with self.assertRaises(tink.TinkError):
+      tink_verify.verify_and_decode(token_with_kid, validator)
 
   def test_legacy_template_fails(self):
     template = keyset_builder.legacy_template(jwt.jwt_es256_template())

@@ -100,7 +100,7 @@ class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySignInternal):
     return _jwt_format.create_signed_compact(unsigned, self._sign(unsigned))
 
 
-class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
+class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerifyInternal):
   """Implementation of JwtPublicKeyVerify using a PublicKeyVerify."""
 
   def __init__(self, cc_primitive: tink_bindings.PublicKeyVerify,
@@ -113,15 +113,20 @@ class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
   def _verify(self, signature: bytes, data: bytes) -> None:
     self._public_key_verify.verify(signature, data)
 
-  def verify_and_decode(
+  def verify_and_decode_with_kid(
       self, compact: Text,
-      validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
+      validator: _jwt_validator.JwtValidator,
+      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a signed compact JWT token."""
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, signature = parts
     self._verify(signature, unsigned_compact)
     header = _json_util.json_loads(json_header)
-    _jwt_format.validate_header(header, self._algorithm)
+    _jwt_format.validate_header(
+        header=header,
+        algorithm=self._algorithm,
+        tink_kid=kid,
+        custom_kid=self._custom_kid)
     raw_jwt = _raw_jwt.raw_jwt_from_json(
         _jwt_format.get_type_header(header), json_payload)
     _jwt_validator.validate(validator, raw_jwt)
@@ -166,7 +171,7 @@ class _JwtPublicKeySignKeyManagerCcToPyWrapper(
 
 
 class _JwtPublicKeyVerifyKeyManagerCcToPyWrapper(
-    core.KeyManager[_jwt_public_key_verify.JwtPublicKeyVerify]):
+    core.KeyManager[_jwt_public_key_verify.JwtPublicKeyVerifyInternal]):
   """Converts a C++ verify key manager into a JwtPublicKeyVerifyKeyManager."""
 
   def __init__(self, cc_key_manager: tink_bindings.PublicKeyVerifyKeyManager,
@@ -175,13 +180,14 @@ class _JwtPublicKeyVerifyKeyManagerCcToPyWrapper(
     self._cc_key_manager = cc_key_manager
     self._key_data_to_alg_kid = key_data_to_alg_kid
 
-  def primitive_class(self) -> Type[_jwt_public_key_verify.JwtPublicKeyVerify]:
-    return _jwt_public_key_verify.JwtPublicKeyVerify
+  def primitive_class(
+      self) -> Type[_jwt_public_key_verify.JwtPublicKeyVerifyInternal]:
+    return _jwt_public_key_verify.JwtPublicKeyVerifyInternal
 
   @core.use_tink_errors
   def primitive(
-      self,
-      key_data: tink_pb2.KeyData) -> _jwt_public_key_verify.JwtPublicKeyVerify:
+      self, key_data: tink_pb2.KeyData
+  ) -> _jwt_public_key_verify.JwtPublicKeyVerifyInternal:
     verify = self._cc_key_manager.primitive(key_data.SerializeToString())
     algorithm, custom_kid = self._key_data_to_alg_kid(key_data)
     return _JwtPublicKeyVerify(verify, algorithm, custom_kid)

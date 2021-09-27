@@ -131,7 +131,7 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
               expected_issuer='issuer', allow_missing_expiration=True))
 
   def test_bad_tokens_with_valid_signatures_fail(self):
-    handle = tink.new_keyset_handle(jwt.jwt_es256_template())
+    handle = tink.new_keyset_handle(jwt.raw_jwt_es256_template())
     sign = handle.primitive(jwt.JwtPublicKeySign)
     # get the raw sign primitive, so that we can create correct signatures
     wrapped = cast(_jwt_signature_wrappers._WrappedJwtPublicKeySign, sign)
