@@ -16,7 +16,7 @@
 import base64
 import datetime
 
-from typing import Text
+from typing import Any, Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -54,17 +54,21 @@ def _fixed_key_data() -> tink_pb2.KeyData:
       value=jwt_hmac_key.SerializeToString())
 
 
+def _cc_mac() -> Any:
+  key_data = _fixed_key_data()
+  cc_key_manager = tink_bindings.MacKeyManager.from_cc_registry(
+      'type.googleapis.com/google.crypto.tink.JwtHmacKey')
+  return cc_key_manager.primitive(key_data.SerializeToString())
+
+
 def create_fixed_jwt_hmac() -> _jwt_mac.JwtMacInternal:
   key_data = _fixed_key_data()
   key_manager = _jwt_hmac_key_manager.MacCcToPyJwtMacKeyManager()
   return key_manager.primitive(key_data)
 
 
-def create_signed_token(json_header: Text, json_payload: Text) -> Text:
-  key_data = _fixed_key_data()
-  cc_key_manager = tink_bindings.MacKeyManager.from_cc_registry(
-      'type.googleapis.com/google.crypto.tink.JwtHmacKey')
-  cc_mac = cc_key_manager.primitive(key_data.SerializeToString())
+def gen_token(json_header: Text, json_payload: Text) -> Text:
+  cc_mac = _cc_mac()
   unsigned_token = (
       _jwt_format.encode_header(json_header) + b'.' +
       _jwt_format.encode_payload(json_payload))
@@ -152,62 +156,99 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
           jwt.new_validator(expected_issuer='jane', fixed_now=DATETIME_1970),
           kid=None)
 
-  def test_valid_signed_compact(self):
-    jwt_hmac = create_fixed_jwt_hmac()
-
-    valid_token = create_signed_token('{"alg":"HS256"}', '{"iss":"joe"}')
-    verified = jwt_hmac.verify_mac_and_decode_with_kid(
-        valid_token,
-        jwt.new_validator(
-            expected_issuer='joe',
-            allow_missing_expiration=True,
-            fixed_now=DATETIME_1970),
-        kid=None)
-    self.assertEqual(verified.issuer(), 'joe')
-
-    token_with_unknown_typ = create_signed_token(
-        '{"alg":"HS256","typ":"unknown"}', '{"iss":"joe"}')
-    verified2 = jwt_hmac.verify_mac_and_decode_with_kid(
-        token_with_unknown_typ,
-        jwt.new_validator(
-            expected_type_header='unknown',
-            expected_issuer='joe',
-            allow_missing_expiration=True,
-            fixed_now=DATETIME_1970),
-        kid=None)
-    self.assertEqual(verified2.issuer(), 'joe')
-
-    token_with_unknown_kid = create_signed_token(
-        '{"kid":"unknown","alg":"HS256"}', '{"iss":"joe"}')
-    verified2 = jwt_hmac.verify_mac_and_decode_with_kid(
-        token_with_unknown_kid,
-        jwt.new_validator(
-            expected_issuer='joe',
-            allow_missing_expiration=True,
-            fixed_now=DATETIME_1970),
-        kid=None)
-    self.assertEqual(verified2.issuer(), 'joe')
-
-  def test_invalid_signed_compact_with_valid_signature(self):
+  def test_weird_tokens_with_valid_macs(self):
     jwt_hmac = create_fixed_jwt_hmac()
     validator = jwt.new_validator(
-        expected_issuer='joe',
-        allow_missing_expiration=True,
-        fixed_now=DATETIME_1970)
+        expected_issuer='joe', allow_missing_expiration=True)
+    cc_mac = _cc_mac()
 
-    # token with valid signature but invalid alg header
-    token_with_invalid_header = create_signed_token('{"alg":"RS256"}',
-                                                    '{"iss":"joe"}')
+    # Normal token.
+    valid_token = gen_token('{"alg":"HS256"}', '{"iss":"joe"}')
+    verified = jwt_hmac.verify_mac_and_decode_with_kid(
+        valid_token, validator, kid=None)
+    self.assertEqual(verified.issuer(), 'joe')
+
+    # Token with unknown header is valid.
+    token_with_unknown_header = gen_token(
+        '{"unknown_header":"123","alg":"HS256"}', '{"iss":"joe"}')
+    verified2 = jwt_hmac.verify_mac_and_decode_with_kid(
+        token_with_unknown_header, validator, kid=None)
+    self.assertEqual(verified2.issuer(), 'joe')
+
+    # Token with unknown kid is valid, since primitives with output prefix type
+    # RAW ignore kid headers.
+    token_with_unknown_kid = gen_token('{"kid":"unknown","alg":"HS256"}',
+                                       '{"iss":"joe"}')
+    verified2 = jwt_hmac.verify_mac_and_decode_with_kid(
+        token_with_unknown_kid, validator, kid=None)
+    self.assertEqual(verified2.issuer(), 'joe')
+
+    # Token with invalid alg header
+    alg_invalid = gen_token('{"alg":"HS384"}', '{"iss":"joe"}')
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(alg_invalid, validator, kid=None)
+
+    # Token with empty header
+    empty_header = gen_token('{}', '{"iss":"joe"}')
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(empty_header, validator, kid=None)
+
+    # Token header is not valid JSON
+    header_invalid = gen_token('{"alg":"HS256"', '{"iss":"joe"}')
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode_with_kid(
-          token_with_invalid_header, validator, kid=None)
+          header_invalid, validator, kid=None)
 
-    # token with valid signature but invalid json in payload
-    token_with_invalid_payload = create_signed_token('{"alg":"HS256"}',
-                                                     '{"iss":"joe"')
+    # Token payload is not valid JSON
+    payload_invalid = gen_token('{"alg":"HS256"}', '{"iss":"joe"')
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode_with_kid(
-          token_with_invalid_payload, validator, kid=None)
+          payload_invalid, validator, kid=None)
+
+    # Token with whitespace in header JSON string is valid.
+    whitespace_in_header = gen_token(' {"alg":   \n  "HS256"} \n ',
+                                     '{"iss":"joe" }')
+    verified_jwt = jwt_hmac.verify_mac_and_decode_with_kid(
+        whitespace_in_header, validator, kid=None)
+    self.assertEqual(verified_jwt.issuer(), 'joe')
+
+    # Token with whitespace in payload JSON string is valid.
+    whitespace_in_payload = gen_token('{"alg":"HS256"}',
+                                      ' {"iss": \n"joe" } \n')
+    verified_jwt = jwt_hmac.verify_mac_and_decode_with_kid(
+        whitespace_in_payload, validator, kid=None)
+    self.assertEqual(verified_jwt.issuer(), 'joe')
+
+    # Token with whitespace in base64-encoded header is invalid.
+    with_whitespace_in_encoding = (
+        _jwt_format.encode_header('{"alg":"HS256"}') + b' .' +
+        _jwt_format.encode_payload('{"iss":"joe"}'))
+    token_with_whitespace_in_encoding = _jwt_format.create_signed_compact(
+        with_whitespace_in_encoding,
+        cc_mac.compute_mac(with_whitespace_in_encoding))
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          token_with_whitespace_in_encoding, validator, kid=None)
+
+    # Token with invalid character is invalid.
+    with_invalid_char = (
+        _jwt_format.encode_header('{"alg":"HS256"}') + b'.?' +
+        _jwt_format.encode_payload('{"iss":"joe"}'))
+    token_with_invalid_char = _jwt_format.create_signed_compact(
+        with_invalid_char, cc_mac.compute_mac(with_invalid_char))
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          token_with_invalid_char, validator, kid=None)
+
+    # Token with additional '.' is invalid.
+    with_dot = (
+        _jwt_format.encode_header('{"alg":"HS256"}') + b'.' +
+        _jwt_format.encode_payload('{"iss":"joe"}') + b'.')
+    token_with_dot = _jwt_format.create_signed_compact(
+        with_dot, cc_mac.compute_mac(with_dot))
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          token_with_dot, validator, kid=None)
 
   @parameterized.named_parameters([
       ('modified_signature',
