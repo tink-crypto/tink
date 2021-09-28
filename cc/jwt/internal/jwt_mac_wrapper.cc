@@ -91,8 +91,8 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
         jwt_mac.VerifyMacAndDecodeWithKid(compact, validator, kid);
     if (verified_jwt.ok()) {
       return verified_jwt;
-    } else if (verified_jwt.status().error_code() !=
-               util::error::UNAUTHENTICATED) {
+    } else if (verified_jwt.status().code() !=
+               absl::StatusCode::kUnauthenticated) {
       // errors that are not the result of a MAC verification
       interesting_status = verified_jwt.status();
     }

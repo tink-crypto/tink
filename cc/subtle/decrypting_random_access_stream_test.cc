@@ -256,7 +256,7 @@ TEST(DecryptingRandomAccessStreamTest, SelectiveDecryption) {
                   dec_stream->PRead(position, chunk_size, buffer.get());
               if (position <= pt_size) {
                 EXPECT_TRUE(status.ok() ||
-                            status.error_code() == util::error::OUT_OF_RANGE);
+                            status.code() == absl::StatusCode::kOutOfRange);
               } else {
                 EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
               }

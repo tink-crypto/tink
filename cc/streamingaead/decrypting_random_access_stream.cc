@@ -107,7 +107,7 @@ util::Status DecryptingRandomAccessStream::PRead(
     if (decrypting_stream_result.ok()) {
       auto status = decrypting_stream_result.ValueOrDie()->PRead(
           position, count, dest_buffer);
-      if (status.ok() || status.error_code() == util::error::OUT_OF_RANGE) {
+      if (status.ok() || status.code() == absl::StatusCode::kOutOfRange) {
         // Found a match.
         matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());
         return status;

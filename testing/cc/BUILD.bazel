@@ -134,6 +134,7 @@ cc_library(
     deps = [
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
         "@tink_cc",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",

@@ -68,7 +68,7 @@ util::StatusOr<int> PythonInputStream::Next(const void** data) {
   auto read_result = adapter_->Read(buffer_.size());
   if (is_eof(read_result.status())) {
     return status_ = util::Status(util::error::OUT_OF_RANGE, "EOF");
-  } else if (read_result.status().error_code() == util::error::OUT_OF_RANGE) {
+  } else if (read_result.status().code() == absl::StatusCode::kOutOfRange) {
     // We need to change the error code because for InputStream OUT_OF_RANGE
     // status always means EOF.
     return status_ = util::Status(util::error::UNKNOWN,

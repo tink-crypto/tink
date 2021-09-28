@@ -20,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
@@ -270,8 +271,7 @@ void CliUtil::CopyStream(InputStream* input_stream,
   const void* in_buffer;
   while (true) {
     auto next_result = input_stream->Next(&in_buffer);
-    if (next_result.status().error_code() ==
-        crypto::tink::util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       auto status = output_stream->Close();
       if (!status.ok()) {

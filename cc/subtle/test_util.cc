@@ -56,7 +56,7 @@ util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
   output->clear();
   while (true) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       return util::OkStatus();
     }

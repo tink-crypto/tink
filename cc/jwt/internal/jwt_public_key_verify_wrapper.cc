@@ -78,8 +78,8 @@ JwtPublicKeyVerifySetWrapper::VerifyAndDecode(
         jwt_verify.VerifyAndDecodeWithKid(compact, validator, kid);
     if (verified_jwt.ok()) {
       return verified_jwt;
-    } else if (verified_jwt.status().error_code() !=
-               util::error::UNAUTHENTICATED) {
+    } else if (verified_jwt.status().code() !=
+               absl::StatusCode::kUnauthenticated) {
       // errors that are not the result of a signature verification
       interesting_status = verified_jwt.status();
     }

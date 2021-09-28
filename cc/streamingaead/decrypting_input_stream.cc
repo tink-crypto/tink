@@ -77,7 +77,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
         std::move(shared_ct), associated_data_);
     if (decrypting_stream_result.ok()) {
       auto next_result = decrypting_stream_result.ValueOrDie()->Next(data);
-      if (next_result.status().error_code() == util::error::OUT_OF_RANGE ||
+      if (next_result.status().code() == absl::StatusCode::kOutOfRange ||
           next_result.ok()) {  // Found a match.
         buffered_ct_source_->DisableRewinding();
         matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());

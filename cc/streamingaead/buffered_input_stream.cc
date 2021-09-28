@@ -122,7 +122,7 @@ crypto::tink::util::Status BufferedInputStream::Rewind() {
   if (!rewinding_enabled_) {
     return util::Status(util::error::INVALID_ARGUMENT, "rewinding is disabled");
   }
-  if (status_.ok() || status_.error_code() == util::error::OUT_OF_RANGE) {
+  if (status_.ok() || status_.code() == absl::StatusCode::kOutOfRange) {
     status_ = util::OkStatus();
     position_ = 0;
     count_backedup_ = 0;

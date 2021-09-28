@@ -60,7 +60,7 @@ Status ReadAndVerifyFragment(RandomAccessStream* ras, int pos, int count,
   auto buf = std::move(buf_result.ValueOrDie());
   int full_size = full_contents.size();
   auto status = ras->PRead(pos, count, buf.get());
-  if (!status.ok() && status.error_code() != util::error::OUT_OF_RANGE) {
+  if (!status.ok() && status.code() != absl::StatusCode::kOutOfRange) {
     return Status(
         crypto::tink::util::error::INTERNAL,
         absl::StrCat("PRead failed with status: ", status.ToString()));

@@ -162,9 +162,9 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/status",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",

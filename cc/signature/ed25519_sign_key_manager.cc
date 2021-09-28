@@ -87,7 +87,7 @@ StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::DeriveKey(
   crypto::tink::util::StatusOr<util::SecretData> randomness =
       ReadSecretBytesFromStream(kEd25519SecretSeedSize, input_stream);
   if (!randomness.ok()) {
-    if (randomness.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
       return crypto::tink::util::Status(
           crypto::tink::util::error::INVALID_ARGUMENT,
           "Could not get enough pseudorandomness from input stream");

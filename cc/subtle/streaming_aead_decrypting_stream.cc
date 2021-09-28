@@ -56,7 +56,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
   output->resize(count);
   while (bytes_to_be_read > 0) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       output->resize(count - bytes_to_be_read);
       return next_result.status();
@@ -118,7 +118,7 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
     std::vector<uint8_t> header;
     status_ = ReadFromStream(ct_source_.get(),
                              segment_decrypter_->get_header_size(), &header);
-    if (status_.error_code() == util::error::OUT_OF_RANGE) {
+    if (status_.code() == absl::StatusCode::kOutOfRange) {
       status_ = Status(util::error::INVALID_ARGUMENT,
                        "Could not read stream header.");
     }
@@ -128,10 +128,10 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
     is_initialized_ = true;
     count_backedup_ = 0;
     status_ = ReadFromStream(ct_source_.get(), ct_buffer_.size(), &ct_buffer_);
-    if (!status_.ok() && (status_.error_code() != util::error::OUT_OF_RANGE)) {
+    if (!status_.ok() && (status_.code() != absl::StatusCode::kOutOfRange)) {
       return status_;
     }
-    read_last_segment_ = (status_.error_code() == util::error::OUT_OF_RANGE);
+    read_last_segment_ = (status_.code() == absl::StatusCode::kOutOfRange);
     status_ = segment_decrypter_->DecryptSegment(
         ct_buffer_,
         /* segment_number = */ segment_number_,
@@ -171,10 +171,10 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
   segment_number_++;
   ct_buffer_.resize(segment_decrypter_->get_ciphertext_segment_size());
   status_ = ReadFromStream(ct_source_.get(), ct_buffer_.size(), &ct_buffer_);
-  if (!status_.ok() && (status_.error_code() != util::error::OUT_OF_RANGE)) {
+  if (!status_.ok() && (status_.code() != absl::StatusCode::kOutOfRange)) {
     return status_;
   }
-  read_last_segment_ = (status_.error_code() == util::error::OUT_OF_RANGE);
+  read_last_segment_ = (status_.code() == absl::StatusCode::kOutOfRange);
   status_ = segment_decrypter_->DecryptSegment(
       ct_buffer_,
       /* segment_number = */ segment_number_,

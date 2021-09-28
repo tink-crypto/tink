@@ -117,7 +117,7 @@ util::Status DecryptingRandomAccessStream::PRead(int64_t position, int count,
 // streams can be added in the future if needed.
 void DecryptingRandomAccessStream::InitializeIfNeeded()
     ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
-  if (status_.error_code() != util::error::UNAVAILABLE) {
+  if (status_.code() != absl::StatusCode::kUnavailable) {
     // Already initialized or stream failed permanently.
     return;
   }
@@ -133,7 +133,7 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
   auto buf = std::move(buf_result.ValueOrDie());
   status_ = ct_source_->PRead(ct_offset_, header_size_, buf.get());
   if (!status_.ok()) {
-    if (status_.error_code() == util::error::OUT_OF_RANGE) {
+    if (status_.code() == absl::StatusCode::kOutOfRange) {
       status_ = Status(util::error::INVALID_ARGUMENT, "could not read header");
     }
     return;
@@ -217,7 +217,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
   auto pread_status = ct_source_->PRead(ct_position, segment_size, ct_buffer);
   if (pread_status.ok() ||
       (is_last_segment && ct_buffer->size() > 0 &&
-       pread_status.error_code() == util::error::OUT_OF_RANGE)) {
+       pread_status.code() == absl::StatusCode::kOutOfRange)) {
     // some bytes were read
     auto dec_status = segment_decrypter_->DecryptSegment(
         std::vector<uint8_t>(ct_buffer->get_mem_block(),
@@ -271,7 +271,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
     auto segment_nr = GetSegmentNr(position + read_count);
     auto status =
         ReadAndDecryptSegment(segment_nr, ct_buffer.get(), &pt_segment);
-    if (status.ok() || status.error_code() == util::error::OUT_OF_RANGE) {
+    if (status.ok() || status.code() == absl::StatusCode::kOutOfRange) {
       int pt_count = pt_segment.size() - pt_offset;
       int to_copy_count = std::min(pt_count, remaining);
       auto s = dest_buffer->set_size(read_count + to_copy_count);
@@ -279,7 +279,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
       std::memcpy(dest_buffer->get_mem_block() + read_count,
                   pt_segment.data() + pt_offset, to_copy_count);
       pt_offset = 0;
-      if (status.error_code() == util::error::OUT_OF_RANGE &&
+      if (status.code() == absl::StatusCode::kOutOfRange &&
           to_copy_count == pt_count)
         return status;
       read_count += to_copy_count;

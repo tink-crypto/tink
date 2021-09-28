@@ -447,7 +447,7 @@ class DummyStreamingAead : public StreamingAead {
         auto next_result = ct_source_->Next(data);
         if (!next_result.ok()) {
           status_ = next_result.status();
-          if (status_.error_code() == util::error::OUT_OF_RANGE) {
+          if (status_.code() == absl::StatusCode::kOutOfRange) {
             status_ = util::Status(util::error::INVALID_ARGUMENT,
                                    "Could not read header");
           }
@@ -508,7 +508,7 @@ class DummyStreamingAead : public StreamingAead {
         crypto::tink::util::Buffer* dest_buffer) override {
       {  // Initialize, if not initialized yet.
         absl::MutexLock lock(&status_mutex_);
-        if (status_.error_code() == util::error::UNAVAILABLE) Initialize();
+        if (status_.code() == absl::StatusCode::kUnavailable) Initialize();
         if (!status_.ok()) return status_;
       }
       auto status = dest_buffer->set_size(0);
@@ -520,7 +520,7 @@ class DummyStreamingAead : public StreamingAead {
     util::StatusOr<int64_t> size() override {
       {  // Initialize, if not initialized yet.
         absl::MutexLock lock(&status_mutex_);
-        if (status_.error_code() == util::error::UNAVAILABLE) Initialize();
+        if (status_.code() == absl::StatusCode::kUnavailable) Initialize();
         if (!status_.ok()) return status_;
       }
       auto ct_size_result = ct_source_->size();
@@ -534,7 +534,7 @@ class DummyStreamingAead : public StreamingAead {
     void Initialize() ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
       auto buf = std::move(util::Buffer::New(exp_header_.size()).ValueOrDie());
       status_ = ct_source_->PRead(0, exp_header_.size(), buf.get());
-      if (!status_.ok() && status_.error_code() != util::error::OUT_OF_RANGE)
+      if (!status_.ok() && status_.code() != absl::StatusCode::kOutOfRange)
         return;
       if (buf->size() < exp_header_.size()) {
         status_ = util::Status(util::error::INVALID_ARGUMENT,

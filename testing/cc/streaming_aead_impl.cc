@@ -17,6 +17,7 @@
 // Implementation of a StreamingAEAD Service.
 #include "streaming_aead_impl.h"
 
+#include "absl/status/status.h"
 #include "tink/streaming_aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
@@ -146,7 +147,7 @@ using ::grpc::Status;
   const void* buffer;
   while (true) {
     auto next_result = decrypting_stream->Next(&buffer);
-    if (next_result.status().error_code() == tinkutil::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       break;
     }
