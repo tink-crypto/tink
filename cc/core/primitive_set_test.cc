@@ -159,10 +159,10 @@ TEST_F(PrimitiveSetTest, Basic) {
 
   PrimitiveSet<Mac> primitive_set;
   EXPECT_TRUE(primitive_set.get_primary() == nullptr);
-  EXPECT_EQ(util::error::NOT_FOUND,
-            primitive_set.get_raw_primitives().status().error_code());
-  EXPECT_EQ(util::error::NOT_FOUND,
-            primitive_set.get_primitives("prefix").status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound,
+            primitive_set.get_raw_primitives().status().code());
+  EXPECT_EQ(absl::StatusCode::kNotFound,
+            primitive_set.get_primitives("prefix").status().code());
 
   // Add all the primitives.
   auto add_primitive_result =

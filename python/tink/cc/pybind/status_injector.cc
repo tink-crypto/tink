@@ -51,7 +51,7 @@ class TestClass {
 };
 
 bool CheckStatus(const util::Status& status, util::error::Code code) {
-  return status.error_code() == code;
+  return status.code() == static_cast<absl::StatusCode>(code);
 }
 
 util::Status ReturnStatus(util::error::Code code,

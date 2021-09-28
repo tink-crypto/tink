@@ -180,6 +180,7 @@ cc_test(
         ":python_input_stream",
         ":test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
     ],
