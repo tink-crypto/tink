@@ -174,8 +174,18 @@ java_library(
 
 java_library(
     name = "hpke_test_util",
-    srcs = ["HpkeTestUtil.java"],
+    srcs = [
+        "HpkeTestEncryption.java",
+        "HpkeTestId.java",
+        "HpkeTestSetup.java",
+        "HpkeTestUtil.java",
+        "HpkeTestVector.java",
+    ],
     deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_gson_gson",
     ],
 )

@@ -2,14 +2,23 @@ licenses(["notice"])
 
 package(default_testonly = 1)
 
+filegroup(
+    name = "test_vectors",
+    srcs = ["testdata/test_vectors.json"],
+)
+
 java_test(
     name = "X25519HpkeKemTest",
     size = "small",
     srcs = ["X25519HpkeKemTest.java"],
+    resources = [":test_vectors"],
     deps = [
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
         "//src/main/java/com/google/crypto/tink/testing:hpke_test_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
     ],

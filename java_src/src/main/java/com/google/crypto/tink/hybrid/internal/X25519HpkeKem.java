@@ -24,8 +24,6 @@ import javax.crypto.Mac;
 
 /** Diffie-Hellman-based X25519 HPKE KEM variant. */
 public final class X25519HpkeKem implements HpkeKem {
-  private static final byte[] X25519_HKDF_SHA256_KEM_ID = HpkeUtil.intToByteArray(2, 0x20);
-
   private final String macAlgorithm;
 
   /** Construct X25519-HKDF HPKE KEM using {@code macAlgorithm}. */
@@ -38,11 +36,12 @@ public final class X25519HpkeKem implements HpkeKem {
       throws GeneralSecurityException {
     byte[] kemContext = Bytes.concat(senderPublicKey, recipientPublicKey);
     int macLength = Mac.getInstance(macAlgorithm).getMacLength();
+    byte[] kemSuiteId = HpkeUtil.kemSuiteId(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
     return Hkdf.computeHkdf(
         macAlgorithm,
-        HpkeUtil.labelIkm("eae_prk", dhSharedSecret, X25519_HKDF_SHA256_KEM_ID),
+        HpkeUtil.labelIkm("eae_prk", dhSharedSecret, kemSuiteId),
         /*salt=*/ null,
-        HpkeUtil.labelInfo("shared_secret", kemContext, X25519_HKDF_SHA256_KEM_ID, macLength),
+        HpkeUtil.labelInfo("shared_secret", kemContext, kemSuiteId, macLength),
         macLength);
   }
 
