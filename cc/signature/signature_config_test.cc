@@ -182,7 +182,8 @@ TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
   std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256Ieee());
-  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha512());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Ieee());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521Ieee());

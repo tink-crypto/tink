@@ -439,14 +439,14 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
                /* key_id= */ 623628,
                key_manager.CreateKey(key_format).ValueOrDie(),
                KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(
-        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP384Sha384().value()));
     AddLegacyKey(EcdsaSignKeyManager().get_key_type(),
                  /* key_id= */ 36285,
                  key_manager.CreateKey(key_format).ValueOrDie(),
                  KeyStatusType::DISABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(
-        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP384Sha512().value()));
     AddRawKey(EcdsaSignKeyManager().get_key_type(),
               /* key_id= */ 42, key_manager.CreateKey(key_format).ValueOrDie(),
               KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
