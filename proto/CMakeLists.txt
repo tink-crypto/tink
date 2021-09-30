@@ -188,6 +188,21 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME tpm_commom_cc_proto
+  SRCS tpm_common.proto
+  DEPS
+    tink::proto::common_cc_proto
+)
+
+tink_cc_proto(
+  NAME tpm_hmac_cc_proto
+  SRCS tpm_hmac.proto
+  DEPS
+     tink::proto::hmac_cc_proto
+     tink::proto::tpm_commom_cc_proto
+)
+
+tink_cc_proto(
   NAME empty_cc_proto
   SRCS empty.proto
 )

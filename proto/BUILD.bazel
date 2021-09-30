@@ -387,6 +387,33 @@ proto_library(
 )
 
 # -----------------------------------------------
+# TPM common
+# -----------------------------------------------
+proto_library(
+    name = "tpm_commom_proto",
+    srcs = [
+        "tpm_common.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# TPM hmac
+# -----------------------------------------------
+proto_library(
+    name = "tp_hmac_proto",
+    srcs = [
+        "tpm_hmac.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":hmac_proto",
+        ":tpm_common_proto",
+    ],
+)
+
+# -----------------------------------------------
 # empty
 # -----------------------------------------------
 proto_library(
