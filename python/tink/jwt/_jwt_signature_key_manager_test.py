@@ -217,6 +217,25 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode(token_with_dot, validator)
 
+    # num_recursions has been chosen such that parsing of this token fails
+    # in all languages. We want to make sure that the algorithm does not
+    # hang or crash in this case, but only returns a parsing error.
+    num_recursions = 10000
+    rec_payload = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    rec_token = gen_compact('{"alg":"ES256"}', rec_payload, raw_sign)
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(
+          rec_token, validator=jwt.new_validator(allow_missing_expiration=True))
+
+    # test wrong types
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(cast(str, None), validator)
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(cast(str, 123), validator)
+    with self.assertRaises(tink.TinkError):
+      valid_bytes = valid.encode('utf8')
+      verify.verify_and_decode(cast(str, valid_bytes), validator)
+
   def test_create_ecdsa_handle_with_invalid_algorithm_fails(self):
     key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(
         algorithm=jwt_ecdsa_pb2.ES_UNKNOWN)

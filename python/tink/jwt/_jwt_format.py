@@ -141,6 +141,8 @@ def split_signed_compact(
   Raises:
     _jwt_error.JwtInvalidError if it fails.
   """
+  if not isinstance(signed_compact, str):
+    raise _jwt_error.JwtInvalidError('invalid token: not a str')
   try:
     encoded = signed_compact.encode('utf8')
   except UnicodeEncodeError:

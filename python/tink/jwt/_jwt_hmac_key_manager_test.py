@@ -16,7 +16,7 @@
 import base64
 import datetime
 
-from typing import Any, Text
+from typing import cast, Any, Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -249,6 +249,30 @@ class JwtHmacKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(tink.TinkError):
       jwt_hmac.verify_mac_and_decode_with_kid(
           token_with_dot, validator, kid=None)
+
+    # num_recursions has been chosen such that parsing of this token fails
+    # in all languages. We want to make sure that the algorithm does not
+    # hang or crash in this case, but only returns a parsing error.
+    num_recursions = 10000
+    rec_payload = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    rec_token = gen_token('{"alg":"HS256"}', rec_payload)
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          rec_token,
+          validator=jwt.new_validator(allow_missing_expiration=True),
+          kid=None)
+
+    # test wrong types
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          cast(str, None), validator, kid=None)
+    with self.assertRaises(tink.TinkError):
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          cast(str, 123), validator, kid=None)
+    with self.assertRaises(tink.TinkError):
+      valid_token_bytes = valid_token.encode('utf8')
+      jwt_hmac.verify_mac_and_decode_with_kid(
+          cast(str, valid_token_bytes), validator, kid=None)
 
   @parameterized.named_parameters([
       ('modified_signature',
