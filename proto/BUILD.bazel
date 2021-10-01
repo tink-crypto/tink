@@ -390,7 +390,7 @@ proto_library(
 # TPM common
 # -----------------------------------------------
 proto_library(
-    name = "tpm_commom_proto",
+    name = "tpm_common_proto",
     srcs = [
         "tpm_common.proto",
     ],
@@ -402,7 +402,7 @@ proto_library(
 # TPM hmac
 # -----------------------------------------------
 proto_library(
-    name = "tp_hmac_proto",
+    name = "tpm_hmac_proto",
     srcs = [
         "tpm_hmac.proto",
     ],
