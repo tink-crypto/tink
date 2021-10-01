@@ -27,6 +27,10 @@ GO_MOD_DIR="${TMP_DIR}/go-mod-test"
 
 REPO_URL_PREFIX="github.com/google/tink"
 
+# TODO(b/201806781): Remove when no longer necessary.
+sudo apt-get update
+sudo apt-get upgrade -y ca-certificates
+
 (
   cd "${REPO_DIR}"
   ./kokoro/copy_credentials.sh
