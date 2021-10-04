@@ -37,219 +37,174 @@ namespace tink {
 namespace subtle {
 namespace {
 
+constexpr absl::string_view kMessage = "Some data to encrypt.";
+constexpr absl::string_view kAad = "Some data to authenticate.";
+constexpr absl::string_view kKey128 = "000102030405060708090a0b0c0d0e0f";
+constexpr absl::string_view kKey256 =
+    "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f";
+
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::testing::Eq;
+using ::testing::Not;
 
-TEST(AesGcmBoringSslTest, testBasic) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+class AesGcmBoringSslTest : public testing::Test {
+ protected:
+  void SetUp() override {
+    if (IsFipsModeEnabled() && !FIPS_mode()) {
+      GTEST_SKIP() << "Test should not run in FIPS mode when BoringCrypto is "
+                      "unavailable.";
+    }
+
+    util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key_);
+    ASSERT_THAT(cipher.status(), IsOk());
+    cipher_ = std::move(*cipher);
   }
 
-  util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto res = AesGcmBoringSsl::New(key);
-  EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
-  std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  auto ct = cipher->Encrypt(message, aad);
-  EXPECT_TRUE(ct.ok()) << ct.status();
-  EXPECT_EQ(ct.ValueOrDie().size(), message.size() + 12 + 16);
-  auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
-  EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  util::SecretData key_ =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
+  std::unique_ptr<Aead> cipher_ = nullptr;
+};
+
+TEST_F(AesGcmBoringSslTest, BasicEncryptDecrypt) {
+  util::StatusOr<std::string> ciphertext = cipher_->Encrypt(kMessage, kAad);
+  ASSERT_THAT(ciphertext.status(), IsOk());
+  EXPECT_EQ(ciphertext->size(), kMessage.size() + 12 + 16);
+  util::StatusOr<std::string> plaintext = cipher_->Decrypt(*ciphertext, kAad);
+  ASSERT_THAT(plaintext.status(), IsOk());
+  EXPECT_EQ(*plaintext, kMessage);
 }
 
-TEST(AesGcmBoringSslTest, testModification) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
-  util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
-  std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
-  EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
-  // Modify the ciphertext
-  for (size_t i = 0; i < ct.size() * 8; i++) {
-    std::string modified_ct = ct;
+TEST_F(AesGcmBoringSslTest, ModifyMessageAndAad) {
+  std::string ciphertext = cipher_->Encrypt(kMessage, kAad).ValueOrDie();
+  ASSERT_THAT(cipher_->Decrypt(ciphertext, kAad).status(), IsOk());
+  // Modify the ciphertext.
+  for (size_t i = 0; i < ciphertext.size() * 8; i++) {
+    std::string modified_ct = ciphertext;
     modified_ct[i / 8] ^= 1 << (i % 8);
-    EXPECT_FALSE(cipher->Decrypt(modified_ct, aad).ok()) << i;
+    EXPECT_THAT(cipher_->Decrypt(modified_ct, kAad).status(), Not(IsOk())) << i;
   }
-  // Modify the additional data
-  for (size_t i = 0; i < aad.size() * 8; i++) {
-    std::string modified_aad = aad;
+  // Modify the additional data.
+  for (size_t i = 0; i < kAad.size() * 8; i++) {
+    std::string modified_aad = std::string(kAad);
     modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher->Decrypt(ct, modified_aad);
-    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.ValueOrDie();
+    auto decrypted = cipher_->Decrypt(ciphertext, modified_aad);
+    EXPECT_THAT(decrypted.status(), Not(IsOk())) << i << " pt:" << *decrypted;
   }
-  // Truncate the ciphertext
-  for (size_t i = 0; i < ct.size(); i++) {
-    std::string truncated_ct(ct, 0, i);
-    EXPECT_FALSE(cipher->Decrypt(truncated_ct, aad).ok()) << i;
+  // Truncate the ciphertext.
+  for (size_t i = 0; i < ciphertext.size(); i++) {
+    std::string truncated_ct(ciphertext, 0, i);
+    EXPECT_THAT(cipher_->Decrypt(truncated_ct, kAad).status(), Not(IsOk()))
+        << i;
   }
 }
 
 void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
   {  // AAD is a null string_view.
     const absl::string_view aad;
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
+    util::StatusOr<std::string> plaintext = cipher->Decrypt(ct, aad);
+    EXPECT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(message, *plaintext);
   }
   {  // AAD is a an empty string.
-    auto pt_or_status = cipher->Decrypt(ct, "");
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
+    util::StatusOr<std::string> plaintext = cipher->Decrypt(ct, "");
+    EXPECT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(message, *plaintext);
   }
   {  // AAD is a default constructed string_view.
-    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
+    util::StatusOr<std::string> plaintext =
+        cipher->Decrypt(ct, absl::string_view());
+    EXPECT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(message, *plaintext);
   }
 }
 
-TEST(AesGcmBoringSslTest, testAadEmptyVersusNullStringView) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
-  const util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
-  { // AAD is a null string_view.
-    const std::string message = "Some data to encrypt.";
+TEST_F(AesGcmBoringSslTest, AadEmptyVersusNullStringView) {
+  {
+    // AAD is a null string_view.
     const absl::string_view aad;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
+    auto ciphertext = cipher_->Encrypt(kMessage, aad);
+    EXPECT_THAT(ciphertext.status(), IsOk());
+    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
   }
   {  // AAD is a an empty string.
-    const std::string message = "Some data to encrypt.";
-    auto ct_or_status = cipher->Encrypt(message, "");
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
+    auto ciphertext = cipher_->Encrypt(kMessage, "");
+    EXPECT_THAT(ciphertext.status(), IsOk());
+    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
   }
   {  // AAD is a default constructed string_view.
-    const std::string message = "Some data to encrypt.";
-    auto ct_or_status = cipher->Encrypt(message, absl::string_view());
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
+    auto ciphertext = cipher_->Encrypt(kMessage, absl::string_view());
+    EXPECT_THAT(ciphertext.status(), IsOk());
+    TestDecryptWithEmptyAad(cipher_.get(), *ciphertext, kMessage);
   }
 }
 
-TEST(AesGcmBoringSslTest, testMessageEmptyVersusNullStringView) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
-  const util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
-  const std::string aad = "Some data to authenticate.";
+TEST_F(AesGcmBoringSslTest, MessageEmptyVersusNullStringView) {
   {  // Message is a null string_view.
     const absl::string_view message;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, kAad);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
   {  // Message is an empty string.
     const std::string message = "";
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, kAad);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
   {  // Message is a default constructed string_view.
-    auto ct_or_status = cipher->Encrypt(absl::string_view(), aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(absl::string_view(), kAad);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, kAad);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
 }
 
-TEST(AesGcmBoringSslTest, testBothMessageAndAadEmpty) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
-  const util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(AesGcmBoringSsl::New(key).ValueOrDie());
+TEST_F(AesGcmBoringSslTest, BothMessageAndAadEmpty) {
   {  // Both are null string_view.
     const absl::string_view message;
     const absl::string_view aad;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, aad);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, aad);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
   {  // Both are empty string.
     const std::string message = "";
     const std::string aad = "";
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext = cipher_->Encrypt(message, aad);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, aad);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
   {  // Both are default constructed string_view.
-    auto ct_or_status =
-        cipher->Encrypt(absl::string_view(), absl::string_view());
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
+    util::StatusOr<std::string> ciphertext =
+        cipher_->Encrypt(absl::string_view(), absl::string_view());
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    auto plaintext = cipher_->Decrypt(*ciphertext, absl::string_view());
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, "");
   }
 }
 
-TEST(AesGcmBoringSslTest, testInvalidKeySizes) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-
+TEST_F(AesGcmBoringSslTest, InvalidKeySizes) {
   for (int keysize = 0; keysize < 65; keysize++) {
     util::SecretData key(keysize, 'x');
-    auto cipher = AesGcmBoringSsl::New(key);
-    EXPECT_THAT(cipher.ok(), Eq(keysize == 16 || keysize == 32));
+    util::StatusOr<std::unique_ptr<crypto::tink::Aead>> cipher =
+        AesGcmBoringSsl::New(key);
+    if (keysize == 16 || keysize == 32) {
+      EXPECT_THAT(cipher.status(), IsOk());
+    } else {
+      EXPECT_THAT(cipher.status(), Not(IsOk()));
+    }
   }
 }
 
@@ -266,7 +221,7 @@ static std::string GetError() {
 }
 
 // Test with test vectors from Wycheproof project.
-bool WycheproofTest(const rapidjson::Document &root) {
+bool WycheproofTest(const rapidjson::Document& root) {
   int errors = 0;
   for (const rapidjson::Value& test_group : root["testGroups"].GetArray()) {
     const size_t iv_size = test_group["ivSize"].GetInt();
@@ -289,12 +244,11 @@ bool WycheproofTest(const rapidjson::Document &root) {
       std::string tag = WycheproofUtil::GetBytes(test["tag"]);
       std::string id = absl::StrCat(test["tcId"].GetInt());
       std::string expected = test["result"].GetString();
-      auto cipher =
-         std::move(AesGcmBoringSsl::New(key).ValueOrDie());
+      auto cipher = std::move(*AesGcmBoringSsl::New(key));
       auto result = cipher->Decrypt(iv + ct + tag, aad);
       bool success = result.ok();
       if (success) {
-        std::string decrypted = result.ValueOrDie();
+        std::string decrypted = *result;
         if (expected == "invalid") {
           ADD_FAILURE() << "decrypted invalid ciphertext:" << id;
           errors++;
@@ -304,12 +258,9 @@ bool WycheproofTest(const rapidjson::Document &root) {
         }
       } else {
         if (expected == "valid" || expected == "acceptable") {
-          ADD_FAILURE()
-              << "Could not decrypt test with tcId:" << id
-              << " iv_size:" << iv_size
-              << " tag_size:" << tag_size
-              << " key_size:" << key_size
-              << " error:" << GetError();
+          ADD_FAILURE() << "Could not decrypt test with tcId:" << id
+                        << " iv_size:" << iv_size << " tag_size:" << tag_size
+                        << " key_size:" << key_size << " error:" << GetError();
           errors++;
         }
       }
@@ -318,7 +269,7 @@ bool WycheproofTest(const rapidjson::Document &root) {
   return errors == 0;
 }
 
-TEST(AesGcmBoringSslTest, TestVectors) {
+TEST(AesGcmBoringSslTestWycheproofTest, TestVectors) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
@@ -329,31 +280,31 @@ TEST(AesGcmBoringSslTest, TestVectors) {
   ASSERT_TRUE(WycheproofTest(*root));
 }
 
-TEST(AesGcmBoringSslTest, TestFipsOnly) {
+TEST(AesGcmBoringSslTestWycheproofTest, TestFipsOnly) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
 
-  util::SecretData key128 = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key128 =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
+  util::SecretData key256 =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey256));
 
   EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(), IsOk());
   EXPECT_THAT(subtle::AesGcmBoringSsl::New(key256).status(), IsOk());
 }
 
-TEST(AesGcmBoringSslTest, TestFipsFailWithoutBoringCrypto) {
+TEST(AesGcmBoringSslTestWycheproofTest, TestFipsFailWithoutBoringCrypto) {
   if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
 
-  util::SecretData key128 = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key128 =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
+  util::SecretData key256 =
+      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey256));
 
   EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(),
               StatusIs(util::error::INTERNAL));
