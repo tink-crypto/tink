@@ -313,6 +313,8 @@ tink_cc_library(
     crypto
     absl::core_headers
     absl::memory
+    absl::span
+    absl::strings
 )
 
 tink_cc_library(

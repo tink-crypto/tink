@@ -21,7 +21,8 @@
 #include <utility>
 
 #include "absl/base/macros.h"
-#include "openssl/aead.h"
+#include "absl/strings/string_view.h"
+#include "openssl/evp.h"
 #include "tink/aead.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
@@ -38,6 +39,7 @@ class AesGcmBoringSsl : public Aead {
       absl::string_view key_value) {
     return AesGcmBoringSsl::New(util::SecretDataFromStringView(key_value));
   }
+
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       const util::SecretData& key);
 
@@ -53,13 +55,18 @@ class AesGcmBoringSsl : public Aead {
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
-  static constexpr int kIvSizeInBytes = 12;
-  static constexpr int kTagSizeInBytes = 16;
+#ifdef OPENSSL_IS_BORINGSSL
+  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> context)
+      : context_(std::move(context)) {}
 
-  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
-      : ctx_(std::move(ctx)) {}
+  bssl::UniquePtr<EVP_AEAD_CTX> context_;
+#else
+  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_CIPHER_CTX> context)
+      : context_(std::move(context)) {}
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  // We cache the context to allow performing precomputations on the key.
+  const bssl::UniquePtr<EVP_CIPHER_CTX> context_;
+#endif
 };
 
 }  // namespace subtle
