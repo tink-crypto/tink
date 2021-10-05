@@ -1,0 +1,40 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "tpm_hmac_key_manager",
+    srcs = ["tpm_hmac_key_manager.cc"],
+    hdrs = ["tpm_hmac_key_manager.h"],
+    include_prefix = "tink/integration/tpm/mac",
+    deps = [
+        "//:core/key_type_manager",
+        "//:mac",
+        "//proto:common_cc_proto",
+        "//proto:tpm_common_cc_proto",
+        "//proto:tpm_hmac_cc_proto",
+        "//util:constants",
+        "//util:enums",
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
+        "//util:validation",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
+# tests
+
+cc_test(
+    name = "tpm_hmac_key_manager_test",
+    srcs = ["tpm_hmac_key_manager_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":tpm_hmac_key_manager",
+        "//proto:common_cc_proto",
+        "//proto:hmac_cc_proto",
+        "//proto:tpm_hmac_cc_proto",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
