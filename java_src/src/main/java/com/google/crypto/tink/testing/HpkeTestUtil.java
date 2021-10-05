@@ -29,9 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Test utility class for HPKE implementation. */
+/** Test utility class for parsing test vectors from the HPKE I.-D. in JSON format. */
 public final class HpkeTestUtil {
-
   /**
    * Parses JSON-formatted test vectors from {@code path} into a {@link java.util.Map} from {@link
    * com.google.crypto.tink.hybrid.internal.HpkeTestId}s to {@link
@@ -59,11 +58,14 @@ public final class HpkeTestUtil {
         HpkeTestSetup testSetup =
             new HpkeTestSetup(
                 testObject.get("info").getAsString(),
+                testObject.get("pkEm").getAsString(),
                 testObject.get("skEm").getAsString(),
                 testObject.get("pkRm").getAsString(),
                 testObject.get("skRm").getAsString(),
                 testObject.get("enc").getAsString(),
                 testObject.get("shared_secret").getAsString(),
+                testObject.get("key_schedule_context").getAsString(),
+                testObject.get("secret").getAsString(),
                 testObject.get("key").getAsString(),
                 testObject.get("base_nonce").getAsString());
         JsonArray encryptionsArray = testObject.get("encryptions").getAsJsonArray();

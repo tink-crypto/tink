@@ -21,9 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
-/**
- * Collection of helper functions for HPKE.
- */
+/** Collection of helper functions for HPKE. */
 public final class HpkeUtil {
   // HPKE mode identifiers.
   public static final byte[] BASE_MODE = intToByteArray(1, 0x0);
@@ -39,7 +37,10 @@ public final class HpkeUtil {
   public static final byte[] AES_256_GCM_AEAD_ID = intToByteArray(2, 0x2);
   public static final byte[] CHACHA20_POLY1305_AEAD_ID = intToByteArray(2, 0x3);
 
+  public static final byte[] EMPTY_SALT = new byte[0];
+
   private static final byte[] KEM = "KEM".getBytes(UTF_8);
+  private static final byte[] HPKE = "HPKE".getBytes(UTF_8);
   private static final byte[] HPKE_V1 = "HPKE-v1".getBytes(UTF_8);
 
   /**
@@ -63,14 +64,26 @@ public final class HpkeUtil {
   }
 
   /**
-   * Generates a KEM suite id from {@code kemId} according to the definition in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5.
-   * Only used for KEM suite id.
+   * Generates KEM suite id from {@code kemId} according to the definition in
+   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5. Only used for KEM
+   * suite id.
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
   public static byte[] kemSuiteId(byte[] kemId) throws GeneralSecurityException {
     return Bytes.concat(KEM, kemId);
+  }
+
+  /**
+   * Generates HPKE suite id from {@code kemId}, {@code kdfId}, and {@code aeadId} according to the
+   * definition in https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-8. Used
+   * for any non-KEM suite id.
+   *
+   * @throws GeneralSecurityException when byte concatenation fails.
+   */
+  public static byte[] hpkeSuiteId(byte[] kemId, byte[] kdfId, byte[] aeadId)
+      throws GeneralSecurityException {
+    return Bytes.concat(HPKE, kemId, kdfId, aeadId);
   }
 
   /**
