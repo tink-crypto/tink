@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "absl/base/attributes.h"
-#include "openssl/mem.h"
+#include "openssl/crypto.h"
 
 namespace crypto {
 namespace tink {
