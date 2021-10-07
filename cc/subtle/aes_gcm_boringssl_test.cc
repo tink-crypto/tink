@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
 #include "include/rapidjson/document.h"
@@ -30,7 +31,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -46,8 +46,9 @@ constexpr absl::string_view kKey256 =
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Not;
+using ::testing::Test;
 
-class AesGcmBoringSslTest : public testing::Test {
+class AesGcmBoringSslTest : public Test {
  protected:
   void SetUp() override {
     if (IsFipsModeEnabled() && !FIPS_mode()) {
@@ -55,14 +56,13 @@ class AesGcmBoringSslTest : public testing::Test {
                       "unavailable.";
     }
 
-    util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key_);
+    util::SecretData key =
+        util::SecretDataFromStringView(absl::HexStringToBytes(kKey128));
+    util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key);
     ASSERT_THAT(cipher.status(), IsOk());
     cipher_ = std::move(*cipher);
   }
-
-  util::SecretData key_ =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
-  std::unique_ptr<Aead> cipher_ = nullptr;
+  std::unique_ptr<Aead> cipher_;
 };
 
 TEST_F(AesGcmBoringSslTest, BasicEncryptDecrypt) {
@@ -98,7 +98,7 @@ TEST_F(AesGcmBoringSslTest, ModifyMessageAndAad) {
   }
 }
 
-void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
+void TestDecryptWithEmptyAad(Aead* cipher, absl::string_view ct,
                              absl::string_view message) {
   {  // AAD is a null string_view.
     const absl::string_view aad;
@@ -286,13 +286,13 @@ TEST(AesGcmBoringSslTestWycheproofTest, TestFipsOnly) {
         << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
   }
 
-  util::SecretData key128 =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
-  util::SecretData key256 =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey256));
+  util::SecretData key_128 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey128));
+  util::SecretData key_256 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey256));
 
-  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(), IsOk());
-  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key256).status(), IsOk());
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_128).status(), IsOk());
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_256).status(), IsOk());
 }
 
 TEST(AesGcmBoringSslTestWycheproofTest, TestFipsFailWithoutBoringCrypto) {
@@ -301,14 +301,14 @@ TEST(AesGcmBoringSslTestWycheproofTest, TestFipsFailWithoutBoringCrypto) {
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
 
-  util::SecretData key128 =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey128));
-  util::SecretData key256 =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(kKey256));
+  util::SecretData key_128 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey128));
+  util::SecretData key_256 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey256));
 
-  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key128).status(),
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_128).status(),
               StatusIs(util::error::INTERNAL));
-  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key256).status(),
+  EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_256).status(),
               StatusIs(util::error::INTERNAL));
 }
 
