@@ -25,6 +25,7 @@
 #include "openssl/evp.h"
 #include "tink/aead.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -56,16 +57,16 @@ class AesGcmBoringSsl : public Aead {
 
  private:
 #ifdef OPENSSL_IS_BORINGSSL
-  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> context)
+  explicit AesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> context)
       : context_(std::move(context)) {}
 
-  bssl::UniquePtr<EVP_AEAD_CTX> context_;
+  internal::SslUniquePtr<EVP_AEAD_CTX> context_;
 #else
-  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_CIPHER_CTX> context)
+  explicit AesGcmBoringSsl(internal::SslUniquePtr<EVP_CIPHER_CTX> context)
       : context_(std::move(context)) {}
 
   // We cache the context to allow performing precomputations on the key.
-  const bssl::UniquePtr<EVP_CIPHER_CTX> context_;
+  const internal::SslUniquePtr<EVP_CIPHER_CTX> context_;
 #endif
 };
 

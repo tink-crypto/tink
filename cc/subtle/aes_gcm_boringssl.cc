@@ -25,6 +25,7 @@
 #include "absl/types/span.h"
 #include "openssl/evp.h"
 #include "openssl/mem.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -83,10 +84,10 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
   }
 
 #ifdef OPENSSL_IS_BORINGSSL
-  bssl::UniquePtr<EVP_AEAD_CTX> context(EVP_AEAD_CTX_new(
+  internal::SslUniquePtr<EVP_AEAD_CTX> context(EVP_AEAD_CTX_new(
       aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
 #else
-  bssl::UniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
 #endif
   if (context == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -154,7 +155,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   // allows to allocate an AesGcmBoringSsl cipher, and intialize the context
   // to force precomputation on the key, and only then set a different IV for
   // each call to `Encrypt`.
-  bssl::UniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
   // This makes a copy of the `cipher_data` field of the context too, which
   // contains the key material and IV (see
   // https://github.com/google/boringssl/blob/master/crypto/fipsmodule/cipher/cipher.c#L116).
@@ -238,7 +239,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
       reinterpret_cast<const uint8_t*>(ciphertext.data() + ciphertex_offset),
       plaintext_size);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
   EVP_CIPHER_CTX_copy(context.get(), context_.get());
 
   util::Status res = SetIv(context.get(), iv, /*encryption=*/false);

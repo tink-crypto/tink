@@ -28,6 +28,15 @@ cc_library(
 )
 
 cc_library(
+    name = "ssl_unique_ptr",
+    hdrs = ["ssl_unique_ptr.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_library(
     name = "key_info",
     srcs = ["key_info.cc"],
     hdrs = ["key_info.h"],
@@ -43,6 +52,9 @@ cc_library(
     hdrs = ["registry_impl.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":fips_utils",
+        ":keyset_wrapper",
+        ":keyset_wrapper_impl",
         "//:catalogue",
         "//:core/key_manager_impl",
         "//:core/key_type_manager",
@@ -51,9 +63,6 @@ cc_library(
         "//:key_manager",
         "//:primitive_set",
         "//:primitive_wrapper",
-        ":fips_utils",
-        ":keyset_wrapper",
-        ":keyset_wrapper_impl",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:protobuf_helper",
@@ -79,18 +88,17 @@ cc_library(
     name = "fips_utils",
     srcs = ["fips_utils.cc"],
     hdrs = ["fips_utils.h"],
-    include_prefix = "tink/internal",
     defines = select({
         "fips_enabled": ["TINK_USE_ONLY_FIPS"],
         "//conditions:default": [],
     }),
+    include_prefix = "tink/internal",
     deps = [
         "//util:status",
-        "@com_google_absl//absl/base:core_headers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
-
 
 cc_test(
     name = "keyset_wrapper_impl_test",
@@ -168,4 +176,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-

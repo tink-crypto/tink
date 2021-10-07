@@ -18,6 +18,7 @@ tink_cc_library(
   NAME subtle
   SRCS ${TINK_SUBTLE_PUBLIC_APIS}
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::subtle::aes_gcm_boringssl
     tink::subtle::aes_siv_boringssl
     tink::subtle::common_enums
@@ -303,6 +304,7 @@ tink_cc_library(
     aes_gcm_boringssl.h
   DEPS
     tink::internal::fips_utils
+    tink::internal::ssl_unique_ptr
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl

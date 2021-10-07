@@ -24,11 +24,19 @@ tink_cc_library(
 )
 
 tink_cc_library(
-    NAME key_info
-    SRCS
-      key_info.h
-      key_info.cc
-    DEPS
+  NAME ssl_unique_ptr
+  SRCS
+    ssl_unique_ptr.h
+  DEPS
+    crypto
+)
+
+tink_cc_library(
+  NAME key_info
+  SRCS
+    key_info.h
+    key_info.cc
+  DEPS
     tink::proto::tink_cc_proto
 )
 
