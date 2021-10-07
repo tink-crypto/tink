@@ -564,6 +564,7 @@ tink_cc_library(
     subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::random
     tink::config::tink_fips
@@ -1221,6 +1222,7 @@ tink_cc_test(
   DATA wycheproof::testvectors
   DEPS
     tink::config::tink_fips
+    tink::internal::ssl_unique_ptr
     tink::subtle::ec_util
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util

@@ -26,6 +26,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -114,7 +115,8 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's BIGNUM constructed from bigendian string
   // representation.
-  static util::StatusOr<bssl::UniquePtr<BIGNUM>> str2bn(absl::string_view s);
+  static util::StatusOr<internal::SslUniquePtr<BIGNUM>> str2bn(
+      absl::string_view s);
 
   // Returns a string of size 'len' that holds BIGNUM 'bn'.
   static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len);
@@ -167,7 +169,7 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<bssl::UniquePtr<EC_POINT>> EcPointDecode(
+  static util::StatusOr<internal::SslUniquePtr<EC_POINT>> EcPointDecode(
       EllipticCurveType curve, EcPointFormat format, absl::string_view encoded);
 
   // Returns the encoded public key based on curve type, point format and
@@ -242,12 +244,12 @@ class SubtleUtilBoringSSL {
   static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
 
   // Creates a BoringSSL RSA key from an RsaPrivateKey.
-  static util::StatusOr<bssl::UniquePtr<RSA>> BoringSslRsaFromRsaPrivateKey(
-      const RsaPrivateKey &key);
+  static util::StatusOr<internal::SslUniquePtr<RSA>>
+  BoringSslRsaFromRsaPrivateKey(const RsaPrivateKey &key);
 
   // Creates a BoringSSL RSA key from an RsaPublicKey.
-  static util::StatusOr<bssl::UniquePtr<RSA>> BoringSslRsaFromRsaPublicKey(
-      const RsaPublicKey &key);
+  static util::StatusOr<internal::SslUniquePtr<RSA>>
+  BoringSslRsaFromRsaPublicKey(const RsaPublicKey &key);
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
   static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);

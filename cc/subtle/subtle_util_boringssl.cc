@@ -32,6 +32,7 @@
 #include "openssl/mem.h"
 #include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/util/errors.h"
@@ -62,8 +63,8 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
 
   const BIGNUM *priv_key = EC_KEY_get0_private_key(&key);
   const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
-  bssl::UniquePtr<BIGNUM> pub_key_x_bn(BN_new());
-  bssl::UniquePtr<BIGNUM> pub_key_y_bn(BN_new());
+  internal::SslUniquePtr<BIGNUM> pub_key_x_bn(BN_new());
+  internal::SslUniquePtr<BIGNUM> pub_key_y_bn(BN_new());
   if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key,
                                            pub_key_x_bn.get(),
                                            pub_key_y_bn.get(), nullptr)) {
@@ -122,9 +123,9 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::BignumToSecretData(
 }
 
 // static
-util::StatusOr<bssl::UniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(
+util::StatusOr<internal::SslUniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(
     absl::string_view s) {
-  bssl::UniquePtr<BIGNUM> bn(
+  internal::SslUniquePtr<BIGNUM> bn(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(s.data()), s.length(),
                 nullptr /* ret */));
   if (bn.get() == nullptr) {
@@ -152,10 +153,10 @@ util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 // static
 util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
     EllipticCurveType curve, absl::string_view pubx, absl::string_view puby) {
-  bssl::UniquePtr<BIGNUM> bn_x(
+  internal::SslUniquePtr<BIGNUM> bn_x(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(pubx.data()),
                 pubx.size(), nullptr));
-  bssl::UniquePtr<BIGNUM> bn_y(
+  internal::SslUniquePtr<BIGNUM> bn_y(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(puby.data()),
                 puby.length(), nullptr));
   if (bn_x.get() == nullptr || bn_y.get() == nullptr) {
@@ -165,8 +166,8 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
-  bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
-  bssl::UniquePtr<EC_POINT> pub_key(EC_POINT_new(group.get()));
+  internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group.get()));
   if (1 != EC_POINT_set_affine_coordinates_GFp(
                group.get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
     return util::Status(util::error::INTERNAL,
@@ -184,8 +185,8 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
   }
   auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve_type));
   if (!status_or_group.ok()) return status_or_group.status();
-  bssl::UniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
-  bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
+  internal::SslUniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
+  internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
 
   if (key.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -226,7 +227,7 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
     return group.status();
   }
 
-  bssl::UniquePtr<EC_KEY> key(EC_KEY_derive_from_secret(
+  internal::SslUniquePtr<EC_KEY> key(EC_KEY_derive_from_secret(
       *group, secret_seed.data(), secret_seed.size()));
 
   if (key.get() == nullptr) {
@@ -339,8 +340,9 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
-  bssl::UniquePtr<EC_GROUP> priv_group(status_or_ec_group.ValueOrDie());
-  bssl::UniquePtr<EC_POINT> shared_point(EC_POINT_new(priv_group.get()));
+  internal::SslUniquePtr<EC_GROUP> priv_group(status_or_ec_group.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> shared_point(
+      EC_POINT_new(priv_group.get()));
   // BoringSSL's EC_POINT_set_affine_coordinates_GFp documentation says that
   // "unlike with OpenSSL, it's considered an error if the point is not on the
   // curve". To be sure, we double check here.
@@ -358,7 +360,7 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     return util::Status(util::error::INTERNAL, "Shared point is not on curve");
   }
   // Get shared point's x coordinate.
-  bssl::UniquePtr<BIGNUM> shared_x(BN_new());
+  internal::SslUniquePtr<BIGNUM> shared_x(BN_new());
   if (1 !=
       EC_POINT_get_affine_coordinates_GFp(priv_group.get(), shared_point.get(),
                                           shared_x.get(), nullptr, nullptr)) {
@@ -370,14 +372,16 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
 }
 
 // static
-util::StatusOr<bssl::UniquePtr<EC_POINT>> SubtleUtilBoringSSL::EcPointDecode(
-    EllipticCurveType curve, EcPointFormat format, absl::string_view encoded) {
+util::StatusOr<internal::SslUniquePtr<EC_POINT>>
+SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
+                                   EcPointFormat format,
+                                   absl::string_view encoded) {
   auto status_or_ec_group = GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
-  bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
-  bssl::UniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
+  internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
   unsigned curve_size_in_bytes = (EC_GROUP_get_degree(group.get()) + 7) / 8;
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
@@ -407,8 +411,8 @@ util::StatusOr<bssl::UniquePtr<EC_POINT>> SubtleUtilBoringSSL::EcPointDecode(
             absl::Substitute("point has is $0 bytes, expected $1",
                              encoded.size(), 2 * curve_size_in_bytes));
       }
-      bssl::UniquePtr<BIGNUM> x(BN_new());
-      bssl::UniquePtr<BIGNUM> y(BN_new());
+      internal::SslUniquePtr<BIGNUM> x(BN_new());
+      internal::SslUniquePtr<BIGNUM> y(BN_new());
       if (nullptr == x.get() || nullptr == y.get()) {
         return util::Status(
             util::error::INTERNAL,
@@ -464,7 +468,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
-  bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
+  internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
   unsigned curve_size_in_bytes = (EC_GROUP_get_degree(group.get()) + 7) / 8;
   if (1 != EC_POINT_is_on_curve(group.get(), point, nullptr)) {
     return util::Status(util::error::INTERNAL, "Point is not on curve");
@@ -483,8 +487,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                          1 + 2 * curve_size_in_bytes);
     }
     case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
-      bssl::UniquePtr<BIGNUM> x(BN_new());
-      bssl::UniquePtr<BIGNUM> y(BN_new());
+      internal::SslUniquePtr<BIGNUM> x(BN_new());
+      internal::SslUniquePtr<BIGNUM> y(BN_new());
       if (nullptr == x.get() || nullptr == y.get()) {
         return util::Status(
             util::error::INTERNAL,
@@ -535,7 +539,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Signature is not valid.");
   }
-  bssl::UniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
+  internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
   auto status_or_r =
       SubtleUtilBoringSSL::str2bn(ieee_sig.substr(0, ieee_sig.size() / 2));
   if (!status_or_r.ok()) {
@@ -649,12 +653,12 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
     int modulus_size_in_bits, const BIGNUM *e,
     SubtleUtilBoringSSL::RsaPrivateKey *private_key,
     SubtleUtilBoringSSL::RsaPublicKey *public_key) {
-  bssl::UniquePtr<RSA> rsa(RSA_new());
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa == nullptr) {
     return util::Status(util::error::INTERNAL, "Could not initialize RSA.");
   }
 
-  bssl::UniquePtr<BIGNUM> e_copy(BN_new());
+  internal::SslUniquePtr<BIGNUM> e_copy(BN_new());
   if (BN_copy(e_copy.get(), e) == nullptr) {
     return util::Status(util::error::INTERNAL, GetErrors());
   }
@@ -769,7 +773,7 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
 }
 
 // static
-util::StatusOr<bssl::UniquePtr<RSA>>
+util::StatusOr<internal::SslUniquePtr<RSA>>
 SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
     const SubtleUtilBoringSSL::RsaPrivateKey &rsa_key) {
   auto status_or_n = SubtleUtilBoringSSL::str2bn(rsa_key.n);
@@ -788,7 +792,7 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
       SubtleUtilBoringSSL::ValidateRsaPublicExponent(rsa_key.e);
   if (!exponent_status.ok()) return exponent_status;
 
-  bssl::UniquePtr<RSA> rsa(RSA_new());
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "BoringSsl RSA allocation error");
@@ -818,7 +822,7 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
 }
 
 // static
-util::StatusOr<bssl::UniquePtr<RSA>>
+util::StatusOr<internal::SslUniquePtr<RSA>>
 SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
     const SubtleUtilBoringSSL::RsaPublicKey &key) {
   auto status_or_n = SubtleUtilBoringSSL::str2bn(key.n);
@@ -837,7 +841,7 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
     return modulus_status;
   }
 
-  bssl::UniquePtr<RSA> rsa(RSA_new());
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "BoringSsl RSA allocation error");

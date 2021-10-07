@@ -23,7 +23,10 @@
 #include "openssl/crypto.h"
 
 #ifndef OPENSSL_IS_BORINGSSL
+#include "openssl/bn.h"
+#include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "openssl/rsa.h"
 #endif
 
 namespace crypto {
@@ -56,6 +59,37 @@ template <>
 struct Deleter<EVP_CIPHER_CTX> {
   void operator()(EVP_CIPHER_CTX* ptr) { EVP_CIPHER_CTX_free(ptr); }
 };
+template <>
+struct Deleter<BIGNUM> {
+  void operator()(BIGNUM* ptr) { BN_free(ptr); }
+};
+template <>
+struct Deleter<BN_CTX> {
+  void operator()(BN_CTX* ptr) { BN_CTX_free(ptr); }
+};
+template <>
+struct Deleter<RSA> {
+  void operator()(RSA* ptr) { RSA_free(ptr); }
+};
+template <>
+struct Deleter<EVP_AEAD_CTX> {
+  void operator()(EVP_AEAD_CTX* ptr) { EVP_AEAD_CTX_free(ptr); }
+};
+template <>
+struct Deleter<EC_POINT> {
+  void operator()(EC_POINT* ptr) { EC_POINT_free(ptr); }
+};
+template <>
+struct Deleter<EC_GROUP> {
+  void operator()(EC_GROUP* ptr) { EC_GROUP_free(ptr); }
+};
+template <>
+struct Deleter<EC_KEY> {
+  void operator()(EC_KEY* ptr) { EC_KEY_free(ptr); }
+};
+template <>
+struct Deleter<ECDSA_SIG> {
+  void operator()(ECDSA_SIG* ptr) { ECDSA_SIG_free(ptr); }
 
 template <typename T>
 using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;
