@@ -67,4 +67,14 @@ public final class X25519HpkeKem implements HpkeKem {
     byte[] recipientPublicKey = X25519.publicFromPrivate(recipientPrivateKey);
     return deriveKemSharedSecret(dhSharedSecret, encapsulatedKey, recipientPublicKey);
   }
+
+  @Override
+  public byte[] getKemId() throws GeneralSecurityException {
+    switch (macAlgorithm) {
+      case "HmacSha256":
+        return HpkeUtil.X25519_HKDF_SHA256_KEM_ID;
+      default:
+        throw new GeneralSecurityException("Could not determine HPKE KEM ID");
+    }
+  }
 }

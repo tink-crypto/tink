@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for {@link X25519HpkeKemTest}. */
+/** Unit tests for {@link X25519HpkeKem}. */
 @RunWith(JUnit4.class)
 public final class X25519HpkeKemTest {
   private static final byte[] EXPORT_ONLY_AEAD_ID = HpkeUtil.intToByteArray(2, 0xffff);
@@ -225,5 +225,17 @@ public final class X25519HpkeKemTest {
     assertThrows(
         InvalidKeyException.class,
         () -> kem.decapsulate(validEncapsulatedKey, invalidRecipientPrivateKey));
+  }
+
+  @Test
+  public void getKemId_succeeds() throws GeneralSecurityException {
+    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    expect.that(kem.getKemId()).isEqualTo(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
+  }
+
+  @Test
+  public void getKemId_failsWithInvalidMacAlgorithm() {
+    X25519HpkeKem kem = new X25519HpkeKem("BadMac");
+    assertThrows(GeneralSecurityException.class, kem::getKemId);
   }
 }
