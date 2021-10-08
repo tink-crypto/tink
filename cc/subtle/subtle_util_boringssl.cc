@@ -22,6 +22,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
+#include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
@@ -35,6 +36,7 @@
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -42,8 +44,31 @@
 namespace crypto {
 namespace tink {
 namespace subtle {
-
 namespace {
+
+// Converts the absolute value of `bignum` into a big-endian form, and writes it
+// in `buffer`.
+util::Status BignumToBinaryPadded(absl::Span<char> buffer,
+                                  const BIGNUM *bignum) {
+  if (bignum == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
+  }
+
+// BN_bn2binpad returns the length of the buffer on success and -1 on failure.
+#ifdef OPENSSL_IS_BORINGSSL
+  int len = BN_bn2binpad(bignum, reinterpret_cast<uint8_t *>(buffer.data()),
+                         buffer.size());
+#else
+  int len = BN_bn2binpad(
+      bignum, reinterpret_cast<unsigned char *>(buffer.data()), buffer.size());
+#endif
+  if (len == -1) {
+    return util::Status(util::error::INTERNAL,
+                        "Value too large to fit into the given buffer");
+  }
+
+  return util::OkStatus();
+}
 
 size_t ScalarSizeInBytes(const EC_GROUP *group) {
   return BN_num_bytes(EC_GROUP_get0_order(group));
@@ -65,8 +90,7 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
   internal::SslUniquePtr<BIGNUM> pub_key_x_bn(BN_new());
   internal::SslUniquePtr<BIGNUM> pub_key_y_bn(BN_new());
-  if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key,
-                                           pub_key_x_bn.get(),
+  if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key, pub_key_x_bn.get(),
                                            pub_key_y_bn.get(), nullptr)) {
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
@@ -84,14 +108,14 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   if (!pub_y_str.ok()) {
     return pub_y_str.status();
   }
-  ec_key.pub_y =  std::move(*pub_y_str);
+  ec_key.pub_y = std::move(*pub_y_str);
   util::StatusOr<util::SecretData> priv_key_or =
       SubtleUtilBoringSSL::BignumToSecretData(priv_key,
                                               ScalarSizeInBytes(*group));
   if (!priv_key_or.ok()) {
     return priv_key_or.status();
   }
-  ec_key.priv =  std::move(*priv_key_or);
+  ec_key.priv = std::move(*priv_key_or);
   return ec_key;
 }
 
@@ -103,11 +127,14 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
   if (bn == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
   }
-  std::unique_ptr<uint8_t[]> res(new uint8_t[len]);
-  if (1 != BN_bn2bin_padded(res.get(), len, bn)) {
-    return util::Status(util::error::INTERNAL, "Value too large");
-  }
-  return std::string(reinterpret_cast<const char *>(res.get()), len);
+
+  std::string buffer;
+  ResizeStringUninitialized(&buffer, len);
+
+  util::Status res = BignumToBinaryPadded(absl::MakeSpan(&buffer[0], len), bn);
+  if (!res.ok()) return res;
+
+  return buffer;
 }
 
 util::StatusOr<util::SecretData> SubtleUtilBoringSSL::BignumToSecretData(
@@ -115,11 +142,15 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::BignumToSecretData(
   if (bn == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
   }
-  util::SecretData res(len);
-  if (BN_bn2bin_padded(res.data(), len, bn) != 1) {
-    return util::Status(util::error::INTERNAL, "Value too large");
-  }
-  return res;
+  util::SecretData secret_data(len);
+
+  util::Status res = BignumToBinaryPadded(
+      absl::MakeSpan(reinterpret_cast<char *>(secret_data.data()),
+                     secret_data.size()),
+      bn);
+  if (!res.ok()) return res;
+
+  return secret_data;
 }
 
 // static
@@ -341,8 +372,7 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     return status_or_ec_group.status();
   }
   internal::SslUniquePtr<EC_GROUP> priv_group(status_or_ec_group.ValueOrDie());
-  internal::SslUniquePtr<EC_POINT> shared_point(
-      EC_POINT_new(priv_group.get()));
+  internal::SslUniquePtr<EC_POINT> shared_point(EC_POINT_new(priv_group.get()));
   // BoringSSL's EC_POINT_set_affine_coordinates_GFp documentation says that
   // "unlike with OpenSSL, it's considered an error if the point is not on the
   // curve". To be sure, we double check here.
@@ -473,20 +503,23 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   if (1 != EC_POINT_is_on_curve(group.get(), point, nullptr)) {
     return util::Status(util::error::INTERNAL, "Point is not on curve");
   }
+
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
-      std::unique_ptr<uint8_t[]> encoded(
-          new uint8_t[1 + 2 * curve_size_in_bytes]);
-      size_t size = EC_POINT_point2oct(
-          group.get(), point, POINT_CONVERSION_UNCOMPRESSED, encoded.get(),
-          1 + 2 * curve_size_in_bytes, nullptr);
-      if (size != 1 + 2 * curve_size_in_bytes) {
+      std::string encoded_point;
+      const int encoded_point_size = 1 + 2 * curve_size_in_bytes;
+      ResizeStringUninitialized(&encoded_point, encoded_point_size);
+      size_t size =
+          EC_POINT_point2oct(group.get(), point, POINT_CONVERSION_UNCOMPRESSED,
+                             reinterpret_cast<uint8_t *>(&encoded_point[0]),
+                             encoded_point_size, /*ctx=*/nullptr);
+      if (size != encoded_point_size) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + 2 * curve_size_in_bytes);
+      return encoded_point;
     }
     case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      std::string encoded_point;
       internal::SslUniquePtr<BIGNUM> x(BN_new());
       internal::SslUniquePtr<BIGNUM> y(BN_new());
       if (nullptr == x.get() || nullptr == y.get()) {
@@ -494,37 +527,48 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
             util::error::INTERNAL,
             "Openssl internal error allocating memory for coordinates");
       }
-      std::unique_ptr<uint8_t[]> encoded(new uint8_t[2 * curve_size_in_bytes]);
+      ResizeStringUninitialized(&encoded_point, 2 * curve_size_in_bytes);
 
       if (1 != EC_POINT_get_affine_coordinates_GFp(group.get(), point, x.get(),
                                                    y.get(), nullptr)) {
         return util::Status(util::error::INTERNAL,
                             "Openssl internal error getting coordinates");
       }
-      if (1 != BN_bn2bin_padded(reinterpret_cast<uint8_t *>(encoded.get()),
-                                curve_size_in_bytes, x.get())) {
-        return util::Status(util::error::INTERNAL,
-                            "Openssl internal error serializing x coordinate");
+
+      util::Status res = BignumToBinaryPadded(
+          absl::MakeSpan(&encoded_point[0], curve_size_in_bytes), x.get());
+
+      if (!res.ok()) {
+        return ToStatusF(
+            util::error::INTERNAL,
+            "Openssl internal error serializing the x coordinate - %s",
+            res.message());
       }
-      if (1 != BN_bn2bin_padded(reinterpret_cast<uint8_t *>(
-                                    encoded.get() + curve_size_in_bytes),
-                                curve_size_in_bytes, y.get())) {
-        return util::Status(util::error::INTERNAL,
-                            "Openssl internal error serializing y coordinate");
+      res = BignumToBinaryPadded(
+          absl::MakeSpan(&encoded_point[0] + curve_size_in_bytes,
+                         curve_size_in_bytes),
+          y.get());
+      if (!res.ok()) {
+        return ToStatusF(
+            util::error::INTERNAL,
+            "Openssl internal error serializing the y coordinate - %s",
+            res.message());
       }
-      return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         2 * curve_size_in_bytes);
+      return encoded_point;
     }
     case EcPointFormat::COMPRESSED: {
-      std::unique_ptr<uint8_t[]> encoded(new uint8_t[1 + curve_size_in_bytes]);
-      size_t size = EC_POINT_point2oct(
-          group.get(), point, POINT_CONVERSION_COMPRESSED, encoded.get(),
-          1 + curve_size_in_bytes, nullptr);
-      if (size != 1 + curve_size_in_bytes) {
+      std::string encoded_point;
+      const int encoded_point_size = 1 + curve_size_in_bytes;
+      ResizeStringUninitialized(&encoded_point, encoded_point_size);
+
+      size_t size =
+          EC_POINT_point2oct(group.get(), point, POINT_CONVERSION_COMPRESSED,
+                             reinterpret_cast<uint8_t *>(&encoded_point[0]),
+                             encoded_point_size, /*ctx=*/nullptr);
+      if (size != encoded_point_size) {
         return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
       }
-      return std::string(reinterpret_cast<const char *>(encoded.get()),
-                         1 + curve_size_in_bytes);
+      return encoded_point;
     }
     default:
       return util::Status(util::error::INTERNAL, "Unsupported point format");
@@ -615,15 +659,13 @@ util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
   if (!status_or_e.ok()) return status_or_e.status();
   auto e = status_or_e.ValueOrDie().get();
   if (!BN_is_odd(e)) {
-    return util::Status(
-        util::error::INVALID_ARGUMENT,
-        "Public exponent must be odd.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Public exponent must be odd.");
   }
 
   if (BN_cmp_word(e, 65536) <= 0) {
-    return util::Status(
-        util::error::INVALID_ARGUMENT,
-        "Public exponent must be greater than 65536.");
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Public exponent must be greater than 65536.");
   }
 
   return util::OkStatus();
@@ -883,7 +925,6 @@ const EVP_CIPHER *SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(
       return nullptr;
   }
 }
-
 
 // static
 const EVP_AEAD *SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(

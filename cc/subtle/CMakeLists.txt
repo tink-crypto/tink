@@ -567,6 +567,7 @@ tink_cc_library(
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::random
+    tink::subtle::subtle_util
     tink::config::tink_fips
     tink::util::errors
     tink::util::secret_data
@@ -575,6 +576,7 @@ tink_cc_library(
     crypto
     absl::strings
     absl::memory
+    absl::span
 )
 
 tink_cc_library(

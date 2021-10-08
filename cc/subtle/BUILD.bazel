@@ -596,6 +596,7 @@ cc_library(
     deps = [
         ":common_enums",
         ":random",
+        ":subtle_util",
         "//config:tink_fips",
         "//internal:ssl_unique_ptr",
         "//util:errors",
@@ -605,6 +606,7 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
