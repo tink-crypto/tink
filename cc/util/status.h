@@ -33,7 +33,7 @@ namespace error {
 
 
 // These values match the error codes in the codes.proto file of the original.
-enum Code {
+enum ABSL_DEPRECATED("Prefer using absl::StatusCode instead.") Code {
   // Not an error; returned on success
   OK = 0,
 
