@@ -1,0 +1,25 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_library(
+    name = "insecure_nonce_aes_gcm_jce",
+    srcs = ["InsecureNonceAesGcmJce.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_aes_gcm_jce-android",
+    srcs = ["InsecureNonceAesGcmJce.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)

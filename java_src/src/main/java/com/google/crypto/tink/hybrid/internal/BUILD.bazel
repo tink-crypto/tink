@@ -1,8 +1,19 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
+package(default_visibility = ["//visibility:public"])
+
 licenses(["notice"])
 
-package(default_visibility = ["//visibility:public"])
+java_library(
+    name = "aes_gcm_hpke_aead",
+    srcs = ["AesGcmHpkeAead.java"],
+    deps = [
+        ":hpke_aead",
+        ":hpke_util",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
 
 java_library(
     name = "hkdf_hpke_kdf",
@@ -11,6 +22,14 @@ java_library(
         ":hpke_kdf",
         ":hpke_util",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "hpke_aead",
+    srcs = ["HpkeAead.java"],
+    deps = [
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -57,12 +76,31 @@ java_library(
 # Android libraries
 
 android_library(
+    name = "aes_gcm_hpke_aead-android",
+    srcs = ["AesGcmHpkeAead.java"],
+    deps = [
+        ":hpke_aead-android",
+        ":hpke_util-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
     name = "hkdf_hpke_kdf-android",
     srcs = ["HkdfHpkeKdf.java"],
     deps = [
         ":hpke_kdf-android",
         ":hpke_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "hpke_aead-android",
+    srcs = ["HpkeAead.java"],
+    deps = [
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -77,7 +115,7 @@ android_library(
     srcs = ["HpkeKem.java"],
     deps = [
         ":hpke_kem_encap_output-android",
-    ]
+    ],
 )
 
 android_library(

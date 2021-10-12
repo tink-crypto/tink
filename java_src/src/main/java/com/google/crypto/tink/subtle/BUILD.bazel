@@ -295,6 +295,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
