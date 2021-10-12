@@ -9,6 +9,7 @@ import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {SecurityException} from '../exception/security_exception';
 import {HybridDecrypt, HybridEncrypt} from '../hybrid';
 import * as HybridConfig from '../hybrid/hybrid_config';
+import {HybridKeyTemplates} from '../hybrid/hybrid_key_templates';
 import {Mac} from '../mac';
 import * as Bytes from '../subtle/bytes';
 import * as Random from '../subtle/random';
@@ -552,6 +553,52 @@ describe('keyset handle test', function() {
     const keysetHandle = readNoSecret(reader);
 
     expect(keysetHandle.getKeyset()).toEqual(keyset);
+  });
+
+  describe('getPublicKeysetHandle', () => {
+    it('can get a public keyset from a private keyset', async () => {
+      const privateHandle = await generateNew(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      expect(() => privateHandle.getPublicKeysetHandle())
+          .not.toThrowError(
+              SecurityException, 'The keyset contains a non-private key');
+    });
+
+    it('can not get a public keyset from another public keyset', async () => {
+      const privateHandle = await generateNew(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      const publicHandle = privateHandle.getPublicKeysetHandle();
+      expect(() => publicHandle.getPublicKeysetHandle())
+          .toThrowError(
+              SecurityException, 'The keyset contains a non-private key');
+    });
+  });
+
+  describe('writeNoSecret', () => {
+    it('throws if the keyset contains secret keys', async () => {
+      const privateHandle = await generateNew(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      expect(() => privateHandle.writeNoSecret(new BinaryKeysetWriter()))
+          .toThrowError(SecurityException);
+    });
+
+    it('writes bytes if the keyset contains no secret keys', async () => {
+      const privateHandle = await generateNew(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      const publicHandle = privateHandle.getPublicKeysetHandle();
+      expect(() => publicHandle.writeNoSecret(new BinaryKeysetWriter()))
+          .not.toThrow();
+    });
+
+    it('can import the keyset using readNoSecret', async () => {
+      const privateHandle = await generateNew(
+          HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
+      const publicHandle = privateHandle.getPublicKeysetHandle();
+      const keysetBytes = publicHandle.writeNoSecret(new BinaryKeysetWriter());
+
+      const importedHandle = readNoSecret(new BinaryKeysetReader(keysetBytes));
+      expect(publicHandle.getKeyset()).toEqual(importedHandle.getKeyset());
+    });
   });
 });
 
