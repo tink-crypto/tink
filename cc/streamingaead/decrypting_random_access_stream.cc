@@ -125,7 +125,7 @@ StatusOr<int64_t> DecryptingRandomAccessStream::size() {
     return matching_stream_->size();
   }
   // TODO(b/139722894): attempt matching here?
-  return Status(util::error::UNAVAILABLE, "no matching found yet");
+  return Status(absl::StatusCode::kUnavailable, "no matching found yet");
 }
 
 }  // namespace streamingaead

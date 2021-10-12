@@ -248,7 +248,8 @@ class DummyStreamingAead : public StreamingAead {
         std::unique_ptr<crypto::tink::RandomAccessStream> ct_source,
         absl::string_view expected_header)
         : ct_source_(std::move(ct_source)), exp_header_(expected_header),
-          status_(util::Status(util::error::UNAVAILABLE, "not initialized")) {}
+          status_(util::Status(absl::StatusCode::kUnavailable,
+                               "not initialized")) {}
 
     crypto::tink::util::Status PRead(
         int64_t position, int count,
@@ -274,7 +275,7 @@ class DummyStreamingAead : public StreamingAead {
       if (!ct_size_result.ok()) return ct_size_result.status();
       auto pt_size = ct_size_result.ValueOrDie() - exp_header_.size();
       if (pt_size >= 0) return pt_size;
-      return util::Status(util::error::UNAVAILABLE, "size not available");
+      return util::Status(absl::StatusCode::kUnavailable, "size not available");
     }
 
    private:

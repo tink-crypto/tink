@@ -72,7 +72,8 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
                   "Size of the first segment must be greater than 0.");
   }
   dec_stream->status_ =
-      Status(util::error::UNAVAILABLE, "The header hasn't been read yet.");
+      Status(absl::StatusCode::kUnavailable,
+             "The header hasn't been read yet.");
   return {std::move(dec_stream)};
 }
 
