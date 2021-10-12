@@ -102,7 +102,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Regular Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
@@ -118,7 +118,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Empty Context Info Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
@@ -135,7 +135,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (empty_plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Empty Context Info and Message Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
@@ -153,7 +153,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         auto decrypt_result =
             hybrid_decrypt->Decrypt(Random::GetRandomBytes(1198), context_info);
         if (decrypt_result.ok()) {
-          return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+          return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                             "Decrypted random ciphertext");
         }
       }
@@ -162,7 +162,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
             hybrid_decrypt->Decrypt(ciphertext, Random::GetRandomBytes(14));
         if (decrypt_result.ok()) {
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Decrypted ciphertext with random context info");
         }
       }

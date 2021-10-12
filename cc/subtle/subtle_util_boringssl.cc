@@ -238,12 +238,12 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
   // used when FIPS-only mode is enabled at compile time.
 #ifdef TINK_USE_ONLY_FIPS
   return crypto::tink::util::Status(
-      crypto::tink::util::error::INTERNAL,
+      absl::StatusCode::kInternal,
       "Deriving EC keys is not allowed in FIPS mode.");
 #else
   if (IsFipsModeEnabled()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         "Deriving EC keys is not allowed in FIPS mode.");
   }
 

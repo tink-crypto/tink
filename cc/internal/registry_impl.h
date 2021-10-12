@@ -315,7 +315,7 @@ class RegistryImpl {
         const {
       if (q_type_index_ != std::type_index(typeid(Q))) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "RegistryImpl::KeysetWrapper() called with wrong type");
       }
       return static_cast<KeysetWrapper<Q>*>(keyset_wrapper_.get());
@@ -335,7 +335,7 @@ class RegistryImpl {
       }
       if (q_type_index_ != std::type_index(typeid(P))) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "RegistryImpl::LegacyWrapper() called with wrong type");
       }
       return static_cast<const PrimitiveWrapper<P, P>*>(
@@ -515,7 +515,7 @@ crypto::tink::util::Status RegistryImpl::RegisterKeyTypeManager(
   auto fips_status = internal::ChecksFipsCompatibility(fips_compatible);
   if (!fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*owned_manager).name(),
                      " as it is not FIPS compatible."));
@@ -567,7 +567,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (!private_fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*private_key_manager).name(),
                      " as it is not FIPS compatible."));
@@ -578,7 +578,7 @@ crypto::tink::util::Status RegistryImpl::RegisterAsymmetricKeyManagers(
 
   if (!public_fips_status.ok()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Failed registering the key manager for ",
                      typeid(*public_key_manager).name(),
                      " as it is not FIPS compatible."));

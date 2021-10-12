@@ -54,7 +54,7 @@ Status ReadAndVerifyFragment(RandomAccessStream* ras, int pos, int count,
                              absl::string_view full_contents) {
   auto buf_result = util::Buffer::New(count);
   if (!buf_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   absl::StrCat("Could not allocate buffer of size ", count));
   }
   auto buf = std::move(buf_result.ValueOrDie());
@@ -62,18 +62,18 @@ Status ReadAndVerifyFragment(RandomAccessStream* ras, int pos, int count,
   auto status = ras->PRead(pos, count, buf.get());
   if (!status.ok() && status.code() != absl::StatusCode::kOutOfRange) {
     return Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("PRead failed with status: ", status.ToString()));
   }
   int exp_size = std::min(count, full_size - pos);
   if (exp_size != buf->size()) {
-    return Status(crypto::tink::util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   absl::StrCat("PRead returned ", buf->size(), " bytes, while ",
                                exp_size, " bytes were expected."));
   }
   if (std::memcmp(full_contents.data() + pos, buf->get_mem_block(), exp_size)) {
     return Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("PRead returned bytes [",
                      std::string(buf->get_mem_block(), exp_size), "] while [",
                      full_contents.substr(pos, exp_size), "] were expected."));
@@ -108,7 +108,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
   if (!status.ok()) return status;
   if (plaintext.size() != enc_stream->Position()) {
     return ::crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         "Plaintext size different from stream position.");
   }
 
@@ -129,7 +129,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
     return status;
   }
   if (plaintext != decrypted) {
-    return ::crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+    return ::crypto::tink::util::Status(absl::StatusCode::kInternal,
                                         "Decryption differs from plaintext.");
   }
 
@@ -147,7 +147,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
       auto status = ReadAndVerifyFragment(dec_ras.get(), pos, count, plaintext);
       if (!status.ok()) {
         return Status(
-            crypto::tink::util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             absl::StrCat("Random access decryption failed at position=", pos,
                          " with count=", count,
                          " and status: ", status.ToString()));

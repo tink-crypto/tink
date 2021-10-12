@@ -47,7 +47,7 @@ crypto::tink::util::Status EncryptThenDecrypt(
       dem.Decrypt(encryption_or.ValueOrDie(), associated_data);
   if (!decryption_or.status().ok()) return decryption_or.status();
   if (decryption_or.ValueOrDie() != message) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+    return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                       "Message/Decryption mismatch");
   }
   return util::OkStatus();

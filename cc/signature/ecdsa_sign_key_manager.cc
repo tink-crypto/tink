@@ -68,7 +68,7 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
     const EcdsaKeyFormat& ecdsa_key_format, InputStream* input_stream) const {
   if (IsFipsModeEnabled()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         "Deriving EC keys is not allowed in FIPS mode.");
   }
 
