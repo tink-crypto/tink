@@ -1,5 +1,6 @@
 com.google.crypto.tink
 com.google.crypto.tink.aead
+com.google.crypto.tink.aead.internal
 com.google.crypto.tink.aead.subtle
 com.google.crypto.tink.annotations
 com.google.crypto.tink.config
