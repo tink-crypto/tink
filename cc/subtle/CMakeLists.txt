@@ -164,9 +164,10 @@ tink_cc_library(
     aes_cmac_boringssl.h
   DEPS
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
     tink::internal::fips_utils
+    tink::internal::ssl_unique_ptr
     tink::core::mac
+    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -843,15 +844,15 @@ tink_cc_test(
   NAME aes_cmac_boringssl_test
   SRCS aes_cmac_boringssl_test.cc
   DEPS
+    tink::config::tink_fips
+    tink::core::mac
     tink::subtle::common_enums
     tink::subtle::aes_cmac_boringssl
-    tink::internal::fips_utils
-    tink::core::mac
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
+    absl::strings
 )
 
 tink_cc_test(
