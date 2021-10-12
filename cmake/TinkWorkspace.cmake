@@ -61,15 +61,22 @@ http_archive(
 # Paths are hard-coded in tests, which expects wycheproof/ in this location.
 add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/cc/wycheproof")
 
-http_archive(
-  NAME boringssl
-  URL https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip
-  SHA256 73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84
-  CMAKE_SUBDIR src
-)
+if (NOT TINK_USE_SYSTEM_OPENSSL)
+  http_archive(
+    NAME boringssl
+    URL https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip
+    SHA256 73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84
+    CMAKE_SUBDIR src
+  )
 
-# BoringSSL targets do not carry include directory info, this fixes it.
-target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+  # BoringSSL targets do not carry include directory info, this fixes it.
+  target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+else()
+  add_library(crypto INTERFACE)
+  find_package(OpenSSL 1.1.0 REQUIRED)
+  target_link_libraries(crypto INTERFACE OpenSSL::Crypto)
+  target_include_directories(crypto INTERFACE OpenSSL::Crypto)
+endif()
 
 set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "Tink dependency override" FORCE)
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)
