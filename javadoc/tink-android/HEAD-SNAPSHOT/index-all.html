@@ -737,6 +737,8 @@
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/package-summary.html">com.google.crypto.tink.aead</a> - package com.google.crypto.tink.aead</dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a> - package com.google.crypto.tink.aead.internal</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/aead/subtle/package-summary.html">com.google.crypto.tink.aead.subtle</a> - package com.google.crypto.tink.aead.subtle</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/annotations/package-summary.html">com.google.crypto.tink.annotations</a> - package com.google.crypto.tink.annotations</dt>
@@ -963,6 +965,10 @@
 <dd>
 <div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#decrypt-byte:A-byte:A-byte:A-">decrypt(byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
+<dd>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
@@ -986,7 +992,9 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesEaxJce.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle">AesEaxJce</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesGcmJce.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle">AesGcmJce</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridDecrypt.html" title="class in com.google.crypto.tink.subtle">EciesAeadHkdfHybridDecrypt</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EncryptThenAuthenticate.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EncryptThenAuthenticate.html" title="class in com.google.crypto.tink.subtle">EncryptThenAuthenticate</a></dt>
@@ -1399,6 +1407,10 @@
 <dd>
 <div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#encrypt-byte:A-byte:A-byte:A-">encrypt(byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
+<dd>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/KmsEnvelopeAead.html" title="class in com.google.crypto.tink.aead">KmsEnvelopeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.aead.subtle.<a href="com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></dt>
@@ -1423,7 +1435,9 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesEaxJce.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesEaxJce.html" title="class in com.google.crypto.tink.subtle">AesEaxJce</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesGcmJce.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle">AesGcmJce</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html" title="class in com.google.crypto.tink.subtle">EciesAeadHkdfHybridEncrypt</a></dt>
 <dd>
 <div class="block">Encrypts <code>plaintext</code> using <code>contextInfo</code> as <b>info</b>-parameter of the underlying
@@ -1531,6 +1545,8 @@
 <dd>
 <div class="block">Returns the size of an element of the field over which the curve is defined.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#FIPS">FIPS</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html#FIPS">FIPS</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrHmacStreaming.html" title="class in com.google.crypto.tink.subtle">AesCtrHmacStreaming</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html#FIPS">FIPS</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/AesCtrJceCipher.html" title="class in com.google.crypto.tink.subtle">AesCtrJceCipher</a></dt>
@@ -2434,6 +2450,13 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init(ByteBuffer, byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle">StreamSegmentDecrypter</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">InsecureNonceAesGcmJce</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block">Insecure version of <a href="com/google/crypto/tink/subtle/AesGcmJce.html" title="class in com.google.crypto.tink.subtle"><code>AesGcmJce</code></a> that allows the caller to set
+ the IV.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#InsecureNonceAesGcmJce-byte:A-boolean-">InsecureNonceAesGcmJce(byte[], boolean)</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html#insecureSecretAccess--">insecureSecretAccess()</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey">SecretKeyAccess</a></dt>
 <dd>
 <div class="block">Returns a <code>KeyAccess</code> instance where <code>canAccessSecret()</code> returns true.</div>
@@ -2474,6 +2497,8 @@
 <div class="block">Returns whether Android Keystore is being used to wrap Tink keysets.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#isValidDerEncoding-byte:A-">isValidDerEncoding(byte[])</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#IV_SIZE_IN_BYTES">IV_SIZE_IN_BYTES</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a name="I:J">
@@ -3881,6 +3906,8 @@
 </a>
 <h2 class="title">T</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#TAG_SIZE_IN_BYTES">TAG_SIZE_IN_BYTES</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html#TCipher--">TCipher()</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineWrapper.TCipher.html" title="class in com.google.crypto.tink.subtle">EngineWrapper.TCipher</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/AeadConfig.html#TINK_1_0_0">TINK_1_0_0</a></span> - Static variable in class com.google.crypto.tink.aead.<a href="com/google/crypto/tink/aead/AeadConfig.html" title="class in com.google.crypto.tink.aead">AeadConfig</a></dt>
