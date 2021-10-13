@@ -32,6 +32,7 @@
 #include "openssl/err.h"
 #include "openssl/mem.h"
 #include "openssl/rsa.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -900,44 +901,37 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
   return rsa;
 }
 
-// static
 const EVP_CIPHER *SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
     uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aes_128_ctr();
-    case 32:
-      return EVP_aes_256_ctr();
-    default:
-      return nullptr;
+  util::StatusOr<const EVP_CIPHER *> res =
+      internal::GetAesCtrCipherForKeySize(size_in_bytes);
+  if (!res.ok()) {
+    return nullptr;
   }
+  return *res;
 }
 
-// static
 const EVP_CIPHER *SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(
     uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aes_128_gcm();
-    case 32:
-      return EVP_aes_256_gcm();
-    default:
-      return nullptr;
+  util::StatusOr<const EVP_CIPHER *> res =
+      internal::GetAesGcmCipherForKeySize(size_in_bytes);
+  if (!res.ok()) {
+    return nullptr;
   }
+  return *res;
 }
 
-// static
+#ifdef OPENSSL_IS_BORINGSSL
 const EVP_AEAD *SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
     uint32_t size_in_bytes) {
-  switch (size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm();
-    case 32:
-      return EVP_aead_aes_256_gcm();
-    default:
-      return nullptr;
+  util::StatusOr<const EVP_AEAD *> res =
+      internal::GetAesGcmAeadForKeySize(size_in_bytes);
+  if (!res.ok()) {
+    return nullptr;
   }
+  return *res;
 }
+#endif
 
 namespace boringssl {
 

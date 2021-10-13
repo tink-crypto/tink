@@ -27,6 +27,7 @@
 #include "openssl/cipher.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -34,7 +35,6 @@
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -163,9 +163,10 @@ AesCtrHmacStreamSegmentEncrypter::New(const AesCtrHmacStreaming::Params& params,
                       params.key_size, &key_value, &hmac_key_value);
   if (!status.ok()) return status;
 
-  auto cipher = SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(params.key_size);
-  if (cipher == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesCtrCipherForKeySize(params.key_size);
+  if (!cipher.ok()) {
+    return cipher.status();
   }
 
   auto hmac_result = HmacBoringSsl::New(params.tag_algo, params.tag_size,
@@ -176,7 +177,7 @@ AesCtrHmacStreamSegmentEncrypter::New(const AesCtrHmacStreaming::Params& params,
   return {absl::WrapUnique(new AesCtrHmacStreamSegmentEncrypter(
       std::move(key_value), header, nonce_prefix,
       params.ciphertext_segment_size, params.ciphertext_offset, params.tag_size,
-      cipher, std::move(mac)))};
+      *cipher, std::move(mac)))};
 }
 
 util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(
@@ -276,10 +277,13 @@ util::Status AesCtrHmacStreamSegmentDecrypter::Init(
                            &key_value_, &hmac_key_value);
   if (!status.ok()) return status;
 
-  cipher_ = SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(key_size_);
-  if (cipher_ == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesCtrCipherForKeySize(key_size_);
+  if (!cipher.ok()) {
+    return cipher.status();
   }
+
+  cipher_ = *cipher;
 
   auto hmac_result =
       HmacBoringSsl::New(tag_algo_, tag_size_, std::move(hmac_key_value));

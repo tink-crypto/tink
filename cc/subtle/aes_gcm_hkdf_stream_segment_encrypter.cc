@@ -26,6 +26,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -68,7 +69,7 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
                     AesGcmHkdfStreamSegmentEncrypter::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
-      AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
+          AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "ciphertext_segment_size too small");
   }
@@ -77,13 +78,13 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
 
 util::StatusOr<bssl::UniquePtr<EVP_AEAD_CTX>> CreateAeadCtx(
     const util::SecretData& key) {
-  const EVP_AEAD* aead =
-      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
-  if (aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+  util::StatusOr<const EVP_AEAD*> aead =
+      internal::GetAesGcmAeadForKeySize(key.size());
+  if (!aead.ok()) {
+    return aead.status();
   }
   bssl::UniquePtr<EVP_AEAD_CTX> ctx(
-      EVP_AEAD_CTX_new(aead, key.data(), key.size(),
+      EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
   if (!ctx) {
     return util::Status(util::error::INTERNAL,
@@ -131,8 +132,7 @@ AesGcmHkdfStreamSegmentEncrypter::New(Params params) {
 }
 
 util::Status AesGcmHkdfStreamSegmentEncrypter::EncryptSegment(
-    const std::vector<uint8_t>& plaintext,
-    bool is_last_segment,
+    const std::vector<uint8_t>& plaintext, bool is_last_segment,
     std::vector<uint8_t>* ciphertext_buffer) {
   if (plaintext.size() > get_plaintext_segment_size()) {
     return util::Status(util::error::INVALID_ARGUMENT, "plaintext too long");
@@ -157,20 +157,17 @@ util::Status AesGcmHkdfStreamSegmentEncrypter::EncryptSegment(
                    static_cast<uint32_t>(get_segment_number()));
   iv.back() = is_last_segment ? 1 : 0;
   size_t out_len;
-  if (!EVP_AEAD_CTX_seal(
-          ctx_.get(), ciphertext_buffer->data(), &out_len,
-          ciphertext_buffer->size(),
-          iv.data(), iv.size(),
-          plaintext.data(), plaintext.size(),
-          /* ad = */ nullptr, /* ad.length() = */ 0)) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Encryption failed: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+  if (!EVP_AEAD_CTX_seal(ctx_.get(), ciphertext_buffer->data(), &out_len,
+                         ciphertext_buffer->size(), iv.data(), iv.size(),
+                         plaintext.data(), plaintext.size(),
+                         /* ad = */ nullptr, /* ad.length() = */ 0)) {
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Encryption failed: ", SubtleUtilBoringSSL::GetErrors()));
   }
   IncSegmentNumber();
   return util::OkStatus();
 }
-
 
 }  // namespace subtle
 }  // namespace tink

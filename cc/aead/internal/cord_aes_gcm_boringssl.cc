@@ -28,9 +28,9 @@
 #include "openssl/cipher.h"
 #include "openssl/err.h"
 #include "tink/aead/cord_aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -40,13 +40,12 @@ namespace crypto {
 namespace tink {
 
 util::Status CordAesGcmBoringSsl::Init(util::SecretData key_value) {
-  cipher_ =
-      subtle::SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(key_value.size());
-
-  if (cipher_ == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> res =
+      internal::GetAesGcmCipherForKeySize(key_value.size());
+  if (!res.ok()) {
+    return res.status();
   }
-
+  cipher_ = *res;
   key_ = key_value;
   return util::OkStatus();
 }

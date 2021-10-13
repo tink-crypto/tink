@@ -252,13 +252,18 @@ class SubtleUtilBoringSSL {
   BoringSslRsaFromRsaPublicKey(const RsaPublicKey &key);
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
+  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
   static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
 
   // Returns BoringSSL's AES GCM EVP_CIPHER for the key size.
+  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
   static const EVP_CIPHER *GetAesGcmCipherForKeySize(uint32_t size_in_bytes);
 
+#ifdef OPENSSL_IS_BORINGSSL
   // Returns BoringSSL's AES GCM EVP_AEAD for the key size.
+  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
   static const EVP_AEAD *GetAesGcmAeadForKeySize(uint32_t size_in_bytes);
+#endif
 };
 
 namespace boringssl {
@@ -268,7 +273,6 @@ util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
                                                  const EVP_MD &hasher);
 
 }  // namespace boringssl
-
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

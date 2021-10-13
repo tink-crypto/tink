@@ -20,9 +20,9 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/evp.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -34,23 +34,26 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
   auto status = internal::CheckFipsCompatibility<AesCtrBoringSsl>();
   if (!status.ok()) return status;
 
-  const EVP_CIPHER* cipher =
-      SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(key.size());
-  if (cipher == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesCtrCipherForKeySize(key.size());
+  if (!cipher.ok()) {
+    return cipher.status();
   }
+
   if (iv_size < kMinIvSizeInBytes || iv_size > kBlockSize) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid iv size");
   }
   return {
-      absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, cipher))};
+      absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, *cipher))};
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
     absl::string_view plaintext) const {
   // BoringSSL expects a non-null pointer for plaintext, regardless of whether
   // the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  if (plaintext.empty() && plaintext.data() == nullptr) {
+    plaintext = absl::string_view("");
+  }
 
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {

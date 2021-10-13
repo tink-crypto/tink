@@ -28,6 +28,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
@@ -111,7 +112,8 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
                         "decrypter already initialized");
   }
   if (header.size() != header_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
         absl::StrCat("wrong header size, expected ", header_size_, " bytes"));
   }
   if (header[0] != header_size_) {
@@ -139,13 +141,14 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
   util::SecretData key = std::move(hkdf_result).ValueOrDie();
 
   // Initialize ctx_.
-  const EVP_AEAD* aead =
-      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
-  if (aead == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+  util::StatusOr<const EVP_AEAD*> aead =
+      internal::GetAesGcmAeadForKeySize(key.size());
+  if (!aead.ok()) {
+    return aead.status();
   }
-  ctx_.reset(
-      EVP_AEAD_CTX_new(aead, key.data(), key.size(),
+
+  ctx_ = bssl::UniquePtr<EVP_AEAD_CTX>(
+      EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
   if (!ctx_) {
     return util::Status(util::error::INTERNAL,
@@ -157,14 +160,12 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
 
 int AesGcmHkdfStreamSegmentDecrypter::get_plaintext_segment_size() const {
   return ciphertext_segment_size_ -
-      AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes;
+         AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes;
 }
 
 util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
-    const std::vector<uint8_t>& ciphertext,
-    int64_t segment_number,
-    bool is_last_segment,
-    std::vector<uint8_t>* plaintext_buffer) {
+    const std::vector<uint8_t>& ciphertext, int64_t segment_number,
+    bool is_last_segment, std::vector<uint8_t>* plaintext_buffer) {
   if (!is_initialized_) {
     return util::Status(util::error::FAILED_PRECONDITION,
                         "decrypter not initialized");
@@ -199,22 +200,19 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
 
   // Decrypt.
   size_t out_len;
-  if (!EVP_AEAD_CTX_open(
-          ctx_.get(), plaintext_buffer->data(), &out_len,
-          plaintext_buffer->size(),
-          iv.data(), iv.size(),
-          ciphertext.data(), ciphertext.size(),
-          /* ad = */ nullptr, /* ad.length() = */ 0)) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Decryption failed: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+  if (!EVP_AEAD_CTX_open(ctx_.get(), plaintext_buffer->data(), &out_len,
+                         plaintext_buffer->size(), iv.data(), iv.size(),
+                         ciphertext.data(), ciphertext.size(),
+                         /* ad = */ nullptr, /* ad.length() = */ 0)) {
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Decryption failed: ", SubtleUtilBoringSSL::GetErrors()));
   }
   if (out_len != plaintext_buffer->size()) {
     return util::Status(util::error::INTERNAL, "incorrect plaintext size");
   }
   return util::OkStatus();
 }
-
 
 }  // namespace subtle
 }  // namespace tink

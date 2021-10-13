@@ -304,12 +304,12 @@ tink_cc_library(
     aes_gcm_boringssl.cc
     aes_gcm_boringssl.h
   DEPS
+    tink::core::aead
+    tink::aead::internal::aead_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::subtle::random
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
-    tink::core::aead
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -326,6 +326,7 @@ tink_cc_library(
     aes_gcm_hkdf_stream_segment_decrypter.cc
     aes_gcm_hkdf_stream_segment_decrypter.h
   DEPS
+    tink::aead::internal::aead_util
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::common_enums
     tink::subtle::hkdf
@@ -349,6 +350,7 @@ tink_cc_library(
     aes_gcm_hkdf_stream_segment_encrypter.cc
     aes_gcm_hkdf_stream_segment_encrypter.h
   DEPS
+    tink::aead::internal::aead_util
     tink::subtle::random
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util_boringssl
@@ -396,6 +398,9 @@ tink_cc_library(
     aes_ctr_hmac_streaming.cc
     aes_ctr_hmac_streaming.h
   DEPS
+    tink::core::mac
+    tink::aead::internal::aead_util
+    tink::internal::fips_utils
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::hmac_boringssl
@@ -404,9 +409,6 @@ tink_cc_library(
     tink::subtle::stream_segment_decrypter
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
-    tink::internal::fips_utils
-    tink::core::mac
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -463,11 +465,11 @@ tink_cc_library(
     aes_ctr_boringssl.cc
     aes_ctr_boringssl.h
   DEPS
+    tink::aead::internal::aead_util
     tink::internal::fips_utils
     tink::subtle::ind_cpa_cipher
     tink::subtle::random
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -565,6 +567,7 @@ tink_cc_library(
     subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
+    tink::aead::internal::aead_util
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::random
@@ -875,10 +878,10 @@ tink_cc_test(
   SRCS aes_gcm_boringssl_test.cc
   DATA wycheproof::testvectors
   DEPS
+    tink::config::tink_fips
+    tink::core::aead
     tink::subtle::aes_gcm_boringssl
     tink::subtle::wycheproof_util
-    tink::internal::fips_utils
-    tink::core::aead
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

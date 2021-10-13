@@ -25,10 +25,10 @@
 #include "absl/types/span.h"
 #include "openssl/evp.h"
 #include "openssl/mem.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -73,19 +73,19 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
   if (!status.ok()) return status;
 
 #ifdef OPENSSL_IS_BORINGSSL
-  const EVP_AEAD* aead =
-      SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
+  util::StatusOr<const EVP_AEAD*> aead =
+      internal::GetAesGcmAeadForKeySize(key.size());
 #else
-  const EVP_CIPHER* aead =
-      SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(key.size());
+  util::StatusOr<const EVP_CIPHER*> aead =
+      internal::GetAesGcmCipherForKeySize(key.size());
 #endif
-  if (aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+  if (!aead.ok()) {
+    return aead.status();
   }
 
 #ifdef OPENSSL_IS_BORINGSSL
   internal::SslUniquePtr<EVP_AEAD_CTX> context(EVP_AEAD_CTX_new(
-      aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
+      *aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
 #else
   internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
 #endif

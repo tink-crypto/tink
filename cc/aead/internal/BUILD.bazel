@@ -3,6 +3,19 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
+    name = "aead_util",
+    srcs = ["aead_util.cc"],
+    hdrs = ["aead_util.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        "//util:errors",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_library(
     name = "cord_aes_gcm_boringssl",
     srcs = ["cord_aes_gcm_boringssl.cc"],
     hdrs = ["cord_aes_gcm_boringssl.h"],
@@ -54,3 +67,16 @@ cc_test(
         "@rapidjson",
     ],
 )
+
+cc_test(
+    name = "aead_util_test",
+    size = "small",
+    srcs = ["aead_util_test.cc"],
+    deps = [
+        ":aead_util",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+        "@boringssl//:crypto",
+    ],
+)
+

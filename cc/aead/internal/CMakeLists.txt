@@ -1,6 +1,18 @@
 tink_module(aead::internal)
 
 tink_cc_library(
+  NAME aead_util
+  SRCS
+    aead_util.cc
+    aead_util.h
+  DEPS
+    tink::util::errors
+    tink::util::status
+    tink::util::statusor
+    crypto
+)
+
+tink_cc_library(
   NAME cord_aes_gcm_boringssl
   SRCS
     cord_aes_gcm_boringssl.cc
@@ -25,4 +37,16 @@ tink_cc_library(
   DEPS
     tink::util::statusor
     absl::strings
+)
+
+
+tink_cc_test(
+  NAME aead_util_test
+  SRCS aead_util_test.cc
+  DEPS
+    tink::aead::internal::aead_util
+    tink::util::statusor
+    tink::util::test_matchers
+    crypto
+    gmock
 )
