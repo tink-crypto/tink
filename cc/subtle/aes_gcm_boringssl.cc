@@ -24,7 +24,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/evp.h"
-#include "openssl/mem.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
@@ -99,7 +98,7 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
   // precomputations on the key. It doesn't matter at this point if we set
   // encryption or decryption, it will be overwritten later on anyways any time
   // we call EVP_CipherInit_ex.
-  if (EVP_CipherInit_ex(context.get(), aead, /*impl=*/nullptr,
+  if (EVP_CipherInit_ex(context.get(), *aead, /*impl=*/nullptr,
                         reinterpret_cast<const uint8_t*>(&key[0]),
                         /*iv=*/nullptr, /*enc=*/1) <= 0) {
     return util::Status(util::error::INTERNAL, "Context initialization failed");

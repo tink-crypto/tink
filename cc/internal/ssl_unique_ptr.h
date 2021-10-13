@@ -24,6 +24,7 @@
 
 #ifndef OPENSSL_IS_BORINGSSL
 #include "openssl/bn.h"
+#include "openssl/cmac.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
@@ -72,10 +73,6 @@ struct Deleter<RSA> {
   void operator()(RSA* ptr) { RSA_free(ptr); }
 };
 template <>
-struct Deleter<EVP_AEAD_CTX> {
-  void operator()(EVP_AEAD_CTX* ptr) { EVP_AEAD_CTX_free(ptr); }
-};
-template <>
 struct Deleter<EC_POINT> {
   void operator()(EC_POINT* ptr) { EC_POINT_free(ptr); }
 };
@@ -90,6 +87,11 @@ struct Deleter<EC_KEY> {
 template <>
 struct Deleter<ECDSA_SIG> {
   void operator()(ECDSA_SIG* ptr) { ECDSA_SIG_free(ptr); }
+};
+template <>
+struct Deleter<CMAC_CTX> {
+  void operator()(CMAC_CTX* ptr) { CMAC_CTX_free(ptr); }
+};
 
 template <typename T>
 using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;
