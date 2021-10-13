@@ -52,6 +52,16 @@ TEST(ErrorsTest, ToAbslStatus) {
   EXPECT_EQ(::absl::Status(crypto::tink::util::OkStatus()), ::absl::OkStatus());
 }
 
+TEST(ErrorsTest, ToStatusFAbslStatusCodeTest) {
+  const char* const msg = "test message %s 2 %d";
+  const char* expected_msg = "test message asdf 2 42";
+  crypto::tink::util::Status status =
+      ToStatusF(absl::StatusCode::kUnknown, msg, "asdf", 42);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(expected_msg, status.error_message());
+  EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
+}
+
 }  // namespace
 }  // namespace tink
 }  // namespace crypto

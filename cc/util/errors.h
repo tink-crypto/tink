@@ -25,7 +25,16 @@ namespace tink {
 
 // Constructs a Status with formatted error message.
 template <typename... Args>
+ABSL_DEPRECATED("Prefer using absl::StatusCode as a first argument.")
 util::Status ToStatusF(util::error::Code code,
+                       const absl::FormatSpec<Args...>& format,
+                       const Args&... args) {
+  return util::Status(code, absl::StrFormat(format, args...));
+}
+
+// Constructs a Status with formatted error message using absl::StatusCode.
+template <typename... Args>
+util::Status ToStatusF(absl::StatusCode code,
                        const absl::FormatSpec<Args...>& format,
                        const Args&... args) {
   return util::Status(code, absl::StrFormat(format, args...));
