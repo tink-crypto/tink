@@ -200,7 +200,7 @@ func (km *Manager) Destroy(keyID uint32) error {
 		switch key.Status {
 		case tinkpb.KeyStatusType_ENABLED, tinkpb.KeyStatusType_DISABLED, tinkpb.KeyStatusType_DESTROYED:
 			km.ks.Key[i].Status = tinkpb.KeyStatusType_DESTROYED
-			km.ks.Key[i].KeyData = nil
+			km.ks.Key[i].KeyData = &tinkpb.KeyData{}
 			return nil
 		default:
 			return fmt.Errorf("keyset_manager: cannot destroy key with id %d with status %s", keyID, km.ks.Key[i].Status.String())

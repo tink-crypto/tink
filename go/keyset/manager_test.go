@@ -484,8 +484,39 @@ func TestKeysetManagerDestroy(t *testing.T) {
 	if ks2.Key[1].Status != tinkpb.KeyStatusType_DESTROYED {
 		t.Errorf("unexpected status got %s", ks2.Key[1].Status.String())
 	}
-	if ks2.Key[1].KeyData != nil {
-		t.Errorf("expected key data to be nil")
+	if ks2.Key[1].KeyData == nil {
+		t.Errorf("expected key data not to be nil")
+		t.FailNow()
+	}
+	if ks2.Key[1].KeyData.Value != nil {
+		t.Errorf("expected key data value to be nil, got not nil")
+	}
+	if ks2.Key[1].KeyData.TypeUrl != "" {
+		t.Errorf("expected empty type url, got %s", ks2.Key[1].KeyData.TypeUrl)
+	}
+	if ks2.Key[1].KeyData.KeyMaterialType != tinkpb.KeyData_UNKNOWN_KEYMATERIAL {
+		t.Errorf("unexpected key material type, got %s", ks2.Key[1].KeyData.KeyMaterialType.String())
+	}
+}
+
+func TestKeysetManagerDestroyWithKeysetInfo(t *testing.T) {
+	primaryKeyID := uint32(42)
+	otherKeyID := uint32(43)
+	keyData := testutil.NewKeyData("some type url", []byte{0}, tinkpb.KeyData_SYMMETRIC)
+	key := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, primaryKeyID, tinkpb.OutputPrefixType_TINK)
+	key2 := testutil.NewKey(keyData, tinkpb.KeyStatusType_ENABLED, otherKeyID, tinkpb.OutputPrefixType_TINK)
+	ks1 := testutil.NewKeyset(primaryKeyID, []*tinkpb.Keyset_Key{key, key2})
+	h1, _ := testkeyset.NewHandle(ks1)
+	ksm1 := keyset.NewManagerFromHandle(h1)
+	// destroy key
+	err := ksm1.Destroy(otherKeyID)
+	if err != nil {
+		t.Errorf("expected no error but got error %s", err)
+	}
+	// verify keyset info is not nil
+	info := h1.KeysetInfo()
+	if info == nil {
+		t.Errorf("expected keyset info to be not nil, got nil")
 	}
 }
 
