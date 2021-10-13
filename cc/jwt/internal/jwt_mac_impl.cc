@@ -80,7 +80,7 @@ util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecodeWithKid(
   util::Status verify_result = mac_->VerifyMac(mac_value, unsigned_token);
   if (!verify_result.ok()) {
     // Use a different error code so that we can distinguish it.
-    return util::Status(util::error::UNAUTHENTICATED,
+    return util::Status(absl::StatusCode::kUnauthenticated,
                         verify_result.error_message());
   }
   std::vector<absl::string_view> parts = absl::StrSplit(unsigned_token, '.');
