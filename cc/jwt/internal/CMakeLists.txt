@@ -176,6 +176,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    tink::util::test_util
     tink::proto::jwt_hmac_cc_proto
     gmock
 )
