@@ -15,37 +15,85 @@
 # limitations under the License.
 ################################################################################
 
-set -e
+set -xe
 
-# Install libssl-dev only when running in Kokoro to allow running the script
-# locally for debugging purposes.
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  # Install the latest version of OpenSSL.
-  sudo apt-get install libssl-dev -y
-fi
+install_cmake() {
+  local cmake_version="3.21.3"
+  local cmake_sha256="a19aa9fcf368e9d923cdb29189528f0fe00a0d08e752ba4e547af91817518696"
 
-cd git*/tink
+  local cmake_name="cmake-${cmake_version}-linux-x86_64"
+  local cmake_archive="${cmake_name}.tar.gz"
+  local cmake_url="https://github.com/Kitware/CMake/releases/download/v${cmake_version}/${cmake_archive}"
 
-./kokoro/copy_credentials.sh
+  local -r cmake_tmpdir="$(mktemp -dt tink-cmake.XXXXXX)"
+  (
+    cd "${cmake_tmpdir}"
+    curl -OLS "${cmake_url}"
+    echo "${cmake_sha256} ${cmake_archive}" | sha256sum -c
 
-# Currently there is a limited list of targets that can be built with OpenSSL.
-# This list is expected to grow larger as new targets can use OpenSSL.
-TEST_TARGETS=(
-  "tink_test_subtle_random_test"
-  "tink_test_subtle_aes_cmac_boringssl_test"
-  "tink_test_subtle_aes_gcm_boringssl_test"
-)
+    tar xzf "${cmake_archive}"
+  )
+  export PATH="${cmake_tmpdir}/${cmake_name}/bin:${PATH}"
+}
 
-echo "========================================================= Running cmake"
-cmake --version
-cmake . \
-  -DTINK_BUILD_TESTS=ON \
-  -DCMAKE_CXX_STANDARD=11 \
-  -DTINK_USE_SYSTEM_OPENSSL=ON
-echo "==================================================== Building with make"
-make -j "$(nproc)" "${TEST_TARGETS[@]}"
-echo "======================================================= Testing targets"
-for target in "${TEST_TARGETS[@]}"; do
-  ./cc/subtle/"${target}"
-done
-echo "================================================== Done testing targets"
+install_openssl() {
+  local openssl_version="1.1.1l"
+  local openssl_sha256="0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1"
+
+  local openssl_name="openssl-${openssl_version}"
+  local openssl_archive="${openssl_name}.tar.gz"
+  local openssl_url="https://www.openssl.org/source/${openssl_archive}"
+
+  local -r openssl_tmpdir="$(mktemp -dt tink-openssl.XXXXXX)"
+  (
+    cd "${openssl_tmpdir}"
+    curl -OLS "${openssl_url}"
+    echo "${openssl_sha256} ${openssl_archive}" | sha256sum -c
+
+    tar xzf "${openssl_archive}"
+    cd "${openssl_name}"
+    ./config --prefix="${openssl_tmpdir}" --openssldir="${openssl_tmpdir}"
+    make
+    make install
+  )
+  export OPENSSL_ROOT_DIR="${openssl_tmpdir}"
+  export PATH="${openssl_tmpdir}/bin:${PATH}"
+}
+
+main() {
+  cd git*/tink
+
+  ./kokoro/copy_credentials.sh
+  if [[ -n "${KOKORO_ROOT}" ]]; then
+    # TODO(b/201806781): Remove when no longer necessary.
+    sudo apt-get install -y ca-certificates
+    sudo rm -f /usr/share/ca-certificates/mozilla/DST_Root_CA_X3.crt
+    sudo update-ca-certificates
+
+    install_cmake
+    install_openssl
+  fi
+
+  # Currently there is a limited list of targets that can be built with OpenSSL.
+  # This list is expected to grow larger as new targets can use OpenSSL.
+  TEST_TARGETS=(
+    "tink_test_subtle_random_test"
+    "tink_test_subtle_aes_cmac_boringssl_test"
+    "tink_test_subtle_aes_gcm_boringssl_test"
+  )
+
+  echo "========================================================= Running cmake"
+  cmake --version
+  cmake . \
+    -DTINK_BUILD_TESTS=ON \
+    -DCMAKE_CXX_STANDARD=11 \
+    -DTINK_USE_SYSTEM_OPENSSL=ON
+  echo "==================================================== Building with make"
+  make -j "$(nproc)" "${TEST_TARGETS[@]}"
+  echo "======================================================= Testing targets"
+  # Execute all tests that were built using the above make invocation.
+  ctest -E ".*_NOT_BUILT"
+  echo "================================================== Done testing targets"
+}
+
+main "$@"
