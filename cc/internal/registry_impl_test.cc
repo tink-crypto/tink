@@ -251,7 +251,8 @@ class TestWrapper : public PrimitiveWrapper<P, Q> {
   TestWrapper() {}
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
-    return util::Status(util::error::UNIMPLEMENTED, "This is a test wrapper.");
+    return util::Status(absl::StatusCode::kUnimplemented,
+                        "This is a test wrapper.");
   }
 };
 
@@ -484,7 +485,7 @@ class TestAeadCatalogue : public Catalogue<Aead> {
   util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
       const std::string& type_url, const std::string& primitive_name,
       uint32_t min_version) const override {
-    return util::Status(util::error::UNIMPLEMENTED,
+    return util::Status(absl::StatusCode::kUnimplemented,
                         "This is a test catalogue.");
   }
 };
@@ -1323,14 +1324,14 @@ class TestPrivateKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PrivatePrimitiveA>> Create(
         const EcdsaPrivateKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
   class PrivatePrimitiveBFactory : public PrimitiveFactory<PrivatePrimitiveB> {
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PrivatePrimitiveB>> Create(
         const EcdsaPrivateKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 
@@ -1387,14 +1388,14 @@ class TestPublicKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PublicPrimitiveA>> Create(
         const EcdsaPublicKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
   class PublicPrimitiveBFactory : public PrimitiveFactory<PublicPrimitiveB> {
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PublicPrimitiveB>> Create(
         const EcdsaPublicKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 

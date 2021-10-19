@@ -43,7 +43,7 @@ EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
       return EciesHkdfX25519RecipientKemBoringSsl::New(curve,
                                                        std::move(priv_key));
     default:
-      return util::Status(util::error::UNIMPLEMENTED,
+      return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
 }

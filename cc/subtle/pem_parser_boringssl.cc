@@ -311,13 +311,13 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "PEM EC Public Key parsing is unimplemented");
 }
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "PEM EC Private Key parsing is unimplemented");
 }
 

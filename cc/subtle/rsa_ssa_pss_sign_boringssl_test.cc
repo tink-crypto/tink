@@ -107,7 +107,7 @@ TEST_F(RsaPssSignBoringsslTest, RejectsInvalidPaddingHash) {
       /*sig_hash=*/HashType::SHA256, /*mgf1_hash=*/HashType::UNKNOWN_HASH,
       /*salt_length=*/0};
   ASSERT_THAT(RsaSsaPssSignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST_F(RsaPssSignBoringsslTest, RejectsUnsafePaddingHash) {

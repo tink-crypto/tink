@@ -348,7 +348,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
         break;
       }
       default:
-        return util::Status(util::error::UNIMPLEMENTED,
+        return util::Status(absl::StatusCode::kUnimplemented,
                             "EC Keys Parsing unimplemented");
     }
   }
@@ -375,7 +375,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
         break;
       }
       default:
-        return util::Status(util::error::UNIMPLEMENTED,
+        return util::Status(absl::StatusCode::kUnimplemented,
                             "EC Keys Parsing unimplemented");
     }
   }
@@ -388,7 +388,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
 
 util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 SignaturePemKeysetReader::ReadEncrypted() {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "Reading Encrypted PEM is not supported");
 }
 

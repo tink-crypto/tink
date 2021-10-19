@@ -45,7 +45,7 @@ Cecpq2HkdfRecipientKemBoringSsl::New(EllipticCurveType curve,
       return Cecpq2HkdfX25519RecipientKemBoringSsl::New(
           curve, std::move(ec_private_key), std::move(hrss_private_key_seed));
     default:
-      return util::Status(util::error::UNIMPLEMENTED,
+      return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
 }

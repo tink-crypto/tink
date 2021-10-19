@@ -60,7 +60,7 @@ class ExamplePrivateKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PrivatePrimitive>> Create(
         const EcdsaPrivateKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 
@@ -109,7 +109,7 @@ class TestPublicKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PublicPrimitive>> Create(
         const EcdsaPublicKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 
@@ -173,7 +173,7 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
   ExamplePrivateKeyTypeManager private_km;
   TestPublicKeyTypeManager public_km;
   EXPECT_CALL(private_km, ValidateKey)
-      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+      .WillOnce(Return(util::Status(absl::StatusCode::kOutOfRange,
                                     "GetPublicKeyDataValidatePrivateKey")));
 
   std::unique_ptr<KeyManager<PrivatePrimitive>> key_manager =
@@ -183,7 +183,7 @@ TEST(PrivateKeyManagerImplTest, GetPublicKeyDataValidatePrivateKey) {
       dynamic_cast<const PrivateKeyFactory&>(key_manager->get_key_factory())
           .GetPublicKeyData(EcdsaPrivateKey().SerializeAsString())
           .status(),
-      StatusIs(util::error::OUT_OF_RANGE,
+      StatusIs(absl::StatusCode::kOutOfRange,
                HasSubstr("GetPublicKeyDataValidatePrivateKey")));
 }
 

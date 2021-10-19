@@ -52,8 +52,8 @@ class HkdfInputStream : public InputStream {
       return returnDataFromPosition(data);
     }
     if (i_ == 255) {
-      stream_status_ = crypto::tink::util::Status(
-          crypto::tink::util::error::OUT_OF_RANGE, "EOF");
+      stream_status_ =
+          crypto::tink::util::Status(absl::StatusCode::kOutOfRange, "EOF");
       return stream_status_;
     }
     stream_status_ = UpdateTi();
@@ -190,7 +190,7 @@ HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
   }
   auto evp_md_or = SubtleUtilBoringSSL::EvpHash(hash);
   if (!evp_md_or.ok()) {
-    return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
+    return util::Status(absl::StatusCode::kUnimplemented, "Unsupported hash");
   }
 
   return {absl::WrapUnique(

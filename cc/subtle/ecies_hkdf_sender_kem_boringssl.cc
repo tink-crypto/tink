@@ -40,7 +40,7 @@ EciesHkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
     case EllipticCurveType::CURVE25519:
       return EciesHkdfX25519SendKemBoringSsl::New(curve, pubx, puby);
     default:
-      return util::Status(util::error::UNIMPLEMENTED,
+      return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
 }

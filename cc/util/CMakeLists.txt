@@ -197,6 +197,7 @@ tink_cc_library(
   SRCS
     test_matchers.h
   DEPS
+    absl::status
     tink::util::status
     tink::util::statusor
     gmock

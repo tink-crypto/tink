@@ -45,7 +45,7 @@ Cecpq2HkdfSenderKemBoringSsl::New(subtle::EllipticCurveType curve,
       return Cecpq2HkdfX25519SenderKemBoringSsl::New(curve, ec_pubx, ec_puby,
                                                      marshalled_hrss_pub);
     default:
-      return util::Status(util::error::UNIMPLEMENTED,
+      return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
 }

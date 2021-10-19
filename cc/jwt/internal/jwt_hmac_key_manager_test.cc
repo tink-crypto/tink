@@ -168,7 +168,7 @@ TEST(JwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
       absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
 
   ASSERT_THAT(JwtHmacKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {

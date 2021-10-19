@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -122,7 +123,9 @@ IsOkAndHolds(InnerMatcher&& inner_matcher) {
 // TODO(lizatretyakova): remove the static_cast and fix the comment above to
 // use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P(StatusIs, code,
-          "is a Status with a " + util::ErrorCodeString(code) + " code") {
+          "is a Status with a " +
+              absl::StatusCodeToString(static_cast<absl::StatusCode>(code)) +
+              " code") {
   if (arg.code() == static_cast<absl::StatusCode>(code)) {
     return true;
   }

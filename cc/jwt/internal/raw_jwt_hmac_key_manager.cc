@@ -75,7 +75,7 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::CreateKey(
 StatusOr<JwtHmacKey> RawJwtHmacKeyManager::DeriveKey(
     const JwtHmacKeyFormat& jwt_hmac_key_format,
     InputStream* input_stream) const {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "RawJwtHmacKeyManager::DeriveKey is not implemented");
 }
 

@@ -56,7 +56,7 @@ class InternalKeyFactory {
   virtual crypto::tink::util::StatusOr<KeyProto> DeriveKey(
       const KeyFormatProto& key_format, InputStream* input_stream) const {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         "Deriving key not implemented for this key type.");
   }
 };

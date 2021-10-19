@@ -119,21 +119,21 @@ class KeyFactoryImpl<KeyTypeManager<KeyProto, void, List<Primitives...>>>
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(const portable_proto::MessageLite& key_format) const override {
     return util::Status(
-        util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         "Creating new keys is not supported for this key manager.");
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<portable_proto::MessageLite>>
   NewKey(absl::string_view serialized_key_format) const override {
     return util::Status(
-        util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         "Creating new keys is not supported for this key manager.");
   }
 
   crypto::tink::util::StatusOr<std::unique_ptr<google::crypto::tink::KeyData>>
   NewKeyData(absl::string_view serialized_key_format) const override {
     return util::Status(
-        util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         "Creating new keys is not supported for this key manager.");
   }
 };
@@ -288,7 +288,7 @@ CreateDeriverFunctionFor(
                             InputStream* randomness)
              -> crypto::tink::util::StatusOr<google::crypto::tink::KeyData> {
     return crypto::tink::util::Status(
-        util::error::UNIMPLEMENTED,
+        absl::StatusCode::kUnimplemented,
         absl::StrCat("Registered KeyManager for type '",
                      key_type_manager->get_key_type(),
                      "' does not support key generation."));

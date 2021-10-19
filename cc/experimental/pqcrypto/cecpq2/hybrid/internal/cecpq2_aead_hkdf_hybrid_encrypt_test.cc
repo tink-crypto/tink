@@ -88,7 +88,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedEcType) {
       google::crypto::tink::EllipticCurveType::NIST_P256);
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(sender_key);
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::UNIMPLEMENTED,
+              StatusIs(absl::StatusCode::kUnimplemented,
                        HasSubstr("Unsupported elliptic curve")));
 }
 

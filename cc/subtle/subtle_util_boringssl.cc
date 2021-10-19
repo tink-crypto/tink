@@ -177,7 +177,7 @@ util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
     case EllipticCurveType::NIST_P521:
       return EC_GROUP_new_by_curve_name(NID_secp521r1);
     default:
-      return util::Status(util::error::UNIMPLEMENTED,
+      return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
 }
@@ -361,7 +361,7 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
     case HashType::SHA512:
       return EVP_sha512();
     default:
-      return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
+      return util::Status(absl::StatusCode::kUnimplemented, "Unsupported hash");
   }
 }
 
