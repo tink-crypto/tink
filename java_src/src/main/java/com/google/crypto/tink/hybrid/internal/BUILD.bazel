@@ -35,6 +35,22 @@ java_library(
 )
 
 java_library(
+    name = "hpke_context",
+    srcs = ["HpkeContext.java"],
+    deps = [
+        ":hpke_aead",
+        ":hpke_kdf",
+        ":hpke_kem",
+        ":hpke_kem_encap_output",
+        ":hpke_util",
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+java_library(
     name = "hpke_kdf",
     srcs = ["HpkeKdf.java"],
 )
@@ -50,6 +66,21 @@ java_library(
 java_library(
     name = "hpke_kem_encap_output",
     srcs = ["HpkeKemEncapOutput.java"],
+)
+
+java_library(
+    name = "hpke_primitive_factory",
+    srcs = ["HpkePrimitiveFactory.java"],
+    deps = [
+        ":aes_gcm_hpke_aead",
+        ":hkdf_hpke_kdf",
+        ":hpke_aead",
+        ":hpke_kdf",
+        ":hpke_kem",
+        ":hpke_util",
+        ":x25519_hpke_kem",
+        "//proto:hpke_java_proto",
+    ],
 )
 
 java_library(
@@ -106,6 +137,22 @@ android_library(
 )
 
 android_library(
+    name = "hpke_context-android",
+    srcs = ["HpkeContext.java"],
+    deps = [
+        ":hpke_aead-android",
+        ":hpke_kdf-android",
+        ":hpke_kem-android",
+        ":hpke_kem_encap_output-android",
+        ":hpke_util-android",
+        "//proto:hpke_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_findbugs_jsr305",
+    ],
+)
+
+android_library(
     name = "hpke_kdf-android",
     srcs = ["HpkeKdf.java"],
 )
@@ -121,6 +168,21 @@ android_library(
 android_library(
     name = "hpke_kem_encap_output-android",
     srcs = ["HpkeKemEncapOutput.java"],
+)
+
+android_library(
+    name = "hpke_primitive_factory-android",
+    srcs = ["HpkePrimitiveFactory.java"],
+    deps = [
+        ":aes_gcm_hpke_aead-android",
+        ":hkdf_hpke_kdf-android",
+        ":hpke_aead-android",
+        ":hpke_kdf-android",
+        ":hpke_kem-android",
+        ":hpke_util-android",
+        ":x25519_hpke_kem-android",
+        "//proto:hpke_java_proto_lite",
+    ],
 )
 
 android_library(

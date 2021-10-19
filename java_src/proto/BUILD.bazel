@@ -324,3 +324,13 @@ java_lite_proto_library(
     name = "empty_java_proto_lite",
     deps = ["@tink_base//proto:empty_proto"],
 )
+
+java_proto_library(
+    name = "hpke_java_proto",
+    deps = ["@tink_base//proto:hpke_proto"],
+)
+
+java_lite_proto_library(
+    name = "hpke_java_proto_lite",
+    deps = ["@tink_base//proto:hpke_proto"],
+)
