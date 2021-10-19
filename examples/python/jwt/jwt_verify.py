@@ -13,9 +13,7 @@
 # limitations under the License.
 
 # [START python-jwt-signature-example]
-"""A utility for creating and verifying Json Web Tokens (JWT).
-
-It loads cleartext keys from disk - this is not recommended!
+"""A utility for verifying Json Web Tokens (JWT).
 """
 
 from __future__ import absolute_import
@@ -30,16 +28,13 @@ from absl import app
 from absl import flags
 from absl import logging
 import tink
-from tink import cleartext_keyset_handle
 from tink import jwt
 
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_enum('mode', None, ['sign', 'verify'],
-                  'The operation to perform.')
-flags.DEFINE_string('keyset_path', None,
-                    'Path to the keyset used for the JWT signature operation.')
+flags.DEFINE_string('public_jwk_set_path', None,
+                    'Path to public keyset in JWK format.')
 flags.DEFINE_string('audience', None, 'Audience to be used in the token')
 flags.DEFINE_string('token_path', None, 'Path to the signature file.')
 
@@ -54,35 +49,16 @@ def main(argv):
     logging.exception('Error initialising Tink: %s', e)
     return 1
 
-  # Read the keyset into a keyset_handle
-  with open(FLAGS.keyset_path, 'rt') as keyset_file:
+  # Read the keyset into a KeysetHandle
+  with open(FLAGS.public_jwk_set_path, 'rt') as public_jwk_set_file:
     try:
-      text = keyset_file.read()
-      keyset_handle = cleartext_keyset_handle.read(tink.JsonKeysetReader(text))
+      text = public_jwk_set_file.read()
+      keyset_handle = jwt.jwk_set_to_keyset_handle(text)
     except tink.TinkError as e:
       logging.exception('Error reading keyset: %s', e)
       return 1
 
   now = datetime.datetime.now(tz=datetime.timezone.utc)
-  if FLAGS.mode == 'sign':
-    # Get the JwtPublicKeySign primitive
-    try:
-      jwt_sign = keyset_handle.primitive(jwt.JwtPublicKeySign)
-    except tink.TinkError as e:
-      logging.exception('Error creating JwtPublicKeySign: %s', e)
-      return 1
-
-    # Create token
-    raw_jwt = jwt.new_raw_jwt(
-        audiences=[FLAGS.audience],
-        expiration=now + datetime.timedelta(seconds=100))
-    token = jwt_sign.sign_and_encode(raw_jwt)
-    with open(FLAGS.token_path, 'wt') as token_file:
-      token_file.write(token)
-    logging.info('Token has been written to %s', FLAGS.token_path)
-    return 0
-
-  # Get the JwtPublicKeyVerify primitive
   try:
     jwt_verify = keyset_handle.primitive(jwt.JwtPublicKeyVerify)
   except tink.TinkError as e:
@@ -105,7 +81,7 @@ def main(argv):
 
 if __name__ == '__main__':
   flags.mark_flags_as_required(
-      ['mode', 'keyset_path', 'audience', 'token_path'])
+      ['public_jwk_set_path', 'audience', 'token_path'])
   app.run(main)
 
 # [END python-jwt-signature-example]
