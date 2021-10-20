@@ -13,8 +13,6 @@ tink_cc_library(
     tink::core::crypto_format
     tink::core::primitive_set
     tink::core::primitive_wrapper
-    tink::core::registry
-    tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
