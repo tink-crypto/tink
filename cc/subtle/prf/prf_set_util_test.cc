@@ -112,7 +112,7 @@ TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfUpdateFails) {
                   std::string("mock_stateful_mac"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("UpdateFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("UpdateFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfFinalizeFails) {
@@ -120,7 +120,7 @@ TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfFinalizeFails) {
                   util::Status(util::error::INTERNAL, "FinalizeFailed"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("FinalizeFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("FinalizeFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfTooMuchOutputRequested) {
