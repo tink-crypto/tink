@@ -165,7 +165,7 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
   // We're past the first segment, and no space was backed up, so we
   // try to get and decrypt the next ciphertext segment, if any.
   if (read_last_segment_) {
-    status_ = Status(util::error::OUT_OF_RANGE, "Reached end of stream.");
+    status_ = Status(absl::StatusCode::kOutOfRange, "Reached end of stream.");
     return status_;
   }
   segment_number_++;

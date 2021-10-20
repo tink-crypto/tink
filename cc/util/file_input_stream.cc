@@ -79,7 +79,7 @@ crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {
   int read_result = read_ignoring_eintr(fd_, buffer_.get(), buffer_size_);
   if (read_result <= 0) {  // EOF or an I/O error.
     if (read_result == 0) {
-      status_ = Status(util::error::OUT_OF_RANGE, "EOF");
+      status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
       status_ =
           ToStatusF(util::error::INTERNAL, "I/O error: %d", read_result);

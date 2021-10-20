@@ -74,7 +74,7 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
   int read_count = pread(fd_, dest_buffer->get_mem_block(), count, position);
   if (read_count == 0) {
     dest_buffer->set_size(0).IgnoreError();
-    return Status(util::error::OUT_OF_RANGE, "EOF");
+    return Status(absl::StatusCode::kOutOfRange, "EOF");
   }
   if (read_count < 0) {
     dest_buffer->set_size(0).IgnoreError();

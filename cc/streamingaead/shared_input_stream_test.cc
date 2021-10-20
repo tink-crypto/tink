@@ -163,7 +163,7 @@ TEST(SharedInputStreamTest, SingleBackup) {
           EXPECT_EQ(pos, shared_stream->Position());
         } else {
           EXPECT_THAT(next_result.status(),
-                      StatusIs(util::error::OUT_OF_RANGE));
+                      StatusIs(absl::StatusCode::kOutOfRange));
         }
 
         // Read the rest of the input.

@@ -217,8 +217,8 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
           EXPECT_EQ(pt_size, dec_stream->size().ValueOrDie());
           std::string decrypted;
           auto status = ReadAll(dec_stream.get(), &decrypted);
-          EXPECT_THAT(status,
-                      StatusIs(util::error::OUT_OF_RANGE, HasSubstr("EOF")));
+          EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
+                                       HasSubstr("EOF")));
           EXPECT_EQ(plaintext, decrypted);
         }
       }
@@ -353,7 +353,7 @@ TEST(DecryptingRandomAccessStreamTest, OutOfRangeDecryption) {
 
         // Reading at EOF.
         status = dec_stream->PRead(position, chunk_size, buffer.get());
-        EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE));
+        EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange));
 
         // Reading past EOF.
         status = dec_stream->PRead(position + 1 , chunk_size, buffer.get());

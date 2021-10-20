@@ -235,7 +235,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
       status = ReadAll(dec_stream_result.ValueOrDie().get(), &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                    HasSubstr("EOF")));
       EXPECT_EQ(plaintext, decrypted);
     }

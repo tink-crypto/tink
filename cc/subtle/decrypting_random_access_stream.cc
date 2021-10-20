@@ -202,7 +202,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
     int64_t segment_nr, Buffer* ct_buffer, std::vector<uint8_t>* pt_segment) {
   int64_t ct_position = segment_nr * ct_segment_size_;
   if (ct_position / ct_segment_size_ != segment_nr /* overflow occured! */) {
-    return Status(util::error::OUT_OF_RANGE,
+    return Status(absl::StatusCode::kOutOfRange,
                   absl::StrCat("segment_nr * ct_segment_size too large: ",
                                segment_nr, ct_segment_size_));
   }
@@ -226,7 +226,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
         segment_nr, is_last_segment, pt_segment);
     if (dec_status.ok()) {
       return is_last_segment ?
-          Status(util::error::OUT_OF_RANGE, "EOF") : util::OkStatus();
+          Status(absl::StatusCode::kOutOfRange, "EOF") : util::OkStatus();
     }
     return dec_status;
   }
@@ -243,7 +243,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
 
   if (position > std::numeric_limits<int64_t>::max() - count) {
     return Status(
-        util::error::OUT_OF_RANGE,
+        absl::StatusCode::kOutOfRange,
         absl::StrCat(
             "Invalid parameters to PReadAndDecrypt; position too large: ",
             position));
@@ -253,7 +253,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
   if (pt_size_result.ok()) {
     auto pt_size = pt_size_result.ValueOrDie();
     if (position > pt_size) {
-      return Status(util::error::OUT_OF_RANGE,
+      return Status(absl::StatusCode::kOutOfRange,
                     "position is larger than stream size");
     }
   }

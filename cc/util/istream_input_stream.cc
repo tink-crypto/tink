@@ -60,7 +60,7 @@ crypto::tink::util::StatusOr<int> IstreamInputStream::Next(const void** data) {
     if (input_->good()) return count_read;  // No bytes could be read.
     // If !good(), distinguish EOF from other failures.
     if (input_->eof()) {
-      status_ = Status(util::error::OUT_OF_RANGE, "EOF");
+      status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
       status_ =
           ToStatusF(util::error::INTERNAL, "I/O error: %s", strerror(errno));
