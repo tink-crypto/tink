@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.hybrid.internal;
 
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 
 /**
@@ -23,6 +24,7 @@ import java.security.GeneralSecurityException;
  *
  * <p>HPKE I.-D. is available at https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-11.html.
  */
+@Immutable
 public interface HpkeKem {
   /**
    * Generates and encapsulates a shared secret using the {@code recipientPublicKey}. Returns a

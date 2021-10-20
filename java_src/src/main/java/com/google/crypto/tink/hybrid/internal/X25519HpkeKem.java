@@ -19,10 +19,12 @@ package com.google.crypto.tink.hybrid.internal;
 import com.google.crypto.tink.subtle.Bytes;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.X25519;
+import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 
 /** Diffie-Hellman-based X25519 HPKE KEM variant. */
+@Immutable
 public final class X25519HpkeKem implements HpkeKem {
   private final String macAlgorithm;
 
