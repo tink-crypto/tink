@@ -321,6 +321,7 @@ tink_cc_library(
     tink::aead::internal::aead_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
+    tink::internal::util
     tink::subtle::random
     tink::subtle::subtle_util
     tink::util::secret_data
