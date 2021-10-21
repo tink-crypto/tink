@@ -20,7 +20,7 @@
 #include <memory>
 #include <utility>
 
-#include "tink/internal/fips_utils.h"
+#include "tink/config/tink_fips.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"

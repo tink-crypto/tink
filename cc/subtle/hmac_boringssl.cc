@@ -19,18 +19,18 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "openssl/digest.h"
+#include "openssl/err.h"
+#include "openssl/evp.h"
+#include "openssl/hmac.h"
+#include "openssl/mem.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "openssl/digest.h"
-#include "openssl/err.h"
-#include "openssl/evp.h"
-#include "openssl/hmac.h"
-#include "openssl/mem.h"
-
 
 namespace crypto {
 namespace tink {
@@ -64,7 +64,7 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
@@ -81,12 +81,11 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }
 
-util::Status HmacBoringSsl::VerifyMac(
-    absl::string_view mac,
-    absl::string_view data) const {
+util::Status HmacBoringSsl::VerifyMac(absl::string_view mac,
+                                      absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   if (mac.size() != tag_size_) {
     return util::Status(util::error::INVALID_ARGUMENT, "incorrect tag size");

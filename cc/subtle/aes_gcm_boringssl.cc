@@ -134,17 +134,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   }
   return result;
 #else
-  absl::string_view plaintext_data = plaintext;
-  if (plaintext.data() == nullptr) {
-    // In case of null plaintext, we treat it as an empty string.
-    plaintext_data = absl::string_view("");
-  }
-
-  absl::string_view aad = additional_data;
-  if (additional_data.data() == nullptr) {
-    // In case of null additional_data, we treat it as an empty string.
-    aad = absl::string_view("");
-  }
+  absl::string_view plaintext_data = internal::EnsureStringNonNull(plaintext);
+  absl::string_view aad = internal::EnsureStringNonNull(additional_data);
 
   std::string result = Random::GetRandomBytes(kIvSizeInBytes);
   ResizeStringUninitialized(
@@ -222,11 +213,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   }
   return result;
 #else
-  absl::string_view aad = additional_data;
-  if (additional_data.data() == nullptr) {
-    // In case of null additional_data, we treat it as an empty string.
-    aad = absl::string_view("");
-  }
+  absl::string_view aad = internal::EnsureStringNonNull(additional_data);
 
   const size_t plaintext_size =
       ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes;

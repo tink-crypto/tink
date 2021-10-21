@@ -23,9 +23,9 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -69,8 +69,8 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
 
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   const std::string nonce = Random::GetRandomBytes(kNonceSize);
   if (nonce.size() != kNonceSize) {
@@ -110,7 +110,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (ciphertext.size() < kNonceSize + kTagSize) {
     return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");

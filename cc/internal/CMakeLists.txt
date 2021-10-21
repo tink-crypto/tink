@@ -10,6 +10,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME util
+  SRCS
+    util.h
+    util.cc
+  DEPS
+    absl::strings
+)
+
+tink_cc_library(
   NAME keyset_wrapper_impl
   SRCS
     keyset_wrapper_impl.h
@@ -91,6 +100,15 @@ tink_cc_library(
     tink::util::status
 )
 
+tink_cc_test(
+  NAME util_test
+  SRCS
+    util_test.cc
+  DEPS
+    tink::internal::util
+    absl::strings
+    gmock
+)
 
 tink_cc_test(
   NAME keyset_wrapper_impl_test

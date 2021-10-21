@@ -10,7 +10,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::core::public_key_verify
-    tink::subtle::subtle_util_boringssl
+    tink::internal::util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -44,7 +44,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::core::public_key_sign
-    tink::subtle::subtle_util_boringssl
+    tink::subtle::subtle_util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto

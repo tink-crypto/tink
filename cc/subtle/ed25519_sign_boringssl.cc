@@ -23,8 +23,8 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
+#include "tink/internal/util.h"
 #include "tink/public_key_sign.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -49,7 +49,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
 
 util::StatusOr<std::string> Ed25519SignBoringSsl::Sign(
     absl::string_view data) const {
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   uint8_t out_sig[ED25519_SIGNATURE_LEN];
   std::fill(std::begin(out_sig), std::end(out_sig), 0);

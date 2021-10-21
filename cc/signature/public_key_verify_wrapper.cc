@@ -18,9 +18,9 @@
 
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_verify.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -59,13 +59,12 @@ class PublicKeyVerifySetWrapper : public PublicKeyVerify {
   std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set_;
 };
 
-util::Status PublicKeyVerifySetWrapper::Verify(
-    absl::string_view signature,
-    absl::string_view data) const {
+util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
+                                               absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
-  signature = subtle::SubtleUtilBoringSSL::EnsureNonNull(signature);
+  data = internal::EnsureStringNonNull(data);
+  signature = internal::EnsureStringNonNull(signature);
 
   if (signature.length() <= CryptoFormat::kNonRawPrefixSize) {
     // This also rejects raw signatures with size of 4 bytes or fewer.
@@ -100,7 +99,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
   auto raw_primitives_result = public_key_verify_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& public_key_verify_entry :
-             *(raw_primitives_result.ValueOrDie())) {
+         *(raw_primitives_result.ValueOrDie())) {
       auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {

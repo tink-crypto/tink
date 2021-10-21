@@ -18,7 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/base.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/util.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -59,7 +59,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
 util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   if (!CMAC_Update(cmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),

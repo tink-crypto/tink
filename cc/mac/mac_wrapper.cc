@@ -18,9 +18,9 @@
 
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -64,7 +64,7 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   auto primary = mac_set_->get_primary();
   std::string local_data;
@@ -83,8 +83,8 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
 util::Status MacSetWrapper::VerifyMac(
     absl::string_view mac_value,
     absl::string_view data) const {
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
-  mac_value = subtle::SubtleUtilBoringSSL::EnsureNonNull(mac_value);
+  data = internal::EnsureStringNonNull(data);
+  mac_value = internal::EnsureStringNonNull(mac_value);
 
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =

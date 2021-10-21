@@ -24,6 +24,7 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
@@ -125,13 +126,13 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   // Compute the digest.
   unsigned int digest_size;
   uint8_t digest[EVP_MAX_MD_SIZE];
   if (1 != EVP_Digest(data.data(), data.size(), digest, &digest_size, hash_,
-                  nullptr)) {
+                      nullptr)) {
     return util::Status(util::error::INTERNAL, "Could not compute digest.");
   }
 
@@ -139,7 +140,7 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
   std::vector<uint8_t> buffer(ECDSA_size(key_.get()));
   unsigned int sig_length;
   if (1 != ECDSA_sign(0 /* unused */, digest, digest_size, buffer.data(),
-                  &sig_length, key_.get())) {
+                      &sig_length, key_.get())) {
     return util::Status(util::error::INTERNAL, "Signing failed.");
   }
 

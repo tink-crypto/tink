@@ -12,6 +12,7 @@ cc_library(
         "//:crypto_format",
         "//:primitive_set",
         "//:primitive_wrapper",
+        "//internal:util",
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",

@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/base.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
@@ -57,7 +58,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
 util::Status StatefulHmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   if (!HMAC_Update(hmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),

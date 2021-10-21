@@ -15,10 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
+
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
@@ -65,7 +67,7 @@ util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
                                               absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   auto digest_result = boringssl::ComputeHash(data, *sig_hash_);
   if (!digest_result.ok()) return digest_result.status();

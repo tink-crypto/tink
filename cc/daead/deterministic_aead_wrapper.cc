@@ -18,8 +18,8 @@
 
 #include "tink/crypto_format.h"
 #include "tink/deterministic_aead.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -64,8 +64,8 @@ DeterministicAeadSetWrapper::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   auto encrypt_result =
       daead_set_->get_primary()->get_primitive().EncryptDeterministically(
@@ -80,7 +80,7 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =

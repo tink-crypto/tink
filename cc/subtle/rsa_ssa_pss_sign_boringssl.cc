@@ -24,6 +24,7 @@
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
@@ -69,7 +70,7 @@ RsaSsaPssSignBoringSsl::RsaSsaPssSignBoringSsl(bssl::UniquePtr<RSA> private_key,
 
 util::StatusOr<std::string> RsaSsaPssSignBoringSsl::Sign(
     absl::string_view data) const {
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
   auto digest_or = boringssl::ComputeHash(data, *sig_hash_);
   if (!digest_or.ok()) return digest_or.status();
   std::vector<uint8_t> digest = std::move(digest_or.ValueOrDie());

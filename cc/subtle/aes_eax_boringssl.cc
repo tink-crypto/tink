@@ -28,9 +28,9 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -119,13 +119,11 @@ bool AesEaxBoringSsl::EqualBlocks(const uint8_t x[kBlockSize],
 }
 
 bool AesEaxBoringSsl::IsValidKeySize(size_t key_size_in_bytes) {
-  return key_size_in_bytes == 16 ||
-         key_size_in_bytes == 32;
+  return key_size_in_bytes == 16 || key_size_in_bytes == 32;
 }
 
 bool AesEaxBoringSsl::IsValidNonceSize(size_t nonce_size_in_bytes) {
-  return nonce_size_in_bytes == 12 ||
-         nonce_size_in_bytes == 16;
+  return nonce_size_in_bytes == 12 || nonce_size_in_bytes == 16;
 }
 
 util::SecretData AesEaxBoringSsl::ComputeB() const {
@@ -232,8 +230,8 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
   std::string ciphertext;
@@ -258,7 +256,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
@@ -273,7 +271,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   Block mac = Omac(encrypted, 2);
   XorBlock(N.data(), &mac);
   XorBlock(H.data(), &mac);
-  const uint8_t *sig = reinterpret_cast<const uint8_t*>(tag.data());
+  const uint8_t* sig = reinterpret_cast<const uint8_t*>(tag.data());
   if (!EqualBlocks(mac.data(), sig)) {
     return util::Status(util::error::INVALID_ARGUMENT, "Tag mismatch");
   }
@@ -289,5 +287,3 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto
-
-

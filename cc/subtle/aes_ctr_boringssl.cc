@@ -21,6 +21,7 @@
 #include "absl/memory/memory.h"
 #include "openssl/evp.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -51,9 +52,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
     absl::string_view plaintext) const {
   // BoringSSL expects a non-null pointer for plaintext, regardless of whether
   // the size is 0.
-  if (plaintext.empty() && plaintext.data() == nullptr) {
-    plaintext = absl::string_view("");
-  }
+  plaintext = internal::EnsureStringNonNull(plaintext);
 
   bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {

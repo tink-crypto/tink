@@ -48,7 +48,7 @@ tink_cc_library(
     tink::core::hybrid_decrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
-    tink::subtle::subtle_util_boringssl
+    tink::internal::util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
@@ -65,7 +65,7 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::core::primitive_set
     tink::core::primitive_wrapper
-    tink::subtle::subtle_util_boringssl
+    tink::internal::util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto

@@ -23,6 +23,7 @@
 #include "openssl/evp.h"
 #include "openssl/mem.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
@@ -79,7 +80,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
                                           absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   // Compute the digest.
   unsigned int digest_size;

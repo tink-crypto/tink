@@ -18,6 +18,7 @@
 
 #include "tink/aead.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -59,14 +60,13 @@ class AeadSetWrapper : public Aead {
 
 util::StatusOr<std::string> AeadSetWrapper::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data) const {
-  if (plaintext.empty() && plaintext.data() == nullptr) {
-    plaintext = absl::string_view("");
-  }
-  if (associated_data.empty() && associated_data.data() == nullptr) {
-    associated_data = absl::string_view("");
-  }
-  auto encrypt_result = aead_set_->get_primary()->get_primitive()
-      .Encrypt(plaintext, associated_data);
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  associated_data = internal::EnsureStringNonNull(associated_data);
+
+  auto encrypt_result = aead_set_->get_primary()->get_primitive().Encrypt(
+      plaintext, associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = aead_set_->get_primary()->get_identifier();
   return key_id + encrypt_result.ValueOrDie();
@@ -74,9 +74,9 @@ util::StatusOr<std::string> AeadSetWrapper::Encrypt(
 
 util::StatusOr<std::string> AeadSetWrapper::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
-  if (associated_data.empty() && associated_data.data() == nullptr) {
-    associated_data = absl::string_view("");
-  }
+  // BoringSSL expects a non-null pointer for plaintext and additional_data,
+  // regardless of whether the size is 0.
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =

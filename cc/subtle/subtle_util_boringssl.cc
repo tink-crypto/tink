@@ -673,14 +673,6 @@ util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
   return util::OkStatus();
 }
 
-// static
-absl::string_view SubtleUtilBoringSSL::EnsureNonNull(absl::string_view str) {
-  if (str.empty() && str.data() == nullptr) {
-    return absl::string_view("");
-  }
-  return str;
-}
-
 util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
     int modulus_size_in_bits, const BIGNUM *e,
     SubtleUtilBoringSSL::RsaPrivateKey *private_key,
@@ -926,7 +918,7 @@ namespace boringssl {
 
 util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
                                                  const EVP_MD &hasher) {
-  input = SubtleUtilBoringSSL::EnsureNonNull(input);
+  input = internal::EnsureStringNonNull(input);
   std::vector<uint8_t> digest(EVP_MAX_MD_SIZE);
   uint32_t digest_length = 0;
   if (EVP_Digest(input.data(), input.length(), digest.data(), &digest_length,

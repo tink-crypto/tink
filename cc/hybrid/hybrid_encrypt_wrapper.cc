@@ -18,8 +18,8 @@
 
 #include "tink/crypto_format.h"
 #include "tink/hybrid_encrypt.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -39,7 +39,6 @@ util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
   }
   return util::OkStatus();
 }
-
 
 // Returns an HybridEncrypt-primitive that uses the primary
 // HybridEncrypt-instance provided in 'hybrid_encrypt_set',
@@ -64,8 +63,8 @@ util::StatusOr<std::string> HybridEncryptSetWrapper::Encrypt(
     absl::string_view plaintext, absl::string_view context_info) const {
   // BoringSSL expects a non-null pointer for plaintext and context_info,
   // regardless of whether the size is 0.
-  plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  context_info = internal::EnsureStringNonNull(context_info);
 
   auto primary = hybrid_encrypt_set_->get_primary();
   auto encrypt_result =

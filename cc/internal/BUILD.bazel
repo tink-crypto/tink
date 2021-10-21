@@ -13,6 +13,14 @@ cc_library(
 )
 
 cc_library(
+    name = "util",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
+    include_prefix = "tink/internal",
+    deps = ["@com_google_absl//absl/strings"],
+)
+
+cc_library(
     name = "keyset_wrapper_impl",
     hdrs = ["keyset_wrapper_impl.h"],
     include_prefix = "tink/internal",
@@ -107,6 +115,16 @@ cc_library(
     include_prefix = "tink/internal",
     deps = [
         "@boringssl//:crypto",
+    ],
+)
+
+cc_test(
+    name = "util_test",
+    srcs = ["util_test.cc"],
+    deps = [
+        ":util",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

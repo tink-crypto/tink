@@ -29,6 +29,7 @@
 #include "openssl/evp.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -229,7 +230,10 @@ class SubtleUtilBoringSSL {
       absl::string_view exponent);
 
   // Return an empty string if str.data() is nullptr; otherwise return str.
-  static absl::string_view EnsureNonNull(absl::string_view str);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  inline static absl::string_view EnsureNonNull(absl::string_view str) {
+    return internal::EnsureStringNonNull(str);
+  }
 
   // Creates a new RSA public and private key pair.
   static util::Status GetNewRsaKeyPair(int modulus_size_in_bits,

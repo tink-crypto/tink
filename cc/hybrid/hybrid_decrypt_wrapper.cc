@@ -18,8 +18,8 @@
 
 #include "tink/crypto_format.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -48,7 +48,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
   // BoringSSL expects a non-null pointer for context_info,
   // regardless of whether the size is 0.
-  context_info = subtle::SubtleUtilBoringSSL::EnsureNonNull(context_info);
+  context_info = internal::EnsureStringNonNull(context_info);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =
@@ -74,7 +74,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
   auto raw_primitives_result = hybrid_decrypt_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& hybrid_decrypt_entry : *(raw_primitives_result.ValueOrDie())) {
-        HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
+      HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
       auto decrypt_result = hybrid_decrypt.Decrypt(ciphertext, context_info);
       if (decrypt_result.ok()) {
         return std::move(decrypt_result.ValueOrDie());
@@ -99,8 +99,7 @@ util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
 }  // anonymous namespace
 
 // static
-util::StatusOr<std::unique_ptr<HybridDecrypt>>
-HybridDecryptWrapper::Wrap(
+util::StatusOr<std::unique_ptr<HybridDecrypt>> HybridDecryptWrapper::Wrap(
     std::unique_ptr<PrimitiveSet<HybridDecrypt>> primitive_set) const {
   util::Status status = Validate(primitive_set.get());
   if (!status.ok()) return status;

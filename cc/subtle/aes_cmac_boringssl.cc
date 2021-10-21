@@ -19,9 +19,10 @@
 #include <string>
 
 #include "absl/memory/memory.h"
-#include "openssl/evp.h"
 #include "openssl/cmac.h"
+#include "openssl/evp.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -79,9 +80,7 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  if (data.empty() && data.data() == nullptr) {
-    data = absl::string_view("");
-  }
+  data = internal::EnsureStringNonNull(data);
 
   std::string result;
   ResizeStringUninitialized(&result, kMaxTagSize);

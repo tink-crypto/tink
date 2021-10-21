@@ -20,16 +20,15 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/string_view.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/ind_cpa_cipher.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -59,8 +58,8 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
@@ -91,7 +90,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (ciphertext.size() < tag_size_) {
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");

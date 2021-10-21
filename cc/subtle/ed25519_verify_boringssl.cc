@@ -21,8 +21,8 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
+#include "tink/internal/util.h"
 #include "tink/public_key_verify.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -49,8 +49,8 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> Ed25519VerifyBoringSsl::New(
 
 util::Status Ed25519VerifyBoringSsl::Verify(absl::string_view signature,
                                             absl::string_view data) const {
-  signature = SubtleUtilBoringSSL::EnsureNonNull(signature);
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  signature = internal::EnsureStringNonNull(signature);
+  data = internal::EnsureStringNonNull(data);
 
   if (signature.size() != ED25519_SIGNATURE_LEN) {
     return util::Status(
