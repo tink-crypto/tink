@@ -27,6 +27,8 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::testing::AllOf;
+using ::testing::HasSubstr;
 using ::testing::IsEmpty;
 using ::testing::SizeIs;
 
@@ -46,9 +48,11 @@ TEST(GetSslErrorsTest, ReturnsExpectedErrorrs) {
   std::vector<std::string> lines =
       absl::StrSplit(errors_without_last_char, '\n');
   ASSERT_THAT(lines, SizeIs(3));
-  EXPECT_THAT(lines[0], testing::ContainsRegex("BIO.*?UNINITIALIZED"));
-  EXPECT_THAT(lines[1], testing::ContainsRegex("BIO.*?WRITE_TO_READ_ONLY_BIO"));
-  EXPECT_THAT(lines[2], testing::ContainsRegex("BIO.*?UNSUPPORTED_METHOD"));
+  EXPECT_THAT(lines[0], AllOf(HasSubstr("BIO"), HasSubstr("UNINITIALIZED")));
+  EXPECT_THAT(lines[1],
+              AllOf(HasSubstr("BIO"), HasSubstr("WRITE_TO_READ_ONLY_BIO")));
+  EXPECT_THAT(lines[2],
+              AllOf(HasSubstr("BIO"), HasSubstr("UNSUPPORTED_METHOD")));
   // A second call to GetSslErrors() returns an empty string because the
   // OpenSSL/BoringSSL error queue is empty.
   EXPECT_THAT(GetSslErrors(), IsEmpty());
