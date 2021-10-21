@@ -37,6 +37,9 @@ run_linux_tests() {
   local manual_targets=("$@")
 
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    TEST_FLAGS+=( --jvmopt="-Djava.net.preferIPv6Addresses=true" )
+  fi
   readonly TEST_FLAGS
   (
     cd "${workspace_dir}"
