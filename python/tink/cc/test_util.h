@@ -17,6 +17,7 @@
 #ifndef TINK_PYTHON_CC_TEST_UTIL_H_
 #define TINK_PYTHON_CC_TEST_UTIL_H_
 
+#include "absl/status/status.h"
 #include "tink/cc/python_file_object_adapter.h"
 #include "tink/streaming_aead.h"
 #include "absl/base/thread_annotations.h"
@@ -39,7 +40,7 @@ class TestWritableObject : public PythonFileObjectAdapter {
   util::Status Close() override { return util::OkStatus(); }
 
   util::StatusOr<std::string> Read(int size) override {
-    return util::Status(util::error::UNIMPLEMENTED, "not readable");
+    return util::Status(absl::StatusCode::kUnimplemented, "not readable");
   }
 
   std::string* GetBuffer() { return &buffer_; }
@@ -57,7 +58,7 @@ class TestReadableObject : public PythonFileObjectAdapter {
   }
 
   util::StatusOr<int> Write(absl::string_view data) override {
-    return util::Status(util::error::UNIMPLEMENTED, "not writable");
+    return util::Status(absl::StatusCode::kUnimplemented, "not writable");
   }
 
   util::Status Close() override { return util::OkStatus(); }

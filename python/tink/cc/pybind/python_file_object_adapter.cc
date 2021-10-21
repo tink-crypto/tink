@@ -16,6 +16,7 @@
 
 #include "tink/cc/python_file_object_adapter.h"
 
+#include "absl/status/status.h"
 #include "pybind11/pybind11.h"
 #include "tink/cc/pybind/status_casters.h"
 
@@ -38,7 +39,7 @@ namespace tink {
     pybind11::function overload =                                         \
         pybind11::get_overload(static_cast<const cname *>(this), name);   \
     if (!overload) {                                                      \
-      return util::Status(util::error::UNIMPLEMENTED,                     \
+      return util::Status(absl::StatusCode::kUnimplemented,               \
                           "No Python overload is defined for " name "."); \
     }                                                                     \
     overload(__VA_ARGS__); /* Ignoring return value. */                   \
@@ -59,7 +60,7 @@ namespace tink {
     pybind11::function overload =                                            \
         pybind11::get_overload(static_cast<const cname *>(this), name);      \
     if (!overload) {                                                         \
-      return util::Status(util::error::UNIMPLEMENTED,                        \
+      return util::Status(absl::StatusCode::kUnimplemented,                  \
                           "No Python overload is defined for " name ".");    \
     }                                                                        \
     auto o = overload(__VA_ARGS__);                                          \

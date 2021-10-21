@@ -752,6 +752,7 @@ objc_library(
         "//objc/util:test_helpers",
         "//proto:all_objc_proto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_protobuf//:protobuf_lite",
     ],
 )
