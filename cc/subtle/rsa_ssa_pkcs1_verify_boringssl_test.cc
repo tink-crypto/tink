@@ -24,9 +24,10 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
+#include "tink/internal/err_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
@@ -96,7 +97,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
   auto verifier = std::move(verifier_result.ValueOrDie());
   auto status =
       verifier->Verify(nist_test_vector.signature, nist_test_vector.message);
-  EXPECT_TRUE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+  EXPECT_TRUE(status.ok()) << status << internal::GetSslErrors();
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
@@ -149,7 +150,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
     modified_message[i / 8] ^= 1 << (i % 8);
     auto status =
         verifier->Verify(nist_test_vector.signature, modified_message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
   // Modify the signature.
   for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
@@ -157,14 +158,14 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
     modified_signature[i / 8] ^= 1 << (i % 8);
     auto status =
         verifier->Verify(modified_signature, nist_test_vector.message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
   // Truncate the signature.
   for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
     std::string truncated_signature(nist_test_vector.signature, 0, i);
     auto status =
         verifier->Verify(truncated_signature, nist_test_vector.message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
 }
 

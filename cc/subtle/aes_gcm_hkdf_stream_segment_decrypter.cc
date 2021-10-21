@@ -29,11 +29,11 @@
 #include "absl/types/span.h"
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -206,7 +206,7 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
                          /* ad = */ nullptr, /* ad.length() = */ 0)) {
     return util::Status(
         util::error::INTERNAL,
-        absl::StrCat("Decryption failed: ", SubtleUtilBoringSSL::GetErrors()));
+        absl::StrCat("Decryption failed: ", internal::GetSslErrors()));
   }
   if (out_len != plaintext_buffer->size()) {
     return util::Status(util::error::INTERNAL, "incorrect plaintext size");

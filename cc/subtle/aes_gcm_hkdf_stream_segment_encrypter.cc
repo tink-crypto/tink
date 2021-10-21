@@ -27,8 +27,8 @@
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -163,7 +163,7 @@ util::Status AesGcmHkdfStreamSegmentEncrypter::EncryptSegment(
                          /* ad = */ nullptr, /* ad.length() = */ 0)) {
     return util::Status(
         util::error::INTERNAL,
-        absl::StrCat("Encryption failed: ", SubtleUtilBoringSSL::GetErrors()));
+        absl::StrCat("Encryption failed: ", internal::GetSslErrors()));
   }
   IncSegmentNumber();
   return util::OkStatus();

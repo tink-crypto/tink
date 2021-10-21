@@ -31,6 +31,7 @@
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -339,7 +340,7 @@ class PemParserTest : public ::testing::Test {
 
     // Generate a 2048 bits RSA key pair.
     EXPECT_EQ(RSA_generate_key_ex(rsa_.get(), 2048, e.get(), /*cb=*/nullptr), 1)
-        << SubtleUtilBoringSSL::GetErrors();
+        << internal::GetSslErrors();
 
     // Write keys to PEM.
     bssl::UniquePtr<BIO> pub_key_pem_bio(BIO_new(BIO_s_mem()));
@@ -347,13 +348,13 @@ class PemParserTest : public ::testing::Test {
 
     // Write in PEM format.
     EXPECT_EQ(PEM_write_bio_RSA_PUBKEY(pub_key_pem_bio.get(), rsa_.get()), 1)
-        << SubtleUtilBoringSSL::GetErrors();
+        << internal::GetSslErrors();
     EXPECT_EQ(
         PEM_write_bio_RSAPrivateKey(prv_key_pem_bio.get(), rsa_.get(),
                                     /*enc=*/nullptr, /*kstr=*/nullptr,
                                     /*klen=*/0, /*cb=*/nullptr, /*u=*/nullptr),
         1)
-        << SubtleUtilBoringSSL::GetErrors();
+        << internal::GetSslErrors();
 
     pem_rsa_pub_key_.resize(pub_key_pem_bio->num_write + 1);
     pem_rsa_prv_key_.resize(prv_key_pem_bio->num_write + 1);
@@ -390,7 +391,7 @@ void Corrupt(ContainerType* container) {
 TEST_F(PemParserTest, ReadRsaPublicKey) {
   auto key_statusor = PemParser::ParseRsaPublicKey(
       absl::string_view(pem_rsa_pub_key_.data(), pem_rsa_pub_key_.size()));
-  ASSERT_TRUE(key_statusor.ok()) << SubtleUtilBoringSSL::GetErrors();
+  ASSERT_TRUE(key_statusor.ok()) << internal::GetSslErrors();
 
   // Verify exponent and modulus are correctly set.
   auto key = std::move(key_statusor.ValueOrDie());
@@ -406,7 +407,7 @@ TEST_F(PemParserTest, ReadRsaPublicKey) {
 TEST_F(PemParserTest, ReadRsaPrivatekey) {
   auto key_statusor = PemParser::ParseRsaPrivateKey(
       absl::string_view(pem_rsa_prv_key_.data(), pem_rsa_prv_key_.size()));
-  ASSERT_TRUE(key_statusor.ok()) << SubtleUtilBoringSSL::GetErrors();
+  ASSERT_TRUE(key_statusor.ok()) << internal::GetSslErrors();
 
   // Verify exponents and modulus.
   auto key = std::move(key_statusor.ValueOrDie());

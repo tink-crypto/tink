@@ -23,6 +23,7 @@
 #include "openssl/base.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
@@ -84,7 +85,7 @@ util::StatusOr<std::string> RsaSsaPssSignBoringSsl::Sign(
                         /*mgf1_md=*/mgf1_hash_, salt_length_) != 1) {
     // TODO(b/112581512): Decide if it's safe to propagate the BoringSSL error.
     // For now, just empty the error stack.
-    SubtleUtilBoringSSL::GetErrors();
+    internal::GetSslErrors();
     return util::Status(util::error::INTERNAL, "Signing failed.");
   }
   return std::string(reinterpret_cast<const char*>(signature.data()),

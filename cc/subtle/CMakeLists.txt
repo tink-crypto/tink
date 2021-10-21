@@ -202,6 +202,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
@@ -219,6 +220,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::core::public_key_verify
     tink::util::errors
@@ -253,6 +255,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
@@ -288,6 +291,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::core::public_key_sign
     tink::util::errors
@@ -327,12 +331,12 @@ tink_cc_library(
     aes_gcm_hkdf_stream_segment_decrypter.h
   DEPS
     tink::aead::internal::aead_util
+    tink::internal::err_util
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::common_enums
     tink::subtle::hkdf
     tink::subtle::random
     tink::subtle::stream_segment_decrypter
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -351,9 +355,9 @@ tink_cc_library(
     aes_gcm_hkdf_stream_segment_encrypter.h
   DEPS
     tink::aead::internal::aead_util
+    tink::internal::err_util
     tink::subtle::random
     tink::subtle::stream_segment_encrypter
-    tink::subtle::subtle_util_boringssl
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -568,6 +572,7 @@ tink_cc_library(
     subtle_util_boringssl.h
   DEPS
     tink::aead::internal::aead_util
+    tink::internal::err_util
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::random
@@ -1123,6 +1128,7 @@ tink_cc_test(
     tink::config::tink_fips
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::err_util
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -1153,6 +1159,7 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::wycheproof_util
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::core::public_key_sign
     tink::core::public_key_verify
@@ -1397,6 +1404,7 @@ tink_cc_test(
   NAME pem_parser_boringssl_test
   SRCS pem_parser_boringssl_test.cc
   DEPS
+    tink::internal::err_util
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::secret_data

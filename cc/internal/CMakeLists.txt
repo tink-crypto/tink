@@ -32,6 +32,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME err_util
+  SRCS
+    err_util.cc
+    err_util.h
+  DEPS
+    crypto
+)
+
+tink_cc_library(
   NAME key_info
   SRCS
     key_info.h
@@ -137,5 +146,15 @@ tink_cc_test(
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    gmock
+)
+
+tink_cc_test(
+  NAME err_util_test
+  SRCS err_util_test.cc
+  DEPS
+    tink::internal::err_util
+    absl::strings
+    crypto
     gmock
 )

@@ -19,13 +19,14 @@
 #include <vector>
 
 #include "absl/strings/str_cat.h"
-#include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/util/errors.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
+#include "tink/internal/err_util.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/errors.h"
 
 namespace crypto {
 namespace tink {
@@ -96,17 +97,17 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
 
   bssl::UniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Invalid public key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::StrCat("Invalid public key: ", internal::GetSslErrors()));
   }
 
   bssl::UniquePtr<BIGNUM> priv_key(
       BN_bin2bn(ec_key.priv.data(), ec_key.priv.size(), nullptr));
   if (!EC_KEY_set_private_key(key.get(), priv_key.get())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Invalid private key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::StrCat("Invalid private key: ", internal::GetSslErrors()));
   }
 
   // Sign.

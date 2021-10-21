@@ -20,12 +20,14 @@
 #include <cstdint>
 #include <vector>
 
+#include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
@@ -127,7 +129,8 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.
-  static std::string GetErrors();
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  inline static std::string GetErrors() { return internal::GetSslErrors(); }
 
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
   static crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(

@@ -22,6 +22,7 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "openssl/mem.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
@@ -49,7 +50,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
-        absl::StrCat("Invalid public key: ", SubtleUtilBoringSSL::GetErrors()));
+        absl::StrCat("Invalid public key: ", internal::GetSslErrors()));
   }
   return New(std::move(key), hash_type, encoding);
 }

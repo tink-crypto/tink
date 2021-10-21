@@ -34,6 +34,7 @@
 #include "openssl/rsa.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -673,18 +674,6 @@ util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
 }
 
 // static
-std::string SubtleUtilBoringSSL::GetErrors() {
-  std::string ret;
-  ERR_print_errors_cb(
-      [](const char *str, size_t len, void *ctx) -> int {
-        static_cast<std::string *>(ctx)->append(str, len);
-        return 1;
-      },
-      &ret);
-  return ret;
-}
-
-// static
 absl::string_view SubtleUtilBoringSSL::EnsureNonNull(absl::string_view str) {
   if (str.empty() && str.data() == nullptr) {
     return absl::string_view("");
@@ -703,13 +692,13 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
 
   internal::SslUniquePtr<BIGNUM> e_copy(BN_new());
   if (BN_copy(e_copy.get(), e) == nullptr) {
-    return util::Status(util::error::INTERNAL, GetErrors());
+    return util::Status(util::error::INTERNAL, internal::GetSslErrors());
   }
   if (RSA_generate_key_ex(rsa.get(), modulus_size_in_bits, e_copy.get(),
                           /*cb=*/nullptr) != 1) {
-    return util::Status(
-        util::error::INTERNAL,
-        absl::StrCat("Error generating private key: ", GetErrors()));
+    return util::Status(util::error::INTERNAL,
+                        absl::StrCat("Error generating private key: ",
+                                     internal::GetSslErrors()));
   }
 
   const BIGNUM *n_bn, *e_bn, *d_bn;
@@ -766,9 +755,9 @@ util::Status SubtleUtilBoringSSL::CopyKey(
   if (!d.ok()) return d.status();
   if (RSA_set0_key(rsa, n.ValueOrDie().get(), e.ValueOrDie().get(),
                    d.ValueOrDie().get()) != 1) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Could not load RSA key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   // The RSA object takes ownership when you call RSA_set0_key.
   n.ValueOrDie().release();
@@ -785,9 +774,9 @@ util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
   if (!p.ok()) return p.status();
   if (!q.ok()) return q.status();
   if (RSA_set0_factors(rsa, p.ValueOrDie().get(), q.ValueOrDie().get()) != 1) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Could not load RSA key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   p.ValueOrDie().release();
   q.ValueOrDie().release();
@@ -805,9 +794,9 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
   if (!crt.ok()) return crt.status();
   if (RSA_set0_crt_params(rsa, dp.ValueOrDie().get(), dq.ValueOrDie().get(),
                           crt.ValueOrDie().get()) != 1) {
-    return util::Status(util::error::INTERNAL,
-                        absl::StrCat("Could not load RSA key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INTERNAL,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   dp.ValueOrDie().release();
   dq.ValueOrDie().release();
@@ -856,9 +845,9 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
   }
 
   if (RSA_check_key(rsa.get()) == 0 || RSA_check_fips(rsa.get()) == 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Could not load RSA key: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
 
   return rsa;
@@ -944,7 +933,7 @@ util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
                  &hasher, /*impl=*/nullptr) != 1) {
     return util::Status(util::error::INTERNAL,
                         absl::StrCat("Openssl internal error computing hash: ",
-                                     SubtleUtilBoringSSL::GetErrors()));
+                                     internal::GetSslErrors()));
   }
   digest.resize(digest_length);
   return digest;

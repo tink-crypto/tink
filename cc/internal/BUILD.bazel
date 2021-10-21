@@ -100,6 +100,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "err_util",
+    srcs = ["err_util.cc"],
+    hdrs = ["err_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "@boringssl//:crypto",
+    ],
+)
+
 cc_test(
     name = "keyset_wrapper_impl_test",
     srcs = ["keyset_wrapper_impl_test.cc"],
@@ -173,6 +183,18 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "err_util_test",
+    size = "small",
+    srcs = ["err_util_test.cc"],
+    deps = [
+        ":err_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
