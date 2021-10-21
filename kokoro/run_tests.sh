@@ -184,6 +184,7 @@ main() {
     if [[ "${PLATFORM}" == 'darwin' ]]; then
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+      export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
       # TODO(b/155225382): Avoid modifying the sytem Python installation.
       pip3 install --user protobuf
