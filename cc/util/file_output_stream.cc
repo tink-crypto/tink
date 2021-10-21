@@ -157,7 +157,7 @@ Status FileOutputStream::Close() {
         util::error::INTERNAL, "I/O error upon close: %d", errno);
     return status_;
   }
-  status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
+  status_ = Status(absl::StatusCode::kFailedPrecondition, "Stream closed");
   return OkStatus();
 }
 

@@ -46,7 +46,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
   bssl::UniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
   // Initialize the HMAC
   if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), md)) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "HMAC initialization failed");
   }
 
@@ -62,7 +62,7 @@ util::Status StatefulHmacBoringSsl::Update(absl::string_view data) {
   if (!HMAC_Update(hmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),
                    data.size())) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "Inputs to HMAC Update invalid");
   }
   return util::OkStatus();

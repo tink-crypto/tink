@@ -966,7 +966,7 @@ TEST_F(RegistryTest, TransformingPrimitiveWrapperCustomKeyManager) {
                   .ok());
 
   EXPECT_THAT(Registry::Wrap<Aead>(std::move(primitive_set)).status(),
-              StatusIs(util::error::FAILED_PRECONDITION,
+              StatusIs(absl::StatusCode::kFailedPrecondition,
                        HasSubstr("custom key manager")));
 }
 

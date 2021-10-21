@@ -254,7 +254,7 @@ AesCtrHmacStreamSegmentDecrypter::New(const AesCtrHmacStreaming::Params& params,
 util::Status AesCtrHmacStreamSegmentDecrypter::Init(
     const std::vector<uint8_t>& header) {
   if (is_initialized_) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "decrypter alreday initialized");
   }
   if (header.size() != get_header_size()) {
@@ -298,7 +298,7 @@ util::Status AesCtrHmacStreamSegmentDecrypter::DecryptSegment(
     const std::vector<uint8_t>& ciphertext, int64_t segment_number,
     bool is_last_segment, std::vector<uint8_t>* plaintext_buffer) {
   if (!is_initialized_) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "decrypter not initialized");
   }
   if (ciphertext.size() > get_ciphertext_segment_size()) {

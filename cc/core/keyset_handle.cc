@@ -73,7 +73,7 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
         key.key_data().key_material_type() == KeyData::SYMMETRIC ||
         key.key_data().key_material_type() == KeyData::ASYMMETRIC_PRIVATE) {
       return util::Status(
-          util::error::FAILED_PRECONDITION,
+          absl::StatusCode::kFailedPrecondition,
           "Cannot create KeysetHandle with secret key material from "
           "potentially unencrypted source.");
     }

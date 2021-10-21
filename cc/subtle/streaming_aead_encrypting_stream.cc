@@ -198,7 +198,7 @@ Status StreamingAeadEncryptingStream::Close() {
     ct_destination_->Close().IgnoreError();
     return status_;
   }
-  status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
+  status_ = Status(absl::StatusCode::kFailedPrecondition, "Stream closed");
   return ct_destination_->Close();
 }
 

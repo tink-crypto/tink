@@ -85,7 +85,8 @@ ComputeMacOutputStream::CloseStreamAndComputeResult() {
     return status_;
   }
   WriteIntoMac();
-  status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream Closed");
+  status_ =
+      util::Status(absl::StatusCode::kFailedPrecondition, "Stream Closed");
   return mac_->Finalize();
 }
 
@@ -155,7 +156,8 @@ util::Status VerifyMacOutputStream::CloseStreamAndComputeResult() {
     return status_;
   }
   WriteIntoMac();
-  status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream Closed");
+  status_ =
+      util::Status(absl::StatusCode::kFailedPrecondition, "Stream Closed");
   util::StatusOr<std::string> mac_actual = mac_->Finalize();
   if (!mac_actual.ok()) {
     return mac_actual.status();

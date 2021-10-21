@@ -48,7 +48,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
   // Initialize the CMAC
   if (!CMAC_Init(ctx.get(), key_value.data(), key_value.size(), cipher,
                  nullptr /* engine */)) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "CMAC initialization failed");
   }
 

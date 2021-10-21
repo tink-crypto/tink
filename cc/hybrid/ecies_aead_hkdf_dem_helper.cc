@@ -59,7 +59,7 @@ class EciesAeadHkdfDemHelperImpl : public EciesAeadHkdfDemHelper {
         Registry::get_key_manager<EncryptionPrimitive>(dem_type_url);
     if (!key_manager_or.ok()) {
       return ToStatusF(
-          util::error::FAILED_PRECONDITION,
+          absl::StatusCode::kFailedPrecondition,
           "No manager for DEM key type '%s' found in the registry.",
           dem_type_url);
     }

@@ -329,7 +329,7 @@ class RegistryImpl {
         // directly or has a custom key manager for a primitive which has a
         // PrimitiveWrapper<P,Q> with P != Q.
         return crypto::tink::util::Status(
-            crypto::tink::util::error::FAILED_PRECONDITION,
+            absl::StatusCode::kFailedPrecondition,
             absl::StrCat("Cannot use primitive type ", typeid(P).name(),
                          " with a custom key manager."));
       }

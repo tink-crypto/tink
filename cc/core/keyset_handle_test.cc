@@ -612,7 +612,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
              KeyData::UNKNOWN_KEYMATERIAL, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
@@ -622,7 +622,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
              KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
@@ -632,7 +632,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
@@ -653,7 +653,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
 
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {

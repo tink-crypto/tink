@@ -263,7 +263,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
   auto dec = std::move(dec_result.ValueOrDie());
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
   ASSERT_THAT(dec->Init(enc->get_header()),
-              StatusIs(util::error::FAILED_PRECONDITION,
+              StatusIs(absl::StatusCode::kFailedPrecondition,
                        HasSubstr("alreday initialized")));
 }
 
@@ -327,9 +327,9 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size(), 'c');
   std::vector<uint8_t> pt;
-  ASSERT_THAT(
-      dec->DecryptSegment(ct, 0, true, &pt),
-      StatusIs(util::error::FAILED_PRECONDITION, HasSubstr("not initialized")));
+  ASSERT_THAT(dec->DecryptSegment(ct, 0, true, &pt),
+              StatusIs(absl::StatusCode::kFailedPrecondition,
+                       HasSubstr("not initialized")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
