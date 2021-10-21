@@ -44,7 +44,7 @@ class CcKeyManager {
       const std::string& type_url) {
     auto key_manager_result = Registry::get_key_manager<P>(type_url);
     if (!key_manager_result.ok()) {
-      return util::Status(util::error::FAILED_PRECONDITION,
+      return util::Status(absl::StatusCode::kFailedPrecondition,
                           absl::StrCat("No manager for key type '", type_url,
                                        "' found in the registry."));
     }

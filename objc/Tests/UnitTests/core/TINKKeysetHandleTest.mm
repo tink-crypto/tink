@@ -460,7 +460,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -476,7 +476,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -493,7 +493,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -520,7 +520,7 @@ static Keyset *gKeyset;
                                                                         error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
@@ -566,7 +566,7 @@ static Keyset *gKeyset;
   NSData *serializedKeysetNoSecret = [handle serializedKeysetNoSecret:&error];
   XCTAssertNil(serializedKeysetNoSecret);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::FAILED_PRECONDITION);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kFailedPrecondition);
   XCTAssertTrue([error.localizedFailureReason
       containsString:@"Cannot create KeysetHandle with secret key material"]);
 }
