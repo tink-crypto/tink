@@ -35,19 +35,19 @@ using ::grpc::Status;
                                   PrfSetKeyIdsResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto prf_set_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::PrfSet>();
   if (!prf_set_result.ok()) {
-    response->set_err(prf_set_result.status().error_message());
+    response->set_err(prf_set_result.status().message());
     return ::grpc::Status::OK;
   }
   auto* output = response->mutable_output();
@@ -64,19 +64,19 @@ using ::grpc::Status;
                                    PrfSetComputeResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto prf_set_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::PrfSet>();
   if (!prf_set_result.ok()) {
-    response->set_err(prf_set_result.status().error_message());
+    response->set_err(prf_set_result.status().message());
     return ::grpc::Status::OK;
   }
   auto prfs = prf_set_result.ValueOrDie()->GetPrfs();
@@ -88,7 +88,7 @@ using ::grpc::Status;
   auto compute_result =
       prf_it->second->Compute(request->input_data(), request->output_length());
   if (!compute_result.ok()) {
-    response->set_err(compute_result.status().error_message());
+    response->set_err(compute_result.status().message());
     return ::grpc::Status::OK;
   }
   response->set_output(compute_result.ValueOrDie());

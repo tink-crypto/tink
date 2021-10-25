@@ -36,24 +36,24 @@ using ::grpc::Status;
                                    SignatureSignResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->private_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto private_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!private_handle_result.ok()) {
-    response->set_err(private_handle_result.status().error_message());
+    response->set_err(private_handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto signer_result = private_handle_result.ValueOrDie()
                            ->GetPrimitive<crypto::tink::PublicKeySign>();
   if (!signer_result.ok()) {
-    response->set_err(signer_result.status().error_message());
+    response->set_err(signer_result.status().message());
     return ::grpc::Status::OK;
   }
   auto sign_result = signer_result.ValueOrDie()->Sign(request->data());
   if (!sign_result.ok()) {
-    response->set_err(sign_result.status().error_message());
+    response->set_err(sign_result.status().message());
     return ::grpc::Status::OK;
   }
   response->set_signature(sign_result.ValueOrDie());
@@ -66,25 +66,25 @@ using ::grpc::Status;
                                      SignatureVerifyResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->public_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto public_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!public_handle_result.ok()) {
-    response->set_err(public_handle_result.status().error_message());
+    response->set_err(public_handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto verifier_result = public_handle_result.ValueOrDie()
                              ->GetPrimitive<crypto::tink::PublicKeyVerify>();
   if (!verifier_result.ok()) {
-    response->set_err(verifier_result.status().error_message());
+    response->set_err(verifier_result.status().message());
     return ::grpc::Status::OK;
   }
   auto status = verifier_result.ValueOrDie()->Verify(request->signature(),
                                                      request->data());
   if (!status.ok()) {
-    response->set_err(status.error_message());
+    response->set_err(status.message());
     return ::grpc::Status::OK;
   }
   return ::grpc::Status::OK;

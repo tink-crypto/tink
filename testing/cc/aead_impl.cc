@@ -35,25 +35,25 @@ using ::grpc::Status;
                                  AeadEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto aead_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
   if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+    response->set_err(aead_result.status().message());
     return ::grpc::Status::OK;
   }
   auto encrypt_result = aead_result.ValueOrDie()->Encrypt(
       request->plaintext(), request->associated_data());
   if (!encrypt_result.ok()) {
-    response->set_err(encrypt_result.status().error_message());
+    response->set_err(encrypt_result.status().message());
     return ::grpc::Status::OK;
   }
   response->set_ciphertext(encrypt_result.ValueOrDie());
@@ -66,25 +66,25 @@ using ::grpc::Status;
                                  AeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto aead_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Aead>();
   if (!aead_result.ok()) {
-    response->set_err(aead_result.status().error_message());
+    response->set_err(aead_result.status().message());
     return ::grpc::Status::OK;
   }
   auto decrypt_result = aead_result.ValueOrDie()->Decrypt(
       request->ciphertext(), request->associated_data());
   if (!decrypt_result.ok()) {
-    response->set_err(decrypt_result.status().error_message());
+    response->set_err(decrypt_result.status().message());
     return ::grpc::Status::OK;
   }
   response->set_plaintext(decrypt_result.ValueOrDie());

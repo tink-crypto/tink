@@ -45,19 +45,19 @@ using ::grpc::Status;
     StreamingAeadEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto streaming_aead_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::StreamingAead>();
   if (!streaming_aead_result.ok()) {
-    response->set_err(streaming_aead_result.status().error_message());
+    response->set_err(streaming_aead_result.status().message());
     return ::grpc::Status::OK;
   }
 
@@ -70,7 +70,7 @@ using ::grpc::Status;
       streaming_aead_result.ValueOrDie()->NewEncryptingStream(
           std::move(ciphertext_destination), request->associated_data());
   if (!encrypting_stream_result.ok()) {
-    response->set_err(encrypting_stream_result.status().error_message());
+    response->set_err(encrypting_stream_result.status().message());
     return ::grpc::Status::OK;
   }
   auto encrypting_stream = std::move(encrypting_stream_result.ValueOrDie());
@@ -84,7 +84,7 @@ using ::grpc::Status;
   while (remaining > 0) {
     auto next_result = encrypting_stream->Next(&buffer);
     if (!next_result.ok()) {
-      response->set_err(next_result.status().error_message());
+      response->set_err(next_result.status().message());
       return ::grpc::Status::OK;
     }
     available_space = next_result.ValueOrDie();
@@ -98,8 +98,8 @@ using ::grpc::Status;
   }
   auto close_status = encrypting_stream->Close();
   if (!close_status.ok()) {
-     response->set_err(close_status.error_message());
-     return ::grpc::Status::OK;
+    response->set_err(close_status.message());
+    return ::grpc::Status::OK;
   }
 
   response->set_ciphertext(ciphertext_buf->str());
@@ -113,19 +113,19 @@ using ::grpc::Status;
     StreamingAeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(reader_result.status().message());
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().error_message());
+    response->set_err(handle_result.status().message());
     return ::grpc::Status::OK;
   }
   auto streaming_aead_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::StreamingAead>();
   if (!streaming_aead_result.ok()) {
-    response->set_err(streaming_aead_result.status().error_message());
+    response->set_err(streaming_aead_result.status().message());
     return ::grpc::Status::OK;
   }
 
@@ -138,7 +138,7 @@ using ::grpc::Status;
       streaming_aead_result.ValueOrDie()->NewDecryptingStream(
           std::move(ciphertext_source), request->associated_data());
   if (!decrypting_stream_result.ok()) {
-    response->set_err(decrypting_stream_result.status().error_message());
+    response->set_err(decrypting_stream_result.status().message());
     return ::grpc::Status::OK;
   }
   auto decrypting_stream = std::move(decrypting_stream_result.ValueOrDie());
@@ -152,7 +152,7 @@ using ::grpc::Status;
       break;
     }
     if (!next_result.ok()) {
-      response->set_err(next_result.status().error_message());
+      response->set_err(next_result.status().message());
       return ::grpc::Status::OK;
     }
     auto read_bytes = next_result.ValueOrDie();
