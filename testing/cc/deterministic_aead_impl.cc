@@ -36,25 +36,25 @@ using ::grpc::Status;
     DeterministicAeadEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto daead_result = handle_result.ValueOrDie()
                           ->GetPrimitive<crypto::tink::DeterministicAead>();
   if (!daead_result.ok()) {
-    response->set_err(daead_result.status().message());
+    response->set_err(std::string(daead_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto encrypt_result = daead_result.ValueOrDie()->EncryptDeterministically(
       request->plaintext(), request->associated_data());
   if (!encrypt_result.ok()) {
-    response->set_err(encrypt_result.status().message());
+    response->set_err(std::string(encrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
   response->set_ciphertext(encrypt_result.ValueOrDie());
@@ -68,25 +68,25 @@ using ::grpc::Status;
     DeterministicAeadDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto daead_result = handle_result.ValueOrDie()
                           ->GetPrimitive<crypto::tink::DeterministicAead>();
   if (!daead_result.ok()) {
-    response->set_err(daead_result.status().message());
+    response->set_err(std::string(daead_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto decrypt_result = daead_result.ValueOrDie()->DecryptDeterministically(
       request->ciphertext(), request->associated_data());
   if (!decrypt_result.ok()) {
-    response->set_err(decrypt_result.status().message());
+    response->set_err(std::string(decrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
   response->set_plaintext(decrypt_result.ValueOrDie());

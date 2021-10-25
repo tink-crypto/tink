@@ -35,24 +35,24 @@ using ::grpc::Status;
                                    ComputeMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto mac_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
-    response->set_err(mac_result.status().message());
+    response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto compute_result = mac_result.ValueOrDie()->ComputeMac(request->data());
   if (!compute_result.ok()) {
-    response->set_err(compute_result.status().message());
+    response->set_err(std::string(compute_result.status().message()));
     return ::grpc::Status::OK;
   }
   response->set_mac_value(compute_result.ValueOrDie());
@@ -65,25 +65,25 @@ using ::grpc::Status;
                                   VerifyMacResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto mac_result =
       handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
-    response->set_err(mac_result.status().message());
+    response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status =
       mac_result.ValueOrDie()->VerifyMac(request->mac_value(), request->data());
   if (!status.ok()) {
-    response->set_err(status.message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   return ::grpc::Status::OK;

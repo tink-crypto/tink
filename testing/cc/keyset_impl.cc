@@ -205,20 +205,20 @@ KeysetImpl::KeysetImpl() {
   }
   auto handle_result = KeysetHandle::GenerateNew(key_template);
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   std::stringbuf keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer_result.ok()) {
-    response->set_err(writer_result.status().message());
+    response->set_err(std::string(writer_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
-    response->set_err(status.message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
@@ -231,32 +231,32 @@ KeysetImpl::KeysetImpl() {
                                   KeysetPublicResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->private_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto private_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!private_handle_result.ok()) {
-    response->set_err(private_handle_result.status().message());
+    response->set_err(std::string(private_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto public_handle_result =
       private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
   if (!public_handle_result.ok()) {
-    response->set_err(public_handle_result.status().message());
+    response->set_err(std::string(public_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   std::stringbuf public_keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&public_keyset));
   if (!writer_result.ok()) {
-    response->set_err(writer_result.status().message());
+    response->set_err(std::string(writer_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(
       writer_result.ValueOrDie().get(), *public_handle_result.ValueOrDie());
   if (!status.ok()) {
-    response->set_err(status.message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   response->set_public_keyset(public_keyset.str());
@@ -269,26 +269,26 @@ KeysetImpl::KeysetImpl() {
                                   KeysetToJsonResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   std::stringbuf json_keyset;
   auto writer_result =
       JsonKeysetWriter::New(absl::make_unique<std::ostream>(&json_keyset));
   if (!writer_result.ok()) {
-    response->set_err(writer_result.status().message());
+    response->set_err(std::string(writer_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
-    response->set_err(status.message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   response->set_json_keyset(json_keyset.str());
@@ -301,26 +301,26 @@ KeysetImpl::KeysetImpl() {
                                     KeysetFromJsonResponse* response) {
   auto reader_result = JsonKeysetReader::New(request->json_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
-    response->set_err(handle_result.status().message());
+    response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   std::stringbuf keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer_result.ok()) {
-    response->set_err(writer_result.status().message());
+    response->set_err(std::string(writer_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
-    response->set_err(status.message());
+    response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
