@@ -51,7 +51,7 @@ TEST_F(AeadFactoryTest, testBasic) {
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 TEST_F(AeadFactoryTest, testPrimitive) {
@@ -109,7 +109,7 @@ TEST_F(AeadFactoryTest, testPrimitive) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
             decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
   AesGcmKey raw_key;

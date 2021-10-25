@@ -108,10 +108,9 @@ util::StatusOr<std::string> KmsEnvelopeAead::Decrypt(
       ciphertext.substr(kEncryptedDekPrefixSize, enc_dek_size),
       kEmptyAssociatedData);
   if (!dek_decrypt_result.ok()) {
-    return util::Status(
-        util::error::INVALID_ARGUMENT,
-        absl::StrCat("invalid ciphertext: ",
-                     dek_decrypt_result.status().error_message()));
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        absl::StrCat("invalid ciphertext: ",
+                                     dek_decrypt_result.status().message()));
   }
 
   // Create AEAD from DEK.

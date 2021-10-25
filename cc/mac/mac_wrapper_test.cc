@@ -41,7 +41,7 @@ TEST(MacWrapperTest, WrapNullptr) {
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(absl::StatusCode::kInternal, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                      mac_result.status().error_message());
+                      std::string(mac_result.status().message()));
 }
 
 TEST(MacWrapperTest, WrapEmpty) {
@@ -50,7 +50,7 @@ TEST(MacWrapperTest, WrapEmpty) {
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                      mac_result.status().error_message());
+                      std::string(mac_result.status().message()));
 }
 
 TEST(MacWrapperTest, Basic) {
@@ -109,7 +109,7 @@ TEST(MacWrapperTest, Basic) {
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
-                      status.error_message());
+                      std::string(status.message()));
 }
 
 TEST(MacWrapperTest, testLegacyAuthentication) {

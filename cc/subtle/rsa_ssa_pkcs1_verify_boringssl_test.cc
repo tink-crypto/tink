@@ -118,7 +118,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "only modulus size >= 2048-bit is supported",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Use SHA1 for digital signature.
@@ -128,7 +128,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "SHA1 is not safe for digital signature",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 

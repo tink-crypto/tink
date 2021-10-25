@@ -51,7 +51,7 @@ TEST(PythonInputStreamTest, testReadingStreams) {
     std::string stream_contents;
     auto status = ReadTillEnd(input_stream.get(), &stream_contents);
     EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(contents, stream_contents);
   }
 }

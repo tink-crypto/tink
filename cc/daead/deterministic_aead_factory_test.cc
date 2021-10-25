@@ -50,7 +50,7 @@ TEST_F(DeterministicAeadFactoryTest, testBasic) {
   EXPECT_FALSE(daead_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, daead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      daead_result.status().error_message());
+                      std::string(daead_result.status().message()));
 }
 
 TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
@@ -112,7 +112,7 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
             decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 
   // Create raw ciphertext with 2nd key, and decrypt
   // with DeterministicAead-instance.

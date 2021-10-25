@@ -140,7 +140,7 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
     auto status_or_ec_point2 = SubtleUtilBoringSSL::EcPointDecode(
         test.curve, test.format, encoded_str);
     EXPECT_FALSE(status_or_ec_point2.ok());
-    EXPECT_LE(0, status_or_ec_point2.status().error_message().find(
+    EXPECT_LE(0, status_or_ec_point2.status().message().find(
                      "point should start with"));
   }
 }

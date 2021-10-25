@@ -32,13 +32,13 @@ TEST(ErrorsTest, ToStatusFTest) {
   status = util::Status(crypto::tink::util::error::OK, msg1);
   EXPECT_TRUE(status.ok());
   // if status is OK, error message is ignored
-  EXPECT_EQ("", status.error_message());
+  EXPECT_EQ("", status.message());
   EXPECT_EQ(crypto::tink::util::error::OK, status.error_code());
 
   const char* expected_msg2 = "test message asdf 2 42";
   status = ToStatusF(crypto::tink::util::error::UNKNOWN, msg2, "asdf", 42);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(expected_msg2, status.error_message());
+  EXPECT_EQ(expected_msg2, status.message());
   EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
 }
 

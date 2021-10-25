@@ -87,7 +87,7 @@ TEST(FileRandomAccessStreamTest, ReadingStreams) {
     auto status = ReadAll(ra_stream.get(), 1 + (stream_size / 10),
                           &stream_contents);
     EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(file_contents, stream_contents);
     EXPECT_EQ(stream_size, ra_stream->size().ValueOrDie());
   }

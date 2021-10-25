@@ -173,7 +173,7 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
       (*jwt_verify)->VerifyAndDecode(*compact, *validator2);
   EXPECT_FALSE(verified_jwt2.ok());
   // Make sure the error message is interesting
-  EXPECT_THAT(verified_jwt2.status().error_message(), Eq("wrong issuer"));
+  EXPECT_THAT(verified_jwt2.status().message(), Eq("wrong issuer"));
 
   // Raw primitives don't add a kid header, Tink primitives require a kid
   // header to be set. Thefore, changing the output prefix to TINK makes the

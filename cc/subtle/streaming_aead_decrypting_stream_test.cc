@@ -135,7 +135,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, EmptyCiphertext) {
   EXPECT_FALSE(next_result.ok());
   EXPECT_EQ(next_result.status().code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not read stream header",
-                      next_result.status().error_message());
+                      std::string(next_result.status().message()));
 }
 
 TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
@@ -154,7 +154,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, InvalidStreamHeader) {
   EXPECT_FALSE(next_result.ok());
   EXPECT_EQ(next_result.status().code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Invalid stream header",
-                      next_result.status().error_message());
+                      std::string(next_result.status().message()));
 }
 
 TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
@@ -178,7 +178,7 @@ TEST_F(StreamingAeadDecryptingStreamTest, TruncatedLastSegment) {
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.code(), absl::StatusCode::kInvalidArgument);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unexpected last-segment marker",
-                      status.error_message());
+                      std::string(status.message()));
 }
 
 

@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
   auto primitive_result = keyset_handle->GetPrimitive<crypto::tink::Aead>();
   if (!primitive_result.ok()) {
     std::clog << "Getting AEAD-primitive from the factory failed: "
-              << primitive_result.status().error_message() << std::endl;
+              << primitive_result.status().message() << std::endl;
     exit(1);
   }
   std::unique_ptr<crypto::tink::Aead> aead =
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     auto encrypt_result = aead->Encrypt(input, associated_data);
     if (!encrypt_result.ok()) {
       std::clog << "Error while encrypting the input:"
-                << encrypt_result.status().error_message() << std::endl;
+                << encrypt_result.status().message() << std::endl;
       exit(1);
     }
     output = encrypt_result.ValueOrDie();
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
       std::clog << "Error while decrypting the input:"
-                << decrypt_result.status().error_message() << std::endl;
+                << decrypt_result.status().message() << std::endl;
       exit(1);
     }
     output = decrypt_result.ValueOrDie();

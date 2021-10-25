@@ -53,7 +53,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Only some fields set.
@@ -65,7 +65,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Wrong EC type.
@@ -78,7 +78,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kUnimplemented, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Unsupported DEM key type.
@@ -98,7 +98,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported DEM",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 
@@ -115,7 +115,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testBasic) {
   EXPECT_FALSE(bad_result.ok());
   EXPECT_EQ(absl::StatusCode::kFailedPrecondition, bad_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
-                      bad_result.status().error_message());
+                      std::string(bad_result.status().message()));
 
   // Register DEM key manager.
   ASSERT_TRUE(Registry::RegisterKeyTypeManager(

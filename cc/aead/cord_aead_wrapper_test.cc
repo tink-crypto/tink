@@ -46,7 +46,7 @@ TEST(AeadSetWrapperTest, WrapNullptr) {
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(absl::StatusCode::kInternal, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 TEST(AeadSetWrapperTest, WrapEmpty) {
@@ -55,7 +55,7 @@ TEST(AeadSetWrapperTest, WrapEmpty) {
   EXPECT_FALSE(aead_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 std::unique_ptr<PrimitiveSet<CordAead>> setup_keyset() {

@@ -50,7 +50,7 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInternal,
         hybrid_encrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        hybrid_encrypt_result.status().error_message());
+                        std::string(hybrid_encrypt_result.status().message()));
   }
 
   { // hybrid_encrypt_set has no primary primitive.
@@ -62,7 +62,7 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
         hybrid_encrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        hybrid_encrypt_result.status().error_message());
+                        std::string(hybrid_encrypt_result.status().message()));
   }
 
   { // Correct hybrid_encrypt_set;

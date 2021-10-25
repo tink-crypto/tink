@@ -54,7 +54,7 @@ TEST_F(MacFactoryTest, testBasic) {
   EXPECT_FALSE(mac_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      mac_result.status().error_message());
+                      std::string(mac_result.status().message()));
 }
 
 TEST_F(MacFactoryTest, testPrimitive) {
@@ -114,13 +114,13 @@ TEST_F(MacFactoryTest, testPrimitive) {
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
-                      status.error_message());
+                      std::string(status.message()));
 
   status = mac->VerifyMac("some bad mac value", data);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
-                      status.error_message());
+                      std::string(status.message()));
 
   // Create raw MAC value with 2nd key, and verify with Mac-instance.
   auto raw_mac = std::move(

@@ -67,7 +67,7 @@ TEST_F(PublicKeyVerifyFactoryTest, testBasic) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
       public_key_verify_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      public_key_verify_result.status().error_message());
+                      std::string(public_key_verify_result.status().message()));
 }
 
 TEST_F(PublicKeyVerifyFactoryTest, testPrimitive) {

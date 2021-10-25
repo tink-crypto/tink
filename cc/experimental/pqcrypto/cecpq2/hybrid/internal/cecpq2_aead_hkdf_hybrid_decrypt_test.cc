@@ -144,7 +144,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
             hybrid_decrypt->Decrypt(Random::GetRandomBytes(16), context_info);
         if (decrypt_result.status().code() !=
                 absl::StatusCode::kInvalidArgument ||
-            !absl::StrContains(decrypt_result.status().error_message(),
+            !absl::StrContains(decrypt_result.status().message(),
                                "ciphertext too short")) {
           return decrypt_result.status();
         }

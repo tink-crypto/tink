@@ -51,7 +51,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     EXPECT_EQ(absl::StatusCode::kInternal,
               hybrid_decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        hybrid_decrypt_result.status().error_message());
+                        std::string(hybrid_decrypt_result.status().message()));
   }
 
   { // hybrid_decrypt_set has no primary primitive.
@@ -63,7 +63,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
         hybrid_decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        hybrid_decrypt_result.status().error_message());
+                        std::string(hybrid_decrypt_result.status().message()));
   }
 
   { // Correct hybrid_decrypt_set;
@@ -135,7 +135,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
       EXPECT_EQ(absl::StatusCode::kInvalidArgument,
                 decrypt_result.status().code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-          decrypt_result.status().error_message());
+                          std::string(decrypt_result.status().message()));
     }
 
     {  // Correct ciphertext prefix.
@@ -155,7 +155,7 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
       EXPECT_EQ(absl::StatusCode::kInvalidArgument,
           decrypt_result.status().code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-          decrypt_result.status().error_message());
+                          std::string(decrypt_result.status().message()));
     }
   }
 }

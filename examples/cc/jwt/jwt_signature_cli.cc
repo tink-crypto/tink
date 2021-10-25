@@ -89,7 +89,7 @@ void GeneratePrivateKey(absl::string_view output_filename) {
       crypto::tink::KeysetHandle::GenerateNew(key_template);
   if (!keyset_handle.ok()) {
     std::clog << "Generating new keyset failed: "
-              << keyset_handle.status().error_message() << std::endl;
+              << keyset_handle.status().message() << std::endl;
     exit(1);
   }
   std::clog << "Writing the keyset to file " << output_filename
@@ -113,7 +113,7 @@ void ExtractPublicKey(absl::string_view private_keyset_filename,
       public_keyset_handle = private_keyset_handle->GetPublicKeysetHandle();
   if (!public_keyset_handle.ok()) {
     std::clog << "Getting the keyset failed: "
-              << public_keyset_handle.status().error_message() << std::endl;
+              << public_keyset_handle.status().message() << std::endl;
     exit(1);
   }
 
@@ -134,7 +134,7 @@ void Sign(absl::string_view keyset_filename, absl::string_view audience,
       jwt_public_key_sign = keyset_handle->GetPrimitive<JwtPublicKeySign>();
   if (!jwt_public_key_sign.ok()) {
     std::clog << "Getting JwtPublicKeySign-primitive from the factory failed: "
-              << jwt_public_key_sign.status().error_message() << std::endl;
+              << jwt_public_key_sign.status().message() << std::endl;
     exit(1);
   }
 
@@ -148,7 +148,7 @@ void Sign(absl::string_view keyset_filename, absl::string_view audience,
           .SetExpiration(absl::Now() + absl::Seconds(100))
           .Build();
   if (!raw_jwt.ok()) {
-    std::clog << "Building RawJwt failed: " << raw_jwt.status().error_message()
+    std::clog << "Building RawJwt failed: " << raw_jwt.status().message()
               << std::endl;
     exit(1);
   }
@@ -157,7 +157,7 @@ void Sign(absl::string_view keyset_filename, absl::string_view audience,
       (*jwt_public_key_sign)->SignAndEncode(*raw_jwt);
   if (!token.ok()) {
     std::clog << "Error while generating the token: "
-              << token.status().error_message() << std::endl;
+              << token.status().message() << std::endl;
     exit(1);
   }
 
@@ -179,7 +179,7 @@ void Verify(absl::string_view keyset_filename,
       keyset_handle->GetPrimitive<crypto::tink::JwtPublicKeyVerify>();
   if (!verifier.ok()) {
     std::clog << "Getting JwtPublicKeyVerify-primitive from the factory "
-              << "failed: " << verifier.status().error_message() << std::endl;
+              << "failed: " << verifier.status().message() << std::endl;
     exit(1);
   }
 
@@ -195,8 +195,8 @@ void Verify(absl::string_view keyset_filename,
           .ExpectAudience(expected_audience)
           .Build();
   if (!validator.ok()) {
-    std::clog << "Building validator failed: "
-              << validator.status().error_message() << std::endl;
+    std::clog << "Building validator failed: " << validator.status().message()
+              << std::endl;
     exit(1);
   }
 
@@ -205,7 +205,7 @@ void Verify(absl::string_view keyset_filename,
       (*verifier)->VerifyAndDecode(token, *validator);
   if (!verified_jwt.ok()) {
     std::clog << "Error while verifying the token: "
-              << verified_jwt.status().error_message() << std::endl;
+              << verified_jwt.status().message() << std::endl;
     result = "invalid";
   } else {
     absl::Duration ttl = *verified_jwt->GetExpiration() - absl::Now();
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
   crypto::tink::util::Status status = crypto::tink::JwtSignatureRegister();
   if (!status.ok()) {
-    std::clog << "JwtSignatureRegister() failed: " << status.error_message()
+    std::clog << "JwtSignatureRegister() failed: " << status.message()
               << std::endl;
     exit(1);
   }

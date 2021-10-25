@@ -123,8 +123,7 @@ TEST_F(HkdfTest, testLongOutput) {
       test::HexDecodeOrDie(test.salt_hex), test::HexDecodeOrDie(test.info_hex),
       255 * 32 + 1 /* 255 * hashLength + 1 */);
   EXPECT_FALSE(status_or_string.ok());
-  EXPECT_EQ(status_or_string.status().error_message(),
-            "BoringSSL's HKDF failed");
+  EXPECT_EQ(status_or_string.status().message(), "BoringSSL's HKDF failed");
 }
 
 TEST_F(HkdfTest, ComputeEciesHkdfSecretData) {

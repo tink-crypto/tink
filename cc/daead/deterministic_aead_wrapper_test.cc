@@ -49,7 +49,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     EXPECT_FALSE(daead_result.ok());
     EXPECT_EQ(absl::StatusCode::kInternal, daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                        daead_result.status().error_message());
+                        std::string(daead_result.status().message()));
   }
 
   {  // daead_set has no primary primitive.
@@ -61,7 +61,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
               daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                        daead_result.status().error_message());
+                        std::string(daead_result.status().message()));
   }
 
   {  // Correct daead_set;
@@ -130,7 +130,7 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
               decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                        decrypt_result.status().error_message());
+                        std::string(decrypt_result.status().message()));
   }
 }
 

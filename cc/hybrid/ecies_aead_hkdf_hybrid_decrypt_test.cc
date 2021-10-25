@@ -139,7 +139,7 @@ class EciesAeadHkdfHybridDecryptTest : public ::testing::Test {
         EXPECT_EQ(absl::StatusCode::kInvalidArgument,
                   decrypt_result.status().code());
         EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext too short",
-                            decrypt_result.status().error_message());
+                            std::string(decrypt_result.status().message()));
       }
       {  // Long but still bad ciphertext.
         auto decrypt_result =
@@ -163,7 +163,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Only some fields set.
@@ -175,7 +175,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "missing required fields",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Wrong EC type.
@@ -189,7 +189,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kUnimplemented, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported elliptic curve",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Unsupported DEM key type.
@@ -210,7 +210,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "Unsupported DEM",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 
@@ -228,7 +228,7 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testGettingHybridEncryptWithoutManager) {
   EXPECT_FALSE(bad_result.ok());
   EXPECT_EQ(absl::StatusCode::kFailedPrecondition, bad_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No manager for DEM",
-                      bad_result.status().error_message());
+                      std::string(bad_result.status().message()));
 }
 
 TEST_F(EciesAeadHkdfHybridDecryptTest, testAesGcmHybridDecryption) {

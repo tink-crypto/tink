@@ -99,7 +99,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetBinaryKeysetReader(
   auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the reader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_reader_result.ValueOrDie());
@@ -114,7 +114,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetJsonKeysetReader(
   auto keyset_reader_result = JsonKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the reader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_reader_result.ValueOrDie());
@@ -129,7 +129,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetBinaryKeysetWriter(
   auto keyset_writer_result = BinaryKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer_result.ok()) {
     std::clog << "Creation of the writer failed: "
-              << keyset_writer_result.status().error_message() << std::endl;
+              << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_writer_result.ValueOrDie());
@@ -144,7 +144,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetJsonKeysetWriter(
   auto keyset_writer_result = JsonKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer_result.ok()) {
     std::clog << "Creation of the writer failed: "
-              << keyset_writer_result.status().error_message() << std::endl;
+              << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_writer_result.ValueOrDie());
@@ -157,7 +157,7 @@ std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
       CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
-              << keyset_handle_result.status().error_message() << std::endl;
+              << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_handle_result.ValueOrDie());
@@ -169,8 +169,7 @@ void CliUtil::WriteKeyset(const KeysetHandle& keyset_handle,
   auto writer = GetBinaryKeysetWriter(filename);
   auto status = writer->Write(CleartextKeysetHandle::GetKeyset(keyset_handle));
   if (!status.ok()) {
-    std::clog << "Writing the keyset failed: " << status.error_message()
-              << std::endl;
+    std::clog << "Writing the keyset failed: " << status.message() << std::endl;
     exit(1);
   }
 }
@@ -180,14 +179,14 @@ void CliUtil::InitTink() {
   std::clog << "Initializing Tink...\n";
   auto status = TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Initialization of Tink failed: " << status.error_message()
+    std::clog << "Initialization of Tink failed: " << status.message()
               << std::endl;
     exit(1);
   }
 
   Status gcp_result = InitGcp();
   if (!gcp_result.ok()) {
-    std::clog << gcp_result.error_message() << std::endl;
+    std::clog << gcp_result.message() << std::endl;
   }
 
   Status aws_result = InitAws();

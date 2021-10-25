@@ -61,7 +61,7 @@ TEST_F(HybridEncryptFactoryTest, testBasic) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
       hybrid_encrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      hybrid_encrypt_result.status().error_message());
+                      std::string(hybrid_encrypt_result.status().message()));
 }
 
 TEST_F(HybridEncryptFactoryTest, testPrimitive) {

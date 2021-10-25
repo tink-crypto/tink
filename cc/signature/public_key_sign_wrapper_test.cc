@@ -49,7 +49,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     EXPECT_FALSE(pk_sign_result.ok());
     EXPECT_EQ(absl::StatusCode::kInternal, pk_sign_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        pk_sign_result.status().error_message());
+                        std::string(pk_sign_result.status().message()));
   }
 
   { // pk_sign_set has no primary primitive.
@@ -60,7 +60,7 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
         pk_sign_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        pk_sign_result.status().error_message());
+                        std::string(pk_sign_result.status().message()));
   }
 
   { // Correct pk_sign_set;

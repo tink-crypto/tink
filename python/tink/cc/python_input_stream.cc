@@ -35,7 +35,7 @@ namespace {
 
 bool is_eof(const util::Status& status) {
   return status.error_code() == util::error::UNKNOWN &&
-         absl::StrContains(status.error_message(), "EOFError");
+         absl::StrContains(status.message(), "EOFError");
 }
 
 }  // namespace
@@ -71,8 +71,8 @@ util::StatusOr<int> PythonInputStream::Next(const void** data) {
   } else if (read_result.status().code() == absl::StatusCode::kOutOfRange) {
     // We need to change the error code because for InputStream OUT_OF_RANGE
     // status always means EOF.
-    return status_ = util::Status(util::error::UNKNOWN,
-                                  read_result.status().error_message());
+    return status_ = util::Status(absl::StatusCode::kUnknown,
+                                  read_result.status().message());
   } else if (!read_result.ok()) {
     return status_ = read_result.status();
   }

@@ -120,7 +120,7 @@ TEST(StreamingAeadSetWrapperTest, WrapNullptr) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInternal, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(StreamingAeadSetWrapperTest, WrapEmpty) {
@@ -129,7 +129,7 @@ TEST(StreamingAeadSetWrapperTest, WrapEmpty) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {

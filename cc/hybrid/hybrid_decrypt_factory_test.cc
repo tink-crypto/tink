@@ -63,7 +63,7 @@ TEST_F(HybridDecryptFactoryTest, testBasic) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
       hybrid_decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      hybrid_decrypt_result.status().error_message());
+                      std::string(hybrid_decrypt_result.status().message()));
 }
 
 TEST_F(HybridDecryptFactoryTest, testPrimitive) {
@@ -137,7 +137,7 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
               decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                        decrypt_result.status().error_message());
+                        std::string(decrypt_result.status().message()));
   }
 }
 

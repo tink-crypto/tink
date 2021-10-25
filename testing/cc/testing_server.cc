@@ -39,28 +39,29 @@ ABSL_FLAG(int, port, 23456, "the port");
 void RunServer() {
   auto status = crypto::tink::TinkConfig::Register();
   if (!status.ok()) {
-    std::cout << "TinkConfig::Register() failed: " << status.error_message()
+    std::cout << "TinkConfig::Register() failed: " << status.message()
               << std::endl;
     return;
   }
   auto jwt_mac_status = crypto::tink::JwtMacRegister();
   if (!jwt_mac_status.ok()) {
-    std::cout << "JwtMacRegister() failed: " << jwt_mac_status.error_message()
+    std::cout << "JwtMacRegister() failed: " << jwt_mac_status.message()
               << std::endl;
     return;
   }
   auto jwt_signature_status = crypto::tink::JwtSignatureRegister();
   if (!jwt_signature_status.ok()) {
     std::cout << "JwtSignatureRegister() failed: "
-              << jwt_signature_status.error_message() << std::endl;
+              << jwt_signature_status.message() << std::endl;
     return;
   }
   auto register_fake_kms_client_status =
       crypto::tink::test::FakeKmsClient::RegisterNewClient("", "");
   if (!register_fake_kms_client_status.ok()) {
-    std::cout << "FakeKmsClient::RegisterNewClient("", "") failed: "
-        << register_fake_kms_client_status.error_message()
-              << std::endl;
+    std::cout << "FakeKmsClient::RegisterNewClient("
+                 ", "
+                 ") failed: "
+              << register_fake_kms_client_status.message() << std::endl;
     return;
   }
 

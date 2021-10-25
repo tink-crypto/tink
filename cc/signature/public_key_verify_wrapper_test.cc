@@ -48,7 +48,7 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     EXPECT_FALSE(pk_verify_result.ok());
     EXPECT_EQ(absl::StatusCode::kInternal, pk_verify_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        pk_verify_result.status().error_message());
+                        std::string(pk_verify_result.status().message()));
   }
 
   { // pk_verify_set has no primary primitive.
@@ -60,7 +60,7 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
         pk_verify_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        pk_verify_result.status().error_message());
+                        std::string(pk_verify_result.status().message()));
   }
 
   { // Correct pk_verify_set;

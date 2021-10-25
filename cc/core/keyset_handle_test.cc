@@ -476,7 +476,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_FALSE(public_handle_result.ok());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ASYMMETRIC_PRIVATE",
-                        public_handle_result.status().error_message());
+                        std::string(public_handle_result.status().message()));
   }
   { // A keyset with multiple keys.
     Keyset keyset;
@@ -501,7 +501,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_FALSE(public_handle_result.ok());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
-                        public_handle_result.status().error_message());
+                        std::string(public_handle_result.status().message()));
   }
 }
 

@@ -51,7 +51,8 @@ TEST(AeadSetWrapperTest, WrapNullptr) {
   util::StatusOr<std::unique_ptr<Aead>> aead = wrapper.Wrap(nullptr);
   EXPECT_THAT(aead.status(), Not(IsOk()));
   EXPECT_THAT(aead.status(), StatusIs(absl::StatusCode::kInternal));
-  EXPECT_PRED_FORMAT2(IsSubstring, "non-NULL", aead.status().error_message());
+  EXPECT_PRED_FORMAT2(IsSubstring, "non-NULL",
+                      std::string(aead.status().message()));
 }
 
 TEST(AeadSetWrapperTest, WrapEmpty) {
@@ -60,7 +61,8 @@ TEST(AeadSetWrapperTest, WrapEmpty) {
       wrapper.Wrap(absl::make_unique<PrimitiveSet<Aead>>());
   EXPECT_THAT(aead.status(), Not(IsOk()));
   EXPECT_THAT(aead.status(), StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_PRED_FORMAT2(IsSubstring, "no primary", aead.status().error_message());
+  EXPECT_PRED_FORMAT2(IsSubstring, "no primary",
+                      std::string(aead.status().message()));
 }
 
 TEST(AeadSetWrapperTest, Basic) {
@@ -116,7 +118,7 @@ TEST(AeadSetWrapperTest, Basic) {
   EXPECT_THAT(resulting_plaintext.status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_PRED_FORMAT2(IsSubstring, "decryption failed",
-                      resulting_plaintext.status().error_message());
+                      std::string(resulting_plaintext.status().message()));
 }
 
 TEST(AeadSetWrapperTest, DecryptNonPrimary) {

@@ -78,7 +78,7 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
             EXPECT_EQ(absl::StatusCode::kInvalidArgument,
                       failed_result.status().code());
             EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-null",
-                                failed_result.status().error_message());
+                                std::string(failed_result.status().message()));
 
             for (int pt_size : {0, 16, 100, 1000, 10000}) {
               SCOPED_TRACE(absl::StrCat(" pt_size = ", pt_size));
@@ -110,7 +110,7 @@ TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testIkmSize) {
@@ -129,7 +129,7 @@ TEST(AesGcmHkdfStreamingTest, testIkmSize) {
     EXPECT_FALSE(result.ok());
     EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 
@@ -149,7 +149,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unsupported hkdf_hash",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
@@ -168,7 +168,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be 16 or 32",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
@@ -187,7 +187,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-negative",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
@@ -206,7 +206,7 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext_segment_size too small",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 
