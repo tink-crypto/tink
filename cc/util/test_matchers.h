@@ -139,7 +139,7 @@ MATCHER_P(StatusIs, code,
 // use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
   return (arg.code() == static_cast<absl::StatusCode>(code)) &&
-         testing::Matches(message_matcher)(arg.error_message());
+         testing::Matches(message_matcher)(std::string(arg.message()));
 }
 
 // Matches a Keyset::Key with `key`.
