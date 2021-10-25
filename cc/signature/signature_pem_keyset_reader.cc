@@ -24,6 +24,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/keyset_reader.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
@@ -36,6 +37,7 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
@@ -43,7 +45,12 @@
 namespace crypto {
 namespace tink {
 
+using ::google::crypto::tink::EcdsaParams;
+using ::google::crypto::tink::EcdsaPublicKey;
+using ::google::crypto::tink::EcdsaSignatureEncoding;
+using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::EncryptedKeyset;
+using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyStatusType;
@@ -69,6 +76,32 @@ util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
   auto salt_len_or = util::Enums::HashLength(pem_parameters.hash_type);
   if (!salt_len_or.ok()) return salt_len_or.status();
   parameters->set_salt_length(salt_len_or.ValueOrDie());
+
+  return util::OkStatus();
+}
+
+// Sets the parameters for an ECDSA key `parameters` given the PEM
+// parameters `pem_parameters`.
+util::Status SetEcdsaParameters(const PemKeyParams& pem_parameters,
+                                EcdsaParams* parameters) {
+  if (parameters == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Null parameters provided");
+  }
+
+  if (pem_parameters.hash_type != HashType::SHA256 ||
+      pem_parameters.key_size_in_bits != 256 ||
+      pem_parameters.algorithm != PemAlgorithm::ECDSA_IEEE) {
+    return util::Status(
+        util::error::INVALID_ARGUMENT,
+        "Only NIST_P256 ECDSA supported. Parameters should contain "
+        "SHA256, 256 bit key size and ECDSA_IEEE algorithm.");
+  }
+
+  parameters->set_hash_type(pem_parameters.hash_type);
+  parameters->set_curve(EllipticCurveType::NIST_P256);
+  parameters->set_encoding(
+      google::crypto::tink::EcdsaSignatureEncoding::IEEE_P1363);
 
   return util::OkStatus();
 }
@@ -227,6 +260,39 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
 
   return util::OkStatus();
 }
+// Parses a given PEM-encoded ECDSA public key `pem_key`, and adds it to the
+// keyset `keyset`.
+util::Status AddEcdsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
+  // Parse the PEM string into a ECDSA public key.
+  auto public_key_subtle_or =
+      subtle::PemParser::ParseEcPublicKey(pem_key.serialized_key);
+  if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
+
+  std::unique_ptr<subtle::SubtleUtilBoringSSL::EcKey> public_key_subtle =
+      std::move(public_key_subtle_or).ValueOrDie();
+
+  EcdsaPublicKey ecdsa_key;
+  EcdsaVerifyKeyManager key_manager;
+
+  // ECDSA Public Key Parameters
+  ecdsa_key.set_x(public_key_subtle->pub_x);
+  ecdsa_key.set_y(public_key_subtle->pub_y);
+  auto set_parameter_status =
+      SetEcdsaParameters(pem_key.parameters, ecdsa_key.mutable_params());
+  if (!set_parameter_status.ok()) return set_parameter_status;
+
+  ecdsa_key.set_version(key_manager.get_version());
+
+  // Validate the key.
+  auto key_validation_status = key_manager.ValidateKey(ecdsa_key);
+  if (!key_validation_status.ok()) return key_validation_status;
+
+  *keyset->add_key() = NewKeysetKey(
+      GenerateUnusedKeyId(*keyset), key_manager.get_key_type(),
+      key_manager.key_material_type(), ecdsa_key.SerializeAsString());
+
+  return util::OkStatus();
+}
 
 // Parses a given PEM-encoded RSA public key `pem_key`, and adds it to the
 // keyset `keyset`.
@@ -374,9 +440,9 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
         if (!add_rsassa_pss_status.ok()) return add_rsassa_pss_status;
         break;
       }
-      default:
-        return util::Status(absl::StatusCode::kUnimplemented,
-                            "EC Keys Parsing unimplemented");
+      case PemKeyType::PEM_EC:
+        auto add_ecdsa_status = AddEcdsaPublicKey(pem_key, keyset.get());
+        if (!add_ecdsa_status.ok()) return add_ecdsa_status;
     }
   }
 

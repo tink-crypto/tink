@@ -28,6 +28,7 @@
 #include "openssl/digest.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "openssl/nid.h"
 #include "openssl/x509.h"
 #include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
@@ -143,6 +144,31 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
     EXPECT_LE(0, status_or_ec_point2.status().message().find(
                      "point should start with"));
   }
+}
+
+TEST(SubtleUtilBoringSSLTest, GetCurveSuccess) {
+  EC_GROUP* p256_group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+  EC_GROUP* p384_group = EC_GROUP_new_by_curve_name(NID_secp384r1);
+  EC_GROUP* p521_group = EC_GROUP_new_by_curve_name(NID_secp521r1);
+
+  auto p256_curve = SubtleUtilBoringSSL::GetCurve(p256_group);
+  auto p384_curve = SubtleUtilBoringSSL::GetCurve(p384_group);
+  auto p521_curve = SubtleUtilBoringSSL::GetCurve(p521_group);
+
+  EXPECT_THAT(p256_curve.status(), util::OkStatus());
+  EXPECT_THAT(p384_curve.status(), util::OkStatus());
+  EXPECT_THAT(p521_curve.status(), util::OkStatus());
+
+  EXPECT_EQ(p256_curve.ValueOrDie(), EllipticCurveType::NIST_P256);
+  EXPECT_EQ(p384_curve.ValueOrDie(), EllipticCurveType::NIST_P384);
+  EXPECT_EQ(p521_curve.ValueOrDie(), EllipticCurveType::NIST_P521);
+}
+
+TEST(SubtleUtilBoringSSLTest, GetCurveUnimplemented) {
+  EC_GROUP* unsupported_group = EC_GROUP_new_by_curve_name(NID_secp224r1);
+
+  EXPECT_THAT(SubtleUtilBoringSSL::GetCurve(unsupported_group).status(),
+              StatusIs(util::error::UNIMPLEMENTED));
 }
 
 TEST(SubtleUtilBoringSSLTest, Bn2strAndStr2bn) {

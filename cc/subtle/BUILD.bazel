@@ -855,6 +855,7 @@ cc_library(
         ":subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
+        "//internal:ssl_unique_ptr",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
     ],

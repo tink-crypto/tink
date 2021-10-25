@@ -1419,6 +1419,7 @@ tink_cc_test(
     tink::internal::err_util
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
+    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

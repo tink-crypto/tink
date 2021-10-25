@@ -23,9 +23,12 @@
 #include "openssl/base.h"
 #include "openssl/bio.h"
 #include "openssl/bn.h"
+#include "openssl/ec.h"
+#include "openssl/ec_key.h"
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -39,7 +42,7 @@ namespace {
 constexpr int kBsslOk = 1;
 
 // Verifies that the given RSA pointer `rsa_key` points to a valid RSA key.
-util::Status VerifyRsaKey(const RSA *rsa_key) {
+util::Status VerifyRsaKey(const RSA* rsa_key) {
   if (rsa_key == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid RSA key format");
@@ -48,6 +51,21 @@ util::Status VerifyRsaKey(const RSA *rsa_key) {
   if (RSA_check_key(rsa_key) != kBsslOk) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "Invalid RSA key format");
+  }
+  return util::OkStatus();
+}
+
+// Verifies that the given ECDSA pointer `ecdsa_key` points to a valid ECDSA
+// key.
+util::Status VerifyEcdsaKey(const EC_KEY* ecdsa_key) {
+  if (ecdsa_key == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid ECDSA key format");
+  }
+  // Check the key parameters.
+  if (EC_KEY_check_key(ecdsa_key) != kBsslOk) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "Invalid ECDSA key format");
   }
   return util::OkStatus();
 }
@@ -168,13 +186,13 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
                         "PEM Public Key parsing failed");
   }
   // No need to free bssl_rsa_key after use.
-  RSA *bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
+  RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
   auto is_valid = VerifyRsaKey(bssl_rsa_key);
   if (!is_valid.ok()) {
     return is_valid;
   }
 
-  // Get the public key paramters.
+  // Get the public key parameters.
   const BIGNUM *n_bn, *e_bn, *d_bn;
   RSA_get0_key(bssl_rsa_key, &n_bn, &e_bn, &d_bn);
 
@@ -214,7 +232,7 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   }
 
   // No need to free bssl_rsa_key after use.
-  RSA *bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
+  RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
 
   auto is_valid_key = VerifyRsaKey(bssl_rsa_key);
   if (!is_valid_key.ok()) {
@@ -311,8 +329,50 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
-  return util::Status(absl::StatusCode::kUnimplemented,
-                      "PEM EC Public Key parsing is unimplemented");
+  // Read the ECDSA key into EVP_PKEY.
+  bssl::UniquePtr<BIO> ecdsa_key_bio(BIO_new(BIO_s_mem()));
+  BIO_write(ecdsa_key_bio.get(), pem_serialized_key.data(),
+            pem_serialized_key.size());
+
+  bssl::UniquePtr<EVP_PKEY> evp_ecdsa_key(PEM_read_bio_PUBKEY(
+      ecdsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
+
+  if (evp_ecdsa_key == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "PEM Public Key parsing failed");
+  }
+  // No need to free bssl_ecdsa_key after use.
+  EC_KEY* bssl_ecdsa_key = EVP_PKEY_get0_EC_KEY(evp_ecdsa_key.get());
+  auto is_valid = VerifyEcdsaKey(bssl_ecdsa_key);
+  if (!is_valid.ok()) {
+    return is_valid;
+  }
+
+  // Get the public key parameters.
+  internal::SslUniquePtr<BIGNUM> x_coordinate(BN_new());
+  internal::SslUniquePtr<BIGNUM> y_coordinate(BN_new());
+  const EC_POINT* public_point = EC_KEY_get0_public_key(bssl_ecdsa_key);
+  const EC_GROUP* ec_group = EC_KEY_get0_group(bssl_ecdsa_key);
+  EC_POINT_get_affine_coordinates(ec_group, public_point, x_coordinate.get(),
+                                  y_coordinate.get(), nullptr);
+
+  // Convert public key parameters and construct Subtle ECKey
+  auto x_string = SubtleUtilBoringSSL::bn2str(x_coordinate.get(),
+                                              BN_num_bytes(x_coordinate.get()));
+  auto y_string = SubtleUtilBoringSSL::bn2str(y_coordinate.get(),
+                                              BN_num_bytes(y_coordinate.get()));
+  auto curve = SubtleUtilBoringSSL::GetCurve(ec_group);
+
+  if (!x_string.ok()) return x_string.status();
+  if (!y_string.ok()) return y_string.status();
+  if (!curve.ok()) return curve.status();
+
+  auto ecdsa_public_key = absl::make_unique<SubtleUtilBoringSSL::EcKey>();
+  ecdsa_public_key->pub_x = std::move(x_string).ValueOrDie();
+  ecdsa_public_key->pub_y = std::move(y_string).ValueOrDie();
+  ecdsa_public_key->curve = std::move(curve).ValueOrDie();
+
+  return ecdsa_public_key;
 }
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>

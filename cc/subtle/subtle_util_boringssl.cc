@@ -184,6 +184,22 @@ util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
 }
 
 // static
+util::StatusOr<EllipticCurveType> SubtleUtilBoringSSL::GetCurve(
+    const EC_GROUP *group) {
+  switch (EC_GROUP_get_curve_name(group)) {
+    case NID_X9_62_prime256v1:
+      return EllipticCurveType::NIST_P256;
+    case NID_secp384r1:
+      return EllipticCurveType::NIST_P384;
+    case NID_secp521r1:
+      return EllipticCurveType::NIST_P521;
+    default:
+      return util::Status(absl::StatusCode::kUnimplemented,
+                          "Unsupported elliptic curve");
+  }
+}
+
+// static
 util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
     EllipticCurveType curve, absl::string_view pubx, absl::string_view puby) {
   internal::SslUniquePtr<BIGNUM> bn_x(

@@ -19,12 +19,14 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
+#include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_config.h"
@@ -35,6 +37,7 @@
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
+#include "proto/ecdsa.pb.h"
 #include "proto/rsa_ssa_pss.pb.h"
 #include "proto/tink.pb.h"
 
@@ -46,6 +49,9 @@ using ::crypto::tink::test::EqualsKey;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::error::Code;
+using ::google::crypto::tink::EcdsaPublicKey;
+using ::google::crypto::tink::EcdsaSignatureEncoding;
+using ::google::crypto::tink::EllipticCurveType;
 using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::Keyset;
@@ -56,6 +62,34 @@ using ::google::crypto::tink::RsaSsaPssPublicKey;
 using ::testing::Eq;
 using ::testing::Not;
 using ::testing::SizeIs;
+
+constexpr absl::string_view kEcdsaP256PublicKey =
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1M5IlCiYLvNDGG65DmoErfQTZjWa\n"
+    "UI/nrGayg/BmQa4f9db4zQRCc5IwErn3JtlLDAxQ8fXUoy99klswBEMZ/A==\n"
+    "-----END PUBLIC KEY-----\n";
+constexpr absl::string_view kEcdsaP256PublicKeyX =
+    "d4ce489428982ef343186eb90e6a04adf41366359a508fe7ac66b283f06641ae";
+constexpr absl::string_view kEcdsaP256PublicKeyY =
+    "1ff5d6f8cd044273923012b9f726d94b0c0c50f1f5d4a32f7d925b30044319fc";
+
+constexpr absl::string_view kEcdsaP384PublicKey =
+    "-----BEGIN PUBLIC KEY-----"
+    "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAESbGnhTcoHIGYTgAJLwTCLGEMrCq6ej3p"
+    "kr9q0iMF0tVFAYdX7YI8ZDM04Y2VsuZC0qhRRFxdoL8NVD6q1f+YY0SDxUnZYEUk"
+    "MSHtbVybpk2rZWptJeAYsBxNOrPxc4mJ"
+    "-----END PUBLIC KEY-----";
+
+constexpr absl::string_view kSecp256k1PublicKey =
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEuDj/ROW8F3vyEYnQdmCC/J2EMiaIf8l2\n"
+    "A3EQC37iCm/wyddb+6ezGmvKGXRJbutW3jVwcZVdg8Sxutqgshgy6Q==\n"
+    "-----END PUBLIC KEY-----";
+
+constexpr absl::string_view kEd25519PublicKey =
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MCowBQYDK2VwAyEAfU0Of2FTpptiQrUiq77mhf2kQg+INLEIw72uNp71Sfo=\n"
+    "-----END PUBLIC KEY-----\n";
 
 constexpr absl::string_view kRsaPublicKey2048 =
     "-----BEGIN PUBLIC KEY-----\n"
@@ -104,6 +138,21 @@ constexpr absl::string_view kRsaPrivateKey2048 =
     "uAeidKZk3SJEmj0F1+Aiir2KRv+RX543VvzCtEXNkVViVrirzvjZUGKPdkMWfbF8\n"
     "OdD7qHPPNu5jSyaroeN6VqfbELpewhYzulMEipckEZlU4+Dxu2k1eQ==\n"
     "-----END RSA PRIVATE KEY-----\n";
+
+// Helper function that creates an EcdsaPublicKey from the given PEM encoded
+// key `pem_encoded_key`, Hash type `hash_type` and key version `key_version`.
+EcdsaPublicKey GetExpectedEcdsaPublicKeyProto() {
+  EcdsaPublicKey public_key_proto;
+  public_key_proto.set_version(0);
+  public_key_proto.set_x(absl::HexStringToBytes(kEcdsaP256PublicKeyX));
+  public_key_proto.set_y(absl::HexStringToBytes(kEcdsaP256PublicKeyY));
+  public_key_proto.mutable_params()->set_hash_type(HashType::SHA256);
+  public_key_proto.mutable_params()->set_curve(EllipticCurveType::NIST_P256);
+  public_key_proto.mutable_params()->set_encoding(
+      EcdsaSignatureEncoding::IEEE_P1363);
+
+  return public_key_proto;
+}
 
 // Helper function that creates an RsaSsaPssPublicKey from the given PEM encoded
 // key `pem_encoded_key`, Hash type `hash_type` and key version `key_version`.
@@ -197,7 +246,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
 }
 
 // Verify parsing works correctly on valid inputs.
-TEST(SignaturePemKeysetReaderTest, ReadCorrectPublicKey) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
@@ -262,7 +311,7 @@ TEST(SignaturePemKeysetReaderTest, ReadCorrectPublicKey) {
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_key2));
 }
 
-TEST(SignaturePemKeysetReaderTest, ReadCorrectPrivateKey) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_SIGN);
 
@@ -330,7 +379,7 @@ TEST(SignaturePemKeysetReaderTest, ReadCorrectPrivateKey) {
 
 // Expects an INVLID_ARGUMENT when passing a public key to a
 // PublicKeySignPemKeysetReader.
-TEST(SignaturePemKeysetTeaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_SIGN);
   builder.Add({.serialized_key = std::string(kRsaPublicKey2048),
@@ -349,7 +398,7 @@ TEST(SignaturePemKeysetTeaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
 
 // Expects an INVLID_ARGUMENT when passing a private key to a
 // PublicKeyVerifyPemKeysetReader.
-TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
@@ -368,7 +417,7 @@ TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
 }
 
 // Expects an INVALID_ARGUMENT error as the key size is too small.
-TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyTooSmall) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
@@ -388,7 +437,7 @@ TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyTooSmall) {
 
 // Expects an INVALID_ARGUMENT error as the key is 2048 bits, but PemKeyParams
 // reports 3072.
-TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeySizeMismatch) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
@@ -407,7 +456,7 @@ TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeySizeMismatch) {
 }
 
 // Expects an INVALID_ARGUMENT error as SHA1 is not allowed.
-TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyInvalidHashType) {
+TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
 
@@ -423,6 +472,165 @@ TEST(SignaturePemKeysetTeaderTest, ReadRsaPublicKeyInvalidHashType) {
       std::move(keyset_reader_or).ValueOrDie();
 
   EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA256}});
+
+  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA256}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), IsOk());
+  std::unique_ptr<Keyset> keyset = std::move(keyset_read).ValueOrDie();
+
+  // Key manager to validate key type and key material type.
+  EcdsaVerifyKeyManager key_manager;
+  EXPECT_THAT(keyset->key(), SizeIs(2));
+  EXPECT_THAT(keyset->primary_key_id(), keyset->key(0).key_id());
+  EXPECT_THAT(keyset->key(0).key_id(), Not(Eq(keyset->key(1).key_id())));
+
+  // Build the expected primary key.
+  Keyset::Key expected_primary;
+  // ID is randomly generated, so we simply copy the primary key ID.
+  expected_primary.set_key_id(keyset->primary_key_id());
+  expected_primary.set_status(KeyStatusType::ENABLED);
+  expected_primary.set_output_prefix_type(OutputPrefixType::RAW);
+
+  // Populate the expected primary key KeyData.
+  KeyData* expected_primary_data = expected_primary.mutable_key_data();
+  expected_primary_data->set_type_url(key_manager.get_key_type());
+  expected_primary_data->set_key_material_type(key_manager.key_material_type());
+  expected_primary_data->set_value(
+      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+  EXPECT_THAT(keyset->key(0), EqualsKey(expected_primary))
+      << "expected key: " << expected_primary.DebugString();
+
+  // Build the expected secondary key.
+  Keyset::Key expected_secondary;
+  // ID is randomly generated, so we simply copy the primary key ID.
+  expected_secondary.set_key_id(keyset->key(1).key_id());
+  expected_secondary.set_status(KeyStatusType::ENABLED);
+  expected_secondary.set_output_prefix_type(OutputPrefixType::RAW);
+
+  // Populate the expected secondary key KeyData.
+  KeyData* expected_secondary_data = expected_secondary.mutable_key_data();
+  expected_secondary_data->set_type_url(key_manager.get_key_type());
+  expected_secondary_data->set_key_material_type(
+      key_manager.key_material_type());
+  expected_secondary_data->set_value(
+      GetExpectedEcdsaPublicKeyProto().SerializeAsString());
+  EXPECT_THAT(keyset->key(1), EqualsKey(expected_secondary))
+      << "expected key: " << expected_secondary.DebugString();
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongHashType) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA512}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongKeySize) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 512,
+                              .hash_type = HashType::SHA256}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongAlgorithm) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEcdsaP256PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::RSASSA_PSS,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA256}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadEd25519ShouldFail) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEd25519PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA256}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kSecp256k1PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 256,
+                              .hash_type = HashType::SHA256}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+}
+
+TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {
+  auto builder = SignaturePemKeysetReaderBuilder(
+      SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_VERIFY);
+
+  builder.Add({.serialized_key = std::string(kEcdsaP384PublicKey),
+               .parameters = {.key_type = PemKeyType::PEM_EC,
+                              .algorithm = PemAlgorithm::ECDSA_IEEE,
+                              .key_size_in_bits = 384,
+                              .hash_type = HashType::SHA384}});
+
+  auto reader = builder.Build();
+  ASSERT_THAT(reader.status(), IsOk());
+  auto keyset_read = reader->get()->Read();
+  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
 }
 
 }  // namespace

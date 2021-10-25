@@ -142,6 +142,10 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
       EllipticCurveType curve, absl::string_view pubx, absl::string_view puby);
 
+  // Returns the curve type associated with the EC_GROUP
+  static crypto::tink::util::StatusOr<EllipticCurveType> GetCurve(
+      const EC_GROUP *group);
+
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
       EllipticCurveType curve_type);
