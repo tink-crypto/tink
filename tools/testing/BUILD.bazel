@@ -33,20 +33,6 @@ java_library(
 )
 
 java_binary(
-    name = "compare_keysets_cli_java",
-    testonly = 1,
-    srcs = ["java/com/google/crypto/tink/testing/CompareKeysetsCli.java"],
-    main_class = "com.google.crypto.tink.testing.CompareKeysetsCli",
-    deps = [
-        ":cli_util",
-        ":compare_keysets",
-        "@tink_java//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
-        "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
-        "@tink_java//src/main/java/com/google/crypto/tink/config:tink_config",
-    ],
-)
-
-java_binary(
     name = "aead_cli_java",
     testonly = 1,
     srcs = [
