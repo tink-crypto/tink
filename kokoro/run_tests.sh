@@ -91,10 +91,6 @@ run_all_linux_tests() {
 }
 
 run_macos_tests() {
-  # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=13.2}"
-  : "${XCODE_VERSION:=11.3}"
-
   local -a BAZEL_FLAGS=(
     --compilation_mode=dbg --dynamic_mode=off --cpu=ios_x86_64
     --ios_cpu=x86_64 --experimental_enable_objc_cc_deps
@@ -184,6 +180,10 @@ main() {
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
+      # Default values for iOS SDK and Xcode. Can be overriden by another script.
+      : "${IOS_SDK_VERSION:=13.2}"
+      : "${XCODE_VERSION:=11.3}"
+
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
       export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
