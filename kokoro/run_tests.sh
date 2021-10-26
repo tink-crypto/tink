@@ -21,7 +21,6 @@ set -e
 # Display commands to stderr.
 set -x
 
-./kokoro/copy_credentials.sh
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
@@ -192,6 +191,9 @@ main() {
       # TODO(b/155225382): Avoid modifying the sytem Python installation.
       pip3 install --user protobuf
     fi
+
+    ./kokoro/copy_credentials.sh
+    ./kokoro/update_android_sdk.sh
   fi
 
   # Verify required environment variables.

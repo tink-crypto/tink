@@ -25,6 +25,9 @@ export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Develope
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
+./kokoro/copy_credentials.sh
+./kokoro/update_android_sdk.sh
+
 cd java_src
 use_bazel.sh $(cat .bazelversion)
 bazel build ...

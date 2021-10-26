@@ -1,5 +1,6 @@
 #!/bin/bash
-# Copyright 2020 Google LLC
+
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +15,21 @@
 # limitations under the License.
 ################################################################################
 
+set -x
 
-set -euo pipefail
+if [[ -z "${KOKORO_ROOT}" ]] ; then
+  exit 0
+fi
 
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/copy_credentials.sh
+readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
-export XCODE_VERSION=11.3
-export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
-export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
+if [[ "${PLATFORM}" == 'darwin' ]]; then
+  export JAVA_OPTS="-Djava.net.preferIPv6Addresses=true"
+fi
 
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+# Install build-tools.
+(yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" "build-tools;30.0.3"
 
-cd apps
-use_bazel.sh $(cat .bazelversion)
-time bazel build -- ...
-time bazel test -- ...
+# Install all necessary parts of the Android SDK.
+(yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" "platform-tools" \
+  "platforms;android-29" "platforms;android-30" "platforms;android-31"

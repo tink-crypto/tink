@@ -67,14 +67,14 @@ def tink_base_deps():
 
     # Remote Build Execution
     if not native.existing_rule("bazel_toolchains"):
-        # Latest bazel_toolchains package on 2021-01-08
+        # Latest bazel_toolchains package on 2021-10-13
         http_archive(
             name = "bazel_toolchains",
-            sha256 = "1caf8584434d3e31be674067996be787cfa511fda2a0f05811131b588886477f",
-            strip_prefix = "bazel-toolchains-3.7.2",
+            sha256 = "179ec02f809e86abf56356d8898c8bd74069f1bd7c56044050c2cd3d79d0e024",
+            strip_prefix = "bazel-toolchains-4.1.0",
             urls = [
-                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/releases/download/3.7.2/bazel-toolchains-3.7.2.tar.gz",
-                "https://github.com/bazelbuild/bazel-toolchains/archive/3.7.2.tar.gz",
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/releases/download/4.1.0/bazel-toolchains-4.1.0.tar.gz",
+                "https://github.com/bazelbuild/bazel-toolchains/releases/download/4.1.0/bazel-toolchains-4.1.0.tar.gz",
             ],
         )
     if not native.existing_rule("wycheproof"):
