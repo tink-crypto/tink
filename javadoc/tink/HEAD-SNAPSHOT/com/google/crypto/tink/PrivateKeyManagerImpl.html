@@ -186,7 +186,7 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code>com.google.crypto.tink.proto.KeyData</code></td>
+<td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html#getPublicKeyData-com.google.protobuf.ByteString-">getPublicKeyData</a></span>(com.google.protobuf.ByteString&nbsp;serializedKey)</code>
 <div class="block">Extracts the public key data from the private key data.</div>
 </td>
@@ -209,7 +209,7 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 </td>
 </tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code>com.google.crypto.tink.proto.KeyData</code></td>
+<td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html#newKeyData-com.google.protobuf.ByteString-">newKeyData</a></span>(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)</code>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.</div>
 </td>
@@ -268,15 +268,15 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 <ul class="blockList">
 <li class="blockList">
 <h4>getPublicKeyData</h4>
-<pre>public&nbsp;com.google.crypto.tink.proto.KeyData&nbsp;getPublicKeyData(com.google.protobuf.ByteString&nbsp;serializedKey)
-                                                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;getPublicKeyData(com.google.protobuf.ByteString&nbsp;serializedKey)
+                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html#getPublicKeyData-com.google.protobuf.ByteString-">PrivateKeyManager</a></code></span></div>
 <div class="block">Extracts the public key data from the private key data.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html#getPublicKeyData-com.google.protobuf.ByteString-">getPublicKeyData</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PrimitiveT</a>&gt;</code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the <code>KeyData</code> containing the public keys</dd>
+<dd>the <a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> containing the public keys</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the specified format is wrong or not supported</dd>
 </dl>
@@ -416,8 +416,8 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 <ul class="blockList">
 <li class="blockList">
 <h4>newKeyData</h4>
-<pre>public final&nbsp;com.google.crypto.tink.proto.KeyData&nbsp;newKeyData(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
-                                                      throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<pre>public final&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;newKeyData(com.google.protobuf.ByteString&nbsp;serializedKeyFormat)
+                         throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../com/google/crypto/tink/KeyManager.html#newKeyData-com.google.protobuf.ByteString-">KeyManager</a></code></span></div>
 <div class="block">Generates a new <code>KeyData</code> according to specification in <code>serializedkeyFormat</code>.
 

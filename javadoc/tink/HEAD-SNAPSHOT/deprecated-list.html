@@ -95,6 +95,12 @@
 <div class="block"><span class="deprecationComment">Catalogues are no longer supported.</span></div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyTypeEntryOrBuilder.html" title="interface in com.google.crypto.tink.proto">com.google.crypto.tink.proto.KeyTypeEntryOrBuilder</a></td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/RegistryConfigOrBuilder.html" title="interface in com.google.crypto.tink.proto">com.google.crypto.tink.proto.RegistryConfigOrBuilder</a></td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -147,38 +153,44 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyTypeEntry.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.KeyTypeEntry</a></td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacFactory.html" title="class in com.google.crypto.tink.mac">com.google.crypto.tink.mac.MacFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(Mac.class)</code> after registering the <code>MacWrapper</code> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacKeyTemplates.html" title="class in com.google.crypto.tink.mac">com.google.crypto.tink.mac.MacKeyTemplates</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/KeyTemplates.html#get-java.lang.String-"><code>KeyTemplates.get(java.lang.String)</code></a>, e.g.,
      KeyTemplates.get("HMAC_SHA256_128BITTAG")</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink">com.google.crypto.tink.NoSecretKeysetHandle</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/KeysetHandle.html#readNoSecret-com.google.crypto.tink.KeysetReader-"><code>KeysetHandle.readNoSecret(com.google.crypto.tink.KeysetReader)</code></a> instead</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/prf/PrfKeyTemplates.html" title="class in com.google.crypto.tink.prf">com.google.crypto.tink.prf.PrfKeyTemplates</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/KeyTemplates.html#get-java.lang.String-"><code>KeyTemplates.get(java.lang.String)</code></a>, e.g.,
      KeyTemplates.get("HKDF_SHA256")</span></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeySignFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeySign.class)</code> after registering the
      <code>PublicKeySignWrapper</code> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeyVerifyFactory.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.PublicKeyVerifyFactory</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeyVerify.class)</code> after registering the
      <code>PublicKeyVerifyWrapper</code> instead.</span></div>
 </td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/RegistryConfig.html" title="class in com.google.crypto.tink.proto">com.google.crypto.tink.proto.RegistryConfig</a></td>
 </tr>
 <tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/SignatureKeyTemplates.html" title="class in com.google.crypto.tink.signature">com.google.crypto.tink.signature.SignatureKeyTemplates</a>
@@ -239,65 +251,63 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#LATEST">com.google.crypto.tink.daead.DeterministicAeadConfig.LATEST</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#LATEST">com.google.crypto.tink.config.TinkConfig.LATEST</a>
+<div class="block"><span class="deprecationComment">This is not supported anymore.</span></div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#LATEST">com.google.crypto.tink.config.TinkConfig.LATEST</a>
-<div class="block"><span class="deprecationComment">This is not supported anymore.</span></div>
+<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#LATEST">com.google.crypto.tink.daead.DeterministicAeadConfig.LATEST</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#LATEST">com.google.crypto.tink.hybrid.HybridConfig.LATEST</a>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#LATEST">com.google.crypto.tink.aead.AeadConfig.LATEST</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacConfig.html#LATEST">com.google.crypto.tink.mac.MacConfig.LATEST</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/mac/MacConfig.html#register--"><code>MacConfig.register()</code></a></span></div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#LATEST">com.google.crypto.tink.aead.AeadConfig.LATEST</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+</td>
+</tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#TINK_1_0_0">com.google.crypto.tink.config.TinkConfig.TINK_1_0_0</a>&nbsp;</td>
+<td class="colOne"><a href="com/google/crypto/tink/signature/SignatureConfig.html#TINK_1_0_0">com.google.crypto.tink.signature.SignatureConfig.TINK_1_0_0</a>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/signature/SignatureConfig.html#TINK_1_0_0">com.google.crypto.tink.signature.SignatureConfig.TINK_1_0_0</a>&nbsp;</td>
+<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#TINK_1_0_0">com.google.crypto.tink.config.TinkConfig.TINK_1_0_0</a>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#TINK_1_0_0">com.google.crypto.tink.hybrid.HybridConfig.TINK_1_0_0</a>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#TINK_1_0_0">com.google.crypto.tink.aead.AeadConfig.TINK_1_0_0</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacConfig.html#TINK_1_0_0">com.google.crypto.tink.mac.MacConfig.TINK_1_0_0</a>
 <div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/mac/MacConfig.html#register--"><code>MacConfig.register()</code></a></span></div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#TINK_1_1_0">com.google.crypto.tink.daead.DeterministicAeadConfig.TINK_1_1_0</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
-</td>
-</tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#TINK_1_1_0">com.google.crypto.tink.config.TinkConfig.TINK_1_1_0</a>&nbsp;</td>
+<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#TINK_1_0_0">com.google.crypto.tink.aead.AeadConfig.TINK_1_0_0</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/SignatureConfig.html#TINK_1_1_0">com.google.crypto.tink.signature.SignatureConfig.TINK_1_1_0</a>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#TINK_1_1_0">com.google.crypto.tink.hybrid.HybridConfig.TINK_1_1_0</a>&nbsp;</td>
+<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#TINK_1_1_0">com.google.crypto.tink.config.TinkConfig.TINK_1_1_0</a>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#TINK_1_1_0">com.google.crypto.tink.aead.AeadConfig.TINK_1_1_0</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#TINK_1_1_0">com.google.crypto.tink.streamingaead.StreamingAeadConfig.TINK_1_1_0</a>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#TINK_1_1_0">com.google.crypto.tink.daead.DeterministicAeadConfig.TINK_1_1_0</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
 </td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#TINK_1_1_0">com.google.crypto.tink.hybrid.HybridConfig.TINK_1_1_0</a>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/MacConfig.html#TINK_1_1_0">com.google.crypto.tink.mac.MacConfig.TINK_1_1_0</a>
@@ -305,7 +315,9 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#TINK_1_1_0">com.google.crypto.tink.streamingaead.StreamingAeadConfig.TINK_1_1_0</a>&nbsp;</td>
+<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#TINK_1_1_0">com.google.crypto.tink.aead.AeadConfig.TINK_1_1_0</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+</td>
 </tr>
 </tbody>
 </table>
@@ -386,13 +398,13 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#aes256CmacTemplate--">com.google.crypto.tink.prf.AesCmacPrfKeyManager.aes256CmacTemplate()</a>
-<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("AES256_CMAC_PRF")</code></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html#aes256CmacTemplate--">com.google.crypto.tink.mac.AesCmacKeyManager.aes256CmacTemplate()</a>
+<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("AES256_CMAC")</code></span></div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html#aes256CmacTemplate--">com.google.crypto.tink.mac.AesCmacKeyManager.aes256CmacTemplate()</a>
-<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("AES256_CMAC")</code></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/prf/AesCmacPrfKeyManager.html#aes256CmacTemplate--">com.google.crypto.tink.prf.AesCmacPrfKeyManager.aes256CmacTemplate()</a>
+<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("AES256_CMAC_PRF")</code></span></div>
 </td>
 </tr>
 <tr class="altColor">
@@ -504,21 +516,21 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">com.google.crypto.tink.daead.DeterministicAeadFactory.getPrimitive(KeysetHandle)</a>
-<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(DeterministicAead.class)</code> after registering
-     the <code>DeterministicAeadWrapper</code> instead.</span></div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeyVerifyFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">com.google.crypto.tink.signature.PublicKeyVerifyFactory.getPrimitive(KeysetHandle)</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeyVerify.class)</code> after registering the
      <code>PublicKeyVerifyWrapper</code> instead.</span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/signature/PublicKeySignFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">com.google.crypto.tink.signature.PublicKeySignFactory.getPrimitive(KeysetHandle)</a>
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(PublicKeySign.class)</code> after registering the
      <code>PublicKeySignWrapper</code> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadFactory.html#getPrimitive-com.google.crypto.tink.KeysetHandle-">com.google.crypto.tink.daead.DeterministicAeadFactory.getPrimitive(KeysetHandle)</a>
+<div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(DeterministicAead.class)</code> after registering
+     the <code>DeterministicAeadWrapper</code> instead.</span></div>
 </td>
 </tr>
 <tr class="altColor">
@@ -564,13 +576,13 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha256Template--">com.google.crypto.tink.prf.HmacPrfKeyManager.hmacSha256Template()</a>
-<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA256_PRF")</code></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256Template--">com.google.crypto.tink.mac.HmacKeyManager.hmacSha256Template()</a>
+<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA256_256BITTAG")</code></span></div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha256Template--">com.google.crypto.tink.mac.HmacKeyManager.hmacSha256Template()</a>
-<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA256_256BITTAG")</code></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha256Template--">com.google.crypto.tink.prf.HmacPrfKeyManager.hmacSha256Template()</a>
+<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA256_PRF")</code></span></div>
 </td>
 </tr>
 <tr class="altColor">
@@ -579,23 +591,13 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha512Template--">com.google.crypto.tink.prf.HmacPrfKeyManager.hmacSha512Template()</a>
-<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA512_PRF")</code></span></div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#hmacSha512Template--">com.google.crypto.tink.mac.HmacKeyManager.hmacSha512Template()</a>
 <div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA512_512BITTAG")</code></span></div>
 </td>
 </tr>
-<tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#init--">com.google.crypto.tink.daead.DeterministicAeadConfig.init()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
-</td>
-</tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#init--">com.google.crypto.tink.config.TinkConfig.init()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/config/TinkConfig.html#register--"><code>TinkConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/prf/HmacPrfKeyManager.html#hmacSha512Template--">com.google.crypto.tink.prf.HmacPrfKeyManager.hmacSha512Template()</a>
+<div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("HMAC_SHA512_PRF")</code></span></div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -604,13 +606,23 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#init--">com.google.crypto.tink.hybrid.HybridConfig.init()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/hybrid/HybridConfig.html#register--"><code>HybridConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/config/TinkConfig.html#init--">com.google.crypto.tink.config.TinkConfig.init()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/config/TinkConfig.html#register--"><code>TinkConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#init--">com.google.crypto.tink.aead.AeadConfig.init()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#init--">com.google.crypto.tink.streamingaead.StreamingAeadConfig.init()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>StreamingAeadConfig.register()</code></a></span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#init--">com.google.crypto.tink.daead.DeterministicAeadConfig.init()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/daead/DeterministicAeadConfig.html#register--"><code>DeterministicAeadConfig.register()</code></a></span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/hybrid/HybridConfig.html#init--">com.google.crypto.tink.hybrid.HybridConfig.init()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/hybrid/HybridConfig.html#register--"><code>HybridConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="altColor">
@@ -619,8 +631,8 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#init--">com.google.crypto.tink.streamingaead.StreamingAeadConfig.init()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#init--">com.google.crypto.tink.aead.AeadConfig.init()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="altColor">
@@ -739,13 +751,13 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#registerStandardKeyTypes--">com.google.crypto.tink.aead.AeadConfig.registerStandardKeyTypes()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/mac/MacConfig.html#registerStandardKeyTypes--">com.google.crypto.tink.mac.MacConfig.registerStandardKeyTypes()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/mac/MacConfig.html#register--"><code>MacConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="com/google/crypto/tink/mac/MacConfig.html#registerStandardKeyTypes--">com.google.crypto.tink.mac.MacConfig.registerStandardKeyTypes()</a>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/mac/MacConfig.html#register--"><code>MacConfig.register()</code></a></span></div>
+<td class="colOne"><a href="com/google/crypto/tink/aead/AeadConfig.html#registerStandardKeyTypes--">com.google.crypto.tink.aead.AeadConfig.registerStandardKeyTypes()</a>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/aead/AeadConfig.html#register--"><code>AeadConfig.register()</code></a></span></div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -776,11 +788,46 @@
 </td>
 </tr>
 <tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/EcdsaSignatureEncoding.html#valueOf-int-">com.google.crypto.tink.proto.EcdsaSignatureEncoding.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/EcdsaSignatureEncoding.html#forNumber-int-"><code>EcdsaSignatureEncoding.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/HashType.html#valueOf-int-">com.google.crypto.tink.proto.HashType.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/HashType.html#forNumber-int-"><code>HashType.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/EllipticCurveType.html#valueOf-int-">com.google.crypto.tink.proto.EllipticCurveType.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/EllipticCurveType.html#forNumber-int-"><code>EllipticCurveType.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/EcPointFormat.html#valueOf-int-">com.google.crypto.tink.proto.EcPointFormat.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/EcPointFormat.html#forNumber-int-"><code>EcPointFormat.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/OutputPrefixType.html#valueOf-int-">com.google.crypto.tink.proto.OutputPrefixType.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/OutputPrefixType.html#forNumber-int-"><code>OutputPrefixType.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyStatusType.html#valueOf-int-">com.google.crypto.tink.proto.KeyStatusType.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/KeyStatusType.html#forNumber-int-"><code>KeyStatusType.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html#valueOf-int-">com.google.crypto.tink.proto.KeyData.KeyMaterialType.valueOf(int)</a>
+<div class="block"><span class="deprecationComment">Use <a href="com/google/crypto/tink/proto/KeyData.KeyMaterialType.html#forNumber-int-"><code>KeyData.KeyMaterialType.forNumber(int)</code></a> instead.</span></div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><a href="com/google/crypto/tink/JsonKeysetReader.html#withJsonObject-java.lang.Object-">com.google.crypto.tink.JsonKeysetReader.withJsonObject(Object)</a>
 <div class="block"><span class="deprecationComment">Use <code>#withString</code></span></div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="com/google/crypto/tink/aead/XChaCha20Poly1305KeyManager.html#xChaCha20Poly1305Template--">com.google.crypto.tink.aead.XChaCha20Poly1305KeyManager.xChaCha20Poly1305Template()</a>
 <div class="block"><span class="deprecationComment">use <code>KeyTemplates.get("XCHACHA20_POLY1305")</code></span></div>
 </td>

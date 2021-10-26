@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">com.google.crypto.tink.KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</li>
+<li><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">com.google.crypto.tink.KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</li>
 <li>
 <ul class="inheritance">
 <li>com.google.crypto.tink.prf.HmacPrfKeyManager</li>
@@ -114,7 +114,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">HmacPrfKeyManager</span>
-extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</pre>
+extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</pre>
 <div class="block">This key manager generates new <code>HmacPrfKey</code> keys and produces new instances of <code>PrfHmacJce</code>.</div>
 </li>
 </ul>
@@ -201,19 +201,19 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 </td>
 </tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;com.google.crypto.tink.proto.HmacPrfKeyFormat,com.google.crypto.tink.proto.HmacPrfKey&gt;</code></td>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKeyFormat.html" title="class in com.google.crypto.tink.proto">HmacPrfKeyFormat</a>,<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#keyFactory--">keyFactory</a></span>()</code>
 <div class="block">Returns the <a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink"><code>KeyTypeManager.KeyFactory</code></a> for this key type.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
-<td class="colFirst"><code>com.google.crypto.tink.proto.KeyData.KeyMaterialType</code></td>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto">KeyData.KeyMaterialType</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#keyMaterialType--">keyMaterialType</a></span>()</code>
-<div class="block">Returns the <code>KeyData.KeyMaterialType</code> for this proto.</div>
+<div class="block">Returns the <a href="../../../../../com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto"><code>KeyData.KeyMaterialType</code></a> for this proto.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>com.google.crypto.tink.proto.HmacPrfKey</code></td>
+<td class="colFirst"><code><a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#parseKey-com.google.protobuf.ByteString-">parseKey</a></span>(com.google.protobuf.ByteString&nbsp;byteString)</code>
 <div class="block">Parses a serialized key proto.</div>
 </td>
@@ -224,7 +224,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacPrfKey-">validateKey</a></span>(com.google.crypto.tink.proto.HmacPrfKey&nbsp;key)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/prf/HmacPrfKeyManager.html#validateKey-com.google.crypto.tink.proto.HmacPrfKey-">validateKey</a></span>(<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&nbsp;key)</code>
 <div class="block">Checks if the given <code>keyProto</code> is a valid key.</div>
 </td>
 </tr>
@@ -285,7 +285,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <div class="block">Returns the type URL that identifies the key type of keys managed by this KeyManager.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#getKeyType--">getKeyType</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#getKeyType--">getKeyType</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -300,7 +300,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <div class="block">Returns the version number of this KeyManager.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#getVersion--">getVersion</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#getVersion--">getVersion</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -310,12 +310,12 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>keyMaterialType</h4>
-<pre>public&nbsp;com.google.crypto.tink.proto.KeyData.KeyMaterialType&nbsp;keyMaterialType()</pre>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto">KeyData.KeyMaterialType</a>&nbsp;keyMaterialType()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyMaterialType--">KeyTypeManager</a></code></span></div>
-<div class="block">Returns the <code>KeyData.KeyMaterialType</code> for this proto.</div>
+<div class="block">Returns the <a href="../../../../../com/google/crypto/tink/proto/KeyData.KeyMaterialType.html" title="enum in com.google.crypto.tink.proto"><code>KeyData.KeyMaterialType</code></a> for this proto.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyMaterialType--">keyMaterialType</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyMaterialType--">keyMaterialType</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -325,13 +325,13 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>validateKey</h4>
-<pre>public&nbsp;void&nbsp;validateKey(com.google.crypto.tink.proto.HmacPrfKey&nbsp;key)
+<pre>public&nbsp;void&nbsp;validateKey(<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&nbsp;key)
                  throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#validateKey-KeyProtoT-">KeyTypeManager</a></code></span></div>
 <div class="block">Checks if the given <code>keyProto</code> is a valid key.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#validateKey-KeyProtoT-">validateKey</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#validateKey-KeyProtoT-">validateKey</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if the passed <code>keyProto</code> is not valid in any way.</dd>
 </dl>
@@ -343,15 +343,15 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>parseKey</h4>
-<pre>public&nbsp;com.google.crypto.tink.proto.HmacPrfKey&nbsp;parseKey(com.google.protobuf.ByteString&nbsp;byteString)
-                                                 throws com.google.protobuf.InvalidProtocolBufferException</pre>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&nbsp;parseKey(com.google.protobuf.ByteString&nbsp;byteString)
+                    throws com.google.protobuf.InvalidProtocolBufferException</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#parseKey-com.google.protobuf.ByteString-">KeyTypeManager</a></code></span></div>
 <div class="block">Parses a serialized key proto.
 
  <p>Implement as <code>return KeyProtoT.parseFrom(byteString);</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#parseKey-com.google.protobuf.ByteString-">parseKey</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#parseKey-com.google.protobuf.ByteString-">parseKey</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>com.google.protobuf.InvalidProtocolBufferException</code></dd>
 </dl>
@@ -363,7 +363,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <ul class="blockList">
 <li class="blockList">
 <h4>keyFactory</h4>
-<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;com.google.crypto.tink.proto.HmacPrfKeyFormat,com.google.crypto.tink.proto.HmacPrfKey&gt;&nbsp;keyFactory()</pre>
+<pre>public&nbsp;<a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink">KeyTypeManager.KeyFactory</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKeyFormat.html" title="class in com.google.crypto.tink.proto">HmacPrfKeyFormat</a>,<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;&nbsp;keyFactory()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyFactory--">KeyTypeManager</a></code></span></div>
 <div class="block">Returns the <a href="../../../../../com/google/crypto/tink/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink"><code>KeyTypeManager.KeyFactory</code></a> for this key type.
 
@@ -371,7 +371,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
  not support creating primitives, no implementation is required.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyFactory--">keyFactory</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#keyFactory--">keyFactory</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -400,7 +400,7 @@ extends <a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" titl
 <div class="block">Returns the FIPS compatibility of this KeyTypeManager.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#fipsStatus--">fipsStatus</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;com.google.crypto.tink.proto.HmacPrfKey&gt;</code></dd>
+<dd><code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html#fipsStatus--">fipsStatus</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../../com/google/crypto/tink/proto/HmacPrfKey.html" title="class in com.google.crypto.tink.proto">HmacPrfKey</a>&gt;</code></dd>
 </dl>
 </li>
 </ul>

@@ -172,9 +172,9 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static com.google.crypto.tink.proto.KeyData</code></td>
+<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a></code></td>
 <td class="colLast"><span class="typeNameLabel">Registry.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/Registry.html#newKeyData-com.google.crypto.tink.KeyTemplate-">newKeyData</a></span>(<a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;keyTemplate)</code>
-<div class="block">Convenience method for generating a new <code>KeyData</code> for the specified <code>template</code>.</div>
+<div class="block">Convenience method for generating a new <a href="../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto"><code>KeyData</code></a> for the specified <code>template</code>.</div>
 </td>
 </tr>
 </tbody>
@@ -266,14 +266,14 @@
 <tr class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KmsAeadKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/KmsAeadKeyManager.html#createKeyTemplate-java.lang.String-">createKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;kekUri)</code>
-<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <code>KmsAeadKey</code> whose key encrypting key (KEK) is pointing to <code>kekUri</code>.</div>
+<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <a href="../../../../../com/google/crypto/tink/proto/KmsAeadKey.html" title="class in com.google.crypto.tink.proto"><code>KmsAeadKey</code></a> whose key encrypting key (KEK) is pointing to <code>kekUri</code>.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KmsEnvelopeAeadKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManager.html#createKeyTemplate-java.lang.String-com.google.crypto.tink.KeyTemplate-">createKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;kekUri,
                  <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;dekTemplate)</code>
-<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <code>KmsEnvelopeAeadKey</code> whose key encrypting key (KEK) is pointing to
+<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <a href="../../../../../com/google/crypto/tink/proto/KmsEnvelopeAeadKey.html" title="class in com.google.crypto.tink.proto"><code>KmsEnvelopeAeadKey</code></a> whose key encrypting key (KEK) is pointing to
  <code>kekUri</code> and DEK template is <code>dekTemplate</code>.</div>
 </td>
 </tr>
@@ -362,7 +362,7 @@
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
 <td class="colLast"><span class="typeNameLabel">KmsEnvelopeAeadKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/aead/KmsEnvelopeAeadKeyManager.html#createKeyTemplate-java.lang.String-com.google.crypto.tink.KeyTemplate-">createKeyTemplate</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;kekUri,
                  <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a>&nbsp;dekTemplate)</code>
-<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <code>KmsEnvelopeAeadKey</code> whose key encrypting key (KEK) is pointing to
+<div class="block">Returns a new <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> that can generate a <a href="../../../../../com/google/crypto/tink/proto/KmsEnvelopeAeadKey.html" title="class in com.google.crypto.tink.proto"><code>KmsEnvelopeAeadKey</code></a> whose key encrypting key (KEK) is pointing to
  <code>kekUri</code> and DEK template is <code>dekTemplate</code>.</div>
 </td>
 </tr>
@@ -566,9 +566,9 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">EcdsaSignKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/EcdsaSignKeyManager.html#createKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createKeyTemplate</a></span>(com.google.crypto.tink.proto.HashType&nbsp;hashType,
-                 com.google.crypto.tink.proto.EllipticCurveType&nbsp;curve,
-                 com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding,
+<td class="colLast"><span class="typeNameLabel">EcdsaSignKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/EcdsaSignKeyManager.html#createKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createKeyTemplate</a></span>(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
+                 <a href="../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
+                 <a href="../../../../../com/google/crypto/tink/proto/EcdsaSignatureEncoding.html" title="enum in com.google.crypto.tink.proto">EcdsaSignatureEncoding</a>&nbsp;encoding,
                  <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;prefixType)</code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
