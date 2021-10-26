@@ -110,7 +110,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public final class <span class="typeNameLabel">KeysetHandle</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
-<div class="block">A KeysetHandle provides abstracted access to <code>Keyset</code>, to limit the exposure of actual
+<div class="block">A KeysetHandle provides abstracted access to <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a>, to limit the exposure of actual
  protocol buffers that hold sensitive key material.
 
  <p>This class allows reading and writing encrypted keysets. Users that want to read or write can
@@ -140,13 +140,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#assertEnoughEncryptedKeyMaterial-com.google.crypto.tink.proto.EncryptedKeyset-">assertEnoughEncryptedKeyMaterial</a></span>(com.google.crypto.tink.proto.EncryptedKeyset&nbsp;keyset)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#assertEnoughEncryptedKeyMaterial-com.google.crypto.tink.proto.EncryptedKeyset-">assertEnoughEncryptedKeyMaterial</a></span>(<a href="../../../../com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset</a>&nbsp;keyset)</code>
 <div class="block">Validates that an encrypted keyset contains enough key material to build a keyset on.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#assertEnoughKeyMaterial-com.google.crypto.tink.proto.Keyset-">assertEnoughKeyMaterial</a></span>(com.google.crypto.tink.proto.Keyset&nbsp;keyset)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#assertEnoughKeyMaterial-com.google.crypto.tink.proto.Keyset-">assertEnoughKeyMaterial</a></span>(<a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a>&nbsp;keyset)</code>
 <div class="block">Validates that a keyset handle contains enough key material to build a keyset on.</div>
 </td>
 </tr>
@@ -162,7 +162,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.proto.KeyTemplate-">generateNew</a></span>(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#generateNew-com.google.crypto.tink.proto.KeyTemplate-">generateNew</a></span>(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
      Please use the generateNew method that takes a <a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
@@ -183,7 +183,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i6" class="altColor">
-<td class="colFirst"><code>com.google.crypto.tink.proto.KeysetInfo</code></td>
+<td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto">KeysetInfo</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#getKeysetInfo--">getKeysetInfo</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
@@ -239,7 +239,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/KeysetHandle.html#toString--">toString</a></span>()</code>
-<div class="block">Extracts and returns the string representation of the <code>KeysetInfo</code> of the managed keyset.</div>
+<div class="block">Extracts and returns the string representation of the <a href="../../../../com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto"><code>KeysetInfo</code></a> of the managed keyset.</div>
 </td>
 </tr>
 <tr id="i15" class="rowColor">
@@ -302,10 +302,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>getKeysetInfo</h4>
-<pre>public&nbsp;com.google.crypto.tink.proto.KeysetInfo&nbsp;getKeysetInfo()</pre>
+<pre>public&nbsp;<a href="../../../../com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto">KeysetInfo</a>&nbsp;getKeysetInfo()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the <code>KeysetInfo</code> that doesn't contain actual key
+<dd>the <a href="../../../../com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto"><code>KeysetInfo</code></a> that doesn't contain actual key
      material.</dd>
 </dl>
 </li>
@@ -317,7 +317,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>generateNew</h4>
 <pre><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Deprecated.html?is-external=true" title="class or interface in java.lang">@Deprecated</a>
-public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;generateNew(com.google.crypto.tink.proto.KeyTemplate&nbsp;keyTemplate)
+public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink">KeysetHandle</a>&nbsp;generateNew(<a href="../../../../com/google/crypto/tink/proto/KeyTemplate.html" title="class in com.google.crypto.tink.proto">KeyTemplate</a>&nbsp;keyTemplate)
                                                   throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;<span class="deprecationComment">This method takes a KeyTemplate proto, which is an internal implementation detail.
      Please use the generateNew method that takes a <a href="../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink"><code>KeyTemplate</code></a> POJO.</span></div>
@@ -430,7 +430,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
  load cleartext keysets can use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink"><code>CleartextKeysetHandle</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>serialized</code> that is a serialized <code>Keyset</code></dd>
+<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>serialized</code> that is a serialized <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/io/IOException.html?is-external=true" title="class or interface in java.io">IOException</a></code></dd>
@@ -452,7 +452,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
  load cleartext keysets can use <a href="../../../../com/google/crypto/tink/CleartextKeysetHandle.html" title="class in com.google.crypto.tink"><code>CleartextKeysetHandle</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>serialized</code> that is a serialized <code>Keyset</code></dd>
+<dd>a new <a href="../../../../com/google/crypto/tink/KeysetHandle.html" title="class in com.google.crypto.tink"><code>KeysetHandle</code></a> from <code>serialized</code> that is a serialized <a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto"><code>Keyset</code></a></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -540,7 +540,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <li class="blockList">
 <h4>toString</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;toString()</pre>
-<div class="block">Extracts and returns the string representation of the <code>KeysetInfo</code> of the managed keyset.</div>
+<div class="block">Extracts and returns the string representation of the <a href="../../../../com/google/crypto/tink/proto/KeysetInfo.html" title="class in com.google.crypto.tink.proto"><code>KeysetInfo</code></a> of the managed keyset.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></dd>
@@ -553,7 +553,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <ul class="blockList">
 <li class="blockList">
 <h4>assertEnoughKeyMaterial</h4>
-<pre>public static&nbsp;void&nbsp;assertEnoughKeyMaterial(com.google.crypto.tink.proto.Keyset&nbsp;keyset)
+<pre>public static&nbsp;void&nbsp;assertEnoughKeyMaterial(<a href="../../../../com/google/crypto/tink/proto/Keyset.html" title="class in com.google.crypto.tink.proto">Keyset</a>&nbsp;keyset)
                                     throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Validates that a keyset handle contains enough key material to build a keyset on.</div>
 <dl>
@@ -568,7 +568,7 @@ public static final&nbsp;<a href="../../../../com/google/crypto/tink/KeysetHandl
 <ul class="blockList">
 <li class="blockList">
 <h4>assertEnoughEncryptedKeyMaterial</h4>
-<pre>public static&nbsp;void&nbsp;assertEnoughEncryptedKeyMaterial(com.google.crypto.tink.proto.EncryptedKeyset&nbsp;keyset)
+<pre>public static&nbsp;void&nbsp;assertEnoughEncryptedKeyMaterial(<a href="../../../../com/google/crypto/tink/proto/EncryptedKeyset.html" title="class in com.google.crypto.tink.proto">EncryptedKeyset</a>&nbsp;keyset)
                                              throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Validates that an encrypted keyset contains enough key material to build a keyset on.</div>
 <dl>

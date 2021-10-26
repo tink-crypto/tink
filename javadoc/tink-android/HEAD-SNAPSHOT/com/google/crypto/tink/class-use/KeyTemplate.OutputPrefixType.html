@@ -186,9 +186,9 @@ the order they are declared.</div>
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/KeyTemplate.html" title="class in com.google.crypto.tink">KeyTemplate</a></code></td>
-<td class="colLast"><span class="typeNameLabel">EcdsaSignKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/EcdsaSignKeyManager.html#createKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createKeyTemplate</a></span>(com.google.crypto.tink.proto.HashType&nbsp;hashType,
-                 com.google.crypto.tink.proto.EllipticCurveType&nbsp;curve,
-                 com.google.crypto.tink.proto.EcdsaSignatureEncoding&nbsp;encoding,
+<td class="colLast"><span class="typeNameLabel">EcdsaSignKeyManager.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/signature/EcdsaSignKeyManager.html#createKeyTemplate-com.google.crypto.tink.proto.HashType-com.google.crypto.tink.proto.EllipticCurveType-com.google.crypto.tink.proto.EcdsaSignatureEncoding-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createKeyTemplate</a></span>(<a href="../../../../../com/google/crypto/tink/proto/HashType.html" title="enum in com.google.crypto.tink.proto">HashType</a>&nbsp;hashType,
+                 <a href="../../../../../com/google/crypto/tink/proto/EllipticCurveType.html" title="enum in com.google.crypto.tink.proto">EllipticCurveType</a>&nbsp;curve,
+                 <a href="../../../../../com/google/crypto/tink/proto/EcdsaSignatureEncoding.html" title="enum in com.google.crypto.tink.proto">EcdsaSignatureEncoding</a>&nbsp;encoding,
                  <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;prefixType)</code>&nbsp;</td>
 </tr>
 </tbody>
@@ -207,7 +207,7 @@ the order they are declared.</div>
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html" title="class in com.google.crypto.tink.tinkkey">KeyHandle</a></code></td>
-<td class="colLast"><span class="typeNameLabel">KeyHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createFromKey</a></span>(com.google.crypto.tink.proto.KeyData&nbsp;keyData,
+<td class="colLast"><span class="typeNameLabel">KeyHandle.</span><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/KeyHandle.html#createFromKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">createFromKey</a></span>(<a href="../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;keyData,
              <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;opt)</code>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;
 <div class="block"><span class="deprecationComment">Use the KeyHandle(TinkKey, KeyAccess) constructor instead.</span></div>
@@ -241,7 +241,7 @@ the order they are declared.</div>
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/internal/ProtoKey.html#ProtoKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">ProtoKey</a></span>(com.google.crypto.tink.proto.KeyData&nbsp;keyData,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/tinkkey/internal/ProtoKey.html#ProtoKey-com.google.crypto.tink.proto.KeyData-com.google.crypto.tink.KeyTemplate.OutputPrefixType-">ProtoKey</a></span>(<a href="../../../../../com/google/crypto/tink/proto/KeyData.html" title="class in com.google.crypto.tink.proto">KeyData</a>&nbsp;keyData,
         <a href="../../../../../com/google/crypto/tink/KeyTemplate.OutputPrefixType.html" title="enum in com.google.crypto.tink">KeyTemplate.OutputPrefixType</a>&nbsp;opt)</code>
 <div class="block">Constructs a ProtoKey with <code>hasSecret()</code> returning true if the input <code>KeyData</code> has
  key material of type UNKNOWN_KEYMATERIAL, SYMMETRIC, or ASYMMETRIC_PRIVATE.</div>
