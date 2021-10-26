@@ -40,7 +40,7 @@ class ZeroCopyAead {
  public:
   // Returns the maximum buffer size needed for encryption. The actual
   // size of the written cypertext may be smaller.
-  virtual int64_t MaxEncryptionSize(int64_t plaintext_size) const = 0;
+  virtual uint64_t MaxEncryptionSize(int64_t plaintext_size) const = 0;
 
   // Encrypts 'plaintext' with 'associated_data' as associated data,
   // and returns the size of the ciphertext that is written in 'buffer'.
@@ -54,7 +54,7 @@ class ZeroCopyAead {
 
   // Returns the maximum buffer size needed for decryption. The actual
   // size of the written plaintext may be smaller.
-  virtual int64_t MaxDecryptionSize(int64_t ciphertext_size) const = 0;
+  virtual uint64_t MaxDecryptionSize(int64_t ciphertext_size) const = 0;
 
   // Decrypts 'ciphertext' with 'associated_data' as associated data,
   // and returns the size of the plaintext that is written in 'buffer'.

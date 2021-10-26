@@ -39,6 +39,23 @@ tink_cc_library(
     absl::strings
 )
 
+tink_cc_library(
+  NAME zero_copy_aes_gcm_boringssl
+  SRCS
+    zero_copy_aes_gcm_boringssl.cc
+    zero_copy_aes_gcm_boringssl.h
+  DEPS
+    absl::core_headers
+    absl::memory
+    crypto
+    tink::aead::internal::zero_copy_aead
+    tink::subtle::random
+    tink::subtle::subtle_util
+    tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
 
 tink_cc_test(
   NAME aead_util_test

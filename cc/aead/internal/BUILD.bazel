@@ -43,6 +43,25 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "zero_copy_aes_gcm_boringssl",
+    srcs = ["zero_copy_aes_gcm_boringssl.cc"],
+    hdrs = ["zero_copy_aes_gcm_boringssl.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        ":zero_copy_aead",
+        "//subtle:random",
+        "//subtle:subtle_util",
+        "//subtle:subtle_util_boringssl",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
 cc_test(
     name = "cord_aes_gcm_boringssl_test",
     size = "small",
@@ -75,8 +94,22 @@ cc_test(
     deps = [
         ":aead_util",
         "//util:test_matchers",
-        "@com_google_googletest//:gtest_main",
         "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
+cc_test(
+    name = "zero_copy_aes_gcm_boringssl_test",
+    size = "small",
+    srcs = ["zero_copy_aes_gcm_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":zero_copy_aes_gcm_boringssl",
+        "//subtle:aes_gcm_boringssl",
+        "//util:test_matchers",
+        "//util:test_util",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
