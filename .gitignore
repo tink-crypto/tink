@@ -13,4 +13,4 @@ tulsigen-*
 **/local.properties
 **/build/**
 .externalNativeBuild
-
+node_modules
