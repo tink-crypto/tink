@@ -3,20 +3,17 @@ tink_module(subtle)
 add_subdirectory(prf)
 add_subdirectory(mac)
 
-set(TINK_SUBTLE_PUBLIC_APIS
-  common_enums.h
-  aes_gcm_boringssl.h
-  aes_siv_boringssl.h
-  encrypt_then_authenticate.h
-  hmac_boringssl.h
-  hkdf.h
-  ind_cpa_cipher.h
-  random.h
-)
-
 tink_cc_library(
   NAME subtle
-  SRCS ${TINK_SUBTLE_PUBLIC_APIS}
+  SRCS
+    common_enums.h
+    aes_gcm_boringssl.h
+    aes_siv_boringssl.h
+    encrypt_then_authenticate.h
+    hmac_boringssl.h
+    hkdf.h
+    ind_cpa_cipher.h
+    random.h
   DEPS
     tink::internal::ssl_unique_ptr
     tink::subtle::aes_gcm_boringssl
@@ -48,7 +45,8 @@ add_library(tink::subtle ALIAS tink_subtle_subtle)
 
 tink_cc_library(
   NAME ind_cpa_cipher
-  SRCS ind_cpa_cipher.h
+  SRCS
+    ind_cpa_cipher.h
   DEPS
     tink::util::statusor
     absl::strings
@@ -208,16 +206,16 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    absl::strings
+    crypto
+    tink::core::public_key_sign
+    tink::internal::bn_util
     tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::internal::util
-    tink::core::public_key_sign
     tink::util::errors
-    tink::util::status
     tink::util::statusor
-    crypto
-    absl::strings
 )
 
 tink_cc_library(
@@ -306,16 +304,15 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    absl::memory
+    absl::strings
+    crypto
+    tink::core::public_key_sign
+    tink::internal::bn_util
     tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::util
-    tink::core::public_key_sign
-    tink::util::errors
-    tink::util::status
     tink::util::statusor
-    crypto
-    absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -577,7 +574,8 @@ tink_cc_library(
   SRCS
     common_enums.cc
     common_enums.h
-  DEPS absl::strings
+  DEPS
+    absl::strings
 )
 
 tink_cc_library(
@@ -628,14 +626,18 @@ tink_cc_library(
 
 tink_cc_library(
   NAME stream_segment_decrypter
-  SRCS stream_segment_decrypter.h
-  DEPS tink::util::status
+  SRCS
+    stream_segment_decrypter.h
+  DEPS
+    tink::util::status
 )
 
 tink_cc_library(
   NAME stream_segment_encrypter
-  SRCS stream_segment_encrypter.h
-  DEPS tink::util::status
+  SRCS
+    stream_segment_encrypter.h
+  DEPS
+    tink::util::status
 )
 
 tink_cc_library(
@@ -814,10 +816,13 @@ tink_cc_library(
     pem_parser_boringssl.cc
     pem_parser_boringssl.h
   DEPS
+    tink::subtle::common_enums
+    tink::subtle::subtle_util_boringssl
     absl::memory
     absl::strings
     crypto
-    tink::subtle::subtle_util_boringssl
+    tink::internal::ssl_unique_ptr
+    tink::internal::bn_util
     tink::util::status
     tink::util::statusor
 )
@@ -826,7 +831,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME ecies_hkdf_recipient_kem_boringssl_test
-  SRCS ecies_hkdf_recipient_kem_boringssl_test.cc
+  SRCS
+    ecies_hkdf_recipient_kem_boringssl_test.cc
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
@@ -840,7 +846,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ecies_hkdf_sender_kem_boringssl_test
-  SRCS ecies_hkdf_sender_kem_boringssl_test.cc
+  SRCS
+    ecies_hkdf_sender_kem_boringssl_test.cc
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
@@ -856,7 +863,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ec_util_test
-  SRCS ec_util_test.cc
+  SRCS
+    ec_util_test.cc
   DEPS
     tink::subtle::ec_util
     tink::util::status
@@ -866,7 +874,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME hkdf_test
-  SRCS hkdf_test.cc
+  SRCS
+    hkdf_test.cc
   DEPS
     tink::subtle::common_enums
     tink::subtle::hkdf
@@ -878,7 +887,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_cmac_boringssl_test
-  SRCS aes_cmac_boringssl_test.cc
+  SRCS
+    aes_cmac_boringssl_test.cc
   DEPS
     tink::config::tink_fips
     tink::core::mac
@@ -893,7 +903,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME hmac_boringssl_test
-  SRCS hmac_boringssl_test.cc
+  SRCS
+    hmac_boringssl_test.cc
   DEPS
     tink::subtle::common_enums
     tink::subtle::hmac_boringssl
@@ -908,8 +919,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_gcm_boringssl_test
-  SRCS aes_gcm_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    aes_gcm_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::config::tink_fips
     tink::core::aead
@@ -926,7 +939,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_gcm_hkdf_stream_segment_decrypter_test
-  SRCS aes_gcm_hkdf_stream_segment_decrypter_test.cc
+  SRCS
+    aes_gcm_hkdf_stream_segment_decrypter_test.cc
   DEPS
     tink::subtle::aes_gcm_hkdf_stream_segment_decrypter
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
@@ -944,7 +958,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_gcm_hkdf_stream_segment_encrypter_test
-  SRCS aes_gcm_hkdf_stream_segment_encrypter_test.cc
+  SRCS
+    aes_gcm_hkdf_stream_segment_encrypter_test.cc
   DEPS
     gmock
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
@@ -959,7 +974,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_gcm_hkdf_streaming_test
-  SRCS aes_gcm_hkdf_streaming_test.cc
+  SRCS
+    aes_gcm_hkdf_streaming_test.cc
   DEPS
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::common_enums
@@ -979,7 +995,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_ctr_hmac_streaming_test
-  SRCS aes_ctr_hmac_streaming_test.cc
+  SRCS
+    aes_ctr_hmac_streaming_test.cc
   DEPS
     tink::subtle::aes_ctr_hmac_streaming
     tink::subtle::common_enums
@@ -999,8 +1016,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_eax_boringssl_test
-  SRCS aes_eax_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    aes_eax_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::aes_eax_boringssl
     tink::subtle::common_enums
@@ -1018,7 +1037,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME encrypt_then_authenticate_test
-  SRCS encrypt_then_authenticate_test.cc
+  SRCS
+    encrypt_then_authenticate_test.cc
   DEPS
     tink::subtle::aes_ctr_boringssl
     tink::subtle::common_enums
@@ -1036,7 +1056,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_ctr_boringssl_test
-  SRCS aes_ctr_boringssl_test.cc
+  SRCS
+    aes_ctr_boringssl_test.cc
   DEPS
     tink::subtle::aes_ctr_boringssl
     tink::subtle::random
@@ -1050,8 +1071,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_siv_boringssl_test
-  SRCS aes_siv_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    aes_siv_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::aes_siv_boringssl
     tink::subtle::common_enums
@@ -1069,7 +1092,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ecdsa_sign_boringssl_test
-  SRCS ecdsa_sign_boringssl_test.cc
+  SRCS
+    ecdsa_sign_boringssl_test.cc
   DEPS
     tink::subtle::common_enums
     tink::subtle::ec_util
@@ -1086,8 +1110,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ecdsa_verify_boringssl_test
-  SRCS ecdsa_verify_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    ecdsa_verify_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::common_enums
     tink::subtle::ecdsa_sign_boringssl
@@ -1106,7 +1132,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ed25519_sign_boringssl_test
-  SRCS ed25519_sign_boringssl_test.cc
+  SRCS
+    ed25519_sign_boringssl_test.cc
   DEPS
     tink::subtle::ed25519_sign_boringssl
     tink::subtle::ed25519_verify_boringssl
@@ -1126,8 +1153,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME ed25519_verify_boringssl_test
-  SRCS ed25519_verify_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    ed25519_verify_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::ed25519_sign_boringssl
     tink::subtle::ed25519_verify_boringssl
@@ -1147,8 +1176,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME rsa_ssa_pss_verify_boringssl_test
-  SRCS rsa_ssa_pss_verify_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    rsa_ssa_pss_verify_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::config::tink_fips
     tink::core::public_key_sign
@@ -1169,7 +1200,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME rsa_ssa_pss_sign_boringssl_test
-  SRCS rsa_ssa_pss_sign_boringssl_test.cc
+  SRCS
+    rsa_ssa_pss_sign_boringssl_test.cc
   DEPS
     tink::config::tink_fips
     tink::internal::ssl_unique_ptr
@@ -1183,8 +1215,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME rsa_ssa_pkcs1_verify_boringssl_test
-  SRCS rsa_ssa_pkcs1_verify_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    rsa_ssa_pkcs1_verify_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::core::public_key_sign
     tink::core::public_key_verify
@@ -1205,7 +1239,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME rsa_ssa_pkcs1_sign_boringssl_test
-  SRCS rsa_ssa_pkcs1_sign_boringssl_test.cc
+  SRCS
+    rsa_ssa_pkcs1_sign_boringssl_test.cc
   DEPS
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
@@ -1219,8 +1254,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aes_gcm_siv_boringssl_test
-  SRCS aes_gcm_siv_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    aes_gcm_siv_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::aes_gcm_siv_boringssl
     tink::subtle::common_enums
@@ -1239,7 +1276,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME random_test
-  SRCS random_test.cc
+  SRCS
+    random_test.cc
   DEPS
     tink::subtle::random
     tink::util::secret_data
@@ -1249,13 +1287,16 @@ tink_cc_test(
 
 tink_cc_test(
   NAME common_enums_test
-  SRCS common_enums_test.cc
-  DEPS tink::subtle::common_enums
+  SRCS
+    common_enums_test.cc
+  DEPS
+    tink::subtle::common_enums
 )
 
 tink_cc_test(
   NAME subtle_util_test
-  SRCS subtle_util_test.cc
+  SRCS
+    subtle_util_test.cc
   DEPS
     tink::subtle::subtle_util
     gmock
@@ -1263,8 +1304,10 @@ tink_cc_test(
 
 tink_cc_test(
   NAME subtle_util_boringssl_test
-  SRCS subtle_util_boringssl_test.cc
-  DATA wycheproof::testvectors
+  SRCS
+    subtle_util_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::common_enums
     tink::subtle::ec_util
@@ -1286,7 +1329,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME xchacha20_poly1305_boringssl_test
-  SRCS xchacha20_poly1305_boringssl_test.cc
+  SRCS
+    xchacha20_poly1305_boringssl_test.cc
   DEPS
     tink::subtle::xchacha20_poly1305_boringssl
     tink::config::tink_fips
@@ -1302,7 +1346,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME streaming_aead_decrypting_stream_test
-  SRCS streaming_aead_decrypting_stream_test.cc
+  SRCS
+    streaming_aead_decrypting_stream_test.cc
   DEPS
     tink::subtle::random
     tink::subtle::stream_segment_decrypter
@@ -1318,7 +1363,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME streaming_aead_encrypting_stream_test
-  SRCS streaming_aead_encrypting_stream_test.cc
+  SRCS
+    streaming_aead_encrypting_stream_test.cc
   DEPS
     tink::subtle::random
     tink::subtle::stream_segment_encrypter
@@ -1334,7 +1380,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME aead_test_util_test
-  SRCS aead_test_util_test.cc
+  SRCS
+    aead_test_util_test.cc
   DEPS
     tink::subtle::aead_test_util
     tink::util::test_matchers
@@ -1343,10 +1390,10 @@ tink_cc_test(
     gmock
 )
 
-
 tink_cc_test(
   NAME streaming_aead_test_util_test
-  SRCS streaming_aead_test_util_test.cc
+  SRCS
+    streaming_aead_test_util_test.cc
   DEPS
     tink::subtle::streaming_aead_test_util
     tink::subtle::test_util
@@ -1362,7 +1409,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME hybrid_test_util_test
-  SRCS hybrid_test_util_test.cc
+  SRCS
+    hybrid_test_util_test.cc
   DEPS
     tink::subtle::hybrid_test_util
     tink::util::test_matchers
@@ -1373,7 +1421,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME decrypting_random_access_stream_test
-  SRCS decrypting_random_access_stream_test.cc
+  SRCS
+    decrypting_random_access_stream_test.cc
   DEPS
     absl::memory
     absl::strings
@@ -1392,7 +1441,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME streaming_mac_impl_test
-  SRCS streaming_mac_impl_test.cc
+  SRCS
+    streaming_mac_impl_test.cc
   DEPS
     tink::subtle::streaming_mac_impl
     tink::subtle::random
@@ -1405,7 +1455,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME stateful_hmac_boringssl_test
-  SRCS stateful_hmac_boringssl_test.cc
+  SRCS
+    stateful_hmac_boringssl_test.cc
   DEPS
     absl::memory
     tink::subtle::common_enums
@@ -1421,7 +1472,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME stateful_cmac_boringssl_test
-  SRCS stateful_cmac_boringssl_test.cc
+  SRCS
+    stateful_cmac_boringssl_test.cc
   DEPS
     absl::memory
     tink::subtle::common_enums
@@ -1437,17 +1489,20 @@ tink_cc_test(
 
 tink_cc_test(
   NAME pem_parser_boringssl_test
-  SRCS pem_parser_boringssl_test.cc
+  SRCS
+    pem_parser_boringssl_test.cc
   DEPS
-    tink::internal::err_util
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
-    tink::internal::ssl_unique_ptr
+    gmock
+    absl::strings
+    crypto
+    tink::internal::bn_util
+    tink::internal::err_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    tink::util::test_util
     tink::util::test_matchers
-    absl::strings
-    crypto
+    tink::util::test_util
 )
+

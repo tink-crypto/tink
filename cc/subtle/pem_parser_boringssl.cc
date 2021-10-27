@@ -27,6 +27,7 @@
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -202,13 +203,17 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   }
 
   // We are only interested in e and n.
-  auto n_str_statusor = SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn));
-  auto e_str_statusor = SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn));
-  if (!n_str_statusor.ok()) return n_str_statusor.status();
-  if (!e_str_statusor.ok()) return e_str_statusor.status();
+  auto n_str = internal::BignumToString(n_bn, BN_num_bytes(n_bn));
+  auto e_str = internal::BignumToString(e_bn, BN_num_bytes(e_bn));
+  if (!n_str.ok()) {
+    return n_str.status();
+  }
+  if (!e_str.ok()) {
+    return e_str.status();
+  }
   auto rsa_public_key = absl::make_unique<SubtleUtilBoringSSL::RsaPublicKey>();
-  rsa_public_key->e = std::move(e_str_statusor.ValueOrDie());
-  rsa_public_key->n = std::move(n_str_statusor.ValueOrDie());
+  rsa_public_key->e = *std::move(e_str);
+  rsa_public_key->n = *std::move(n_str);
 
   return rsa_public_key;
 }
@@ -244,44 +249,54 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Save exponents.
   auto rsa_private_key =
       absl::make_unique<SubtleUtilBoringSSL::RsaPrivateKey>();
-  auto n_str = SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn));
-  auto e_str = SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn));
-  auto d_str =
-      SubtleUtilBoringSSL::BignumToSecretData(d_bn, BN_num_bytes(d_bn));
-  if (!n_str.ok()) return n_str.status();
-  if (!e_str.ok()) return e_str.status();
-  if (!d_str.ok()) return d_str.status();
-  rsa_private_key->n = std::move(n_str.ValueOrDie());
-  rsa_private_key->e = std::move(e_str.ValueOrDie());
-  rsa_private_key->d = std::move(d_str.ValueOrDie());
+  auto n_str = internal::BignumToString(n_bn, BN_num_bytes(n_bn));
+  auto e_str = internal::BignumToString(e_bn, BN_num_bytes(e_bn));
+  auto d_str = internal::BignumToSecretData(d_bn, BN_num_bytes(d_bn));
+  if (!n_str.ok()) {
+    return n_str.status();
+  }
+  if (!e_str.ok()) {
+    return e_str.status();
+  }
+  if (!d_str.ok()) {
+    return d_str.status();
+  }
+  rsa_private_key->n = *std::move(n_str);
+  rsa_private_key->e = *std::move(e_str);
+  rsa_private_key->d = *std::move(d_str);
 
   // Save factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(bssl_rsa_key, &p_bn, &q_bn);
-  auto p_str =
-      SubtleUtilBoringSSL::BignumToSecretData(p_bn, BN_num_bytes(p_bn));
-  auto q_str =
-      SubtleUtilBoringSSL::BignumToSecretData(q_bn, BN_num_bytes(q_bn));
-  if (!p_str.ok()) return p_str.status();
-  if (!q_str.ok()) return q_str.status();
-  rsa_private_key->p = std::move(p_str.ValueOrDie());
-  rsa_private_key->q = std::move(q_str.ValueOrDie());
+  auto p_str = internal::BignumToSecretData(p_bn, BN_num_bytes(p_bn));
+  auto q_str = internal::BignumToSecretData(q_bn, BN_num_bytes(q_bn));
+  if (!p_str.ok()) {
+    return p_str.status();
+  }
+  if (!q_str.ok()) {
+    return q_str.status();
+  }
+  rsa_private_key->p = *std::move(p_str);
+  rsa_private_key->q = *std::move(q_str);
 
   // Save CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(bssl_rsa_key, &dp_bn, &dq_bn, &crt_bn);
-  auto dp_str =
-      SubtleUtilBoringSSL::BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
-  auto dq_str =
-      SubtleUtilBoringSSL::BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
-  auto crt_str =
-      SubtleUtilBoringSSL::BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
-  if (!dp_str.ok()) return dp_str.status();
-  if (!dq_str.ok()) return dq_str.status();
-  if (!crt_str.ok()) return crt_str.status();
-  rsa_private_key->dp = std::move(dp_str.ValueOrDie());
-  rsa_private_key->dq = std::move(dq_str.ValueOrDie());
-  rsa_private_key->crt = std::move(crt_str.ValueOrDie());
+  auto dp_str = internal::BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
+  auto dq_str = internal::BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
+  auto crt_str = internal::BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
+  if (!dp_str.ok()) {
+    return dp_str.status();
+  }
+  if (!dq_str.ok()) {
+    return dq_str.status();
+  }
+  if (!crt_str.ok()) {
+    return crt_str.status();
+  }
+  rsa_private_key->dp = *std::move(dp_str);
+  rsa_private_key->dq = *std::move(dq_str);
+  rsa_private_key->crt = *std::move(crt_str);
 
   return rsa_private_key;
 }

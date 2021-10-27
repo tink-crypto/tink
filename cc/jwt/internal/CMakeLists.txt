@@ -40,7 +40,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME json_util_test
-  SRCS json_util_test.cc
+  SRCS
+    json_util_test.cc
   DEPS
     tink::jwt::internal::json_util
     tink::util::test_matchers
@@ -66,7 +67,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_format_test
-  SRCS jwt_format_test.cc
+  SRCS
+    jwt_format_test.cc
   DEPS
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
@@ -77,7 +79,8 @@ tink_cc_test(
 
 tink_cc_test(
   NAME raw_jwt_hmac_key_manager_test
-  SRCS raw_jwt_hmac_key_manager_test.cc
+  SRCS
+    raw_jwt_hmac_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_hmac_key_manager
     tink::core::key_manager_impl
@@ -114,7 +117,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_mac_impl_test
-  SRCS jwt_mac_impl_test.cc
+  SRCS
+    jwt_mac_impl_test.cc
   DEPS
     tink::jwt::internal::jwt_format
     tink::jwt::internal::jwt_mac_impl
@@ -165,7 +169,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_hmac_key_manager_test
-  SRCS jwt_hmac_key_manager_test.cc
+  SRCS
+    jwt_hmac_key_manager_test.cc
   DEPS
     tink::jwt::internal::jwt_hmac_key_manager
     tink::core::key_manager_impl
@@ -198,7 +203,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_mac_wrapper_test
-  SRCS jwt_mac_wrapper_test.cc
+  SRCS
+    jwt_mac_wrapper_test.cc
   DEPS
     tink::jwt::internal::jwt_hmac_key_manager
     tink::jwt::internal::jwt_mac_wrapper
@@ -239,7 +245,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME raw_jwt_ecdsa_sign_key_manager_test
-  SRCS raw_jwt_ecdsa_sign_key_manager_test.cc
+  SRCS
+    raw_jwt_ecdsa_sign_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
     tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
@@ -280,7 +287,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME raw_jwt_ecdsa_verify_key_manager_test
-  SRCS raw_jwt_ecdsa_verify_key_manager_test.cc
+  SRCS
+    raw_jwt_ecdsa_verify_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_ecdsa_sign_key_manager
     tink::jwt::internal::raw_jwt_ecdsa_verify_key_manager
@@ -304,41 +312,45 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
-    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
+    absl::memory
+    absl::strings
+    tink::core::private_key_type_manager
+    tink::core::public_key_sign
+    tink::core::public_key_verify
+    tink::internal::bn_util
     tink::signature::sig_util
+    tink::subtle::rsa_ssa_pkcs1_sign_boringssl
+    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::subtle::rsa_ssa_pkcs1_sign_boringssl
-    tink::subtle::subtle_util_boringssl
-    tink::core::public_key_sign
-    tink::core::private_key_type_manager
-    absl::memory
-    absl::strings
+    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
 )
 
 tink_cc_test(
   NAME raw_jwt_rsa_ssa_pkcs1_sign_key_manager_test
-  SRCS raw_jwt_rsa_ssa_pkcs1_sign_key_manager_test.cc
+  SRCS
+    raw_jwt_rsa_ssa_pkcs1_sign_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
+    gmock
+    absl::flat_hash_set
+    crypto
     tink::core::public_key_sign
-    tink::core::public_key_verify
+    tink::internal::bn_util
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
-    tink::subtle::subtle_util_boringssl
-    tink::util::enums
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
-    crypto
-    gmock
-    absl::flat_hash_set
+    tink::proto::rsa_ssa_pkcs1_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -347,12 +359,13 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pkcs1_verify_key_manager.cc
     raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h
   DEPS
+    absl::memory
+    absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
+    tink::internal::bn_util
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
-    tink::proto::common_cc_proto
-    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -360,13 +373,14 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    absl::memory
-    absl::strings
+    tink::proto::common_cc_proto
+    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
 )
 
 tink_cc_test(
   NAME raw_jwt_rsa_ssa_pkcs1_verify_key_manager_test
-  SRCS raw_jwt_rsa_ssa_pkcs1_verify_key_manager_test.cc
+  SRCS
+    raw_jwt_rsa_ssa_pkcs1_verify_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
@@ -392,8 +406,14 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pss_sign_key_manager.h
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
-    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
+    absl::memory
+    absl::strings
+    tink::core::private_key_type_manager
+    tink::core::public_key_sign
+    tink::internal::bn_util
     tink::signature::sig_util
+    tink::subtle::rsa_ssa_pss_sign_boringssl
+    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -402,34 +422,27 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    tink::subtle::rsa_ssa_pss_sign_boringssl
-    tink::subtle::subtle_util_boringssl
-    tink::core::public_key_sign
-    tink::core::key_type_manager
-    tink::core::private_key_type_manager
     tink::proto::jwt_rsa_ssa_pss_cc_proto
     tink::proto::tink_cc_proto
-    absl::memory
-    absl::strings
 )
 
 tink_cc_test(
   NAME raw_jwt_rsa_ssa_pss_sign_key_manager_test
-  SRCS raw_jwt_rsa_ssa_pss_sign_key_manager_test.cc
+  SRCS
+    raw_jwt_rsa_ssa_pss_sign_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
-    tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
+    gmock
+    absl::flat_hash_set
+    crypto
     tink::core::public_key_sign
+    tink::internal::bn_util
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::jwt_rsa_ssa_pss_cc_proto
-    crypto
-    gmock
-    absl::flat_hash_set
 )
 
 tink_cc_library(
@@ -438,14 +451,13 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pss_verify_key_manager.cc
     raw_jwt_rsa_ssa_pss_verify_key_manager.h
   DEPS
+    absl::memory
+    absl::strings
     tink::core::key_type_manager
-    tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::bn_util
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
-    tink::proto::common_cc_proto
-    tink::proto::jwt_rsa_ssa_pss_cc_proto
-    tink::proto::tink_cc_proto
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -453,29 +465,30 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
-    absl::memory
-    absl::strings
+    tink::proto::common_cc_proto
+    tink::proto::jwt_rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME raw_jwt_rsa_ssa_pss_verify_key_manager_test
-  SRCS raw_jwt_rsa_ssa_pss_verify_key_manager_test.cc
+  SRCS
+    raw_jwt_rsa_ssa_pss_verify_key_manager_test.cc
   DEPS
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
-    tink::core::public_key_sign
+    gmock
+    absl::strings
+    crypto
     tink::core::public_key_verify
+    tink::internal::bn_util
     tink::subtle::rsa_ssa_pss_sign_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
     tink::proto::jwt_rsa_ssa_pss_cc_proto
-    crypto
-    gmock
-    absl::flat_hash_set
 )
 
 tink_cc_library(
@@ -513,7 +526,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_public_key_sign_verify_impl_test
-  SRCS jwt_public_key_sign_verify_impl_test.cc
+  SRCS
+    jwt_public_key_sign_verify_impl_test.cc
   DEPS
     tink::jwt::internal::jwt_format
     tink::jwt::internal::jwt_public_key_sign_impl
@@ -566,7 +580,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_ecdsa_sign_verify_key_manager_test
-  SRCS jwt_ecdsa_sign_verify_key_manager_test.cc
+  SRCS
+    jwt_ecdsa_sign_verify_key_manager_test.cc
   DEPS
     tink::jwt::internal::jwt_ecdsa_sign_key_manager
     tink::jwt::internal::jwt_ecdsa_verify_key_manager
@@ -608,7 +623,8 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_public_key_wrappers_test
-  SRCS jwt_public_key_wrappers_test.cc
+  SRCS
+    jwt_public_key_wrappers_test.cc
   DEPS
     tink::jwt::internal::jwt_ecdsa_sign_key_manager
     tink::jwt::internal::jwt_ecdsa_verify_key_manager
@@ -661,16 +677,20 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_rsa_ssa_pkcs1_sign_verify_key_manager_test
-  SRCS jwt_rsa_ssa_pkcs1_sign_verify_key_manager_test.cc
+  SRCS
+    jwt_rsa_ssa_pkcs1_sign_verify_key_manager_test.cc
   DEPS
+    tink::jwt::internal::json_util
+    tink::jwt::internal::jwt_format
     tink::jwt::internal::jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::jwt_rsa_ssa_pkcs1_verify_key_manager
-    tink::subtle::subtle_util_boringssl
+    gmock
+    absl::strings
+    crypto
+    tink::internal::bn_util
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    crypto
-    gmock
 )
 
 tink_cc_library(
@@ -709,16 +729,20 @@ tink_cc_library(
 
 tink_cc_test(
   NAME jwt_rsa_ssa_pss_sign_verify_key_manager_test
-  SRCS jwt_rsa_ssa_pss_sign_verify_key_manager_test.cc
+  SRCS
+    jwt_rsa_ssa_pss_sign_verify_key_manager_test.cc
   DEPS
+    tink::jwt::internal::json_util
+    tink::jwt::internal::jwt_format
     tink::jwt::internal::jwt_rsa_ssa_pss_sign_key_manager
     tink::jwt::internal::jwt_rsa_ssa_pss_verify_key_manager
-    tink::subtle::subtle_util_boringssl
+    gmock
+    absl::strings
+    crypto
+    tink::internal::bn_util
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    crypto
-    gmock
 )
 
 tink_cc_library(
@@ -756,3 +780,4 @@ tink_cc_library(
     tink::util::statusor
     absl::strings
 )
+

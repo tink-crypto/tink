@@ -673,21 +673,16 @@ TEST(SubtleUtilBoringSSLTest, ValidateRsaPublicExponent) {
 
   for (const BN_ULONG test : *public_exponent_fail_tests) {
     BN_set_word(e_bn.get(), test);
-    auto e_str =
-        SubtleUtilBoringSSL::bn2str(e_bn.get(), BN_num_bytes(e_bn.get()));
-    EXPECT_TRUE(e_str.ok());
-    ASSERT_THAT(
-        SubtleUtilBoringSSL::ValidateRsaPublicExponent(e_str.ValueOrDie()),
-        Not(IsOk()));
+    auto e_str = internal::BignumToString(e_bn.get(), BN_num_bytes(e_bn.get()));
+    ASSERT_THAT(e_str.status(), IsOk());
+    EXPECT_THAT(SubtleUtilBoringSSL::ValidateRsaPublicExponent(*e_str),
+                Not(IsOk()));
   }
 
   BN_set_word(e_bn.get(), RSA_F4);
-  auto e_str =
-      SubtleUtilBoringSSL::bn2str(e_bn.get(), BN_num_bytes(e_bn.get()));
-  EXPECT_TRUE(e_str.ok());
-  ASSERT_THAT(
-      SubtleUtilBoringSSL::ValidateRsaPublicExponent(e_str.ValueOrDie()),
-      IsOk());
+  auto e_str = internal::BignumToString(e_bn.get(), BN_num_bytes(e_bn.get()));
+  ASSERT_THAT(e_str.status(), IsOk());
+  EXPECT_THAT(SubtleUtilBoringSSL::ValidateRsaPublicExponent(*e_str), IsOk());
 }
 
 TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {

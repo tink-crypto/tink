@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
@@ -45,8 +46,8 @@ using ::google::crypto::tink::RsaSsaPssKeyFormat;
 using ::google::crypto::tink::RsaSsaPssPrivateKey;
 using ::google::crypto::tink::RsaSsaPssPublicKey;
 using ::testing::Eq;
-using ::testing::Not;
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 TEST(RsaSsaPssVerifyKeyManagerTest, Basics) {
   EXPECT_THAT(RsaSsaPssVerifyKeyManager().get_version(), Eq(0));
@@ -74,8 +75,7 @@ RsaSsaPssKeyFormat CreateKeyFormat(HashType sig_hash, HashType mgf1_hash,
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
 
   return key_format;
 }
@@ -238,4 +238,3 @@ TEST(RsaSsaPssVerifyKeyManagerTest, TestVector) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-

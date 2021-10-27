@@ -18,6 +18,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/bn_util.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -62,7 +63,7 @@ Status RsaSsaPssVerifyKeyManager::ValidateKey(
     const RsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
+  auto status_or_n = internal::StringToBignum(key.n());
   if (!status_or_n.ok()) return status_or_n.status();
   auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
       BN_num_bits(status_or_n.ValueOrDie().get()));

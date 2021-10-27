@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/bn_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
@@ -79,8 +80,7 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
 
 StatusOr<RsaSsaPkcs1PrivateKey> RsaSsaPkcs1SignKeyManager::CreateKey(
     const RsaSsaPkcs1KeyFormat& rsa_ssa_pkcs1_key_format) const {
-  auto e = subtle::SubtleUtilBoringSSL::str2bn(
-      rsa_ssa_pkcs1_key_format.public_exponent());
+  auto e = internal::StringToBignum(rsa_ssa_pkcs1_key_format.public_exponent());
   if (!e.ok()) return e.status();
 
   subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key;

@@ -20,7 +20,7 @@
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/bn_util.h"
 #include "tink/util/constants.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
@@ -83,8 +83,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -107,8 +106,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPssKeyTemplate(HashType sig_hash,
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }

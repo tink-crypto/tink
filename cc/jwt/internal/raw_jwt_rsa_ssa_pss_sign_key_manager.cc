@@ -21,6 +21,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/bn_util.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/sig_util.h"
@@ -86,14 +87,13 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
 StatusOr<JwtRsaSsaPssPrivateKey> RawJwtRsaSsaPssSignKeyManager::CreateKey(
     const JwtRsaSsaPssKeyFormat& key_format) const {
   util::StatusOr<bssl::UniquePtr<BIGNUM>> e =
-      subtle::SubtleUtilBoringSSL::str2bn(key_format.public_exponent());
+      internal::StringToBignum(key_format.public_exponent());
   if (!e.ok()) return e.status();
 
   subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key;
   subtle::SubtleUtilBoringSSL::RsaPublicKey public_key;
   util::Status status = subtle::SubtleUtilBoringSSL::GetNewRsaKeyPair(
-      key_format.modulus_size_in_bits(), e->get(),
-      &private_key, &public_key);
+      key_format.modulus_size_in_bits(), e->get(), &private_key, &public_key);
   if (!status.ok()) return status;
 
   JwtRsaSsaPssPrivateKey key_proto =

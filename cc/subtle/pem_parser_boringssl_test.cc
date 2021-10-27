@@ -30,6 +30,7 @@
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -44,6 +45,7 @@ namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
 // Test vectors for ECDSA were generated using the `openssl` command.
@@ -363,6 +365,14 @@ class PemParserRsaTest : public ::testing::Test {
               prv_key_pem_bio->num_write);
   }
 
+  // Utility function that sets expectations to test that `bn_str` equals `bn`.
+  void ExpectBnEqual(absl::string_view bn_str, const BIGNUM *bn) {
+    util::StatusOr<std::string> expected_bn_str =
+        internal::BignumToString(bn, BN_num_bytes(bn));
+    ASSERT_THAT(expected_bn_str.status(), IsOk());
+    EXPECT_EQ(bn_str, *expected_bn_str);
+  }
+
  protected:
   // PEM encoded 2048 bit RSA key pair.
   std::vector<char> pem_rsa_pub_key_;
@@ -391,13 +401,11 @@ TEST_F(PemParserRsaTest, ReadRsaPublicKey) {
   ASSERT_TRUE(key_statusor.ok()) << internal::GetSslErrors();
 
   // Verify exponent and modulus are correctly set.
-  auto key = std::move(key_statusor.ValueOrDie());
+  auto key = *std::move(key_statusor);
   const BIGNUM *e_bn, *n_bn;
   RSA_get0_key(rsa_.get(), &n_bn, &e_bn, nullptr);
-  EXPECT_EQ(key->e,
-            SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn)).ValueOrDie());
-  EXPECT_EQ(key->n,
-            SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn)).ValueOrDie());
+  ExpectBnEqual(key->e, e_bn);
+  ExpectBnEqual(key->n, n_bn);
 }
 
 // Test we can correctly parse an RSA private key.
@@ -410,31 +418,23 @@ TEST_F(PemParserRsaTest, ReadRsaPrivatekey) {
   auto key = std::move(key_statusor.ValueOrDie());
   const BIGNUM *e_bn, *n_bn, *d_bn;
   RSA_get0_key(rsa_.get(), &n_bn, &e_bn, &d_bn);
-  EXPECT_EQ(key->e,
-            SubtleUtilBoringSSL::bn2str(e_bn, BN_num_bytes(e_bn)).ValueOrDie());
-  EXPECT_EQ(key->n,
-            SubtleUtilBoringSSL::bn2str(n_bn, BN_num_bytes(n_bn)).ValueOrDie());
-  EXPECT_EQ(util::SecretDataAsStringView(key->d),
-            SubtleUtilBoringSSL::bn2str(d_bn, BN_num_bytes(d_bn)).ValueOrDie());
+  ExpectBnEqual(key->e, e_bn);
+  ExpectBnEqual(key->n, n_bn);
+
+  ExpectBnEqual(util::SecretDataAsStringView(key->d), d_bn);
   // Verify private key factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(rsa_.get(), &p_bn, &q_bn);
-  EXPECT_EQ(util::SecretDataAsStringView(key->p),
-            SubtleUtilBoringSSL::bn2str(p_bn, BN_num_bytes(p_bn)).ValueOrDie());
-  EXPECT_EQ(util::SecretDataAsStringView(key->q),
-            SubtleUtilBoringSSL::bn2str(q_bn, BN_num_bytes(q_bn)).ValueOrDie());
+
+  ExpectBnEqual(util::SecretDataAsStringView(key->p), p_bn);
+  ExpectBnEqual(util::SecretDataAsStringView(key->q), q_bn);
   // Verify CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(rsa_.get(), &dp_bn, &dq_bn, &crt_bn);
-  EXPECT_EQ(
-      util::SecretDataAsStringView(key->dp),
-      SubtleUtilBoringSSL::bn2str(dp_bn, BN_num_bytes(dp_bn)).ValueOrDie());
-  EXPECT_EQ(
-      util::SecretDataAsStringView(key->dq),
-      SubtleUtilBoringSSL::bn2str(dq_bn, BN_num_bytes(dq_bn)).ValueOrDie());
-  EXPECT_EQ(
-      util::SecretDataAsStringView(key->crt),
-      SubtleUtilBoringSSL::bn2str(crt_bn, BN_num_bytes(crt_bn)).ValueOrDie());
+
+  ExpectBnEqual(util::SecretDataAsStringView(key->dp), dp_bn);
+  ExpectBnEqual(util::SecretDataAsStringView(key->dq), dq_bn);
+  ExpectBnEqual(util::SecretDataAsStringView(key->crt), crt_bn);
 }
 
 TEST_F(PemParserRsaTest, WriteRsaPrivateKey) {

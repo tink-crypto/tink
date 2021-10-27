@@ -16,18 +16,19 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/test_util.h"
 #include "tink/util/test_matchers.h"
+#include "tink/util/test_util.h"
 #include "proto/rsa_ssa_pkcs1.pb.h"
 #include "proto/tink.pb.h"
 
@@ -35,7 +36,6 @@ namespace crypto {
 namespace tink {
 namespace {
 
-using ::crypto::tink::subtle::SubtleUtilBoringSSL;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::HashType;
@@ -66,8 +66,7 @@ RsaSsaPkcs1KeyFormat CreateKeyFormat(HashType hash_type,
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
   return key_format;
 }
 
@@ -128,38 +127,47 @@ void CheckNewKey(const RsaSsaPkcs1PrivateKey& private_key,
   EXPECT_EQ(public_key.params().SerializeAsString(),
             key_format.params().SerializeAsString());
   EXPECT_EQ(key_format.public_exponent(), public_key.e());
-  auto n = std::move(SubtleUtilBoringSSL::str2bn(public_key.n()).ValueOrDie());
-  auto d = std::move(SubtleUtilBoringSSL::str2bn(private_key.d()).ValueOrDie());
-  auto p = std::move(SubtleUtilBoringSSL::str2bn(private_key.p()).ValueOrDie());
-  auto q = std::move(SubtleUtilBoringSSL::str2bn(private_key.q()).ValueOrDie());
-  auto dp =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.dp()).ValueOrDie());
-  auto dq =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.dq()).ValueOrDie());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(public_key.n());
+  ASSERT_THAT(n.status(), IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> d =
+      internal::StringToBignum(private_key.d());
+  ASSERT_THAT(d.status(), IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> p =
+      internal::StringToBignum(private_key.p());
+  ASSERT_THAT(p.status(), IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> q =
+      internal::StringToBignum(private_key.q());
+  ASSERT_THAT(q.status(), IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dp =
+      internal::StringToBignum(private_key.dp());
+  ASSERT_THAT(dp.status(), IsOk());
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dq =
+      internal::StringToBignum(private_key.dq());
+  ASSERT_THAT(dq.status(), IsOk());
   bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
   auto n_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mul(n_calc.get(), p.get(), q.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(n_calc.get(), n.get()));
+  EXPECT_TRUE(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()));
+  EXPECT_TRUE(BN_equal_consttime(n_calc.get(), n->get()));
 
   // Check n size >= modulus_size_in_bits bit.
-  EXPECT_GE(BN_num_bits(n.get()), key_format.modulus_size_in_bits());
+  EXPECT_GE(BN_num_bits(n->get()), key_format.modulus_size_in_bits());
 
   // dp = d mod (p - 1)
-  auto pm1 = bssl::UniquePtr<BIGNUM>(BN_dup(p.get()));
+  auto pm1 = bssl::UniquePtr<BIGNUM>(BN_dup(p->get()));
   EXPECT_TRUE(BN_sub_word(pm1.get(), 1));
   auto dp_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mod(dp_calc.get(), d.get(), pm1.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(dp_calc.get(), dp.get()));
+  EXPECT_TRUE(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()));
+  EXPECT_TRUE(BN_equal_consttime(dp_calc.get(), dp->get()));
 
   // dq = d mod (q - 1)
-  auto qm1 = bssl::UniquePtr<BIGNUM>(BN_dup(q.get()));
+  auto qm1 = bssl::UniquePtr<BIGNUM>(BN_dup(q->get()));
   EXPECT_TRUE(BN_sub_word(qm1.get(), 1));
   auto dq_calc = bssl::UniquePtr<BIGNUM>(BN_new());
-  EXPECT_TRUE(BN_mod(dq_calc.get(), d.get(), qm1.get(), ctx.get()));
-
-  EXPECT_TRUE(BN_equal_consttime(dq_calc.get(), dq.get()));
+  EXPECT_TRUE(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()));
+  EXPECT_TRUE(BN_equal_consttime(dq_calc.get(), dq->get()));
 }
 
 TEST(RsaSsaPkcs1SignKeyManagerTest, CreateKey) {
@@ -255,4 +263,3 @@ TEST(EcdsaSignKeyManagerTest, Create) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-

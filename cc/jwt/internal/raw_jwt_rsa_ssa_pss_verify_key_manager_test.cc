@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_sign_key_manager.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
@@ -39,14 +40,14 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::StatusOr;
-using ::google::crypto::tink::KeyData;
+using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
 using ::google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPssPrivateKey;
 using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
-using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
+using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
-using ::testing::Not;
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, Basics) {
   EXPECT_THAT(RawJwtRsaSsaPssVerifyKeyManager().get_version(), Eq(0));
@@ -64,8 +65,8 @@ TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, ValidateEmptyKey) {
 }
 
 JwtRsaSsaPssKeyFormat CreateKeyFormat(JwtRsaSsaPssAlgorithm algorithm,
-                                   int modulus_size_in_bits,
-                                   int public_exponent) {
+                                      int modulus_size_in_bits,
+                                      int public_exponent) {
   JwtRsaSsaPssKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
@@ -73,8 +74,7 @@ JwtRsaSsaPssKeyFormat CreateKeyFormat(JwtRsaSsaPssAlgorithm algorithm,
   bssl::UniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
 
   return key_format;
 }
@@ -85,9 +85,7 @@ JwtRsaSsaPssPublicKey CreateValidPublicKey() {
           .CreateKey(
               CreateKeyFormat(JwtRsaSsaPssAlgorithm::PS256, 3072, RSA_F4))
           .ValueOrDie();
-  return RawJwtRsaSsaPssSignKeyManager()
-      .GetPublicKey(private_key)
-      .ValueOrDie();
+  return RawJwtRsaSsaPssSignKeyManager().GetPublicKey(private_key).ValueOrDie();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -209,4 +207,3 @@ TEST(RawJwtRsaSsaPssVerifyKeyManagerTest, TestVector) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-

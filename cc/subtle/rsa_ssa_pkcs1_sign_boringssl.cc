@@ -23,6 +23,7 @@
 #include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -48,7 +49,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
   if (!sig_hash.ok()) return sig_hash.status();
 
   // Check RSA's modulus.
-  auto status_or_n = SubtleUtilBoringSSL::str2bn(private_key.n);
+  auto status_or_n = internal::StringToBignum(private_key.n);
   if (!status_or_n.ok()) return status_or_n.status();
   auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
       BN_num_bits(status_or_n.ValueOrDie().get()));

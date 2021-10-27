@@ -23,6 +23,7 @@
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -52,19 +53,21 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
   internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
       reinterpret_cast<const uint8_t*>(der.data()), der.size()));
-  if (ecdsa.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+  if (ecdsa == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
                         "Internal BoringSSL ECDSA_SIG_from_bytes's error");
   }
-  auto status_or_r = SubtleUtilBoringSSL::bn2str(ecdsa->r, field_size_in_bytes);
-  if (!status_or_r.ok()) {
-    return status_or_r.status();
+  util::StatusOr<std::string> r =
+      internal::BignumToString(ecdsa->r, field_size_in_bytes);
+  if (!r.ok()) {
+    return r.status();
   }
-  auto status_or_s = SubtleUtilBoringSSL::bn2str(ecdsa->s, field_size_in_bytes);
-  if (!status_or_s.ok()) {
-    return status_or_s.status();
+  util::StatusOr<std::string> s =
+      internal::BignumToString(ecdsa->s, field_size_in_bytes);
+  if (!s.ok()) {
+    return s.status();
   }
-  return status_or_r.ValueOrDie() + status_or_s.ValueOrDie();
+  return absl::StrCat(*r, *s);
 }
 
 }  // namespace
