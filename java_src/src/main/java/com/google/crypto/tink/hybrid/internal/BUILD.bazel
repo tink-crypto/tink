@@ -51,6 +51,37 @@ java_library(
 )
 
 java_library(
+    name = "hpke_decrypt",
+    srcs = ["HpkeDecrypt.java"],
+    deps = [
+        ":hpke_aead",
+        ":hpke_context",
+        ":hpke_kdf",
+        ":hpke_kem",
+        ":hpke_primitive_factory",
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
+    name = "hpke_encrypt",
+    srcs = ["HpkeEncrypt.java"],
+    deps = [
+        ":hpke_aead",
+        ":hpke_context",
+        ":hpke_kdf",
+        ":hpke_kem",
+        ":hpke_primitive_factory",
+        "//proto:hpke_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
     name = "hpke_kdf",
     srcs = ["HpkeKdf.java"],
     deps = [
