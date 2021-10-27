@@ -21,6 +21,7 @@
 #include "absl/memory/memory.h"
 #include "openssl/evp.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
@@ -54,7 +55,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
   // the size is 0.
   plaintext = internal::EnsureStringNonNull(plaintext);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");
@@ -93,7 +94,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
     return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
   }
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");

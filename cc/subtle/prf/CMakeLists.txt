@@ -29,6 +29,7 @@ tink_cc_library(
     crypto
     tink::config::tink_fips
     tink::core::input_stream
+    tink::internal::ssl_unique_ptr
     tink::subtle::subtle
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl

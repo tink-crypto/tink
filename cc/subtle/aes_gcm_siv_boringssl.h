@@ -24,6 +24,7 @@
 #include "openssl/aead.h"
 #include "tink/aead.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -68,10 +69,10 @@ class AesGcmSivBoringSsl : public Aead {
   static constexpr int kIvSizeInBytes = 12;
   static constexpr int kTagSizeInBytes = 16;
 
-  explicit AesGcmSivBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
+  explicit AesGcmSivBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> ctx)
       : ctx_(std::move(ctx)) {}
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle

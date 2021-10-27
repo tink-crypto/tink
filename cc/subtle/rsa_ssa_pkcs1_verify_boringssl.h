@@ -23,8 +23,9 @@
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
-#include "tink/public_key_verify.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -60,10 +61,11 @@ class RsaSsaPkcs1VerifyBoringSsl : public PublicKeyVerify {
   // https://www.keylength.com/en/4/).
   static constexpr size_t kMinModulusSizeInBits = 2048;
 
-  RsaSsaPkcs1VerifyBoringSsl(bssl::UniquePtr<RSA> rsa, const EVP_MD* sig_hash)
+  RsaSsaPkcs1VerifyBoringSsl(internal::SslUniquePtr<RSA> rsa,
+                             const EVP_MD* sig_hash)
       : rsa_(std::move(rsa)), sig_hash_(sig_hash) {}
 
-  const bssl::UniquePtr<RSA> rsa_;
+  const internal::SslUniquePtr<RSA> rsa_;
   const EVP_MD* const sig_hash_;  // Owned by BoringSSL.
 };
 

@@ -21,6 +21,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -78,7 +79,7 @@ class EciesHkdfNistPCurveRecipientKemBoringSsl
 
   EllipticCurveType curve_;
   util::SecretData priv_key_value_;
-  bssl::UniquePtr<EC_GROUP> ec_group_;
+  internal::SslUniquePtr<EC_GROUP> ec_group_;
 };
 
 // Implementation of EciesHkdfRecipientKemBoringSsl for curve25519.

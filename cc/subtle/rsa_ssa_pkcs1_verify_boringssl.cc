@@ -21,10 +21,12 @@
 #include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -48,8 +50,9 @@ RsaSsaPkcs1VerifyBoringSsl::New(
   if (!sig_hash_result.ok()) return sig_hash_result.status();
 
   // The RSA modulus and exponent are checked as part of the conversion to
-  // bssl::UniquePtr<RSA>.
-  auto rsa = SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(pub_key);
+  // internal::SslUniquePtr<RSA>.
+  util::StatusOr<internal::SslUniquePtr<RSA>> rsa =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(pub_key);
   if (!rsa.ok()) {
     return rsa.status();
   }

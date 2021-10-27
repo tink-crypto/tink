@@ -24,6 +24,7 @@
 #include "openssl/base.h"
 #include "openssl/hkdf.h"
 #include "openssl/hmac.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
@@ -151,7 +152,7 @@ class HkdfInputStream : public InputStream {
   // problems and are permanent.
   util::Status stream_status_ = util::OkStatus();
 
-  bssl::UniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
+  internal::SslUniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
 
   // Current value T(i).
   util::SecretData ti_;

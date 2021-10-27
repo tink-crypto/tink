@@ -20,6 +20,7 @@
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -86,9 +87,9 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
     return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid KEM bytes: %s",
                      status_or_ec_point.status().message());
   }
-  bssl::UniquePtr<EC_POINT> pub_key =
+  internal::SslUniquePtr<EC_POINT> pub_key =
       std::move(status_or_ec_point.ValueOrDie());
-  bssl::UniquePtr<BIGNUM> priv_key(
+  internal::SslUniquePtr<BIGNUM> priv_key(
       BN_bin2bn(priv_key_value_.data(), priv_key_value_.size(), nullptr));
   auto shared_secret_or = SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
       curve_, priv_key.get(), pub_key.get());

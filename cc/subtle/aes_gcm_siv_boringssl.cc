@@ -21,6 +21,7 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -51,7 +52,7 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
   if (aead == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
   }
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
       aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
   if (!ctx) {
     return util::Status(util::error::INTERNAL,

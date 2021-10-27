@@ -20,12 +20,13 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
-#include "openssl/base.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -48,8 +49,9 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
   if (!mgf1_hash.ok()) return mgf1_hash.status();
 
   // The RSA modulus and exponent are checked as part of the conversion to
-  // bssl::UniquePtr<RSA>.
-  auto rsa = SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
+  // internal::SslUniquePtr<RSA>.
+  util::StatusOr<internal::SslUniquePtr<RSA>> rsa =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
   if (!rsa.ok()) {
     return rsa.status();
   }
@@ -59,10 +61,9 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPssSignBoringSsl::New(
       mgf1_hash.ValueOrDie(), params.salt_length))};
 }
 
-RsaSsaPssSignBoringSsl::RsaSsaPssSignBoringSsl(bssl::UniquePtr<RSA> private_key,
-                                               const EVP_MD* sig_hash,
-                                               const EVP_MD* mgf1_hash,
-                                               int32_t salt_length)
+RsaSsaPssSignBoringSsl::RsaSsaPssSignBoringSsl(
+    internal::SslUniquePtr<RSA> private_key, const EVP_MD* sig_hash,
+    const EVP_MD* mgf1_hash, int32_t salt_length)
     : private_key_(std::move(private_key)),
       sig_hash_(sig_hash),
       mgf1_hash_(mgf1_hash),

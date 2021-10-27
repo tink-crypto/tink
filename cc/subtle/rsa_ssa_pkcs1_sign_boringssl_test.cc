@@ -15,16 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/rsa_ssa_pkcs1_sign_boringssl.h"
+
 #include <cstdint>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
-#include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/crypto.h"
 #include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/test_matchers.h"
@@ -49,7 +50,7 @@ class RsaPkcs1SignBoringsslTest : public ::testing::Test {
   }
 
  protected:
-  bssl::UniquePtr<BIGNUM> rsa_f4_;
+  internal::SslUniquePtr<BIGNUM> rsa_f4_;
   SubtleUtilBoringSSL::RsaPrivateKey private_key_;
   SubtleUtilBoringSSL::RsaPublicKey public_key_;
 };

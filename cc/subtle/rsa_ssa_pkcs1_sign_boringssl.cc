@@ -20,13 +20,14 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
-#include "openssl/base.h"
 #include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -54,8 +55,9 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
   if (!modulus_status.ok()) return modulus_status;
 
   // The RSA modulus and exponent are checked as part of the conversion to
-  // bssl::UniquePtr<RSA>.
-  auto rsa = SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
+  // internal::SslUniquePtr<RSA>.
+  util::StatusOr<internal::SslUniquePtr<RSA>> rsa =
+      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
   if (!rsa.ok()) {
     return rsa.status();
   }

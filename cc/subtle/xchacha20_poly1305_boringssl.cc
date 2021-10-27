@@ -23,6 +23,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
@@ -59,7 +60,7 @@ util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
 
 util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
                        key_.size(), kTagSize));
   if (ctx.get() == nullptr) {
@@ -116,7 +117,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
     return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
   }
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
                        key_.size(), kTagSize));
   if (ctx.get() == nullptr) {

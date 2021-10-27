@@ -21,6 +21,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -61,10 +62,10 @@ class EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  virtual
-      crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
-      HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
-      uint32_t key_size_in_bytes, EcPointFormat point_format) const = 0;
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>>
+  GenerateKey(HashType hash, absl::string_view hkdf_salt,
+              absl::string_view hkdf_info, uint32_t key_size_in_bytes,
+              EcPointFormat point_format) const = 0;
 
   virtual ~EciesHkdfSenderKemBoringSsl() = default;
 };
@@ -99,7 +100,7 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
   EllipticCurveType curve_;
   std::string pubx_;
   std::string puby_;
-  bssl::UniquePtr<EC_POINT> peer_pub_key_;
+  internal::SslUniquePtr<EC_POINT> peer_pub_key_;
 };
 
 // Implementation of EciesHkdfSenderKemBoringSsl for curve25519.

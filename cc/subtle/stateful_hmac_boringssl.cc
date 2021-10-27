@@ -17,7 +17,8 @@
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
 #include "absl/memory/memory.h"
-#include "openssl/base.h"
+#include "openssl/evp.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -44,7 +45,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
   }
 
   // Create and initialize the HMAC context
-  bssl::UniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
+  internal::SslUniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
   // Initialize the HMAC
   if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), md)) {
     return util::Status(absl::StatusCode::kFailedPrecondition,

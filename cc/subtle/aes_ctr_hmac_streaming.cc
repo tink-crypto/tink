@@ -23,11 +23,10 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
-#include "openssl/cipher.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -203,8 +202,8 @@ util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(
       NonceForSegment(nonce_prefix_, segment_number_, is_last_segment);
 
   // Encrypt.
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
-  if (ctx.get() == nullptr) {
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  if (ctx == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");
   }
@@ -332,7 +331,7 @@ util::Status AesCtrHmacStreamSegmentDecrypter::DecryptSegment(
   if (!status.ok()) return status;
 
   // Decrypt.
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_CIPHER_CTX");

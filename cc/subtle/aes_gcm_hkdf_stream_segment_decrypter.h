@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "openssl/aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/secret_data.h"
@@ -112,7 +113,7 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
   bool is_initialized_ = false;
   std::vector<uint8_t> salt_;
   std::vector<uint8_t> nonce_prefix_;
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle

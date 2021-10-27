@@ -25,13 +25,13 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "openssl/bio.h"
 #include "openssl/bn.h"
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -331,7 +331,7 @@ class PemParserRsaTest : public ::testing::Test {
     // Create a new RSA key and output to PEM.
     ASSERT_THAT(rsa_, testing::NotNull());
 
-    bssl::UniquePtr<BIGNUM> e(BN_new());
+    internal::SslUniquePtr<BIGNUM> e(BN_new());
     ASSERT_THAT(e, testing::NotNull());
     BN_set_word(e.get(), RSA_F4);
 
@@ -340,8 +340,8 @@ class PemParserRsaTest : public ::testing::Test {
         << internal::GetSslErrors();
 
     // Write keys to PEM.
-    bssl::UniquePtr<BIO> pub_key_pem_bio(BIO_new(BIO_s_mem()));
-    bssl::UniquePtr<BIO> prv_key_pem_bio(BIO_new(BIO_s_mem()));
+    internal::SslUniquePtr<BIO> pub_key_pem_bio(BIO_new(BIO_s_mem()));
+    internal::SslUniquePtr<BIO> prv_key_pem_bio(BIO_new(BIO_s_mem()));
 
     // Write in PEM format.
     EXPECT_EQ(PEM_write_bio_RSA_PUBKEY(pub_key_pem_bio.get(), rsa_.get()), 1)
@@ -369,7 +369,7 @@ class PemParserRsaTest : public ::testing::Test {
   std::vector<char> pem_rsa_prv_key_;
 
   // Holds the RSA object.
-  bssl::UniquePtr<RSA> rsa_;
+  internal::SslUniquePtr<RSA> rsa_;
 };
 
 // Corrupts `container` by modifying one the elements in the middle.

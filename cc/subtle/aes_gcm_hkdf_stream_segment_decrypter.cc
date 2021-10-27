@@ -30,6 +30,7 @@
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
@@ -147,7 +148,7 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
     return aead.status();
   }
 
-  ctx_ = bssl::UniquePtr<EVP_AEAD_CTX>(
+  ctx_ = internal::SslUniquePtr<EVP_AEAD_CTX>(
       EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
   if (!ctx_) {

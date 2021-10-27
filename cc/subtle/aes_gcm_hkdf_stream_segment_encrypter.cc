@@ -28,6 +28,7 @@
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -76,14 +77,14 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
   return util::OkStatus();
 }
 
-util::StatusOr<bssl::UniquePtr<EVP_AEAD_CTX>> CreateAeadCtx(
+util::StatusOr<internal::SslUniquePtr<EVP_AEAD_CTX>> CreateAeadCtx(
     const util::SecretData& key) {
   util::StatusOr<const EVP_AEAD*> aead =
       internal::GetAesGcmAeadForKeySize(key.size());
   if (!aead.ok()) {
     return aead.status();
   }
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(
       EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
   if (!ctx) {
@@ -112,7 +113,7 @@ int AesGcmHkdfStreamSegmentEncrypter::get_plaintext_segment_size() const {
 }
 
 AesGcmHkdfStreamSegmentEncrypter::AesGcmHkdfStreamSegmentEncrypter(
-    bssl::UniquePtr<EVP_AEAD_CTX> ctx, const Params& params)
+    internal::SslUniquePtr<EVP_AEAD_CTX> ctx, const Params& params)
     : ctx_(std::move(ctx)),
       nonce_prefix_(Random::GetRandomBytes(kNoncePrefixSizeInBytes)),
       header_(CreateHeader(params.salt, nonce_prefix_)),

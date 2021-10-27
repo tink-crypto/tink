@@ -24,6 +24,7 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -49,7 +50,7 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
                                                     const EC_KEY* key) {
   size_t field_size_in_bytes =
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
-  bssl::UniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
+  internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
       reinterpret_cast<const uint8_t*>(der.data()), der.size()));
   if (ecdsa.get() == nullptr) {
     return util::Status(util::error::INTERNAL,
@@ -87,8 +88,8 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   // Check curve.
   auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
   if (!group_result.ok()) return group_result.status();
-  bssl::UniquePtr<EC_GROUP> group(group_result.ValueOrDie());
-  bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
+  internal::SslUniquePtr<EC_GROUP> group(group_result.ValueOrDie());
+  internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
   EC_KEY_set_group(key.get(), group.get());
 
   // Check key.
@@ -96,14 +97,14 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
       SubtleUtilBoringSSL::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
   if (!ec_point_result.ok()) return ec_point_result.status();
 
-  bssl::UniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
         absl::StrCat("Invalid public key: ", internal::GetSslErrors()));
   }
 
-  bssl::UniquePtr<BIGNUM> priv_key(
+  internal::SslUniquePtr<BIGNUM> priv_key(
       BN_bin2bn(ec_key.priv.data(), ec_key.priv.size(), nullptr));
   if (!EC_KEY_set_private_key(key.get(), priv_key.get())) {
     return util::Status(
@@ -117,7 +118,7 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   return std::move(sign);
 }
 
-EcdsaSignBoringSsl::EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key,
+EcdsaSignBoringSsl::EcdsaSignBoringSsl(internal::SslUniquePtr<EC_KEY> key,
                                        const EVP_MD* hash,
                                        EcdsaSignatureEncoding encoding)
     : key_(std::move(key)), hash_(hash), encoding_(encoding) {}

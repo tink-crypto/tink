@@ -17,7 +17,8 @@
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
 #include "absl/memory/memory.h"
-#include "openssl/base.h"
+#include "openssl/evp.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/util/status.h"
 
@@ -43,7 +44,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
   }
 
   // Create and initialize the CMAC context
-  bssl::UniquePtr<CMAC_CTX> ctx(CMAC_CTX_new());
+  internal::SslUniquePtr<CMAC_CTX> ctx(CMAC_CTX_new());
 
   // Initialize the CMAC
   if (!CMAC_Init(ctx.get(), key_value.data(), key_value.size(), cipher,

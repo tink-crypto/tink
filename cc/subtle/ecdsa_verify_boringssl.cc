@@ -21,8 +21,8 @@
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
-#include "openssl/mem.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -39,15 +39,15 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   // Check curve.
   auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
   if (!group_result.ok()) return group_result.status();
-  bssl::UniquePtr<EC_GROUP> group(group_result.ValueOrDie());
-  bssl::UniquePtr<EC_KEY> key(EC_KEY_new());
+  internal::SslUniquePtr<EC_GROUP> group(group_result.ValueOrDie());
+  internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
   EC_KEY_set_group(key.get(), group.get());
 
   // Check key.
   auto ec_point_result =
       SubtleUtilBoringSSL::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
   if (!ec_point_result.ok()) return ec_point_result.status();
-  bssl::UniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
         util::error::INVALID_ARGUMENT,
@@ -58,7 +58,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
 
 // static
 util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
-    bssl::UniquePtr<EC_KEY> ec_key, HashType hash_type,
+    internal::SslUniquePtr<EC_KEY> ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
   auto status = internal::CheckFipsCompatibility<EcdsaVerifyBoringSsl>();
   if (!status.ok()) return status;

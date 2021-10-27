@@ -19,10 +19,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
-#include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/test_matchers.h"
@@ -47,7 +47,7 @@ class RsaPssSignBoringsslTest : public ::testing::Test {
   }
 
  protected:
-  bssl::UniquePtr<BIGNUM> rsa_f4_;
+  internal::SslUniquePtr<BIGNUM> rsa_f4_;
   SubtleUtilBoringSSL::RsaPrivateKey private_key_;
   SubtleUtilBoringSSL::RsaPublicKey public_key_;
 };
@@ -176,8 +176,8 @@ TEST_F(RsaPssSignBoringsslTest, TestRestrictedFipsModuli) {
   SubtleUtilBoringSSL::RsaPrivateKey private_key;
   SubtleUtilBoringSSL::RsaPublicKey public_key;
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  4096, rsa_f4_.get(), &private_key, &public_key),
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(4096, rsa_f4_.get(),
+                                                    &private_key, &public_key),
               IsOk());
 
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
@@ -194,8 +194,8 @@ TEST_F(RsaPssSignBoringsslTest, TestAllowedFipsModuli) {
   SubtleUtilBoringSSL::RsaPrivateKey private_key;
   SubtleUtilBoringSSL::RsaPublicKey public_key;
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  3072, rsa_f4_.get(), &private_key, &public_key),
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(3072, rsa_f4_.get(),
+                                                    &private_key, &public_key),
               IsOk());
 
   SubtleUtilBoringSSL::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,

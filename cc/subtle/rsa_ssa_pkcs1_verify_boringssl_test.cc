@@ -26,6 +26,7 @@
 #include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
@@ -311,13 +312,13 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestAllowedFipsModuli) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
-  bssl::UniquePtr<BIGNUM> rsa_f4(BN_new());
+  internal::SslUniquePtr<BIGNUM> rsa_f4(BN_new());
   SubtleUtilBoringSSL::RsaPrivateKey private_key;
   SubtleUtilBoringSSL::RsaPublicKey public_key;
   BN_set_u64(rsa_f4.get(), RSA_F4);
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  3072, rsa_f4.get(), &private_key, &public_key),
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(3072, rsa_f4.get(),
+                                                    &private_key, &public_key),
               IsOk());
 
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
@@ -330,22 +331,21 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestRestrictedFipsModuli) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
-  bssl::UniquePtr<BIGNUM> rsa_f4(BN_new());
+  internal::SslUniquePtr<BIGNUM> rsa_f4(BN_new());
   SubtleUtilBoringSSL::RsaPrivateKey private_key;
   SubtleUtilBoringSSL::RsaPublicKey public_key;
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
   BN_set_u64(rsa_f4.get(), RSA_F4);
 
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  2048, rsa_f4.get(), &private_key, &public_key),
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, rsa_f4.get(),
+                                                    &private_key, &public_key),
               IsOk());
 
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),
               StatusIs(util::error::INTERNAL));
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  4096, rsa_f4.get(), &private_key, &public_key),
+  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(4096, rsa_f4.get(),
+                                                    &private_key, &public_key),
               IsOk());
 
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),

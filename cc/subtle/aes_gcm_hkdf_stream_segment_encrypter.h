@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "openssl/aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -83,35 +84,26 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
       Params params);
 
   // Overridden methods of StreamSegmentEncrypter.
-  util::Status EncryptSegment(
-      const std::vector<uint8_t>& plaintext,
-      bool is_last_segment,
-      std::vector<uint8_t>* ciphertext_buffer) override;
+  util::Status EncryptSegment(const std::vector<uint8_t>& plaintext,
+                              bool is_last_segment,
+                              std::vector<uint8_t>* ciphertext_buffer) override;
 
-  const std::vector<uint8_t>& get_header() const override {
-    return header_;
-  }
-  int64_t get_segment_number() const override {
-    return segment_number_;
-  }
+  const std::vector<uint8_t>& get_header() const override { return header_; }
+  int64_t get_segment_number() const override { return segment_number_; }
   int get_plaintext_segment_size() const override;
   int get_ciphertext_segment_size() const override {
     return ciphertext_segment_size_;
   }
-  int get_ciphertext_offset() const override {
-    return ciphertext_offset_;
-  }
+  int get_ciphertext_offset() const override { return ciphertext_offset_; }
 
  protected:
-  void IncSegmentNumber() override {
-    segment_number_++;
-  }
+  void IncSegmentNumber() override { segment_number_++; }
 
  private:
-  AesGcmHkdfStreamSegmentEncrypter(bssl::UniquePtr<EVP_AEAD_CTX> ctx,
+  AesGcmHkdfStreamSegmentEncrypter(internal::SslUniquePtr<EVP_AEAD_CTX> ctx,
                                    const Params& params);
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
   const std::string nonce_prefix_;
   const std::vector<uint8_t> header_;
   const int ciphertext_segment_size_;

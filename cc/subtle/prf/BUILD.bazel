@@ -18,6 +18,7 @@ cc_library(
         ":streaming_prf",
         "//:input_stream",
         "//config:tink_fips",
+        "//internal:ssl_unique_ptr",
         "//subtle",
         "//subtle:subtle_util",
         "//subtle:subtle_util_boringssl",

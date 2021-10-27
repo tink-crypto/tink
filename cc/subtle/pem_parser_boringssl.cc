@@ -20,7 +20,6 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "openssl/bio.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
@@ -84,7 +83,7 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   if (!group_statusor.ok()) {
     return group_statusor.status();
   }
-  bssl::UniquePtr<EC_GROUP> group(group_statusor.ValueOrDie());
+  internal::SslUniquePtr<EC_GROUP> group(group_statusor.ValueOrDie());
   if (group.get() == nullptr) {
     return util::Status(
         util::error::INTERNAL,
@@ -98,14 +97,14 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   }
 
   // Create an EC point and initialize it from the key proto.
-  bssl::UniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
+  internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
   if (!point.get()) {
     return util::Status(util::error::INTERNAL, "failed to allocate EC_POINT");
   }
-  bssl::UniquePtr<BIGNUM> x(BN_bin2bn(
+  internal::SslUniquePtr<BIGNUM> x(BN_bin2bn(
       reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_x.data()),
       subtle_ec_key.pub_x.length(), nullptr));
-  bssl::UniquePtr<BIGNUM> y(BN_bin2bn(
+  internal::SslUniquePtr<BIGNUM> y(BN_bin2bn(
       reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_y.data()),
       subtle_ec_key.pub_y.length(), nullptr));
   if (!EC_POINT_set_affine_coordinates_GFp(group.get(), point.get(), x.get(),
@@ -139,7 +138,7 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPrivateKey(
   if (!status.ok()) {
     return status;
   }
-  bssl::UniquePtr<BIGNUM> x(BN_bin2bn(
+  internal::SslUniquePtr<BIGNUM> x(BN_bin2bn(
       reinterpret_cast<const unsigned char*>(subtle_ec_key.priv.data()),
       subtle_ec_key.priv.size(), nullptr));
   if (!EC_KEY_set_private_key(openssl_ec_key, x.get())) {
@@ -174,11 +173,11 @@ util::StatusOr<std::string> ConvertBioToString(BIO* bio) {
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPublicKey>>
 PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   // Read the RSA key into EVP_PKEY.
-  bssl::UniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
   BIO_write(rsa_key_bio.get(), pem_serialized_key.data(),
             pem_serialized_key.size());
 
-  bssl::UniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PUBKEY(
+  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PUBKEY(
       rsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
 
   if (evp_rsa_key == nullptr) {
@@ -218,12 +217,12 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPrivateKey>>
 PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Read the private key into EVP_PKEY.
-  bssl::UniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
   BIO_write(rsa_key_bio.get(), pem_serialized_key.data(),
             pem_serialized_key.size());
 
   // BoringSSL APIs to parse the PEM data.
-  bssl::UniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PrivateKey(
+  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PrivateKey(
       rsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
 
   if (evp_rsa_key == nullptr) {
@@ -295,8 +294,8 @@ util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
     return rsa_statusor.status();
   }
 
-  bssl::UniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
-  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_RSA_PUBKEY(bio.get(), rsa.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "failed to write openssl RSA key to write bio");
@@ -312,11 +311,11 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
     return rsa_statusor.status();
   }
 
-  bssl::UniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
-  bssl::UniquePtr<EVP_PKEY> evp(EVP_PKEY_new());
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  internal::SslUniquePtr<EVP_PKEY> evp(EVP_PKEY_new());
   EVP_PKEY_set1_RSA(evp.get(), rsa.get());
 
-  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_PrivateKey(bio.get(), evp.get(),
                                 /*enc=*/nullptr, /*kstr=*/nullptr,
                                 /*klen=*/0,
@@ -330,11 +329,11 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
   // Read the ECDSA key into EVP_PKEY.
-  bssl::UniquePtr<BIO> ecdsa_key_bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> ecdsa_key_bio(BIO_new(BIO_s_mem()));
   BIO_write(ecdsa_key_bio.get(), pem_serialized_key.data(),
             pem_serialized_key.size());
 
-  bssl::UniquePtr<EVP_PKEY> evp_ecdsa_key(PEM_read_bio_PUBKEY(
+  internal::SslUniquePtr<EVP_PKEY> evp_ecdsa_key(PEM_read_bio_PUBKEY(
       ecdsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
 
   if (evp_ecdsa_key == nullptr) {
@@ -383,13 +382,13 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
 
 util::StatusOr<std::string> PemParser::WriteEcPublicKey(
     const SubtleUtilBoringSSL::EcKey& ec_key) {
-  bssl::UniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
+  internal::SslUniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
   util::Status status =
       ConvertSubtleEcKeyToOpenSslEcPublicKey(ec_key, openssl_ec_key.get());
   if (!status.ok()) {
     return status;
   }
-  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_EC_PUBKEY(bio.get(), openssl_ec_key.get())) {
     return util::Status(util::error::INVALID_ARGUMENT,
                         "failed to write openssl EC key to write bio");
@@ -399,13 +398,13 @@ util::StatusOr<std::string> PemParser::WriteEcPublicKey(
 
 util::StatusOr<std::string> PemParser::WriteEcPrivateKey(
     const SubtleUtilBoringSSL::EcKey& ec_key) {
-  bssl::UniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
+  internal::SslUniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
   util::Status status =
       ConvertSubtleEcKeyToOpenSslEcPrivateKey(ec_key, openssl_ec_key.get());
   if (!status.ok()) {
     return status;
   }
-  bssl::UniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
+  internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_ECPrivateKey(bio.get(), openssl_ec_key.get(),
                                   /*enc=*/nullptr, /*kstr=*/nullptr, /*klen=*/0,
                                   /*cb=*/nullptr, /*u=*/nullptr)) {

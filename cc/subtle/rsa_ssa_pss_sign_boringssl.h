@@ -20,10 +20,10 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "openssl/ec.h"
 #include "openssl/rsa.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -53,12 +53,12 @@ class RsaSsaPssSignBoringSsl : public PublicKeySign {
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
-  const bssl::UniquePtr<RSA> private_key_;
+  const internal::SslUniquePtr<RSA> private_key_;
   const EVP_MD* sig_hash_;   // Owned by BoringSSL.
   const EVP_MD* mgf1_hash_;  // Owned by BoringSSL.
   int32_t salt_length_;
 
-  RsaSsaPssSignBoringSsl(bssl::UniquePtr<RSA> private_key,
+  RsaSsaPssSignBoringSsl(internal::SslUniquePtr<RSA> private_key,
                          const EVP_MD* sig_hash, const EVP_MD* mgf1_hash,
                          int32_t salt_length);
 };

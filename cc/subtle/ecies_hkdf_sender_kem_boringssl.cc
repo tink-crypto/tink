@@ -19,6 +19,7 @@
 #include "absl/memory/memory.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -59,8 +60,7 @@ EciesHkdfNistPCurveSendKemBoringSsl::New(subtle::EllipticCurveType curve,
       internal::CheckFipsCompatibility<EciesHkdfNistPCurveSendKemBoringSsl>();
   if (!status.ok()) return status;
 
-  auto status_or_ec_point =
-      SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
+  auto status_or_ec_point = SubtleUtilBoringSSL::GetEcPoint(curve, pubx, puby);
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
   std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
       new EciesHkdfNistPCurveSendKemBoringSsl(curve, pubx, puby,
@@ -82,8 +82,8 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
   if (!status_or_ec_group.ok()) {
     return status_or_ec_group.status();
   }
-  bssl::UniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
-  bssl::UniquePtr<EC_KEY> ephemeral_key(EC_KEY_new());
+  internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
+  internal::SslUniquePtr<EC_KEY> ephemeral_key(EC_KEY_new());
   if (1 != EC_KEY_set_group(ephemeral_key.get(), group.get())) {
     return util::Status(util::error::INTERNAL, "EC_KEY_set_group failed");
   }
