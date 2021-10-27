@@ -32,6 +32,7 @@
 #include "openssl/x509.h"
 #include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
@@ -169,21 +170,6 @@ TEST(SubtleUtilBoringSSLTest, GetCurveUnimplemented) {
 
   EXPECT_THAT(SubtleUtilBoringSSL::GetCurve(unsupported_group).status(),
               StatusIs(util::error::UNIMPLEMENTED));
-}
-
-TEST(SubtleUtilBoringSSLTest, Bn2strAndStr2bn) {
-  int len = 8;
-  std::string bn_str[6] = {"0000000000000000", "0000000000000001",
-                           "1000000000000000", "ffffffffffffffff",
-                           "0fffffffffffffff", "00ffffffffffffff"};
-  for (const std::string& s : bn_str) {
-    auto status_or_bn = SubtleUtilBoringSSL::str2bn(test::HexDecodeOrDie(s));
-    EXPECT_TRUE(status_or_bn.ok());
-    auto status_or_str =
-        SubtleUtilBoringSSL::bn2str(status_or_bn.ValueOrDie().get(), len);
-    EXPECT_TRUE(status_or_str.ok());
-    EXPECT_EQ(test::HexDecodeOrDie(s), status_or_str.ValueOrDie());
-  }
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {
@@ -361,52 +347,53 @@ TEST(CreatesNewRsaKeyPairTest, KeyIsWellFormed) {
   ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
                                                     &public_key),
               IsOk());
-  auto n = std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
-  auto d = std::move(
-      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.d))
-          .ValueOrDie());
-  auto p = std::move(
-      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.p))
-          .ValueOrDie());
-  auto q = std::move(
-      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.q))
-          .ValueOrDie());
-  auto dp = std::move(
-      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dp))
-          .ValueOrDie());
-  auto dq = std::move(
-      SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(private_key.dq))
-          .ValueOrDie());
+  auto n = internal::StringToBignum(private_key.n);
+  ASSERT_THAT(n.status(), IsOk());
+  auto d =
+      internal::StringToBignum(util::SecretDataAsStringView(private_key.d));
+  ASSERT_THAT(d.status(), IsOk());
+  auto p =
+      internal::StringToBignum(util::SecretDataAsStringView(private_key.p));
+  ASSERT_THAT(p.status(), IsOk());
+  auto q =
+      internal::StringToBignum(util::SecretDataAsStringView(private_key.q));
+  ASSERT_THAT(q.status(), IsOk());
+  auto dp =
+      internal::StringToBignum(util::SecretDataAsStringView(private_key.dp));
+  ASSERT_THAT(dp.status(), IsOk());
+  auto dq =
+      internal::StringToBignum(util::SecretDataAsStringView(private_key.dq));
+  ASSERT_THAT(dq.status(), IsOk());
   internal::SslUniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
   {
     auto n_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
-    ASSERT_TRUE(BN_mul(n_calc.get(), p.get(), q.get(), ctx.get()));
-    ASSERT_TRUE(BN_equal_consttime(n_calc.get(), n.get()));
+    ASSERT_TRUE(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()));
+    ASSERT_TRUE(BN_equal_consttime(n_calc.get(), n->get()));
   }
 
   // Check n size >= 2048 bit.
-  EXPECT_GE(BN_num_bits(n.get()), 2048);
+  EXPECT_GE(BN_num_bits(n->get()), 2048);
 
   // dp = d mod (p - 1)
   {
-    auto pm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(p.get()));
+    auto pm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(p->get()));
     ASSERT_TRUE(BN_sub_word(pm1.get(), 1));
     auto dp_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
-    ASSERT_TRUE(BN_mod(dp_calc.get(), d.get(), pm1.get(), ctx.get()));
+    ASSERT_TRUE(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()));
 
-    ASSERT_TRUE(BN_equal_consttime(dp_calc.get(), dp.get()));
+    ASSERT_TRUE(BN_equal_consttime(dp_calc.get(), dp->get()));
   }
 
   // dq = d mod (q - 1)
   {
-    auto qm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(q.get()));
+    auto qm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(q->get()));
     ASSERT_TRUE(BN_sub_word(qm1.get(), 1));
     auto dq_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
-    ASSERT_TRUE(BN_mod(dq_calc.get(), d.get(), qm1.get(), ctx.get()));
+    ASSERT_TRUE(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()));
 
-    ASSERT_TRUE(BN_equal_consttime(dq_calc.get(), dq.get()));
+    ASSERT_TRUE(BN_equal_consttime(dq_calc.get(), dq->get()));
   }
 }
 
@@ -445,15 +432,17 @@ TEST(CreatesNewRsaKeyPairTest, GeneratesDifferentKeysEveryTime) {
 }
 
 // Checks if a BIGNUM is equal to a string value.
-bool BignumEqualsString(const BIGNUM* bn, absl::string_view data) {
-  std::string converted =
-      SubtleUtilBoringSSL::bn2str(bn, BN_num_bytes(bn)).ValueOrDie();
-  return converted == data;
+void ExpectBignumEqualsString(const BIGNUM* bn, absl::string_view data) {
+  util::StatusOr<std::string> converted =
+      internal::BignumToString(bn, BN_num_bytes(bn));
+  ASSERT_THAT(converted.status(), IsOk());
+  EXPECT_EQ(*converted, data);
 }
 
 // Checks if a BIGNUM is equal to a SecretData value.
-bool BignumEqualsSecretData(const BIGNUM* bn, const util::SecretData& data) {
-  return BignumEqualsString(bn, util::SecretDataAsStringView(data));
+void ExpectBignumEqualsSecretData(const BIGNUM* bn,
+                                  const util::SecretData& data) {
+  ExpectBignumEqualsString(bn, util::SecretDataAsStringView(data));
 }
 
 TEST(CopiesRsaKeysTest, CopiesRsaPrivateKey) {
@@ -471,13 +460,11 @@ TEST(CopiesRsaKeysTest, CopiesRsaPrivateKey) {
   EXPECT_TRUE(rsa_result.ok());
   internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
 
-  EXPECT_TRUE(BignumEqualsString(rsa->e, private_key.e));
-
-  EXPECT_TRUE(BignumEqualsString(rsa->n, private_key.n));
-  EXPECT_TRUE(BignumEqualsSecretData(rsa->d, private_key.d));
-
-  EXPECT_TRUE(BignumEqualsSecretData(rsa->p, private_key.p));
-  EXPECT_TRUE(BignumEqualsSecretData(rsa->q, private_key.q));
+  ExpectBignumEqualsString(rsa->e, private_key.e);
+  ExpectBignumEqualsString(rsa->n, private_key.n);
+  ExpectBignumEqualsSecretData(rsa->d, private_key.d);
+  ExpectBignumEqualsSecretData(rsa->p, private_key.p);
+  ExpectBignumEqualsSecretData(rsa->q, private_key.q);
 }
 
 TEST(CopiesRsaKeysTest, CopiesRsaPublicKey) {
@@ -495,9 +482,8 @@ TEST(CopiesRsaKeysTest, CopiesRsaPublicKey) {
   EXPECT_TRUE(rsa_result.ok());
   internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
 
-  EXPECT_TRUE(BignumEqualsString(rsa->e, public_key.e));
-
-  EXPECT_TRUE(BignumEqualsString(rsa->n, public_key.n));
+  ExpectBignumEqualsString(rsa->e, public_key.e);
+  ExpectBignumEqualsString(rsa->n, public_key.n);
 }
 
 TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {
@@ -663,8 +649,7 @@ TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
   ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
                                                     &public_key),
               IsOk());
-  auto n_2048 =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
+  auto n_2048 = std::move(internal::StringToBignum(private_key.n).ValueOrDie());
   ASSERT_THAT(
       SubtleUtilBoringSSL::ValidateRsaModulusSize(BN_num_bits(n_2048.get())),
       IsOk());
@@ -672,8 +657,7 @@ TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {
   ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(1024, e.get(), &private_key,
                                                     &public_key),
               IsOk());
-  auto n_1024 =
-      std::move(SubtleUtilBoringSSL::str2bn(private_key.n).ValueOrDie());
+  auto n_1024 = std::move(internal::StringToBignum(private_key.n).ValueOrDie());
   ASSERT_THAT(
       SubtleUtilBoringSSL::ValidateRsaModulusSize(BN_num_bits(n_1024.get())),
       Not(IsOk()));

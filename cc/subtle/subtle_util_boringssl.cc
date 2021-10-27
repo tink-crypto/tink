@@ -34,6 +34,7 @@
 #include "openssl/rsa.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -42,35 +43,12 @@
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
-
-// Converts the absolute value of `bignum` into a big-endian form, and writes it
-// in `buffer`.
-util::Status BignumToBinaryPadded(absl::Span<char> buffer,
-                                  const BIGNUM *bignum) {
-  if (bignum == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
-  }
-
-// BN_bn2binpad returns the length of the buffer on success and -1 on failure.
-#ifdef OPENSSL_IS_BORINGSSL
-  int len = BN_bn2binpad(bignum, reinterpret_cast<uint8_t *>(buffer.data()),
-                         buffer.size());
-#else
-  int len = BN_bn2binpad(
-      bignum, reinterpret_cast<unsigned char *>(buffer.data()), buffer.size());
-#endif
-  if (len == -1) {
-    return util::Status(util::error::INTERNAL,
-                        "Value too large to fit into the given buffer");
-  }
-
-  return util::OkStatus();
-}
 
 size_t ScalarSizeInBytes(const EC_GROUP *group) {
   return BN_num_bytes(EC_GROUP_get0_order(group));
@@ -99,21 +77,20 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   }
   SubtleUtilBoringSSL::EcKey ec_key;
   ec_key.curve = curve;
-  util::StatusOr<std::string> pub_x_str = SubtleUtilBoringSSL::bn2str(
+  util::StatusOr<std::string> pub_x_str = internal::BignumToString(
       pub_key_x_bn.get(), FieldElementSizeInBytes(*group));
   if (!pub_x_str.ok()) {
     return pub_x_str.status();
   }
   ec_key.pub_x = std::move(*pub_x_str);
-  util::StatusOr<std::string> pub_y_str = SubtleUtilBoringSSL::bn2str(
+  util::StatusOr<std::string> pub_y_str = internal::BignumToString(
       pub_key_y_bn.get(), FieldElementSizeInBytes(*group));
   if (!pub_y_str.ok()) {
     return pub_y_str.status();
   }
   ec_key.pub_y = std::move(*pub_y_str);
   util::StatusOr<util::SecretData> priv_key_or =
-      SubtleUtilBoringSSL::BignumToSecretData(priv_key,
-                                              ScalarSizeInBytes(*group));
+      internal::BignumToSecretData(priv_key, ScalarSizeInBytes(*group));
   if (!priv_key_or.ok()) {
     return priv_key_or.status();
   }
@@ -122,50 +99,6 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
 }
 
 }  // namespace
-
-// static
-util::StatusOr<std::string> SubtleUtilBoringSSL::bn2str(const BIGNUM *bn,
-                                                        size_t len) {
-  if (bn == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
-  }
-
-  std::string buffer;
-  ResizeStringUninitialized(&buffer, len);
-
-  util::Status res = BignumToBinaryPadded(absl::MakeSpan(&buffer[0], len), bn);
-  if (!res.ok()) return res;
-
-  return buffer;
-}
-
-util::StatusOr<util::SecretData> SubtleUtilBoringSSL::BignumToSecretData(
-    const BIGNUM *bn, size_t len) {
-  if (bn == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "BIGNUM is NULL");
-  }
-  util::SecretData secret_data(len);
-
-  util::Status res = BignumToBinaryPadded(
-      absl::MakeSpan(reinterpret_cast<char *>(secret_data.data()),
-                     secret_data.size()),
-      bn);
-  if (!res.ok()) return res;
-
-  return secret_data;
-}
-
-// static
-util::StatusOr<internal::SslUniquePtr<BIGNUM>> SubtleUtilBoringSSL::str2bn(
-    absl::string_view s) {
-  internal::SslUniquePtr<BIGNUM> bn(
-      BN_bin2bn(reinterpret_cast<const unsigned char *>(s.data()), s.length(),
-                nullptr /* ret */));
-  if (bn.get() == nullptr) {
-    return util::Status(util::error::INTERNAL, "BIGNUM allocation failed");
-  }
-  return std::move(bn);
-}
 
 // static
 util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
@@ -415,8 +348,8 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     return util::Status(util::error::INTERNAL,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
-  return BignumToSecretData(shared_x.get(),
-                            FieldElementSizeInBytes(priv_group.get()));
+  return internal::BignumToSecretData(
+      shared_x.get(), FieldElementSizeInBytes(priv_group.get()));
 }
 
 // static
@@ -553,7 +486,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                             "Openssl internal error getting coordinates");
       }
 
-      util::Status res = BignumToBinaryPadded(
+      util::Status res = internal::BignumToBinaryPadded(
           absl::MakeSpan(&encoded_point[0], curve_size_in_bytes), x.get());
 
       if (!res.ok()) {
@@ -562,7 +495,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
             "Openssl internal error serializing the x coordinate - %s",
             res.message());
       }
-      res = BignumToBinaryPadded(
+      res = internal::BignumToBinaryPadded(
           absl::MakeSpan(&encoded_point[0] + curve_size_in_bytes,
                          curve_size_in_bytes),
           y.get());
@@ -603,11 +536,11 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
   }
   internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
   auto status_or_r =
-      SubtleUtilBoringSSL::str2bn(ieee_sig.substr(0, ieee_sig.size() / 2));
+      internal::StringToBignum(ieee_sig.substr(0, ieee_sig.size() / 2));
   if (!status_or_r.ok()) {
     return status_or_r.status();
   }
-  auto status_or_s = SubtleUtilBoringSSL::str2bn(
+  auto status_or_s = internal::StringToBignum(
       ieee_sig.substr(ieee_sig.size() / 2, ieee_sig.size() / 2));
   if (!status_or_s.ok()) {
     return status_or_s.status();
@@ -673,7 +606,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
 // static
 util::Status SubtleUtilBoringSSL::ValidateRsaPublicExponent(
     absl::string_view exponent) {
-  auto status_or_e = subtle::SubtleUtilBoringSSL::str2bn(exponent);
+  auto status_or_e = internal::StringToBignum(exponent);
   if (!status_or_e.ok()) return status_or_e.status();
   auto e = status_or_e.ValueOrDie().get();
   if (!BN_is_odd(e)) {
@@ -713,41 +646,64 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
   RSA_get0_key(rsa.get(), &n_bn, &e_bn, &d_bn);
 
   // Save exponents.
-  auto n_str = bn2str(n_bn, BN_num_bytes(n_bn));
-  auto e_str = bn2str(e_bn, BN_num_bytes(e_bn));
-  auto d_str = BignumToSecretData(d_bn, BN_num_bytes(d_bn));
-  if (!n_str.ok()) return n_str.status();
-  if (!e_str.ok()) return e_str.status();
-  if (!d_str.ok()) return d_str.status();
-  private_key->n = std::move(n_str.ValueOrDie());
-  private_key->e = std::move(e_str.ValueOrDie());
-  private_key->d = std::move(d_str.ValueOrDie());
-
+  util::StatusOr<std::string> n_str =
+      internal::BignumToString(n_bn, BN_num_bytes(n_bn));
+  if (!n_str.ok()) {
+    return n_str.status();
+  }
+  util::StatusOr<std::string> e_str =
+      internal::BignumToString(e_bn, BN_num_bytes(e_bn));
+  if (!e_str.ok()) {
+    return e_str.status();
+  }
+  util::StatusOr<util::SecretData> d_str =
+      internal::BignumToSecretData(d_bn, BN_num_bytes(d_bn));
+  if (!d_str.ok()) {
+    return d_str.status();
+  }
+  private_key->n = std::move(*n_str);
+  private_key->e = std::move(*e_str);
+  private_key->d = std::move(*d_str);
   public_key->n = private_key->n;
   public_key->e = private_key->e;
 
   // Save factors.
   const BIGNUM *p_bn, *q_bn;
   RSA_get0_factors(rsa.get(), &p_bn, &q_bn);
-  auto p_str = BignumToSecretData(p_bn, BN_num_bytes(p_bn));
-  auto q_str = BignumToSecretData(q_bn, BN_num_bytes(q_bn));
-  if (!p_str.ok()) return p_str.status();
-  if (!q_str.ok()) return q_str.status();
-  private_key->p = std::move(p_str.ValueOrDie());
-  private_key->q = std::move(q_str.ValueOrDie());
+  util::StatusOr<util::SecretData> p_str =
+      internal::BignumToSecretData(p_bn, BN_num_bytes(p_bn));
+  if (!p_str.ok()) {
+    return p_str.status();
+  }
+  util::StatusOr<util::SecretData> q_str =
+      internal::BignumToSecretData(q_bn, BN_num_bytes(q_bn));
+  if (!q_str.ok()) {
+    return q_str.status();
+  }
+  private_key->p = std::move(*p_str);
+  private_key->q = std::move(*q_str);
 
   // Save CRT parameters.
   const BIGNUM *dp_bn, *dq_bn, *crt_bn;
   RSA_get0_crt_params(rsa.get(), &dp_bn, &dq_bn, &crt_bn);
-  auto dp_str = BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
-  auto dq_str = BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
-  auto crt_str = BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
-  if (!dp_str.ok()) return dp_str.status();
-  if (!dq_str.ok()) return dq_str.status();
-  if (!crt_str.ok()) return crt_str.status();
-  private_key->dp = std::move(dp_str.ValueOrDie());
-  private_key->dq = std::move(dq_str.ValueOrDie());
-  private_key->crt = std::move(crt_str.ValueOrDie());
+  util::StatusOr<util::SecretData> dp_str =
+      internal::BignumToSecretData(dp_bn, BN_num_bytes(dp_bn));
+  if (!dp_str.ok()) {
+    return dp_str.status();
+  }
+  util::StatusOr<util::SecretData> dq_str =
+      internal::BignumToSecretData(dq_bn, BN_num_bytes(dq_bn));
+  if (!dq_str.ok()) {
+    return dq_str.status();
+  }
+  util::StatusOr<util::SecretData> crt_str =
+      internal::BignumToSecretData(crt_bn, BN_num_bytes(crt_bn));
+  if (!crt_str.ok()) {
+    return crt_str.status();
+  }
+  private_key->dp = std::move(*dp_str);
+  private_key->dq = std::move(*dq_str);
+  private_key->crt = std::move(*crt_str);
 
   return util::OkStatus();
 }
@@ -755,9 +711,9 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
 // static
 util::Status SubtleUtilBoringSSL::CopyKey(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
-  auto n = SubtleUtilBoringSSL::str2bn(key.n);
-  auto e = SubtleUtilBoringSSL::str2bn(key.e);
-  auto d = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.d));
+  auto n = internal::StringToBignum(key.n);
+  auto e = internal::StringToBignum(key.e);
+  auto d = internal::StringToBignum(util::SecretDataAsStringView(key.d));
   if (!n.ok()) return n.status();
   if (!e.ok()) return e.status();
   if (!d.ok()) return d.status();
@@ -777,8 +733,8 @@ util::Status SubtleUtilBoringSSL::CopyKey(
 // static
 util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
-  auto p = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.p));
-  auto q = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.q));
+  auto p = internal::StringToBignum(util::SecretDataAsStringView(key.p));
+  auto q = internal::StringToBignum(util::SecretDataAsStringView(key.q));
   if (!p.ok()) return p.status();
   if (!q.ok()) return q.status();
   if (RSA_set0_factors(rsa, p.ValueOrDie().get(), q.ValueOrDie().get()) != 1) {
@@ -794,9 +750,9 @@ util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
 // static
 util::Status SubtleUtilBoringSSL::CopyCrtParams(
     const SubtleUtilBoringSSL::RsaPrivateKey &key, RSA *rsa) {
-  auto dp = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.dp));
-  auto dq = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.dq));
-  auto crt = SubtleUtilBoringSSL::str2bn(util::SecretDataAsStringView(key.crt));
+  auto dp = internal::StringToBignum(util::SecretDataAsStringView(key.dp));
+  auto dq = internal::StringToBignum(util::SecretDataAsStringView(key.dq));
+  auto crt = internal::StringToBignum(util::SecretDataAsStringView(key.crt));
   if (!dp.ok()) return dp.status();
   if (!dq.ok()) return dq.status();
   if (!crt.ok()) return crt.status();
@@ -816,7 +772,7 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
 util::StatusOr<internal::SslUniquePtr<RSA>>
 SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
     const SubtleUtilBoringSSL::RsaPrivateKey &rsa_key) {
-  auto status_or_n = SubtleUtilBoringSSL::str2bn(rsa_key.n);
+  auto status_or_n = internal::StringToBignum(rsa_key.n);
   if (!status_or_n.ok()) {
     return status_or_n.status();
   }
@@ -865,12 +821,12 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
 util::StatusOr<internal::SslUniquePtr<RSA>>
 SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
     const SubtleUtilBoringSSL::RsaPublicKey &key) {
-  auto status_or_n = SubtleUtilBoringSSL::str2bn(key.n);
+  auto status_or_n = internal::StringToBignum(key.n);
   if (!status_or_n.ok()) {
     return status_or_n.status();
   }
 
-  auto status_or_e = SubtleUtilBoringSSL::str2bn(key.e);
+  auto status_or_e = internal::StringToBignum(key.e);
   if (!status_or_e.ok()) {
     return status_or_e.status();
   }

@@ -100,6 +100,21 @@ tink_cc_library(
     tink::util::status
 )
 
+tink_cc_library(
+  NAME bn_util
+  SRCS
+    bn_util.cc
+    bn_util.h
+  DEPS
+    tink::internal::ssl_unique_ptr
+    absl::span
+    crypto
+    tink::subtle::subtle_util
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
+
 tink_cc_test(
   NAME util_test
   SRCS
@@ -175,4 +190,17 @@ tink_cc_test(
     absl::strings
     crypto
     gmock
+)
+
+tink_cc_test(
+  NAME bn_util_test
+  SRCS bn_util_test.cc
+  DEPS
+    tink::internal::bn_util
+    tink::internal::ssl_unique_ptr
+    gmock
+    absl::strings
+    crypto
+    tink::util::statusor
+    tink::util::test_matchers
 )

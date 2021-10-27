@@ -577,8 +577,7 @@ tink_cc_library(
   SRCS
     common_enums.cc
     common_enums.h
-  DEPS
-    absl::strings
+  DEPS absl::strings
 )
 
 tink_cc_library(
@@ -594,22 +593,24 @@ tink_cc_library(
     subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
-    tink::aead::internal::aead_util
-    tink::internal::err_util
-    tink::internal::ssl_unique_ptr
-    tink::internal::util
     tink::subtle::common_enums
     tink::subtle::random
     tink::subtle::subtle_util
+    absl::core_headers
+    absl::memory
+    absl::strings
+    absl::span
+    crypto
+    tink::aead::internal::aead_util
     tink::config::tink_fips
+    tink::internal::bn_util
+    tink::internal::err_util
+    tink::internal::ssl_unique_ptr
+    tink::internal::util
     tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    crypto
-    absl::strings
-    absl::memory
-    absl::span
 )
 
 tink_cc_library(
@@ -773,38 +774,38 @@ tink_cc_library(
 )
 
 tink_cc_library(
-    NAME stateful_hmac_boringssl
-    SRCS
-      stateful_hmac_boringssl.cc
-      stateful_hmac_boringssl.h
-    DEPS
-      absl::memory
-      crypto
-      tink::internal::util
-      tink::internal::ssl_unique_ptr
-      tink::subtle::common_enums
-      tink::subtle::mac::stateful_mac
-      tink::subtle::subtle_util_boringssl
-      tink::util::secret_data
-      tink::util::status
-      tink::util::statusor
+  NAME stateful_hmac_boringssl
+  SRCS
+    stateful_hmac_boringssl.cc
+    stateful_hmac_boringssl.h
+  DEPS
+    absl::memory
+    crypto
+    tink::internal::util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::mac::stateful_mac
+    tink::subtle::subtle_util_boringssl
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(
-    NAME stateful_cmac_boringssl
-    SRCS
-      stateful_cmac_boringssl.cc
-      stateful_cmac_boringssl.h
-    DEPS
-      absl::memory
-      crypto
-      tink::internal::util
-      tink::internal::ssl_unique_ptr
-      tink::subtle::common_enums
-      tink::subtle::mac::stateful_mac
-      tink::util::secret_data
-      tink::util::status
-      tink::util::statusor
+  NAME stateful_cmac_boringssl
+  SRCS
+    stateful_cmac_boringssl.cc
+    stateful_cmac_boringssl.h
+  DEPS
+    absl::memory
+    crypto
+    tink::internal::util
+    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
+    tink::subtle::mac::stateful_mac
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
 )
 
 tink_cc_library(
@@ -1265,19 +1266,22 @@ tink_cc_test(
   SRCS subtle_util_boringssl_test.cc
   DATA wycheproof::testvectors
   DEPS
-    tink::config::tink_fips
-    tink::internal::ssl_unique_ptr
+    tink::subtle::common_enums
     tink::subtle::ec_util
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
+    gmock
+    absl::strings
+    crypto
+    rapidjson
+    tink::config::tink_fips
+    tink::internal::bn_util
+    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
-    crypto
-    absl::strings
-    rapidjson
 )
 
 tink_cc_test(

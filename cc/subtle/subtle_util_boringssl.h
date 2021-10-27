@@ -27,6 +27,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -118,15 +119,24 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's BIGNUM constructed from bigendian string
   // representation.
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
   static util::StatusOr<internal::SslUniquePtr<BIGNUM>> str2bn(
-      absl::string_view s);
-
-  // Returns a string of size 'len' that holds BIGNUM 'bn'.
-  static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len);
+      absl::string_view s) {
+    return internal::StringToBignum(s);
+  }
 
   // Returns a SecretData of size 'len' that holds BIGNUM 'bn'.
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len) {
+    return internal::BignumToString(bn, len);
+  }
+
+  // Returns a string of size 'len' that holds BIGNUM 'bn'.
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
   static util::StatusOr<util::SecretData> BignumToSecretData(const BIGNUM *bn,
-                                                             size_t len);
+                                                             size_t len) {
+    return internal::BignumToSecretData(bn, len);
+  }
 
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.

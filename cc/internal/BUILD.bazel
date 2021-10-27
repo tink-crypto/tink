@@ -118,6 +118,22 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "bn_util",
+    srcs = ["bn_util.cc"],
+    hdrs = ["bn_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":ssl_unique_ptr",
+        "//subtle:subtle_util",
+        "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
 cc_test(
     name = "util_test",
     srcs = ["util_test.cc"],
@@ -211,6 +227,21 @@ cc_test(
     srcs = ["err_util_test.cc"],
     deps = [
         ":err_util",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "bn_util_test",
+    size = "small",
+    srcs = ["bn_util_test.cc"],
+    deps = [
+        ":bn_util",
+        ":ssl_unique_ptr",
+        "//util:statusor",
+        "//util:test_matchers",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
