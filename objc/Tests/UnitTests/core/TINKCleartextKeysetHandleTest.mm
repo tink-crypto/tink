@@ -67,7 +67,7 @@
   XCTAssertNil(
       [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error]);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::RESOURCE_EXHAUSTED);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kResourceExhausted);
   XCTAssertTrue(
       [error.localizedFailureReason containsString:@"A KeysetReader can be used only once."]);
 }
