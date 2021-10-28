@@ -48,6 +48,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     crypto
+    tink::aead::internal::aead_util
     tink::aead::internal::zero_copy_aead
     tink::subtle::random
     tink::subtle::subtle_util

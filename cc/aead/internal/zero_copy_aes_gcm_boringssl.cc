@@ -18,10 +18,10 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/aead.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -30,14 +30,14 @@ namespace internal {
 
 util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
     const util::SecretData &key) {
-  const EVP_AEAD *aead =
-      subtle::SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(key.size());
-  if (aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+  util::StatusOr<const EVP_AEAD *> aead =
+      internal::GetAesGcmAeadForKeySize(key.size());
+  if (!aead.ok()) {
+    return aead.status();
   }
   bssl::UniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
-      aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
-  if (!ctx) {
+      *aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
+  if (ctx == nullptr) {
     return util::Status(util::error::INTERNAL,
                         "could not initialize EVP_AEAD_CTX");
   }

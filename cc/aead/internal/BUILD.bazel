@@ -50,9 +50,9 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         ":zero_copy_aead",
+        "//aead/internal:aead_util",
         "//subtle:random",
         "//subtle:subtle_util",
-        "//subtle:subtle_util_boringssl",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
