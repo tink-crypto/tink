@@ -18,7 +18,7 @@ import {assertExists, createKeyset} from '../testing/internal/test_utils';
 import {BinaryKeysetReader} from './binary_keyset_reader';
 import {BinaryKeysetWriter} from './binary_keyset_writer';
 import {CleartextKeysetHandle} from './cleartext_keyset_handle';
-import * as KeyManager from './key_manager';
+import {KeyFactory, KeyManager} from './key_manager';
 import {generateNew, KeysetHandle, read, readNoSecret} from './keyset_handle';
 import {PbKeyData, PbKeyMaterialType, PbKeyset, PbKeysetKey, PbKeyStatusType, PbMessage, PbOutputPrefixType} from './proto';
 import * as Registry from './registry';
@@ -42,20 +42,15 @@ describe('KeysetHandle', () => {
   describe('constructor', () => {
     it('throws with empty list of keys', async () => {
       const keyset = new PbKeyset().setKeyList([]);
-      try {
-        new KeysetHandle(keyset);
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: Keyset should be non null and must contain at least one key.');
-        return;
-      }
-      fail('An exception should be thrown.');
+      expect(() => new KeysetHandle(keyset))
+          .toThrowError(
+              SecurityException,
+              'Keyset should be non null and must contain at least one key.');
     });
 
     it('does not throw for valid keyset protos', async () => {
       const keyset = createKeyset();
-      new KeysetHandle(keyset);
+      expect(() => new KeysetHandle(keyset)).not.toThrow();
     });
   });
 
@@ -77,18 +72,12 @@ describe('KeysetHandle', () => {
           CleartextKeysetHandle.serializeToBinary(keysetHandle);
       const keysetReader = new BinaryKeysetReader(serializedKeyset);
       const aead = await keysetHandle.getPrimitive<Aead>(Aead);
-      try {
-        await read(keysetReader, aead);
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: KeysetHandle -- read: Not implemented yet.');
-        return;
-      }
-      fail('An exception should be thrown.');
+
+      await expectAsync(read(keysetReader, aead))
+          .toBeRejectedWithError(
+              SecurityException, 'KeysetHandle -- read: Not implemented yet.');
     });
   });
-
 
   describe('generateNew', () => {
     it('generates new keyset handles given a key template', async () => {
@@ -119,15 +108,9 @@ describe('KeysetHandle', () => {
       const keysetWriter = new BinaryKeysetWriter();
       const aead = await keysetHandle.getPrimitive<Aead>(Aead);
 
-      try {
-        await keysetHandle.write(keysetWriter, aead);
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: KeysetHandle -- write: Not implemented yet.');
-        return;
-      }
-      fail('An exception should be thrown.');
+      await expectAsync(keysetHandle.write(keysetWriter, aead))
+          .toBeRejectedWithError(
+              SecurityException, 'KeysetHandle -- write: Not implemented yet.');
     });
   });
 
@@ -192,9 +175,8 @@ describe('KeysetHandle', () => {
       // to the keyset.
       const keyTypeUrl = 'new_custom_aead_key_type';
       const keyId = 0xFFFFFFFF;
-      const key = createKey(
-          keyId, PbOutputPrefixType.TINK, keyTypeUrl,
-          /* enabled = */ true);
+      const key =
+          createKey({keyId, outputPrefix: PbOutputPrefixType.TINK, keyTypeUrl});
       keyset.addKey(key);
       keyset.setPrimaryKeyId(keyId);
       const keysetHandle = new KeysetHandle(keyset);
@@ -218,14 +200,10 @@ describe('KeysetHandle', () => {
       // ciphertext. This is because managerInRegistry is different from
       // customKeyManager.
       const aeadFromRegistry = await keysetHandle.getPrimitive<Aead>(Aead);
-      try {
-        await aeadFromRegistry.decrypt(ciphertext);
-        fail('An exception should be thrown here.');
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: Decryption failed for the given ciphertext.');
-      }
+
+      await expectAsync(aeadFromRegistry.decrypt(ciphertext))
+          .toBeRejectedWithError(
+              SecurityException, 'Decryption failed for the given ciphertext.');
 
       // Check that the primitive returned by getPrimitive with customKeyManager
       // decrypts correctly.
@@ -242,9 +220,8 @@ describe('KeysetHandle', () => {
       // to the keyset.
       const keyTypeUrl = 'new_custom_hybrid_encrypt_key_type';
       const keyId = 0xFFFFFFFF;
-      const key = createKey(
-          keyId, PbOutputPrefixType.TINK, keyTypeUrl,
-          /* enabled = */ true);
+      const key =
+          createKey({keyId, outputPrefix: PbOutputPrefixType.TINK, keyTypeUrl});
       keyset.addKey(key);
       keyset.setPrimaryKeyId(keyId);
       const keysetHandle = new KeysetHandle(keyset);
@@ -295,9 +272,11 @@ describe('KeysetHandle', () => {
       // Add a new key with a new key type associated to custom key manager
       // to the keyset.
       const publicKeyTypeUrl = 'new_custom_hybrid_encrypt_key_type';
-      const publicKey = createKey(
-          keyId, PbOutputPrefixType.TINK, publicKeyTypeUrl,
-          /* enabled = */ true);
+      const publicKey = createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.TINK,
+        keyTypeUrl: publicKeyTypeUrl
+      });
       publicKeyset.addKey(publicKey);
       publicKeyset.setPrimaryKeyId(keyId);
       const publicKeysetHandle = new KeysetHandle(publicKeyset);
@@ -308,9 +287,11 @@ describe('KeysetHandle', () => {
       // Add a new key with a new key type associated to custom key manager
       // to the keyset.
       const privateKeyTypeUrl = 'new_custom_hybrid_decrypt_key_type';
-      const privateKey = createKey(
-          keyId, PbOutputPrefixType.TINK, privateKeyTypeUrl,
-          /* enabled = */ true);
+      const privateKey = createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.TINK,
+        keyTypeUrl: privateKeyTypeUrl
+      });
       privateKeyset.addKey(privateKey);
       privateKeyset.setPrimaryKeyId(keyId);
       const privateKeysetHandle = new KeysetHandle(privateKeyset);
@@ -342,14 +323,9 @@ describe('KeysetHandle', () => {
       // is because the ciphertext suffix is different.
       const hybridDecryptFromRegistry =
           await privateKeysetHandle.getPrimitive<HybridDecrypt>(HybridDecrypt);
-      try {
-        await hybridDecryptFromRegistry.decrypt(ciphertext);
-        fail('An exception should be thrown here.');
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: Decryption failed for the given ciphertext.');
-      }
+      await expectAsync(hybridDecryptFromRegistry.decrypt(ciphertext))
+          .toBeRejectedWithError(
+              SecurityException, 'Decryption failed for the given ciphertext.');
 
       // Create a custom private key manager with the correct ciphertext suffix.
       const customHybridDecryptKeyManager = new DummyKeyManager(
@@ -372,9 +348,11 @@ describe('KeysetHandle', () => {
       // manager providing Mac primitives with this key.
       const macKeyTypeUrl = 'mac_key_type_1';
       const macKeyId = 0xFFFFFFFF;
-      const macKey = createKey(
-          macKeyId, PbOutputPrefixType.TINK, macKeyTypeUrl,
-          /* enabled = */ true);
+      const macKey = createKey({
+        keyId: macKeyId,
+        outputPrefix: PbOutputPrefixType.TINK,
+        keyTypeUrl: macKeyTypeUrl
+      });
       keyset.addKey(macKey);
       const primitive = new DummyMac(new Uint8Array([0xFF]));
       Registry.registerKeyManager(
@@ -382,34 +360,46 @@ describe('KeysetHandle', () => {
 
       const keysetHandle = new KeysetHandle(keyset);
 
-      try {
-        await keysetHandle.getPrimitive<Aead>(Aead);
-        fail('An exception should be thrown.');
-      } catch (e) {
-        expect(e.toString())
-            .toBe(
-                'SecurityException: Requested primitive type which is not supported by ' +
-                'this key manager.');
-      }
+      await expectAsync(keysetHandle.getPrimitive<Aead>(Aead))
+          .toBeRejectedWithError(
+              SecurityException,
+              'Requested primitive type which is not supported by ' +
+                  'this key manager.');
     });
   });
 
   describe('getPrimitiveSet', () => {
     it('primary key is the enabled key with given id', async () => {
-      const id = 1;
+      const keyId = 1;
       const primaryUrl = 'key_type_url_for_primary_key';
       const disabledUrl = 'key_type_url_for_disabled_key';
 
       const keyset = new PbKeyset();
-      keyset.addKey(createKey(
-          id, PbOutputPrefixType.TINK, disabledUrl, /* enabled = */ false));
-      keyset.addKey(createKey(
-          id, PbOutputPrefixType.LEGACY, disabledUrl, /* enabled = */ false));
-      keyset.addKey(createKey(
-          id, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
-      keyset.addKey(createKey(
-          id, PbOutputPrefixType.TINK, primaryUrl, /* enabled = */ true));
-      keyset.setPrimaryKeyId(id);
+      keyset.addKey(createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.TINK,
+        keyTypeUrl: disabledUrl,
+        enabled: false
+      }));
+      keyset.addKey(createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.LEGACY,
+        keyTypeUrl: disabledUrl,
+        enabled: false
+      }));
+      keyset.addKey(createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.RAW,
+        keyTypeUrl: disabledUrl,
+        enabled: false
+      }));
+      keyset.addKey(createKey({
+        keyId,
+        outputPrefix: PbOutputPrefixType.TINK,
+        keyTypeUrl: primaryUrl,
+        enabled: true
+      }));
+      keyset.setPrimaryKeyId(keyId);
 
       const keysetHandle = new KeysetHandle(keyset);
 
@@ -434,10 +424,18 @@ describe('KeysetHandle', () => {
       const keyset = new PbKeyset();
       // Add RAW keys with different ids from [1, ENABLED_RAW_KEYS_COUNT].
       for (let i = 0; i < enabledRawKeysCount; i++) {
-        keyset.addKey(createKey(
-            1 + i, PbOutputPrefixType.RAW, enabledUrl, /* enabled = */ true));
-        keyset.addKey(createKey(
-            1 + i, PbOutputPrefixType.RAW, disabledUrl, /* enabled = */ false));
+        keyset.addKey(createKey({
+          keyId: 1 + i,
+          outputPrefix: PbOutputPrefixType.RAW,
+          keyTypeUrl: enabledUrl,
+          enabled: true
+        }));
+        keyset.addKey(createKey({
+          keyId: 1 + i,
+          outputPrefix: PbOutputPrefixType.RAW,
+          keyTypeUrl: disabledUrl,
+          enabled: false
+        }));
       }
       keyset.setPrimaryKeyId(1);
       const keysetHandle = new KeysetHandle(keyset);
@@ -466,8 +464,8 @@ describe('KeysetHandle', () => {
       // Create keyset handle.
       const keyTypeUrl = 'some_key_type_url';
       const keyId = 1;
-      const key = createKey(
-          keyId, PbOutputPrefixType.TINK, keyTypeUrl, true /* enabled */);
+      const key =
+          createKey({keyId, outputPrefix: PbOutputPrefixType.TINK, keyTypeUrl});
 
       const keyset = new PbKeyset();
       keyset.addKey(key);
@@ -505,31 +503,29 @@ describe('KeysetHandle', () => {
         // Create a public keyset.
         const keyset = new PbKeyset();
         for (let i = 0; i < 3; i++) {
-          const key = createKey(
-              /* keyId = */ i + 1,
-              /* outputPrefix = */ PbOutputPrefixType.TINK,
-              /* keyTypeUrl = */ 'someType',
-              /* enabled = */ (i % 4) < 2,
-              /* opt_keyMaterialType */ PbKeyMaterialType.ASYMMETRIC_PUBLIC);
+          const key = createKey({
+            keyId: i + 1,
+            outputPrefix: PbOutputPrefixType.TINK,
+            keyTypeUrl: 'someType',
+            enabled: (i % 4) < 2,
+            keyMaterialType: PbKeyMaterialType.ASYMMETRIC_PUBLIC,
+          });
           keyset.addKey(key);
         }
         keyset.setPrimaryKeyId(1);
-        const key = createKey(
-            /* keyId = */ 0xFFFFFFFF,
-            /* outputPrefix = */ PbOutputPrefixType.RAW,
-            /* keyTypeUrl = */ 'someType',
-            /* enabled = */ true,
-            /* opt_keyMaterialType = */ secretKeyMaterialType);
+        const key = createKey({
+          keyId: 0xFFFFFFFF,
+          outputPrefix: PbOutputPrefixType.RAW,
+          keyTypeUrl: 'someType',
+          enabled: true,
+          keyMaterialType: secretKeyMaterialType,
+        });
         keyset.addKey(key);
         const reader =
             BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
-        try {
-          readNoSecret(reader);
-          fail('An exception should be thrown.');
-        } catch (e) {
-          expect(e.toString())
-              .toBe('SecurityException: Keyset contains secret key material.');
-        }
+        expect(() => readNoSecret(reader))
+            .toThrowError(
+                SecurityException, 'Keyset contains secret key material.');
       }
     });
 
@@ -537,12 +533,13 @@ describe('KeysetHandle', () => {
       // Create a public keyset.
       const keyset = new PbKeyset();
       for (let i = 0; i < 3; i++) {
-        const key = createKey(
-            /* keyId = */ i + 1,
-            /* outputPrefix = */ PbOutputPrefixType.TINK,
-            /* keyTypeUrl = */ 'someType',
-            /* enabled = */ (i % 4) < 2,
-            /* opt_keyMaterialType = */ PbKeyMaterialType.ASYMMETRIC_PUBLIC);
+        const key = createKey({
+          keyId: i + 1,
+          outputPrefix: PbOutputPrefixType.TINK,
+          keyTypeUrl: 'someType',
+          enabled: (i % 4) < 2,
+          keyMaterialType: PbKeyMaterialType.ASYMMETRIC_PUBLIC,
+        });
         keyset.addKey(key);
       }
       keyset.setPrimaryKeyId(1);
@@ -603,28 +600,27 @@ describe('KeysetHandle', () => {
 });
 
 /** Function for creating keys for testing purposes. */
-function createKey(
-    keyId: number, outputPrefix: PbOutputPrefixType, keyTypeUrl: string,
-    enabled: boolean,
-    opt_keyMaterialType: PbKeyMaterialType =
-        PbKeyMaterialType.SYMMETRIC): PbKeysetKey {
-  const key = new PbKeysetKey();
-  if (enabled) {
-    key.setStatus(PbKeyStatusType.ENABLED);
-  } else {
-    key.setStatus(PbKeyStatusType.DISABLED);
-  }
-
-  key.setOutputPrefixType(outputPrefix);
-  key.setKeyId(keyId);
-
-  const keyData = new PbKeyData()
+function createKey({
+  keyId,
+  outputPrefix,
+  keyTypeUrl,
+  enabled = true,
+  keyMaterialType = PbKeyMaterialType.SYMMETRIC
+}: {
+  keyId: number,
+  outputPrefix: PbOutputPrefixType,
+  keyTypeUrl: string,
+  enabled?: boolean,
+  keyMaterialType?: PbKeyMaterialType,
+}): PbKeysetKey {
+  return new PbKeysetKey()
+      .setStatus(enabled ? PbKeyStatusType.ENABLED : PbKeyStatusType.DISABLED)
+      .setOutputPrefixType(outputPrefix)
+      .setKeyId(keyId)
+      .setKeyData(new PbKeyData()
                       .setTypeUrl(keyTypeUrl)
                       .setValue(new Uint8Array([1]))
-                      .setKeyMaterialType(opt_keyMaterialType);
-  key.setKeyData(keyData);
-
-  return key;
+                      .setKeyMaterialType(keyMaterialType));
 }
 
 /**
@@ -635,8 +631,7 @@ function createKey(
  * keyType added to the Keyset.
  */
 function createKeysetAndInitializeRegistry(
-    primitiveType: Constructor<unknown>,
-    opt_numberOfKeys: number = 15): PbKeyset {
+    primitiveType: Constructor<unknown>, numberOfKeys = 15): PbKeyset {
   const numberOfKeyTypes = 5;
   const keyTypePrefix = 'key_type_';
 
@@ -660,8 +655,8 @@ function createKeysetAndInitializeRegistry(
 
   const keyset = new PbKeyset();
 
-  for (let i = 1; i < opt_numberOfKeys; i++) {
-    const keyType = keyTypePrefix + (i % numberOfKeyTypes).toString();
+  for (let i = 1; i < numberOfKeys; i++) {
+    const keyTypeUrl = keyTypePrefix + (i % numberOfKeyTypes).toString();
     let outputPrefix: PbOutputPrefixType;
     switch (i % 3) {
       case 0:
@@ -675,17 +670,14 @@ function createKeysetAndInitializeRegistry(
     }
     // There are no primitives added to PrimitiveSet for disabled keys, thus
     // they are quite rarely added into the Keyset.
-    const key = createKey(i, outputPrefix, keyType, /* enabled = */ i % 7 < 6);
-    keyset.addKey(key);
+    keyset.addKey(
+        createKey({keyId: i, outputPrefix, keyTypeUrl, enabled: i % 7 < 6}));
   }
 
   keyset.setPrimaryKeyId(1);
   return keyset;
 }
 
-/**
- * @final
- */
 class DummyAead extends Aead {
   constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
@@ -693,7 +685,7 @@ class DummyAead extends Aead {
 
   /** @override */
   // Encrypt method just append the primitive identifier to plaintext.
-  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array) {
+  async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array) {
     const result =
         new Uint8Array(plaintext.length + this.ciphertextSuffix.length);
     result.set(plaintext, 0);
@@ -705,13 +697,13 @@ class DummyAead extends Aead {
   // Decrypt method throws an exception whenever ciphertext does not end with
   // ciphertext suffix, otherwise it returns the first part (without
   // ciphertext suffix).
-  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array) {
+  async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array) {
     const plaintext = ciphertext.subarray(
         0, ciphertext.length - this.ciphertextSuffix.length);
     const ciphertextSuffix = ciphertext.subarray(
         ciphertext.length - this.ciphertextSuffix.length, ciphertext.length);
 
-    if ([...ciphertextSuffix].toString() !=
+    if ([...ciphertextSuffix].toString() !==
         [...this.ciphertextSuffix].toString()) {
       throw new SecurityException('Ciphertext decryption failed.');
     }
@@ -720,9 +712,6 @@ class DummyAead extends Aead {
   }
 }
 
-/**
- * @final
- */
 class DummyMac extends Mac {
   constructor(private readonly tag: Uint8Array) {
     super();
@@ -745,25 +734,24 @@ class DummyMac extends Mac {
   }
 }
 
-/** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
   constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
   }
   // Async is used here just because real primitives returns Promise.
   /** @override */
-  async encrypt(plaintext: Uint8Array, opt_associatedData?: Uint8Array) {
+  async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array) {
     return Bytes.concat(plaintext, this.ciphertextSuffix);
   }
 }
 
-/** @final */
 class DummyHybridDecrypt extends HybridDecrypt {
   constructor(private readonly ciphertextSuffix: Uint8Array) {
     super();
   }
+
   /** @override */
-  async decrypt(ciphertext: Uint8Array, opt_associatedData?: Uint8Array) {
+  async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array) {
     const cipherLen = ciphertext.length;
     const suffixLen = this.ciphertextSuffix.length;
     const plaintext = ciphertext.subarray(0, cipherLen - suffixLen);
@@ -775,32 +763,13 @@ class DummyHybridDecrypt extends HybridDecrypt {
   }
 }
 
-// Key factory and key manager classes used in tests.
-
-/** @final */
-class DummyKeyFactory implements KeyManager.KeyFactory {
-  /** @override */
-  newKey(keyFormat: PbMessage|Uint8Array): PbMessage|Promise<PbMessage> {
-    throw new SecurityException('Not implemented, function is not needed.');
-  }
-
-  /** @override */
-  newKeyData(serializedKeyFormat: Uint8Array): PbKeyData|Promise<PbKeyData> {
-    throw new SecurityException('Not implemented, function is not needed.');
-  }
-}
-
-/**
- * @final
- */
-class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
+class DummyKeyManager<T> implements KeyManager<T> {
   constructor(
       private readonly keyType: string, private readonly primitive: T,
       private readonly primitiveType: Constructor<T>) {}
 
-  /** @override */
   async getPrimitive(primitiveType: Constructor<T>, key: PbKeyData|PbMessage) {
-    if (primitiveType != this.getPrimitiveType()) {
+    if (primitiveType !== this.getPrimitiveType()) {
       throw new SecurityException(
           'Requested primitive type which is not ' +
           'supported by this key manager.');
@@ -808,28 +777,23 @@ class DummyKeyManager<T> implements KeyManager.KeyManager<T> {
     return this.primitive;
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }
 
-  /** @override */
   getVersion(): number {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
-  getKeyFactory(): KeyManager.KeyFactory {
+  getKeyFactory(): KeyFactory {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 }
