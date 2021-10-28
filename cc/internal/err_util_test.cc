@@ -34,10 +34,15 @@ using ::testing::SizeIs;
 
 TEST(GetSslErrorsTest, ReturnsExpectedErrorrs) {
   // Artificially add some errors to OpenSSL/BoringSSL's error queue.
+#ifdef OPENSSL_IS_BORINGSSL
   OPENSSL_PUT_ERROR(BIO, BIO_R_UNINITIALIZED);
   OPENSSL_PUT_ERROR(BIO, BIO_R_WRITE_TO_READ_ONLY_BIO);
   OPENSSL_PUT_ERROR(BIO, BIO_R_UNSUPPORTED_METHOD);
-
+#else
+  BIOerr(BIO_F_BIO_READ_INTERN, BIO_R_UNINITIALIZED);
+  BIOerr(BIO_F_MEM_WRITE, BIO_R_WRITE_TO_READ_ONLY_BIO);
+  BIOerr(BIO_F_BIO_CTRL, BIO_R_UNSUPPORTED_METHOD);
+#endif
   std::string error = GetSslErrors();
 
   // OpenSSL/BoringSSL returns each error as a null terminated char*; since we
@@ -48,11 +53,22 @@ TEST(GetSslErrorsTest, ReturnsExpectedErrorrs) {
   std::vector<std::string> lines =
       absl::StrSplit(errors_without_last_char, '\n');
   ASSERT_THAT(lines, SizeIs(3));
-  EXPECT_THAT(lines[0], AllOf(HasSubstr("BIO"), HasSubstr("UNINITIALIZED")));
+
+#ifdef OPENSSL_IS_BORINGSSL
+  std::string uninitialized_str = "UNINITIALIZED";
+  std::string write_to_read_only_bio_str = "WRITE_TO_READ_ONLY_BIO";
+  std::string unsupported_method_str = "UNSUPPORTED_METHOD";
+#else
+  std::string uninitialized_str = "uninitialized";
+  std::string write_to_read_only_bio_str = "write to read only BIO";
+  std::string unsupported_method_str = "unsupported method";
+#endif
+
+  EXPECT_THAT(lines[0], AllOf(HasSubstr("BIO"), HasSubstr(uninitialized_str)));
   EXPECT_THAT(lines[1],
-              AllOf(HasSubstr("BIO"), HasSubstr("WRITE_TO_READ_ONLY_BIO")));
+              AllOf(HasSubstr("BIO"), HasSubstr(write_to_read_only_bio_str)));
   EXPECT_THAT(lines[2],
-              AllOf(HasSubstr("BIO"), HasSubstr("UNSUPPORTED_METHOD")));
+              AllOf(HasSubstr("BIO"), HasSubstr(unsupported_method_str)));
   // A second call to GetSslErrors() returns an empty string because the
   // OpenSSL/BoringSSL error queue is empty.
   EXPECT_THAT(GetSslErrors(), IsEmpty());
