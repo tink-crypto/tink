@@ -1280,7 +1280,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerLessRestrictive) {
               IsOk());
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
@@ -1295,7 +1295,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
                   absl::make_unique<TestAeadKeyManager>(
                       "type.googleapis.com/google.crypto.tink.AesGcmKey"),
                   true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
@@ -1310,7 +1310,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
               IsOk());
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 class PrivatePrimitiveA {};
@@ -1507,7 +1507,7 @@ TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
   EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
                   CreateTestPrivateKeyManagerFipsCompatible(),
                   CreateTestPublicKeyManagerFipsCompatible(), true),
-              StatusIs(util::error::ALREADY_EXISTS,
+              StatusIs(absl::StatusCode::kAlreadyExists,
                        HasSubstr("forbidden new key operation")));
 }
 
@@ -1757,29 +1757,29 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithWrongClasses) {
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager2>(),
-          absl::make_unique<TestPublicKeyTypeManager>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager>(),
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager2>(),
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<TestPrivateKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(),
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
 }
 
 class TestPublicKeyTypeManagerWithDifferentKeyType

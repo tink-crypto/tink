@@ -79,12 +79,12 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
     return crypto::tink::util::OkStatus();
   }
   if (it->second.key_manager_type_index() != key_manager_type_index) {
-    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+    return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered.",
                      type_url);
   }
   if (!it->second.new_key_allowed() && new_key_allowed) {
-    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+    return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered "
                      "with forbidden new key operation.",
                      type_url);

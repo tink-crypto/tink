@@ -789,6 +789,7 @@ cc_test(
         "//proto:empty_cc_proto",
         "//util:status",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

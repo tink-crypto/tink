@@ -436,7 +436,7 @@ crypto::tink::util::Status RegistryImpl::AddCatalogue(
         static_cast<Catalogue<P>*>(curr_catalogue->second.catalogue.get());
     if (std::type_index(typeid(*existing)) !=
         std::type_index(typeid(*catalogue))) {
-      return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+      return ToStatusF(absl::StatusCode::kAlreadyExists,
                        "A catalogue named '%s' has been already added.",
                        catalogue_name);
     }
@@ -682,7 +682,7 @@ crypto::tink::util::Status RegistryImpl::RegisterPrimitiveWrapper(
   if (it != primitive_to_wrapper_.end()) {
     if (!it->second.HasSameType(*wrapper)) {
       return util::Status(
-          crypto::tink::util::error::ALREADY_EXISTS,
+          absl::StatusCode::kAlreadyExists,
           "A wrapper named for this primitive has already been added.");
     }
     return crypto::tink::util::OkStatus();

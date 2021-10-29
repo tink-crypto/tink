@@ -681,6 +681,7 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::proto::empty_cc_proto
+    absl::status
     gmock
 )
 
