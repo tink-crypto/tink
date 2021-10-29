@@ -49,7 +49,7 @@ print_test() {
 
 #############################################################################
 
-print_test "generate_token_and_public_keyset"
+print_test "generate_token"
 
 # Generate a signed token
 test_command ${SIGN_CLI} \
@@ -57,22 +57,28 @@ test_command ${SIGN_CLI} \
   --audience "${AUDIENCE}" \
   --token_path "${TOKEN_PATH}"
 
-if (( TEST_STATUS != 0 )); then
+if (( TEST_STATUS == 0 )); then
+  echo "+++ Success: Generating the token succeeded."
+else
   echo "--- Failure: Generating the token failed."
   exit 1
 fi
+
+#############################################################################
+
+print_test "generate_public_keyset"
 
 # Generate the public keyset in JWK format
 test_command ${GEN_PUBLIC_JWK_SET_CLI} \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
   --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}"
 
-if (( TEST_STATUS != 0 )); then
-  echo "--- Failure: Generating the public keyset failed."
+if (( TEST_STATUS == 0 )); then
+  echo "+++ Success: Generating the public JWK set succeeded."
+else
+  echo "--- Failure: Generating the public JWK set failed."
   exit 1
 fi
-
-echo "+++ Success."
 
 #############################################################################
 
@@ -85,9 +91,9 @@ test_command ${VERIFY_CLI} \
   --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS == 0 )); then
-  echo "+++ Success: Token is valid."
+  echo "+++ Success: Verification passed for a valid token."
 else
-  echo "--- Failure: Token is invalid."
+  echo "--- Failure: Verification failed for a valid token."
   exit 1
 fi
 
