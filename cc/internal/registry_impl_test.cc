@@ -1846,7 +1846,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->NewKeyData(key_template);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "CreateKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "CreateKey worked");
   }
 
   crypto::tink::util::StatusOr<EcdsaPrivateKey> DeriveKey(
@@ -1861,7 +1862,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->DeriveKey(key_template, input_stream);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "DeriveKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "DeriveKey worked");
   }
 
   crypto::tink::util::StatusOr<EcdsaPublicKey> GetPublicKey(
@@ -1874,7 +1876,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->NewKeyData(key_template);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "GetPublicKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "GetPublicKey worked");
   }
 
  private:
@@ -1919,7 +1922,7 @@ TEST_F(RegistryImplTest, CanDelegateCreateKey) {
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
   key_template.set_value(format.SerializeAsString());
   EXPECT_THAT(registry_impl.NewKeyData(key_template).status(),
-              StatusIs(util::error::DEADLINE_EXCEEDED,
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
                        HasSubstr("CreateKey worked")));
 }
 
@@ -1947,9 +1950,9 @@ TEST_F(RegistryImplTest, CanDelegateDeriveKey) {
   key_template.set_type_url(
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
   key_template.set_value(format.SerializeAsString());
-  EXPECT_THAT(
-      registry_impl.DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::DEADLINE_EXCEEDED, HasSubstr("DeriveKey worked")));
+  EXPECT_THAT(registry_impl.DeriveKey(key_template, nullptr).status(),
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
+                       HasSubstr("DeriveKey worked")));
 }
 
 TEST_F(RegistryImplTest, CanDelegateGetPublicKey) {
@@ -1977,7 +1980,7 @@ TEST_F(RegistryImplTest, CanDelegateGetPublicKey) {
                   .GetPublicKeyData(DelegatingKeyTypeManager().get_key_type(),
                                     private_key.SerializeAsString())
                   .status(),
-              StatusIs(util::error::DEADLINE_EXCEEDED,
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
                        HasSubstr("GetPublicKey worked")));
 }
 
