@@ -18,15 +18,15 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-import "tink/proto/tpm_common.proto";
 import "tink/proto/hmac.proto";
+import "tink/proto/tpm_common.proto";
 
-option go_package = "github.com/google/tink/proto/tpm_hmac";
+option go_package = "github.com/google/tink/proto/tpm_hmac_go_proto";
 
 message TpmHmacParams {
   HmacParams hmac_params = 1;
   TpmObjectAuthPolicy auth_policy = 2;
-  repeated TpmPrimaryKey parents = 3;
+  TpmHierarchy key_hierarchy = 3;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.TpmHmacKey
@@ -35,11 +35,10 @@ message TpmHmacKey {
   TpmHmacParams params = 2;
   bytes wrapped_key = 3;
   bytes public_template = 4;
+  repeated TpmPrimaryKey parents = 5;
 }
 
 message TpmHmacKeyFormat {
   uint32 version = 1;
   TpmHmacParams params = 2;
 }
-
-

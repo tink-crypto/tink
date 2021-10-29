@@ -20,7 +20,7 @@ package google.crypto.tink;
 
 import "tink/proto/common.proto";
 
-option go_package = "github.com/google/tink/proto/tpm_common";
+option go_package = "github.com/google/tink/proto/tpm_common_go_proto";
 
 message TpmObjectAuthPolicy {
   bool password_required = 1;
@@ -38,9 +38,22 @@ message TpmObjectAuthPolicy {
   repeated Pcr pcrs = 2;
 }
 
-// Defines the public parameters needed to re-create a Storage Key in the TPM.
-// The public template is a marshaled TPM2B_PUBLIC structure
+// Defines the public parameters needed to re-create a Storage Primary Key in
+// the TPM. The public_template is a marshaled TPM2B_PUBLIC structure
 // (https://trustedcomputinggroup.org/wp-content/uploads/TCG_TPM2_r1p59_Part2_Structures_pub.pdf#page=160).
 message TpmPrimaryKey {
   bytes public_template = 1;
+}
+
+// A Hierarchy is a collection of entities that are related and managed as a
+// group. All primary objects in the TPM are places under one of the following
+// hierarchies.
+enum TpmHierarchy {
+  HIERARCHY_UNSPECIFIED = 0;
+  // TPM (reserved handle) hierarchy for platform owner.
+  HIERARCHY_OWNER = 1;
+  // TPM (reserved handle) hierarchy for platform manufacter.
+  HIERARCHY_PLATFORM = 2;
+  // TPM (reserved handle) hierarchy for privacy administration.
+  HIERARCHY_ENDORSEMENT = 3;
 }

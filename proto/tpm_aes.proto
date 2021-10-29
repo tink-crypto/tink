@@ -18,27 +18,34 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-import "proto/hmac.proto";
 import "proto/tpm_common.proto";
 
-option go_package = "github.com/google/tink/proto/tpm_hmac_go_proto";
+option go_package = "github.com/google/tink/proto/tpm_aes_go_proto";
 
-message TpmHmacParams {
-  HmacParams hmac_params = 1;
-  TpmObjectAuthPolicy auth_policy = 2;
+message TpmAesKeyParams {
+  TpmObjectAuthPolicy auth_policy = 1;
+
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+    // Cipher Feedback Mode - default TPM block cipher mode of operation.
+    MODE_CFB = 1;
+    // Counter mode of operation.
+    MODE_CTR = 2;
+  }
+  Mode mode = 2;
+
   TpmHierarchy key_hierarchy = 3;
 }
 
-// key_type: type.googleapis.com/google.crypto.tink.TpmHmacKey
-message TpmHmacKey {
+// key_type: type.googleapis.com/google.crypto.tink.TpmAesKey
+// TpmAesKey is TPM Restricted Storage key used for sealing blobs of data.
+message TpmAesKey {
   uint32 version = 1;
-  TpmHmacParams params = 2;
-  bytes wrapped_key = 3;
-  bytes public_template = 4;
-  repeated TpmPrimaryKey parents = 5;
+  TpmAesKeyParams params = 2;
+  TpmPrimaryKey primary_key = 3;
 }
 
-message TpmHmacKeyFormat {
-  uint32 version = 1;
-  TpmHmacParams params = 2;
+message TpmAesKeyFormat {
+  uint32 key_size = 1;
+  TpmAesKeyParams params = 2;
 }
