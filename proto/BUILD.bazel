@@ -387,53 +387,6 @@ proto_library(
 )
 
 # -----------------------------------------------
-# TPM common
-# -----------------------------------------------
-proto_library(
-    name = "tpm_common_proto",
-    srcs = [
-        "tpm_common.proto",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [":common_proto"],
-)
-
-# -----------------------------------------------
-# TPM hmac
-# -----------------------------------------------
-proto_library(
-    name = "tpm_hmac_proto",
-    srcs = [
-        "tpm_hmac.proto",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":hmac_proto",
-        ":tpm_common_proto",
-    ],
-)
-
-# ----------------------------------------------------------------------------
-# TPM AEAD
-# ----------------------------------------------------------------------------
-proto_library(
-    name = "tpm_aes_proto",
-    srcs = ["tpm_aes.proto"],
-    visibility = ["//visibility:public"],
-    deps = [":tpm_common_proto"],
-)
-
-proto_library(
-    name = "tpm_aes_hmac_aead_proto",
-    srcs = ["tpm_aes_hmac_aead.proto"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":tpm_aes_proto",
-        ":tpm_hmac_proto",
-    ],
-)
-
-# -----------------------------------------------
 # empty
 # -----------------------------------------------
 proto_library(
