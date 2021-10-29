@@ -306,7 +306,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs13072Sha256F4) {
   EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
   EXPECT_EQ(HashType::SHA256, key_format.params().hash_type());
   EXPECT_GE(key_format.modulus_size_in_bits(), 3072);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> resulting_bn =
       internal::StringToBignum(key_format.public_exponent());
@@ -336,7 +336,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPkcs14096Sha512F4) {
   EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
   EXPECT_EQ(HashType::SHA512, key_format.params().hash_type());
   EXPECT_GE(key_format.modulus_size_in_bits(), 4096);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> resulting_bn =
       internal::StringToBignum(key_format.public_exponent());
@@ -368,7 +368,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss3072Sha256Sha256F4) {
   EXPECT_EQ(HashType::SHA256, key_format.params().mgf1_hash());
   EXPECT_EQ(32, key_format.params().salt_length());
   EXPECT_GE(key_format.modulus_size_in_bits(), 3072);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> resulting_bn =
       internal::StringToBignum(key_format.public_exponent());
@@ -401,7 +401,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss4096Sha384Sha384F4) {
   EXPECT_EQ(HashType::SHA384, key_format.params().mgf1_hash());
   EXPECT_EQ(48, key_format.params().salt_length());
   EXPECT_GE(key_format.modulus_size_in_bits(), 4096);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> resulting_bn =
       internal::StringToBignum(key_format.public_exponent());
@@ -434,7 +434,7 @@ TEST(SignatureKeyTemplatesTest, KeyTemplatesWithRsaSsaPss4096Sha512Sha512F4) {
   EXPECT_EQ(HashType::SHA512, key_format.params().mgf1_hash());
   EXPECT_EQ(64, key_format.params().salt_length());
   EXPECT_GE(key_format.modulus_size_in_bits(), 4096);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), RSA_F4);
 
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> resulting_bn =

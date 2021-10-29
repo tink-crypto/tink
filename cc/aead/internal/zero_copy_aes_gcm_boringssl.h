@@ -23,6 +23,7 @@
 #include "absl/base/macros.h"
 #include "openssl/aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -54,10 +55,10 @@ class ZeroCopyAesGcmBoringSsl : public ZeroCopyAead {
   static constexpr int kIvSizeInBytes = 12;
   static constexpr int kTagSizeInBytes = 16;
 
-  explicit ZeroCopyAesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
+  explicit ZeroCopyAesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> ctx)
       : ctx_(std::move(ctx)) {}
 
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace internal

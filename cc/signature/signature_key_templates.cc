@@ -21,6 +21,7 @@
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/constants.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
@@ -80,7 +81,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
   auto params = key_format.mutable_params();
   params->set_hash_type(hash_type);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
@@ -103,7 +104,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPssKeyTemplate(HashType sig_hash,
   params->set_mgf1_hash(mgf1_hash);
   params->set_salt_length(salt_length);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());

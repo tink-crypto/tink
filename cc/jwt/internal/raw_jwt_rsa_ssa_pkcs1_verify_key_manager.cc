@@ -21,6 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -68,8 +69,11 @@ Status RawJwtRsaSsaPkcs1VerifyKeyManager::ValidateKey(
     const JwtRsaSsaPkcs1PublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  util::StatusOr<bssl::UniquePtr<BIGNUM>> n = internal::StringToBignum(key.n());
-  if (!n.ok()) return n.status();
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n());
+  if (!n.ok()) {
+    return n.status();
+  }
   util::Status modulus_status =
       subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
           BN_num_bits(n->get()));

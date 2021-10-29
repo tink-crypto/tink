@@ -20,6 +20,7 @@
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -35,7 +36,7 @@ util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
   if (!aead.ok()) {
     return aead.status();
   }
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
+  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
       *aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
   if (ctx == nullptr) {
     return util::Status(util::error::INTERNAL,

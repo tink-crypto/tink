@@ -22,6 +22,7 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         "//aead:cord_aead",
+        "//internal:ssl_unique_ptr",
         "//subtle:random",
         "//subtle:subtle_util",
         "//subtle:subtle_util_boringssl",
@@ -51,6 +52,7 @@ cc_library(
     deps = [
         ":zero_copy_aead",
         "//aead/internal:aead_util",
+        "//internal:ssl_unique_ptr",
         "//subtle:random",
         "//subtle:subtle_util",
         "//util:secret_data",

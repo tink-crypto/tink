@@ -66,7 +66,7 @@ JwtRsaSsaPkcs1KeyFormat CreateKeyFormat(JwtRsaSsaPkcs1Algorithm algorithm,
   JwtRsaSsaPkcs1KeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
@@ -120,6 +120,7 @@ void CheckNewKey(const JwtRsaSsaPkcs1PrivateKey& private_key,
   EXPECT_GT(public_key.e().length(), 0);
   EXPECT_EQ(public_key.algorithm(), key_format.algorithm());
   EXPECT_EQ(key_format.public_exponent(), public_key.e());
+
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
       internal::StringToBignum(public_key.n());
   ASSERT_THAT(n.status(), IsOk());
@@ -138,11 +139,10 @@ void CheckNewKey(const JwtRsaSsaPkcs1PrivateKey& private_key,
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> dq =
       internal::StringToBignum(private_key.dq());
   ASSERT_THAT(dq.status(), IsOk());
-
-  bssl::UniquePtr<BN_CTX> ctx(BN_CTX_new());
+  internal::SslUniquePtr<BN_CTX> ctx(BN_CTX_new());
 
   // Check n = p * q.
-  auto n_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+  auto n_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()));
   EXPECT_TRUE(BN_equal_consttime(n_calc.get(), n->get()));
 
@@ -150,16 +150,16 @@ void CheckNewKey(const JwtRsaSsaPkcs1PrivateKey& private_key,
   EXPECT_GE(BN_num_bits(n->get()), key_format.modulus_size_in_bits());
 
   // dp = d mod (p - 1)
-  auto pm1 = bssl::UniquePtr<BIGNUM>(BN_dup(p->get()));
+  auto pm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(p->get()));
   EXPECT_TRUE(BN_sub_word(pm1.get(), 1));
-  auto dp_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+  auto dp_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()));
   EXPECT_TRUE(BN_equal_consttime(dp_calc.get(), dp->get()));
 
   // dq = d mod (q - 1)
-  auto qm1 = bssl::UniquePtr<BIGNUM>(BN_dup(q->get()));
+  auto qm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(q->get()));
   EXPECT_TRUE(BN_sub_word(qm1.get(), 1));
-  auto dq_calc = bssl::UniquePtr<BIGNUM>(BN_new());
+  auto dq_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()));
 
   EXPECT_TRUE(BN_equal_consttime(dq_calc.get(), dq->get()));

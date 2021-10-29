@@ -22,6 +22,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/sig_util.h"
@@ -86,7 +87,7 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
 
 StatusOr<JwtRsaSsaPssPrivateKey> RawJwtRsaSsaPssSignKeyManager::CreateKey(
     const JwtRsaSsaPssKeyFormat& key_format) const {
-  util::StatusOr<bssl::UniquePtr<BIGNUM>> e =
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> e =
       internal::StringToBignum(key_format.public_exponent());
   if (!e.ok()) return e.status();
 

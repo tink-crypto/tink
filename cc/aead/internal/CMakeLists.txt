@@ -18,6 +18,7 @@ tink_cc_library(
     cord_aes_gcm_boringssl.cc
     cord_aes_gcm_boringssl.h
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::subtle::random
     tink::subtle::subtle_util
     tink::subtle::subtle_util_boringssl
@@ -49,6 +50,7 @@ tink_cc_library(
     absl::memory
     crypto
     tink::aead::internal::aead_util
+    tink::internal::ssl_unique_ptr
     tink::aead::internal::zero_copy_aead
     tink::subtle::random
     tink::subtle::subtle_util

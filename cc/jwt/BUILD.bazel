@@ -120,6 +120,7 @@ cc_library(
     include_prefix = "tink/jwt",
     visibility = ["//visibility:public"],
     deps = [
+        "//internal:ssl_unique_ptr",
         "//proto:common_cc_proto",
         "//proto:jwt_ecdsa_cc_proto",
         "//proto:jwt_hmac_cc_proto",

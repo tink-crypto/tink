@@ -21,6 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -40,9 +41,9 @@ using ::crypto::tink::subtle::RsaSsaPssVerifyBoringSsl;
 using ::crypto::tink::util::Enums;
 using ::crypto::tink::util::Status;
 using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::HashType;
 using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
 using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
-using ::google::crypto::tink::HashType;
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
@@ -66,23 +67,34 @@ RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
 
   util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verify =
       subtle::RsaSsaPssVerifyBoringSsl::New(rsa_pub_key, params);
-  if (!verify.ok()) return verify.status();
+  if (!verify.ok()) {
+    return verify.status();
+  }
   return {*std::move(verify)};
 }
 
 Status RawJwtRsaSsaPssVerifyKeyManager::ValidateKey(
     const JwtRsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
-  if (!status.ok()) return status;
-  util::StatusOr<bssl::UniquePtr<BIGNUM>> n = internal::StringToBignum(key.n());
-  if (!n.ok()) return n.status();
+  if (!status.ok()) {
+    return status;
+  }
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n());
+  if (!n.ok()) {
+    return n.status();
+  }
   util::Status modulus_status =
       subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
           BN_num_bits(n->get()));
-  if (!modulus_status.ok()) return modulus_status;
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
   util::Status exponent_status =
       subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(key.e());
-  if (!exponent_status.ok()) return exponent_status;
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return ValidateAlgorithm(key.algorithm());
 }
 

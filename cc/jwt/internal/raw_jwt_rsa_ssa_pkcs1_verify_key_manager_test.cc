@@ -24,6 +24,7 @@
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
@@ -75,7 +76,7 @@ JwtRsaSsaPkcs1KeyFormat CreateKeyFormat(JwtRsaSsaPkcs1Algorithm algorithm,
   JwtRsaSsaPkcs1KeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());

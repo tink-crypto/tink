@@ -21,6 +21,7 @@
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
@@ -72,7 +73,7 @@ RsaSsaPssKeyFormat CreateKeyFormat(HashType sig_hash, HashType mgf1_hash,
   params->set_salt_length(salt_length);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
 
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
       internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());

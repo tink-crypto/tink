@@ -311,6 +311,7 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pkcs1_sign_key_manager.cc
     raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
     absl::memory
     absl::strings
@@ -337,6 +338,7 @@ tink_cc_test(
   SRCS
     raw_jwt_rsa_ssa_pkcs1_sign_key_manager_test.cc
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
     gmock
@@ -364,6 +366,7 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::constants
@@ -382,6 +385,7 @@ tink_cc_test(
   SRCS
     raw_jwt_rsa_ssa_pkcs1_verify_key_manager_test.cc
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
     tink::core::public_key_sign
@@ -405,6 +409,7 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pss_sign_key_manager.cc
     raw_jwt_rsa_ssa_pss_sign_key_manager.h
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
     absl::memory
     absl::strings
@@ -431,6 +436,7 @@ tink_cc_test(
   SRCS
     raw_jwt_rsa_ssa_pss_sign_key_manager_test.cc
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
     gmock
     absl::flat_hash_set
@@ -456,6 +462,7 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::constants
@@ -475,6 +482,7 @@ tink_cc_test(
   SRCS
     raw_jwt_rsa_ssa_pss_verify_key_manager_test.cc
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
     gmock
@@ -682,6 +690,7 @@ tink_cc_test(
   DEPS
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::jwt_rsa_ssa_pkcs1_verify_key_manager
     gmock
@@ -734,6 +743,7 @@ tink_cc_test(
   DEPS
     tink::jwt::internal::json_util
     tink::jwt::internal::jwt_format
+    tink::internal::ssl_unique_ptr
     tink::jwt::internal::jwt_rsa_ssa_pss_sign_key_manager
     tink::jwt::internal::jwt_rsa_ssa_pss_verify_key_manager
     gmock

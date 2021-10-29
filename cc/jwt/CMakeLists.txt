@@ -176,6 +176,7 @@ tink_cc_library(
     jwt_key_templates.cc
     jwt_key_templates.h
   DEPS
+    tink::internal::ssl_unique_ptr
     tink::proto::common_cc_proto
     tink::proto::jwt_ecdsa_cc_proto
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto

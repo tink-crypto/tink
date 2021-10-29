@@ -24,11 +24,10 @@
 
 #include "absl/strings/cord.h"
 #include "openssl/aead.h"
-#include "openssl/base.h"
-#include "openssl/cipher.h"
 #include "openssl/err.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/aead_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
@@ -64,7 +63,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
     absl::Cord plaintext, absl::Cord additional_data) const {
   std::string iv = subtle::Random::GetRandomBytes(kIvSizeInBytes);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
 
   if (!EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
     return util::Status(util::error::INTERNAL, "Encryption init failed");
@@ -139,7 +138,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
   absl::Cord raw_ciphertext = ciphertext.Subcord(
       kIvSizeInBytes, ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (!EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
     return util::Status(util::error::INTERNAL, "Decryption init failed");
   }
