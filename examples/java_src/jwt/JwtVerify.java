@@ -11,22 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-// [START jwt-signature-example]
+// [START java-jwt-verify-example]
 package jwt;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.crypto.tink.CleartextKeysetHandle;
-import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.jwt.JwtPublicKeySign;
+import com.google.crypto.tink.jwt.JwkSetConverter;
 import com.google.crypto.tink.jwt.JwtPublicKeyVerify;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.jwt.JwtValidator;
-import com.google.crypto.tink.jwt.RawJwt;
 import com.google.crypto.tink.jwt.VerifiedJwt;
+import com.google.crypto.tink.tinkkey.KeyAccess;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
@@ -35,68 +32,39 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * A command-line utility for signing and verifying JSON Web Tokens (JWTs).
- *
- * <p>It loads cleartext keys from disk - this is not recommended!
+ * A command-line utility for verifying JSON Web Tokens (JWTs).
  *
  * <p>It requires the following arguments:
  *
  * <ul>
- *   <li>mode: either 'sign' or 'verify'.
- *   <li>key-file: Read the key material from this file.
+ *   <li>public-jwkset-file: Name of the input file containing the public keyset in JWK set format.
  *   <li>audience: The audience claim to be used in the token
- *   <li>token-file: name of the file containing the signed JWT.
+ *   <li>token-file: name of the input file containing the signed JWT.
  */
-public final class JwtSignatureExample {
+public final class JwtVerify {
   public static void main(String[] args) throws Exception {
-    if (args.length != 4) {
-      System.err.printf("Expected 4 parameters, got %d\n", args.length);
+    if (args.length != 3) {
+      System.err.printf("Expected 3 parameters, got %d\n", args.length);
       System.err.println(
-          "Usage: java JwtSignatureExample sign/verify key-file audience token-file");
+          "Usage: java JwtVerify public-jwk-set-file audience token-file");
       System.exit(1);
     }
 
-    String mode = args[0];
-    if (!mode.equals("sign") && !mode.equals("verify")) {
-      System.err.println("Incorrect mode. Please select sign or verify.");
-      System.exit(1);
-    }
-    File keyFile = new File(args[1]);
-    String audience = args[2];
-    File tokenFile = new File(args[3]);
+    File publicJwkSetFile = new File(args[0]);
+    String audience = args[1];
+    File tokenFile = new File(args[2]);
 
     // Register all JWT signature key types with the Tink runtime.
     JwtSignatureConfig.register();
 
-    // Read the keyset into a KeysetHandle.
-    KeysetHandle handle = null;
+    // Read the public keyset in JWK set format into a KeysetHandle.
+    KeysetHandle publicKeysetHandle = null;
     try {
-      handle = CleartextKeysetHandle.read(JsonKeysetReader.withFile(keyFile));
+      String publicJwkSet = new String(Files.readAllBytes(publicJwkSetFile.toPath()), UTF_8);
+      publicKeysetHandle = JwkSetConverter.toKeysetHandle(publicJwkSet, KeyAccess.publicAccess());
     } catch (GeneralSecurityException | IOException ex) {
       System.err.println("Cannot read keyset, got error: " + ex);
       System.exit(1);
-    }
-
-    if (mode.equals("sign")) {
-      // Get the primitive.
-      JwtPublicKeySign signer = null;
-      try {
-        signer = handle.getPrimitive(JwtPublicKeySign.class);
-      } catch (GeneralSecurityException ex) {
-        System.err.println("Cannot create primitive, got error: " + ex);
-        System.exit(1);
-      }
-
-      // Use the primitive to sign a token that expires in 100 seconds.
-      RawJwt rawJwt = RawJwt.newBuilder()
-          .addAudience(audience)
-          .setExpiration(Instant.now().plusSeconds(100))
-          .build();
-      String signedToken = signer.signAndEncode(rawJwt);
-      try (FileOutputStream stream = new FileOutputStream(tokenFile)) {
-        stream.write(signedToken.getBytes(UTF_8));
-      }
-      System.exit(0);
     }
 
     List<String> lines = Files.readAllLines(tokenFile.toPath());
@@ -109,7 +77,7 @@ public final class JwtSignatureExample {
     // Get the primitive.
     JwtPublicKeyVerify verifier = null;
     try {
-      verifier = handle.getPrimitive(JwtPublicKeyVerify.class);
+      verifier = publicKeysetHandle.getPrimitive(JwtPublicKeyVerify.class);
     } catch (GeneralSecurityException ex) {
       System.err.println("Cannot create primitive, got error: " + ex);
       System.exit(1);
@@ -129,6 +97,6 @@ public final class JwtSignatureExample {
     System.exit(0);
   }
 
-  private JwtSignatureExample() {}
+  private JwtVerify() {}
 }
-// [END jwt-signature-example]
+// [END java-jwt-verify-example]
