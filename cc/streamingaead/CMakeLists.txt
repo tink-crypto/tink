@@ -281,6 +281,7 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(

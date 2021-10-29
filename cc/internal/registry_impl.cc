@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -32,7 +33,7 @@ StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
-    return ToStatusF(util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
   return &it->second;

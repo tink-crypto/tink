@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
@@ -128,7 +129,7 @@ class PrimitiveSet {
     typename CiphertextPrefixToPrimitivesMap::iterator found =
         primitives_.find(std::string(identifier));
     if (found == primitives_.end()) {
-      return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+      return ToStatusF(absl::StatusCode::kNotFound,
                        "No primitives found for identifier '%s'.", identifier);
     }
     return &(found->second);

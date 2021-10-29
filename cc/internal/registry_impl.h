@@ -25,6 +25,7 @@
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -454,7 +455,7 @@ crypto::tink::util::StatusOr<const Catalogue<P>*> RegistryImpl::get_catalogue(
   absl::MutexLock lock(&maps_mutex_);
   auto catalogue_entry = name_to_catalogue_map_.find(catalogue_name);
   if (catalogue_entry == name_to_catalogue_map_.end()) {
-    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No catalogue named '%s' has been added.", catalogue_name);
   }
   if (catalogue_entry->second.type_id_name != typeid(P).name()) {
@@ -699,7 +700,7 @@ RegistryImpl::get_key_manager(absl::string_view type_url) const {
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
-    return ToStatusF(crypto::tink::util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
   return it->second.get_key_manager<P>(type_url);
@@ -732,7 +733,7 @@ RegistryImpl::GetLegacyWrapper() const {
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
-        util::error::NOT_FOUND,
+        absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
   return it->second.GetLegacyWrapper<P>();
@@ -745,7 +746,7 @@ RegistryImpl::GetKeysetWrapper() const {
   auto it = primitive_to_wrapper_.find(std::type_index(typeid(P)));
   if (it == primitive_to_wrapper_.end()) {
     return util::Status(
-        util::error::NOT_FOUND,
+        absl::StatusCode::kNotFound,
         absl::StrCat("No wrapper registered for type ", typeid(P).name()));
   }
   return it->second.GetKeysetWrapper<P>();

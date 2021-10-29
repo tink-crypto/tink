@@ -239,6 +239,7 @@ tink_cc_test(
   NAME hybrid_config_test
   SRCS hybrid_config_test.cc
   DEPS
+    absl::status
     tink::hybrid::hybrid_config
     tink::hybrid::hybrid_key_templates
     tink::config::tink_fips
@@ -256,6 +257,7 @@ tink_cc_test(
   NAME hpke_config_test
   SRCS hpke_config_test.cc
   DEPS
+    absl::status
     tink::config::tink_fips
     tink::core::config
     tink::core::hybrid_decrypt

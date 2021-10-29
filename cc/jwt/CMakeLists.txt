@@ -12,6 +12,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     protobuf::libprotobuf
+    absl::status
     absl::strings
     absl::time
 )

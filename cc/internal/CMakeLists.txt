@@ -85,6 +85,7 @@ tink_cc_library(
     absl::flat_hash_map
     absl::memory
     absl::optional
+    absl::status
     absl::strings
     absl::synchronization
 )
@@ -179,6 +180,7 @@ tink_cc_test(
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     gmock
 )
 

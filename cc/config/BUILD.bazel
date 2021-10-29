@@ -73,6 +73,7 @@ cc_test(
         "//aead:aes_gcm_key_manager",
         "//util:status",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

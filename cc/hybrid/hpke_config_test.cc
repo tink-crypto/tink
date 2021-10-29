@@ -22,7 +22,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/config.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
@@ -54,10 +54,10 @@ TEST_F(HpkeConfigTest, Basic) {
 
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   internal::HpkePrivateKeyManager().get_key_type()).status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
                   internal::HpkePublicKeyManager().get_key_type()).status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(RegisterHpke(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   internal::HpkePrivateKeyManager().get_key_type()).status(),
@@ -86,7 +86,7 @@ TEST_F(HpkeConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

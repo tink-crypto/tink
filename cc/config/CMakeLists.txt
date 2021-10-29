@@ -45,6 +45,7 @@ tink_cc_test(
   NAME tink_config_test
   SRCS tink_config_test.cc
   DEPS
+    absl::status
     tink::aead::aes_gcm_key_manager
     tink::config::tink_config
     tink::core::aead

@@ -19,11 +19,14 @@
 #include <random>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/registry.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -91,7 +94,7 @@ Status KeysetManager::Enable(uint32_t key_id) {
       return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
@@ -113,7 +116,7 @@ Status KeysetManager::Disable(uint32_t key_id) {
       return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
@@ -133,7 +136,7 @@ Status KeysetManager::Delete(uint32_t key_id) {
       return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
@@ -157,7 +160,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
       return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
@@ -175,7 +178,7 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
       return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 

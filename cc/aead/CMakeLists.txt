@@ -311,6 +311,7 @@ tink_cc_test(
   NAME aead_config_test
   SRCS aead_config_test.cc
   DEPS
+    absl::status
     tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::aead::aes_gcm_key_manager
@@ -318,7 +319,7 @@ tink_cc_test(
     tink::core::config
     tink::core::keyset_handle
     tink::core::registry
-    tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
 )
@@ -479,6 +480,7 @@ tink_cc_test(
   DEPS
     absl::base
     absl::memory
+    absl::status
     absl::strings
     tink::aead::aead_config
     tink::aead::aead_key_templates

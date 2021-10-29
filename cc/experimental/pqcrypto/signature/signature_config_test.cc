@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
@@ -51,11 +52,11 @@ TEST_F(PcqSignatureConfigTest, CheckDilithium) {
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   DilithiumSignKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   DilithiumVerifyKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   DilithiumSignKeyManager().get_key_type())
@@ -75,11 +76,11 @@ TEST_F(PcqSignatureConfigTest, CheckSphincs) {
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   SphincsSignKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   SphincsVerifyKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   SphincsSignKeyManager().get_key_type())
@@ -99,11 +100,11 @@ TEST_F(PcqSignatureConfigTest, CheckFalcon) {
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   FalconSignKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   FalconVerifyKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(PqSignatureConfigRegister(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   FalconSignKeyManager().get_key_type())

@@ -19,6 +19,7 @@
 #include <list>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
@@ -52,7 +53,7 @@ TEST_F(MacConfigTest, Basic) {
 
   EXPECT_THAT(
       Registry::get_key_manager<Mac>(HmacKeyManager().get_key_type()).status(),
-      StatusIs(util::error::NOT_FOUND));
+      StatusIs(absl::StatusCode::kNotFound));
   ASSERT_THAT(MacConfig::Register(), IsOk());
   EXPECT_THAT(
       Registry::get_key_manager<Mac>(HmacKeyManager().get_key_type()).status(),
@@ -108,7 +109,7 @@ TEST_F(MacConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

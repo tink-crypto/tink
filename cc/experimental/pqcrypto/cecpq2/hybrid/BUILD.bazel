@@ -107,6 +107,7 @@ cc_test(
         ":cecpq2_aead_hkdf_public_key_manager",
         ":cecpq2_hybrid_config",
         ":cecpq2_hybrid_key_templates",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:hybrid_decrypt",
         "@tink_cc//:hybrid_encrypt",

@@ -609,6 +609,7 @@ tink_cc_test(
     tink::signature::signature_key_templates
     gmock
     absl::memory
+    absl::status
     crypto
     tink::core::config
     tink::core::keyset_handle

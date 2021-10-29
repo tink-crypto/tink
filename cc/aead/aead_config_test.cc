@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -27,7 +28,7 @@
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
 #include "tink/registry.h"
-#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
@@ -57,7 +58,7 @@ TEST_F(AeadConfigTest, RegisterWorks) {
   }
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(AeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
@@ -116,7 +117,7 @@ TEST_F(AeadConfigTest, RegisterNonFipsTemplates) {
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 
@@ -148,7 +149,7 @@ TEST_F(AeadConfigTest, RegisterFailsIfBoringCryptoNotAvailable) {
 
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(AeadConfig::Register(), StatusIs(util::error::INTERNAL));
 }
 

@@ -22,6 +22,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
@@ -57,11 +58,11 @@ TEST_F(HybridConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
                   EciesAeadHkdfPublicKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(HybridConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
@@ -176,7 +177,7 @@ TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

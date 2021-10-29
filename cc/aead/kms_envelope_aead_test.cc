@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/base/internal/endian.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
@@ -76,7 +77,7 @@ TEST(KmsEnvelopeAeadTest, MissingDekKeyManager) {
   auto remote_aead = absl::make_unique<DummyAead>(remote_aead_name);
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
   EXPECT_THAT(aead_result.status(),
-              StatusIs(util::error::NOT_FOUND, HasSubstr("AesEaxKey")));
+              StatusIs(absl::StatusCode::kNotFound, HasSubstr("AesEaxKey")));
 }
 
 TEST(KmsEnvelopeAeadTest, WrongDekPrimitive) {

@@ -387,6 +387,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::synchronization
 )
 
@@ -484,6 +485,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     absl::base
     absl::memory
+    absl::status
     absl::synchronization
   PUBLIC
 )
@@ -510,6 +512,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::base
+    absl::status
     absl::strings
     absl::synchronization
 )
@@ -726,6 +729,7 @@ tink_cc_test(
   NAME kms_clients_test
   SRCS core/kms_clients_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::core::aead
     tink::core::kms_client

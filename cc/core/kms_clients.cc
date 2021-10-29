@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/kms_client.h"
@@ -55,7 +56,8 @@ StatusOr<const KmsClient*> KmsClients::LocalGet(absl::string_view key_uri) {
   for (const auto& client : clients_) {
     if (client->DoesSupport(key_uri)) return client.get();
   }
-  return ToStatusF(util::error::NOT_FOUND, "no KmsClient found for key '%s'.",
+  return ToStatusF(absl::StatusCode::kNotFound,
+                   "no KmsClient found for key '%s'.",
                    std::string(key_uri).c_str());
 }
 

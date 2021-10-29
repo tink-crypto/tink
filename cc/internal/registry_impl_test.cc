@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "openssl/crypto.h"
 #include "tink/aead.h"
@@ -1234,7 +1235,7 @@ TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
 
   EXPECT_THAT(
       RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::NOT_FOUND, HasSubstr("No manager")));
+      StatusIs(absl::StatusCode::kNotFound, HasSubstr("No manager")));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {

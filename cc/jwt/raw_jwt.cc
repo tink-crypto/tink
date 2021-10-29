@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
@@ -234,7 +235,7 @@ util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimAudience));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND, "No Audiences found");
+    return util::Status(absl::StatusCode::kNotFound, "No Audiences found");
   }
   google::protobuf::Value list = it->second;
   if (list.kind_case() != google::protobuf::Value::kListValue) {
@@ -262,7 +263,7 @@ util::StatusOr<std::string> RawJwt::GetJwtId() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimJwtId));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND, "No JwtId found");
+    return util::Status(absl::StatusCode::kNotFound, "No JwtId found");
   }
   const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kStringValue) {
@@ -279,7 +280,7 @@ util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimExpiration));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND, "No Expiration found");
+    return util::Status(absl::StatusCode::kNotFound, "No Expiration found");
   }
   const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -297,7 +298,7 @@ util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimNotBefore));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND, "No NotBefore found");
+    return util::Status(absl::StatusCode::kNotFound, "No NotBefore found");
   }
   const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -315,7 +316,7 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimIssuedAt));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND, "No IssuedAt found");
+    return util::Status(absl::StatusCode::kNotFound, "No IssuedAt found");
   }
   const google::protobuf::Value& value = it->second;
   if (value.kind_case() != google::protobuf::Value::kNumberValue) {
@@ -342,7 +343,7 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND,
+    return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
   const google::protobuf::Value& value = it->second;
@@ -367,7 +368,7 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND,
+    return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
   const google::protobuf::Value& value = it->second;
@@ -391,7 +392,7 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND,
+    return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
   const google::protobuf::Value& value = it->second;
@@ -416,7 +417,7 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND,
+    return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
   const google::protobuf::Value& value = it->second;
@@ -442,7 +443,7 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
   auto fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
-    return util::Status(util::error::NOT_FOUND,
+    return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
   const google::protobuf::Value& value = it->second;
