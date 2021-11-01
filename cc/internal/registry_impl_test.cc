@@ -323,9 +323,9 @@ TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
   EXPECT_FALSE(result_after.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result_after.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
 }
 
 TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
@@ -348,17 +348,19 @@ TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      status.error_message()) << status;
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "forbidden new key operation" ,
-                      status.error_message()) << status;
+                      std::string(status.message()))
+      << status;
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "forbidden new key operation",
+                      std::string(status.message()))
+      << status;
 
   auto result_after = Registry::NewKeyData(key_template);
   EXPECT_FALSE(result_after.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result_after.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
 }
 
 TEST_F(RegistryTest, testConcurrentRegistration) {
@@ -634,9 +636,9 @@ TEST_F(RegistryTest, testNewKeyData) {
     EXPECT_EQ(absl::StatusCode::kInvalidArgument,
               new_key_data_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type_3,
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
   }
 
   {  // A key type that is not supported.
@@ -649,7 +651,7 @@ TEST_F(RegistryTest, testNewKeyData) {
     EXPECT_EQ(absl::StatusCode::kNotFound,
               new_key_data_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_type_url,
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
   }
 }
 
@@ -695,7 +697,7 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
   EXPECT_EQ(absl::StatusCode::kInvalidArgument,
             wrong_key_type_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
-                      wrong_key_type_result.status().error_message());
+                      std::string(wrong_key_type_result.status().message()));
 
   // Try with a bad serialized key.
   auto bad_key_result = Registry::GetPublicKeyData(
@@ -704,7 +706,7 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
   EXPECT_FALSE(bad_key_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, bad_key_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
-                      bad_key_result.status().error_message());
+                      std::string(bad_key_result.status().message()));
 }
 
 // Tests that if we register the same type of wrapper twice, the second call
@@ -793,7 +795,7 @@ TEST_F(RegistryTest, NoWrapperRegistered) {
   EXPECT_FALSE(result.ok());
   EXPECT_EQ(absl::StatusCode::kNotFound, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No wrapper registered",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 // Tests that if the wrapper fails, the error of the wrapped is forwarded
@@ -807,7 +809,7 @@ TEST_F(RegistryTest, WrapperFails) {
       Registry::Wrap<Aead>(absl::make_unique<PrimitiveSet<Aead>>());
   EXPECT_FALSE(result.ok());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "This is a test wrapper",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 // Tests that wrapping works as expected in the usual case.
@@ -866,7 +868,7 @@ TEST_F(RegistryTest, UsualWrappingTest) {
   EXPECT_FALSE(decrypt_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 }
 
 std::string AddAesGcmKey(uint32_t key_id, OutputPrefixType output_prefix_type,
@@ -982,11 +984,12 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   auto result =
       Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());
   EXPECT_FALSE(result.ok());
-  EXPECT_THAT(result.status().error_message(),
+  EXPECT_THAT(std::string(result.status().message()),
               HasSubstr(AesGcmKeyManager().get_key_type()));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
-  EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
+  EXPECT_THAT(std::string(result.status().message()),
+              HasSubstr(typeid(Aead).name()));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {

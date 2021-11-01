@@ -18,6 +18,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/test_matchers.h"
@@ -119,7 +120,7 @@ TEST(KeysetWrapperImplTest, FailingGetPrimitive) {
       wrapper_or->Wrap(keyset);
 
   ASSERT_THAT(wrapped.status(), Not(IsOk()));
-  ASSERT_THAT(wrapped.status().error_message(), HasSubstr("error:two"));
+  ASSERT_THAT(std::string(wrapped.status().message()), HasSubstr("error:two"));
 }
 
 // This test checks that validate keyset is called. We simply pass an empty

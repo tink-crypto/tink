@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
@@ -86,11 +87,13 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
         std::vector<uint8_t> pt(enc->get_plaintext_segment_size() + 1, 'p');
         auto status = enc->EncryptSegment(pt, true, nullptr);
         EXPECT_FALSE(status.ok());
-        EXPECT_THAT(status.error_message(), HasSubstr("plaintext too long"));
+        EXPECT_THAT(std::string(status.message()),
+                    HasSubstr("plaintext too long"));
         pt.resize(enc->get_plaintext_segment_size());
         status = enc->EncryptSegment(pt, true, nullptr);
         EXPECT_FALSE(status.ok());
-        EXPECT_THAT(status.error_message(), HasSubstr("must be non-null"));
+        EXPECT_THAT(std::string(status.message()),
+                    HasSubstr("must be non-null"));
       }
     }
   }
@@ -112,7 +115,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongKeySize) {
         auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
         EXPECT_FALSE(result.ok());
         EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
-        EXPECT_THAT(result.status().error_message(),
+        EXPECT_THAT(std::string(result.status().message()),
                     HasSubstr("must have 16 or 32 bytes"));
       }
     }
@@ -133,7 +136,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongSaltSize) {
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
       EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
-      EXPECT_THAT(result.status().error_message(),
+      EXPECT_THAT(std::string(result.status().message()),
                   HasSubstr("same size as the key"));
     }
   }
@@ -153,7 +156,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextOffset) {
       auto result = AesGcmHkdfStreamSegmentEncrypter::New(params);
       EXPECT_FALSE(result.ok());
       EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
-      EXPECT_THAT(result.status().error_message(),
+      EXPECT_THAT(std::string(result.status().message()),
                   HasSubstr("must be non-negative"));
     }
   }
@@ -182,7 +185,8 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testWrongCiphertextSegmentSize) {
         if (ct_segment_size < min_ct_segment_size) {
           EXPECT_FALSE(result.ok());
           EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
-          EXPECT_THAT(result.status().error_message(), HasSubstr("too small"));
+          EXPECT_THAT(std::string(result.status().message()),
+                      HasSubstr("too small"));
         } else {
           EXPECT_TRUE(result.ok()) << result.status();
         }

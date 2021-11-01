@@ -105,6 +105,7 @@ cc_test(
     deps = [
         ":output_stream_adapter",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:output_stream",
         "@tink_cc//subtle:random",

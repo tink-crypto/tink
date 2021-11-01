@@ -138,6 +138,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
     absl::flat_hash_map
     gmock

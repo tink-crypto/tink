@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/output_stream.h"
@@ -191,7 +192,8 @@ TEST(DecryptingRandomAccessStreamTest, TooManySegments) {
 
   auto result = dec_stream->size();
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
-  EXPECT_THAT(result.status().error_message(), HasSubstr("too many segments"));
+  EXPECT_THAT(std::string(result.status().message()),
+              HasSubstr("too many segments"));
 }
 
 TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {

@@ -969,6 +969,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -1425,6 +1426,7 @@ tink_cc_test(
     decrypting_random_access_stream_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::output_stream
     tink::core::random_access_stream
