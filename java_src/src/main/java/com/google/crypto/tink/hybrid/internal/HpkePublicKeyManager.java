@@ -18,10 +18,6 @@ package com.google.crypto.tink.hybrid.internal;
 
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTypeManager;
-import com.google.crypto.tink.proto.HpkeAead;
-import com.google.crypto.tink.proto.HpkeKdf;
-import com.google.crypto.tink.proto.HpkeKem;
-import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Validators;
@@ -70,19 +66,6 @@ public final class HpkePublicKeyManager extends KeyTypeManager<HpkePublicKey> {
     if (!key.hasParams()) {
       throw new GeneralSecurityException("Missing HPKE key params.");
     }
-    validateParams(key.getParams());
-  }
-
-  private void validateParams(HpkeParams params) throws GeneralSecurityException {
-    if ((params.getKem() == HpkeKem.KEM_UNKNOWN) || (params.getKem() == HpkeKem.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid KEM param: " + params.getKem().name());
-    }
-    if ((params.getKdf() == HpkeKdf.KDF_UNKNOWN) || (params.getKdf() == HpkeKdf.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid KDF param: " + params.getKdf().name());
-    }
-    if ((params.getAead() == HpkeAead.AEAD_UNKNOWN)
-        || (params.getAead() == HpkeAead.UNRECOGNIZED)) {
-      throw new GeneralSecurityException("Invalid AEAD param: " + params.getAead().name());
-    }
+    HpkeUtil.validateParams(key.getParams());
   }
 }

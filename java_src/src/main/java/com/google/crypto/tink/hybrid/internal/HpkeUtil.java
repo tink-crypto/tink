@@ -18,6 +18,10 @@ package com.google.crypto.tink.hybrid.internal;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.crypto.tink.proto.HpkeAead;
+import com.google.crypto.tink.proto.HpkeKdf;
+import com.google.crypto.tink.proto.HpkeKem;
+import com.google.crypto.tink.proto.HpkeParams;
 import com.google.crypto.tink.subtle.Bytes;
 import java.security.GeneralSecurityException;
 
@@ -70,7 +74,7 @@ public final class HpkeUtil {
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
-  public static byte[] kemSuiteId(byte[] kemId) throws GeneralSecurityException {
+  static byte[] kemSuiteId(byte[] kemId) throws GeneralSecurityException {
     return Bytes.concat(KEM, kemId);
   }
 
@@ -81,7 +85,7 @@ public final class HpkeUtil {
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
-  public static byte[] hpkeSuiteId(byte[] kemId, byte[] kdfId, byte[] aeadId)
+  static byte[] hpkeSuiteId(byte[] kemId, byte[] kdfId, byte[] aeadId)
       throws GeneralSecurityException {
     return Bytes.concat(HPKE, kemId, kdfId, aeadId);
   }
@@ -93,7 +97,7 @@ public final class HpkeUtil {
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
-  public static byte[] labelIkm(String label, byte[] ikm, byte[] suiteId)
+  static byte[] labelIkm(String label, byte[] ikm, byte[] suiteId)
       throws GeneralSecurityException {
     return Bytes.concat(HPKE_V1, suiteId, label.getBytes(UTF_8), ikm);
   }
@@ -105,9 +109,22 @@ public final class HpkeUtil {
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
-  public static byte[] labelInfo(String label, byte[] info, byte[] suiteId, int length)
+  static byte[] labelInfo(String label, byte[] info, byte[] suiteId, int length)
       throws GeneralSecurityException {
     return Bytes.concat(intToByteArray(2, length), HPKE_V1, suiteId, label.getBytes(UTF_8), info);
+  }
+
+  static void validateParams(HpkeParams params) throws GeneralSecurityException {
+    if ((params.getKem() == HpkeKem.KEM_UNKNOWN) || (params.getKem() == HpkeKem.UNRECOGNIZED)) {
+      throw new GeneralSecurityException("Invalid KEM param: " + params.getKem().name());
+    }
+    if ((params.getKdf() == HpkeKdf.KDF_UNKNOWN) || (params.getKdf() == HpkeKdf.UNRECOGNIZED)) {
+      throw new GeneralSecurityException("Invalid KDF param: " + params.getKdf().name());
+    }
+    if ((params.getAead() == HpkeAead.AEAD_UNKNOWN)
+        || (params.getAead() == HpkeAead.UNRECOGNIZED)) {
+      throw new GeneralSecurityException("Invalid AEAD param: " + params.getAead().name());
+    }
   }
 
   private HpkeUtil() {}

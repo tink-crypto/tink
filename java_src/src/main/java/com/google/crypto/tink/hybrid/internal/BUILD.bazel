@@ -123,6 +123,7 @@ java_library(
     srcs = ["HpkePublicKeyManager.java"],
     deps = [
         ":hpke_encrypt",
+        ":hpke_util",
         "//proto:hpke_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
@@ -136,6 +137,7 @@ java_library(
     name = "hpke_util",
     srcs = ["HpkeUtil.java"],
     deps = [
+        "//proto:hpke_java_proto",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -275,6 +277,7 @@ android_library(
     srcs = ["HpkePublicKeyManager.java"],
     deps = [
         ":hpke_encrypt-android",
+        ":hpke_util-android",
         "//proto:hpke_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
@@ -288,6 +291,7 @@ android_library(
     name = "hpke_util-android",
     srcs = ["HpkeUtil.java"],
     deps = [
+        "//proto:hpke_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
