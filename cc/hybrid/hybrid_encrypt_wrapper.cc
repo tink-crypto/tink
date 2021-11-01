@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/internal/util.h"
@@ -30,7 +31,7 @@ namespace {
 
 util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
   if (hybrid_encrypt_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "hybrid_encrypt_set must be non-NULL");
   }
   if (hybrid_encrypt_set->get_primary() == nullptr) {

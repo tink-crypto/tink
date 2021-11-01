@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
@@ -88,7 +89,7 @@ util::StatusOr<std::string> RsaSsaPssSignBoringSsl::Sign(
     // TODO(b/112581512): Decide if it's safe to propagate the BoringSSL error.
     // For now, just empty the error stack.
     internal::GetSslErrors();
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
   return std::string(reinterpret_cast<const char*>(signature.data()),
                      signature_length);

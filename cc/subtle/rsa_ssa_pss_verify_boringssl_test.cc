@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "include/rapidjson/document.h"
@@ -321,7 +322,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, TestFipsFailWithoutBoringCrypto) {
                                               /*mgf1_hash=*/HashType::SHA256,
                                               /*salt_length=*/32};
   EXPECT_THAT(RsaSsaPssVerifyBoringSsl::New(pub_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaSsaPssVerifyBoringSslTest, TestAllowedFipsModuli) {
@@ -363,14 +364,14 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, TestRestrictedFipsModuli) {
               IsOk());
 
   EXPECT_THAT(RsaSsaPssVerifyBoringSsl::New(public_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 
   EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(4096, rsa_f4.get(),
                                                     &private_key, &public_key),
               IsOk());
 
   EXPECT_THAT(RsaSsaPssVerifyBoringSsl::New(public_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

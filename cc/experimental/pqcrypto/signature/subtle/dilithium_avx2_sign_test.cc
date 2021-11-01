@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "testing/base/public/googletest.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
@@ -174,7 +175,7 @@ TEST_P(DilithiumAvx2SignTest, FipsMode) {
 
   // Create a new signer.
   EXPECT_THAT(DilithiumAvx2Sign::New(key_pair->first).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 INSTANTIATE_TEST_SUITE_P(

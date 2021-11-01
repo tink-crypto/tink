@@ -31,6 +31,7 @@
 #include <string>
 
 #include "absl/algorithm/container.h"
+#include "absl/status/status.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
@@ -240,7 +241,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxAesni::New(
   }
   auto eax = absl::WrapUnique(new AesEaxAesni(nonce_size_in_bytes));
   if (!eax->SetKey(key)) {
-    return util::Status(util::error::INTERNAL, "Setting AES key failed");
+    return util::Status(absl::StatusCode::kInternal, "Setting AES key failed");
   }
   return {std::move(eax)};
 }
@@ -537,7 +538,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]),
                      ciphertext_size - nonce_size_));
   if (!result) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
   return ciphertext;
 }
@@ -562,7 +563,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
       nonce, encrypted, additional_data,
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&res[0]), res.size()));
   if (!result) {
-    return util::Status(util::error::INTERNAL, "Decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption failed");
   }
   return res;
 }

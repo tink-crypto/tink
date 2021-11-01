@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/types/span.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/util/test_matchers.h"
@@ -159,8 +160,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
   EXPECT_EQ(
       cipher_->Decrypt(ciphertext_modified, kAad, absl::MakeSpan(plaintext))
           .status()
-          .error_code(),
-      util::error::INTERNAL);
+          .code(),
+      absl::StatusCode::kInternal);
 
   // Truncate the ciphertext.
   std::string ciphertext_truncated(decoded_ciphertext, 0,
@@ -169,8 +170,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
   EXPECT_EQ(
       cipher_->Decrypt(ciphertext_truncated, kAad, absl::MakeSpan(plaintext))
           .status()
-          .error_code(),
-      util::error::INTERNAL);
+          .code(),
+      absl::StatusCode::kInternal);
 
   // Modify the additional data.
   std::string aad_modified = std::string(kAad);
@@ -180,8 +181,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
       cipher_
           ->Decrypt(decoded_ciphertext, aad_modified, absl::MakeSpan(plaintext))
           .status()
-          .error_code(),
-      util::error::INTERNAL);
+          .code(),
+      absl::StatusCode::kInternal);
 }
 
 TEST(BuffersOverlapTest, Empty) {

@@ -16,6 +16,7 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/util.h"
 #include "tink/primitive_set.h"
@@ -32,7 +33,7 @@ namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
   if (public_key_sign_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "public_key_sign_set must be non-NULL");
   }
   if (public_key_sign_set->get_primary() == nullptr) {

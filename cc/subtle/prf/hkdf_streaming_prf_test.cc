@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
@@ -550,7 +551,7 @@ TEST(HkdfStreamingPrf, TestFipsOnly) {
   std::string info = Random::GetRandomBytes(345);
 
   EXPECT_THAT(HkdfStreamingPrf::New(hash, std::move(ikm), salt).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 }  // namespace
 }  // namespace subtle

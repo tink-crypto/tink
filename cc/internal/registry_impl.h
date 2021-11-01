@@ -789,7 +789,7 @@ inline crypto::tink::util::Status RegistryImpl::RestrictToFipsIfEmpty() const {
     SetFipsRestricted();
     return util::OkStatus();
   }
-  return util::Status(util::error::INTERNAL,
+  return util::Status(absl::StatusCode::kInternal,
                       "Could not set FIPS only mode. Registry is not empty.");
 }
 

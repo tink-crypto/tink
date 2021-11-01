@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/bio.h"
@@ -87,12 +88,12 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   internal::SslUniquePtr<EC_GROUP> group(group_statusor.ValueOrDie());
   if (group.get() == nullptr) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("failed to set EC group to curve ", subtle_ec_key.curve));
   }
   if (!EC_KEY_set_group(openssl_ec_key, group.get())) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("failed to set key group from EC group for curve ",
                      subtle_ec_key.curve));
   }
@@ -100,7 +101,8 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   // Create an EC point and initialize it from the key proto.
   internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
   if (!point.get()) {
-    return util::Status(util::error::INTERNAL, "failed to allocate EC_POINT");
+    return util::Status(absl::StatusCode::kInternal,
+                        "failed to allocate EC_POINT");
   }
   internal::SslUniquePtr<BIGNUM> x(BN_bin2bn(
       reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_x.data()),
@@ -120,7 +122,8 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
 
   // Set the key's point from the EC point, created above.
   if (!EC_KEY_set_public_key(openssl_ec_key, point.get())) {
-    return util::Status(util::error::INTERNAL, "failed to set public key");
+    return util::Status(absl::StatusCode::kInternal,
+                        "failed to set public key");
   }
 
   return util::OkStatus();

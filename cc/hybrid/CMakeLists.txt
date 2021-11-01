@@ -52,6 +52,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
 )
 
@@ -69,6 +70,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
 )
 
@@ -144,6 +146,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(

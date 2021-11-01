@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/jwt_public_key_sign.h"
@@ -48,7 +49,8 @@ class JwtPublicKeySignSetWrapper : public JwtPublicKeySign {
 
 util::Status Validate(PrimitiveSet<JwtPublicKeySignInternal>* jwt_sign_set) {
   if (jwt_sign_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "jwt_sign_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "jwt_sign_set must be non-NULL");
   }
   if (jwt_sign_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

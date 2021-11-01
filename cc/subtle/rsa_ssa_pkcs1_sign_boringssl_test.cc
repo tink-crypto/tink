@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/bn.h"
 #include "openssl/crypto.h"
@@ -147,7 +148,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestFipsFailWithoutBoringCrypto) {
 
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
   EXPECT_THAT(RsaSsaPkcs1SignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
@@ -164,7 +165,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, TestRestrictedFipsModuli) {
 
   SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
   EXPECT_THAT(RsaSsaPkcs1SignBoringSsl::New(private_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, TestAllowedFipsModuli) {

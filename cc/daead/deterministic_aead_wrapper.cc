@@ -16,6 +16,7 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/deterministic_aead.h"
 #include "tink/internal/util.h"
@@ -30,7 +31,8 @@ namespace {
 
 util::Status Validate(PrimitiveSet<DeterministicAead>* daead_set) {
   if (daead_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "daead_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "daead_set must be non-NULL");
   }
   if (daead_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

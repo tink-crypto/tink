@@ -26,6 +26,7 @@
 #include <cstdlib>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
@@ -426,7 +427,7 @@ util::Status ZTestUniformString(absl::string_view bytes) {
     return util::OkStatus();
   }
   return util::Status(
-      util::error::INTERNAL,
+      absl::StatusCode::kInternal,
       absl::StrCat("Z test for uniformly distributed variable out of bounds; "
                    "Actual number of set bits was ",
                    num_set_bits, " expected was ", expected,
@@ -470,7 +471,7 @@ util::Status ZTestAutocorrelationUniformString(absl::string_view bytes) {
     return util::OkStatus();
   }
   return util::Status(
-      util::error::INTERNAL,
+      absl::StatusCode::kInternal,
       absl::StrCat("Autocorrelation exceeded 10 standard deviation at ",
                    violations.size(),
                    " indices: ", absl::StrJoin(violations, ", ")));

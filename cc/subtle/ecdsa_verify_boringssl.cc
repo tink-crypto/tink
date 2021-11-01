@@ -16,6 +16,7 @@
 
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
@@ -87,7 +88,8 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
   uint8_t digest[EVP_MAX_MD_SIZE];
   if (1 != EVP_Digest(data.data(), data.size(), digest, &digest_size, hash_,
                       nullptr)) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Could not compute digest.");
   }
 
   std::string derSig(signature);

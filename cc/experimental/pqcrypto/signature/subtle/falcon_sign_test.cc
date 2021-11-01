@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
 #include "tink/util/status.h"
@@ -124,7 +125,7 @@ TEST_P(FalconSignTest, FipsMode) {
 
   // Create a new signer.
   EXPECT_THAT(FalconSign::New(key_pair->GetPrivateKey()).status(),
-              test::StatusIs(util::error::INTERNAL));
+              test::StatusIs(absl::StatusCode::kInternal));
 }
 
 INSTANTIATE_TEST_SUITE_P(

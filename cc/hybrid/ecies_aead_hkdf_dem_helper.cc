@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/key_manager.h"
@@ -81,14 +82,14 @@ class EciesAeadHkdfDemHelperImpl : public EciesAeadHkdfDemHelper {
       std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
   GetAeadOrDaead(const util::SecretData& symmetric_key_value) const override {
     if (symmetric_key_value.size() != key_params_.key_size_in_bytes) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "Wrong length of symmetric key.");
     }
     auto key_or = key_manager_->get_key_factory().NewKey(key_template_.value());
     if (!key_or.ok()) return key_or.status();
     auto key = std::move(key_or).ValueOrDie();
     if (!ReplaceKeyBytes(symmetric_key_value, key.get())) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "Generation of DEM-key failed.");
     }
 

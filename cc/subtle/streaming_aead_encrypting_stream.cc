@@ -20,6 +20,7 @@
 #include <cstring>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/statusor.h"
@@ -84,7 +85,7 @@ StatusOr<std::unique_ptr<OutputStream>> StreamingAeadEncryptingStream::New(
       enc_stream->segment_encrypter_->get_header().size();
 
   if (first_segment_size <= 0) {
-    return Status(util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   "Size of the first segment must be greater than 0.");
   }
   enc_stream->pt_buffer_.resize(first_segment_size);

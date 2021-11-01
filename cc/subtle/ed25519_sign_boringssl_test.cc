@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/curve25519.h"
 #include "tink/public_key_sign.h"
@@ -338,7 +339,7 @@ TEST_F(Ed25519SignBoringSslTest, testFipsMode) {
 
   // Create a new signer.
   EXPECT_THAT(Ed25519SignBoringSsl::New(private_key).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

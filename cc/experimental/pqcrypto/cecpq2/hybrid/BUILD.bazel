@@ -40,6 +40,7 @@ cc_library(
     srcs = ["cecpq2_aead_hkdf_dem_helper.cc"],
     hdrs = ["cecpq2_aead_hkdf_dem_helper.h"],
     deps = [
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@tink_cc//:aead",
         "@tink_cc//:deterministic_aead",

@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/jwt_public_key_verify.h"
@@ -52,7 +53,7 @@ class JwtPublicKeyVerifySetWrapper : public JwtPublicKeyVerify {
 util::Status Validate(
     PrimitiveSet<JwtPublicKeyVerifyInternal>* jwt_verify_set) {
   if (jwt_verify_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "jwt_verify_set must be non-NULL");
   }
   for (const auto* entry : jwt_verify_set->get_all()) {

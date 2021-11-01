@@ -28,6 +28,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
     absl::cord
 )
@@ -48,6 +49,7 @@ tink_cc_library(
   DEPS
     absl::core_headers
     absl::memory
+    absl::status
     crypto
     tink::aead::internal::aead_util
     tink::internal::ssl_unique_ptr

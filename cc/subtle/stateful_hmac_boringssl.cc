@@ -17,6 +17,7 @@
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/evp.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -75,7 +76,8 @@ util::StatusOr<std::string> StatefulHmacBoringSsl::Finalize() {
   unsigned int out_len;
 
   if (!HMAC_Final(hmac_context_.get(), buf, &out_len)) {
-    return util::Status(util::error::INTERNAL, "HMAC finalization failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "HMAC finalization failed");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }

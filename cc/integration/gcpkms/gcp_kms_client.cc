@@ -23,6 +23,7 @@
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
@@ -71,7 +72,7 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
   if (credentials_path.empty()) {
     auto creds = grpc::GoogleDefaultCredentials();
     if (creds == nullptr) {
-      return Status(util::error::INTERNAL,
+      return Status(absl::StatusCode::kInternal,
                     "Could not read default credentials");
     }
     return creds;

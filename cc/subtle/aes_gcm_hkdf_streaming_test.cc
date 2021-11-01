@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
 #include "tink/output_stream.h"
@@ -224,7 +225,7 @@ TEST(AesGcmHkdfStreamingTest, TestFipsOnly) {
   params.hkdf_hash = SHA256;
 
   EXPECT_THAT(AesGcmHkdfStreaming::New(std::move(params)).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

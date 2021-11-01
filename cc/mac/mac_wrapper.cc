@@ -16,6 +16,7 @@
 
 #include "tink/mac/mac_wrapper.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/util.h"
@@ -51,7 +52,8 @@ class MacSetWrapper : public Mac {
 
 util::Status Validate(PrimitiveSet<Mac>* mac_set) {
   if (mac_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "mac_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "mac_set must be non-NULL");
   }
   if (mac_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

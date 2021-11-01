@@ -16,6 +16,7 @@
 
 #include "tink/signature/public_key_verify_wrapper.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/util.h"
@@ -34,7 +35,7 @@ namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
   if (public_key_verify_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "public_key_verify_set must be non-NULL");
   }
   if (public_key_verify_set->get_primary() == nullptr) {

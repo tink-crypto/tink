@@ -14,6 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "absl/status/status.h"
 #include "tink/subtle/test_util.h"
 
 
@@ -50,7 +51,8 @@ util::Status WriteToStream(OutputStream* output_stream,
 
 util::Status ReadFromStream(InputStream* input_stream, std::string* output) {
   if (input_stream == nullptr || output == nullptr) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();

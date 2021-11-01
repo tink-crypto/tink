@@ -17,6 +17,7 @@
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
 #include "tink/public_key_sign.h"
@@ -116,7 +117,7 @@ RsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
   auto sign_verify_result =
       SignAndVerify(signer.ValueOrDie().get(), verifier.ValueOrDie().get());
   if (!sign_verify_result.ok()) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "security bug: signing with private key followed by "
                         "verifying with public key failed");
   }

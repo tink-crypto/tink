@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/cipher.h"
@@ -336,7 +337,7 @@ TEST(CreatesNewRsaKeyPairTest, FailsOnLargeE) {
   BN_set_word(e.get(), 1L << 33);
   ASSERT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
                                                     &public_key),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST(CreatesNewRsaKeyPairTest, KeyIsWellFormed) {
@@ -638,7 +639,8 @@ TEST(SubtleUtilBoringSSLTest, GenerationWithSeedFailsWithWrongCurve) {
   auto keypair_or_status = SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
       EllipticCurveType::CURVE25519, seed);
 
-  EXPECT_THAT(keypair_or_status.status(), StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(keypair_or_status.status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateRsaModulusSize) {

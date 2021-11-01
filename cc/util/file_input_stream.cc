@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -82,7 +83,7 @@ crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {
       status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
       status_ =
-          ToStatusF(util::error::INTERNAL, "I/O error: %d", read_result);
+          ToStatusF(absl::StatusCode::kInternal, "I/O error: %d", read_result);
     }
     return status_;
   }

@@ -16,6 +16,7 @@
 #include "tink/prf/prf_set_wrapper.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
 
@@ -49,7 +50,8 @@ class PrfSetPrimitiveWrapper : public PrfSet {
 
 util::Status Validate(PrimitiveSet<Prf>* prf_set) {
   if (prf_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "prf_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "prf_set must be non-NULL");
   }
   if (prf_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

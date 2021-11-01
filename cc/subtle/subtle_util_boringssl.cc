@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "absl/types/span.h"
@@ -72,7 +73,7 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   internal::SslUniquePtr<BIGNUM> pub_key_y_bn(BN_new());
   if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key, pub_key_x_bn.get(),
                                            pub_key_y_bn.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
   SubtleUtilBoringSSL::EcKey ec_key;
@@ -142,7 +143,7 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
       BN_bin2bn(reinterpret_cast<const unsigned char *>(puby.data()),
                 puby.length(), nullptr));
   if (bn_x.get() == nullptr || bn_y.get() == nullptr) {
-    return util::Status(util::error::INTERNAL, "BN_bin2bn failed");
+    return util::Status(absl::StatusCode::kInternal, "BN_bin2bn failed");
   }
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) {
@@ -152,7 +153,7 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
   internal::SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group.get()));
   if (1 != EC_POINT_set_affine_coordinates_GFp(
                group.get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_set_affine_coordinates_GFp failed");
   }
   return pub_key.release();
@@ -171,7 +172,7 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
 
   if (key.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EC key generation failed in BoringSSL.");
   }
 
@@ -199,7 +200,7 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
   }
 
   if (curve_type == EllipticCurveType::CURVE25519) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "Creating a X25519 key from a seed is not supported.");
   }
 
@@ -213,7 +214,7 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
       *group, secret_seed.data(), secret_seed.size()));
 
   if (key.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EC key generation failed in BoringSSL.");
   }
 
@@ -328,24 +329,26 @@ util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
   // "unlike with OpenSSL, it's considered an error if the point is not on the
   // curve". To be sure, we double check here.
   if (1 != EC_POINT_is_on_curve(priv_group.get(), pub_key, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point is not on curve");
+    return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
   // Compute the shared point.
   if (1 != EC_POINT_mul(priv_group.get(), shared_point.get(), nullptr, pub_key,
                         priv_key, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point multiplication failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Point multiplication failed");
   }
   // Check for buggy computation.
   if (1 !=
       EC_POINT_is_on_curve(priv_group.get(), shared_point.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL, "Shared point is not on curve");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Shared point is not on curve");
   }
   // Get shared point's x coordinate.
   internal::SslUniquePtr<BIGNUM> shared_x(BN_new());
   if (1 !=
       EC_POINT_get_affine_coordinates_GFp(priv_group.get(), shared_point.get(),
                                           shared_x.get(), nullptr, nullptr)) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
   return internal::BignumToSecretData(
@@ -368,12 +371,12 @@ SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
     case EcPointFormat::UNCOMPRESSED: {
       if (static_cast<int>(encoded[0]) != 0x04) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "Uncompressed point should start with 0x04, but input doesn't");
       }
       if (encoded.size() != 1 + 2 * curve_size_in_bytes) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             absl::Substitute("point has is $0 bytes, expected $1",
                              encoded.size(), 1 + 2 * curve_size_in_bytes));
       }
@@ -381,14 +384,15 @@ SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
           EC_POINT_oct2point(group.get(), point.get(),
                              reinterpret_cast<const uint8_t *>(encoded.data()),
                              encoded.size(), nullptr)) {
-        return util::Status(util::error::INTERNAL, "EC_POINT_toc2point failed");
+        return util::Status(absl::StatusCode::kInternal,
+                            "EC_POINT_toc2point failed");
       }
       break;
     }
     case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
       if (encoded.size() != 2 * curve_size_in_bytes) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             absl::Substitute("point has is $0 bytes, expected $1",
                              encoded.size(), 2 * curve_size_in_bytes));
       }
@@ -396,24 +400,24 @@ SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
       internal::SslUniquePtr<BIGNUM> y(BN_new());
       if (nullptr == x.get() || nullptr == y.get()) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "Openssl internal error allocating memory for coordinates");
       }
       if (nullptr ==
           BN_bin2bn(reinterpret_cast<const uint8_t *>(encoded.data()),
                     curve_size_in_bytes, x.get())) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Openssl internal error extracting x coordinate");
       }
       if (nullptr == BN_bin2bn(reinterpret_cast<const uint8_t *>(
                                    encoded.data() + curve_size_in_bytes),
                                curve_size_in_bytes, y.get())) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Openssl internal error extracting y coordinate");
       }
       if (1 != EC_POINT_set_affine_coordinates_GFp(group.get(), point.get(),
                                                    x.get(), y.get(), nullptr)) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Openssl internal error setting coordinates");
       }
       break;
@@ -421,7 +425,7 @@ SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
     case EcPointFormat::COMPRESSED: {
       if (static_cast<int>(encoded[0]) != 0x03 &&
           static_cast<int>(encoded[0]) != 0x02) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Compressed point should start with either 0x02 or "
                             "0x03, but input doesn't");
       }
@@ -429,15 +433,16 @@ SubtleUtilBoringSSL::EcPointDecode(EllipticCurveType curve,
           EC_POINT_oct2point(group.get(), point.get(),
                              reinterpret_cast<const uint8_t *>(encoded.data()),
                              encoded.size(), nullptr)) {
-        return util::Status(util::error::INTERNAL, "EC_POINT_oct2point failed");
+        return util::Status(absl::StatusCode::kInternal,
+                            "EC_POINT_oct2point failed");
       }
       break;
     }
     default:
-      return util::Status(util::error::INTERNAL, "Unsupported format");
+      return util::Status(absl::StatusCode::kInternal, "Unsupported format");
   }
   if (1 != EC_POINT_is_on_curve(group.get(), point.get(), nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point is not on curve");
+    return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
   return {std::move(point)};
 }
@@ -452,7 +457,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
   internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
   unsigned curve_size_in_bytes = (EC_GROUP_get_degree(group.get()) + 7) / 8;
   if (1 != EC_POINT_is_on_curve(group.get(), point, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Point is not on curve");
+    return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
 
   switch (format) {
@@ -465,7 +470,8 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                              reinterpret_cast<uint8_t *>(&encoded_point[0]),
                              encoded_point_size, /*ctx=*/nullptr);
       if (size != encoded_point_size) {
-        return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
+        return util::Status(absl::StatusCode::kInternal,
+                            "EC_POINT_point2oct failed");
       }
       return encoded_point;
     }
@@ -475,14 +481,14 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
       internal::SslUniquePtr<BIGNUM> y(BN_new());
       if (nullptr == x.get() || nullptr == y.get()) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "Openssl internal error allocating memory for coordinates");
       }
       ResizeStringUninitialized(&encoded_point, 2 * curve_size_in_bytes);
 
       if (1 != EC_POINT_get_affine_coordinates_GFp(group.get(), point, x.get(),
                                                    y.get(), nullptr)) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Openssl internal error getting coordinates");
       }
 
@@ -491,7 +497,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
 
       if (!res.ok()) {
         return ToStatusF(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "Openssl internal error serializing the x coordinate - %s",
             res.message());
       }
@@ -501,7 +507,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
           y.get());
       if (!res.ok()) {
         return ToStatusF(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "Openssl internal error serializing the y coordinate - %s",
             res.message());
       }
@@ -517,12 +523,14 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcPointEncode(
                              reinterpret_cast<uint8_t *>(&encoded_point[0]),
                              encoded_point_size, /*ctx=*/nullptr);
       if (size != encoded_point_size) {
-        return util::Status(util::error::INTERNAL, "EC_POINT_point2oct failed");
+        return util::Status(absl::StatusCode::kInternal,
+                            "EC_POINT_point2oct failed");
       }
       return encoded_point;
     }
     default:
-      return util::Status(util::error::INTERNAL, "Unsupported point format");
+      return util::Status(absl::StatusCode::kInternal,
+                          "Unsupported point format");
   }
 }
 
@@ -547,7 +555,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
   }
   if (1 != ECDSA_SIG_set0(ecdsa.get(), status_or_r.ValueOrDie().get(),
                           status_or_s.ValueOrDie().get())) {
-    return util::Status(util::error::INTERNAL, "ECDSA_SIG_set0 error.");
+    return util::Status(absl::StatusCode::kInternal, "ECDSA_SIG_set0 error.");
   }
   // ECDSA_SIG_set0 takes ownership of s and r's pointers.
   status_or_r.ValueOrDie().release();
@@ -595,7 +603,7 @@ util::Status SubtleUtilBoringSSL::ValidateRsaModulusSize(size_t modulus_size) {
   // See
   // https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3318
   if (IsFipsModeEnabled() && (modulus_size != 3072)) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         absl::StrCat("Modulus size is ", modulus_size,
                                      " only modulus size 3072 is supported "));
   }
@@ -628,16 +636,17 @@ util::Status SubtleUtilBoringSSL::GetNewRsaKeyPair(
     SubtleUtilBoringSSL::RsaPublicKey *public_key) {
   internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa == nullptr) {
-    return util::Status(util::error::INTERNAL, "Could not initialize RSA.");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Could not initialize RSA.");
   }
 
   internal::SslUniquePtr<BIGNUM> e_copy(BN_new());
   if (BN_copy(e_copy.get(), e) == nullptr) {
-    return util::Status(util::error::INTERNAL, internal::GetSslErrors());
+    return util::Status(absl::StatusCode::kInternal, internal::GetSslErrors());
   }
   if (RSA_generate_key_ex(rsa.get(), modulus_size_in_bits, e_copy.get(),
                           /*cb=*/nullptr) != 1) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         absl::StrCat("Error generating private key: ",
                                      internal::GetSslErrors()));
   }
@@ -720,7 +729,7 @@ util::Status SubtleUtilBoringSSL::CopyKey(
   if (RSA_set0_key(rsa, n.ValueOrDie().get(), e.ValueOrDie().get(),
                    d.ValueOrDie().get()) != 1) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   // The RSA object takes ownership when you call RSA_set0_key.
@@ -739,7 +748,7 @@ util::Status SubtleUtilBoringSSL::CopyPrimeFactors(
   if (!q.ok()) return q.status();
   if (RSA_set0_factors(rsa, p.ValueOrDie().get(), q.ValueOrDie().get()) != 1) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   p.ValueOrDie().release();
@@ -759,7 +768,7 @@ util::Status SubtleUtilBoringSSL::CopyCrtParams(
   if (RSA_set0_crt_params(rsa, dp.ValueOrDie().get(), dq.ValueOrDie().get(),
                           crt.ValueOrDie().get()) != 1) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
   }
   dp.ValueOrDie().release();
@@ -790,7 +799,7 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(
 
   internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "BoringSsl RSA allocation error");
   }
   util::Status status = SubtleUtilBoringSSL::CopyKey(rsa_key, rsa.get());
@@ -839,14 +848,14 @@ SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(
 
   internal::SslUniquePtr<RSA> rsa(RSA_new());
   if (rsa.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "BoringSsl RSA allocation error");
   }
 
   // The value d is null for a public RSA key.
   if (1 != RSA_set0_key(rsa.get(), status_or_n.ValueOrDie().get(),
                         status_or_e.ValueOrDie().get(), /*d=*/nullptr)) {
-    return util::Status(util::error::INTERNAL, "Could not set RSA key.");
+    return util::Status(absl::StatusCode::kInternal, "Could not set RSA key.");
   }
   status_or_n.ValueOrDie().release();
   status_or_e.ValueOrDie().release();
@@ -895,7 +904,7 @@ util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
   uint32_t digest_length = 0;
   if (EVP_Digest(input.data(), input.length(), digest.data(), &digest_length,
                  &hasher, /*impl=*/nullptr) != 1) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         absl::StrCat("Openssl internal error computing hash: ",
                                      internal::GetSslErrors()));
   }

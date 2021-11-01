@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
@@ -281,9 +282,9 @@ TEST(AesCmacBoringSslTest, TestFipsOnly) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
 
   EXPECT_THAT(subtle::AesCmacBoringSsl::New(key128, kTagSize).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::AesCmacBoringSsl::New(key256, kTagSize).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 }  // namespace
 }  // namespace subtle

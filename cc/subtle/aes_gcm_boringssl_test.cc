@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
@@ -307,9 +308,9 @@ TEST(AesGcmBoringSslTestWycheproofTest, TestFipsFailWithoutBoringCrypto) {
       util::SecretDataFromStringView(absl::HexStringToBytes(kKey256));
 
   EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::AesGcmBoringSsl::New(key_256).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

@@ -97,6 +97,7 @@ tink_cc_library(
     fips_utils.h
   DEPS
     absl::base
+    absl::status
     crypto
     tink::util::status
 )

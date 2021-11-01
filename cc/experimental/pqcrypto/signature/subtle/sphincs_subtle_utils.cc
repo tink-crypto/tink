@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/util/secret_data.h"
@@ -56,7 +57,7 @@ crypto::tink::util::StatusOr<SphincsKeyPair> GenerateSphincsKeyPair(
   if (0 != sphincs_helper_pqclean.Keygen(
                reinterpret_cast<uint8_t *>(public_key.data()),
                reinterpret_cast<uint8_t *>(private_key.data()))) {
-    return util::Status(util::error::INTERNAL, "Key generation failed.");
+    return util::Status(absl::StatusCode::kInternal, "Key generation failed.");
   }
 
   util::SecretData private_key_data =

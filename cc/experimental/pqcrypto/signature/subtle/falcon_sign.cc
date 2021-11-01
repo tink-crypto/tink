@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/secret_data.h"
@@ -77,7 +78,7 @@ util::StatusOr<std::string> FalconSign::Sign(absl::string_view data) const {
   }
 
   if (result != 0) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
 
   signature.resize(sig_length);

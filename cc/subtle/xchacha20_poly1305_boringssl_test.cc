@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/err.h"
 #include "tink/config/tink_fips.h"
@@ -256,7 +257,8 @@ TEST(XChacha20Poly1305BoringSslTest, TestFipsOnly) {
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
 
   auto xchacha20_poly1305_res = subtle::XChacha20Poly1305BoringSsl::New(key256);
-  EXPECT_THAT(xchacha20_poly1305_res.status(), StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(xchacha20_poly1305_res.status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

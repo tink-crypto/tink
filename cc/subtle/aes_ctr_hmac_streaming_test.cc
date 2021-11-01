@@ -22,6 +22,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
@@ -548,7 +549,7 @@ TEST(AesCtrHmacStreamingTest, TestFipsOnly) {
   AesCtrHmacStreaming::Params params = ValidParams();
 
   EXPECT_THAT(AesCtrHmacStreaming::New(std::move(params)).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

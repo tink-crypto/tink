@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/hkdf.h"
@@ -92,16 +93,17 @@ class HkdfInputStream : public InputStream {
     if (1 != HKDF_extract(
                  prk.data(), &prk_len, digest, secret.data(), secret.size(),
                  reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
-      return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+      return util::Status(absl::StatusCode::kInternal,
+                          "BoringSSL's HKDF failed");
     }
     prk.resize(prk_len);
     if (!hmac_ctx_) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_CTX_new failed");
     }
     if (!HMAC_Init_ex(hmac_ctx_.get(), prk.data(), prk.size(), digest,
                       nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Init_ex failed");
     }
     return UpdateTi();
@@ -121,26 +123,26 @@ class HkdfInputStream : public InputStream {
   // for a single round; hence we implement this ourselves.
   util::Status UpdateTi() {
     if (!HMAC_Init_ex(hmac_ctx_.get(), nullptr, 0, nullptr, nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Init_ex failed");
     }
     if (i_ != 0 && !HMAC_Update(hmac_ctx_.get(), ti_.data(), ti_.size())) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on ti_");
     }
     if (!HMAC_Update(hmac_ctx_.get(),
                      reinterpret_cast<const uint8_t *>(&input_[0]),
                      input_.size())) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on input_");
     }
     uint8_t i_as_uint8 = i_ + 1;
     if (!HMAC_Update(hmac_ctx_.get(), &i_as_uint8, 1)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on i_");
     }
     if (!HMAC_Final(hmac_ctx_.get(), ti_.data(), nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Final failed");
     }
     i_++;

@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
@@ -137,7 +138,8 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
   uint8_t digest[EVP_MAX_MD_SIZE];
   if (1 != EVP_Digest(data.data(), data.size(), digest, &digest_size, hash_,
                       nullptr)) {
-    return util::Status(util::error::INTERNAL, "Could not compute digest.");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Could not compute digest.");
   }
 
   // Compute the signature.
@@ -145,7 +147,7 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
   unsigned int sig_length;
   if (1 != ECDSA_sign(0 /* unused */, digest, digest_size, buffer.data(),
                       &sig_length, key_.get())) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
 
   if (encoding_ == subtle::EcdsaSignatureEncoding::IEEE_P1363) {

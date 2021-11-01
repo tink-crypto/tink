@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/cmac.h"
 #include "openssl/evp.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -94,18 +95,18 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
   if (!cipher.ok()) return cipher.status();
   if (CMAC_Init(context.get(), reinterpret_cast<const uint8_t*>(&key_[0]),
                 key_.size(), *cipher, nullptr) <= 0) {
-    return util::Status(util::error::INTERNAL, "Failed to compute CMAC");
+    return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
   }
   if (CMAC_Update(context.get(), reinterpret_cast<const uint8_t*>(data.data()),
                   data.size()) <= 0) {
-    return util::Status(util::error::INTERNAL, "Failed to compute CMAC");
+    return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
   }
   size_t len = 0;
   const int res =
       CMAC_Final(context.get(), reinterpret_cast<uint8_t*>(&result[0]), &len);
 #endif
   if (res == 0) {
-    return util::Status(util::error::INTERNAL, "Failed to compute CMAC");
+    return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
   }
   result.resize(tag_size_);
   return result;

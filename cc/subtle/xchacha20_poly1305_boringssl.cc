@@ -22,6 +22,7 @@
 
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -52,7 +53,7 @@ util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
 
   const EVP_AEAD* cipher = EVP_aead_xchacha20_poly1305();
   if (cipher == nullptr) {
-    return util::Status(util::error::INTERNAL, "Failed to get EVP_AEAD");
+    return util::Status(absl::StatusCode::kInternal, "Failed to get EVP_AEAD");
   }
   return std::unique_ptr<Aead>(
       new XChacha20Poly1305BoringSsl(std::move(key), cipher));
@@ -64,7 +65,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
                        key_.size(), kTagSize));
   if (ctx.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_AEAD_CTX");
   }
 
@@ -75,7 +76,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
 
   const std::string nonce = Random::GetRandomBytes(kNonceSize);
   if (nonce.size() != kNonceSize) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "Failed to get enough random bytes for nonce");
   }
 
@@ -96,13 +97,15 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Encrypt(
       reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size());
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL, "EVP_AEAD_CTX_seal failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_AEAD_CTX_seal failed");
   }
   written += out_len;
 
   // Verify that all the expected data has been written.
   if (written != ciphertext_size) {
-    return util::Status(util::error::INTERNAL, "Incorrect ciphertext size");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Incorrect ciphertext size");
   }
   return ct;
 }
@@ -121,7 +124,7 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
       EVP_AEAD_CTX_new(aead_, reinterpret_cast<const uint8_t*>(key_.data()),
                        key_.size(), kTagSize));
   if (ctx.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_AEAD_CTX");
   }
 
@@ -141,11 +144,12 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
       reinterpret_cast<const uint8_t*>(additional_data.data()),
       additional_data.size());
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL, "EVP_AEAD_CTX_open failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_AEAD_CTX_open failed");
   }
 
   if (len != out_size) {
-    return util::Status(util::error::INTERNAL, "Incorrect output size");
+    return util::Status(absl::StatusCode::kInternal, "Incorrect output size");
   }
 
   return out;

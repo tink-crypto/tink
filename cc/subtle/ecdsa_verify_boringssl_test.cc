@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "include/rapidjson/document.h"
 #include "tink/public_key_sign.h"
@@ -264,20 +265,23 @@ TEST_F(EcdsaVerifyBoringSslTest, TestFipsFailWithoutBoringCrypto) {
   auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                        EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P384)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                        EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P521)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaVerifyBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                        EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

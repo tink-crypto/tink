@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/aes.h"
 #include "openssl/mem.h"
 #include "tink/deterministic_aead.h"
@@ -37,7 +38,8 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
   util::SecretUniquePtr<AES_KEY> aes_key = util::MakeSecretUniquePtr<AES_KEY>();
   if (AES_set_encrypt_key(reinterpret_cast<const uint8_t*>(key.data()),
                           8 * key.size(), aes_key.get()) != 0) {
-    return util::Status(util::error::INTERNAL, "could not initialize aes key");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize aes key");
   }
   return aes_key;
 }

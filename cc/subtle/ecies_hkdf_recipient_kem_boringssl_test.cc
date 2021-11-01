@@ -17,6 +17,7 @@
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
@@ -208,7 +209,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestFipsOnly) {
   EXPECT_THAT(EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType::NIST_P256,
                                                   private_key)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestFipsOnly) {
@@ -220,7 +221,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestFipsOnly) {
   EXPECT_THAT(EciesHkdfX25519RecipientKemBoringSsl::New(
                   EllipticCurveType::CURVE25519, private_key)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

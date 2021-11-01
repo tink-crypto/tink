@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/falcon_subtle_utils.h"
 #include "tink/util/secret_data.h"
@@ -69,7 +70,7 @@ util::Status FalconVerify::Verify(absl::string_view signature,
   }
 
   if (result != 0) {
-    return util::Status(util::error::INTERNAL, "Signature is not valid.");
+    return util::Status(absl::StatusCode::kInternal, "Signature is not valid.");
   }
 
   return util::Status::OK;

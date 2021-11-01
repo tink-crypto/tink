@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "testing/base/public/googletest.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "tink/config/tink_fips.h"
@@ -249,7 +250,7 @@ TEST_P(DilithiumAvx2VerifyTest, FipsMode) {
   ASSERT_THAT(key_pair.status(), IsOk());
 
   EXPECT_THAT(DilithiumAvx2Verify::New(key_pair->second).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 struct TestVector {

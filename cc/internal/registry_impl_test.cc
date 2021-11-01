@@ -1027,7 +1027,7 @@ TEST_F(RegistryTest, RegisterFipsKeyTypeManagerNoBoringCrypto) {
 
   EXPECT_THAT(
       Registry::RegisterKeyTypeManager(std::move(fips_key_manager), true),
-      StatusIs(util::error::INTERNAL));
+      StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
@@ -2004,7 +2004,7 @@ TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
                   std::move(fips_key_manager), true);
   EXPECT_THAT(status, IsOk());
   EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

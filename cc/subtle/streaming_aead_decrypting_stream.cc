@@ -20,6 +20,7 @@
 #include <cstring>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/status.h"
@@ -47,7 +48,7 @@ namespace {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::vector<uint8_t>* output) {
   if (count <= 0 || input_stream == nullptr || output == nullptr) {
-    return Status(util::error::INTERNAL, "Illegal read from a stream");
+    return Status(absl::StatusCode::kInternal, "Illegal read from a stream");
   }
   const void* buffer;
   int bytes_to_be_read = count;
@@ -96,7 +97,7 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
       dec_stream->segment_decrypter_->get_ciphertext_offset() -
       dec_stream->segment_decrypter_->get_header_size();
   if (first_segment_size <= 0) {
-    return Status(util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   "Size of the first segment must be greater than 0.");
   }
   dec_stream->ct_buffer_.resize(first_segment_size);

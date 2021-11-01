@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/config/tink_fips.h"
@@ -169,20 +170,23 @@ TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
   auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P384)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P521)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

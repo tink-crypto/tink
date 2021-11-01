@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -81,7 +82,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     return tag.status();
   }
   if (tag.ValueOrDie().size() != tag_size_) {
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(absl::StatusCode::kInternal, "invalid tag size");
   }
   return ciphertext.append(tag.ValueOrDie());
 }

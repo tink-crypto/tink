@@ -131,9 +131,9 @@ TEST(KmsEnvelopeAeadTest, DecryptionErrors) {
 
   // Wrong associated data.
   decrypt_result = aead->Decrypt(ct, "wrong aad");
-  EXPECT_THAT(
-      decrypt_result.status(),
-      StatusIs(util::error::INTERNAL, HasSubstr("Authentication failed")));
+  EXPECT_THAT(decrypt_result.status(),
+              StatusIs(absl::StatusCode::kInternal,
+                       HasSubstr("Authentication failed")));
 }
 
 TEST(KmsEnvelopeAeadTest, KeyFormat) {

@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -58,7 +59,8 @@ std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::string* output) {
   if (input_stream == nullptr || output == nullptr || count < 0) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();

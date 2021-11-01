@@ -150,7 +150,7 @@ TEST_F(AeadConfigTest, RegisterFailsIfBoringCryptoNotAvailable) {
   EXPECT_THAT(Registry::get_key_manager<Aead>(AesGcmKeyManager().get_key_type())
                   .status(),
               StatusIs(absl::StatusCode::kNotFound));
-  EXPECT_THAT(AeadConfig::Register(), StatusIs(util::error::INTERNAL));
+  EXPECT_THAT(AeadConfig::Register(), StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

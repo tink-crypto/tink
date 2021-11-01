@@ -8,6 +8,7 @@ tink_cc_library(
     aead_wrapper.cc
     aead_wrapper.h
   DEPS
+    absl::status
     absl::strings
     tink::core::aead
     tink::core::crypto_format
@@ -34,6 +35,7 @@ tink_cc_library(
     cord_aead_wrapper.cc
     cord_aead_wrapper.h
   DEPS
+    absl::status
     absl::strings
     absl::cord
     tink::aead::cord_aead

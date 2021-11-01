@@ -23,6 +23,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/config.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/aead.h"
@@ -88,7 +89,7 @@ util::StatusOr<internal::SslUniquePtr<EVP_AEAD_CTX>> CreateAeadCtx(
       EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
                        AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
   if (!ctx) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_AEAD_CTX");
   }
   return ctx;
@@ -163,7 +164,7 @@ util::Status AesGcmHkdfStreamSegmentEncrypter::EncryptSegment(
                          plaintext.data(), plaintext.size(),
                          /* ad = */ nullptr, /* ad.length() = */ 0)) {
     return util::Status(
-        util::error::INTERNAL,
+        absl::StatusCode::kInternal,
         absl::StrCat("Encryption failed: ", internal::GetSslErrors()));
   }
   IncSegmentNumber();

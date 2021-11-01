@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/err.h"
@@ -204,22 +205,24 @@ util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(
   // Encrypt.
   internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_CIPHER_CTX");
   }
   if (EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                          reinterpret_cast<const uint8_t*>(key_value_.data()),
                          reinterpret_cast<const uint8_t*>(nonce.data())) != 1) {
-    return util::Status(util::error::INTERNAL, "could not initialize ctx");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize ctx");
   }
 
   int out_len;
   if (EVP_EncryptUpdate(ctx.get(), ciphertext_buffer->data(), &out_len,
                         plaintext.data(), plaintext.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "encryption failed");
   }
   if (out_len != plaintext.size()) {
-    return util::Status(util::error::INTERNAL, "incorrect ciphertext size");
+    return util::Status(absl::StatusCode::kInternal,
+                        "incorrect ciphertext size");
   }
 
   // Add MAC tag.
@@ -333,22 +336,24 @@ util::Status AesCtrHmacStreamSegmentDecrypter::DecryptSegment(
   // Decrypt.
   internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_CIPHER_CTX");
   }
   if (EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr /* engine */,
                          reinterpret_cast<const uint8_t*>(key_value_.data()),
                          reinterpret_cast<const uint8_t*>(nonce.data())) != 1) {
-    return util::Status(util::error::INTERNAL, "could not initialize ctx");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize ctx");
   }
 
   int out_len;
   if (EVP_DecryptUpdate(ctx.get(), plaintext_buffer->data(), &out_len,
                         ciphertext.data(), pt_size) != 1) {
-    return util::Status(util::error::INTERNAL, "decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "decryption failed");
   }
   if (out_len != pt_size) {
-    return util::Status(util::error::INTERNAL, "incorrect plaintext size");
+    return util::Status(absl::StatusCode::kInternal,
+                        "incorrect plaintext size");
   }
 
   return util::OkStatus();

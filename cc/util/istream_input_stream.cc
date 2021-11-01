@@ -22,6 +22,7 @@
 #include <istream>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -62,8 +63,8 @@ crypto::tink::util::StatusOr<int> IstreamInputStream::Next(const void** data) {
     if (input_->eof()) {
       status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
-      status_ =
-          ToStatusF(util::error::INTERNAL, "I/O error: %s", strerror(errno));
+      status_ = ToStatusF(absl::StatusCode::kInternal, "I/O error: %s",
+                          strerror(errno));
     }
     return status_;
   }

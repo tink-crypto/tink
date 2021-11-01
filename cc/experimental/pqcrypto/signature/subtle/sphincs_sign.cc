@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
@@ -67,7 +68,7 @@ util::StatusOr<std::string> SphincsSign::Sign(absl::string_view data) const {
            reinterpret_cast<uint8_t *>(signature.data()), &sig_length,
            reinterpret_cast<const uint8_t *>(data.data()), data.size(),
            reinterpret_cast<const uint8_t *>(key_.GetKey().data())) != 0)) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
 
   return signature;

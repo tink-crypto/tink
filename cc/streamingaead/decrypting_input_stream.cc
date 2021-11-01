@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"
@@ -67,7 +68,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
   attempted_matching_ = true;
   auto raw_primitives_result = primitives_->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INTERNAL, "No RAW primitives found");
+    return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
   for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
     StreamingAead& streaming_aead = primitive->get_primitive();

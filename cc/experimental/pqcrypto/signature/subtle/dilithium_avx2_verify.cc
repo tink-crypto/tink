@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
@@ -93,7 +94,8 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
           break;
         }
         default: {
-          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
         }
       }
       break;
@@ -119,7 +121,8 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
           break;
         }
         default: {
-          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
         }
       }
       break;
@@ -145,13 +148,14 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
           break;
         }
         default: {
-          return util::Status(util::error::INTERNAL, "Invalid seed expansion.");
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
         }
       }
       break;
     }
     default:
-      return util::Status(util::error::INTERNAL, "Invalid keysize.");
+      return util::Status(absl::StatusCode::kInternal, "Invalid keysize.");
   }
 
   if (result != 0) {

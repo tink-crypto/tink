@@ -17,6 +17,7 @@
 #include "tink/subtle/hkdf.h"
 
 #include "absl/algorithm/container.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
@@ -44,7 +45,7 @@ util::StatusOr<util::SecretData> Hkdf::ComputeHkdf(HashType hash,
                 ikm.data(), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
-    return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+    return util::Status(absl::StatusCode::kInternal, "BoringSSL's HKDF failed");
   }
   return out_key;
 }
@@ -64,7 +65,7 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
-    return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+    return util::Status(absl::StatusCode::kInternal, "BoringSSL's HKDF failed");
   }
   return out_key;
 }

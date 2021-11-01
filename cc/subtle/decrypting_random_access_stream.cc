@@ -22,6 +22,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/random_access_stream.h"
@@ -237,7 +238,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
     int64_t position, int count, Buffer* dest_buffer) {
   if (position < 0 || count < 0 || dest_buffer == nullptr
       || count > dest_buffer->allocated_size() || dest_buffer->size() != 0) {
-    return Status(util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   "Invalid parameters to PReadAndDecrypt");
   }
 

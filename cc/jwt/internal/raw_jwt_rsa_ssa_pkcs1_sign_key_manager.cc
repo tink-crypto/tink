@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -127,7 +128,7 @@ RawJwtRsaSsaPkcs1SignKeyManager::PublicKeySignFactory::Create(
   util::Status sign_verify_result =
       SignAndVerify(signer->get(), verifier->get());
   if (!sign_verify_result.ok()) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "security bug: signing with private key followed by "
                         "verifying with public key failed");
   }

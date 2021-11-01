@@ -17,6 +17,7 @@
 #include "tink/aead/internal/zero_copy_aes_gcm_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
@@ -39,7 +40,7 @@ util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
   internal::SslUniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
       *aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
   if (ctx == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_AEAD_CTX");
   }
   return {absl::WrapUnique(new ZeroCopyAesGcmBoringSsl(std::move(ctx)))};
@@ -76,7 +77,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
           reinterpret_cast<const uint8_t *>(plaintext.data()), plaintext.size(),
           reinterpret_cast<const uint8_t *>(associated_data.data()),
           associated_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
   return kIvSizeInBytes + len;
 }
@@ -114,7 +115,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
           ciphertext.size() - kIvSizeInBytes,
           reinterpret_cast<const uint8_t *>(associated_data.data()),
           associated_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
   }
   return len;
 }

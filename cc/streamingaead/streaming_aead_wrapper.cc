@@ -16,6 +16,7 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/streaming_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/input_stream.h"
@@ -37,7 +38,8 @@ namespace {
 
 Status Validate(PrimitiveSet<StreamingAead>* primitives) {
   if (primitives == nullptr) {
-    return Status(util::error::INTERNAL, "primitive set must be non-NULL");
+    return Status(absl::StatusCode::kInternal,
+                  "primitive set must be non-NULL");
   }
   if (primitives->get_primary() == nullptr) {
     return Status(util::error::INVALID_ARGUMENT,

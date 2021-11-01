@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/internal/util.h"
@@ -86,7 +87,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
 
 util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
   if (hybrid_decrypt_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "hybrid_decrypt_set must be non-NULL");
   }
   if (hybrid_decrypt_set->get_primary() == nullptr) {

@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
@@ -55,7 +56,8 @@ class JwtMacSetWrapper : public JwtMac {
 
 util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
   if (jwt_mac_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "jwt_mac_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "jwt_mac_set must be non-NULL");
   }
   if (jwt_mac_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

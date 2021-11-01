@@ -17,6 +17,7 @@
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -74,7 +75,7 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
     subtle::EcPointFormat point_format) const {
   if (peer_pub_key_.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "peer_pub_key_ wasn't initialized");
   }
 
@@ -85,10 +86,11 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
   internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
   internal::SslUniquePtr<EC_KEY> ephemeral_key(EC_KEY_new());
   if (1 != EC_KEY_set_group(ephemeral_key.get(), group.get())) {
-    return util::Status(util::error::INTERNAL, "EC_KEY_set_group failed");
+    return util::Status(absl::StatusCode::kInternal, "EC_KEY_set_group failed");
   }
   if (1 != EC_KEY_generate_key(ephemeral_key.get())) {
-    return util::Status(util::error::INTERNAL, "EC_KEY_generate_key failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "EC_KEY_generate_key failed");
   }
   const BIGNUM* ephemeral_priv = EC_KEY_get0_private_key(ephemeral_key.get());
   const EC_POINT* ephemeral_pub = EC_KEY_get0_public_key(ephemeral_key.get());

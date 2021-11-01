@@ -17,6 +17,7 @@
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/random_access_stream.h"
 #include "tink/primitive_set.h"
@@ -95,7 +96,7 @@ util::Status DecryptingRandomAccessStream::PRead(
   attempted_matching_ = true;
   auto raw_primitives_result = primitives_->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INTERNAL, "No RAW primitives found");
+    return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
   for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
     StreamingAead& streaming_aead = primitive->get_primitive();

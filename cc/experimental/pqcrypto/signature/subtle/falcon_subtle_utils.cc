@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/util/secret_data.h"
@@ -101,7 +102,7 @@ crypto::tink::util::StatusOr<FalconKeyPair> GenerateFalconKeyPair(
       FalconPublicKeyPqclean::NewPublicKey(public_key);
 
   if (!falcon_private_key.ok() || !falcon_public_key.ok()) {
-    return util::Status(util::error::INTERNAL, "Key generation failed.");
+    return util::Status(absl::StatusCode::kInternal, "Key generation failed.");
   }
 
   FalconKeyPair key_pair(*falcon_private_key, *falcon_public_key);

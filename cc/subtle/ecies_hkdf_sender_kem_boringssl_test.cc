@@ -19,6 +19,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
@@ -284,7 +285,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestFipsOnly) {
   EXPECT_THAT(EciesHkdfNistPCurveSendKemBoringSsl::New(curve, test_key.pub_x,
                                                        test_key.pub_y)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestFipsOnly) {
@@ -298,7 +299,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestFipsOnly) {
   EXPECT_THAT(EciesHkdfX25519SendKemBoringSsl::New(curve, test_key.pub_x,
                                                    test_key.pub_y)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

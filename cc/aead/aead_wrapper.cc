@@ -16,6 +16,7 @@
 
 #include "tink/aead/aead_wrapper.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/crypto_format.h"
@@ -30,7 +31,8 @@ namespace {
 
 util::Status Validate(PrimitiveSet<Aead>* aead_set) {
   if (aead_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "aead_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "aead_set must be non-NULL");
   }
   if (aead_set->get_primary() == nullptr) {
     return util::Status(util::error::INVALID_ARGUMENT,

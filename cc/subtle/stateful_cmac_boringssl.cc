@@ -18,6 +18,7 @@
 
 #include "absl/memory/memory.h"
 #include "openssl/evp.h"
+#include "absl/status/status.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/util/status.h"
@@ -65,7 +66,8 @@ util::Status StatefulCmacBoringSsl::Update(absl::string_view data) {
   if (!CMAC_Update(cmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),
                    data.size())) {
-    return util::Status(util::error::INTERNAL, "Inputs to CMAC Update invalid");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Inputs to CMAC Update invalid");
   }
   return util::OkStatus();
 }
@@ -75,7 +77,8 @@ util::StatusOr<std::string> StatefulCmacBoringSsl::Finalize() {
   size_t out_len;
 
   if (!CMAC_Final(cmac_context_.get(), buf, &out_len)) {
-    return util::Status(util::error::INTERNAL, "CMAC finalization failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "CMAC finalization failed");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }

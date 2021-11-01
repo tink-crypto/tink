@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/digest.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
@@ -75,7 +76,7 @@ util::StatusOr<std::string> HmacBoringSsl::ComputeMac(
     // TODO(bleichen): We expect that BoringSSL supports the
     //   hashes that we use. Maybe we should have a status that indicates
     //   such mismatches between expected and actual behaviour.
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "BoringSSL failed to compute HMAC");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
@@ -96,7 +97,7 @@ util::Status HmacBoringSsl::VerifyMac(absl::string_view mac,
                             reinterpret_cast<const uint8_t*>(data.data()),
                             data.size(), buf, &out_len);
   if (res == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "BoringSSL failed to compute HMAC");
   }
   if (CRYPTO_memcmp(buf, mac.data(), tag_size_) != 0) {

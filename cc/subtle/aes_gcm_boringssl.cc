@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/evp.h"
@@ -51,13 +52,13 @@ util::Status SetIv(EVP_CIPHER_CTX* context, absl::string_view iv,
   // Set the IV.
   if (EVP_CIPHER_CTX_ctrl(context, EVP_CTRL_GCM_SET_IVLEN, iv.size(),
                           /*ptr=*/nullptr) <= 0) {
-    return util::Status(util::error::INTERNAL, "Setting IV size failed");
+    return util::Status(absl::StatusCode::kInternal, "Setting IV size failed");
   }
   if (EVP_CipherInit_ex(context, /*cipher=*/nullptr, /*impl=*/nullptr,
                         /*key=*/nullptr,
                         reinterpret_cast<const uint8_t*>(&iv[0]),
                         /*enc=*/encryption_flag) <= 0) {
-    return util::Status(util::error::INTERNAL, "Failed to set the IV");
+    return util::Status(absl::StatusCode::kInternal, "Failed to set the IV");
   }
 
   return util::OkStatus();
@@ -90,7 +91,7 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
   internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
 #endif
   if (context == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "EVP_CIPHER_CTX initialization Failed");
   }
 
@@ -102,7 +103,8 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmBoringSsl::New(
   if (EVP_CipherInit_ex(context.get(), *aead, /*impl=*/nullptr,
                         reinterpret_cast<const uint8_t*>(&key[0]),
                         /*iv=*/nullptr, /*enc=*/1) <= 0) {
-    return util::Status(util::error::INTERNAL, "Context initialization failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Context initialization failed");
   }
 #endif
 
@@ -131,7 +133,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
           plaintext.size(),
           reinterpret_cast<const uint8_t*>(additional_data.data()),
           additional_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
   return result;
 #else
@@ -161,7 +163,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   if (EVP_EncryptUpdate(context.get(), nullptr, &len,
                         reinterpret_cast<const uint8_t*>(aad.data()),
                         aad.size()) <= 0) {
-    return util::Status(util::error::INTERNAL, "Failed to add AAD");
+    return util::Status(absl::StatusCode::kInternal, "Failed to add AAD");
   }
 
   // Write the ciphertext after the iv.
@@ -170,10 +172,10 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   if (EVP_EncryptUpdate(context.get(), ciphertext, &len,
                         reinterpret_cast<const uint8_t*>(plaintext_data.data()),
                         plaintext_data.size()) <= 0) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
   if (EVP_EncryptFinal_ex(context.get(), /*out=*/nullptr, &len) <= 0) {
-    return util::Status(util::error::INTERNAL, "Finalization failed");
+    return util::Status(absl::StatusCode::kInternal, "Finalization failed");
   }
 
   // Write the tag after the ciphertext.
@@ -181,7 +183,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
   auto* tag_data = reinterpret_cast<uint8_t*>(&result[0] + tag_offset);
   if (EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_GET_TAG, kTagSizeInBytes,
                           tag_data) <= 0) {
-    return util::Status(util::error::INTERNAL, "Failed to get the tag");
+    return util::Status(absl::StatusCode::kInternal, "Failed to get the tag");
   }
   return result;
 #endif
@@ -210,7 +212,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
           ciphertex_and_tag, ciphertext.size() - kIvSizeInBytes,
           reinterpret_cast<const uint8_t*>(additional_data.data()),
           additional_data.size()) != 1) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
   }
   return result;
 #else
@@ -237,7 +239,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   if (EVP_DecryptUpdate(context.get(), /*out=*/nullptr, &len,
                         reinterpret_cast<const uint8_t*>(aad.data()),
                         aad.size()) <= 0) {
-    return util::Status(util::error::INTERNAL, "Decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption failed");
   }
 
   // This copy is needed since EVP_CIPHER_CTX_ctrl requires a non-const pointer
@@ -248,7 +250,7 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   // Set the tag.
   if (EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG, kTagSizeInBytes,
                           reinterpret_cast<uint8_t*>(&tag[0])) <= 0) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "Could not set authentication tag");
   }
   std::string result;
@@ -258,10 +260,10 @@ util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
   if (!EVP_DecryptUpdate(context.get(), reinterpret_cast<uint8_t*>(&result[0]),
                          &len, ciphertext_only.data(),
                          ciphertext_only.size())) {
-    return util::Status(util::error::INTERNAL, "Decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption failed");
   }
   if (!EVP_DecryptFinal_ex(context.get(), nullptr, &len)) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
   }
 
   return result;

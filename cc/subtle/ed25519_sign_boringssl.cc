@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
@@ -57,7 +58,7 @@ util::StatusOr<std::string> Ed25519SignBoringSsl::Sign(
   if (ED25519_sign(
           out_sig, reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(private_key_.data())) != 1) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
 
   return std::string(reinterpret_cast<char *>(out_sig), ED25519_SIGNATURE_LEN);

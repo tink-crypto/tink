@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/cord.h"
 #include "openssl/aead.h"
 #include "openssl/err.h"
@@ -66,18 +67,18 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
   internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
 
   if (!EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Encryption init failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption init failed");
   }
 
   if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, kIvSizeInBytes,
                            nullptr)) {
-    return util::Status(util::error::INTERNAL, "Setting IV size failed");
+    return util::Status(absl::StatusCode::kInternal, "Setting IV size failed");
   }
 
   if (!EVP_EncryptInit_ex(ctx.get(), nullptr, nullptr,
                           reinterpret_cast<const uint8_t*>(key_.data()),
                           reinterpret_cast<const uint8_t*>(iv.data()))) {
-    return util::Status(util::error::INTERNAL, "Encryption init failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption init failed");
   }
 
   int len = 0;
@@ -86,7 +87,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
     if (!EVP_EncryptUpdate(ctx.get(), nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Encryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Encryption failed");
     }
   }
 
@@ -104,19 +105,19 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
             reinterpret_cast<uint8_t*>(&(buffer[ciphertext_buffer_offset])),
             &len, reinterpret_cast<const uint8_t*>(plaintext_chunk.data()),
             plaintext_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Encryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Encryption failed");
     }
     ciphertext_buffer_offset += plaintext_chunk.size();
   }
   if (!EVP_EncryptFinal_ex(ctx.get(), nullptr, &len)) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
 
   std::string tag;
   subtle::ResizeStringUninitialized(&tag, kTagSizeInBytes);
   if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_GET_TAG, kTagSizeInBytes,
                            reinterpret_cast<uint8_t*>(&tag[0]))) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
 
   // Create result cord
@@ -130,7 +131,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
     absl::Cord ciphertext, absl::Cord additional_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INTERNAL, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInternal, "Ciphertext too short");
   }
 
   // First bytes contain IV
@@ -140,18 +141,18 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
 
   internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (!EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Decryption init failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption init failed");
   }
 
   if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, kIvSizeInBytes,
                            nullptr)) {
-    return util::Status(util::error::INTERNAL, "Setting IV size failed");
+    return util::Status(absl::StatusCode::kInternal, "Setting IV size failed");
   }
 
   if (!EVP_DecryptInit_ex(ctx.get(), nullptr, nullptr,
                           reinterpret_cast<const uint8_t*>(key_.data()),
                           reinterpret_cast<const uint8_t*>(iv.data()))) {
-    return util::Status(util::error::INTERNAL, "Decryption init failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption init failed");
   }
 
   int len = 0;
@@ -160,7 +161,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
     if (!EVP_DecryptUpdate(ctx.get(), nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Decryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Decryption failed");
     }
   }
 
@@ -182,7 +183,7 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
                            &len,
                            reinterpret_cast<const uint8_t*>(ct_chunk.data()),
                            ct_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Decryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Decryption failed");
     }
     plaintext_buffer_offset += ct_chunk.size();
   }
@@ -193,12 +194,12 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
 
   if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_TAG, kTagSizeInBytes,
                            &tag[0])) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "Could not set authentication tag");
   }
   // Verify authentication tag
   if (!EVP_DecryptFinal_ex(ctx.get(), nullptr, &len)) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
   }
   return result;
 }
