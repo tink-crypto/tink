@@ -14,13 +14,8 @@
 
 """This class implements helper functions for testing."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import os
-from typing import Text, Mapping
+from typing import Mapping
 
 from tink.proto import tink_pb2
 from tink import aead
@@ -32,7 +27,7 @@ from tink import prf
 from tink import signature as pk_signature
 
 
-def tink_root_path() -> Text:
+def tink_root_path() -> str:
   """Returns the path to the Tink root directory used for the test enviroment.
 
      The path can be set in the TINK_SRC_PATH enviroment variable. If Bazel
@@ -55,14 +50,15 @@ def tink_root_path() -> Text:
                    'TINK_SRC_PATH is set.')
 
 
-def fake_key(value: bytes = b'fakevalue',
-             type_url: Text = 'fakeurl',
-             key_material_type: tink_pb2.KeyData.KeyMaterialType = tink_pb2
-             .KeyData.SYMMETRIC,
-             key_id: int = 1234,
-             status: tink_pb2.KeyStatusType = tink_pb2.ENABLED,
-             output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
-            ) -> tink_pb2.Keyset.Key:
+def fake_key(
+    value: bytes = b'fakevalue',
+    type_url: str = 'fakeurl',
+    key_material_type: tink_pb2.KeyData.KeyMaterialType = tink_pb2.KeyData
+    .SYMMETRIC,
+    key_id: int = 1234,
+    status: tink_pb2.KeyStatusType = tink_pb2.ENABLED,
+    output_prefix_type: tink_pb2.OutputPrefixType = tink_pb2.TINK
+) -> tink_pb2.Keyset.Key:
   """Returns a fake but valid key."""
   key = tink_pb2.Keyset.Key(
       key_id=key_id,
@@ -77,7 +73,7 @@ def fake_key(value: bytes = b'fakevalue',
 class FakeMac(mac.Mac):
   """A fake MAC implementation."""
 
-  def __init__(self, name: Text = 'FakeMac'):
+  def __init__(self, name: str = 'FakeMac'):
     self._name = name
 
   def compute_mac(self, data: bytes) -> bytes:
@@ -91,7 +87,7 @@ class FakeMac(mac.Mac):
 class FakeAead(aead.Aead):
   """A fake AEAD implementation."""
 
-  def __init__(self, name: Text = 'FakeAead'):
+  def __init__(self, name: str = 'FakeAead'):
     self._name = name
 
   def encrypt(self, plaintext: bytes, associated_data: bytes) -> bytes:
@@ -109,7 +105,7 @@ class FakeAead(aead.Aead):
 class FakeDeterministicAead(daead.DeterministicAead):
   """A fake Deterministic AEAD implementation."""
 
-  def __init__(self, name: Text = 'FakeDeterministicAead'):
+  def __init__(self, name: str = 'FakeDeterministicAead'):
     self._name = name
 
   def encrypt_deterministically(self, plaintext: bytes,
@@ -130,7 +126,7 @@ class FakeDeterministicAead(daead.DeterministicAead):
 class FakeHybridDecrypt(hybrid.HybridDecrypt):
   """A fake HybridEncrypt implementation."""
 
-  def __init__(self, name: Text = 'Hybrid'):
+  def __init__(self, name: str = 'Hybrid'):
     self._name = name
 
   def decrypt(self, ciphertext: bytes, context_info: bytes) -> bytes:
@@ -146,7 +142,7 @@ class FakeHybridDecrypt(hybrid.HybridDecrypt):
 class FakeHybridEncrypt(hybrid.HybridEncrypt):
   """A fake HybridEncrypt implementation."""
 
-  def __init__(self, name: Text = 'Hybrid'):
+  def __init__(self, name: str = 'Hybrid'):
     self._name = name
 
   def encrypt(self, plaintext: bytes, context_info: bytes) -> bytes:
@@ -156,7 +152,7 @@ class FakeHybridEncrypt(hybrid.HybridEncrypt):
 class FakePublicKeySign(pk_signature.PublicKeySign):
   """A fake PublicKeySign implementation."""
 
-  def __init__(self, name: Text = 'FakePublicKeySign'):
+  def __init__(self, name: str = 'FakePublicKeySign'):
     self._name = name
 
   def sign(self, data: bytes) -> bytes:
@@ -166,7 +162,7 @@ class FakePublicKeySign(pk_signature.PublicKeySign):
 class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
   """A fake PublicKeyVerify implementation."""
 
-  def __init__(self, name: Text = 'FakePublicKeyVerify'):
+  def __init__(self, name: str = 'FakePublicKeyVerify'):
     self._name = name
 
   def verify(self, signature: bytes, data: bytes):
@@ -177,7 +173,7 @@ class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
 class FakePrf(prf.Prf):
   """A fake Prf implementation."""
 
-  def __init__(self, name: Text = 'FakePrf'):
+  def __init__(self, name: str = 'FakePrf'):
     self._name = name
 
   def compute(self, input_data: bytes, output_length: int) -> bytes:
@@ -192,7 +188,7 @@ class FakePrf(prf.Prf):
 class FakePrfSet(prf.PrfSet):
   """A fake PrfSet implementation that contains exactly one Prf."""
 
-  def __init__(self, name: Text = 'FakePrf'):
+  def __init__(self, name: str = 'FakePrf'):
     self._prf = FakePrf(name)
 
   def primary_id(self) -> int:

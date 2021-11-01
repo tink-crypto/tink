@@ -13,8 +13,6 @@
 # limitations under the License.
 """Python implementation of a KeysetBuilder."""
 
-# Placeholder for import for type annotations
-
 import io
 import random
 from tink.proto import tink_pb2
@@ -49,7 +47,7 @@ def legacy_template(template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
   return template_copy
 
 
-class KeysetBuilder(object):
+class KeysetBuilder:
   """A KeysetBuilder provides convenience methods for managing Keysets.
 
   It provides methods for adding, disabling, enabling, or deleting keys.
