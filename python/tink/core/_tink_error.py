@@ -14,10 +14,6 @@
 
 """This module defines basic exceptions in Tink."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from tink.cc.pybind import tink_bindings
 
 KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.StatusNotOk,)

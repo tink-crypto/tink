@@ -14,26 +14,15 @@
 
 """Reads Keysets from file."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 
-from typing import Text
-# Special imports
-import six
-
-
-from tink.proto import tink_pb2
-from tink import core
 from google.protobuf import json_format
 from google.protobuf import message
+from tink.proto import tink_pb2
+from tink import core
 
 
-@six.add_metaclass(abc.ABCMeta)
-class KeysetReader(object):
+class KeysetReader(metaclass=abc.ABCMeta):
   """Reads a Keyset."""
 
   @abc.abstractmethod
@@ -50,7 +39,7 @@ class KeysetReader(object):
 class JsonKeysetReader(KeysetReader):
   """Reads a JSON Keyset."""
 
-  def __init__(self, serialized_keyset: Text):
+  def __init__(self, serialized_keyset: str):
     self._serialized_keyset = serialized_keyset
 
   def read(self) -> tink_pb2.Keyset:

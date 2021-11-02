@@ -14,11 +14,6 @@
 
 """A container class for a set of primitives."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import collections
 from typing import Generic, List, Type, TypeVar
 

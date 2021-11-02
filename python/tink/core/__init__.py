@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """Core package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.proto import tink_pb2
 from tink.core import _crypto_format
@@ -45,7 +41,6 @@ PrimitiveWrapper = _primitive_wrapper.PrimitiveWrapper
 crypto_format = _crypto_format
 
 
-class KeyAccess(object):
+class KeyAccess:
   """Base class for access tokens for Tink Keys."""
   pass
-

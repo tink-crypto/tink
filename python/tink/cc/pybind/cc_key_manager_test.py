@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.cc.pybind.py_key_manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from typing import cast
 from absl.testing import absltest
 from tink.proto import aes_eax_pb2
@@ -43,7 +39,7 @@ def setUpModule():
 class AeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(AeadKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.AeadKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesEaxKey')
 
@@ -90,7 +86,7 @@ class AeadKeyManagerTest(absltest.TestCase):
 class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(DeterministicAeadKeyManagerTest, self).setUp()
+    super().setUp()
     daead_key_manager = tink_bindings.DeterministicAeadKeyManager
     self.key_manager = daead_key_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesSivKey')
@@ -197,7 +193,7 @@ class HybridKeyManagerTest(absltest.TestCase):
 class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(MacKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacKey')
 
@@ -253,7 +249,7 @@ class MacKeyManagerTest(absltest.TestCase):
 class JwtMacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(JwtMacKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
@@ -307,7 +303,7 @@ class JwtMacKeyManagerTest(absltest.TestCase):
 class PrfKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(PrfKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.PrfKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacPrfKey')
 
@@ -363,7 +359,7 @@ class PrfKeyManagerTest(absltest.TestCase):
 class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(PublicKeySignVerifyKeyManagerTest, self).setUp()
+    super().setUp()
     public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
     self.key_manager_verify = public_key_verify_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
@@ -456,7 +452,7 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 class JwtPublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(JwtPublicKeySignVerifyKeyManagerTest, self).setUp()
+    super().setUp()
     public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
     self.key_manager_verify = public_key_verify_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')

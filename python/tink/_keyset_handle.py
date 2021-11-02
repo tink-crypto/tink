@@ -13,11 +13,6 @@
 # limitations under the License.
 """This module defines KeysetHandle."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import random
 
 from typing import Type, TypeVar
@@ -48,7 +43,7 @@ def has_secret_key_access(token: core.KeyAccess) -> bool:
   return isinstance(token, secret_key_access.SecretKeyAccess)
 
 
-class KeysetHandle(object):
+class KeysetHandle:
   """A KeysetHandle provides abstracted access to Keyset.
 
   KeysetHandle limits the exposure of actual protocol buffers that hold

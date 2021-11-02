@@ -13,10 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.cleartext_keyset_handle."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import io
 
 from absl.testing import absltest

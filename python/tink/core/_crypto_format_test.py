@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.crypto_format."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 from tink.proto import tink_pb2
 from tink import core

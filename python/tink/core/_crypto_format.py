@@ -14,11 +14,6 @@
 
 """Constants and convenience methods for the outputs handled by Tink."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import struct
 
 from tink.proto import tink_pb2

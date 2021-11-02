@@ -14,9 +14,7 @@
 
 """Tests for tink.python.tink.registry."""
 
-# Placeholder for import for type annotations
-
-from typing import cast, Mapping, Type, TypeVar, Text
+from typing import cast, Mapping, Type, TypeVar
 from absl.testing import absltest
 
 from tink.proto import tink_pb2
@@ -36,7 +34,7 @@ P = TypeVar('P')
 
 class DummyKeyManager(core.KeyManager[P]):
 
-  def __init__(self, type_url: Text, primitive_class: Type[P] = aead.Aead):
+  def __init__(self, type_url: str, primitive_class: Type[P] = aead.Aead):
     self._type_url = type_url
     self._primitive_class = primitive_class
 
@@ -46,26 +44,26 @@ class DummyKeyManager(core.KeyManager[P]):
   def primitive(self, key_data: tink_pb2.KeyData) -> P:
     return helper.FakeAead()
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._type_url
 
   def new_key_data(self,
                    key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyData:
     return tink_pb2.KeyData(type_url=key_template.type_url)
 
-  def does_support(self, type_url: Text) -> bool:
+  def does_support(self, type_url: str) -> bool:
     return self.key_type() == type_url
 
 
 class UnsupportedKeyManager(DummyKeyManager[P]):
 
-  def does_support(self, type_url: Text) -> bool:
+  def does_support(self, type_url: str) -> bool:
     return False
 
 
 class DummyPrivateKeyManager(core.PrivateKeyManager[hybrid.HybridDecrypt]):
 
-  def __init__(self, type_url: Text):
+  def __init__(self, type_url: str):
     self._type_url = type_url
 
   def primitive_class(self) -> Type[hybrid.HybridDecrypt]:
@@ -74,7 +72,7 @@ class DummyPrivateKeyManager(core.PrivateKeyManager[hybrid.HybridDecrypt]):
   def primitive(self, key_data: tink_pb2.KeyData) -> hybrid.HybridDecrypt:
     return helper.FakeHybridDecrypt()
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._type_url
 
   def new_key_data(self,
@@ -181,7 +179,7 @@ def _mac_set(mac_list) -> core.PrimitiveSet[mac.Mac]:
 class RegistryTest(absltest.TestCase):
 
   def setUp(self):
-    super(RegistryTest, self).setUp()
+    super().setUp()
     self.reg = core.Registry()
     self.reg.reset()
 

@@ -19,13 +19,6 @@ Reading or writing secret keys is a bad practice, usage of this API should be
 restricted.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-# Special imports
-
 from tink import core
 
 

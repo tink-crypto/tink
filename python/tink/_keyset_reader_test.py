@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink._keyset_reader."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from typing import cast
 from absl.testing import absltest
 
