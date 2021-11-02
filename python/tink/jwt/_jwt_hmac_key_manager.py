@@ -13,12 +13,7 @@
 # limitations under the License.
 """A JWT HMAC key manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Type
+from typing import Optional, Type
 
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
@@ -44,8 +39,8 @@ _ALGORITHM_STRING = {
 class _JwtHmac(_jwt_mac.JwtMacInternal):
   """Interface for authenticating and verifying JWT with JWS MAC."""
 
-  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: Text,
-               custom_kid: Optional[Text]):
+  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: str,
+               custom_kid: Optional[str]):
     self._cc_mac = cc_mac
     self._algorithm = algorithm
     self._custom_kid = custom_kid
@@ -59,7 +54,7 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
     self._cc_mac.verify_mac(mac_value, data)
 
   def compute_mac_and_encode_with_kid(self, raw_jwt: _raw_jwt.RawJwt,
-                                      kid: Optional[Text]) -> Text:
+                                      kid: Optional[str]) -> str:
     """Computes a MAC and encodes the token.
 
     Args:
@@ -83,8 +78,8 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
                                              self._compute_mac(unsigned))
 
   def verify_mac_and_decode_with_kid(
-      self, compact: Text, validator: _jwt_validator.JwtValidator,
-      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
+      self, compact: str, validator: _jwt_validator.JwtValidator,
+      kid: Optional[str]) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token."""
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, mac = parts
@@ -124,7 +119,7 @@ class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMacInternal]):
       custom_kid = None
     return _JwtHmac(cc_mac, algorithm, custom_kid)
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @core.use_tink_errors

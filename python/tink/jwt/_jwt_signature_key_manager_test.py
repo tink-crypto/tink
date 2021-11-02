@@ -15,7 +15,7 @@
 
 import datetime
 
-from typing import cast, Text
+from typing import cast
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -40,7 +40,7 @@ def setUpModule():
   jwt.register_jwt_signature()
 
 
-def gen_compact(json_header: Text, json_payload: Text, raw_sign) -> Text:
+def gen_compact(json_header: str, json_payload: str, raw_sign) -> str:
   unsigned_compact = (
       _jwt_format.encode_header(json_header) + b'.' +
       _jwt_format.encode_payload(json_payload))

@@ -14,18 +14,10 @@
 
 """Interface for PublicKeySign."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
-# Special imports
-import six
 
 
-@six.add_metaclass(abc.ABCMeta)
-class PublicKeySign(object):
+class PublicKeySign(metaclass=abc.ABCMeta):
   """Interface for public key signing.
 
   Digital Signatures provide functionality of signing data and verification of

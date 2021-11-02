@@ -14,7 +14,6 @@
 """Tests for tink.python.tink.jwt._jwt_mac_wrapper."""
 
 import io
-from typing import Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -35,7 +34,7 @@ def setUpModule():
 
 
 def _set_custom_kid(keyset_handle: tink.KeysetHandle,
-                    custom_kid: Text) -> tink.KeysetHandle:
+                    custom_kid: str) -> tink.KeysetHandle:
   """Set the custom_kid field of the first key."""
   buffer = io.BytesIO()
   cleartext_keyset_handle.write(

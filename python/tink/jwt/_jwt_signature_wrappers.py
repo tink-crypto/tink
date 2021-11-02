@@ -13,12 +13,7 @@
 # limitations under the License.
 """Python primitive set wrapper for the JwtMac primitive."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Type
+from typing import Optional, Type
 
 from tink.proto import tink_pb2
 from tink import core
@@ -37,7 +32,7 @@ class _WrappedJwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySign):
   def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
-  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> str:
     primary = self._primitive_set.primary()
     kid = _jwt_format.get_kid(primary.key_id, primary.output_prefix_type)
     return primary.primitive.sign_and_encode_with_kid(raw_jwt, kid)
@@ -50,7 +45,7 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
     self._primitive_set = pset
 
   def verify_and_decode(
-      self, compact: Text,
+      self, compact: str,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     interesting_error = None
     for entries in self._primitive_set.all():

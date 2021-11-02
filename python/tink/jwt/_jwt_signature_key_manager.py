@@ -13,12 +13,7 @@
 # limitations under the License.
 """JWT Signature key managers."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Any, Optional, Text, Type, Tuple, Callable
+from typing import Any, Optional, Type, Tuple, Callable
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
@@ -66,8 +61,8 @@ _RSA_SSA_PSS_ALGORITHM_TEXTS = {
 class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySignInternal):
   """Implementation of JwtPublicKeySignInternal using a PublicKeySign."""
 
-  def __init__(self, cc_primitive: tink_bindings.PublicKeySign, algorithm: Text,
-               custom_kid: Text):
+  def __init__(self, cc_primitive: tink_bindings.PublicKeySign, algorithm: str,
+               custom_kid: str):
     self._public_key_sign = cc_primitive
     self._algorithm = algorithm
     self._custom_kid = custom_kid
@@ -77,7 +72,7 @@ class _JwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySignInternal):
     return self._public_key_sign.sign(data)
 
   def sign_and_encode_with_kid(self, raw_jwt: _raw_jwt.RawJwt,
-                               kid: Optional[Text]) -> Text:
+                               kid: Optional[str]) -> str:
     """Computes a signature and encodes the token.
 
     Args:
@@ -104,7 +99,7 @@ class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerifyInternal):
   """Implementation of JwtPublicKeyVerify using a PublicKeyVerify."""
 
   def __init__(self, cc_primitive: tink_bindings.PublicKeyVerify,
-               algorithm: Text, custom_kid: Optional[Text]):
+               algorithm: str, custom_kid: Optional[str]):
     self._public_key_verify = cc_primitive
     self._algorithm = algorithm
     self._custom_kid = custom_kid
@@ -114,9 +109,8 @@ class _JwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerifyInternal):
     self._public_key_verify.verify(signature, data)
 
   def verify_and_decode_with_kid(
-      self, compact: Text,
-      validator: _jwt_validator.JwtValidator,
-      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
+      self, compact: str, validator: _jwt_validator.JwtValidator,
+      kid: Optional[str]) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a signed compact JWT token."""
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, signature = parts
@@ -139,7 +133,7 @@ class _JwtPublicKeySignKeyManagerCcToPyWrapper(
 
   def __init__(self, cc_key_manager: tink_bindings.PublicKeySignKeyManager,
                key_data_to_alg_kid: Callable[[tink_pb2.KeyData],
-                                             Tuple[Text, Optional[Text]]]):
+                                             Tuple[str, Optional[str]]]):
     self._cc_key_manager = cc_key_manager
     self._key_data_to_alg_kid = key_data_to_alg_kid
 
@@ -155,7 +149,7 @@ class _JwtPublicKeySignKeyManagerCcToPyWrapper(
     algorithm, custom_kid = self._key_data_to_alg_kid(key_data)
     return _JwtPublicKeySign(sign, algorithm, custom_kid)
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @core.use_tink_errors
@@ -176,7 +170,7 @@ class _JwtPublicKeyVerifyKeyManagerCcToPyWrapper(
 
   def __init__(self, cc_key_manager: tink_bindings.PublicKeyVerifyKeyManager,
                key_data_to_alg_kid: Callable[[tink_pb2.KeyData],
-                                             Tuple[Text, Optional[Text]]]):
+                                             Tuple[str, Optional[str]]]):
     self._cc_key_manager = cc_key_manager
     self._key_data_to_alg_kid = key_data_to_alg_kid
 
@@ -192,7 +186,7 @@ class _JwtPublicKeyVerifyKeyManagerCcToPyWrapper(
     algorithm, custom_kid = self._key_data_to_alg_kid(key_data)
     return _JwtPublicKeyVerify(verify, algorithm, custom_kid)
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @core.use_tink_errors
@@ -202,13 +196,13 @@ class _JwtPublicKeyVerifyKeyManagerCcToPyWrapper(
         self._cc_key_manager.new_key_data(key_template.SerializeToString()))
 
 
-def _ecdsa_algorithm_text(algorithm: jwt_ecdsa_pb2.JwtEcdsaAlgorithm) -> Text:
+def _ecdsa_algorithm_text(algorithm: jwt_ecdsa_pb2.JwtEcdsaAlgorithm) -> str:
   if algorithm not in _ECDSA_ALGORITHM_TEXTS:
     raise _jwt_error.JwtInvalidError('Invalid algorithm')
   return _ECDSA_ALGORITHM_TEXTS[algorithm]
 
 
-def _get_custom_kid(public_key_proto: Any) -> Optional[Text]:
+def _get_custom_kid(public_key_proto: Any) -> Optional[str]:
   if public_key_proto.HasField('custom_kid'):
     return public_key_proto.custom_kid.value
   else:
@@ -216,7 +210,7 @@ def _get_custom_kid(public_key_proto: Any) -> Optional[Text]:
 
 
 def _ecdsa_alg_kid_from_private_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_ECDSA_PRIVATE_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_ecdsa_pb2.JwtEcdsaPrivateKey.FromString(key_data.value)
@@ -225,7 +219,7 @@ def _ecdsa_alg_kid_from_private_key_data(
 
 
 def _ecdsa_alg_kid_from_public_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_ECDSA_PUBLIC_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_ecdsa_pb2.JwtEcdsaPublicKey.FromString(key_data.value)
@@ -233,14 +227,14 @@ def _ecdsa_alg_kid_from_public_key_data(
 
 
 def _rsa_ssa_pkcs1_algorithm_text(
-    algorithm: jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1Algorithm) -> Text:
+    algorithm: jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1Algorithm) -> str:
   if algorithm not in _RSA_SSA_PKCS1_ALGORITHM_TEXTS:
     raise _jwt_error.JwtInvalidError('Invalid algorithm')
   return _RSA_SSA_PKCS1_ALGORITHM_TEXTS[algorithm]
 
 
 def _rsa_ssa_pkcs1_alg_kid_from_private_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_RSA_SSA_PKCS1_PRIVATE_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PrivateKey.FromString(
@@ -250,7 +244,7 @@ def _rsa_ssa_pkcs1_alg_kid_from_private_key_data(
 
 
 def _rsa_ssa_pkcs1_alg_kid_from_public_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_RSA_SSA_PKCS1_PUBLIC_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PublicKey.FromString(key_data.value)
@@ -258,14 +252,14 @@ def _rsa_ssa_pkcs1_alg_kid_from_public_key_data(
 
 
 def _rsa_ssa_pss_algorithm_text(
-    algorithm: jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssAlgorithm) -> Text:
+    algorithm: jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssAlgorithm) -> str:
   if algorithm not in _RSA_SSA_PSS_ALGORITHM_TEXTS:
     raise _jwt_error.JwtInvalidError('Invalid algorithm')
   return _RSA_SSA_PSS_ALGORITHM_TEXTS[algorithm]
 
 
 def _rsa_ssa_pss_alg_kid_from_private_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_RSA_SSA_PSS_PRIVATE_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPrivateKey.FromString(key_data.value)
@@ -274,7 +268,7 @@ def _rsa_ssa_pss_alg_kid_from_private_key_data(
 
 
 def _rsa_ssa_pss_alg_kid_from_public_key_data(
-    key_data: tink_pb2.KeyData) -> Tuple[Text, Optional[Text]]:
+    key_data: tink_pb2.KeyData) -> Tuple[str, Optional[str]]:
   if key_data.type_url != _JWT_RSA_SSA_PSS_PUBLIC_KEY_TYPE:
     raise _jwt_error.JwtInvalidError('Invalid key data key type')
   key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey.FromString(key_data.value)

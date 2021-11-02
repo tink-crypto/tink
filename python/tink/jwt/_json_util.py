@@ -14,12 +14,12 @@
 """Defines an Invalid JWT Error."""
 
 import json
-from typing import Any, Text
+from typing import Any
 
 from tink.jwt import _jwt_error
 
 
-def json_dumps(json_data: Any) -> Text:
+def json_dumps(json_data: Any) -> str:
   return json.dumps(json_data, separators=(',', ':'))
 
 
@@ -37,7 +37,7 @@ def validate_all_strings(json_data: Any):
       validate_all_strings(value)
 
 
-def json_loads(json_text: Text) -> Any:
+def json_loads(json_text: str) -> Any:
   """Does the same as json.loads, but with some additional validation."""
   try:
     json_data = json.loads(json_text)

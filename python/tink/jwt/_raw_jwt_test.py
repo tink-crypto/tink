@@ -15,7 +15,7 @@
 import datetime
 import json
 
-from typing import cast, Dict, List, Text
+from typing import cast, Dict, List
 
 from absl.testing import absltest
 # from absl.testing import parameterized
@@ -101,7 +101,7 @@ class RawJwtTest(absltest.TestCase):
 
   def test_string_audiences(self):
     token = jwt.new_raw_jwt(
-        audiences=cast(List[Text], 'bob'), without_expiration=True)
+        audiences=cast(List[str], 'bob'), without_expiration=True)
     self.assertTrue(token.has_audiences())
     self.assertEqual(token.audiences(), ['bob'])
 
@@ -375,7 +375,7 @@ class RawJwtTest(absltest.TestCase):
     audiences.append('eve')
     custom_claims['new_claim'] = 456
     my_claim['three'] = 4
-    output_claim = cast(Dict[Text, Text], token.custom_claim('my_claim'))
+    output_claim = cast(Dict[str, str], token.custom_claim('my_claim'))
     output_claim['three'] = 4  # pytype: disable=container-type-mismatch
 
     # modifications don't affect token.

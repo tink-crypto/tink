@@ -21,11 +21,6 @@ EcdsaPrivateKey, one can do:
 handle = keyset_handle.KeysetHandle(signature_key_templates.ECDSA_P256);
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 from tink.proto import common_pb2
 from tink.proto import ecdsa_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2

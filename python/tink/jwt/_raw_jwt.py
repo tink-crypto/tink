@@ -16,7 +16,7 @@ import copy
 import datetime
 import json
 
-from typing import cast, Mapping, Set, List, Dict, Optional, Text, Union, Any
+from typing import cast, Mapping, Set, List, Dict, Optional, Union, Any
 
 from tink import core
 from tink.jwt import _json_util
@@ -26,7 +26,7 @@ _REGISTERED_NAMES = frozenset({'iss', 'sub', 'jti', 'aud', 'exp', 'nbf', 'iat'})
 
 _MAX_TIMESTAMP_VALUE = 253402300799  # 31 Dec 9999, 23:59:59 GMT
 
-Claim = Union[None, bool, int, float, Text, List[Any], Dict[Text, Any]]
+Claim = Union[None, bool, int, float, str, List[Any], Dict[str, Any]]
 
 
 def _from_datetime(t: datetime.datetime) -> int:
@@ -39,13 +39,13 @@ def _to_datetime(timestamp: float) -> datetime.datetime:
   return datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
 
 
-def _validate_custom_claim_name(name: Text) -> None:
+def _validate_custom_claim_name(name: str) -> None:
   if name in _REGISTERED_NAMES:
     raise _jwt_error.JwtInvalidError(
         'registered name %s cannot be custom claim name' % name)
 
 
-class RawJwt(object):
+class RawJwt:
   """An unencoded and unsigned JSON Web Token (JWT).
 
   It contains all payload claims and a subset of the headers. It does not
@@ -58,8 +58,8 @@ class RawJwt(object):
   def __new__(cls):
     raise core.TinkError('RawJwt cannot be instantiated directly.')
 
-  def __init__(self, type_header: Optional[Text], payload: Dict[Text,
-                                                                Any]) -> None:
+  def __init__(self, type_header: Optional[str], payload: Dict[str,
+                                                               Any]) -> None:
     # No need to copy payload, because only create and from_json_payload
     # call this method.
     if not isinstance(payload, Dict):
@@ -74,12 +74,12 @@ class RawJwt(object):
     self._validate_timestamp_claim('iat')
     self._validate_audience_claim()
 
-  def _validate_string_claim(self, name: Text):
+  def _validate_string_claim(self, name: str):
     if name in self._payload:
-      if not isinstance(self._payload[name], Text):
+      if not isinstance(self._payload[name], str):
         raise _jwt_error.JwtInvalidError('claim %s must be a String' % name)
 
-  def _validate_timestamp_claim(self, name: Text):
+  def _validate_timestamp_claim(self, name: str):
     if name in self._payload:
       timestamp = self._payload[name]
       if not isinstance(timestamp, (int, float)):
@@ -91,19 +91,19 @@ class RawJwt(object):
   def _validate_audience_claim(self):
     if 'aud' in self._payload:
       audiences = self._payload['aud']
-      if isinstance(audiences, Text):
+      if isinstance(audiences, str):
         self._payload['aud'] = [audiences]
         return
       if not isinstance(audiences, list) or not audiences:
         raise _jwt_error.JwtInvalidError('audiences must be a non-empty list')
-      if not all(isinstance(value, Text) for value in audiences):
+      if not all(isinstance(value, str) for value in audiences):
         raise _jwt_error.JwtInvalidError('audiences must only contain Text')
 
   # TODO(juerg): Consider adding a raw_ prefix to all access methods
   def has_type_header(self) -> bool:
     return self._type_header is not None
 
-  def type_header(self) -> Text:
+  def type_header(self) -> str:
     if not self.has_type_header():
       raise KeyError('type header is not set')
     return self._type_header
@@ -111,26 +111,26 @@ class RawJwt(object):
   def has_issuer(self) -> bool:
     return 'iss' in self._payload
 
-  def issuer(self) -> Text:
-    return cast(Text, self._payload['iss'])
+  def issuer(self) -> str:
+    return cast(str, self._payload['iss'])
 
   def has_subject(self) -> bool:
     return 'sub' in self._payload
 
-  def subject(self) -> Text:
-    return cast(Text, self._payload['sub'])
+  def subject(self) -> str:
+    return cast(str, self._payload['sub'])
 
   def has_audiences(self) -> bool:
     return 'aud' in self._payload
 
-  def audiences(self) -> List[Text]:
+  def audiences(self) -> List[str]:
     return list(self._payload['aud'])
 
   def has_jwt_id(self) -> bool:
     return 'jti' in self._payload
 
-  def jwt_id(self) -> Text:
-    return cast(Text, self._payload['jti'])
+  def jwt_id(self) -> str:
+    return cast(str, self._payload['jti'])
 
   def has_expiration(self) -> bool:
     return 'exp' in self._payload
@@ -150,10 +150,10 @@ class RawJwt(object):
   def issued_at(self) -> datetime.datetime:
     return _to_datetime(self._payload['iat'])
 
-  def custom_claim_names(self) -> Set[Text]:
+  def custom_claim_names(self) -> Set[str]:
     return {n for n in self._payload.keys() if n not in _REGISTERED_NAMES}
 
-  def custom_claim(self, name: Text) -> Claim:
+  def custom_claim(self, name: str) -> Claim:
     _validate_custom_claim_name(name)
     value = self._payload[name]
     if isinstance(value, (list, dict)):
@@ -161,23 +161,23 @@ class RawJwt(object):
     else:
       return value
 
-  def json_payload(self) -> Text:
+  def json_payload(self) -> str:
     """Returns the payload encoded as JSON string."""
     return _json_util.json_dumps(self._payload)
 
   @classmethod
   def create(cls,
              *,
-             type_header: Optional[Text] = None,
-             issuer: Optional[Text] = None,
-             subject: Optional[Text] = None,
-             audiences: Optional[List[Text]] = None,
-             jwt_id: Optional[Text] = None,
+             type_header: Optional[str] = None,
+             issuer: Optional[str] = None,
+             subject: Optional[str] = None,
+             audiences: Optional[List[str]] = None,
+             jwt_id: Optional[str] = None,
              expiration: Optional[datetime.datetime] = None,
              without_expiration: Optional[bool] = None,
              not_before: Optional[datetime.datetime] = None,
              issued_at: Optional[datetime.datetime] = None,
-             custom_claims: Optional[Mapping[Text, Claim]] = None) -> 'RawJwt':
+             custom_claims: Optional[Mapping[str, Claim]] = None) -> 'RawJwt':
     """Create a new RawJwt instance."""
     if not expiration and not without_expiration:
       raise ValueError('either expiration or without_expiration must be set')
@@ -202,9 +202,9 @@ class RawJwt(object):
     if custom_claims:
       for name, value in custom_claims.items():
         _validate_custom_claim_name(name)
-        if not isinstance(name, Text):
+        if not isinstance(name, str):
           raise _jwt_error.JwtInvalidError('claim name must be Text')
-        if (value is None or isinstance(value, (bool, int, float, Text))):
+        if (value is None or isinstance(value, (bool, int, float, str))):
           payload[name] = value
         elif isinstance(value, list):
           payload[name] = json.loads(json.dumps(value))
@@ -217,7 +217,7 @@ class RawJwt(object):
     return raw_jwt
 
   @classmethod
-  def _from_json(cls, type_header: Optional[Text], payload: Text) -> 'RawJwt':
+  def _from_json(cls, type_header: Optional[str], payload: str) -> 'RawJwt':
     """Creates a RawJwt from payload encoded as JSON string."""
     raw_jwt = object.__new__(cls)
     raw_jwt.__init__(type_header, _json_util.json_loads(payload))
@@ -225,16 +225,16 @@ class RawJwt(object):
 
 
 def new_raw_jwt(*,
-                type_header: Optional[Text] = None,
-                issuer: Optional[Text] = None,
-                subject: Optional[Text] = None,
-                audiences: Optional[List[Text]] = None,
-                jwt_id: Optional[Text] = None,
+                type_header: Optional[str] = None,
+                issuer: Optional[str] = None,
+                subject: Optional[str] = None,
+                audiences: Optional[List[str]] = None,
+                jwt_id: Optional[str] = None,
                 expiration: Optional[datetime.datetime] = None,
                 without_expiration: bool = False,
                 not_before: Optional[datetime.datetime] = None,
                 issued_at: Optional[datetime.datetime] = None,
-                custom_claims: Optional[Mapping[Text, Claim]] = None) -> RawJwt:
+                custom_claims: Optional[Mapping[str, Claim]] = None) -> RawJwt:
   """Creates a new RawJwt."""
   return RawJwt.create(
       type_header=type_header,
@@ -249,6 +249,6 @@ def new_raw_jwt(*,
       custom_claims=custom_claims)
 
 
-def raw_jwt_from_json(type_header: Optional[Text], payload: Text) -> RawJwt:
+def raw_jwt_from_json(type_header: Optional[str], payload: str) -> RawJwt:
   """Internal function used to verify JWT token."""
   return RawJwt._from_json(type_header, payload)  # pylint: disable=protected-access

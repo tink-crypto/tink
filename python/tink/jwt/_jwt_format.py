@@ -16,7 +16,7 @@
 import base64
 import binascii
 import struct
-from typing import Any, Optional, Text, Tuple
+from typing import Any, Optional, Tuple
 
 from tink.proto import tink_pb2
 from tink.jwt import _json_util
@@ -62,26 +62,26 @@ def base64_decode(encoded_data: bytes) -> bytes:
     raise _jwt_error.JwtInvalidError('invalid base64 encoding')
 
 
-def _validate_algorithm(algorithm: Text) -> None:
+def _validate_algorithm(algorithm: str) -> None:
   if algorithm not in _VALID_ALGORITHMS:
     raise _jwt_error.JwtInvalidError('Invalid algorithm %s' % algorithm)
 
 
-def encode_header(json_header: Text) -> bytes:
+def encode_header(json_header: str) -> bytes:
   try:
     return base64_encode(json_header.encode('utf8'))
   except UnicodeEncodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
 
-def decode_header(encoded_header: bytes) -> Text:
+def decode_header(encoded_header: bytes) -> str:
   try:
     return base64_decode(encoded_header).decode('utf8')
   except UnicodeDecodeError:
     raise _jwt_error.JwtInvalidError('invalid token')
 
 
-def encode_payload(json_payload: Text) -> bytes:
+def encode_payload(json_payload: str) -> bytes:
   """Encodes the payload into compact form."""
   try:
     return base64_encode(json_payload.encode('utf8'))
@@ -89,7 +89,7 @@ def encode_payload(json_payload: Text) -> bytes:
     raise _jwt_error.JwtInvalidError('invalid token')
 
 
-def decode_payload(encoded_payload: bytes) -> Text:
+def decode_payload(encoded_payload: bytes) -> str:
   """Decodes the payload from compact form."""
   try:
     return base64_decode(encoded_payload).decode('utf8')
@@ -107,8 +107,8 @@ def decode_signature(encoded_signature: bytes) -> bytes:
   return base64_decode(encoded_signature)
 
 
-def create_header(algorithm: Text, type_header: Optional[Text],
-                  kid: Optional[Text]) -> bytes:
+def create_header(algorithm: str, type_header: Optional[str],
+                  kid: Optional[str]) -> bytes:
   _validate_algorithm(algorithm)
   header = {}
   if kid:
@@ -119,7 +119,7 @@ def create_header(algorithm: Text, type_header: Optional[Text],
   return encode_header(_json_util.json_dumps(header))
 
 
-def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[Text]:
+def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[str]:
   """Returns the encoded key_id, or None."""
   if prefix == tink_pb2.RAW:
     return None
@@ -130,12 +130,12 @@ def get_kid(key_id: int, prefix: tink_pb2.OutputPrefixType) -> Optional[Text]:
   raise _jwt_error.JwtInvalidError('unexpected output prefix type')
 
 
-def split_signed_compact(
-    signed_compact: Text) -> Tuple[bytes, Text, Text, bytes]:
+def split_signed_compact(signed_compact: str) -> Tuple[bytes, str, str, bytes]:
   """Splits a signed compact into its parts.
 
   Args:
     signed_compact: A signed compact JWT.
+
   Returns:
     A (unsigned_compact, json_header, json_payload, signature_or_mac) tuple.
   Raises:
@@ -162,15 +162,15 @@ def split_signed_compact(
   return (unsigned_compact, json_header, json_payload, signature_or_mac)
 
 
-def _validate_kid_header(header: Any, kid: Text) -> None:
+def _validate_kid_header(header: Any, kid: str) -> None:
   if header['kid'] != kid:
     raise _jwt_error.JwtInvalidError('invalid kid header')
 
 
 def validate_header(header: Any,
-                    algorithm: Text,
-                    tink_kid: Optional[Text] = None,
-                    custom_kid: Optional[Text] = None) -> None:
+                    algorithm: str,
+                    tink_kid: Optional[str] = None,
+                    custom_kid: Optional[str] = None) -> None:
   """Parses the header and validates its values."""
   _validate_algorithm(algorithm)
   hdr_algorithm = header.get('alg', '')
@@ -191,11 +191,11 @@ def validate_header(header: Any,
     _validate_kid_header(header, custom_kid)
 
 
-def get_type_header(header: Any) -> Optional[Text]:
+def get_type_header(header: Any) -> Optional[str]:
   return header.get('typ', None)
 
 
-def create_unsigned_compact(algorithm: Text, kid: Optional[Text],
+def create_unsigned_compact(algorithm: str, kid: Optional[str],
                             raw_jwt: _raw_jwt.RawJwt) -> bytes:
   if raw_jwt.has_type_header():
     header = create_header(algorithm, raw_jwt.type_header(), kid)
@@ -204,5 +204,5 @@ def create_unsigned_compact(algorithm: Text, kid: Optional[Text],
   return header + b'.' + encode_payload(raw_jwt.json_payload())
 
 
-def create_signed_compact(unsigned_compact: bytes, signature: bytes) -> Text:
+def create_signed_compact(unsigned_compact: bytes, signature: bytes) -> str:
   return (unsigned_compact + b'.' + encode_signature(signature)).decode('utf8')

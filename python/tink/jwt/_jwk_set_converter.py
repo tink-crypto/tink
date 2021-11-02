@@ -13,16 +13,11 @@
 # limitations under the License.
 """Convert Tink Keyset with JWT keys from and to JWK sets."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 import json
 import random
 
-from typing import Dict, List, Optional, Text, Union
+from typing import Dict, List, Optional, Union
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
@@ -72,16 +67,16 @@ _RSA_SSA_PSS_NAME_TO_ALGORITHM = {
 }
 
 
-def _base64_encode(data: bytes) -> Text:
+def _base64_encode(data: bytes) -> str:
   return _jwt_format.base64_encode(data).decode('utf8')
 
 
-def _base64_decode(data: Text) -> bytes:
+def _base64_decode(data: str) -> bytes:
   return _jwt_format.base64_decode(data.encode('utf8'))
 
 
 def from_keyset_handle(keyset_handle: tink.KeysetHandle,
-                       key_access: Optional[tink.KeyAccess] = None) -> Text:
+                       key_access: Optional[tink.KeyAccess] = None) -> str:
   """Converts a Tink KeysetHandle with JWT keys into a Json Web Key (JWK) set.
 
   JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
@@ -131,7 +126,7 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
 
 
 def _convert_jwt_ecdsa_key(
-    key: tink_pb2.Keyset.Key) -> Dict[Text, Union[Text, List[Text]]]:
+    key: tink_pb2.Keyset.Key) -> Dict[str, Union[str, List[str]]]:
   """Converts a JwtEcdsaPublicKey into a JWK."""
   ecdsa_public_key = jwt_ecdsa_pb2.JwtEcdsaPublicKey.FromString(
       key.key_data.value)
@@ -156,7 +151,7 @@ def _convert_jwt_ecdsa_key(
 
 
 def _convert_jwt_rsa_ssa_pkcs1_key(
-    key: tink_pb2.Keyset.Key) -> Dict[Text, Union[Text, List[Text]]]:
+    key: tink_pb2.Keyset.Key) -> Dict[str, Union[str, List[str]]]:
   """Converts a JwtRsaSsaPkcs1PublicKey into a JWK."""
   public_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PublicKey.FromString(
       key.key_data.value)
@@ -180,7 +175,7 @@ def _convert_jwt_rsa_ssa_pkcs1_key(
 
 
 def _convert_jwt_rsa_ssa_pss_key(
-    key: tink_pb2.Keyset.Key) -> Dict[Text, Union[Text, List[Text]]]:
+    key: tink_pb2.Keyset.Key) -> Dict[str, Union[str, List[str]]]:
   """Converts a JwtRsaSsaPssPublicKey into a JWK."""
   public_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey.FromString(
       key.key_data.value)
@@ -211,7 +206,7 @@ def _generate_unused_key_id(keyset: tink_pb2.Keyset) -> int:
 
 
 def to_keyset_handle(
-    jwk_set: Text,
+    jwk_set: str,
     key_access: Optional[tink.KeyAccess] = None) -> tink.KeysetHandle:
   """Converts a Json Web Key (JWK) set into a Tink KeysetHandle with JWT keys.
 
@@ -262,7 +257,7 @@ def to_keyset_handle(
   return cleartext_keyset_handle.from_keyset(proto_keyset)
 
 
-def _validate_use_and_key_ops(key: Dict[Text, Union[Text, List[Text]]]):
+def _validate_use_and_key_ops(key: Dict[str, Union[str, List[str]]]):
   """Checks that 'key_ops' and 'use' have the right values if present."""
   if 'key_ops' in key:
     key_ops = key['key_ops']
@@ -273,7 +268,7 @@ def _validate_use_and_key_ops(key: Dict[Text, Union[Text, List[Text]]]):
 
 
 def _convert_to_ecdsa_key(
-    key: Dict[Text, Union[Text, List[Text]]]) -> tink_pb2.Keyset.Key:
+    key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a EC Json Web Key (JWK) into a tink_pb2.Keyset.Key."""
   ecdsa_public_key = jwt_ecdsa_pb2.JwtEcdsaPublicKey()
   algorithm = _ECDSA_NAME_TO_ALGORITHM.get(key['alg'], None)
@@ -302,7 +297,7 @@ def _convert_to_ecdsa_key(
 
 
 def _convert_to_rsa_ssa_pkcs1_key(
-    key: Dict[Text, Union[Text, List[Text]]]) -> tink_pb2.Keyset.Key:
+    key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a JWK into a JwtEcdsaPublicKey."""
   public_key = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1PublicKey()
   algorithm = _RSA_SSA_PKCS1_NAME_TO_ALGORITHM.get(key['alg'], None)
@@ -329,7 +324,7 @@ def _convert_to_rsa_ssa_pkcs1_key(
 
 
 def _convert_to_rsa_ssa_pss_key(
-    key: Dict[Text, Union[Text, List[Text]]]) -> tink_pb2.Keyset.Key:
+    key: Dict[str, Union[str, List[str]]]) -> tink_pb2.Keyset.Key:
   """Converts a JWK into a JwtEcdsaPublicKey."""
   public_key = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssPublicKey()
   algorithm = _RSA_SSA_PSS_NAME_TO_ALGORITHM.get(key['alg'], None)

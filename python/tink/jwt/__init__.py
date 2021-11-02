@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Jwt package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 import datetime
-from typing import Dict, List, Mapping, Optional, Text, Union, cast
+from typing import Dict, List, Mapping, Optional, Union, cast
 
 from tink.jwt import _jwk_set_converter
 from tink.jwt import _jwt_error

@@ -15,7 +15,6 @@
 
 import io
 
-from typing import Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -65,7 +64,7 @@ def _change_output_prefix_to_tink(
 
 
 def _set_custom_kid(keyset_handle: tink.KeysetHandle,
-                    custom_kid: Text) -> tink.KeysetHandle:
+                    custom_kid: str) -> tink.KeysetHandle:
   """Sets the custom_kid field of the first key."""
   buffer = io.BytesIO()
   cleartext_keyset_handle.write(

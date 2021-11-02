@@ -16,7 +16,7 @@
 import base64
 import datetime
 
-from typing import cast, Any, Text
+from typing import cast, Any
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -67,7 +67,7 @@ def create_fixed_jwt_hmac() -> _jwt_mac.JwtMacInternal:
   return key_manager.primitive(key_data)
 
 
-def gen_token(json_header: Text, json_payload: Text) -> Text:
+def gen_token(json_header: str, json_payload: str) -> str:
   cc_mac = _cc_mac()
   unsigned_token = (
       _jwt_format.encode_header(json_header) + b'.' +

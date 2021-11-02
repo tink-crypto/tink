@@ -14,14 +14,14 @@
 
 import datetime
 
-from typing import Optional, Text
+from typing import Optional
 from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
 _MAX_CLOCK_SKEW = datetime.timedelta(minutes=10)
 
 
-class JwtValidator(object):
+class JwtValidator:
   """A JwtValidator defines how JSON Web Tokens (JWTs) should be validated.
 
     By default, the JwtValidator requires that a token has a valid expiration
@@ -36,9 +36,9 @@ class JwtValidator(object):
 
   def __init__(self,
                *,
-               expected_type_header: Optional[Text],
-               expected_issuer: Optional[Text],
-               expected_audience: Optional[Text],
+               expected_type_header: Optional[str],
+               expected_issuer: Optional[str],
+               expected_audience: Optional[str],
                ignore_type_header: bool,
                ignore_issuer: bool,
                ignore_audiences: bool,
@@ -76,19 +76,19 @@ class JwtValidator(object):
   def has_expected_type_header(self) -> bool:
     return self._expected_type_header is not None
 
-  def expected_type_header(self) -> Text:
+  def expected_type_header(self) -> str:
     return self._expected_type_header
 
   def has_expected_issuer(self) -> bool:
     return self._expected_issuer is not None
 
-  def expected_issuer(self) -> Text:
+  def expected_issuer(self) -> str:
     return self._expected_issuer
 
   def has_expected_audience(self) -> bool:
     return self._expected_audience is not None
 
-  def expected_audience(self) -> Text:
+  def expected_audience(self) -> str:
     return self._expected_audience
 
   def ignore_type_header(self) -> bool:
@@ -118,9 +118,9 @@ class JwtValidator(object):
 
 def new_validator(
     *,
-    expected_type_header: Optional[Text] = None,
-    expected_issuer: Optional[Text] = None,
-    expected_audience: Optional[Text] = None,
+    expected_type_header: Optional[str] = None,
+    expected_issuer: Optional[str] = None,
+    expected_audience: Optional[str] = None,
     ignore_type_header: bool = False,
     ignore_issuer: bool = False,
     ignore_audiences: bool = False,

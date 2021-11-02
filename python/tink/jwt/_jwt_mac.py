@@ -13,31 +13,23 @@
 # limitations under the License.
 """Interface for JwtMac."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 
-from typing import Optional, Text
-
-import six
+from typing import Optional
 
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
 
 
-@six.add_metaclass(abc.ABCMeta)
-class JwtMac(object):
+class JwtMac(metaclass=abc.ABCMeta):
   """Interface for authenticating and verifying JWT with JWS MAC.
 
   Sees RFC 7519 and RFC 7515. Security guarantees: similar to MAC.
   """
 
   @abc.abstractmethod
-  def compute_mac_and_encode(self, token: _raw_jwt.RawJwt) -> Text:
+  def compute_mac_and_encode(self, token: _raw_jwt.RawJwt) -> str:
     """Computes a MAC and encodes the token.
 
     Args:
@@ -52,7 +44,7 @@ class JwtMac(object):
 
   @abc.abstractmethod
   def verify_mac_and_decode(
-      self, compact: Text,
+      self, compact: str,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token.
 
@@ -80,8 +72,7 @@ class JwtMac(object):
     raise NotImplementedError()
 
 
-@six.add_metaclass(abc.ABCMeta)
-class JwtMacInternal(object):
+class JwtMacInternal(metaclass=abc.ABCMeta):
   """Internal interface for authenticating and verifying JWT with JWS MAC.
 
   "kid" is an optional value that is set by the wrapper for keys with output
@@ -90,11 +81,11 @@ class JwtMacInternal(object):
 
   @abc.abstractmethod
   def compute_mac_and_encode_with_kid(self, token: _raw_jwt.RawJwt,
-                                      kid: Optional[Text]) -> Text:
+                                      kid: Optional[str]) -> str:
     raise NotImplementedError()
 
   @abc.abstractmethod
   def verify_mac_and_decode_with_kid(
-      self, compact: Text, validator: _jwt_validator.JwtValidator,
-      kid: Optional[Text]) -> _verified_jwt.VerifiedJwt:
+      self, compact: str, validator: _jwt_validator.JwtValidator,
+      kid: Optional[str]) -> _verified_jwt.VerifiedJwt:
     raise NotImplementedError()

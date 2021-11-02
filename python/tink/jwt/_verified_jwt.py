@@ -14,13 +14,13 @@
 
 import datetime
 
-from typing import List, Set, Text
+from typing import List, Set
 
 from tink import core
 from tink.jwt import _raw_jwt
 
 
-class VerifiedJwt(object):
+class VerifiedJwt:
   """A decoded and verified JSON Web Token (JWT).
 
   A new instance of this class is returned as the result of a sucessfully
@@ -48,31 +48,31 @@ class VerifiedJwt(object):
   def has_type_header(self) -> bool:
     return self._raw_jwt.has_type_header()
 
-  def type_header(self) -> Text:
+  def type_header(self) -> str:
     return self._raw_jwt.type_header()
 
   def has_issuer(self) -> bool:
     return self._raw_jwt.has_issuer()
 
-  def issuer(self) -> Text:
+  def issuer(self) -> str:
     return self._raw_jwt.issuer()
 
   def has_subject(self) -> bool:
     return self._raw_jwt.has_subject()
 
-  def subject(self) -> Text:
+  def subject(self) -> str:
     return self._raw_jwt.subject()
 
   def has_audiences(self) -> bool:
     return self._raw_jwt.has_audiences()
 
-  def audiences(self) -> List[Text]:
+  def audiences(self) -> List[str]:
     return self._raw_jwt.audiences()
 
   def has_jwt_id(self) -> bool:
     return self._raw_jwt.has_jwt_id()
 
-  def jwt_id(self) -> Text:
+  def jwt_id(self) -> str:
     return self._raw_jwt.jwt_id()
 
   def has_expiration(self) -> bool:
@@ -93,8 +93,8 @@ class VerifiedJwt(object):
   def issued_at(self) -> datetime.datetime:
     return self._raw_jwt.issued_at()
 
-  def custom_claim_names(self) -> Set[Text]:
+  def custom_claim_names(self) -> Set[str]:
     return self._raw_jwt.custom_claim_names()
 
-  def custom_claim(self, name: Text) -> _raw_jwt.Claim:
+  def custom_claim(self, name: str) -> _raw_jwt.Claim:
     return self._raw_jwt.custom_claim(name)
