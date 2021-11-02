@@ -120,11 +120,20 @@ tink_cc_library(
 tink_cc_library(
   NAME rsa_util
   SRCS
+    rsa_util.cc
     rsa_util.h
   DEPS
-    crypto
+    tink::internal::bn_util
+    tink::internal::err_util
+    tink::internal::ssl_unique_ptr
+    tink::config::tink_fips
     tink::subtle::common_enums
     tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    crypto
+    absl::status
+    absl::strings
 )
 
 tink_cc_test(

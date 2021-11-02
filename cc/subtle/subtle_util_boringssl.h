@@ -75,28 +75,29 @@ class SubtleUtilBoringSSL {
   // Returns BoringSSL's BIGNUM constructed from bigendian string
   // representation.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
-  static util::StatusOr<internal::SslUniquePtr<BIGNUM>> str2bn(
+  static inline util::StatusOr<internal::SslUniquePtr<BIGNUM>> str2bn(
       absl::string_view s) {
     return internal::StringToBignum(s);
   }
 
   // Returns a SecretData of size 'len' that holds BIGNUM 'bn'.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
-  static util::StatusOr<std::string> bn2str(const BIGNUM *bn, size_t len) {
+  static inline util::StatusOr<std::string> bn2str(const BIGNUM *bn,
+                                                   size_t len) {
     return internal::BignumToString(bn, len);
   }
 
   // Returns a string of size 'len' that holds BIGNUM 'bn'.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
-  static util::StatusOr<util::SecretData> BignumToSecretData(const BIGNUM *bn,
-                                                             size_t len) {
+  static inline util::StatusOr<util::SecretData> BignumToSecretData(
+      const BIGNUM *bn, size_t len) {
     return internal::BignumToSecretData(bn, len);
   }
 
   // Returns BoringSSL error strings accumulated in the error queue,
   // thus emptying the queue.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
-  inline static std::string GetErrors() { return internal::GetSslErrors(); }
+  static inline std::string GetErrors() { return internal::GetSslErrors(); }
 
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
   static crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(
@@ -178,37 +179,36 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
       HashType hash_type);
 
+  // Return an empty string if str.data() is nullptr; otherwise return str.
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline absl::string_view EnsureNonNull(absl::string_view str) {
+    return internal::EnsureStringNonNull(str);
+  }
+
   // Validates whether 'sig_hash' is safe to use for digital signature.
   static crypto::tink::util::Status ValidateSignatureHash(
       subtle::HashType sig_hash);
 
-  // Validates whether 'modulus_size' is at least 2048-bit.
-  // To reach 128-bit security strength, RSA's modulus must be at least
-  // 3072-bit while 2048-bit RSA key only has 112-bit security. Nevertheless,
-  // a 2048-bit RSA key is considered safe by NIST until 2030 (see
-  // https://www.keylength.com/en/4/).
-  static crypto::tink::util::Status ValidateRsaModulusSize(size_t modulus_size);
-
-  // Validates whether 'publicExponent' is odd and greater than 65536. The
-  // primes p and q are chosen such that (p-1)(q-1) is relatively prime to the
-  // public exponent. Therefore, the public exponent must be odd. Furthermore,
-  // choosing a public exponent which is not greater than 65536 can lead to weak
-  // instantiations of RSA. A public exponent which is odd and greater than
-  // 65536 conforms to the requirements set by NIST FIPS 186-4 (Appendix B.3.1).
-  static crypto::tink::util::Status ValidateRsaPublicExponent(
-      absl::string_view exponent);
-
-  // Return an empty string if str.data() is nullptr; otherwise return str.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
-  inline static absl::string_view EnsureNonNull(absl::string_view str) {
-    return internal::EnsureStringNonNull(str);
+  static inline crypto::tink::util::Status ValidateRsaModulusSize(
+      size_t modulus_size) {
+    return internal::ValidateRsaModulusSize(modulus_size);
   }
 
-  // Creates a new RSA public and private key pair.
-  static util::Status GetNewRsaKeyPair(int modulus_size_in_bits,
-                                       const BIGNUM *e,
-                                       RsaPrivateKey *private_key,
-                                       RsaPublicKey *public_key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::Status ValidateRsaPublicExponent(
+      absl::string_view exponent) {
+    return internal::ValidateRsaPublicExponent(exponent);
+  }
+
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::Status GetNewRsaKeyPair(int modulus_size_in_bits,
+                                              const BIGNUM *e,
+                                              RsaPrivateKey *private_key,
+                                              RsaPublicKey *public_key) {
+    return internal::NewRsaKeyPair(modulus_size_in_bits, e, private_key,
+                                   public_key);
+  }
 
   // Copies n, e and d into the RSA key.
   static util::Status CopyKey(const RsaPrivateKey &key, RSA *rsa);

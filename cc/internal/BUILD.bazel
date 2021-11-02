@@ -138,12 +138,21 @@ cc_library(
 
 cc_library(
     name = "rsa_util",
+    srcs = ["rsa_util.cc"],
     hdrs = ["rsa_util.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":bn_util",
+        ":err_util",
+        ":ssl_unique_ptr",
+        "//config:tink_fips",
         "//subtle:common_enums",
         "//util:secret_data",
+        "//util:status",
+        "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
     ],
 )
 
