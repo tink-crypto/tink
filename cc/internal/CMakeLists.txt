@@ -117,6 +117,16 @@ tink_cc_library(
     tink::util::statusor
 )
 
+tink_cc_library(
+  NAME rsa_util
+  SRCS
+    rsa_util.h
+  DEPS
+    crypto
+    tink::subtle::common_enums
+    tink::util::secret_data
+)
+
 tink_cc_test(
   NAME util_test
   SRCS

@@ -136,6 +136,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "rsa_util",
+    hdrs = ["rsa_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "//subtle:common_enums",
+        "//util:secret_data",
+        "@boringssl//:crypto",
+    ],
+)
+
 cc_test(
     name = "util_test",
     srcs = ["util_test.cc"],

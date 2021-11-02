@@ -652,6 +652,7 @@ cc_library(
         "//config:tink_fips",
         "//internal:bn_util",
         "//internal:err_util",
+        "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
         "//util:errors",

@@ -622,6 +622,7 @@ tink_cc_library(
     tink::config::tink_fips
     tink::internal::bn_util
     tink::internal::err_util
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::util::errors
