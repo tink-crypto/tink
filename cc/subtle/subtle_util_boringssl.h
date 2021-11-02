@@ -211,21 +211,37 @@ class SubtleUtilBoringSSL {
   }
 
   // Copies n, e and d into the RSA key.
-  static util::Status CopyKey(const RsaPrivateKey &key, RSA *rsa);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::Status CopyKey(const RsaPrivateKey &key, RSA *rsa) {
+    return internal::GetRsaModAndExponents(key, rsa);
+  }
 
   // Copies the prime factors (p, q) into the RSA key.
-  static util::Status CopyPrimeFactors(const RsaPrivateKey &key, RSA *rsa);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::Status CopyPrimeFactors(const RsaPrivateKey &key,
+                                              RSA *rsa) {
+    return internal::GetRsaPrimeFactors(key, rsa);
+  }
 
   // Copies the CRT params and dp, dq into the RSA key.
-  static util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::Status CopyCrtParams(const RsaPrivateKey &key, RSA *rsa) {
+    return internal::GetRsaCrtParams(key, rsa);
+  }
 
   // Creates a BoringSSL RSA key from an RsaPrivateKey.
-  static util::StatusOr<internal::SslUniquePtr<RSA>>
-  BoringSslRsaFromRsaPrivateKey(const RsaPrivateKey &key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::StatusOr<internal::SslUniquePtr<RSA>>
+  BoringSslRsaFromRsaPrivateKey(const RsaPrivateKey &key) {
+    return internal::RsaPrivateKeyToRsa(key);
+  }
 
   // Creates a BoringSSL RSA key from an RsaPublicKey.
-  static util::StatusOr<internal::SslUniquePtr<RSA>>
-  BoringSslRsaFromRsaPublicKey(const RsaPublicKey &key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline util::StatusOr<internal::SslUniquePtr<RSA>>
+  BoringSslRsaFromRsaPublicKey(const RsaPublicKey &key) {
+    return internal::RsaPublicKeyToRsa(key);
+  }
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
   ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")

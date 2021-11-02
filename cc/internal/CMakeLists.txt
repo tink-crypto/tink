@@ -128,6 +128,7 @@ tink_cc_library(
     tink::internal::ssl_unique_ptr
     tink::config::tink_fips
     tink::subtle::common_enums
+    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -226,4 +227,18 @@ tink_cc_test(
     crypto
     tink::util::statusor
     tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME rsa_util_test
+  SRCS rsa_util_test.cc
+  DEPS
+      tink::internal::bn_util
+      tink::internal::rsa_util
+      tink::internal::ssl_unique_ptr
+      gmock
+      crypto
+      tink::util::status
+      tink::util::statusor
+      tink::util::test_matchers
 )

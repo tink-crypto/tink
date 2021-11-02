@@ -304,60 +304,7 @@ TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
 
 
 
-// Checks if a BIGNUM is equal to a string value.
-void ExpectBignumEqualsString(const BIGNUM* bn, absl::string_view data) {
-  util::StatusOr<std::string> converted =
-      internal::BignumToString(bn, BN_num_bytes(bn));
-  ASSERT_THAT(converted.status(), IsOk());
-  EXPECT_EQ(*converted, data);
-}
 
-// Checks if a BIGNUM is equal to a SecretData value.
-void ExpectBignumEqualsSecretData(const BIGNUM* bn,
-                                  const util::SecretData& data) {
-  ExpectBignumEqualsString(bn, util::SecretDataAsStringView(data));
-}
-
-TEST(CopiesRsaKeysTest, CopiesRsaPrivateKey) {
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
-  internal::SslUniquePtr<BIGNUM> e(BN_new());
-  BN_set_word(e.get(), RSA_F4);
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
-                                                    &public_key),
-              IsOk());
-
-  auto rsa_result =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
-  EXPECT_TRUE(rsa_result.ok());
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
-
-  ExpectBignumEqualsString(rsa->e, private_key.e);
-  ExpectBignumEqualsString(rsa->n, private_key.n);
-  ExpectBignumEqualsSecretData(rsa->d, private_key.d);
-  ExpectBignumEqualsSecretData(rsa->p, private_key.p);
-  ExpectBignumEqualsSecretData(rsa->q, private_key.q);
-}
-
-TEST(CopiesRsaKeysTest, CopiesRsaPublicKey) {
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
-  internal::SslUniquePtr<BIGNUM> e(BN_new());
-  BN_set_word(e.get(), RSA_F4);
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(2048, e.get(), &private_key,
-                                                    &public_key),
-              IsOk());
-
-  auto rsa_result =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(public_key);
-  EXPECT_TRUE(rsa_result.ok());
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
-
-  ExpectBignumEqualsString(rsa->e, public_key.e);
-  ExpectBignumEqualsString(rsa->n, public_key.n);
-}
 
 TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {
   // Generate a new key pair.

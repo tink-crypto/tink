@@ -25,6 +25,7 @@
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -58,7 +59,8 @@ TEST(RsaUtilTest, BasicSanityChecks) {
   util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
       GetKeyPair(/*modulus_size_in_bits=*/2048);
   ASSERT_THAT(keys.status(), IsOk());
-  const auto& [public_key, private_key] = *keys;
+  const RsaPublicKey& public_key = keys->first;
+  const RsaPrivateKey& private_key = keys->second;
 
   EXPECT_THAT(private_key.n, Not(IsEmpty()));
   EXPECT_THAT(private_key.e, Not(IsEmpty()));
@@ -93,7 +95,7 @@ TEST(RsaUtilTest, KeyIsWellFormed) {
   util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
       GetKeyPair(/*modulus_size_in_bits=*/2048);
   ASSERT_THAT(keys.status(), IsOk());
-  const auto& [public_key, private_key] = *keys;
+  const RsaPrivateKey& private_key = keys->second;
 
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
       internal::StringToBignum(private_key.n);
@@ -180,7 +182,7 @@ TEST(RsaUtilTest, ValidateRsaModulusSize) {
       GetKeyPair(/*modulus_size_in_bits=*/2048);
   ASSERT_THAT(keys.status(), IsOk());
   {
-    const auto& [public_key, private_key] = *keys;
+    const RsaPrivateKey& private_key = keys->second;
 
     util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
         internal::StringToBignum(private_key.n);
@@ -189,7 +191,8 @@ TEST(RsaUtilTest, ValidateRsaModulusSize) {
   keys = GetKeyPair(/*modulus_size_in_bits=*/1024);
   ASSERT_THAT(keys.status(), IsOk());
   {
-    const auto& [public_key, private_key] = *keys;
+    const RsaPrivateKey& private_key = keys->second;
+
     util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
         internal::StringToBignum(private_key.n);
     EXPECT_THAT(ValidateRsaModulusSize(BN_num_bits(n->get())), Not(IsOk()));
@@ -215,6 +218,94 @@ TEST(RsaUtilTest, ValidateRsaPublicExponent) {
       internal::BignumToString(e_bn.get(), BN_num_bytes(e_bn.get()));
   ASSERT_THAT(e_str.status(), IsOk());
   EXPECT_THAT(ValidateRsaPublicExponent(*e_str), IsOk());
+}
+
+// Checks if a BIGNUM is equal to a string value.
+void ExpectBignumEquals(const BIGNUM* bn, absl::string_view data) {
+  util::StatusOr<std::string> converted =
+      internal::BignumToString(bn, BN_num_bytes(bn));
+  ASSERT_THAT(converted.status(), IsOk());
+  EXPECT_EQ(*converted, data);
+}
+
+// Checks if a BIGNUM is equal to a SecretData value.
+void ExpectBignumEquals(const BIGNUM* bn, const util::SecretData& data) {
+  internal::ExpectBignumEquals(bn, util::SecretDataAsStringView(data));
+}
+
+TEST(RsaUtilTest, GetRsaModAndExponents) {
+  util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
+      GetKeyPair(/*modulus_size_in_bits=*/2048);
+  ASSERT_THAT(keys.status(), IsOk());
+  const RsaPrivateKey& private_key = keys->second;
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
+  util::Status result = GetRsaModAndExponents(private_key, rsa.get());
+  ASSERT_THAT(result, IsOk());
+  ExpectBignumEquals(rsa->e, private_key.e);
+  ExpectBignumEquals(rsa->n, private_key.n);
+  ExpectBignumEquals(rsa->d, private_key.d);
+}
+
+TEST(RsaUtilTest, GetRsaPrimeFactors) {
+  util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
+      GetKeyPair(/*modulus_size_in_bits=*/2048);
+  ASSERT_THAT(keys.status(), IsOk());
+  const RsaPrivateKey& private_key = keys->second;
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
+  util::Status result = GetRsaPrimeFactors(private_key, rsa.get());
+  ASSERT_THAT(result, IsOk());
+  ExpectBignumEquals(rsa->p, private_key.p);
+  ExpectBignumEquals(rsa->q, private_key.q);
+}
+
+TEST(RsaUtilTest, GetRsaCrtParams) {
+  util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
+      GetKeyPair(/*modulus_size_in_bits=*/2048);
+  ASSERT_THAT(keys.status(), IsOk());
+  const RsaPrivateKey& private_key = keys->second;
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
+  const BIGNUM* dp = nullptr;
+  const BIGNUM* dq = nullptr;
+  const BIGNUM* crt = nullptr;
+  util::Status result = GetRsaCrtParams(private_key, rsa.get());
+  ASSERT_THAT(result, IsOk());
+  RSA_get0_crt_params(rsa.get(), &dp, &dq, &crt);
+  ExpectBignumEquals(dp, private_key.dp);
+  ExpectBignumEquals(dq, private_key.dq);
+  ExpectBignumEquals(crt, private_key.crt);
+}
+
+TEST(RsaUtilTest, CopiesRsaPrivateKey) {
+  util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
+      GetKeyPair(/*modulus_size_in_bits=*/2048);
+  ASSERT_THAT(keys.status(), IsOk());
+  const RsaPrivateKey& private_key = keys->second;
+
+  util::StatusOr<internal::SslUniquePtr<RSA>> rsa_result =
+      RsaPrivateKeyToRsa(private_key);
+  EXPECT_TRUE(rsa_result.ok());
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+
+  ExpectBignumEquals(rsa->e, private_key.e);
+  ExpectBignumEquals(rsa->n, private_key.n);
+  ExpectBignumEquals(rsa->d, private_key.d);
+  ExpectBignumEquals(rsa->p, private_key.p);
+  ExpectBignumEquals(rsa->q, private_key.q);
+}
+
+TEST(RsaUtilTest, CopiesRsaPublicKey) {
+  util::StatusOr<std::pair<RsaPublicKey, RsaPrivateKey>> keys =
+      GetKeyPair(/*modulus_size_in_bits=*/2048);
+  ASSERT_THAT(keys.status(), IsOk());
+  const RsaPublicKey& public_key = keys->first;
+
+  util::StatusOr<internal::SslUniquePtr<RSA>> rsa_result =
+      RsaPublicKeyToRsa(public_key);
+  EXPECT_TRUE(rsa_result.ok());
+  internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
+
+  ExpectBignumEquals(rsa->e, public_key.e);
+  ExpectBignumEquals(rsa->n, public_key.n);
 }
 
 }  // namespace

@@ -108,6 +108,26 @@ crypto::tink::util::Status NewRsaKeyPair(int modulus_size_in_bits,
                                          RsaPrivateKey *private_key,
                                          RsaPublicKey *public_key);
 
+// Returns `key`'s private and public exponents (d and e) and mosulus
+// (n) writing a copy of them into `rsa`.
+crypto::tink::util::Status GetRsaModAndExponents(const RsaPrivateKey &key,
+                                                 RSA *rsa);
+
+// Returns `key`'s prime factors (p and q) writing a copy of them into `rsa`.
+crypto::tink::util::Status GetRsaPrimeFactors(const RsaPrivateKey &key,
+                                              RSA *rsa);
+
+// Returns `key`'s CRT parameters (dp and dq) writing a copy of them into `rsa`.
+crypto::tink::util::Status GetRsaCrtParams(const RsaPrivateKey &key, RSA *rsa);
+
+// Creates a OpenSSL/BoringSSL RSA key from `private_key`.
+crypto::tink::util::StatusOr<internal::SslUniquePtr<RSA>> RsaPrivateKeyToRsa(
+    const RsaPrivateKey &private_key);
+
+// Creates a OpenSSL/BoringSSL RSA key from an `public_key`.
+crypto::tink::util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
+    const RsaPublicKey &public_key);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

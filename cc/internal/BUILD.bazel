@@ -148,6 +148,7 @@ cc_library(
         "//config:tink_fips",
         "//subtle:common_enums",
         "//util:secret_data",
+        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -270,5 +271,22 @@ cc_test(
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+
+cc_test(
+    name = "rsa_util_test",
+    size = "small",
+    srcs = ["rsa_util_test.cc"],
+    deps = [
+        ":bn_util",
+        ":rsa_util",
+        ":ssl_unique_ptr",
+        "@com_google_googletest//:gtest_main",
+        "@boringssl//:crypto",
+        "//util:status",
+        "//util:statusor",
+        "//util:test_matchers",
     ],
 )

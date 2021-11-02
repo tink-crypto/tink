@@ -22,6 +22,7 @@
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -152,6 +153,149 @@ util::Status NewRsaKeyPair(int modulus_size_in_bits, const BIGNUM *e,
   private_key->crt = *std::move(crt_str);
 
   return util::OkStatus();
+}
+
+util::Status GetRsaModAndExponents(const RsaPrivateKey &key, RSA *rsa) {
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n);
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> e =
+      internal::StringToBignum(key.e);
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> d =
+      internal::StringToBignum(util::SecretDataAsStringView(key.d));
+  if (!n.ok()) {
+    return n.status();
+  }
+  if (!e.ok()) {
+    return e.status();
+  }
+  if (!d.ok()) {
+    return d.status();
+  }
+  if (RSA_set0_key(rsa, n->get(), e->get(), d->get()) != 1) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
+  }
+  // The RSA object takes ownership when RSA_set0_key is called.
+  n->release();
+  e->release();
+  d->release();
+  return util::OkStatus();
+}
+
+util::Status GetRsaPrimeFactors(const RsaPrivateKey &key, RSA *rsa) {
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> p =
+      internal::StringToBignum(util::SecretDataAsStringView(key.p));
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> q =
+      internal::StringToBignum(util::SecretDataAsStringView(key.q));
+  if (!p.ok()) {
+    return p.status();
+  }
+  if (!q.ok()) {
+    return q.status();
+  }
+  if (RSA_set0_factors(rsa, p->get(), q->get()) != 1) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
+  }
+  p->release();
+  q->release();
+  return util::OkStatus();
+}
+
+util::Status GetRsaCrtParams(const RsaPrivateKey &key, RSA *rsa) {
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dp =
+      internal::StringToBignum(util::SecretDataAsStringView(key.dp));
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> dq =
+      internal::StringToBignum(util::SecretDataAsStringView(key.dq));
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> crt =
+      internal::StringToBignum(util::SecretDataAsStringView(key.crt));
+  if (!dp.ok()) {
+    return dp.status();
+  }
+  if (!dq.ok()) {
+    return dq.status();
+  }
+  if (!crt.ok()) {
+    return crt.status();
+  }
+  if (RSA_set0_crt_params(rsa, dp->get(), dq->get(), crt->get()) != 1) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        absl::StrCat("Could not load RSA key: ", internal::GetSslErrors()));
+  }
+  dp->release();
+  dq->release();
+  crt->release();
+  return util::OkStatus();
+}
+
+util::StatusOr<internal::SslUniquePtr<RSA>> RsaPrivateKeyToRsa(
+    const RsaPrivateKey &private_key) {
+  auto n = internal::StringToBignum(private_key.n);
+  if (!n.ok()) {
+    return n.status();
+  }
+  auto validation_result = ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!validation_result.ok()) {
+    return validation_result;
+  }
+  // Check RSA's public exponent
+  auto exponent_status = ValidateRsaPublicExponent(private_key.e);
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
+  if (rsa.get() == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "BoringSsl RSA allocation error");
+  }
+  util::Status status = GetRsaModAndExponents(private_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+  status = GetRsaPrimeFactors(private_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+  status = GetRsaCrtParams(private_key, rsa.get());
+  if (!status.ok()) {
+    return status;
+  }
+  if (RSA_check_key(rsa.get()) == 0 || RSA_check_fips(rsa.get()) == 0) {
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Could not load RSA key: %s", internal::GetSslErrors());
+  }
+  return rsa;
+}
+
+util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
+    const RsaPublicKey &public_key) {
+  auto n = internal::StringToBignum(public_key.n);
+  if (!n.ok()) {
+    return n.status();
+  }
+  auto e = internal::StringToBignum(public_key.e);
+  if (!e.ok()) {
+    return e.status();
+  }
+  auto validation_result = ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!validation_result.ok()) {
+    return validation_result;
+  }
+  internal::SslUniquePtr<RSA> rsa(RSA_new());
+  if (rsa.get() == nullptr) {
+    return util::Status(absl::StatusCode::kInternal, "RSA allocation error");
+  }
+  // The value d is null for a public RSA key.
+  if (RSA_set0_key(rsa.get(), n->get(), e->get(),
+                   /*d=*/nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "Could not set RSA key.");
+  }
+  n->release();
+  e->release();
+  return rsa;
 }
 
 }  // namespace internal
