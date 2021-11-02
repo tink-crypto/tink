@@ -35,7 +35,7 @@ util::Status Validate(PrimitiveSet<CordAead>* aead_set) {
                         "aead_set must be non-NULL");
   }
   if (aead_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "aead_set has no primary");
   }
   return util::OkStatus();
@@ -101,7 +101,7 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 }  // anonymous namespace
 

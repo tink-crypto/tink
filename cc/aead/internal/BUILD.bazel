@@ -12,6 +12,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -114,6 +115,7 @@ cc_test(
         "//subtle:aes_gcm_boringssl",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],

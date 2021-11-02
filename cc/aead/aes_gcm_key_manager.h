@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -115,7 +116,7 @@ class AesGcmKeyManager
     if (!randomness.ok()) {
       if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
+            absl::StatusCode::kInvalidArgument,
             "Could not get enough pseudorandomness from input stream");
       }
       return randomness.status();

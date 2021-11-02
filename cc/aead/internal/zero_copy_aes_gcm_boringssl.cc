@@ -55,7 +55,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data,
     absl::Span<char> buffer) const {
   if (buffer.size() < MaxEncryptionSize(plaintext.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Encryption buffer too small");
   }
   absl::string_view buffer_string(buffer.data(), buffer.size());
@@ -91,11 +91,12 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data,
     absl::Span<char> buffer) const {
   if (buffer.size() < MaxDecryptionSize(ciphertext.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Decryption buffer too small");
   }
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
   absl::string_view buffer_string(buffer.data(), buffer.size());
   if (BuffersOverlap(ciphertext, buffer_string)) {

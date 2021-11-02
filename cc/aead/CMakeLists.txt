@@ -124,6 +124,7 @@ tink_cc_library(
     tink::util::validation
     tink::proto::aes_eax_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -151,6 +152,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     absl::base
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -206,6 +208,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     absl::base
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -227,6 +230,7 @@ tink_cc_library(
     tink::util::validation
     tink::proto::xchacha20_poly1305_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -244,6 +248,7 @@ tink_cc_library(
     tink::util::validation
     tink::proto::kms_aead_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -260,6 +265,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
     absl::base
 )
@@ -271,6 +277,7 @@ tink_cc_library(
     kms_envelope_aead_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::aead
     tink::core::key_type_manager
@@ -406,6 +413,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::aes_gcm_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -420,6 +428,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::proto::aes_gcm_siv_cc_proto
+    absl::status
 )
 
 tink_cc_test(
@@ -440,6 +449,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    absl::status
 )
 
 tink_cc_test(
@@ -457,6 +467,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::xchacha20_poly1305_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -474,6 +485,7 @@ tink_cc_test(
     tink::subtle::aead_test_util
     tink::proto::kms_aead_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -519,4 +531,5 @@ tink_cc_test(
     tink::proto::kms_envelope_cc_proto
     tink::proto::tink_cc_proto
     gmock
+    absl::status
 )

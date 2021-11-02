@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
@@ -66,7 +67,7 @@ class KmsEnvelopeAeadKeyManager
       const google::crypto::tink::KmsEnvelopeAeadKeyFormat& format)
       const override {
     if (format.kek_uri().empty()) {
-      return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+      return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                         "Missing kek_uri.");
     }
     return util::OkStatus();

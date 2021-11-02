@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/base/internal/endian.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
@@ -57,7 +58,7 @@ util::StatusOr<std::unique_ptr<Aead>> KmsEnvelopeAead::New(
     const google::crypto::tink::KeyTemplate& dek_template,
     std::unique_ptr<Aead> remote_aead) {
   if (remote_aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "remote_aead must be non-null");
   }
   auto km_result = Registry::get_key_manager<Aead>(dek_template.type_url());
@@ -95,20 +96,22 @@ util::StatusOr<std::string> KmsEnvelopeAead::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   // Parse the ciphertext.
   if (ciphertext.size() < kEncryptedDekPrefixSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   auto enc_dek_size = absl::big_endian::Load32(
       reinterpret_cast<const uint8_t*>(ciphertext.data()));
   if (enc_dek_size > ciphertext.size() - kEncryptedDekPrefixSize ||
       enc_dek_size < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid ciphertext");
   }
   // Decrypt the DEK with remote.
   auto dek_decrypt_result = remote_aead_->Decrypt(
       ciphertext.substr(kEncryptedDekPrefixSize, enc_dek_size),
       kEmptyAssociatedData);
   if (!dek_decrypt_result.ok()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("invalid ciphertext: ",
                                      dek_decrypt_result.status().message()));
   }

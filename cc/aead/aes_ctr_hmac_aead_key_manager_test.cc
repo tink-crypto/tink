@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/mac/mac_config.h"
 #include "tink/subtle/aead_test_util.h"
@@ -59,7 +60,7 @@ TEST(AesCtrHmacAeadKeyManagerTest, Basics) {
 
 TEST(AesCtrHmacAeadKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(AesCtrHmacAeadKeyManager().ValidateKey(AesCtrHmacAeadKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 AesCtrHmacAeadKey CreateValidKey() {

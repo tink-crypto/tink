@@ -17,6 +17,7 @@
 #include "tink/aead/kms_aead_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
@@ -53,7 +54,7 @@ TEST(KmsAeadKeyManagerTest, Basics) {
 
 TEST(KmsAeadKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(KmsAeadKeyManager().ValidateKey(KmsAeadKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(KmsAeadKeyManagerTest, ValidateValidKey) {
@@ -78,7 +79,7 @@ TEST(KmsAeadKeyManagerTest, ValidateNoUri) {
 
 TEST(KmsAeadKeyManagerTest, ValidateKeyFormatEmptyKey) {
   EXPECT_THAT(KmsAeadKeyManager().ValidateKeyFormat(KmsAeadKeyFormat()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(KmsAeadKeyManagerTest, ValidateKeyFormatValidKey) {

@@ -108,8 +108,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferEncrypt) {
   std::string ciphertext(max_encryption_size - 1, ' ');
   EXPECT_EQ(cipher_->Encrypt(kMessage, kAad, absl::MakeSpan(ciphertext))
                 .status()
-                .error_code(),
-            util::error::INVALID_ARGUMENT);
+                .code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferDecrypt) {
@@ -118,8 +118,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferDecrypt) {
                 ->Decrypt(test::HexDecodeOrDie(encoded_ciphertext), kAad,
                           absl::MakeSpan(plaintext))
                 .status()
-                .error_code(),
-            util::error::INVALID_ARGUMENT);
+                .code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapEncrypt) {

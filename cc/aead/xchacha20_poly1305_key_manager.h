@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
@@ -70,7 +71,7 @@ class XChaCha20Poly1305KeyManager
     uint32_t key_size = key.key_value().size();
     if (key.key_value().size() != kKeySizeInBytes) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid XChaCha20Poly1305Key: key_value has ", key_size,
                        " bytes; supported size: ", kKeySizeInBytes, " bytes."));
     }
@@ -104,7 +105,7 @@ class XChaCha20Poly1305KeyManager
     if (!randomness.ok()) {
       if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
         return crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT,
+            absl::StatusCode::kInvalidArgument,
             "Could not get enough pseudorandomness from input stream");
       }
       return randomness.status();

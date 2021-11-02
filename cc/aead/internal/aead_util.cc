@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/aead_util.h"
 
+#include "absl/status/status.h"
 #include "openssl/evp.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -32,8 +33,8 @@ util::StatusOr<const EVP_CIPHER *> GetAesCtrCipherForKeySize(
     case 32:
       return EVP_aes_256_ctr();
     default:
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key size %d",
-                       key_size_in_bytes);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Invalid key size %d", key_size_in_bytes);
   }
 }
 
@@ -45,8 +46,8 @@ util::StatusOr<const EVP_CIPHER *> GetAesGcmCipherForKeySize(
     case 32:
       return EVP_aes_256_gcm();
     default:
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key size %d",
-                       key_size_in_bytes);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Invalid key size %d", key_size_in_bytes);
   }
 }
 
@@ -59,8 +60,8 @@ util::StatusOr<const EVP_AEAD *> GetAesGcmAeadForKeySize(
     case 32:
       return EVP_aead_aes_256_gcm();
     default:
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key size %d",
-                       key_size_in_bytes);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Invalid key size %d", key_size_in_bytes);
   }
 }
 #endif

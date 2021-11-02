@@ -10,6 +10,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
 )
 
 tink_cc_library(

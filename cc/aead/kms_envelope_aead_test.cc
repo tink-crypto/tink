@@ -66,8 +66,8 @@ TEST(KmsEnvelopeAeadTest, BasicEncryptDecrypt) {
 TEST(KmsEnvelopeAeadTest, NullAead) {
   auto dek_template = AeadKeyTemplates::Aes128Eax();
   auto aead_result = KmsEnvelopeAead::New(dek_template, nullptr);
-  EXPECT_THAT(aead_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("non-null")));
+  EXPECT_THAT(aead_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
+                                             HasSubstr("non-null")));
 }
 
 TEST(KmsEnvelopeAeadTest, MissingDekKeyManager) {
@@ -87,7 +87,7 @@ TEST(KmsEnvelopeAeadTest, WrongDekPrimitive) {
   auto remote_aead = absl::make_unique<DummyAead>(remote_aead_name);
   auto aead_result = KmsEnvelopeAead::New(dek_template, std::move(remote_aead));
   EXPECT_THAT(aead_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not among supported primitives")));
 }
 
@@ -109,25 +109,29 @@ TEST(KmsEnvelopeAeadTest, DecryptionErrors) {
 
   // Empty ciphertext.
   auto decrypt_result = aead->Decrypt("", aad);
-  EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("too short")));
+  EXPECT_THAT(
+      decrypt_result.status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("too short")));
 
   // Short ciphertext.
   decrypt_result = aead->Decrypt("sh", aad);
-  EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("too short")));
+  EXPECT_THAT(
+      decrypt_result.status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("too short")));
 
   // Truncated ciphertext.
   decrypt_result = aead->Decrypt(ct.substr(2), aad);
-  EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("invalid")));
+  EXPECT_THAT(
+      decrypt_result.status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("invalid")));
 
   // Corrupted ciphertext.
   auto ct_copy = ct;
   ct_copy[4] = 'a';  // corrupt serialized DEK.
   decrypt_result = aead->Decrypt(ct_copy, aad);
-  EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("invalid")));
+  EXPECT_THAT(
+      decrypt_result.status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("invalid")));
 
   // Wrong associated data.
   decrypt_result = aead->Decrypt(ct, "wrong aad");

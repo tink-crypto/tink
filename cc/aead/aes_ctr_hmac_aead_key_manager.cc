@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/status/status.h"
 #include "absl/base/casts.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
@@ -115,7 +116,7 @@ Status AesCtrHmacAeadKeyManager::ValidateKey(
   }
   if (aes_ctr_key.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key.params().iv_size() > 16) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid AesCtrHmacAeadKey: IV size out of range.");
   }
   return HmacKeyManager().ValidateKey(key.hmac_key());
@@ -132,7 +133,7 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   if (aes_ctr_key_format.params().iv_size() < kMinIvSizeInBytes ||
       aes_ctr_key_format.params().iv_size() > 16) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid AesCtrHmacAeadKeyFormat: IV size out of range.");
   }
 
@@ -140,15 +141,14 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
   auto hmac_key_format = key_format.hmac_key_format();
   if (hmac_key_format.key_size() < kMinKeySizeInBytes) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid AesCtrHmacAeadKeyFormat: HMAC key_size is too small.");
   }
   auto params = hmac_key_format.params();
   if (params.tag_size() < kMinTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("Invalid HmacParams: tag_size ",
-                                     params.tag_size(),
-                                     " is too small."));
+                                     params.tag_size(), " is too small."));
   }
   std::map<HashType, uint32_t> max_tag_size = {{HashType::SHA1, 20},
                                                {HashType::SHA224, 28},
@@ -156,18 +156,17 @@ Status AesCtrHmacAeadKeyManager::ValidateKeyFormat(
                                                {HashType::SHA384, 48},
                                                {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("Invalid HmacParams: HashType '",
-                                     Enums::HashName(params.hash()),
-                                     "' not supported."));
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid HmacParams: HashType '",
+                     Enums::HashName(params.hash()), "' not supported."));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
-      return util::Status(util::error::INVALID_ARGUMENT,
-                          absl::StrCat("Invalid HmacParams: tag_size ",
-                                       params.tag_size(),
-                                       " is too big for HashType '",
-                                       Enums::HashName(params.hash()),
-                                       "'."));
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Invalid HmacParams: tag_size ", params.tag_size(),
+                       " is too big for HashType '",
+                       Enums::HashName(params.hash()), "'."));
     }
   }
 

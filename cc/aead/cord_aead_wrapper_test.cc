@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/cord_test_helpers.h"
 #include "absl/strings/str_split.h"
 #include "tink/aead/cord_aead.h"
@@ -186,7 +187,7 @@ TEST(AeadSetWrapperTest, WrapperEncryptBadDecrypt) {
   EXPECT_FALSE(decrypt_result.ok());
   EXPECT_EQ(absl::StatusCode::kInvalidArgument, decrypt_result.status().code());
   EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        testing::HasSubstr("decryption failed")));
 }
 
