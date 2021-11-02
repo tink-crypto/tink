@@ -199,6 +199,7 @@ tink_cc_library(
     tink::jwt::jwt_mac
     tink::util::status
     tink::util::statusor
+    absl::status
 )
 
 tink_cc_test(
@@ -612,6 +613,7 @@ tink_cc_library(
     tink::jwt::jwt_public_key_sign
     tink::util::status
     tink::util::statusor
+    absl::status
 )
 
 tink_cc_library(
@@ -627,6 +629,7 @@ tink_cc_library(
     tink::jwt::internal::jwt_public_key_verify_internal
     tink::util::status
     tink::util::statusor
+    absl::status
 )
 
 tink_cc_test(
@@ -665,6 +668,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -718,6 +722,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pss_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(

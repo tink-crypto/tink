@@ -88,6 +88,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -121,6 +122,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
     absl::str_format
 )
@@ -156,6 +158,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::algorithm_container
+    absl::status
     absl::strings
 )
 
@@ -176,6 +179,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -195,6 +199,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -206,6 +211,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
+    absl::status
     absl::strings
     crypto
     tink::core::public_key_sign
@@ -235,6 +241,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
 )
 
@@ -275,6 +282,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -305,6 +313,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
     absl::memory
+    absl::status
     absl::strings
     crypto
     tink::core::public_key_sign
@@ -335,6 +344,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     absl::span
+    absl::status
     absl::strings
 )
 
@@ -360,6 +370,7 @@ tink_cc_library(
     absl::config
     absl::memory
     absl::span
+    absl::status
     absl::strings
 )
 
@@ -382,6 +393,7 @@ tink_cc_library(
     absl::algorithm_container
     absl::config
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -436,6 +448,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -476,6 +489,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -497,6 +511,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -527,6 +542,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
 )
 
@@ -547,6 +563,7 @@ tink_cc_library(
     crypto
     absl::memory
     absl::span
+    absl::status
     absl::strings
 )
 
@@ -566,6 +583,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -596,6 +614,7 @@ tink_cc_library(
     tink::subtle::subtle_util
     absl::core_headers
     absl::memory
+    absl::status
     absl::strings
     absl::span
     crypto
@@ -651,6 +670,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -663,6 +683,7 @@ tink_cc_library(
     tink::core::output_stream
     tink::util::statusor
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -698,6 +719,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -751,6 +773,7 @@ tink_cc_library(
   DEPS
     absl::core_headers
     absl::memory
+    absl::status
     absl::strings
     absl::synchronization
     tink::subtle::stream_segment_decrypter
@@ -782,6 +805,7 @@ tink_cc_library(
     stateful_hmac_boringssl.h
   DEPS
     absl::memory
+    absl::status
     crypto
     tink::internal::util
     tink::internal::ssl_unique_ptr
@@ -800,6 +824,7 @@ tink_cc_library(
     stateful_cmac_boringssl.h
   DEPS
     absl::memory
+    absl::status
     crypto
     tink::internal::util
     tink::internal::ssl_unique_ptr
@@ -819,6 +844,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
     absl::memory
+    absl::status
     absl::strings
     crypto
     tink::internal::ssl_unique_ptr
@@ -842,6 +868,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -859,6 +886,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -898,6 +926,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    absl::status
     absl::strings
 )
 
@@ -915,6 +944,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -932,6 +962,7 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    absl::status
     absl::strings
     gmock
     rapidjson
@@ -991,6 +1022,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
     absl::strings
 )
 
@@ -1012,6 +1044,7 @@ tink_cc_test(
     tink::util::test_util
     tink::util::test_matchers
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -1032,6 +1065,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::statusor
     tink::util::test_util
+    absl::status
     absl::strings
     rapidjson
 )
@@ -1068,6 +1102,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -1087,6 +1122,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
     absl::strings
     rapidjson
 )
@@ -1107,6 +1143,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -1127,6 +1164,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
     absl::strings
     rapidjson
 )
@@ -1149,6 +1187,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     crypto
+    absl::status
     absl::strings
 )
 
@@ -1172,6 +1211,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     crypto
+    absl::status
     absl::strings
 )
 
@@ -1194,6 +1234,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
     absl::strings
     crypto
     rapidjson
@@ -1210,6 +1251,7 @@ tink_cc_test(
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::test_matchers
+    absl::status
     absl::strings
     crypto
 )
@@ -1233,6 +1275,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
     absl::strings
     crypto
     rapidjson
@@ -1249,6 +1292,7 @@ tink_cc_test(
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::test_matchers
+    absl::status
     absl::strings
     crypto
 )
@@ -1270,6 +1314,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     crypto
+    absl::status
     absl::strings
     rapidjson
     gmock
@@ -1315,6 +1360,7 @@ tink_cc_test(
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
     gmock
+    absl::status
     absl::strings
     crypto
     rapidjson
@@ -1342,6 +1388,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     crypto
+    absl::status
     absl::strings
 )
 

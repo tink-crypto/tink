@@ -7,6 +7,7 @@ tink_cc_library(
     streaming_aead_wrapper.cc
     streaming_aead_wrapper.h
   DEPS
+    absl::status
     absl::strings
     tink::core::crypto_format
     tink::core::input_stream
@@ -156,6 +157,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -165,6 +167,7 @@ tink_cc_library(
     decrypting_random_access_stream.h
   DEPS
     absl::memory
+    absl::status
     absl::synchronization
     tink::core::primitive_set
     tink::core::random_access_stream
@@ -289,6 +292,7 @@ tink_cc_test(
   SRCS buffered_input_stream_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     gmock
     tink::core::input_stream
@@ -347,6 +351,7 @@ tink_cc_test(
   SRCS shared_input_stream_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::input_stream
     tink::streamingaead::buffered_input_stream

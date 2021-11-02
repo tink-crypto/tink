@@ -14,6 +14,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_library(

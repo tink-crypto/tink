@@ -16,6 +16,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 

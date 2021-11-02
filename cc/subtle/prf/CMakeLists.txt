@@ -37,6 +37,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -82,6 +83,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::status
     absl::strings
 )
 
@@ -97,5 +99,6 @@ tink_cc_test(
     tink::subtle::prf::streaming_prf
     gmock
     absl::memory
+    absl::status
     absl::strings
 )

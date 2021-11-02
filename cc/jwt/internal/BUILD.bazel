@@ -211,6 +211,7 @@ cc_library(
         "//jwt:jwt_mac",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -355,6 +356,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -460,6 +462,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -660,6 +663,7 @@ cc_library(
         "//jwt:jwt_public_key_sign",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -676,6 +680,7 @@ cc_library(
         "//jwt:jwt_public_key_verify",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 

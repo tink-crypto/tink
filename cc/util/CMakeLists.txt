@@ -87,6 +87,7 @@ tink_cc_library(
     tink::util::statusor
     tink::core::input_stream
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -100,6 +101,7 @@ tink_cc_library(
     tink::util::statusor
     tink::core::output_stream
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -127,6 +129,7 @@ tink_cc_library(
     tink::util::statusor
     tink::core::input_stream
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -140,6 +143,7 @@ tink_cc_library(
     tink::util::statusor
     tink::core::output_stream
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -187,6 +191,7 @@ tink_cc_library(
     tink::util::secret_data
     absl::core_headers
     absl::memory
+    absl::status
     absl::strings
     absl::cord
     absl::synchronization

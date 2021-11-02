@@ -6,6 +6,7 @@ tink_cc_library(
     public_key_verify_wrapper.cc
     public_key_verify_wrapper.h
   DEPS
+    absl::status
     absl::strings
     tink::core::crypto_format
     tink::core::primitive_set
@@ -39,6 +40,7 @@ tink_cc_library(
     public_key_sign_wrapper.cc
     public_key_sign_wrapper.h
   DEPS
+    absl::status
     absl::strings
     tink::core::crypto_format
     tink::core::primitive_set
@@ -200,6 +202,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     tink::signature::sig_util
     absl::memory
+    absl::status
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
@@ -252,6 +255,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::sig_util
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_type_manager
     tink::core::private_key_type_manager

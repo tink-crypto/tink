@@ -163,6 +163,7 @@ cc_library(
         ":statusor",
         "//:input_stream",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -178,6 +179,7 @@ cc_library(
         ":statusor",
         "//:output_stream",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -209,6 +211,7 @@ cc_library(
         ":statusor",
         "//:input_stream",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -224,6 +227,7 @@ cc_library(
         ":statusor",
         "//:output_stream",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -275,6 +279,7 @@ cc_library(
         "//subtle/mac:stateful_mac",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/synchronization",

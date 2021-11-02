@@ -65,6 +65,7 @@ tink_cc_library(
     prf_set.cc
   DEPS
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -80,6 +81,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
+    absl::status
 )
 
 tink_cc_library(
