@@ -19,11 +19,6 @@ hmac_pb2.HmacKey, one can do:
 handle = keyset_handle.KeysetHandle(mac_key_templates.HMAC_SHA256_128BITTAG).
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 from tink.proto import aes_cmac_pb2
 from tink.proto import common_pb2
 from tink.proto import hmac_pb2

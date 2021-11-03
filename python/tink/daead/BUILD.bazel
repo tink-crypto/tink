@@ -21,7 +21,6 @@ py_library(
     name = "_deterministic_aead",
     srcs = ["_deterministic_aead.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(

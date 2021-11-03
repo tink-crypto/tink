@@ -21,7 +21,6 @@ py_library(
     name = "_prf_set",
     srcs = ["_prf_set.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
@@ -49,7 +48,6 @@ py_test(
         "//tink/proto:hkdf_prf_py_pb2",
         "//tink/proto:hmac_prf_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 

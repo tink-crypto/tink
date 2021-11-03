@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """Aead package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.aead import _aead
 from tink.aead import _aead_key_manager

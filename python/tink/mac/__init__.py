@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Mac package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.mac import _mac
 from tink.mac import _mac_key_manager

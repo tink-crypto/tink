@@ -14,19 +14,10 @@
 
 """This module defines the interface for Deterministic AEAD."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 
-# Special imports
-import six
 
-
-@six.add_metaclass(abc.ABCMeta)
-class DeterministicAead(object):
+class DeterministicAead(metaclass=abc.ABCMeta):
   """Interface for Deterministic Authenticated Encryption with Associated Data.
 
   For why this interface is desirable and some of its use cases, see for

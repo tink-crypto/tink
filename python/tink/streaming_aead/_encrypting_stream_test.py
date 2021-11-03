@@ -14,10 +14,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.streaming_aead.encrypting_stream."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import io
 from typing import cast
 

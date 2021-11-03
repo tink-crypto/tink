@@ -13,14 +13,8 @@
 # limitations under the License.
 """Python wrapper of the wrapped C++ Streaming AEAD key manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
-from typing import Text, BinaryIO
-import six
+from typing import BinaryIO
 
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -55,7 +49,7 @@ class _StreamingAeadCcToPyWrapper(_raw_streaming_aead.RawStreamingAead):
 
 
 def from_cc_registry(
-    type_url: Text) -> core.KeyManager[_raw_streaming_aead.RawStreamingAead]:
+    type_url: str) -> core.KeyManager[_raw_streaming_aead.RawStreamingAead]:
   return core.KeyManagerCcToPyWrapper(
       tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
       _raw_streaming_aead.RawStreamingAead, _StreamingAeadCcToPyWrapper)
@@ -63,8 +57,6 @@ def from_cc_registry(
 
 def register() -> None:
   """Registers Streaming AEAD key managers and the wrapper in the Registry."""
-  if six.PY2:
-    raise NotImplementedError('StreamingAEAD requires Python 3.')
   tink_bindings.register()
   for ident in (
       'AesCtrHmacStreamingKey',

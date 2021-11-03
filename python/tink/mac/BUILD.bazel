@@ -21,7 +21,6 @@ py_library(
     name = "_mac",
     srcs = ["_mac.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(

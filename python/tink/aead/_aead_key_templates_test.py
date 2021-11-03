@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.aead_key_templates."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_aead_pb2

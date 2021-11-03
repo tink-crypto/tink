@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.deterministic_aead_key_manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 
 from tink.proto import aes_siv_pb2

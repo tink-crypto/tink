@@ -14,10 +14,6 @@
 
 """Static methods for handling of Tink configurations."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from tink import aead
 from tink import daead
 from tink import hybrid
