@@ -21,6 +21,7 @@
 #include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
@@ -34,9 +35,8 @@ namespace subtle {
 
 // static
 util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>>
-RsaSsaPkcs1VerifyBoringSsl::New(
-    const SubtleUtilBoringSSL::RsaPublicKey& pub_key,
-    const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
+RsaSsaPkcs1VerifyBoringSsl::New(const internal::RsaPublicKey& pub_key,
+                                const internal::RsaSsaPkcs1Params& params) {
   auto status = internal::CheckFipsCompatibility<RsaSsaPkcs1VerifyBoringSsl>();
   if (!status.ok()) return status;
 
@@ -52,7 +52,7 @@ RsaSsaPkcs1VerifyBoringSsl::New(
   // The RSA modulus and exponent are checked as part of the conversion to
   // internal::SslUniquePtr<RSA>.
   util::StatusOr<internal::SslUniquePtr<RSA>> rsa =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(pub_key);
+      internal::RsaPublicKeyToRsa(pub_key);
   if (!rsa.ok()) {
     return rsa.status();
   }

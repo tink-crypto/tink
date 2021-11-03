@@ -22,6 +22,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/public_key_sign.h"
@@ -31,10 +32,10 @@
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_config.h"
 #include "tink/subtle/pem_parser_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
@@ -156,12 +157,15 @@ EcdsaPublicKey GetExpectedEcdsaPublicKeyProto() {
 
 // Helper function that creates an RsaSsaPssPublicKey from the given PEM encoded
 // key `pem_encoded_key`, Hash type `hash_type` and key version `key_version`.
-RsaSsaPssPublicKey GetRsaSsaPssPublicKeyProto(absl::string_view pem_encoded_key,
-                                              HashType hash_type,
-                                              uint32_t key_version) {
-  auto key_subtle_or = subtle::PemParser::ParseRsaPublicKey(pem_encoded_key);
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::RsaPublicKey> key_subtle =
-      std::move(key_subtle_or).ValueOrDie();
+util::StatusOr<RsaSsaPssPublicKey> GetRsaSsaPssPublicKeyProto(
+    absl::string_view pem_encoded_key, HashType hash_type,
+    uint32_t key_version) {
+  util::StatusOr<std::unique_ptr<internal::RsaPublicKey>> public_key =
+      subtle::PemParser::ParseRsaPublicKey(pem_encoded_key);
+  if (!public_key.ok()) {
+    return public_key.status();
+  }
+  std::unique_ptr<internal::RsaPublicKey> key_subtle = *std::move(public_key);
 
   RsaSsaPssPublicKey public_key_proto;
   public_key_proto.set_version(key_version);
@@ -178,14 +182,17 @@ RsaSsaPssPublicKey GetRsaSsaPssPublicKeyProto(absl::string_view pem_encoded_key,
 // Helper function that creates an RsaSsaPssPrivateKey from the given PEM
 // encoded key `pem_encoded_key`, Hash type `hash_type` and key version
 // `key_version`.
-RsaSsaPssPrivateKey GetRsaSsaPssPrivateKeyProto(
+util::StatusOr<RsaSsaPssPrivateKey> GetRsaSsaPssPrivateKeyProto(
     absl::string_view pem_encoded_key, HashType hash_type,
     uint32_t key_version) {
   // Parse the key with subtle::PemParser to make sure the proto key fields are
   // correct.
-  auto key_subtle_or = subtle::PemParser::ParseRsaPrivateKey(pem_encoded_key);
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::RsaPrivateKey> key_subtle =
-      std::move(key_subtle_or).ValueOrDie();
+  util::StatusOr<std::unique_ptr<internal::RsaPrivateKey>> private_key =
+      subtle::PemParser::ParseRsaPrivateKey(pem_encoded_key);
+  if (!private_key.ok()) {
+    return private_key.status();
+  }
+  std::unique_ptr<internal::RsaPrivateKey> key_subtle = *std::move(private_key);
 
   // Set the inner RSASSA-PSS public key and its parameters.
   RsaSsaPssPrivateKey private_key_proto;
@@ -287,10 +294,12 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   expected_keydata1->set_type_url(verify_key_manager.get_key_type());
   expected_keydata1->set_key_material_type(
       verify_key_manager.key_material_type());
-  expected_keydata1->set_value(
+
+  util::StatusOr<RsaSsaPssPublicKey> rsa_ssa_pss_pub_key =
       GetRsaSsaPssPublicKeyProto(kRsaPublicKey2048, HashType::SHA384,
-                                 verify_key_manager.get_version())
-          .SerializeAsString());
+                                 verify_key_manager.get_version());
+  ASSERT_THAT(rsa_ssa_pss_pub_key.status(), IsOk());
+  expected_keydata1->set_value(rsa_ssa_pss_pub_key->SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_key1));
 
   // Build the expected second key.
@@ -304,10 +313,13 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   expected_keydata2->set_type_url(verify_key_manager.get_key_type());
   expected_keydata2->set_key_material_type(
       verify_key_manager.key_material_type());
-  expected_keydata2->set_value(
+
+  util::StatusOr<RsaSsaPssPublicKey> rsa_ssa_pss_pub_key2 =
       GetRsaSsaPssPublicKeyProto(kRsaPublicKey2048, HashType::SHA256,
-                                 verify_key_manager.get_version())
-          .SerializeAsString());
+                                 verify_key_manager.get_version());
+  ASSERT_THAT(rsa_ssa_pss_pub_key2.status(), IsOk());
+  expected_keydata2->set_value(rsa_ssa_pss_pub_key2->SerializeAsString());
+
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_key2));
 }
 
@@ -353,10 +365,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   expected_keydata1->set_type_url(sign_key_manager.get_key_type());
   expected_keydata1->set_key_material_type(
       sign_key_manager.key_material_type());
-  expected_keydata1->set_value(
+  util::StatusOr<RsaSsaPssPrivateKey> rsa_pss_private_key1 =
       GetRsaSsaPssPrivateKeyProto(kRsaPrivateKey2048, HashType::SHA256,
-                                  sign_key_manager.get_version())
-          .SerializeAsString());
+                                  sign_key_manager.get_version());
+  ASSERT_THAT(rsa_pss_private_key1.status(), IsOk());
+  expected_keydata1->set_value(rsa_pss_private_key1->SerializeAsString());
   EXPECT_THAT(keyset->key(0), EqualsKey(expected_key1));
 
   // Build the expected second key.
@@ -370,10 +383,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   expected_keydata2->set_type_url(sign_key_manager.get_key_type());
   expected_keydata2->set_key_material_type(
       sign_key_manager.key_material_type());
-  expected_keydata2->set_value(
+  util::StatusOr<RsaSsaPssPrivateKey> rsa_pss_private_key2 =
       GetRsaSsaPssPrivateKeyProto(kRsaPrivateKey2048, HashType::SHA384,
-                                  sign_key_manager.get_version())
-          .SerializeAsString());
+                                  sign_key_manager.get_version());
+  ASSERT_THAT(rsa_pss_private_key2.status(), IsOk());
+  expected_keydata2->set_value(rsa_pss_private_key2->SerializeAsString());
   EXPECT_THAT(keyset->key(1), EqualsKey(expected_key2));
 }
 

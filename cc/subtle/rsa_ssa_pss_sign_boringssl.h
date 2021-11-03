@@ -23,10 +23,10 @@
 #include "openssl/ec.h"
 #include "openssl/rsa.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
@@ -40,8 +40,8 @@ namespace subtle {
 class RsaSsaPssSignBoringSsl : public PublicKeySign {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<PublicKeySign>> New(
-      const SubtleUtilBoringSSL::RsaPrivateKey& private_key,
-      const SubtleUtilBoringSSL::RsaSsaPssParams& params);
+      const internal::RsaPrivateKey& private_key,
+      const internal::RsaSsaPssParams& params);
 
   // Computes the signature for 'data'.
   crypto::tink::util::StatusOr<std::string> Sign(

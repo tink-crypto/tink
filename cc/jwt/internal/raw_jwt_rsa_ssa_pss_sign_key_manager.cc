@@ -23,12 +23,12 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pss_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/sig_util.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -53,7 +53,7 @@ using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
 
 namespace {
 std::unique_ptr<JwtRsaSsaPssPrivateKey> RsaPrivateKeySubtleToProto(
-    const subtle::SubtleUtilBoringSSL::RsaPrivateKey& private_key) {
+    const internal::RsaPrivateKey& private_key) {
   auto key_proto = absl::make_unique<JwtRsaSsaPssPrivateKey>();
   key_proto->set_version(RawJwtRsaSsaPssSignKeyManager().get_version());
   key_proto->set_d(std::string(util::SecretDataAsStringView(private_key.d)));
@@ -70,9 +70,9 @@ std::unique_ptr<JwtRsaSsaPssPrivateKey> RsaPrivateKeySubtleToProto(
   return key_proto;
 }
 
-subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
+internal::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
     const JwtRsaSsaPssPrivateKey& key_proto) {
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey key;
+  internal::RsaPrivateKey key;
   key.n = key_proto.public_key().n();
   key.e = key_proto.public_key().e();
   key.d = util::SecretDataFromStringView(key_proto.d());
@@ -88,15 +88,19 @@ subtle::SubtleUtilBoringSSL::RsaPrivateKey RsaPrivateKeyProtoToSubtle(
 
 StatusOr<JwtRsaSsaPssPrivateKey> RawJwtRsaSsaPssSignKeyManager::CreateKey(
     const JwtRsaSsaPssKeyFormat& key_format) const {
-  util::StatusOr<internal::SslUniquePtr<BIGNUM>> e =
+  StatusOr<internal::SslUniquePtr<BIGNUM>> e =
       internal::StringToBignum(key_format.public_exponent());
-  if (!e.ok()) return e.status();
+  if (!e.ok()) {
+    return e.status();
+  }
 
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  subtle::SubtleUtilBoringSSL::RsaPublicKey public_key;
-  util::Status status = subtle::SubtleUtilBoringSSL::GetNewRsaKeyPair(
+  internal::RsaPrivateKey private_key;
+  internal::RsaPublicKey public_key;
+  util::Status status = internal::NewRsaKeyPair(
       key_format.modulus_size_in_bits(), e->get(), &private_key, &public_key);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   JwtRsaSsaPssPrivateKey key_proto =
       std::move(*RsaPrivateKeySubtleToProto(private_key));
@@ -119,7 +123,7 @@ RawJwtRsaSsaPssSignKeyManager::PublicKeySignFactory::Create(
   if (!salt_length.ok()) {
     return salt_length.status();
   }
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = Enums::ProtoToSubtle(*hash);
   params.mgf1_hash = Enums::ProtoToSubtle(*hash);
   params.salt_length = *salt_length;
@@ -151,14 +155,16 @@ Status RawJwtRsaSsaPssSignKeyManager::ValidateKey(
 
 Status RawJwtRsaSsaPssSignKeyManager::ValidateKeyFormat(
     const JwtRsaSsaPssKeyFormat& key_format) const {
-  util::Status modulus_status =
-      subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-          key_format.modulus_size_in_bits());
-  if (!modulus_status.ok()) return modulus_status;
-  util::Status exponent_status =
-      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-          key_format.public_exponent());
-  if (!exponent_status.ok()) return exponent_status;
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(key_format.modulus_size_in_bits());
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+  Status exponent_status =
+      internal::ValidateRsaPublicExponent(key_format.public_exponent());
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return RawJwtRsaSsaPssVerifyKeyManager::ValidateAlgorithm(
       key_format.algorithm());
 }

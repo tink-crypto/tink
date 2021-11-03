@@ -22,12 +22,12 @@
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/subtle/rsa_ssa_pkcs1_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -132,7 +132,7 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, Create) {
   RsaSsaPkcs1PublicKey public_key =
       RsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).ValueOrDie();
 
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
+  internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
   private_key_subtle.e = private_key.public_key().e();
   private_key_subtle.d = util::SecretDataFromStringView(private_key.d());

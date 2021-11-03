@@ -44,11 +44,11 @@ using google::crypto::tink::RsaSsaPkcs1PublicKey;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
     const RsaSsaPkcs1PublicKey& rsa_ssa_pkcs1_public_key) const {
-  subtle::SubtleUtilBoringSSL::RsaPublicKey rsa_pub_key;
+  internal::RsaPublicKey rsa_pub_key;
   rsa_pub_key.n = rsa_ssa_pkcs1_public_key.n();
   rsa_pub_key.e = rsa_ssa_pkcs1_public_key.e();
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
+  internal::RsaSsaPkcs1Params params;
   RsaSsaPkcs1Params rsa_ssa_pkcs1_params = rsa_ssa_pkcs1_public_key.params();
   params.hash_type = Enums::ProtoToSubtle(rsa_ssa_pkcs1_params.hash_type());
 
@@ -73,13 +73,12 @@ Status RsaSsaPkcs1VerifyKeyManager::ValidateKey(
   if (!n.ok()) {
     return n.status();
   }
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(n->get()));
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
   if (!modulus_status.ok()) {
     return modulus_status;
   }
-  auto exponent_status =
-      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(key.e());
+  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
   if (!exponent_status.ok()) {
     return exponent_status;
   }

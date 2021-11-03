@@ -24,10 +24,10 @@
 #include "absl/container/flat_hash_set.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -38,7 +38,6 @@ namespace tink {
 namespace {
 
 using ::crypto::tink::subtle::RsaSsaPssVerifyBoringSsl;
-using ::crypto::tink::subtle::SubtleUtilBoringSSL;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
@@ -234,7 +233,7 @@ TEST(RawJwtRsaSsaPssSignKeyManagerTest, Create) {
       RawJwtRsaSsaPssSignKeyManager().GetPrimitive<PublicKeySign>(*key);
   ASSERT_THAT(signer.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;
@@ -264,7 +263,7 @@ TEST(RawJwtRsaSsaPssSignKeyManagerTest, CreateWrongKey) {
       RawJwtRsaSsaPssSignKeyManager().CreateKey(key_format);
   ASSERT_THAT(second_key.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;

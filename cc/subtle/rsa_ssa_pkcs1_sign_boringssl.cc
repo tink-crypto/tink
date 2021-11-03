@@ -26,6 +26,7 @@
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -35,31 +36,40 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// static
 util::StatusOr<std::unique_ptr<PublicKeySign>> RsaSsaPkcs1SignBoringSsl::New(
-    const SubtleUtilBoringSSL::RsaPrivateKey& private_key,
-    const SubtleUtilBoringSSL::RsaSsaPkcs1Params& params) {
+    const internal::RsaPrivateKey& private_key,
+    const internal::RsaSsaPkcs1Params& params) {
   auto status = internal::CheckFipsCompatibility<RsaSsaPkcs1SignBoringSsl>();
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
 
   // Check hash.
   util::Status sig_hash_valid =
       SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);
-  if (!sig_hash_valid.ok()) return sig_hash_valid;
+  if (!sig_hash_valid.ok()) {
+    return sig_hash_valid;
+  }
   auto sig_hash = SubtleUtilBoringSSL::EvpHash(params.hash_type);
-  if (!sig_hash.ok()) return sig_hash.status();
+  if (!sig_hash.ok()) {
+    return sig_hash.status();
+  }
 
   // Check RSA's modulus.
-  auto status_or_n = internal::StringToBignum(private_key.n);
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
-  if (!modulus_status.ok()) return modulus_status;
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(private_key.n);
+  if (!n.ok()) {
+    return n.status();
+  }
+  auto modulus_status = internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
 
   // The RSA modulus and exponent are checked as part of the conversion to
   // internal::SslUniquePtr<RSA>.
   util::StatusOr<internal::SslUniquePtr<RSA>> rsa =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(private_key);
+      internal::RsaPrivateKeyToRsa(private_key);
   if (!rsa.ok()) {
     return rsa.status();
   }

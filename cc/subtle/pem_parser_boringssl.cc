@@ -29,6 +29,7 @@
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -174,7 +175,7 @@ util::StatusOr<std::string> ConvertBioToString(BIO* bio) {
 }  // namespace
 
 // static.
-util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPublicKey>>
+util::StatusOr<std::unique_ptr<internal::RsaPublicKey>>
 PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   // Read the RSA key into EVP_PKEY.
   internal::SslUniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
@@ -214,7 +215,7 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   if (!e_str.ok()) {
     return e_str.status();
   }
-  auto rsa_public_key = absl::make_unique<SubtleUtilBoringSSL::RsaPublicKey>();
+  auto rsa_public_key = absl::make_unique<internal::RsaPublicKey>();
   rsa_public_key->e = *std::move(e_str);
   rsa_public_key->n = *std::move(n_str);
 
@@ -222,7 +223,7 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
 }
 
 // static.
-util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::RsaPrivateKey>>
+util::StatusOr<std::unique_ptr<internal::RsaPrivateKey>>
 PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Read the private key into EVP_PKEY.
   internal::SslUniquePtr<BIO> rsa_key_bio(BIO_new(BIO_s_mem()));
@@ -250,8 +251,7 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   RSA_get0_key(bssl_rsa_key, &n_bn, &e_bn, &d_bn);
 
   // Save exponents.
-  auto rsa_private_key =
-      absl::make_unique<SubtleUtilBoringSSL::RsaPrivateKey>();
+  auto rsa_private_key = absl::make_unique<internal::RsaPrivateKey>();
   auto n_str = internal::BignumToString(n_bn, BN_num_bytes(n_bn));
   auto e_str = internal::BignumToString(e_bn, BN_num_bytes(e_bn));
   auto d_str = internal::BignumToSecretData(d_bn, BN_num_bytes(d_bn));
@@ -305,9 +305,8 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
 }
 
 util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
-    const SubtleUtilBoringSSL::RsaPublicKey& rsa_key) {
-  auto rsa_statusor =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPublicKey(rsa_key);
+    const internal::RsaPublicKey& rsa_public_key) {
+  auto rsa_statusor = internal::RsaPublicKeyToRsa(rsa_public_key);
   if (!rsa_statusor.ok()) {
     return rsa_statusor.status();
   }
@@ -322,9 +321,8 @@ util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
 }
 
 util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
-    const SubtleUtilBoringSSL::RsaPrivateKey& rsa_key) {
-  auto rsa_statusor =
-      SubtleUtilBoringSSL::BoringSslRsaFromRsaPrivateKey(rsa_key);
+    const internal::RsaPrivateKey& rsa_private_key) {
+  auto rsa_statusor = internal::RsaPrivateKeyToRsa(rsa_private_key);
   if (!rsa_statusor.ok()) {
     return rsa_statusor.status();
   }
@@ -374,10 +372,10 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
                                   y_coordinate.get(), nullptr);
 
   // Convert public key parameters and construct Subtle ECKey
-  auto x_string = SubtleUtilBoringSSL::bn2str(x_coordinate.get(),
-                                              BN_num_bytes(x_coordinate.get()));
-  auto y_string = SubtleUtilBoringSSL::bn2str(y_coordinate.get(),
-                                              BN_num_bytes(y_coordinate.get()));
+  auto x_string = internal::BignumToString(x_coordinate.get(),
+                                           BN_num_bytes(x_coordinate.get()));
+  auto y_string = internal::BignumToString(y_coordinate.get(),
+                                           BN_num_bytes(y_coordinate.get()));
   auto curve = SubtleUtilBoringSSL::GetCurve(ec_group);
 
   if (!x_string.ok()) return x_string.status();

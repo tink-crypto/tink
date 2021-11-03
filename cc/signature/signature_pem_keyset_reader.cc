@@ -23,6 +23,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/keyset_reader.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
@@ -129,8 +130,8 @@ Keyset::Key NewKeysetKey(uint32_t key_id, absl::string_view key_type,
 // `private_key_subtle`; the key is assigned version `key_version` and
 // key paramters `parameters`.
 util::StatusOr<RsaSsaPssPrivateKey> NewRsaSsaPrivateKey(
-    const subtle::SubtleUtilBoringSSL::RsaPrivateKey& private_key_subtle,
-    uint32_t key_version, const PemKeyParams& parameters) {
+    const internal::RsaPrivateKey& private_key_subtle, uint32_t key_version,
+    const PemKeyParams& parameters) {
   RsaSsaPssPrivateKey private_key_proto;
 
   // RSA Private key parameters.
@@ -168,8 +169,8 @@ util::StatusOr<RsaSsaPssPrivateKey> NewRsaSsaPrivateKey(
 // `private_key_subtle`; the key is assigned version `key_version` and
 // key paramters `parameters`.
 RsaSsaPkcs1PrivateKey NewRsaSsaPkcs1PrivateKey(
-    const subtle::SubtleUtilBoringSSL::RsaPrivateKey& private_key_subtle,
-    uint32_t key_version, const PemKeyParams& parameters) {
+    const internal::RsaPrivateKey& private_key_subtle, uint32_t key_version,
+    const PemKeyParams& parameters) {
   RsaSsaPkcs1PrivateKey private_key_proto;
 
   // RSA Private key parameters.
@@ -207,8 +208,8 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
       subtle::PemParser::ParseRsaPrivateKey(pem_key.serialized_key);
   if (!private_key_subtle_or.ok()) return private_key_subtle_or.status();
 
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::RsaPrivateKey>
-      private_key_subtle = std::move(private_key_subtle_or).ValueOrDie();
+  std::unique_ptr<internal::RsaPrivateKey> private_key_subtle =
+      std::move(private_key_subtle_or).ValueOrDie();
 
   size_t modulus_size = private_key_subtle->n.length() * 8;
   if (pem_key.parameters.key_size_in_bits != modulus_size) {
@@ -302,7 +303,7 @@ util::Status AddRsaSsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
       subtle::PemParser::ParseRsaPublicKey(pem_key.serialized_key);
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::RsaPublicKey> public_key_subtle =
+  std::unique_ptr<internal::RsaPublicKey> public_key_subtle =
       std::move(public_key_subtle_or).ValueOrDie();
 
   // Check key length is as expected.

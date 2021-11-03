@@ -320,9 +320,9 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::signature::sig_util
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -367,9 +367,9 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -387,12 +387,12 @@ tink_cc_test(
     raw_jwt_rsa_ssa_pkcs1_verify_key_manager_test.cc
   DEPS
     tink::internal::ssl_unique_ptr
+    tink::internal::rsa_util
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pkcs1_verify_key_manager
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::status
     tink::util::statusor
@@ -417,9 +417,9 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::public_key_sign
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::signature::sig_util
     tink::subtle::rsa_ssa_pss_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -444,8 +444,8 @@ tink_cc_test(
     crypto
     tink::core::public_key_sign
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::subtle::rsa_ssa_pss_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -463,9 +463,9 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -491,8 +491,8 @@ tink_cc_test(
     crypto
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::subtle::rsa_ssa_pss_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

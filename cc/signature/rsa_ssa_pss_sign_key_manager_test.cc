@@ -21,12 +21,12 @@
 #include "absl/container/flat_hash_set.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -269,7 +269,7 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
   auto signer_or = RsaSsaPssSignKeyManager().GetPrimitive<PublicKeySign>(key);
   ASSERT_THAT(signer_or.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;
@@ -301,7 +301,7 @@ TEST(RsaSsaPssSignKeyManagerTest, CreateWrongKey) {
 
   ASSERT_THAT(signer_or.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = subtle::HashType::SHA256;
   params.mgf1_hash = subtle::HashType::SHA256;
   params.salt_length = 32;

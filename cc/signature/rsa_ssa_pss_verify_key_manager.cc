@@ -19,6 +19,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
@@ -43,11 +45,11 @@ using google::crypto::tink::RsaSsaPssPublicKey;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const RsaSsaPssPublicKey& rsa_ssa_pss_public_key) const {
-  subtle::SubtleUtilBoringSSL::RsaPublicKey rsa_pub_key;
+  internal::RsaPublicKey rsa_pub_key;
   rsa_pub_key.n = rsa_ssa_pss_public_key.n();
   rsa_pub_key.e = rsa_ssa_pss_public_key.e();
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   RsaSsaPssParams rsa_ssa_pss_params = rsa_ssa_pss_public_key.params();
   params.sig_hash = Enums::ProtoToSubtle(rsa_ssa_pss_params.sig_hash());
   params.mgf1_hash = Enums::ProtoToSubtle(rsa_ssa_pss_params.mgf1_hash());
@@ -63,14 +65,20 @@ Status RsaSsaPssVerifyKeyManager::ValidateKey(
     const RsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  auto status_or_n = internal::StringToBignum(key.n());
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
-  if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key.e());
-  if (!exponent_status.ok()) return exponent_status;
+  StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n());
+  if (!n.ok()) {
+    return n.status();
+  }
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return ValidateParams(key.params());
 }
 
@@ -92,11 +100,9 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
   //  - Conscrypt/BouncyCastle do not support different hashes.
   if (params.mgf1_hash() != params.sig_hash()) {
     return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("MGF1 hash '",
-                                     params.mgf1_hash(),
+                        absl::StrCat("MGF1 hash '", params.mgf1_hash(),
                                      "' is different from signature hash '",
-                                     params.sig_hash(),
-                                     "'"));
+                                     params.sig_hash(), "'"));
   }
   if (params.salt_length() < 0) {
     return util::Status(util::error::INVALID_ARGUMENT,

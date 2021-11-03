@@ -21,10 +21,10 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -46,7 +46,7 @@ using google::crypto::tink::JwtRsaSsaPkcs1PublicKey;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtRsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtRsaSsaPkcs1PublicKey& jwt_rsa_ssa_pkcs1_public_key) const {
-  subtle::SubtleUtilBoringSSL::RsaPublicKey rsa_pub_key;
+  internal::RsaPublicKey rsa_pub_key;
   rsa_pub_key.n = jwt_rsa_ssa_pkcs1_public_key.n();
   rsa_pub_key.e = jwt_rsa_ssa_pkcs1_public_key.e();
 
@@ -56,7 +56,7 @@ RawJwtRsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
   if (!hash.ok()) {
     return hash.status();
   }
-  subtle::SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
+  internal::RsaSsaPkcs1Params params;
   params.hash_type = Enums::ProtoToSubtle(*hash);
 
   util::StatusOr<std::unique_ptr<subtle::RsaSsaPkcs1VerifyBoringSsl>> verify =
@@ -69,18 +69,20 @@ Status RawJwtRsaSsaPkcs1VerifyKeyManager::ValidateKey(
     const JwtRsaSsaPkcs1PublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+  StatusOr<internal::SslUniquePtr<BIGNUM>> n =
       internal::StringToBignum(key.n());
   if (!n.ok()) {
     return n.status();
   }
-  util::Status modulus_status =
-      subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-          BN_num_bits(n->get()));
-  if (!modulus_status.ok()) return modulus_status;
-  util::Status exponent_status =
-      subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(key.e());
-  if (!exponent_status.ok()) return exponent_status;
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return ValidateAlgorithm(key.algorithm());
 }
 

@@ -208,6 +208,8 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::constants
@@ -261,8 +263,9 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::public_key_sign
     tink::internal::bn_util
+    tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -287,6 +290,8 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::constants
@@ -339,6 +344,7 @@ tink_cc_library(
     absl::memory
     absl::strings
     tink::core::keyset_reader
+    tink::internal::rsa_util
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
     tink::util::enums
@@ -483,8 +489,8 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -507,8 +513,8 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::subtle::rsa_ssa_pss_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -597,8 +603,8 @@ tink_cc_test(
     crypto
     tink::core::public_key_sign
     tink::internal::bn_util
+    tink::internal::rsa_util
     tink::subtle::rsa_ssa_pss_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -671,11 +677,12 @@ tink_cc_test(
     gmock
     absl::strings
     tink::core::cc
+    tink::internal::rsa_util
     tink::subtle::pem_parser_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::secret_data
     tink::util::status
+    tink::util::statusor
     tink::util::test_matchers
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto

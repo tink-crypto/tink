@@ -24,10 +24,10 @@
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -41,8 +41,8 @@ namespace subtle {
 class RsaSsaPssVerifyBoringSsl : public PublicKeyVerify {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>>
-  New(const SubtleUtilBoringSSL::RsaPublicKey& pub_key,
-      const SubtleUtilBoringSSL::RsaSsaPssParams& params);
+  New(const internal::RsaPublicKey& pub_key,
+      const internal::RsaSsaPssParams& params);
 
   // Verifies that 'signature' is a digital signature for 'data'.
   crypto::tink::util::Status Verify(absl::string_view signature,

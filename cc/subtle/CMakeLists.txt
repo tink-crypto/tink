@@ -253,6 +253,7 @@ tink_cc_library(
   DEPS
     tink::core::public_key_verify
     tink::internal::fips_utils
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::subtle::common_enums
@@ -274,6 +275,7 @@ tink_cc_library(
     tink::subtle::subtle_util_boringssl
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::core::public_key_sign
@@ -848,8 +850,9 @@ tink_cc_library(
     absl::status
     absl::strings
     crypto
-    tink::internal::ssl_unique_ptr
     tink::internal::bn_util
+    tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::util::status
     tink::util::statusor
 )
@@ -1227,6 +1230,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::internal::err_util
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pss_verify_boringssl
@@ -1247,6 +1251,7 @@ tink_cc_test(
     rsa_ssa_pss_sign_boringssl_test.cc
   DEPS
     tink::config::tink_fips
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_sign_boringssl
     tink::subtle::rsa_ssa_pss_verify_boringssl
@@ -1268,6 +1273,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::common_enums
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
@@ -1288,6 +1294,7 @@ tink_cc_test(
     rsa_ssa_pkcs1_sign_boringssl_test.cc
   DEPS
     tink::internal::fips_utils
+    tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
     tink::subtle::rsa_ssa_pkcs1_verify_boringssl
@@ -1549,6 +1556,7 @@ tink_cc_test(
     crypto
     tink::internal::bn_util
     tink::internal::err_util
+    tink::internal::rsa_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

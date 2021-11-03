@@ -32,6 +32,7 @@
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
@@ -439,7 +440,7 @@ TEST_F(PemParserRsaTest, ReadRsaPrivatekey) {
 
 TEST_F(PemParserRsaTest, WriteRsaPrivateKey) {
   for (const auto &test_vector : *kRsaKeyTestVectors) {
-    SubtleUtilBoringSSL::RsaPrivateKey key;
+    internal::RsaPrivateKey key;
     key.n = absl::HexStringToBytes(test_vector.modulus_hex_str);
     key.e = absl::HexStringToBytes(test_vector.public_exponent_hex_str);
 
@@ -466,7 +467,7 @@ TEST_F(PemParserRsaTest, WriteRsaPrivateKey) {
 
 TEST_F(PemParserRsaTest, WriteRsaPublicKey) {
   for (const auto &test_vector : *kRsaKeyTestVectors) {
-    SubtleUtilBoringSSL::RsaPublicKey key;
+    internal::RsaPublicKey key;
     key.n = absl::HexStringToBytes(test_vector.modulus_hex_str);
     key.e = absl::HexStringToBytes(test_vector.public_exponent_hex_str);
 
