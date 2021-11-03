@@ -16,7 +16,6 @@
 
 import abc
 from typing import Generic, Type, TypeVar
-import six
 
 from tink.core import _primitive_set
 
@@ -25,8 +24,7 @@ B = TypeVar('B')
 P = TypeVar('P')
 
 
-@six.add_metaclass(abc.ABCMeta)
-class PrimitiveWrapper(Generic[B, P]):
+class PrimitiveWrapper(Generic[B, P], metaclass=abc.ABCMeta):
   """Basic interface for wrapping a primitive.
 
   A PrimitiveSet can be wrapped by a single primitive in order to fulfill a

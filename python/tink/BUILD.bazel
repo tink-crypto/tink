@@ -64,7 +64,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         requirement("protobuf"),
-        requirement("six"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -88,7 +87,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         requirement("protobuf"),
-        requirement("six"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],

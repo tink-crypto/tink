@@ -23,14 +23,12 @@ py_library(
     name = "_hybrid_decrypt",
     srcs = ["_hybrid_decrypt.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
     name = "_hybrid_encrypt",
     srcs = ["_hybrid_encrypt.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(

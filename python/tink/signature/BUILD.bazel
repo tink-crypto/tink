@@ -22,14 +22,12 @@ py_library(
     name = "_public_key_sign",
     srcs = ["_public_key_sign.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
     name = "_public_key_verify",
     srcs = ["_public_key_verify.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
