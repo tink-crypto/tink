@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -554,7 +555,7 @@ TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   std::unique_ptr<KeysetHandle> keyset_handle =
       TestKeysetHandle::GetKeysetHandle(keyset);
   ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Test creating with custom key manager. For this, we reset the registry before

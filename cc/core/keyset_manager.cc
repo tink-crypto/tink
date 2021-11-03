@@ -86,7 +86,7 @@ Status KeysetManager::Enable(uint32_t key_id) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot enable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
@@ -101,14 +101,14 @@ Status KeysetManager::Enable(uint32_t key_id) {
 Status KeysetManager::Disable(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot disable primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot disable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
@@ -123,7 +123,7 @@ Status KeysetManager::Disable(uint32_t key_id) {
 Status KeysetManager::Delete(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot delete primary key (key_id %u).", key_id);
   }
   auto key_field = keyset_.mutable_key();
@@ -143,7 +143,7 @@ Status KeysetManager::Delete(uint32_t key_id) {
 Status KeysetManager::Destroy(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot destroy primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
@@ -151,7 +151,7 @@ Status KeysetManager::Destroy(uint32_t key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::DESTROYED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot destroy key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
@@ -169,7 +169,7 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
   for (auto& key : keyset_.key()) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "The candidate for the primary key must be ENABLED"
                          " (key_id %u).",
                          key_id);

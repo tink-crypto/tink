@@ -60,13 +60,13 @@ class PrimitiveSet {
         std::unique_ptr<P> primitive,
         const google::crypto::tink::KeysetInfo::KeyInfo& key_info) {
       if (key_info.status() != google::crypto::tink::KeyStatusType::ENABLED) {
-        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+        return util::Status(absl::StatusCode::kInvalidArgument,
                             "The key must be ENABLED.");
       }
       auto identifier_result = CryptoFormat::GetOutputPrefix(key_info);
       if (!identifier_result.ok()) return identifier_result.status();
       if (primitive == nullptr) {
-        return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+        return util::Status(absl::StatusCode::kInvalidArgument,
                             "The primitive must be non-null.");
       }
       std::string identifier = identifier_result.ValueOrDie();
@@ -143,16 +143,16 @@ class PrimitiveSet {
   // Sets the given 'primary' as the primary primitive of this set.
   crypto::tink::util::Status set_primary(Entry<P>* primary) {
     if (!primary) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "The primary primitive must be non-null.");
     }
     if (primary->get_status() != google::crypto::tink::KeyStatusType::ENABLED) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Primary has to be enabled.");
     }
     auto entries_result = get_primitives(primary->get_identifier());
     if (!entries_result.ok()) {
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Primary cannot be set to an entry which is "
                           "not held by this primitive set.");
     }

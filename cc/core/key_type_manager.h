@@ -155,7 +155,7 @@ class KeyTypeManager<KeyProtoParam, KeyFormatProtoParam, List<Primitives...>>
       util::StatusOr<std::unique_ptr<Primitive>>>::type
   GetPrimitiveImpl(const KeyProto& key) const {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("No PrimitiveFactory was registered for type ",
                      typeid(Primitive).name()));
   }

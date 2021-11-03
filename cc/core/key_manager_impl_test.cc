@@ -426,7 +426,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFails) {
                        .ValueOrDie();
 
   EXPECT_THAT(key_manager->GetPrimitive(key_data).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("No PrimitiveFactory was registered")));
 }
 

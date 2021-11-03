@@ -20,6 +20,7 @@
 #include <istream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/prettywriter.h"
@@ -189,8 +190,8 @@ util::Status WriteData(absl::string_view data, std::ostream* destination) {
 util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
     std::unique_ptr<std::ostream> destination_stream) {
   if (destination_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "destination_stream must be non-null.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "destination_stream must be non-null.");
   }
   std::unique_ptr<JsonKeysetWriter> writer(
       new JsonKeysetWriter(std::move(destination_stream)));

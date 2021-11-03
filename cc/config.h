@@ -17,6 +17,7 @@
 #ifndef TINK_CONFIG_H_
 #define TINK_CONFIG_H_
 
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "tink/aead/aead_config.h"
 #include "tink/catalogue.h"
@@ -97,7 +98,7 @@ crypto::tink::util::Status Config::Register(
     status = StreamingAeadConfig::Register();
   } else {
     status = util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Non-standard primitive '", entry.primitive_name(),
                      "', call Registry::RegisterKeyManager "
                      "and Registry::"

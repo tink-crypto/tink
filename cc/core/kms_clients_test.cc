@@ -38,10 +38,11 @@ TEST(KmsClientsTest, Empty) {
   EXPECT_THAT(client_result.status(), StatusIs(absl::StatusCode::kNotFound));
 
   client_result = KmsClients::Get("");
-  EXPECT_THAT(client_result.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(client_result.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   auto status = KmsClients::Add(nullptr);
-  EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 struct UriData {

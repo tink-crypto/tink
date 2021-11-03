@@ -14,6 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
@@ -71,7 +72,7 @@ crypto::tink::util::StatusOr<std::string> CryptoFormat::GetOutputPrefix(
     case OutputPrefixType::RAW:
       return std::string(kRawPrefix);
     default:
-      return util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "The given key has invalid OutputPrefixType.");
   }
 }

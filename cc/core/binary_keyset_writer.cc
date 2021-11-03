@@ -20,6 +20,7 @@
 #include <istream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -53,7 +54,7 @@ util::Status WriteProto(const portable_proto::MessageLite& proto,
 util::StatusOr<std::unique_ptr<BinaryKeysetWriter>> BinaryKeysetWriter::New(
     std::unique_ptr<std::ostream> destination_stream) {
   if (destination_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "destination_stream must be non-null.");
   }
   std::unique_ptr<BinaryKeysetWriter> writer(

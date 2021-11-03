@@ -311,6 +311,7 @@ cc_library(
         "//util:errors",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protobuf_lite",
     ],
@@ -329,6 +330,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -347,6 +349,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -366,6 +369,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -401,6 +405,7 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -414,6 +419,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -490,6 +496,7 @@ cc_library(
         "//util:keyset_util",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -506,6 +513,7 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -636,6 +644,7 @@ cc_library(
         ":core/private_key_type_manager",
         ":key_manager",
         "//util:validation",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -777,6 +786,7 @@ cc_test(
         "//util:test_keyset_handle",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

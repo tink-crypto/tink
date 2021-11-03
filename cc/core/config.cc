@@ -16,6 +16,7 @@
 
 #include "tink/config.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "tink/util/errors.h"
@@ -46,14 +47,15 @@ std::unique_ptr<google::crypto::tink::KeyTypeEntry> Config::GetTinkKeyTypeEntry(
 // static
 crypto::tink::util::Status Config::Validate(const KeyTypeEntry& entry) {
   if (entry.type_url().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Missing type_url.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Missing type_url.");
   }
   if (entry.primitive_name().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Missing primitive_name.");
   }
   if (entry.catalogue_name().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Missing catalogue_name.");
   }
   return util::OkStatus();

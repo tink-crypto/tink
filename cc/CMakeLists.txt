@@ -283,6 +283,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
     protobuf::libprotobuf-lite
 )
@@ -299,6 +300,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
 )
 
@@ -315,6 +317,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
     rapidjson
 )
@@ -332,6 +335,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
     absl::strings
     rapidjson
 )
@@ -364,6 +368,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::config_cc_proto
+    absl::status
     absl::strings
 )
 
@@ -376,6 +381,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_library(
@@ -437,6 +443,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     absl::base
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -451,6 +458,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_library(
@@ -537,6 +545,7 @@ tink_cc_library(
     tink::proto::tink_cc_proto
     tink::util::status
     tink::util::statusor
+    absl::status
 )
 
 tink_cc_library(
@@ -573,6 +582,7 @@ tink_cc_library(
     tink::core::key_manager_impl
     tink::core::key_manager
     tink::util::validation
+    absl::status
 )
 
 # tests
@@ -673,6 +683,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_test(
@@ -767,6 +778,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::validation
     absl::memory
+    absl::status
 )
 
 tink_cc_test(
