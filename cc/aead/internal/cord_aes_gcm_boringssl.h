@@ -20,16 +20,16 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "openssl/aead.h"
-#include "openssl/base.h"
-#include "openssl/cipher.h"
+#include "openssl/evp.h"
 #include "tink/aead/cord_aead.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 class CordAesGcmBoringSsl : public CordAead {
  public:
@@ -42,19 +42,14 @@ class CordAesGcmBoringSsl : public CordAead {
   crypto::tink::util::StatusOr<absl::Cord> Decrypt(
       absl::Cord ciphertext, absl::Cord additional_data) const override;
 
-  ~CordAesGcmBoringSsl() override {}
-
  private:
-  static constexpr int kIvSizeInBytes = 12;
-  static constexpr int kTagSizeInBytes = 16;
+  explicit CordAesGcmBoringSsl(internal::SslUniquePtr<EVP_CIPHER_CTX> context)
+      : context_(std::move(context)) {}
 
-  CordAesGcmBoringSsl() {}
-  crypto::tink::util::Status Init(crypto::tink::util::SecretData key_value);
-
-  const EVP_CIPHER *cipher_;
-  crypto::tink::util::SecretData key_;
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context_;
 };
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 

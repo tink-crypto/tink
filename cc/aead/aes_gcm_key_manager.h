@@ -60,8 +60,9 @@ class AesGcmKeyManager
   class CordAeadFactory : public PrimitiveFactory<CordAead> {
     crypto::tink::util::StatusOr<std::unique_ptr<CordAead>> Create(
         const google::crypto::tink::AesGcmKey& key) const override {
-      auto cord_aes_gcm_result = crypto::tink::CordAesGcmBoringSsl::New(
-          util::SecretDataFromStringView(key.key_value()));
+      auto cord_aes_gcm_result =
+          crypto::tink::internal::CordAesGcmBoringSsl::New(
+              util::SecretDataFromStringView(key.key_value()));
       if (!cord_aes_gcm_result.ok()) return cord_aes_gcm_result.status();
       return {std::move(cord_aes_gcm_result.ValueOrDie())};
     }
@@ -108,7 +109,7 @@ class AesGcmKeyManager
       const google::crypto::tink::AesGcmKeyFormat& key_format,
       InputStream* input_stream) const override {
     crypto::tink::util::Status status =
-      ValidateVersion(key_format.version(), get_version());
+        ValidateVersion(key_format.version(), get_version());
     if (!status.ok()) return status;
 
     crypto::tink::util::StatusOr<std::string> randomness =

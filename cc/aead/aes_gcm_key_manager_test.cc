@@ -34,6 +34,7 @@ namespace tink {
 
 namespace {
 
+using ::crypto::tink::internal::CordAesGcmBoringSsl;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::IstreamInputStream;
@@ -180,10 +181,10 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                                 *boring_ssl_aead_or.ValueOrDie(),
-                                 "message", "aad"),
-              IsOk());
+  ASSERT_THAT(
+      EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
+      IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, CreateCordAead) {
@@ -198,14 +199,14 @@ TEST(AesGcmKeyManagerTest, CreateCordAead) {
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> boring_ssl_aead_or =
-      crypto::tink::CordAesGcmBoringSsl::New(
+      CordAesGcmBoringSsl::New(
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                                 *boring_ssl_aead_or.ValueOrDie(),
-                                 "message", "aad"),
-              IsOk());
+  ASSERT_THAT(
+      EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
+      IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, DeriveShortKey) {
@@ -242,8 +243,8 @@ TEST(AesGcmKeyManagerTest, DeriveKeyNotEnoughRandomness) {
   format.set_key_size(16);
   format.set_version(0);
 
-  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
-      "0123456789")};
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789")};
 
   ASSERT_THAT(AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -254,8 +255,8 @@ TEST(AesGcmKeyManagerTest, DeriveKeyWrongVersion) {
   format.set_key_size(16);
   format.set_version(1);
 
-  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
-      "0123456789abcdefghijklmnop")};
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
 
   ASSERT_THAT(
       AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
