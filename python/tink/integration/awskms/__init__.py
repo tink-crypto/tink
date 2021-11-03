@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """StreamingAead package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.integration.awskms import _aws_kms_client
 
