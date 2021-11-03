@@ -13,8 +13,6 @@
 # limitations under the License.
 """Tests for tink.testing.cross_language.util.key_util."""
 
-# Placeholder for import for type annotations
-
 from absl.testing import absltest
 from absl.testing import parameterized
 

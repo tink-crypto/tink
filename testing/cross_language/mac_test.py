@@ -13,8 +13,7 @@
 # limitations under the License.
 """Cross-language tests for the MAC primitive."""
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text, Tuple
+from typing import Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -53,7 +52,7 @@ _ADDITIONAL_KEY_TEMPLATES = {
 }
 
 
-def mac_key_template_names() -> Iterable[Text]:
+def mac_key_template_names() -> Iterable[str]:
   for key_type in supported_key_types.MAC_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
@@ -121,7 +120,7 @@ KEY_ROTATION_TEMPLATES = [
 
 
 def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+) -> Iterable[Tuple[str, str, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for compute_lang in SUPPORTED_LANGUAGES:
     for verify_lang in SUPPORTED_LANGUAGES:
       for old_key_tmpl in KEY_ROTATION_TEMPLATES:

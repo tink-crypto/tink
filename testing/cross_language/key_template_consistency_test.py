@@ -13,8 +13,7 @@
 # limitations under the License.
 """Tests that keys are consistently accepted or rejected in all languages."""
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -26,7 +25,7 @@ from util import supported_key_types
 from util import testing_servers
 
 
-def all_template_names() -> Iterable[Text]:
+def all_template_names() -> Iterable[str]:
   for names in supported_key_types.KEY_TEMPLATE_NAMES.values():
     for name in names:
       yield name

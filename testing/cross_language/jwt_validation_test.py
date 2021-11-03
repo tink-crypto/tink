@@ -18,11 +18,8 @@ with the same key and the MAC is always valid. We test how the validation
 handles weird headers or payloads.
 """
 
-# Placeholder for import for type annotations
-
 import base64
 import datetime
-from typing import Text
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -104,14 +101,14 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def generate_token_from_bytes(header: bytes, payload: bytes) -> Text:
+def generate_token_from_bytes(header: bytes, payload: bytes) -> str:
   """Generates tokens from bytes with valid MACs."""
   unsigned_compact = (_base64_encode(header) + b'.' + _base64_encode(payload))
   mac_value = MAC.compute_mac(unsigned_compact)
   return (unsigned_compact + b'.' + _base64_encode(mac_value)).decode('utf8')
 
 
-def generate_token(header: Text, payload: Text) -> Text:
+def generate_token(header: str, payload: str) -> str:
   """Generates tokens with valid MACs."""
   return generate_token_from_bytes(
       header.encode('utf8'), payload.encode('utf8'))

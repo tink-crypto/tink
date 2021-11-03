@@ -13,9 +13,7 @@
 # limitations under the License.
 """All KeyTypes and which languages support them."""
 
-# Placeholder for import for type annotations
-
-from typing import List, Text
+from typing import List
 
 from tink import aead
 from tink import daead
@@ -385,7 +383,7 @@ _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME = {
 
 
 def _supported_languages_by_template(
-    template_name: Text, key_type: Text) -> List[Text]:
+    template_name: str, key_type: str) -> List[str]:
   if template_name in _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME:
     return _CUSTOM_SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[template_name]
   return SUPPORTED_LANGUAGES[key_type]

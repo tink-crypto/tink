@@ -13,11 +13,9 @@
 # limitations under the License.
 """Cross-language tests for the JWT primitives."""
 
-# Placeholder for import for type annotations
-
 import datetime
 import json
-from typing import Iterable, Text
+from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -40,14 +38,14 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_jwt_mac_key_template_names() -> Iterable[Text]:
+def all_jwt_mac_key_template_names() -> Iterable[str]:
   """Yields all JWT MAC key template names."""
   for key_type in supported_key_types.JWT_MAC_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       yield key_template_name
 
 
-def all_jwt_signature_key_template_names() -> Iterable[Text]:
+def all_jwt_signature_key_template_names() -> Iterable[str]:
   """Yields all JWT signature key template names."""
   for key_type in supported_key_types.JWT_SIGNATURE_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:

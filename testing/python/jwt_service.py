@@ -13,16 +13,11 @@
 # limitations under the License.
 """JWT testing service API implementations in Python."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import datetime
 import io
 import json
 
-from typing import Text, Tuple
+from typing import Tuple
 
 import grpc
 import tink
@@ -143,7 +138,7 @@ def verifiedjwt_to_proto(
       token.custom_claims[name].bool_value = value
     elif isinstance(value, (int, float)):
       token.custom_claims[name].number_value = value
-    elif isinstance(value, Text):
+    elif isinstance(value, str):
       token.custom_claims[name].string_value = value
     elif isinstance(value, dict):
       token.custom_claims[name].json_object_value = json.dumps(value)

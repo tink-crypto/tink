@@ -13,11 +13,6 @@
 # limitations under the License.
 """Testing service API implementations in Python."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 
 import grpc

@@ -17,8 +17,7 @@ These tests check some basic AEAD properties, and that all implementations can
 interoperate with each other.
 """
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text, Tuple
+from typing import Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -62,7 +61,7 @@ _ADDITIONAL_KEY_TEMPLATES = {
 }
 
 
-def all_aead_key_template_names() -> Iterable[Text]:
+def all_aead_key_template_names() -> Iterable[str]:
   """Yields all AEAD key template names."""
   for key_type in supported_key_types.AEAD_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
@@ -133,7 +132,7 @@ KEY_ROTATION_TEMPLATES = [
 
 
 def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+) -> Iterable[Tuple[str, str, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for enc_lang in SUPPORTED_LANGUAGES:
     for dec_lang in SUPPORTED_LANGUAGES:
       for old_key_tmpl in KEY_ROTATION_TEMPLATES:

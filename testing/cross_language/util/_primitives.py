@@ -13,15 +13,10 @@
 # limitations under the License.
 """Implements tink primitives from gRPC testing_api stubs."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import datetime
 import io
 import json
-from typing import BinaryIO, Mapping, Text, Tuple
+from typing import BinaryIO, Mapping, Tuple
 
 import tink
 from tink import aead
@@ -39,7 +34,7 @@ from proto.testing import testing_api_pb2_grpc
 
 
 def key_template(stub: testing_api_pb2_grpc.KeysetStub,
-                 template_name: Text) -> tink_pb2.KeyTemplate:
+                 template_name: str) -> tink_pb2.KeyTemplate:
   request = testing_api_pb2.KeysetTemplateRequest(template_name=template_name)
   response = stub.GetTemplate(request)
   if response.err:
@@ -68,7 +63,7 @@ def public_keyset(stub: testing_api_pb2_grpc.KeysetStub,
 
 def keyset_to_json(
     stub: testing_api_pb2_grpc.KeysetStub,
-    keyset: bytes) -> Text:
+    keyset: bytes) -> str:
   request = testing_api_pb2.KeysetToJsonRequest(keyset=keyset)
   response = stub.ToJson(request)
   if response.err:
@@ -78,7 +73,7 @@ def keyset_to_json(
 
 def keyset_from_json(
     stub: testing_api_pb2_grpc.KeysetStub,
-    json_keyset: Text) -> bytes:
+    json_keyset: str) -> bytes:
   request = testing_api_pb2.KeysetFromJsonRequest(json_keyset=json_keyset)
   response = stub.FromJson(request)
   if response.err:
@@ -87,7 +82,7 @@ def keyset_from_json(
 
 
 def jwk_set_to_keyset(stub: testing_api_pb2_grpc.JwtStub,
-                      jwk_set: Text) -> bytes:
+                      jwk_set: str) -> bytes:
   request = testing_api_pb2.JwtFromJwkSetRequest(jwk_set=jwk_set)
   response = stub.FromJwkSet(request)
   if response.err:
@@ -96,7 +91,7 @@ def jwk_set_to_keyset(stub: testing_api_pb2_grpc.JwtStub,
 
 
 def jwk_set_from_keyset(stub: testing_api_pb2_grpc.JwtStub,
-                        keyset: bytes) -> Text:
+                        keyset: bytes) -> str:
   request = testing_api_pb2.JwtToJwkSetRequest(keyset=keyset)
   response = stub.ToJwkSet(request)
   if response.err:
@@ -107,7 +102,7 @@ def jwk_set_from_keyset(stub: testing_api_pb2_grpc.JwtStub,
 class Aead(aead.Aead):
   """Wraps AEAD service stub into an Aead primitive."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.AeadStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.AeadStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -137,7 +132,7 @@ class Aead(aead.Aead):
 class DeterministicAead(daead.DeterministicAead):
   """Wraps DAEAD services stub into an DeterministicAead primitive."""
 
-  def __init__(self, lang: Text,
+  def __init__(self, lang: str,
                stub: testing_api_pb2_grpc.DeterministicAeadStub,
                keyset: bytes) -> None:
     self.lang = lang
@@ -172,7 +167,7 @@ class DeterministicAead(daead.DeterministicAead):
 class StreamingAead(streaming_aead.StreamingAead):
   """Wraps Streaming AEAD service stub into a StreamingAead primitive."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.StreamingAeadStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.StreamingAeadStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -204,7 +199,7 @@ class StreamingAead(streaming_aead.StreamingAead):
 class Mac(mac.Mac):
   """Wraps MAC service stub into an Mac primitive."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.MacStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.MacStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -228,7 +223,7 @@ class Mac(mac.Mac):
 class HybridEncrypt(hybrid.HybridEncrypt):
   """Implements the HybridEncrypt primitive using a hybrid service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.HybridStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.HybridStub,
                public_handle: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -248,7 +243,7 @@ class HybridEncrypt(hybrid.HybridEncrypt):
 class HybridDecrypt(hybrid.HybridDecrypt):
   """Implements the HybridDecrypt primitive using a hybrid service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.HybridStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.HybridStub,
                private_handle: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -268,7 +263,7 @@ class HybridDecrypt(hybrid.HybridDecrypt):
 class PublicKeySign(tink_signature.PublicKeySign):
   """Implements the PublicKeySign primitive using a signature service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.SignatureStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.SignatureStub,
                private_handle: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -286,7 +281,7 @@ class PublicKeySign(tink_signature.PublicKeySign):
 class PublicKeyVerify(tink_signature.PublicKeyVerify):
   """Implements the PublicKeyVerify primitive using a signature service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.SignatureStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.SignatureStub,
                public_handle: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -303,7 +298,7 @@ class PublicKeyVerify(tink_signature.PublicKeyVerify):
 class _Prf(prf.Prf):
   """Implements a Prf from a PrfSet service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.PrfSetStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.PrfSetStub,
                keyset: bytes, key_id: int) -> None:
     self.lang = lang
     self._stub = stub
@@ -325,7 +320,7 @@ class _Prf(prf.Prf):
 class PrfSet(prf.PrfSet):
   """Implements a PrfSet from a PrfSet service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.PrfSetStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.PrfSetStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
@@ -402,7 +397,7 @@ def raw_jwt_to_proto(raw_jwt: jwt.RawJwt) -> testing_api_pb2.JwtToken:
       raw_token.custom_claims[name].null_value = testing_api_pb2.NULL_VALUE
     if isinstance(value, (int, float)):
       raw_token.custom_claims[name].number_value = value
-    if isinstance(value, Text):
+    if isinstance(value, str):
       raw_token.custom_claims[name].string_value = value
     if isinstance(value, bool):
       raw_token.custom_claims[name].bool_value = value
@@ -501,13 +496,13 @@ def jwt_validator_to_proto(
 class JwtMac():
   """Implements a JwtMac from a Jwt service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.JwtStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
 
-  def compute_mac_and_encode(self, raw_jwt: jwt.RawJwt) -> Text:
+  def compute_mac_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
     response = self._stub.ComputeMacAndEncode(request)
@@ -515,7 +510,7 @@ class JwtMac():
       raise tink.TinkError(response.err)
     return response.signed_compact_jwt
 
-  def verify_mac_and_decode(self, signed_compact_jwt: Text,
+  def verify_mac_and_decode(self, signed_compact_jwt: str,
                             validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
     request = testing_api_pb2.JwtVerifyRequest(
         keyset=self._keyset,
@@ -530,13 +525,13 @@ class JwtMac():
 class JwtPublicKeySign():
   """Implements a JwtPublicKeySign from a Jwt service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.JwtStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
 
-  def sign_and_encode(self, raw_jwt: jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: jwt.RawJwt) -> str:
     request = testing_api_pb2.JwtSignRequest(
         keyset=self._keyset, raw_jwt=raw_jwt_to_proto(raw_jwt))
     response = self._stub.PublicKeySignAndEncode(request)
@@ -548,13 +543,13 @@ class JwtPublicKeySign():
 class JwtPublicKeyVerify():
   """Implements a JwtPublicKeyVerify from a Jwt service stub."""
 
-  def __init__(self, lang: Text, stub: testing_api_pb2_grpc.JwtStub,
+  def __init__(self, lang: str, stub: testing_api_pb2_grpc.JwtStub,
                keyset: bytes) -> None:
     self.lang = lang
     self._stub = stub
     self._keyset = keyset
 
-  def verify_and_decode(self, signed_compact_jwt: Text,
+  def verify_and_decode(self, signed_compact_jwt: str,
                         validator: jwt.JwtValidator) -> jwt.VerifiedJwt:
     request = testing_api_pb2.JwtVerifyRequest(
         keyset=self._keyset,

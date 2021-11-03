@@ -13,9 +13,8 @@
 # limitations under the License.
 """Cross-language tests for the StreamingAead primitive."""
 
-# Placeholder for import for type annotations
 import io
-from typing import Iterable, Text
+from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -49,7 +48,7 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def all_streaming_aead_key_template_names() -> Iterable[Text]:
+def all_streaming_aead_key_template_names() -> Iterable[str]:
   """Yields all Streaming AEAD key template names."""
   for key_type in supported_key_types.STREAMING_AEAD_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:

@@ -42,10 +42,10 @@ can be used in tests to assert that two protos must be equal. If they are
 not equal, the function tries to output a meaningfull error message.
 """
 
-# Placeholder for import for type annotations
+from typing import Any, Optional
 
-from typing import Optional, Text, Any
-
+from google.protobuf import descriptor
+from google.protobuf import message
 from google.protobuf import text_encoding
 from tink.proto import aes_cmac_pb2
 from tink.proto import aes_cmac_prf_pb2
@@ -72,7 +72,7 @@ from tink.proto import kms_envelope_pb2
 from tink.proto import rsa_ssa_pkcs1_pb2
 from tink.proto import rsa_ssa_pss_pb2
 from tink.proto import xchacha20_poly1305_pb2
-from google.protobuf import message
+
 
 TYPE_STRING = 9
 TYPE_MESSAGE = 11
@@ -83,18 +83,18 @@ LABEL_REPEATED = 3
 TYPE_PREFIX = 'type.googleapis.com/'
 
 
-class KeyProto(object):
+class KeyProto:
   """A map from type URLs to key protos and key format protos."""
 
   _from_url = {}
   _format_from_url = {}
 
   @classmethod
-  def from_url(cls, type_url: Text) -> Any:
+  def from_url(cls, type_url: str) -> Any:
     return cls._from_url[type_url]
 
   @classmethod
-  def format_from_url(cls, type_url: Text) -> Any:
+  def format_from_url(cls, type_url: str) -> Any:
     return cls._format_from_url[type_url]
 
   @classmethod
@@ -161,7 +161,9 @@ KeyProto.add_key_type(kms_envelope_pb2.KmsEnvelopeAeadKey,
                       kms_envelope_pb2.KmsEnvelopeAeadKeyFormat)
 
 
-def _text_format_field(value, field, indent, remove_value) -> Text:
+def _text_format_field(value: Any,
+                       field: descriptor.FieldDescriptor,
+                       indent: str, remove_value: bool) -> str:
   """Returns a text formated proto field."""
   if field.type == TYPE_MESSAGE:
     output = [
@@ -179,7 +181,8 @@ def _text_format_field(value, field, indent, remove_value) -> Text:
     return indent + field.name + ': ' + str(value)
 
 
-def _text_format_message(msg, indent, remove_value) -> Text:
+def _text_format_message(msg: message.Message, indent: str,
+                         remove_value: bool) -> str:
   """Returns a text formated proto message.
 
   Args:
@@ -234,14 +237,14 @@ def _text_format_message(msg, indent, remove_value) -> Text:
   return '\n'.join(output)
 
 
-def text_format(msg) -> Text:
+def text_format(msg: message.Message) -> str:
   return _text_format_message(msg, '', False)
 
 
 def assert_tink_proto_equal(self,
                             a: message.Message,
                             b: message.Message,
-                            msg: Optional[Text] = None) -> None:
+                            msg: Optional[str] = None) -> None:
   """Fails with a useful error if a and b aren't equal."""
   self.assertMultiLineEqual(
       _text_format_message(a, '', True),

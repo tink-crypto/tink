@@ -13,9 +13,8 @@
 # limitations under the License.
 """Tests that keys are consistently accepted or rejected in all languages."""
 
-# Placeholder for import for type annotations
 import itertools
-from typing import Iterable, Text, Tuple
+from typing import Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -96,7 +95,7 @@ SIGNATURE_ENCODINGS = [
 ]
 
 
-TestCasesType = Iterable[Tuple[Text, tink_pb2.KeyTemplate]]
+TestCasesType = Iterable[Tuple[str, tink_pb2.KeyTemplate]]
 
 
 def aes_eax_test_cases() -> TestCasesType:
