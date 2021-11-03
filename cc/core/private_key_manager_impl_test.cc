@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"
 #include "tink/registry.h"

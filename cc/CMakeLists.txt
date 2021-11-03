@@ -530,6 +530,7 @@ tink_cc_library(
   SRCS
     core/key_type_manager.h
   DEPS
+    absl::status
     absl::strings
     tink::core::input_stream
     tink::internal::fips_utils
@@ -550,6 +551,7 @@ tink_cc_library(
     tink::util::status
     absl::base
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -784,6 +786,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::util::validation
+    absl::status
 )
 
 tink_cc_test(
@@ -800,4 +803,5 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::util::validation
+    absl::status
 )

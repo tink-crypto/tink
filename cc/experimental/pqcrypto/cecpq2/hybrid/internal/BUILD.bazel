@@ -52,6 +52,7 @@ cc_test(
     deps = [
         ":cecpq2_aead_hkdf_hybrid_encrypt",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:hybrid_encrypt",
         "@tink_cc//aead:aes_gcm_key_manager",
@@ -75,6 +76,7 @@ cc_test(
         ":cecpq2_aead_hkdf_hybrid_decrypt",
         ":cecpq2_aead_hkdf_hybrid_encrypt",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:hybrid_encrypt",
         "@tink_cc//aead:aes_ctr_hmac_aead_key_manager",

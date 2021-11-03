@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -249,7 +250,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
       std::move(keyset_reader_or).ValueOrDie();
 
   EXPECT_THAT(keyset_reader->ReadEncrypted().status(),
-              StatusIs(Code::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 // Verify parsing works correctly on valid inputs.

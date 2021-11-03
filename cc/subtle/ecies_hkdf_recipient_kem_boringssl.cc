@@ -17,6 +17,7 @@
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"

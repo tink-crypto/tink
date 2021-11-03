@@ -69,6 +69,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 

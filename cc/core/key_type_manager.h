@@ -19,6 +19,7 @@
 
 #include <tuple>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/template_util.h"
 #include "tink/input_stream.h"

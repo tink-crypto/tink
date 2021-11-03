@@ -23,6 +23,7 @@ tink_cc_library(
     tink::proto::jwt_hmac_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -183,6 +184,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::jwt_hmac_cc_proto
+    absl::status
     gmock
 )
 

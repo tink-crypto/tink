@@ -675,6 +675,7 @@ tink_cc_test(
     tink::signature::signature_config
     tink::signature::signature_pem_keyset_reader
     gmock
+    absl::status
     absl::strings
     tink::core::cc
     tink::internal::rsa_util
