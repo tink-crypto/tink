@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -72,7 +73,7 @@ StatusOr<HmacKey> HmacKeyManager::DeriveKey(
   if (!randomness.ok()) {
     if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Could not get enough pseudorandomness from input stream");
     }
     return randomness.status();
@@ -87,7 +88,7 @@ StatusOr<HmacKey> HmacKeyManager::DeriveKey(
 
 Status HmacKeyManager::ValidateParams(const HmacParams& params) const {
   if (params.tag_size() < kMinTagSizeInBytes) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid HmacParams: tag_size %d is too small.",
                      params.tag_size());
   }
@@ -97,12 +98,13 @@ Status HmacKeyManager::ValidateParams(const HmacParams& params) const {
                                                {HashType::SHA384, 48},
                                                {HashType::SHA512, 64}};
   if (max_tag_size.find(params.hash()) == max_tag_size.end()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid HmacParams: HashType '%s' not supported.",
                      Enums::HashName(params.hash()));
   } else {
     if (params.tag_size() > max_tag_size[params.hash()]) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(
+          absl::StatusCode::kInvalidArgument,
           "Invalid HmacParams: tag_size %d is too big for HashType '%s'.",
           params.tag_size(), Enums::HashName(params.hash()));
     }
@@ -114,7 +116,7 @@ Status HmacKeyManager::ValidateKey(const HmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKey: key_value is too short.");
   }
   return ValidateParams(key.params());
@@ -124,7 +126,7 @@ Status HmacKeyManager::ValidateKey(const HmacKey& key) const {
 Status HmacKeyManager::ValidateKeyFormat(
     const HmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
   return ValidateParams(key_format.params());

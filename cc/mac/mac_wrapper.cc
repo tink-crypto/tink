@@ -56,7 +56,7 @@ util::Status Validate(PrimitiveSet<Mac>* mac_set) {
                         "mac_set must be non-NULL");
   }
   if (mac_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "mac_set has no primary");
   }
   return util::OkStatus();
@@ -125,7 +125,8 @@ util::Status MacSetWrapper::VerifyMac(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      "verification failed");
 }
 
 }  // namespace

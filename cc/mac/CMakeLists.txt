@@ -86,6 +86,7 @@ tink_cc_library(
     tink::proto::aes_cmac_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -112,6 +113,7 @@ tink_cc_library(
     tink::proto::hmac_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -216,4 +218,5 @@ tink_cc_test(
     tink::util::test_matchers
     tink::proto::hmac_cc_proto
     gmock
+    absl::status
 )
