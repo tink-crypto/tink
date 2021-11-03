@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.util.bytes_io."""
+"""Tests for tink.python.tink.testing.bytes_io."""
 
 import io
 
 from absl.testing import absltest
+
 from tink.testing import bytes_io
 
 

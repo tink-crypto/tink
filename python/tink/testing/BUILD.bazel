@@ -39,9 +39,6 @@ py_library(
     name = "bytes_io",
     srcs = ["bytes_io.py"],
     srcs_version = "PY3",
-    deps = [
-        "//tink/cc/pybind:tink_bindings",
-    ],
 )
 
 py_test(
@@ -51,7 +48,7 @@ py_test(
     deps = [
         ":bytes_io",
         requirement("absl-py"),
-        requirement("six"),
+        requirement("six"),  # needed by absl-py
     ],
 )
 
