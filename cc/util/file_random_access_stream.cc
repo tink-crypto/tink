@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/random_access_stream.h"
 #include "tink/util/buffer.h"
 #include "tink/util/errors.h"
@@ -55,18 +56,18 @@ FileRandomAccessStream::FileRandomAccessStream(int file_descriptor) {
 Status FileRandomAccessStream::PRead(int64_t position, int count,
                                      Buffer* dest_buffer) {
   if (dest_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "dest_buffer must be non-null");
   }
   if (count <= 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "count must be positive");
   }
   if (count > dest_buffer->allocated_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
+    return util::Status(absl::StatusCode::kInvalidArgument, "buffer too small");
   }
   if (position < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "position cannot be negative");
   }
   crypto::tink::util::Status status = dest_buffer->set_size(count);

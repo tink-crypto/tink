@@ -252,9 +252,8 @@ class DummyAead : public Aead {
         absl::StrCat(aead_name_.size(), ":", associated_data.size(), ":",
                      aead_name_, associated_data);
     if (!absl::StartsWith(ciphertext, prefix)) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
-          "Dummy operation failed.");
+      return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                        "Dummy operation failed.");
     }
     ciphertext.remove_prefix(prefix.size());
     return std::string(ciphertext);
@@ -450,7 +449,7 @@ class DummyStreamingAead : public StreamingAead {
         if (!next_result.ok()) {
           status_ = next_result.status();
           if (status_.code() == absl::StatusCode::kOutOfRange) {
-            status_ = util::Status(util::error::INVALID_ARGUMENT,
+            status_ = util::Status(absl::StatusCode::kInvalidArgument,
                                    "Could not read header");
           }
           return status_;
@@ -460,8 +459,8 @@ class DummyStreamingAead : public StreamingAead {
               util::Status(absl::StatusCode::kInternal, "Buffer too small");
         } else if (memcmp((*data), exp_header_.data(),
                           static_cast<int>(exp_header_.size()))) {
-          status_ =
-              util::Status(util::error::INVALID_ARGUMENT, "Corrupted header");
+          status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                                 "Corrupted header");
         }
         if (status_.ok()) {
           ct_source_->BackUp(next_result.ValueOrDie() - exp_header_.size());
@@ -541,12 +540,12 @@ class DummyStreamingAead : public StreamingAead {
       if (!status_.ok() && status_.code() != absl::StatusCode::kOutOfRange)
         return;
       if (buf->size() < exp_header_.size()) {
-        status_ = util::Status(util::error::INVALID_ARGUMENT,
+        status_ = util::Status(absl::StatusCode::kInvalidArgument,
                                "Could not read header");
       } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
                         static_cast<int>(exp_header_.size()))) {
-        status_ =
-            util::Status(util::error::INVALID_ARGUMENT, "Corrupted header");
+        status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                               "Corrupted header");
       }
     }
 
@@ -727,7 +726,7 @@ class DummyKmsClient : public KmsClient {
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> GetAead(
       absl::string_view key_uri) const override {
     if (!DoesSupport(key_uri))
-      return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+      return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                         "key_uri not supported");
     return {absl::make_unique<DummyAead>(key_uri)};
   }

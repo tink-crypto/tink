@@ -7,6 +7,7 @@ tink_cc_library(
     buffer.h
   DEPS
     absl::memory
+    absl::status
     tink::util::status
     tink::util::statusor
 )
@@ -18,6 +19,7 @@ tink_cc_library(
     constants.h
   DEPS
     absl::base
+    absl::status
 )
 
 tink_cc_library(
@@ -40,6 +42,7 @@ tink_cc_library(
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -74,6 +77,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_library(
@@ -116,6 +120,7 @@ tink_cc_library(
     tink::util::statusor
     tink::core::random_access_stream
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -256,6 +261,7 @@ tink_cc_test(
     buffer_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::subtle::random
     tink::util::buffer
@@ -364,6 +370,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::validation
     gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -436,6 +443,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
     tink::aead::aead_key_templates
     tink::core::aead

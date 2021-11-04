@@ -12,6 +12,7 @@ cc_library(
         ":status",
         ":statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -80,6 +81,7 @@ cc_library(
         "//proto:ecdsa_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:common_enums",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -148,6 +150,7 @@ cc_library(
         ":errors",
         ":status",
         "//proto:tink_cc_proto",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -196,6 +199,7 @@ cc_library(
         ":statusor",
         "//:random_access_stream",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -368,6 +372,7 @@ cc_library(
         "//:kms_client",
         "//:kms_clients",
         "//aead:aead_key_templates",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -409,6 +414,7 @@ cc_test(
         ":test_matchers",
         "//subtle:random",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -423,6 +429,7 @@ cc_test(
     deps = [
         ":errors",
         ":status",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -575,6 +582,7 @@ cc_test(
         ":status",
         ":test_matchers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

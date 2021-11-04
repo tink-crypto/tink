@@ -17,6 +17,7 @@
 #include "tink/util/buffer.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -46,7 +47,7 @@ class OwningBuffer : public Buffer {
 
   util::Status set_size(int new_size) override {
     if (new_size < 0  || new_size > allocated_size_) {
-      return Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "new_size must satisfy 0 <= new_size <= allocated_size()");
     }
     size_ = new_size;
@@ -83,7 +84,7 @@ class NonOwningBuffer : public Buffer {
 
   util::Status set_size(int new_size) override {
     if (new_size < 0  || new_size > allocated_size_) {
-      return Status(crypto::tink::util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "new_size must satisfy 0 <= new_size <= allocated_size()");
     }
     size_ = new_size;
@@ -103,7 +104,7 @@ class NonOwningBuffer : public Buffer {
 // static
 StatusOr<std::unique_ptr<Buffer>> Buffer::New(int allocated_size) {
   if (allocated_size <= 0) {
-    return Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "allocated_size must be positive");
   }
   return {absl::make_unique<OwningBuffer>(allocated_size)};
@@ -113,11 +114,11 @@ StatusOr<std::unique_ptr<Buffer>> Buffer::New(int allocated_size) {
 StatusOr<std::unique_ptr<Buffer>> Buffer::NewNonOwning(
     char* mem_block, int allocated_size) {
   if (allocated_size <= 0) {
-    return Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "allocated_size must be positive");
   }
   if (mem_block == nullptr) {
-    return Status(crypto::tink::util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "mem_block must be non-null");
   }
   return {absl::make_unique<NonOwningBuffer>(mem_block, allocated_size)};

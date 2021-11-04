@@ -145,7 +145,8 @@ std::string ReadTestFile(std::string filename) {
 
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Input has odd size.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Input has odd size.");
   }
   std::string decoded(hex.size() / 2, static_cast<char>(0));
   for (size_t i = 0; i < hex.size(); ++i) {
@@ -158,7 +159,8 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
     else if ('A' <= c && c <= 'F')
       val = c - 'A' + 10;
     else
-      return util::Status(util::error::INVALID_ARGUMENT, "Not hexadecimal");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Not hexadecimal");
     decoded[i / 2] = (decoded[i / 2] << 4) | val;
   }
   return decoded;
@@ -443,7 +445,7 @@ std::string Rotate(absl::string_view bytes) {
 util::Status ZTestCrosscorrelationUniformStrings(absl::string_view bytes1,
                                                  absl::string_view bytes2) {
   if (bytes1.size() != bytes2.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Strings are not of equal length");
   }
   std::string crossed(bytes1.size(), '\0');
