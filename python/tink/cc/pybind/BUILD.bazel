@@ -88,7 +88,7 @@ py_test(
     deps = [
         ":tink_bindings",
         requirement("absl-py"),
-        requirement("six"),
+        requirement("six"),  # required by absl-py
     ],
 )
 
@@ -191,7 +191,7 @@ py_test(
     deps = [
         ":tink_bindings",
         requirement("absl-py"),
-        requirement("six"),
+        requirement("six"),  # required by absl-py
     ],
 )
 
