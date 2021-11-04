@@ -54,12 +54,12 @@ util::Status Validate(PrimitiveSet<Prf>* prf_set) {
                         "prf_set must be non-NULL");
   }
   if (prf_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "prf_set has no primary");
   }
   for (auto prf : prf_set->get_all()) {
     if (prf->get_output_prefix_type() != OutputPrefixType::RAW) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "PrfSet should only be used with prefix type RAW");
     }
   }

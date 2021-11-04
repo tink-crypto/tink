@@ -23,6 +23,7 @@ tink_cc_library(
     tink::proto::hkdf_prf_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -105,6 +106,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -132,6 +134,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -151,6 +154,7 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::common_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -227,6 +231,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     gmock
+    absl::status
 )
 
 tink_cc_test(

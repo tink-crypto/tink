@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 #include "tink/subtle/prf/prf_set_util.h"
@@ -52,7 +53,7 @@ TEST(HkdfPrfKeyManagerTest, Basics) {
 
 TEST(HkdfPrfKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(HkdfPrfKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateValid32ByteKey) {
@@ -93,7 +94,7 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeySizes31Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789012345678901234567890");
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, InvalidKeySha1) {
@@ -102,7 +103,7 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeySha1) {
   key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA1);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, InvalidKeyVersion) {
@@ -111,12 +112,12 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeyVersion) {
   key.set_key_value("01234567890123456789012345678901");
   key.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateEmptyKeyFormat) {
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(HkdfPrfKeyFormat()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateValid32ByteKeyFormat) {
@@ -153,7 +154,7 @@ TEST(HkdfPrfKeyManagerTest, InvalidKeyFormatSha1) {
   key_format.set_key_size(32);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA1);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, ValidateInvalid31ByteKeyFormat) {
@@ -161,7 +162,7 @@ TEST(HkdfPrfKeyManagerTest, ValidateInvalid31ByteKeyFormat) {
   key_format.set_key_size(31);
   key_format.mutable_params()->set_hash(::google::crypto::tink::SHA256);
   EXPECT_THAT(HkdfPrfKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HkdfPrfKeyManagerTest, CreateKey) {
@@ -279,8 +280,9 @@ TEST(HmacPrfKeyManagerTest, DeriveKeyWrongVersion) {
   util::IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
 
-  ASSERT_THAT(HkdfPrfKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      HkdfPrfKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 TEST(HkdfPrfKeyManagerTest, CreatePrfSet) {
