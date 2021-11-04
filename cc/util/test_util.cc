@@ -179,11 +179,8 @@ std::string HexEncode(absl::string_view bytes) {
   return res;
 }
 
-#if defined(PLATFORM_GOOGLE)
-string TmpDir() { return FLAGS_test_tmpdir; }
-#else
 std::string TmpDir() {
-  // 'bazel test' sets TEST_TMPDIR
+  // The Bazel 'test' command sets TEST_TMPDIR.
   const char* env = getenv("TEST_TMPDIR");
   if (env && env[0] != '\0') {
     return env;
@@ -194,7 +191,6 @@ std::string TmpDir() {
   }
   return "/tmp";
 }
-#endif
 
 void AddKeyData(
     const google::crypto::tink::KeyData& key_data,
