@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_encrypt_boringssl.h"
 #include "proto/hpke.pb.h"
@@ -30,11 +31,11 @@ using ::google::crypto::tink::HpkePublicKey;
 util::StatusOr<std::unique_ptr<HybridEncrypt>> HpkeEncrypt::New(
     const HpkePublicKey& recipient_public_key) {
   if (recipient_public_key.public_key().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient public key is empty.");
   }
   if (!recipient_public_key.has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient public key is missing HPKE parameters.");
   }
   return {absl::WrapUnique(new HpkeEncrypt(recipient_public_key))};

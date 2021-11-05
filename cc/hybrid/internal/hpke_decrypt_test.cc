@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_encrypt.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
@@ -120,7 +121,8 @@ TEST_P(HpkeDecryptWithBadParamTest, BadParamsFails) {
   util::StatusOr<std::string> decryption =
       (*hpke_decrypt)->Decrypt(params.ciphertext, params.application_info);
 
-  ASSERT_THAT(decryption.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(decryption.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeDecryptWithBadKemTest, BadKemFails) {
@@ -133,7 +135,8 @@ TEST(HpkeDecryptWithBadKemTest, BadKemFails) {
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_decrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_decrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeDecryptWithBadCiphertextTest, BadCiphertextFails) {
@@ -194,7 +197,8 @@ TEST(HpkeDecryptWithMissingPublicKeyTest, MissingPublicKeyFails) {
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_decrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_decrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeDecryptWithMissingHpkeParamsTest, MissingHpkeParamsFails) {
@@ -209,7 +213,8 @@ TEST(HpkeDecryptWithMissingHpkeParamsTest, MissingHpkeParamsFails) {
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_decrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_decrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeDecryptWithZeroLengthPrivateKeyTest, ZeroLengthPrivateKeyFails) {
@@ -223,7 +228,8 @@ TEST(HpkeDecryptWithZeroLengthPrivateKeyTest, ZeroLengthPrivateKeyFails) {
   util::StatusOr<std::unique_ptr<HybridDecrypt>> hpke_decrypt =
       HpkeDecrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_decrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_decrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

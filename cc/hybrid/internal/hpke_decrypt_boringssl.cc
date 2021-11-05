@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/err.h"
@@ -58,7 +59,7 @@ util::Status HpkeDecryptBoringSsl::Init(const HpkeParams& params,
   }
   if (params.kem() != hpke_key.kem()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Specified KEM parameter '", params.kem(),
                      "' does not match given HPKE key's KEM parameter '",
                      hpke_key.kem(), "'."));

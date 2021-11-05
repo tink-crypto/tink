@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "proto/hpke.pb.h"
 
@@ -82,12 +83,12 @@ HpkeTestParams DefaultHpkeTestParams() {
 util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
   if (params.kem() != HpkeKem::DHKEM_X25519_HKDF_SHA256) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("No test parameters for specified KEM:", params.kem()));
   }
   if (params.kdf() != HpkeKdf::HKDF_SHA256) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("No test parameters for specified KDF:", params.kdf()));
   }
   switch (params.aead()) {
@@ -98,7 +99,7 @@ util::StatusOr<HpkeTestParams> CreateHpkeTestParams(const HpkeParams& params) {
     case HpkeAead::CHACHA20_POLY1305:
       return HpkeTestParams(kTestX25519HkdfSha256ChaCha20Poly1305);
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("No test parameters for specified AEAD:",
                                        params.aead()));
   }

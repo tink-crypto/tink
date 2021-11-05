@@ -6,6 +6,7 @@ tink_cc_library(
     hpke_decrypt.cc
     hpke_decrypt.h
   DEPS
+    absl::status
     absl::strings
     tink::core::hybrid_decrypt
     tink::hybrid::internal::hpke_decrypt_boringssl
@@ -23,6 +24,7 @@ tink_cc_library(
     hpke_decrypt_boringssl.cc
     hpke_decrypt_boringssl.h
   DEPS
+    absl::status
     absl::strings
     crypto
     tink::hybrid::internal::hpke_key_boringssl
@@ -39,6 +41,7 @@ tink_cc_library(
     hpke_encrypt.cc
     hpke_encrypt.h
   DEPS
+    absl::status
     absl::strings
     tink::core::hybrid_encrypt
     tink::hybrid::internal::hpke_encrypt_boringssl
@@ -82,6 +85,7 @@ tink_cc_library(
     hpke_key_manager_util.cc
     hpke_key_manager_util.h
   DEPS
+    absl::status
     tink::proto::hpke_cc_proto
     tink::util::status
     tink::util::validation
@@ -93,6 +97,7 @@ tink_cc_library(
     hpke_private_key_manager.cc
     hpke_private_key_manager.h
   DEPS
+    absl::status
     tink::core::key_manager
     tink::core::key_type_manager
     tink::core::hybrid_decrypt
@@ -138,6 +143,7 @@ tink_cc_library(
     hpke_test_util.cc
     hpke_test_util.h
   DEPS
+    absl::status
     absl::strings
     tink::proto::hpke_cc_proto
     tink::util::status
@@ -150,6 +156,7 @@ tink_cc_library(
     hpke_util_boringssl.cc
     hpke_util_boringssl.h
   DEPS
+    absl::status
     crypto
     tink::proto::hpke_cc_proto
     tink::util::status
@@ -162,6 +169,7 @@ tink_cc_test(
   NAME hpke_decrypt_boringssl_test
   SRCS hpke_decrypt_boringssl_test.cc
   DEPS
+    absl::status
     absl::strings
     crypto
     tink::hybrid::internal::hpke_decrypt_boringssl
@@ -176,6 +184,7 @@ tink_cc_test(
   NAME hpke_decrypt_test
   SRCS hpke_decrypt_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::hybrid::internal::hpke_decrypt
     tink::hybrid::internal::hpke_encrypt
@@ -190,6 +199,7 @@ tink_cc_test(
   NAME hpke_encrypt_boringssl_test
   SRCS hpke_encrypt_boringssl_test.cc
   DEPS
+    absl::status
     absl::strings
     crypto
     tink::hybrid::internal::hpke_encrypt_boringssl
@@ -204,6 +214,7 @@ tink_cc_test(
   NAME hpke_encrypt_test
   SRCS hpke_encrypt_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::hybrid::internal::hpke_encrypt
     tink::hybrid::internal::hpke_test_util
@@ -217,6 +228,7 @@ tink_cc_test(
   NAME hpke_key_boringssl_test
   SRCS hpke_key_boringssl_test.cc
   DEPS
+    absl::status
     absl::strings
     crypto
     tink::hybrid::internal::hpke_key_boringssl
@@ -231,6 +243,7 @@ tink_cc_test(
   NAME hpke_key_manager_util_test
   SRCS hpke_key_manager_util_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::hybrid::internal::hpke_key_manager_util
     tink::hybrid::internal::hpke_test_util
@@ -244,6 +257,7 @@ tink_cc_test(
   NAME hpke_private_key_manager_test
   SRCS hpke_private_key_manager_test.cc
   DEPS
+    absl::status
     tink::hybrid::internal::hpke_encrypt
     tink::hybrid::internal::hpke_private_key_manager
     tink::core::hybrid_encrypt
@@ -260,6 +274,7 @@ tink_cc_test(
   NAME hpke_public_key_manager_test
   SRCS hpke_public_key_manager_test.cc
   DEPS
+    absl::status
     tink::hybrid::internal::hpke_public_key_manager
     tink::hybrid::internal::hpke_test_util
     tink::proto::hpke_cc_proto
@@ -279,3 +294,4 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
 )
+#include "third_party/absl/status/status.h"

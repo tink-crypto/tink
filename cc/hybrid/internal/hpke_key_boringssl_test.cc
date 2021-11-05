@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
@@ -54,7 +55,7 @@ TEST(HpkeKeyBoringSslTest, BadKemFails) {
   util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> result =
       HpkeKeyBoringSsl::New(HpkeKem::KEM_UNKNOWN,
                             params.recipient_private_key);
-  ASSERT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(result.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeKeyBoringSslTest, ZeroLengthPrivateKeyFails) {

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -44,7 +45,7 @@ void GenerateX25519Key(HpkePublicKey& public_key, HpkePrivateKey& private_key) {
 util::Status HpkePrivateKeyManager::ValidateKeyFormat(
     const HpkeKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return ValidateParams(key_format.params());
 }
@@ -64,7 +65,7 @@ util::StatusOr<HpkePrivateKey> HpkePrivateKeyManager::CreateKey(
       break;
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unsupported KEM type: ", key_format.params().kem()));
   }
   return private_key;
@@ -80,7 +81,7 @@ util::Status HpkePrivateKeyManager::ValidateKey(
   util::Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Missing HPKE public key.");
   }
   return ValidateKeyAndVersion(key.public_key(), get_version());

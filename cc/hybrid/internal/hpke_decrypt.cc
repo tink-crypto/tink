@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_decrypt_boringssl.h"
 #include "tink/hybrid/internal/hpke_key_boringssl.h"
@@ -44,7 +45,7 @@ util::StatusOr<uint32_t> EncodingSize(HpkeKem kem) {
           subtle::EcPointFormat::UNCOMPRESSED);
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unable to determine KEM-encoding length for ", kem));
   }
 }
@@ -54,15 +55,15 @@ util::StatusOr<uint32_t> EncodingSize(HpkeKem kem) {
 util::StatusOr<std::unique_ptr<HybridDecrypt>> HpkeDecrypt::New(
     const HpkePrivateKey& recipient_private_key) {
   if (recipient_private_key.private_key().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is empty.");
   }
   if (!recipient_private_key.has_public_key()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is missing public key.");
   }
   if (!recipient_private_key.public_key().has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is missing HPKE parameters.");
   }
   HpkeParams hpke_params = recipient_private_key.public_key().params();

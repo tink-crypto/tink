@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/validation.h"
 #include "proto/hpke.pb.h"
@@ -32,13 +33,16 @@ using ::google::crypto::tink::HpkePublicKey;
 
 util::Status ValidateParams(const HpkeParams& params) {
   if (params.kem() == HpkeKem::KEM_UNKNOWN) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid KEM param.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid KEM param.");
   }
   if (params.kdf() == HpkeKdf::KDF_UNKNOWN) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid KDF param.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid KDF param.");
   }
   if (params.aead() == HpkeAead::AEAD_UNKNOWN) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid AEAD param.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid AEAD param.");
   }
   return util::OkStatus();
 }
@@ -48,7 +52,7 @@ util::Status ValidateKeyAndVersion(const HpkePublicKey& key,
   util::Status status = ValidateVersion(key.version(), max_key_version);
   if (!status.ok()) return status;
   if (!key.has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Missing HPKE key params.");
   }
   return ValidateParams(key.params());

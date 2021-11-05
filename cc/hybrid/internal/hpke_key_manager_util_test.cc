@@ -17,6 +17,7 @@
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
@@ -46,17 +47,17 @@ TEST(HpkeKeyManagerUtilTest, ValidateInvalidParamsFails) {
   ASSERT_THAT(
       ValidateParams(CreateHpkeParams(
           HpkeKem::KEM_UNKNOWN, HpkeKdf::HKDF_SHA256, HpkeAead::AES_256_GCM)),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 
   ASSERT_THAT(ValidateParams(CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                                               HpkeKdf::KDF_UNKNOWN,
                                               HpkeAead::AES_256_GCM)),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   ASSERT_THAT(ValidateParams(CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                                               HpkeKdf::HKDF_SHA256,
                                               HpkeAead::AEAD_UNKNOWN)),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeKeyManagerUtilTest, ValidateValidKeyAndVersionSucceeds) {
@@ -76,7 +77,7 @@ TEST(HpkeKeyManagerUtilTest, ValidateTooHighKeyVersionFails) {
   key.set_version(1);
 
   ASSERT_THAT(ValidateKeyAndVersion(key, /*max_key_version=*/0),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeKeyManagerUtilTest, ValidateMissingKeyParamsFails) {
@@ -87,7 +88,7 @@ TEST(HpkeKeyManagerUtilTest, ValidateMissingKeyParamsFails) {
   key.clear_params();
 
   ASSERT_THAT(ValidateKeyAndVersion(key, /*max_key_version=*/1),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace
