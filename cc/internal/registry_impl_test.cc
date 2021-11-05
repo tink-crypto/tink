@@ -1084,7 +1084,7 @@ TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
   EXPECT_THAT(Registry::get_key_manager<Mac>(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey")
                   .status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not among supported primitives")));
 }
 
@@ -1229,7 +1229,7 @@ TEST_F(RegistryTest, KeyManagerDeriveKeyFail) {
 
   EXPECT_THAT(
       RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("cannot derive")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("cannot derive")));
 }
 
 TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
@@ -1661,7 +1661,7 @@ TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
       Registry::get_key_manager<PublicPrimitiveA>(
           TestPrivateKeyTypeManager().get_key_type());
   EXPECT_THAT(km.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not among supported primitives")));
 }
 
@@ -1720,8 +1720,9 @@ TEST_F(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
 
   KeyTemplate key_template;
   key_template.set_type_url(TestPrivateKeyTypeManager().get_key_type());
-  EXPECT_THAT(Registry::NewKeyData(key_template).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("not allow")));
+  EXPECT_THAT(
+      Registry::NewKeyData(key_template).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("not allow")));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicKeyData) {
@@ -1807,7 +1808,7 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
           absl::make_unique<TestPrivateKeyTypeManager>(),
           absl::make_unique<TestPublicKeyTypeManagerWithDifferentKeyType>(),
           true),
-      StatusIs(util::error::INVALID_ARGUMENT,
+      StatusIs(absl::StatusCode::kInvalidArgument,
                HasSubstr("impossible to register")));
 }
 

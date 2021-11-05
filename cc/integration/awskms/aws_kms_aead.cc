@@ -16,6 +16,7 @@
 
 #include "tink/integration/awskms/aws_kms_aead.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -73,11 +74,11 @@ StatusOr<std::unique_ptr<Aead>>
 AwsKmsAead::New(absl::string_view key_arn,
                 std::shared_ptr<Aws::KMS::KMSClient> aws_client) {
   if (key_arn.empty()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Key ARN cannot be empty.");
   }
   if (aws_client == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "AWS KMS client cannot be null.");
   }
   std::unique_ptr<Aead> aead(new AwsKmsAead(key_arn, aws_client));
@@ -105,7 +106,7 @@ StatusOr<std::string> AwsKmsAead::Encrypt(
     return ciphertext;
   }
   auto& err = outcome.GetError();
-  return ToStatusF(util::error::INVALID_ARGUMENT,
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
                    "AWS KMS encryption failed with error: %s",
                    AwsErrorToString(err));
 }
@@ -125,7 +126,7 @@ StatusOr<std::string> AwsKmsAead::Decrypt(
   auto outcome = aws_client_->Decrypt(req);
   if (outcome.IsSuccess()) {
     if (outcome.GetResult().GetKeyId() != Aws::String(key_arn_.c_str())) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "AWS KMS decryption failed: wrong key ARN.");
     }
     auto& buffer = outcome.GetResult().GetPlaintext();
@@ -135,7 +136,7 @@ StatusOr<std::string> AwsKmsAead::Decrypt(
     return plaintext;
   }
   auto& err = outcome.GetError();
-  return ToStatusF(util::error::INVALID_ARGUMENT,
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
                    "AWS KMS decryption failed with error: %s",
                    AwsErrorToString(err));
 }

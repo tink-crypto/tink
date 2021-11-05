@@ -63,8 +63,8 @@ class Wrapper : public PrimitiveWrapper<InputPrimitive, OutputPrimitive> {
 crypto::tink::util::StatusOr<std::unique_ptr<InputPrimitive>> CreateIn(
     const google::crypto::tink::KeyData& key_data) {
   if (absl::StartsWith(key_data.type_url(), "error:")) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT, key_data.type_url());
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                      key_data.type_url());
   } else {
     return absl::make_unique<InputPrimitive>(key_data.type_url());
   }

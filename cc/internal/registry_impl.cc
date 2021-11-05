@@ -45,7 +45,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   if (!key_type_info_or.ValueOrDie()->new_key_allowed()) {
     return crypto::tink::util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("KeyManager for type ", key_template.type_url(),
                      " does not allow for creation of new keys."));
   }
@@ -61,7 +61,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   auto factory = dynamic_cast<const PrivateKeyFactory*>(
       &key_type_info_or.ValueOrDie()->key_factory());
   if (factory == nullptr) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "KeyManager for type '%s' does not have "
                      "a PrivateKeyFactory.",
                      type_url);
@@ -99,7 +99,7 @@ RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   if (!key_type_info_or.ValueOrDie()->key_deriver()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Manager for type '", key_template.type_url(),
                      "' cannot derive keys."));
   }
