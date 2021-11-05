@@ -60,13 +60,13 @@ util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
                         "jwt_mac_set must be non-NULL");
   }
   if (jwt_mac_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "jwt_mac_set has no primary");
   }
   for (const auto* entry : jwt_mac_set->get_all()) {
     if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
         (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "all JWT keys must be either RAW or TINK");
     }
   }
@@ -102,7 +102,8 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
   if (interesting_status.has_value()) {
     return *interesting_status;
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      "verification failed");
 }
 
 }  // namespace

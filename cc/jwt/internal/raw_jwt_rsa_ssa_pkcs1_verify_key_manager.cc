@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
@@ -94,7 +95,7 @@ Status RawJwtRsaSsaPkcs1VerifyKeyManager::ValidateAlgorithm(
     case JwtRsaSsaPkcs1Algorithm::RS512:
       return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PKCS1 Algorithm");
   }
   return util::OkStatus();
@@ -110,7 +111,7 @@ StatusOr<HashType> RawJwtRsaSsaPkcs1VerifyKeyManager::HashForPkcs1Algorithm(
     case JwtRsaSsaPkcs1Algorithm::RS512:
       return HashType::SHA512;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PKCS1 Algorithm");
   }
 }

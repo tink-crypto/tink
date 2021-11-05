@@ -27,6 +27,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     protobuf::libprotobuf
+    absl::status
     absl::strings
     absl::time
 )
@@ -80,6 +81,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     protobuf::libprotobuf
+    absl::status
     absl::strings
     gmock
 )

@@ -18,6 +18,8 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
+
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
@@ -77,7 +79,7 @@ StatusOr<std::string> JwtEcdsaVerifyKeyManager::AlgorithmName(
     case JwtEcdsaAlgorithm::ES512:
       return std::string("ES512");
     default:
-      return Status(util::error::INVALID_ARGUMENT, "Unknown algorithm");
+      return Status(absl::StatusCode::kInvalidArgument, "Unknown algorithm");
   }
 }
 

@@ -55,7 +55,7 @@ Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
     case JwtHmacAlgorithm::HS512:
       return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported algorithm.");
   }
   return util::OkStatus();
@@ -84,7 +84,7 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JwtHmacKey: key_value is too short.");
   }
   return ValidateHmacAlgorithm(key.algorithm());
@@ -94,7 +94,7 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
 Status RawJwtHmacKeyManager::ValidateKeyFormat(
     const JwtHmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
   return ValidateHmacAlgorithm(key_format.algorithm());

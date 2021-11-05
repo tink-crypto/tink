@@ -36,6 +36,7 @@ tink_cc_library(
     protobuf::libprotobuf
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -61,6 +62,7 @@ tink_cc_library(
     tink::jwt::raw_jwt
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
     tink::core::crypto_format
     tink::proto::tink_cc_proto
@@ -113,6 +115,7 @@ tink_cc_library(
     tink::jwt::jwt_mac
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -136,6 +139,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::status
     absl::strings
 )
 
@@ -165,6 +169,7 @@ tink_cc_library(
     tink::proto::common_cc_proto
     tink::proto::jwt_hmac_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -263,6 +268,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::status
 )
 
 tink_cc_library(
@@ -285,6 +291,7 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -306,6 +313,7 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::jwt_ecdsa_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_library(
@@ -365,6 +373,7 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pkcs1_verify_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
@@ -404,6 +413,7 @@ tink_cc_test(
     crypto
     gmock
     absl::flat_hash_set
+    absl::status
 )
 
 tink_cc_library(
@@ -461,6 +471,7 @@ tink_cc_library(
     raw_jwt_rsa_ssa_pss_verify_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
@@ -489,6 +500,7 @@ tink_cc_test(
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_sign_key_manager
     tink::jwt::internal::raw_jwt_rsa_ssa_pss_verify_key_manager
     gmock
+    absl::status
     absl::strings
     crypto
     tink::core::public_key_verify
@@ -514,6 +526,7 @@ tink_cc_library(
     tink::jwt::raw_jwt
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -532,6 +545,7 @@ tink_cc_library(
     tink::jwt::verified_jwt
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -687,6 +701,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_test(
@@ -741,6 +756,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::jwt_rsa_ssa_pss_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_test(

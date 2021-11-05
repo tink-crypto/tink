@@ -53,13 +53,13 @@ util::Status Validate(PrimitiveSet<JwtPublicKeySignInternal>* jwt_sign_set) {
                         "jwt_sign_set must be non-NULL");
   }
   if (jwt_sign_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "jwt_sign_set has no primary");
   }
   for (const auto* entry : jwt_sign_set->get_all()) {
     if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
         (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "all JWT keys must be either RAW or TINK");
     }
   }

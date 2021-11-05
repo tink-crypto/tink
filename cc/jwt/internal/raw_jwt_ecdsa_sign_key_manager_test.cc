@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
@@ -127,9 +128,8 @@ TEST(RawJwtEcdsaSignKeyManagerTest, ValidateKeyUnknownAlgorithm) {
   JwtEcdsaPrivateKey key = CreateValidEs256Key();
   key.mutable_public_key()->set_algorithm(JwtEcdsaAlgorithm::ES_UNKNOWN);
   EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      RawJwtEcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(key),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, GetPublicKey) {

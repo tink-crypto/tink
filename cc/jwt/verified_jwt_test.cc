@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
 #include "tink/jwt/internal/jwt_mac_internal.h"
@@ -51,7 +52,8 @@ util::StatusOr<VerifiedJwt> CreateVerifiedJwt(const RawJwt& raw_jwt) {
           "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1"
           "qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow",
           &key_value)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "failed to parse key");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "failed to parse key");
   }
   crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
       subtle::HmacBoringSsl::New(

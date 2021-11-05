@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -34,12 +35,13 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecodeWithKid(
   // TODO(juerg): Refactor this code into a util function.
   std::size_t signature_pos = compact.find_last_of('.');
   if (signature_pos == absl::string_view::npos) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid token");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid token");
   }
   absl::string_view unsigned_token = compact.substr(0, signature_pos);
   std::string signature;
   if (!DecodeSignature(compact.substr(signature_pos + 1), &signature)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT signature");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid JWT signature");
   }
   util::Status verify_result = verify_->Verify(signature, unsigned_token);
   if (!verify_result.ok()) {
@@ -50,12 +52,12 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecodeWithKid(
   std::vector<absl::string_view> parts = absl::StrSplit(unsigned_token, '.');
   if (parts.size() != 2) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "only tokens in JWS compact serialization format are supported");
   }
   std::string json_header;
   if (!DecodeHeader(parts[0], &json_header)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid header");
   }
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
@@ -69,7 +71,8 @@ util::StatusOr<VerifiedJwt> JwtPublicKeyVerifyImpl::VerifyAndDecodeWithKid(
   }
   std::string json_payload;
   if (!DecodePayload(parts[1], &json_payload)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT payload");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid JWT payload");
   }
   util::StatusOr<RawJwt> raw_jwt = RawJwtParser::FromJson(
       GetTypeHeader(*header), json_payload);

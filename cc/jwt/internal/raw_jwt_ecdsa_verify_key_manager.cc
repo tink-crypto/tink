@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
@@ -77,7 +78,7 @@ RawJwtEcdsaVerifyKeyManager::CurveForEcdsaAlgorithm(
     case JwtEcdsaAlgorithm::ES512:
       return EllipticCurveType::NIST_P521;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
 }
@@ -92,7 +93,7 @@ StatusOr<HashType> RawJwtEcdsaVerifyKeyManager::HashForEcdsaAlgorithm(
     case JwtEcdsaAlgorithm::ES512:
       return HashType::SHA512;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
 }
@@ -105,7 +106,7 @@ Status RawJwtEcdsaVerifyKeyManager::ValidateAlgorithm(
     case JwtEcdsaAlgorithm::ES512:
       return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
   return util::OkStatus();

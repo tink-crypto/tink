@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -55,7 +56,8 @@ util::StatusOr<std::unique_ptr<JwtMacInternal>> CreateJwtMac() {
           "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1"
           "qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow",
           &key_value)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "failed to parse key");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "failed to parse key");
   }
   crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
       subtle::HmacBoringSsl::New(

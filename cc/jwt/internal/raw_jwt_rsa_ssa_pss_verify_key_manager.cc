@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
@@ -104,7 +105,7 @@ Status RawJwtRsaSsaPssVerifyKeyManager::ValidateAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS512:
       return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
   return util::OkStatus();
@@ -120,7 +121,7 @@ StatusOr<HashType> RawJwtRsaSsaPssVerifyKeyManager::HashForPssAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS512:
       return HashType::SHA512;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
 }
@@ -135,7 +136,7 @@ StatusOr<int> RawJwtRsaSsaPssVerifyKeyManager::SaltLengthForPssAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS512:
       return 64;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
 }

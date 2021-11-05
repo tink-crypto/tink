@@ -18,6 +18,8 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
+
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
@@ -79,7 +81,7 @@ StatusOr<std::string> JwtRsaSsaPssVerifyKeyManager::AlgorithmName(
     case JwtRsaSsaPssAlgorithm::PS512:
       return std::string("PS512");
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PKCS1 Algorithm");
   }
 }
