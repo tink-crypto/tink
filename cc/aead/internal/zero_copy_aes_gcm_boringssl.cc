@@ -84,7 +84,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
 
 uint64_t ZeroCopyAesGcmBoringSsl::MaxDecryptionSize(
     int64_t ciphertext_size) const {
-  return ciphertext_size - kIvSizeInBytes;
+  return ciphertext_size - kIvSizeInBytes - kTagSizeInBytes;
 }
 
 crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(

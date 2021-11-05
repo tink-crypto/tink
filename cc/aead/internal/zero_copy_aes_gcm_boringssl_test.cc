@@ -41,7 +41,7 @@ constexpr absl::string_view kAad = "Some data to authenticate.";
 
 // The MaxSizes test verifies these constants.
 constexpr int64_t max_encryption_size = 49;
-constexpr int64_t max_decryption_size = 37;
+constexpr int64_t max_decryption_size = 21;
 
 // The EncodedCiphertext test verifies this constant.
 constexpr absl::string_view encoded_ciphertext =
@@ -63,6 +63,10 @@ class ZeroCopyAesGcmBoringSslTest : public testing::Test {
 };
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, MaxSizes) {
+  // Check i == MaxDecryptionSize(MaxEncryptionSize(i)).
+  EXPECT_EQ(kMessage.size(), cipher_->MaxDecryptionSize(
+                                 cipher_->MaxEncryptionSize(kMessage.size())));
+
   EXPECT_EQ(max_encryption_size, cipher_->MaxEncryptionSize(kMessage.size()));
   std::string ciphertext;
   subtle::ResizeStringUninitialized(&ciphertext, max_encryption_size);
