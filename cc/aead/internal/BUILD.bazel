@@ -144,6 +144,7 @@ cc_test(
     deps = [
         ":zero_copy_aes_gcm_boringssl",
         "//subtle:aes_gcm_boringssl",
+        "//subtle:subtle_util",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
