@@ -19,11 +19,13 @@ package com.google.crypto.tink.hybrid.internal;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
 import com.google.crypto.tink.proto.HpkeParams;
+import com.google.crypto.tink.proto.HpkePrivateKey;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Random;
@@ -39,13 +41,15 @@ import org.junit.runners.JUnit4;
 /** Unit tests for {@link HpkePublicKeyManager}. */
 @RunWith(JUnit4.class)
 public final class HpkePublicKeyManagerTest {
+  private static byte[] privateKeyBytes;
   private static byte[] publicKeyBytes;
 
   private HpkePublicKeyManager keyManager;
 
   @BeforeClass
   public static void generateKeyMaterial() throws GeneralSecurityException {
-    publicKeyBytes = X25519.publicFromPrivate(X25519.generatePrivateKey());
+    privateKeyBytes = X25519.generatePrivateKey();
+    publicKeyBytes = X25519.publicFromPrivate(privateKeyBytes);
   }
 
   @Before
@@ -149,11 +153,20 @@ public final class HpkePublicKeyManagerTest {
   @Test
   public void createPrimitive() throws Exception {
     HpkePublicKey publicKey = createValidHpkePublicKey();
+    HpkePrivateKey privateKey =
+        HpkePrivateKey.newBuilder()
+            .setVersion(keyManager.getVersion())
+            .setPublicKey(publicKey)
+            .setPrivateKey(ByteString.copyFrom(privateKeyBytes))
+            .build();
     HybridEncrypt hybridEncrypt = keyManager.getPrimitive(publicKey, HybridEncrypt.class);
+    HybridDecrypt hybridDecrypt = HpkeDecrypt.createHpkeDecrypt(privateKey);
 
-    // TODO(b/187527392): Confirm that decryption succeeds after implementing HpkePrivateKeyManager.
     byte[] input = Random.randBytes(200);
     byte[] contextInfo = Random.randBytes(100);
-    hybridEncrypt.encrypt(input, contextInfo);
+    byte[] ciphertext = hybridEncrypt.encrypt(input, contextInfo);
+    byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
+
+    assertThat(plaintext).isEqualTo(input);
   }
 }

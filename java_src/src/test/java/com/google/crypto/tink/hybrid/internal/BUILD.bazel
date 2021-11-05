@@ -129,7 +129,9 @@ java_test(
     deps = [
         "//proto:hpke_java_proto",
         "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
         "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_decrypt",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_public_key_manager",
         "//src/main/java/com/google/crypto/tink/subtle:random",
         "//src/main/java/com/google/crypto/tink/subtle:x25519",
