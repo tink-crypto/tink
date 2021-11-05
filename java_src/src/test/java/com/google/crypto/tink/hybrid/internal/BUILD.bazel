@@ -104,6 +104,25 @@ java_test(
 )
 
 java_test(
+    name = "HpkePrivateKeyManagerTest",
+    size = "small",
+    srcs = ["HpkePrivateKeyManagerTest.java"],
+    deps = [
+        "//proto:hpke_java_proto",
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:hybrid_decrypt",
+        "//src/main/java/com/google/crypto/tink:hybrid_encrypt",
+        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_encrypt",
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_private_key_manager",
+        "//src/main/java/com/google/crypto/tink/subtle:random",
+        "@com_google_protobuf//:protobuf_javalite",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "HpkePublicKeyManagerTest",
     size = "small",
     srcs = ["HpkePublicKeyManagerTest.java"],
