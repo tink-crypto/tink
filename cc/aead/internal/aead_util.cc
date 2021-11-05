@@ -18,7 +18,6 @@
 #include "absl/status/status.h"
 #include "openssl/evp.h"
 #include "tink/util/errors.h"
-#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {

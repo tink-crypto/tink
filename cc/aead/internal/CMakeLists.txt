@@ -35,6 +35,33 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME mock_zero_copy_aead
+  SRCS
+    mock_zero_copy_aead.h
+  DEPS
+    tink::aead::internal::zero_copy_aead
+    tink::util::statusor
+    absl::strings
+    gmock
+)
+
+tink_cc_library(
+  NAME
+    aead_from_zero_copy
+  SRCS
+    aead_from_zero_copy.cc
+    aead_from_zero_copy.h
+  DEPS
+    tink::aead::internal::zero_copy_aead
+    absl::memory
+    absl::status
+    tink::core::aead
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME zero_copy_aead
   SRCS zero_copy_aead.h
   DEPS
@@ -72,4 +99,21 @@ tink_cc_test(
     tink::util::test_matchers
     crypto
     gmock
+)
+
+tink_cc_test(
+  NAME
+    aead_from_zero_copy_test
+  SRCS
+    aead_from_zero_copy_test.cc
+  DEPS
+    tink::aead::internal::aead_from_zero_copy
+    tink::aead::internal::mock_zero_copy_aead
+    gmock
+    absl::memory
+    absl::status
+    absl::strings
+    absl::span
+    tink::util::statusor
+    tink::util::test_matchers
 )

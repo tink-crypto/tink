@@ -47,6 +47,36 @@ cc_library(
 )
 
 cc_library(
+    name = "mock_zero_copy_aead",
+    testonly = 1,
+    hdrs = ["mock_zero_copy_aead.h"],
+    copts = ["-Iexternal/gtest/include"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        ":zero_copy_aead",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "aead_from_zero_copy",
+    srcs = ["aead_from_zero_copy.cc"],
+    hdrs = ["aead_from_zero_copy.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        ":zero_copy_aead",
+        "//:aead",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
     name = "zero_copy_aes_gcm_boringssl",
     srcs = ["zero_copy_aes_gcm_boringssl.cc"],
     hdrs = ["zero_copy_aes_gcm_boringssl.h"],
@@ -117,6 +147,23 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "aead_from_zero_copy_test",
+    srcs = ["aead_from_zero_copy_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aead_from_zero_copy",
+        ":mock_zero_copy_aead",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],

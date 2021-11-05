@@ -38,6 +38,8 @@ namespace internal {
 // copying strings from one location to another.
 class ZeroCopyAead {
  public:
+  virtual ~ZeroCopyAead() = default;
+
   // Returns the maximum buffer size needed for encryption. The actual
   // size of the written cypertext may be smaller.
   virtual uint64_t MaxEncryptionSize(int64_t plaintext_size) const = 0;
@@ -67,8 +69,6 @@ class ZeroCopyAead {
   virtual crypto::tink::util::StatusOr<int64_t> Decrypt(
       absl::string_view ciphertext, absl::string_view associated_data,
       absl::Span<char> buffer) const = 0;
-
-  virtual ~ZeroCopyAead() {}
 };
 
 }  // namespace internal
