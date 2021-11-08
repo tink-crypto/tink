@@ -256,7 +256,7 @@ TEST(BufferedInputStreamTest, DisableRewindingInitially) {
       EXPECT_EQ(0, buf_stream->Position());
       buf_stream->DisableRewinding();
       auto status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
 
       // Read a prefix of the stream.
@@ -268,7 +268,7 @@ TEST(BufferedInputStreamTest, DisableRewindingInitially) {
 
       // Attempt rewidning again.
       status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
 
       // Read the rest of the input.
@@ -304,7 +304,7 @@ TEST(BufferedInputStreamTest, DisableRewindingAfterRewind) {
       EXPECT_EQ(0, buf_stream->Position());
       buf_stream->DisableRewinding();
       status = buf_stream->Rewind();
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument,
                                    HasSubstr("rewinding is disabled")));
       // Read the prefix again.
       status = ReadFromStream(buf_stream.get(), read_size, &prefix);

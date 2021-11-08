@@ -43,11 +43,11 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
     std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
     absl::string_view associated_data) {
   if (primitives == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitives must be non-null.");
   }
   if (ciphertext_source == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "ciphertext_source must be non-null.");
   }
   return {absl::WrapUnique(new DecryptingRandomAccessStream(
@@ -59,18 +59,19 @@ util::Status DecryptingRandomAccessStream::PRead(
     crypto::tink::util::Buffer* dest_buffer) {
   {  // "fast-track": quickly proceed if matching has been attempted/found.
     if (dest_buffer == nullptr) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "dest_buffer must be non-null");
     }
     if (count < 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "count cannot be negative");
     }
     if (count > dest_buffer->allocated_size()) {
-      return util::Status(util::error::INVALID_ARGUMENT, "buffer too small");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "buffer too small");
     }
     if (position < 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "position cannot be negative");
     }
     absl::ReaderMutexLock lock(&matching_mutex_);
@@ -78,7 +79,7 @@ util::Status DecryptingRandomAccessStream::PRead(
       return matching_stream_->PRead(position, count, dest_buffer);
     }
     if (attempted_matching_) {
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Did not find a decrypter matching the ciphertext stream.");
     }
   }
@@ -90,7 +91,7 @@ util::Status DecryptingRandomAccessStream::PRead(
     return matching_stream_->PRead(position, count, dest_buffer);
   }
   if (attempted_matching_) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Did not find a decrypter matching the ciphertext stream.");
   }
   attempted_matching_ = true;
@@ -116,7 +117,7 @@ util::Status DecryptingRandomAccessStream::PRead(
     }
     // Not a match, try the next primitive.
   }
-  return Status(util::error::INVALID_ARGUMENT,
+  return Status(absl::StatusCode::kInvalidArgument,
                 "Could not find a decrypter matching the ciphertext stream.");
 }
 

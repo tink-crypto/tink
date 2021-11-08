@@ -42,12 +42,12 @@ Status Validate(PrimitiveSet<StreamingAead>* primitives) {
                   "primitive set must be non-NULL");
   }
   if (primitives->get_primary() == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitive set has no primary");
   }
   auto raw_primitives_result = primitives->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitive set has no raw primitives");
   }
   // TODO(b/129044084)

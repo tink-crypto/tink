@@ -61,7 +61,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
     return matching_stream_->Next(data);
   }
   if (attempted_matching_) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Could not find a decrypter matching the ciphertext stream.");
   }
   // Matching has not been attempted yet, so try it now.
@@ -91,7 +91,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
       return s;
     }
   }
-  return Status(util::error::INVALID_ARGUMENT,
+  return Status(absl::StatusCode::kInvalidArgument,
                 "Could not find a decrypter matching the ciphertext stream.");
 }
 

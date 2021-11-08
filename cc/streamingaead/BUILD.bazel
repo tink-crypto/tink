@@ -84,6 +84,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -111,6 +112,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -126,6 +128,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -219,6 +222,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -246,6 +250,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -273,6 +278,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -360,6 +366,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -384,6 +391,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

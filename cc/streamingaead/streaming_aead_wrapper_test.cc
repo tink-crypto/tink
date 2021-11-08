@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -316,7 +317,7 @@ TEST(StreamingAeadSetWrapperTest, MissingRawPrimitives) {
   // Wrap saead_set and test the resulting StreamingAead.
   StreamingAeadWrapper wrapper;
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
-  EXPECT_THAT(wrap_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(wrap_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                              HasSubstr("no raw primitives")));
 }
 

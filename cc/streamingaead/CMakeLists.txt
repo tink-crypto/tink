@@ -61,6 +61,7 @@ tink_cc_library(
     aes_gcm_hkdf_streaming_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_manager
     tink::core::key_type_manager
@@ -88,6 +89,7 @@ tink_cc_library(
     aes_ctr_hmac_streaming_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_manager
     tink::core::key_type_manager
@@ -114,6 +116,7 @@ tink_cc_library(
     buffered_input_stream.h
   DEPS
     absl::memory
+    absl::status
     tink::core::input_stream
     tink::core::registry
     tink::util::errors
@@ -186,6 +189,7 @@ tink_cc_test(
   SRCS streaming_aead_wrapper_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::input_stream
     tink::core::output_stream
@@ -209,6 +213,7 @@ tink_cc_test(
   NAME aes_gcm_hkdf_streaming_key_manager_test
   SRCS aes_gcm_hkdf_streaming_key_manager_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::core::streaming_aead
     tink::proto::aes_eax_cc_proto
@@ -233,6 +238,7 @@ tink_cc_test(
   NAME aes_ctr_hmac_streaming_key_manager_test
   SRCS aes_ctr_hmac_streaming_key_manager_test.cc
   DEPS
+    absl::status
     absl::strings
     tink::core::streaming_aead
     tink::proto::aes_eax_cc_proto
@@ -309,6 +315,7 @@ tink_cc_test(
   SRCS decrypting_input_stream_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::streamingaead::decrypting_input_stream
     tink::core::input_stream
@@ -330,6 +337,7 @@ tink_cc_test(
   SRCS decrypting_random_access_stream_test.cc
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::output_stream
     tink::core::primitive_set
