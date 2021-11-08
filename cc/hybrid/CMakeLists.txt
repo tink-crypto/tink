@@ -166,6 +166,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::ecies_aead_hkdf_cc_proto
     absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -184,6 +185,7 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::ecies_aead_hkdf_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -211,6 +213,7 @@ tink_cc_library(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -233,6 +236,7 @@ tink_cc_library(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
     absl::strings
+    absl::status
     absl::memory
 )
 
@@ -366,6 +370,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    absl::status
 )
 
 tink_cc_test(
@@ -430,6 +435,7 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    absl::status
 )
 
 tink_cc_test(
@@ -450,4 +456,5 @@ tink_cc_test(
     tink::proto::common_cc_proto
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::tink_cc_proto
+    absl::status
 )

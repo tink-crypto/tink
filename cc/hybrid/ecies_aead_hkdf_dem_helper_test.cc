@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/registry.h"
@@ -55,9 +56,9 @@ TEST(EciesAeadHkdfDemHelperTest, InvalidKey) {
   google::crypto::tink::KeyTemplate dem_key_template;
   dem_key_template.set_type_url("some.type.url/that.is.not.supported");
   auto result = EciesAeadHkdfDemHelper::New(dem_key_template);
-  EXPECT_THAT(
-      EciesAeadHkdfDemHelper::New(dem_key_template).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Unsupported DEM")));
+  EXPECT_THAT(EciesAeadHkdfDemHelper::New(dem_key_template).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Unsupported DEM")));
 }
 
 TEST(EciesAeadHkdfDemHelperTest, DemHelperWithSomeAeadKeyType) {

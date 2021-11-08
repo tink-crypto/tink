@@ -17,6 +17,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
@@ -58,7 +59,7 @@ TEST(EciesAeadHkdfPublicKeyManagerTest, Basics) {
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(
       EciesAeadHkdfPublicKeyManager().ValidateKey(EciesAeadHkdfPublicKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 EciesAeadHkdfPublicKey CreatePublicKey() {
@@ -87,28 +88,28 @@ TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateKeyNoPoint) {
   EciesAeadHkdfParams params = CreatePublicKey().params();
   params.set_ec_point_format(EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(EciesAeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateKeyNoDem) {
   EciesAeadHkdfParams params = CreatePublicKey().params();
   params.mutable_dem_params()->clear_aead_dem();
   EXPECT_THAT(EciesAeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateKeyNoKemCurve) {
   EciesAeadHkdfParams params = CreatePublicKey().params();
   params.mutable_kem_params()->set_curve_type(EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(EciesAeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateKeyNoKemHash) {
   EciesAeadHkdfParams params = CreatePublicKey().params();
   params.mutable_kem_params()->set_hkdf_hash_type(HashType::UNKNOWN_HASH);
   EXPECT_THAT(EciesAeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPublicKeyManagerTest, ValidateGeneratedKey) {

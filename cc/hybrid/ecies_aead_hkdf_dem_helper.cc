@@ -113,7 +113,7 @@ EciesAeadHkdfDemHelper::GetKeyParams(const KeyTemplate& key_template) {
   if (type_url == "type.googleapis.com/google.crypto.tink.AesGcmKey") {
     AesGcmKeyFormat key_format;
     if (!key_format.ParseFromString(key_template.value())) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid AesGcmKeyFormat in DEM key template");
     }
     return {{AES_GCM_KEY, key_format.key_size()}};
@@ -121,7 +121,7 @@ EciesAeadHkdfDemHelper::GetKeyParams(const KeyTemplate& key_template) {
   if (type_url == "type.googleapis.com/google.crypto.tink.AesCtrHmacAeadKey") {
     AesCtrHmacAeadKeyFormat key_format;
     if (!key_format.ParseFromString(key_template.value())) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid AesCtrHmacKeyFormat in DEM key template");
     }
     uint32_t dem_key_size = key_format.aes_ctr_key_format().key_size() +
@@ -132,7 +132,7 @@ EciesAeadHkdfDemHelper::GetKeyParams(const KeyTemplate& key_template) {
   if (type_url ==
       "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
     if (!XChaCha20Poly1305KeyFormat().ParseFromString(key_template.value())) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid XChaCha20KeyFormat in DEM key template");
     }
     return {{XCHACHA20_POLY1305_KEY, 32}};
@@ -141,13 +141,13 @@ EciesAeadHkdfDemHelper::GetKeyParams(const KeyTemplate& key_template) {
     AesSivKeyFormat key_format;
 
     if (!key_format.ParseFromString(key_template.value())) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid AesSiveKeyFormat in DEM key template");
     }
     return {{AES_SIV_KEY, key_format.key_size()}};
   }
-  return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Unsupported DEM key type '%s'.", type_url);
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
+                   "Unsupported DEM key type '%s'.", type_url);
 }
 
 // static

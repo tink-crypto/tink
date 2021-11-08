@@ -17,6 +17,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
@@ -46,7 +47,7 @@ using google::crypto::tink::EciesHkdfKemParams;
 Status EciesAeadHkdfPrivateKeyManager::ValidateKeyFormat(
     const EciesAeadHkdfKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return EciesAeadHkdfPublicKeyManager().ValidateParams(key_format.params());
 }
@@ -86,7 +87,7 @@ Status EciesAeadHkdfPrivateKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing public_key.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing public_key.");
   }
   return EciesAeadHkdfPublicKeyManager().ValidateKey(key.public_key());
 }

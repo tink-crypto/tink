@@ -35,7 +35,7 @@ util::Status Validate(PrimitiveSet<HybridEncrypt>* hybrid_encrypt_set) {
                         "hybrid_encrypt_set must be non-NULL");
   }
   if (hybrid_encrypt_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "hybrid_encrypt_set has no primary");
   }
   return util::OkStatus();

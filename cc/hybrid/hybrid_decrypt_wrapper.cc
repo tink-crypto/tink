@@ -82,7 +82,7 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 
 util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
@@ -91,7 +91,7 @@ util::Status Validate(PrimitiveSet<HybridDecrypt>* hybrid_decrypt_set) {
                         "hybrid_decrypt_set must be non-NULL");
   }
   if (hybrid_decrypt_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "hybrid_decrypt_set has no primary");
   }
   return util::OkStatus();

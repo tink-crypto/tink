@@ -17,6 +17,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -64,7 +65,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, Basics) {
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(
       EciesAeadHkdfPrivateKeyManager().ValidateKey(EciesAeadHkdfPrivateKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 EciesAeadHkdfKeyFormat CreateValidKeyFormat() {
@@ -90,14 +91,14 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoPoint) {
   key_format.mutable_params()->set_ec_point_format(
       EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoDem) {
   EciesAeadHkdfKeyFormat key_format = CreateValidKeyFormat();
   key_format.mutable_params()->mutable_dem_params()->clear_aead_dem();
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemCurve) {
@@ -105,7 +106,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemCurve) {
   key_format.mutable_params()->mutable_kem_params()->set_curve_type(
       EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemHash) {
@@ -113,7 +114,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemHash) {
   key_format.mutable_params()->mutable_kem_params()->set_hkdf_hash_type(
       HashType::UNKNOWN_HASH);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, CreateKey) {
@@ -148,7 +149,7 @@ EciesAeadHkdfPrivateKey CreateValidKey() {
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyEmpty) {
   EXPECT_THAT(
       EciesAeadHkdfPrivateKeyManager().ValidateKey(EciesAeadHkdfPrivateKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKey) {
@@ -160,7 +161,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyWrongVersion) {
   EciesAeadHkdfPrivateKey key = CreateValidKey();
   key.set_version(1);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoPoint) {
@@ -168,7 +169,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoPoint) {
   key.mutable_public_key()->mutable_params()->set_ec_point_format(
       EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoDem) {
@@ -178,7 +179,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoDem) {
       ->mutable_dem_params()
       ->clear_aead_dem();
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemCurve) {
@@ -188,7 +189,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemCurve) {
       ->mutable_kem_params()
       ->set_curve_type(EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemHash) {
@@ -198,7 +199,7 @@ TEST(EciesAeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemHash) {
       ->mutable_kem_params()
       ->set_hkdf_hash_type(HashType::UNKNOWN_HASH);
   EXPECT_THAT(EciesAeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EciesAeadHkdfPrivateKeyManagerTest, GetPublicKey) {

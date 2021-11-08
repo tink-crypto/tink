@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/key_manager.h"
@@ -43,24 +44,25 @@ Status EciesAeadHkdfPublicKeyManager::ValidateParams(
     const EciesAeadHkdfParams& params) const {
   // Validate KEM params.
   if (!params.has_kem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing kem_params.");
   }
   if (params.kem_params().curve_type() == EllipticCurveType::UNKNOWN_CURVE ||
       params.kem_params().hkdf_hash_type() == HashType::UNKNOWN_HASH) {
-    return Status(util::error::INVALID_ARGUMENT, "Invalid kem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Invalid kem_params.");
   }
 
   // Validate DEM params.
   if (!params.has_dem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing dem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing dem_params.");
   }
   if (!params.dem_params().has_aead_dem()) {
-    return Status(util::error::INVALID_ARGUMENT, "Invalid dem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Invalid dem_params.");
   }
 
   // Validate EC point format.
   if (params.ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
-    return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "Unknown EC point format.");
   }
   return util::OkStatus();
 }
@@ -70,7 +72,7 @@ Status EciesAeadHkdfPublicKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return ValidateParams(key.params());
 }

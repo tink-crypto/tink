@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/subtle/ec_util.h"
@@ -39,7 +40,7 @@ util::Status Validate(const EciesAeadHkdfPrivateKey& key) {
   if (!key.has_public_key() || !key.public_key().has_params() ||
       key.public_key().x().empty() || key.key_value().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
@@ -48,12 +49,12 @@ util::Status Validate(const EciesAeadHkdfPrivateKey& key) {
           EllipticCurveType::CURVE25519) {
     if (!key.public_key().y().empty()) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
     }
   } else if (key.public_key().y().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
   return util::OkStatus();
@@ -91,7 +92,8 @@ util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
   if (!header_size_result.ok()) return header_size_result.status();
   auto header_size = header_size_result.ValueOrDie();
   if (ciphertext.size() < header_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   // Use KEM to get a symmetric key.
