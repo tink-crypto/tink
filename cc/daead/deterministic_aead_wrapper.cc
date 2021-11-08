@@ -35,7 +35,7 @@ util::Status Validate(PrimitiveSet<DeterministicAead>* daead_set) {
                         "daead_set must be non-NULL");
   }
   if (daead_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "daead_set has no primary");
   }
   return util::OkStatus();
@@ -116,7 +116,7 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 
 }  // anonymous namespace

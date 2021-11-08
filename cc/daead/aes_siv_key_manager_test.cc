@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/deterministic_aead.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/secret_data.h"
@@ -143,7 +144,7 @@ TEST(AesSivKeyManagerTest, DeriveKeyWithoutEnoughEntropy) {
   util::IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
   auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
-  ASSERT_THAT(key_or.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  ASSERT_THAT(key_or.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("pseudorandomness")));
 }
 
@@ -155,8 +156,8 @@ TEST(AesSivKeyManagerTest, DeriveKeyWrongVersion) {
   format.set_version(1);
   auto key_or = AesSivKeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(key_or.status(), StatusIs(absl::StatusCode::kInvalidArgument,
+                                        HasSubstr("version")));
 }
 
 TEST(AesSivKeyManagerTest, ValidateKey) {

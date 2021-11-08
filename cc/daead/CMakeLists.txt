@@ -21,6 +21,7 @@ tink_cc_library(
     tink::util::validation
     tink::proto::aes_siv_cc_proto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -101,6 +102,7 @@ tink_cc_test(
     tink::util::statusor
     tink::proto::aes_siv_cc_proto
     gmock
+    absl::status
 )
 
 tink_cc_test(
