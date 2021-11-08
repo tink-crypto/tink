@@ -17,6 +17,7 @@
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/subtle/dilithium_avx2_verify.h"
@@ -72,7 +73,7 @@ Status DilithiumVerifyKeyManager::ValidateKey(
           PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES &&
       key.key_value().length() !=
           PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Invalid dilithium public key size.");
   }
   return util::OkStatus();
@@ -86,7 +87,8 @@ Status DilithiumVerifyKeyManager::ValidateParams(
       break;
     }
     default: {
-      return Status(util::error::INVALID_ARGUMENT, "Invalid seed expansion");
+      return Status(absl::StatusCode::kInvalidArgument,
+                    "Invalid seed expansion");
     }
   }
 
@@ -97,7 +99,7 @@ Status DilithiumVerifyKeyManager::ValidateParams(
       break;
     }
     default: {
-      return Status(util::error::INVALID_ARGUMENT, "Invalid key size.");
+      return Status(absl::StatusCode::kInvalidArgument, "Invalid key size.");
     }
   }
 

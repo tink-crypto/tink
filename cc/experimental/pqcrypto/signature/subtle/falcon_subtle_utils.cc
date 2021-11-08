@@ -85,7 +85,7 @@ crypto::tink::util::StatusOr<FalconKeyPair> GenerateFalconKeyPair(
     // Invalid key size.
     default: {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d",
                           private_key_size, kFalcon512PrivateKeySize,
@@ -116,7 +116,7 @@ crypto::tink::util::Status ValidateFalconPrivateKeySize(int32_t key_size) {
     case kFalcon1024PrivateKeySize:
       return util::Status::OK;
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrFormat("Invalid private key size (%d). "
                                           "The only valid sizes are %d, %d",
                                           key_size, kFalcon512PrivateKeySize,
@@ -130,7 +130,7 @@ crypto::tink::util::Status ValidateFalconPublicKeySize(int32_t key_size) {
     case kFalcon1024PublicKeySize:
       return util::Status::OK;
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrFormat("Invalid public key size (%d). "
                                           "The only valid sizes are %d, %d",
                                           key_size, kFalcon512PublicKeySize,

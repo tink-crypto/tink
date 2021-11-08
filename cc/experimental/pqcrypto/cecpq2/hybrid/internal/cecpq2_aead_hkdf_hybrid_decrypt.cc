@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/hrss.h"
 #include "openssl/nid.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
@@ -38,7 +39,7 @@ util::Status Validate(
   if (key.hrss_private_key_seed().empty() || key.x25519_private_key().empty() ||
       key.public_key().hrss_public_key_marshalled().empty() ||
       key.public_key().x25519_public_key_x().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid Cecpq2AeadHkdfPrivateKeyInternal: missing KEM "
                         "required fields.");
   }
@@ -46,7 +47,7 @@ util::Status Validate(
   if (key.public_key().params().kem_params().curve_type() ==
       google::crypto::tink::EllipticCurveType::CURVE25519) {
     if (!key.public_key().x25519_public_key_y().empty()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid Cecpq2AeadHkdfPrivateKeyInternal: has KEM "
                           "unexpected field.");
     }
@@ -54,7 +55,7 @@ util::Status Validate(
     if (key.public_key().params().kem_params().ec_point_format() !=
         google::crypto::tink::EcPointFormat::COMPRESSED) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "X25519 only supports compressed elliptic curve points.");
     }
   }
@@ -100,7 +101,8 @@ util::StatusOr<std::string> Cecpq2AeadHkdfHybridDecrypt::Decrypt(
   uint32_t cecpq2_header_size =
       cecpq2_header_size_result.ValueOrDie() + HRSS_CIPHERTEXT_BYTES;
   if (ciphertext.size() < cecpq2_header_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   // Get the key material size based on the DEM type_url.

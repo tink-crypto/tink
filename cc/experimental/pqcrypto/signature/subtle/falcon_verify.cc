@@ -66,7 +66,8 @@ util::Status FalconVerify::Verify(absl::string_view signature,
       break;
     }
     default:
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid keysize.");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid keysize.");
   }
 
   if (result != 0) {

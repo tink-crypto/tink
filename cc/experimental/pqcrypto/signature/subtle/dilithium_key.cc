@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -72,7 +73,7 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
           break;
         }
         default: {
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Invalid seed expansion");
         }
       }
@@ -96,7 +97,7 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
           break;
         }
         default: {
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Invalid seed expansion");
         }
       }
@@ -120,7 +121,7 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
           break;
         }
         default: {
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Invalid seed expansion");
         }
       }
@@ -129,7 +130,7 @@ DilithiumPrivateKeyPqclean::GenerateKeyPair(
     // Invalid key size.
     default: {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d, %d.",
                           private_key_size,

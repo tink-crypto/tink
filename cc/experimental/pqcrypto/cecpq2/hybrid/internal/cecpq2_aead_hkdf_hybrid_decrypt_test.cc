@@ -231,7 +231,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyNoFieldsSet) {
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(
                   google::crypto::tink::Cecpq2AeadHkdfPrivateKey())
                   .status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -240,7 +240,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyX25519PrivKeyFieldMissing) {
       CreateValidKey();
   recipient_key.set_x25519_private_key("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -249,7 +249,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyX25519PubKeyFieldMissing) {
       CreateValidKey();
   recipient_key.mutable_public_key()->set_x25519_public_key_x("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -258,7 +258,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyHrssPrivKeyFieldMissing) {
       CreateValidKey();
   recipient_key.set_hrss_private_key_seed("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -267,7 +267,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyHrssPubKeyFieldMissing) {
       CreateValidKey();
   recipient_key.mutable_public_key()->set_hrss_public_key_marshalled("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -301,7 +301,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyUnsupportedDem) {
       ->mutable_aead_dem()
       ->set_type_url("some.type.url/that.is.not.supported");
   auto result(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key));
-  EXPECT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("Unsupported DEM")));
 }
 

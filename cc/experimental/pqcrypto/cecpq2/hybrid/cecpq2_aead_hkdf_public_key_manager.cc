@@ -16,6 +16,7 @@
 
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_encrypt.h"
@@ -42,25 +43,27 @@ Status Cecpq2AeadHkdfPublicKeyManager::ValidateParams(
     const Cecpq2AeadHkdfParams& params) const {
   // Validate KEM params
   if (!params.has_kem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing kem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing kem_params.");
   }
   if (params.kem_params().curve_type() == EllipticCurveType::UNKNOWN_CURVE ||
       params.kem_params().curve_type() != EllipticCurveType::CURVE25519 ||
       params.kem_params().hkdf_hash_type() == HashType::UNKNOWN_HASH) {
-    return Status(util::error::INVALID_ARGUMENT, "Invalid kem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Invalid kem_params.");
   }
 
   // Validate DEM params
   if (!params.has_dem_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing dem_params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing dem_params.");
   }
   if (!params.dem_params().has_aead_dem()) {
-    return Status(util::error::INVALID_ARGUMENT, "dem_params has no aead_dem.");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "dem_params has no aead_dem.");
   }
 
   // Validate EC point format
   if (params.kem_params().ec_point_format() == EcPointFormat::UNKNOWN_FORMAT) {
-    return Status(util::error::INVALID_ARGUMENT, "Unknown EC point format.");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "Unknown EC point format.");
   }
   return util::OkStatus();
 }
@@ -70,7 +73,7 @@ Status Cecpq2AeadHkdfPublicKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return ValidateParams(key.params());
 }

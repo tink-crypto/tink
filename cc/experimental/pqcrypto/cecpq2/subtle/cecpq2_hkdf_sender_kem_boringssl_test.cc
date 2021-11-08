@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "openssl/sha.h"
@@ -127,7 +128,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
       test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
 
   EXPECT_THAT(status_or_kem_key.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not post-quantum secure")));
 }
 

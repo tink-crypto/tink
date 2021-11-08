@@ -55,7 +55,7 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> DilithiumAvx2Verify::New(
       key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES &&
       key_size != PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid public key size (%d). "
                         "The only valid sizes are %d, %d, %d.",
                         key_size, PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES,
@@ -159,7 +159,7 @@ util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
   }
 
   if (result != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
 

@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/config/tink_fips.h"
@@ -190,7 +191,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
       test::HexDecodeOrDie(kSaltHex), test::HexDecodeOrDie(kInfoHex), out_len,
       EcPointFormat::COMPRESSED);
   EXPECT_THAT(kem_key_or.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not post-quantum secure")));
 }
 

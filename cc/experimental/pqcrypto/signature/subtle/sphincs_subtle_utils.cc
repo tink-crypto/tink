@@ -77,7 +77,7 @@ crypto::tink::util::Status ValidatePrivateKeySize(int32 key_size) {
       return util::OkStatus();
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d, %d.",
                           key_size, kSphincsPrivateKeySize64,
@@ -93,7 +93,7 @@ crypto::tink::util::Status ValidatePublicKeySize(int32 key_size) {
       return util::OkStatus();
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrFormat("Invalid private key size (%d). "
                           "The only valid sizes are %d, %d, %d.",
                           key_size, kSphincsPublicKeySize32,
@@ -110,7 +110,8 @@ crypto::tink::util::StatusOr<int32> SphincsKeySizeToIndex(int32 key_size) {
     case kSphincsPrivateKeySize128:
       return 2;
     default:
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid key size");
   }
 }
 
@@ -122,7 +123,8 @@ crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params) {
       break;
     }
     default: {
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid hash type");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid hash type");
     }
   }
 
@@ -132,7 +134,8 @@ crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params) {
       break;
     }
     default: {
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid variant");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid variant");
     }
   }
 
@@ -142,7 +145,7 @@ crypto::tink::util::Status ValidateParams(SphincsParamsPqclean params) {
       break;
     }
     default: {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid signature type");
     }
   }

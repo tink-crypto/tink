@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_helper_pqclean.h"
 #include "tink/experimental/pqcrypto/signature/subtle/sphincs_subtle_utils.h"
@@ -67,7 +68,7 @@ util::Status SphincsVerify::Verify(absl::string_view signature,
           reinterpret_cast<const uint8_t *>(signature.data()), signature.size(),
           reinterpret_cast<const uint8_t *>(data.data()), data.size(),
           reinterpret_cast<const uint8_t *>(key_.GetKey().data()))) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
 

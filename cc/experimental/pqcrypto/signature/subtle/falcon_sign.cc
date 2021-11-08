@@ -74,7 +74,8 @@ util::StatusOr<std::string> FalconSign::Sign(absl::string_view data) const {
       break;
     }
     default:
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid keysize.");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid keysize.");
   }
 
   if (result != 0) {

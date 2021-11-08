@@ -17,6 +17,7 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -62,7 +63,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, Basics) {
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(
       Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(Cecpq2AeadHkdfPrivateKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 Cecpq2AeadHkdfKeyFormat CreateValidKeyFormat() {
@@ -88,14 +89,14 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoPoint) {
   auto kem_params = key_format.mutable_params()->mutable_kem_params();
   kem_params->set_ec_point_format(EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoDem) {
   Cecpq2AeadHkdfKeyFormat key_format = CreateValidKeyFormat();
   key_format.mutable_params()->mutable_dem_params()->clear_aead_dem();
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemCurve) {
@@ -103,7 +104,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemCurve) {
   key_format.mutable_params()->mutable_kem_params()->set_curve_type(
       EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemHash) {
@@ -111,7 +112,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyFormatNoKemHash) {
   key_format.mutable_params()->mutable_kem_params()->set_hkdf_hash_type(
       HashType::UNKNOWN_HASH);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateKey) {
@@ -148,7 +149,7 @@ Cecpq2AeadHkdfPrivateKey CreateValidKey() {
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyEmpty) {
   EXPECT_THAT(
       Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(Cecpq2AeadHkdfPrivateKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKey) {
@@ -160,7 +161,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyWrongVersion) {
   Cecpq2AeadHkdfPrivateKey key = CreateValidKey();
   key.set_version(1);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoPoint) {
@@ -170,7 +171,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoPoint) {
       ->mutable_kem_params()
       ->set_ec_point_format(EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoDem) {
@@ -180,7 +181,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoDem) {
       ->mutable_dem_params()
       ->clear_aead_dem();
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemCurve) {
@@ -190,7 +191,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemCurve) {
       ->mutable_kem_params()
       ->set_curve_type(EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemHash) {
@@ -200,7 +201,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyNoKemHash) {
       ->mutable_kem_params()
       ->set_hkdf_hash_type(HashType::UNKNOWN_HASH);
   EXPECT_THAT(Cecpq2AeadHkdfPrivateKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, GetPublicKey) {

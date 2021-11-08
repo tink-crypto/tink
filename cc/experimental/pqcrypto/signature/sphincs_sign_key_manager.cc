@@ -17,6 +17,7 @@
 #include "tink/experimental/pqcrypto/signature/sphincs_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
@@ -113,7 +114,7 @@ Status SphincsSignKeyManager::ValidateKey(const SphincsPrivateKey& key) const {
 Status SphincsSignKeyManager::ValidateKeyFormat(
     const SphincsKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
 
   return SphincsVerifyKeyManager().ValidateParams(key_format.params());

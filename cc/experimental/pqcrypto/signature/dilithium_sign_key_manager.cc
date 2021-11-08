@@ -17,6 +17,7 @@
 #include "tink/experimental/pqcrypto/signature/dilithium_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/experimental/pqcrypto/signature/dilithium_verify_key_manager.h"
@@ -101,7 +102,7 @@ Status DilithiumSignKeyManager::ValidateKey(
           PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
       key.key_value().length() !=
           PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Invalid dilithium private key size.");
   }
 
@@ -111,7 +112,7 @@ Status DilithiumSignKeyManager::ValidateKey(
 Status DilithiumSignKeyManager::ValidateKeyFormat(
     const DilithiumKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
 
   return DilithiumVerifyKeyManager().ValidateParams(key_format.params());

@@ -61,6 +61,7 @@ cc_library(
     hdrs = ["cecpq2_aead_hkdf_private_key_manager.h"],
     deps = [
         ":cecpq2_aead_hkdf_public_key_manager",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@tink_cc//:core/key_type_manager",
         "@tink_cc//:core/private_key_type_manager",
@@ -83,6 +84,7 @@ cc_library(
     srcs = ["cecpq2_aead_hkdf_public_key_manager.cc"],
     hdrs = ["cecpq2_aead_hkdf_public_key_manager.h"],
     deps = [
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@tink_cc//:core/key_type_manager",
         "@tink_cc//:hybrid_encrypt",
@@ -142,6 +144,7 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":cecpq2_aead_hkdf_dem_helper",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//aead:aes_gcm_key_manager",
         "@tink_cc//config:tink_config",
@@ -158,6 +161,7 @@ cc_test(
     deps = [
         ":cecpq2_aead_hkdf_private_key_manager",
         ":cecpq2_aead_hkdf_public_key_manager",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:core/key_type_manager",
@@ -187,6 +191,7 @@ cc_test(
     deps = [
         ":cecpq2_aead_hkdf_private_key_manager",
         ":cecpq2_aead_hkdf_public_key_manager",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:core/key_type_manager",

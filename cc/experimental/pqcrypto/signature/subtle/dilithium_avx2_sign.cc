@@ -56,7 +56,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> DilithiumAvx2Sign::New(
       key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES &&
       key_size != PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid private key size (%d). "
                         "The only valid sizes are %d, %d, %d.",
                         private_key.GetKeyData().size(),

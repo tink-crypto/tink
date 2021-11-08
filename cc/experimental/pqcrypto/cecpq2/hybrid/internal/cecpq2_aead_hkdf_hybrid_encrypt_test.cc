@@ -70,7 +70,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyNoFieldSet) {
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(
       google::crypto::tink::Cecpq2AeadHkdfPublicKey());
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -79,7 +79,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeySomeFieldsSet) {
   sender_key.set_x25519_public_key_x("");
   auto result(Cecpq2AeadHkdfHybridEncrypt::New(sender_key));
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -105,7 +105,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedDemKeyType) {
       ->mutable_aead_dem()
       ->set_type_url("some.type.url/that.is.not.supported");
   auto result(Cecpq2AeadHkdfHybridEncrypt::New(sender_key));
-  EXPECT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("Unsupported DEM key type")));
 }
 

@@ -78,7 +78,7 @@ class Cecpq2AeadHkdfDemHelperImpl : public Cecpq2AeadHkdfDemHelper {
             "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
       return 32;
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Unsupported DEM key type '%s'.", dem_type_url);
     }
   }
@@ -102,7 +102,7 @@ Cecpq2AeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
     return {absl::make_unique<Cecpq2AeadHkdfDemHelperImpl<DeterministicAead>>(
         dem_key_template)};
   }
-  return ToStatusF(util::error::INVALID_ARGUMENT,
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
                    "Unsupported DEM key type '%s'.", dem_type_url);
 }
 
