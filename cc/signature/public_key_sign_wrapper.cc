@@ -37,7 +37,7 @@ util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
                         "public_key_sign_set must be non-NULL");
   }
   if (public_key_sign_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "public_key_sign_set has no primary");
   }
   return util::OkStatus();

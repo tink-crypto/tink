@@ -16,6 +16,7 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
@@ -99,13 +100,13 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
   //
   //  - Conscrypt/BouncyCastle do not support different hashes.
   if (params.mgf1_hash() != params.sig_hash()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("MGF1 hash '", params.mgf1_hash(),
                                      "' is different from signature hash '",
                                      params.sig_hash(), "'"));
   }
   if (params.salt_length() < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "salt length is negative");
   }
   return util::OkStatus();

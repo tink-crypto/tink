@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
@@ -133,7 +134,7 @@ TEST(RsaSsaPssVerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
   key.set_n("\x23");
   key.set_e("\x3");
   EXPECT_THAT(RsaSsaPssVerifyKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("only modulus size >= 2048")));
 }
 

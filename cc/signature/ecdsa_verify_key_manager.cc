@@ -16,6 +16,7 @@
 
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
@@ -60,7 +61,7 @@ Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
     case EcdsaSignatureEncoding::IEEE_P1363:
       break;
     default:
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Unsupported signature encoding: %d", params.encoding());
   }
   switch (params.curve()) {
@@ -69,7 +70,7 @@ Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
       // leftmost bits of the hash is used in signature computation.
       // Therefore, we don't allow it here to prevent security illusion.
       if (params.hash_type() != HashType::SHA256) {
-        return Status(util::error::INVALID_ARGUMENT,
+        return Status(absl::StatusCode::kInvalidArgument,
                       "Only SHA256 is supported for NIST P256.");
       }
       break;
@@ -77,18 +78,18 @@ Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {
       // Allow using SHA384 and SHA512 with NIST-P384.
       if ((params.hash_type() != HashType::SHA384) &&
           (params.hash_type() != HashType::SHA512)) {
-        return Status(util::error::INVALID_ARGUMENT,
+        return Status(absl::StatusCode::kInvalidArgument,
                       "Only SHA384 and SHA512 are supported for this curve.");
       }
       break;
     case EllipticCurveType::NIST_P521:
       if (params.hash_type() != HashType::SHA512) {
-        return Status(util::error::INVALID_ARGUMENT,
+        return Status(absl::StatusCode::kInvalidArgument,
                       "Only SHA512 is supported for this curve.");
       }
       break;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported elliptic curve");
   }
   return util::OkStatus();

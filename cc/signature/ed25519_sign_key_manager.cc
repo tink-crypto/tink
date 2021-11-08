@@ -17,6 +17,7 @@
 #include "tink/signature/ed25519_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_sign.h"
@@ -72,7 +73,7 @@ Status Ed25519SignKeyManager::ValidateKey(const Ed25519PrivateKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().length() != 32) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "The ED25519 private key must be 32-bytes long.");
   }
   return Ed25519VerifyKeyManager().ValidateKey(key.public_key());
@@ -89,7 +90,7 @@ StatusOr<Ed25519PrivateKey> Ed25519SignKeyManager::DeriveKey(
   if (!randomness.ok()) {
     if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Could not get enough pseudorandomness from input stream");
     }
     return randomness.status();

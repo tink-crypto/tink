@@ -17,6 +17,7 @@
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
 #include "tink/public_key_sign.h"
@@ -90,7 +91,7 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
       break;
     default:
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Curve does not support key derivation.");
   }
 
@@ -99,7 +100,7 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
   if (!randomness.ok()) {
     if (randomness.status().code() == absl::StatusCode::kOutOfRange) {
       return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Could not get enough pseudorandomness from input stream");
     }
     return randomness.status();
@@ -153,7 +154,7 @@ Status EcdsaSignKeyManager::ValidateKey(const EcdsaPrivateKey& key) const {
 Status EcdsaSignKeyManager::ValidateKeyFormat(
     const EcdsaKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return EcdsaVerifyKeyManager().ValidateParams(key_format.params());
 }

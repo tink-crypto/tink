@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
@@ -96,7 +97,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP256) {
   params->set_hash_type(HashType::SHA512);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
@@ -106,7 +107,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP384) {
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
@@ -116,7 +117,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyFormatBadHashP521) {
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, CreateKey) {
@@ -164,7 +165,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
   params->set_hash_type(HashType::SHA512);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
@@ -174,7 +175,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
@@ -184,7 +185,7 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
   EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
@@ -284,7 +285,7 @@ TEST(EcdsaSignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
       absl::make_unique<std::stringstream>("tooshort")};
 
   ASSERT_THAT(EcdsaSignKeyManager().DeriveKey(format, &input_stream).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, DeriveKeyInvalidCurve) {
@@ -296,7 +297,7 @@ TEST(EcdsaSignKeyManagerTest, DeriveKeyInvalidCurve) {
       absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
 
   ASSERT_THAT(EcdsaSignKeyManager().DeriveKey(format, &input_stream).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Test vectors have been manually generated based on BoringSSL

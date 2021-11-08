@@ -39,7 +39,7 @@ util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
                         "public_key_verify_set must be non-NULL");
   }
   if (public_key_verify_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "public_key_verify_set has no primary");
   }
   return util::OkStatus();
@@ -70,7 +70,8 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
   if (signature.length() <= CryptoFormat::kNonRawPrefixSize) {
     // This also rejects raw signatures with size of 4 bytes or fewer.
     // We're not aware of any schemes that output signatures that small.
-    return util::Status(util::error::INVALID_ARGUMENT, "Signature too short.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Signature too short.");
   }
   absl::string_view key_id =
       signature.substr(0, CryptoFormat::kNonRawPrefixSize);
@@ -108,7 +109,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "Invalid signature.");
+  return util::Status(absl::StatusCode::kInvalidArgument, "Invalid signature.");
 }
 
 }  // anonymous namespace

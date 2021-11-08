@@ -21,6 +21,7 @@
 #include <random>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/rsa_util.h"
@@ -69,7 +70,7 @@ namespace {
 util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
                                     RsaSsaPssParams* parameters) {
   if (parameters == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Null parameters provided");
   }
   parameters->set_mgf1_hash(pem_parameters.hash_type);
@@ -86,7 +87,7 @@ util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
 util::Status SetEcdsaParameters(const PemKeyParams& pem_parameters,
                                 EcdsaParams* parameters) {
   if (parameters == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Null parameters provided");
   }
 
@@ -94,7 +95,7 @@ util::Status SetEcdsaParameters(const PemKeyParams& pem_parameters,
       pem_parameters.key_size_in_bits != 256 ||
       pem_parameters.algorithm != PemAlgorithm::ECDSA_IEEE) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Only NIST_P256 ECDSA supported. Parameters should contain "
         "SHA256, 256 bit key size and ECDSA_IEEE algorithm.");
   }
@@ -214,7 +215,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
   size_t modulus_size = private_key_subtle->n.length() * 8;
   if (pem_key.parameters.key_size_in_bits != modulus_size) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid RSA Key modulus size; found: ", modulus_size,
                      ", expected: ", pem_key.parameters.key_size_in_bits));
   }
@@ -255,7 +256,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
     }
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid RSA algorithm ", pem_key.parameters.algorithm));
   }
 
@@ -310,7 +311,7 @@ util::Status AddRsaSsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
   size_t modulus_size = public_key_subtle->n.length() * 8;
   if (pem_key.parameters.key_size_in_bits != modulus_size) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid RSA Key modulus size; found ", modulus_size,
                      ", expected ", pem_key.parameters.key_size_in_bits));
   }
@@ -366,7 +367,7 @@ util::Status AddRsaSsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
     }
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid RSA algorithm ", pem_key.parameters.algorithm));
   }
   return util::OkStatus();
@@ -381,7 +382,7 @@ void SignaturePemKeysetReaderBuilder::Add(const PemKey& pem_serialized_key) {
 util::StatusOr<std::unique_ptr<KeysetReader>>
 SignaturePemKeysetReaderBuilder::Build() {
   if (pem_serialized_keys_.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Empty array of PEM-encoded keys");
   }
 
@@ -395,13 +396,13 @@ SignaturePemKeysetReaderBuilder::Build() {
           new PublicKeyVerifyPemKeysetReader(pem_serialized_keys_));
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT,
+  return util::Status(absl::StatusCode::kInvalidArgument,
                       "Unknown pem_reader_type_");
 }
 
 util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
   if (pem_serialized_keys_.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Empty array of PEM-encoded keys");
   }
 
@@ -428,7 +429,7 @@ util::StatusOr<std::unique_ptr<Keyset>> PublicKeySignPemKeysetReader::Read() {
 
 util::StatusOr<std::unique_ptr<Keyset>> PublicKeyVerifyPemKeysetReader::Read() {
   if (pem_serialized_keys_.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Empty array of PEM-encoded keys");
   }
 

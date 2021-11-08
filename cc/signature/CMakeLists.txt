@@ -96,6 +96,7 @@ tink_cc_library(
   DEPS
     tink::signature::ecdsa_verify_key_manager
     absl::memory
+    absl::status
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
@@ -121,6 +122,7 @@ tink_cc_library(
     ecdsa_verify_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
@@ -144,6 +146,7 @@ tink_cc_library(
   DEPS
     tink::signature::ed25519_verify_key_manager
     absl::memory
+    absl::status
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
@@ -168,6 +171,7 @@ tink_cc_library(
     ed25519_verify_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
@@ -285,6 +289,7 @@ tink_cc_library(
     rsa_ssa_pss_verify_key_manager.h
   DEPS
     absl::memory
+    absl::status
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
@@ -342,6 +347,7 @@ tink_cc_library(
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     absl::memory
+    absl::status
     absl::strings
     tink::core::keyset_reader
     tink::internal::rsa_util
@@ -438,6 +444,7 @@ tink_cc_test(
   SRCS
     ecdsa_verify_key_manager_test.cc
   DEPS
+    absl::status
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     gmock
@@ -484,6 +491,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pkcs1_sign_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     gmock
+    absl::status
     absl::strings
     crypto
     tink::core::public_key_sign
@@ -508,6 +516,7 @@ tink_cc_test(
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     gmock
+    absl::status
     absl::strings
     crypto
     tink::core::public_key_sign
@@ -528,6 +537,7 @@ tink_cc_test(
   SRCS
     ecdsa_sign_key_manager_test.cc
   DEPS
+    absl::status
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     gmock
@@ -553,6 +563,7 @@ tink_cc_test(
     tink::signature::ed25519_verify_key_manager
     gmock
     absl::flat_hash_set
+    absl::status
     tink::core::public_key_sign
     tink::core::registry
     tink::subtle::ed25519_verify_boringssl
