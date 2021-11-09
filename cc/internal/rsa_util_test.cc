@@ -88,7 +88,7 @@ TEST(RsaUtilTest, FailsOnLargeE) {
   BN_set_word(e.get(), 1L << 33);
   EXPECT_THAT(NewRsaKeyPair(/*modulus_size_in_bits=*/2048, e.get(),
                             &private_key, &public_key),
-              StatusIs(absl::StatusCode::kInternal));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(RsaUtilTest, KeyIsWellFormed) {
@@ -121,7 +121,7 @@ TEST(RsaUtilTest, KeyIsWellFormed) {
   {
     auto n_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
     ASSERT_EQ(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()), kSslSuccess);
-    EXPECT_EQ(BN_equal_consttime(n_calc.get(), n->get()), kSslSuccess);
+    EXPECT_EQ(BN_cmp(n_calc.get(), n->get()), 0);
   }
 
   // Check n size >= 2048 bit.
@@ -134,7 +134,7 @@ TEST(RsaUtilTest, KeyIsWellFormed) {
     auto dp_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
     ASSERT_EQ(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()),
               kSslSuccess);
-    EXPECT_EQ(BN_equal_consttime(dp_calc.get(), dp->get()), kSslSuccess);
+    EXPECT_EQ(BN_cmp(dp_calc.get(), dp->get()), 0);
   }
 
   // dq = d mod (q - 1)
@@ -144,7 +144,7 @@ TEST(RsaUtilTest, KeyIsWellFormed) {
     auto dq_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
     ASSERT_EQ(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()),
               kSslSuccess);
-    EXPECT_EQ(BN_equal_consttime(dq_calc.get(), dq->get()), kSslSuccess);
+    EXPECT_EQ(BN_cmp(dq_calc.get(), dq->get()), 0);
   }
 }
 
@@ -241,9 +241,13 @@ TEST(RsaUtilTest, GetRsaModAndExponents) {
   internal::SslUniquePtr<RSA> rsa(RSA_new());
   util::Status result = GetRsaModAndExponents(private_key, rsa.get());
   ASSERT_THAT(result, IsOk());
-  ExpectBignumEquals(rsa->e, private_key.e);
-  ExpectBignumEquals(rsa->n, private_key.n);
-  ExpectBignumEquals(rsa->d, private_key.d);
+  const BIGNUM* n = nullptr;
+  const BIGNUM* e = nullptr;
+  const BIGNUM* d = nullptr;
+  RSA_get0_key(rsa.get(), &n, &e, &d);
+  ExpectBignumEquals(n, private_key.n);
+  ExpectBignumEquals(e, private_key.e);
+  ExpectBignumEquals(d, private_key.d);
 }
 
 TEST(RsaUtilTest, GetRsaPrimeFactors) {
@@ -254,8 +258,11 @@ TEST(RsaUtilTest, GetRsaPrimeFactors) {
   internal::SslUniquePtr<RSA> rsa(RSA_new());
   util::Status result = GetRsaPrimeFactors(private_key, rsa.get());
   ASSERT_THAT(result, IsOk());
-  ExpectBignumEquals(rsa->p, private_key.p);
-  ExpectBignumEquals(rsa->q, private_key.q);
+  const BIGNUM* p = nullptr;
+  const BIGNUM* q = nullptr;
+  RSA_get0_factors(rsa.get(), &p, &q);
+  ExpectBignumEquals(p, private_key.p);
+  ExpectBignumEquals(q, private_key.q);
 }
 
 TEST(RsaUtilTest, GetRsaCrtParams) {
@@ -285,12 +292,18 @@ TEST(RsaUtilTest, CopiesRsaPrivateKey) {
       RsaPrivateKeyToRsa(private_key);
   EXPECT_TRUE(rsa_result.ok());
   internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
-
-  ExpectBignumEquals(rsa->e, private_key.e);
-  ExpectBignumEquals(rsa->n, private_key.n);
-  ExpectBignumEquals(rsa->d, private_key.d);
-  ExpectBignumEquals(rsa->p, private_key.p);
-  ExpectBignumEquals(rsa->q, private_key.q);
+  const BIGNUM* n = nullptr;
+  const BIGNUM* e = nullptr;
+  const BIGNUM* d = nullptr;
+  RSA_get0_key(rsa.get(), &n, &e, &d);
+  const BIGNUM* p = nullptr;
+  const BIGNUM* q = nullptr;
+  RSA_get0_factors(rsa.get(), &p, &q);
+  ExpectBignumEquals(n, private_key.n);
+  ExpectBignumEquals(e, private_key.e);
+  ExpectBignumEquals(d, private_key.d);
+  ExpectBignumEquals(p, private_key.p);
+  ExpectBignumEquals(q, private_key.q);
 }
 
 TEST(RsaUtilTest, CopiesRsaPublicKey) {
@@ -304,8 +317,11 @@ TEST(RsaUtilTest, CopiesRsaPublicKey) {
   EXPECT_TRUE(rsa_result.ok());
   internal::SslUniquePtr<RSA> rsa = std::move(rsa_result).ValueOrDie();
 
-  ExpectBignumEquals(rsa->e, public_key.e);
-  ExpectBignumEquals(rsa->n, public_key.n);
+  const BIGNUM* n = nullptr;
+  const BIGNUM* e = nullptr;
+  RSA_get0_key(rsa.get(), &n, &e, /*d=*/nullptr);
+  ExpectBignumEquals(n, public_key.n);
+  ExpectBignumEquals(e, public_key.e);
 }
 
 }  // namespace

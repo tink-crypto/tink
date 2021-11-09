@@ -25,6 +25,10 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
+// Compares `bignum` with the given `word`. It returns a result < 0 if `bignum`
+// < `word`, 0 if `bignum` == `word`, and > 0 if `bignum` > `word`.
+int CompareBignumWithWord(const BIGNUM* bignum, BN_ULONG word);
+
 // Converts the absolute value of `bignum` into a big-endian form, and writes it
 // in `buffer`.
 crypto::tink::util::Status BignumToBinaryPadded(absl::Span<char> buffer,

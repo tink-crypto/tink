@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
@@ -137,6 +138,24 @@ TEST(BnUtil, BufferToSmall) {
           BignumToSecretData(expected_bn->get(), buffer_size);
       EXPECT_THAT(result.status(), Not(IsOk()));
     }
+  }
+}
+
+TEST(BnUtil, CompareBignumWithWord) {
+  internal::SslUniquePtr<BIGNUM> bn(BN_new());
+  BN_set_word(bn.get(), /*value=*/0x0fffffffffffffffUL);
+  EXPECT_EQ(CompareBignumWithWord(bn.get(), /*word=*/0x0fffffffffffffffL), 0);
+  std::vector<BN_ULONG> smaller_words = {
+      0x0000000000000000UL, 0x0000000000000001UL, 0x00ffffffffffffffUL};
+  for (const auto& word : smaller_words) {
+    EXPECT_GT(CompareBignumWithWord(bn.get(), word), 0)
+        << absl::StrCat("With value: 0x", absl::Hex(word));
+  }
+  std::vector<BN_ULONG> larger_words = {0x1000000000000000UL,
+                                        0xffffffffffffffffUL};
+  for (const auto& word : larger_words) {
+    EXPECT_LT(CompareBignumWithWord(bn.get(), word), 0)
+        << absl::StrCat("With value: 0x", absl::Hex(word));
   }
 }
 

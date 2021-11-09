@@ -89,6 +89,16 @@ util::StatusOr<internal::SslUniquePtr<BIGNUM>> StringToBignum(
   return std::move(bn);
 }
 
+int CompareBignumWithWord(const BIGNUM *bignum, BN_ULONG word) {
+#ifdef OPENSSL_IS_BORINGSSL
+  return BN_cmp_word(bignum, word);
+#else
+  internal::SslUniquePtr<BIGNUM> bn_word(BN_new());
+  BN_set_word(bn_word.get(), word);
+  return BN_cmp(bignum, bn_word.get());
+#endif
+}
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

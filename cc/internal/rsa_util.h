@@ -93,12 +93,17 @@ struct RsaPrivateKey {
 // https://www.keylength.com/en/4/).
 crypto::tink::util::Status ValidateRsaModulusSize(size_t modulus_size);
 
-// Validates whether 'publicExponent' is odd and greater than 65536. The
-// primes p and q are chosen such that (p-1)(q-1) is relatively prime to the
-// public exponent. Therefore, the public exponent must be odd. Furthermore,
-// choosing a public exponent which is not greater than 65536 can lead to weak
-// instantiations of RSA. A public exponent which is odd and greater than
-// 65536 conforms to the requirements set by NIST FIPS 186-4 (Appendix B.3.1).
+// Validates whether `exponent` is a valid bignum, is odd, greater than 65536
+// and smaller than 32 bits. The primes p and q are chosen such that (p-1)(q-1)
+// is relatively prime to the public exponent. Therefore, the public exponent
+// must be odd. Furthermore, choosing a public exponent which is not greater
+// than 65536 can lead to weak instantiations of RSA. A public exponent which is
+// odd and greater than 65536 conforms to the requirements set by NIST FIPS
+// 186-4 (Appendix B.3.1).
+crypto::tink::util::Status ValidateRsaPublicExponent(const BIGNUM *exponent);
+
+// Validates whether `exponent` is a valid bignum, is odd, greater than 65536
+// and smaller than 32 bits.
 crypto::tink::util::Status ValidateRsaPublicExponent(
     absl::string_view exponent);
 
