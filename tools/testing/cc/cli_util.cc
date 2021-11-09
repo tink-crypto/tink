@@ -201,14 +201,13 @@ Status CliUtil::InitGcp() {
                            "/tink_base/testdata/credential.json";
   auto client_result = GcpKmsClient::New("", creds_file);
   if (!client_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                        "Failed to connect to GCP client.");
+    return Status(absl::StatusCode::kInternal,
+                  "Failed to connect to GCP client.");
   }
   auto client_add_result =
       KmsClients::Add(std::move(client_result.ValueOrDie()));
   if (!client_add_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                  "Failed to add KMS client.");
+    return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
   }
   return crypto::tink::util::OkStatus();
 }
