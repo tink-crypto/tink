@@ -162,12 +162,6 @@ util::Status ValidateHeader(const google::protobuf::Struct& header,
   return util::OkStatus();
 }
 
-// TODO(juerg): Remove this function once it is not used anymore.
-util::Status ValidateHeader(const google::protobuf::Struct& header,
-                            absl::string_view algorithm) {
-  return ValidateHeader(header, algorithm, absl::nullopt, absl::nullopt);
-}
-
 absl::optional<std::string> GetTypeHeader(
     const google::protobuf::Struct& header) {
   auto it = header.fields().find("typ");
