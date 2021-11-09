@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "openssl/base.h"
 #include "openssl/err.h"
 #include "openssl/hpke.h"
@@ -53,7 +54,7 @@ util::Status HpkeKeyBoringSsl::Init(absl::string_view recipient_private_key) {
           reinterpret_cast<const uint8_t*>(recipient_private_key.data()),
           recipient_private_key.size())) {
     return util::Status(
-        util::error::UNKNOWN,
+        absl::StatusCode::kUnknown,
         "Unable to initialize BoringSSL HPKE recipient private key.");
   }
   return util::OkStatus();

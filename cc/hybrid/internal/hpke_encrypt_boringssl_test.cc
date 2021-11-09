@@ -104,7 +104,7 @@ TEST(HpkeEncryptBoringSslWithMissingPublicKeyTest, ZeroLengthPublicKeyFails) {
       HpkeEncryptBoringSsl::NewForTesting(
           hpke_params, /*recipient_public_key=*/"", params.application_info,
           params.seed_for_testing);
-  ASSERT_THAT(result.status(), StatusIs(util::error::UNKNOWN));
+  ASSERT_THAT(result.status(), StatusIs(absl::StatusCode::kUnknown));
 }
 
 }  // namespace

@@ -78,7 +78,7 @@ util::Status HpkeDecryptBoringSsl::Init(const HpkeParams& params,
           encapsulated_key.size(),
           reinterpret_cast<const uint8_t *>(context_info.data()),
           context_info.size())) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "Unable to set up BoringSSL HPKE recipient context.");
   }
   return util::OkStatus();
@@ -96,7 +96,7 @@ util::StatusOr<std::string> HpkeDecryptBoringSsl::Decrypt(
           ciphertext.size(),
           reinterpret_cast<const uint8_t *>(associated_data.data()),
           associated_data.size())) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "BoringSSL HPKE decryption failed.");
   }
   subtle::ResizeStringUninitialized(&plaintext, plaintext_size);

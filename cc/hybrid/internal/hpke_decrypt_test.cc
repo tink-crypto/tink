@@ -159,7 +159,7 @@ TEST(HpkeDecryptWithBadCiphertextTest, BadCiphertextFails) {
           ->Decrypt(absl::StrCat(*ciphertext, "modified ciphertext"),
                     params.application_info);
 
-  ASSERT_THAT(plaintext.status(), StatusIs(util::error::UNKNOWN));
+  ASSERT_THAT(plaintext.status(), StatusIs(absl::StatusCode::kUnknown));
 }
 
 TEST(HpkeDecryptWithBadAssociatedDataTest, BadAssociatedDataFails) {
@@ -182,7 +182,7 @@ TEST(HpkeDecryptWithBadAssociatedDataTest, BadAssociatedDataFails) {
           ->Decrypt(*ciphertext,
                     absl::StrCat(params.application_info, "modified aad"));
 
-  ASSERT_THAT(plaintext.status(), StatusIs(util::error::UNKNOWN));
+  ASSERT_THAT(plaintext.status(), StatusIs(absl::StatusCode::kUnknown));
 }
 
 TEST(HpkeDecryptWithMissingPublicKeyTest, MissingPublicKeyFails) {

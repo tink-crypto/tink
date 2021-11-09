@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/algorithm/container.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/err.h"
@@ -85,7 +86,7 @@ util::Status HpkeEncryptBoringSsl::Init(
           recipient_public_key.size(),
           reinterpret_cast<const uint8_t *>(context_info.data()),
           context_info.size())) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "Unable to set up HPKE sender context.");
   }
   encapsulated_key_ = std::string(reinterpret_cast<const char *>(enc), enc_len);
@@ -118,7 +119,7 @@ util::Status HpkeEncryptBoringSsl::InitForTesting(
           context_info.size(),
           reinterpret_cast<const uint8_t *>(seed_for_testing.data()),
           seed_for_testing.size())) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "Unable to set up HPKE sender context.");
   }
   encapsulated_key_ = std::string(reinterpret_cast<const char *>(enc), enc_len);
@@ -141,7 +142,7 @@ util::StatusOr<std::string> HpkeEncryptBoringSsl::EncapsulateKeyThenEncrypt(
           reinterpret_cast<const uint8_t *>(plaintext.data()), plaintext.size(),
           reinterpret_cast<const uint8_t *>(associated_data.data()),
           associated_data.size())) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "BoringSSL HPKE encryption failed.");
   }
   return ciphertext;

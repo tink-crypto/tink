@@ -62,7 +62,7 @@ TEST(HpkeKeyBoringSslTest, ZeroLengthPrivateKeyFails) {
   util::StatusOr<std::unique_ptr<HpkeKeyBoringSsl>> result =
       HpkeKeyBoringSsl::New(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                             /*recipient_private_key=*/"");
-  ASSERT_THAT(result.status(), StatusIs(util::error::UNKNOWN));
+  ASSERT_THAT(result.status(), StatusIs(absl::StatusCode::kUnknown));
 }
 
 }  // namespace

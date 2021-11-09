@@ -87,6 +87,7 @@ cc_library(
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@tink_cc//proto:hpke_cc_proto",
     ],
@@ -105,6 +106,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@tink_cc//proto:hpke_cc_proto",
     ],
 )
