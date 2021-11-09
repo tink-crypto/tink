@@ -31,6 +31,7 @@
 #import "objc/signature/TINKPublicKeyVerifyInternal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
@@ -121,7 +122,7 @@ static Keyset publicKeyset;
       [TINKPublicKeyVerifyFactory primitiveWithKeysetHandle:handle error:&error];
   XCTAssertNil(publicKeyVerify);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 
@@ -180,7 +181,7 @@ static Keyset publicKeyset;
       error = nil;
       XCTAssertFalse([mutableSignature isEqualToData:signature]);
       XCTAssertFalse([publicKeyVerify verifySignature:mutableSignature forData:data error:&error]);
-      XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+      XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
       XCTAssertTrue([error.localizedFailureReason containsString:@"Invalid signature."]);
     }
   }
@@ -203,7 +204,7 @@ static Keyset publicKeyset;
       error = nil;
       XCTAssertFalse([mutableData isEqualToData:data]);
       XCTAssertFalse([publicKeyVerify verifySignature:signature forData:mutableData error:&error]);
-      XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+      XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
       XCTAssertTrue([error.localizedFailureReason containsString:@"Invalid signature."]);
     }
   }

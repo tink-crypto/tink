@@ -22,6 +22,7 @@
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKErrors.h"
 
+#include "absl/status/status.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -87,7 +88,7 @@
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT, "Invalid TINKSignatureKeyTemplate"));
+            absl::StatusCode::kInvalidArgument, "Invalid TINKSignatureKeyTemplate"));
       }
       return nil;
   }

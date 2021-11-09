@@ -146,6 +146,7 @@ objc_library(
         "//cc:binary_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -191,6 +192,7 @@ objc_library(
         "//cc:json_keyset_reader",
         "//objc/util:errors",
         "//objc/util:strings",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -234,6 +236,7 @@ objc_library(
         "//objc/util:errors",
         "//objc/util:strings",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -344,6 +347,7 @@ objc_library(
         "//cc/aead:aead_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -412,6 +416,7 @@ objc_library(
         "//cc/daead:deterministic_aead_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -518,6 +523,7 @@ objc_library(
         "//cc/hybrid:hybrid_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -587,6 +593,7 @@ objc_library(
         "//cc/mac:mac_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -651,6 +658,7 @@ objc_library(
         "//cc/signature:signature_key_templates",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 

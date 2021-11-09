@@ -18,6 +18,7 @@
 
 #import <XCTest/XCTest.h>
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
@@ -65,7 +66,7 @@ static EciesAeadHkdfPublicKey getNewEciesPublicKey() {
 
   XCTAssertNil(primitive);
   XCTAssertNotNil(error);
-  XCTAssertEqual(error.code, crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   NSDictionary *userInfo = [error userInfo];
   NSString *errorString = [userInfo objectForKey:NSLocalizedFailureReasonErrorKey];
   XCTAssertTrue([errorString containsString:@"at least one key"]);

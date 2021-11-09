@@ -25,6 +25,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
@@ -84,7 +85,7 @@
       [[TINKKeysetHandle alloc] initCleartextKeysetHandleWithKeysetReader:reader error:&error];
 
   XCTAssertNil(handle);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
 }
 
 - (void)testSerializeKeyset {
