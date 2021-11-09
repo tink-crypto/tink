@@ -170,7 +170,7 @@ TEST(SubtleUtilBoringSSLTest, GetCurveUnimplemented) {
   EC_GROUP* unsupported_group = EC_GROUP_new_by_curve_name(NID_secp224r1);
 
   EXPECT_THAT(SubtleUtilBoringSSL::GetCurve(unsupported_group).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {

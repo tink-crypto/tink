@@ -534,7 +534,7 @@ TEST(PemParserEcTest, ReadEcPublicKeyUnsupportedCurve) {
   auto ecdsa_key =
       PemParser::ParseEcPublicKey(absl::StripAsciiWhitespace(kP224PublicKey));
 
-  EXPECT_THAT(ecdsa_key.status(), StatusIs(util::error::UNIMPLEMENTED));
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(PemParserEcTest, WriteEcPublicKeySucceeds) {
