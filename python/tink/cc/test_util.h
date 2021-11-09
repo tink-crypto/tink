@@ -65,7 +65,7 @@ class TestReadableObject : public PythonFileObjectAdapter {
 
   util::StatusOr<std::string> Read(int size) override {
     if (position_ == buffer_.size() && size > 0) {
-      return util::Status(util::error::UNKNOWN, "EOFError");
+      return util::Status(absl::StatusCode::kUnknown, "EOFError");
     }
     int actual = std::min(size, static_cast<int>(buffer_.size() - position_));
     std::string to_return = buffer_.substr(position_, actual);
@@ -135,7 +135,8 @@ class DummyStreamingAead : public StreamingAead {
           return status_;
         }
         if (next_result.ValueOrDie() < header_.size()) {
-          status_ = util::Status(util::error::INTERNAL, "Buffer too small");
+          status_ =
+              util::Status(absl::StatusCode::kInternal, "Buffer too small");
         } else {
           memcpy(*data, header_.data(), static_cast<int>(header_.size()));
           ct_dest_->BackUp(next_result.ValueOrDie() - header_.size());
@@ -197,17 +198,18 @@ class DummyStreamingAead : public StreamingAead {
         if (!next_result.ok()) {
           status_ = next_result.status();
           if (status_.code() == absl::StatusCode::kOutOfRange) {
-            status_ = util::Status(
-                util::error::INVALID_ARGUMENT, "Could not read header");
+            status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                                   "Could not read header");
           }
           return status_;
         }
         if (next_result.ValueOrDie() < exp_header_.size()) {
-          status_ = util::Status(util::error::INTERNAL, "Buffer too small");
+          status_ =
+              util::Status(absl::StatusCode::kInternal, "Buffer too small");
         } else if (memcmp((*data), exp_header_.data(),
                           static_cast<int>(exp_header_.size()))) {
-          status_ = util::Status(
-              util::error::INVALID_ARGUMENT, "Corrupted header");
+          status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                                 "Corrupted header");
         }
         if (status_.ok()) {
           ct_source_->BackUp(next_result.ValueOrDie() - exp_header_.size());
@@ -287,12 +289,12 @@ class DummyStreamingAead : public StreamingAead {
       if (!status_.ok() &&
           status_.code() != absl::StatusCode::kOutOfRange) return;
       if (buf->size() < exp_header_.size()) {
-        status_ = util::Status(
-            util::error::INVALID_ARGUMENT, "Could not read header");
+        status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                               "Could not read header");
       } else if (memcmp(buf->get_mem_block(), exp_header_.data(),
                         static_cast<int>(exp_header_.size()))) {
-        status_ = util::Status(
-            util::error::INVALID_ARGUMENT, "Corrupted header");
+        status_ = util::Status(absl::StatusCode::kInvalidArgument,
+                               "Corrupted header");
       }
     }
 
