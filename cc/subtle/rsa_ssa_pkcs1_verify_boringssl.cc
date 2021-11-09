@@ -16,6 +16,7 @@
 
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/digest.h"
@@ -81,7 +82,7 @@ util::Status RsaSsaPkcs1VerifyBoringSsl::Verify(absl::string_view signature,
                  /*sig_len=*/signature.length(),
                  /*rsa=*/rsa_.get())) {
     // Signature is invalid.
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
 

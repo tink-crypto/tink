@@ -51,7 +51,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid public key: ", internal::GetSslErrors()));
   }
   return New(std::move(key), hash_type, encoding);
@@ -109,7 +109,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
                         reinterpret_cast<const uint8_t*>(derSig.data()),
                         derSig.size(), key_.get())) {
     // signature is invalid
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
   // signature is valid

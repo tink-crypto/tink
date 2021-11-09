@@ -111,6 +111,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -145,6 +146,7 @@ cc_library(
         "//internal:util",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
@@ -272,6 +274,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -315,6 +318,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -444,6 +448,7 @@ cc_library(
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -497,6 +502,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
     ],
@@ -681,6 +687,7 @@ cc_library(
         ":common_enums",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -818,6 +825,7 @@ cc_library(
         "//:hybrid_decrypt",
         "//:hybrid_encrypt",
         "//util:status",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -853,6 +861,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -1660,6 +1669,7 @@ cc_test(
         ":streaming_aead_test_util",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1709,6 +1719,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1730,6 +1741,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1751,6 +1763,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -1772,6 +1785,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

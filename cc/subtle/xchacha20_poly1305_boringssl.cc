@@ -48,7 +48,7 @@ util::StatusOr<std::unique_ptr<Aead>> XChacha20Poly1305BoringSsl::New(
   if (!status.ok()) return status;
 
   if (!IsValidKeySize(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid key size");
   }
 
   const EVP_AEAD* cipher = EVP_aead_xchacha20_poly1305();
@@ -117,7 +117,8 @@ util::StatusOr<std::string> XChacha20Poly1305BoringSsl::Decrypt(
   additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (ciphertext.size() < kNonceSize + kTagSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
 
   internal::SslUniquePtr<EVP_AEAD_CTX> ctx(

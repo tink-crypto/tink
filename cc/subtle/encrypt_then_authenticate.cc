@@ -48,7 +48,8 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
     std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
   if (tag_size < kMinTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "tag size too small");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "tag size too small");
   }
   std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(
       std::move(ind_cpa_cipher), std::move(mac), tag_size));
@@ -65,7 +66,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 
@@ -94,13 +95,14 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
   additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (ciphertext.size() < tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 

@@ -53,7 +53,7 @@ AesSivBoringSsl::New(const util::SecretData& key) {
   if (!status.ok()) return status;
 
   if (!IsValidKeySizeInBytes(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
   auto k1_or = InitializeAesKey(absl::MakeSpan(key).subspan(0, key.size() / 2));
   if (!k1_or.ok()) {
@@ -220,7 +220,8 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
 util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < kBlockSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   size_t plaintext_size = ciphertext.size() - kBlockSize;
   std::vector<uint8_t> pt(plaintext_size);
@@ -234,7 +235,8 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
                      additional_data.size()),
       absl::MakeSpan(pt), s2v);
   if (CRYPTO_memcmp(siv, s2v, kBlockSize) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid ciphertext");
   }
   return std::string(reinterpret_cast<const char*>(pt.data()), plaintext_size);
 }

@@ -17,8 +17,8 @@
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
 #include "absl/memory/memory.h"
-#include "openssl/evp.h"
 #include "absl/status/status.h"
+#include "openssl/evp.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/util/status.h"
@@ -38,10 +38,11 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulCmacBoringSsl::New(
       cipher = EVP_aes_256_cbc();
       break;
     default:
-      return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "invalid key size");
   }
   if (tag_size > kMaxTagSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid tag size");
   }
 
   // Create and initialize the CMAC context

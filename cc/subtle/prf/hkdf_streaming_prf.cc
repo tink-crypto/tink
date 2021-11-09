@@ -82,11 +82,11 @@ class HkdfInputStream : public InputStream {
     size_t prk_len;
 
     if (!digest) {
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid digest");
+      return util::Status(absl::StatusCode::kInvalidArgument, "Invalid digest");
     }
     const size_t digest_size = EVP_MD_size(digest);
     if (digest_size == 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid digest size (0)");
     }
     ti_.resize(digest_size);
@@ -183,12 +183,12 @@ HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
 
   if (hash != SHA256 && hash != SHA512 && hash != SHA1) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Hash ", hash, " not acceptable for HkdfStreamingPrf"));
   }
 
   if (secret.size() < 10) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Too short secret for HkdfStreamingPrf");
   }
   auto evp_md_or = SubtleUtilBoringSSL::EvpHash(hash);

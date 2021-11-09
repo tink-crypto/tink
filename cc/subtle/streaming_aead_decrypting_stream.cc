@@ -81,11 +81,11 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
     std::unique_ptr<StreamSegmentDecrypter> segment_decrypter,
     std::unique_ptr<InputStream> ciphertext_source) {
   if (segment_decrypter == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "segment_decrypter must be non-null");
   }
   if (ciphertext_source == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "cipertext_source must be non-null");
   }
   std::unique_ptr<StreamingAeadDecryptingStream> dec_stream(
@@ -120,7 +120,7 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
     status_ = ReadFromStream(ct_source_.get(),
                              segment_decrypter_->get_header_size(), &header);
     if (status_.code() == absl::StatusCode::kOutOfRange) {
-      status_ = Status(util::error::INVALID_ARGUMENT,
+      status_ = Status(absl::StatusCode::kInvalidArgument,
                        "Could not read stream header.");
     }
     if (!status_.ok()) return status_;

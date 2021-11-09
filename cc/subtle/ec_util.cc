@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 
+#include "absl/status/status.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/x509.h"
@@ -50,7 +51,7 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
     return coordinate_size;
   }
   if (coordinate_size == 0) {
-    return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Unsupported elliptic curve type: %s",
                      EnumToString(curve_type));
   }
@@ -62,7 +63,7 @@ crypto::tink::util::StatusOr<uint32_t> EcUtil::EncodingSizeInBytes(
     case EcPointFormat::COMPRESSED:
       return coordinate_size + 1;
     default:
-      return ToStatusF(crypto::tink::util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Unsupported elliptic curve point format: %s",
                        EnumToString(point_format));
   }

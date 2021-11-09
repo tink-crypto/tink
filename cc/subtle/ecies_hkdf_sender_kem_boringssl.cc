@@ -133,15 +133,16 @@ EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
   if (!status.ok()) return status;
 
   if (curve != CURVE25519) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "curve is not CURVE25519");
   }
   if (pubx.size() != X25519_PUBLIC_VALUE_LEN) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "pubx has unexpected length");
   }
   if (!puby.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "puby is not empty");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "puby is not empty");
   }
   std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
       new EciesHkdfX25519SendKemBoringSsl(pubx));
@@ -155,7 +156,7 @@ EciesHkdfX25519SendKemBoringSsl::GenerateKey(
     subtle::EcPointFormat point_format) const {
   if (point_format != EcPointFormat::COMPRESSED) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "X25519 only supports compressed elliptic curve points");
   }
 

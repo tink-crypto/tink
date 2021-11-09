@@ -51,7 +51,7 @@ util::StatusOr<const EVP_CIPHER*> CipherForKeySize(size_t key_size) {
     case 32:
       return EVP_aes_256_cbc();
   }
-  return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key size %d",
+  return ToStatusF(absl::StatusCode::kInvalidArgument, "Invalid key size %d",
                    key_size);
 }
 #endif
@@ -65,12 +65,12 @@ util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
   if (!status.ok()) return status;
 
   if (key.size() != kSmallKeySize && key.size() != kBigKeySize) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid key size: expected %d or %d, found %d",
                      kSmallKeySize, kBigKeySize, key.size());
   }
   if (tag_size > kMaxTagSize) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid tag size: expected lower than %d, found %d",
                      kMaxTagSize, tag_size);
   }
@@ -115,14 +115,14 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
 util::Status AesCmacBoringSsl::VerifyMac(absl::string_view mac,
                                          absl::string_view data) const {
   if (mac.size() != tag_size_) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Incorrect tag size: expected %d, found %d", tag_size_,
                      mac.size());
   }
   util::StatusOr<std::string> computed_mac = ComputeMac(data);
   if (!computed_mac.ok()) return computed_mac.status();
   if (CRYPTO_memcmp(computed_mac->data(), mac.data(), tag_size_) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "CMAC verification failed");
   }
   return util::OkStatus();

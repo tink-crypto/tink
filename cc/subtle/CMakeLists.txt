@@ -106,6 +106,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
 )
 
@@ -141,6 +142,7 @@ tink_cc_library(
     tink::util::errors
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
     absl::str_format
 )
@@ -263,6 +265,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
 )
 
@@ -304,6 +307,7 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     crypto
+    absl::status
     absl::strings
 )
 
@@ -424,6 +428,7 @@ tink_cc_library(
     tink::util::statusor
     crypto
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -476,6 +481,7 @@ tink_cc_library(
     absl::config
     absl::memory
     absl::span
+    absl::status
     absl::strings
 )
 
@@ -643,6 +649,7 @@ tink_cc_library(
     tink::subtle::common_enums
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
     rapidjson
 )
@@ -763,6 +770,7 @@ tink_cc_library(
     hybrid_test_util.cc
     hybrid_test_util.h
   DEPS
+    absl::status
     absl::strings
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
@@ -795,6 +803,7 @@ tink_cc_library(
     streaming_mac_impl.h
   DEPS
     absl::memory
+    absl::status
     tink::core::mac
     tink::core::streaming_mac
     tink::subtle::mac::stateful_mac
@@ -1460,6 +1469,7 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_util
     absl::memory
+    absl::status
     absl::strings
     gmock
 )
@@ -1502,6 +1512,7 @@ tink_cc_test(
   SRCS
     streaming_mac_impl_test.cc
   DEPS
+    absl::status
     tink::subtle::streaming_mac_impl
     tink::subtle::random
     tink::subtle::test_util
@@ -1517,6 +1528,7 @@ tink_cc_test(
     stateful_hmac_boringssl_test.cc
   DEPS
     absl::memory
+    absl::status
     tink::subtle::common_enums
     tink::subtle::stateful_hmac_boringssl
     tink::subtle::wycheproof_util
@@ -1534,6 +1546,7 @@ tink_cc_test(
     stateful_cmac_boringssl_test.cc
   DEPS
     absl::memory
+    absl::status
     tink::subtle::common_enums
     tink::subtle::stateful_cmac_boringssl
     tink::subtle::wycheproof_util
@@ -1553,6 +1566,7 @@ tink_cc_test(
     tink::subtle::pem_parser_boringssl
     tink::subtle::subtle_util_boringssl
     gmock
+    absl::status
     absl::strings
     crypto
     tink::internal::bn_util

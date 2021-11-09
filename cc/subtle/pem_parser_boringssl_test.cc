@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
@@ -518,7 +519,8 @@ TEST(PemParserEcTest, ReadEcPublicKeyInvalid) {
     auto ecdsa_key =
         PemParser::ParseEcPublicKey(absl::StripAsciiWhitespace(corrupt_pem));
 
-    EXPECT_THAT(ecdsa_key.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(ecdsa_key.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
@@ -579,7 +581,7 @@ TEST(PemParserEcTest, WriteEcPublicKeyWithBadXFails) {
   SubtleUtilBoringSSL::EcKey ec_key = ec_key_statusor.ValueOrDie();
   Corrupt(&ec_key.pub_x);
   EXPECT_THAT(PemParser::WriteEcPublicKey(ec_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(PemParserEcTest, WriteEcPublicKeyWithBadYFails) {
@@ -588,7 +590,7 @@ TEST(PemParserEcTest, WriteEcPublicKeyWithBadYFails) {
   SubtleUtilBoringSSL::EcKey ec_key = ec_key_statusor.ValueOrDie();
   Corrupt(&ec_key.pub_y);
   EXPECT_THAT(PemParser::WriteEcPublicKey(ec_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(PemParserEcTest, WriteEcPrivateKeyWithBadPrivFails) {
@@ -599,7 +601,7 @@ TEST(PemParserEcTest, WriteEcPrivateKeyWithBadPrivFails) {
   Corrupt(&priv);
   ec_key.priv = util::SecretDataFromStringView(priv);
   EXPECT_THAT(PemParser::WriteEcPrivateKey(ec_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

@@ -40,7 +40,7 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
 
   if (private_key.size() != ED25519_PRIVATE_KEY_LEN) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid ED25519 private key size (%d). "
                         "The only valid size is %d.",
                         private_key.size(), ED25519_PRIVATE_KEY_LEN));

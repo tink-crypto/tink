@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/status.h"
@@ -183,7 +184,7 @@ TEST(StreamingMacImplTest, VerifyEmptyMacFail) {
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifySmallMacFail) {
@@ -199,7 +200,7 @@ TEST(StreamingMacImplTest, VerifySmallMacFail) {
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifyRandMac) {

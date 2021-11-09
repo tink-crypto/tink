@@ -56,15 +56,15 @@ void BigEndianStore32(uint8_t dst[4], uint32_t val) {
 
 util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
   if (params.key.size() != 16 && params.key.size() != 32) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "key must have 16 or 32 bytes");
   }
   if (params.key.size() != params.salt.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "salt must have same size as the key");
   }
   if (params.ciphertext_offset < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_offset must be non-negative");
   }
   int header_size = 1 + params.salt.size() +
@@ -72,7 +72,7 @@ util::Status Validate(const AesGcmHkdfStreamSegmentEncrypter::Params& params) {
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
           AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_segment_size too small");
   }
   return util::OkStatus();
@@ -137,16 +137,18 @@ util::Status AesGcmHkdfStreamSegmentEncrypter::EncryptSegment(
     const std::vector<uint8_t>& plaintext, bool is_last_segment,
     std::vector<uint8_t>* ciphertext_buffer) {
   if (plaintext.size() > get_plaintext_segment_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "plaintext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "plaintext too long");
   }
   if (ciphertext_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_buffer must be non-null");
   }
   if (get_segment_number() > std::numeric_limits<uint32_t>::max() ||
       (get_segment_number() == std::numeric_limits<uint32_t>::max() &&
        !is_last_segment)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "too many segments");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "too many segments");
   }
 
   int ct_size = plaintext.size() + kTagSizeInBytes;

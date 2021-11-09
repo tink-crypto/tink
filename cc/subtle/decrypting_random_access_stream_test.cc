@@ -145,7 +145,7 @@ TEST(DecryptingRandomAccessStreamTest, NegativeCiphertextOffset) {
           std::move(seg_decrypter), absl::make_unique<DummyRandomAccessStream>(
                                         ciphertext_size, ct_offset))
           .status(),
-      StatusIs(util::error::INVALID_ARGUMENT,
+      StatusIs(absl::StatusCode::kInvalidArgument,
                HasSubstr("The ciphertext offset must be non-negative")));
 }
 
@@ -165,7 +165,8 @@ TEST(DecryptingRandomAccessStreamTest,
           std::move(seg_decrypter), absl::make_unique<DummyRandomAccessStream>(
                                         ciphertext_size, ct_offset))
           .status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("greater than 0")));
+      StatusIs(absl::StatusCode::kInvalidArgument,
+               HasSubstr("greater than 0")));
 }
 
 TEST(DecryptingRandomAccessStreamTest, TooManySegments) {
@@ -260,7 +261,8 @@ TEST(DecryptingRandomAccessStreamTest, SelectiveDecryption) {
                 EXPECT_TRUE(status.ok() ||
                             status.code() == absl::StatusCode::kOutOfRange);
               } else {
-                EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+                EXPECT_THAT(status,
+                            StatusIs(absl::StatusCode::kInvalidArgument));
               }
               EXPECT_EQ(std::min(chunk_size, std::max(pt_size - position, 0)),
                         buffer->size());
@@ -313,7 +315,7 @@ TEST(DecryptingRandomAccessStreamTest, TruncatedCiphertextDecryption) {
                   std::move(util::Buffer::New(chunk_size).ValueOrDie());
               auto status =
                   dec_stream->PRead(position, chunk_size, buffer.get());
-              EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+              EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
             }
           }
         }
@@ -347,11 +349,11 @@ TEST(DecryptingRandomAccessStreamTest, OutOfRangeDecryption) {
         int position = pt_size;
         // Negative chunk size.
         auto status = dec_stream->PRead(position, -1, buffer.get());
-        EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+        EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 
         // Negative position.
         status = dec_stream->PRead(-1, chunk_size, buffer.get());
-        EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+        EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 
         // Reading at EOF.
         status = dec_stream->PRead(position, chunk_size, buffer.get());
@@ -359,7 +361,7 @@ TEST(DecryptingRandomAccessStreamTest, OutOfRangeDecryption) {
 
         // Reading past EOF.
         status = dec_stream->PRead(position + 1 , chunk_size, buffer.get());
-        EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+        EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
       }
     }
   }
@@ -385,7 +387,7 @@ TEST(DecryptingRandomAccessStreamTest, WrongCiphertext) {
     int position = 0;
     auto buffer = std::move(util::Buffer::New(chunk_size).ValueOrDie());
     auto status = dec_stream->PRead(position, chunk_size, buffer.get());
-    EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
@@ -394,7 +396,7 @@ TEST(DecryptingRandomAccessStreamTest, NullSegmentDecrypter) {
   auto dec_stream_result =
       DecryptingRandomAccessStream::New(nullptr, std::move(ct_stream));
   EXPECT_THAT(dec_stream_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("segment_decrypter must be non-null")));
 }
 
@@ -407,7 +409,7 @@ TEST(DecryptingRandomAccessStreamTest, NullCiphertextSource) {
   auto dec_stream_result =
       DecryptingRandomAccessStream::New(std::move(seg_decrypter), nullptr);
   EXPECT_THAT(dec_stream_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("cipertext_source must be non-null")));
 }
 

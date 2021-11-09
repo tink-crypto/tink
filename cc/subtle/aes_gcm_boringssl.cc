@@ -192,7 +192,8 @@ util::StatusOr<std::string> AesGcmBoringSsl::Encrypt(
 util::StatusOr<std::string> AesGcmBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
 #ifdef OPENSSL_IS_BORINGSSL
   std::string result;

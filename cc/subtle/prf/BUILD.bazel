@@ -42,6 +42,7 @@ cc_library(
         "//:primitive_set",
         "//:primitive_wrapper",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -59,6 +60,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -89,6 +91,7 @@ cc_test(
         "//util:istream_input_stream",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

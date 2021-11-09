@@ -16,6 +16,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -54,6 +55,7 @@ tink_cc_library(
     tink::subtle::mac::stateful_mac
     tink::subtle::prf::streaming_prf
     absl::strings
+    absl::status
     absl::memory
 )
 

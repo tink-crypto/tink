@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -165,7 +166,7 @@ util::Status VerifyMacOutputStream::CloseStreamAndComputeResult() {
   if (mac_actual.ValueOrDie() == expected_) {
     return util::OkStatus();
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "Incorrect MAC");
+  return util::Status(absl::StatusCode::kInvalidArgument, "Incorrect MAC");
 }
 
 void VerifyMacOutputStream::BackUp(int count) {

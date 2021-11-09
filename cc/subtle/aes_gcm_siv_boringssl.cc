@@ -51,7 +51,7 @@ util::StatusOr<std::unique_ptr<Aead>> AesGcmSivBoringSsl::New(
 
   const EVP_AEAD* aead = GetCipherForKeySize(key.size());
   if (aead == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
   internal::SslUniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
       aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
@@ -87,7 +87,8 @@ util::StatusOr<std::string> AesGcmSivBoringSsl::Encrypt(
 util::StatusOr<std::string> AesGcmSivBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
 
   std::string plaintext;

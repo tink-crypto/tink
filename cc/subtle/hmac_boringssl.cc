@@ -53,10 +53,10 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid tag size");
   }
   if (key.size() < kMinKeySize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
   return {absl::WrapUnique(new HmacBoringSsl(md, tag_size, std::move(key)))};
 }
@@ -89,7 +89,8 @@ util::Status HmacBoringSsl::VerifyMac(absl::string_view mac,
   data = internal::EnsureStringNonNull(data);
 
   if (mac.size() != tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "incorrect tag size");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "incorrect tag size");
   }
   uint8_t buf[EVP_MAX_MD_SIZE];
   unsigned int out_len;
@@ -101,7 +102,8 @@ util::Status HmacBoringSsl::VerifyMac(absl::string_view mac,
                         "BoringSSL failed to compute HMAC");
   }
   if (CRYPTO_memcmp(buf, mac.data(), tag_size_) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "verification failed");
   }
   return util::OkStatus();
 }

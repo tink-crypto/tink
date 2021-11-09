@@ -25,6 +25,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/config.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
@@ -84,7 +85,8 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitAesKey(
   int status = AES_set_encrypt_key(key.data(), key.size() * 8, aeskey.get());
   // status != 0 happens if key_value is invalid.
   if (status != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key value");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid key value");
   }
   return aeskey;
 }
@@ -145,10 +147,11 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
   if (!status.ok()) return status;
 
   if (!IsValidKeySize(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid key size");
   }
   if (!IsValidNonceSize(nonce_size_in_bytes)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid nonce size");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid nonce size");
   }
   auto aeskey_or = InitAesKey(key);
   if (!aeskey_or.ok()) {
@@ -260,7 +263,8 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
   size_t out_size = ct_size - kTagSize - nonce_size_;
   absl::string_view nonce = ciphertext.substr(0, nonce_size_);
@@ -273,7 +277,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   XorBlock(H.data(), &mac);
   const uint8_t* sig = reinterpret_cast<const uint8_t*>(tag.data());
   if (!EqualBlocks(mac.data(), sig)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Tag mismatch");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Tag mismatch");
   }
   std::string res;
   ResizeStringUninitialized(&res, out_size);

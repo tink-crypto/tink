@@ -61,17 +61,18 @@ void BigEndianStore32(uint8_t dst[4], uint32_t val) {
 util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   if (!(params.hkdf_hash == SHA1 || params.hkdf_hash == SHA256 ||
         params.hkdf_hash == SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_hash");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "unsupported hkdf_hash");
   }
   if (params.derived_key_size != 16 && params.derived_key_size != 32) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "derived_key_size must be 16 or 32");
   }
   if (params.ikm.size() < 16 || params.ikm.size() < params.derived_key_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ikm too small");
+    return util::Status(absl::StatusCode::kInvalidArgument, "ikm too small");
   }
   if (params.ciphertext_offset < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_offset must be non-negative");
   }
   int header_size = 1 + params.derived_key_size +
@@ -79,7 +80,7 @@ util::Status Validate(const AesGcmHkdfStreamSegmentDecrypter::Params& params) {
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size +
           AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_segment_size too small");
   }
   return util::OkStatus();
@@ -115,11 +116,11 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
   }
   if (header.size() != header_size_) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("wrong header size, expected ", header_size_, " bytes"));
   }
   if (header[0] != header_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "corrupted header");
+    return util::Status(absl::StatusCode::kInvalidArgument, "corrupted header");
   }
 
   // Extract salt and nonce_prefix.
@@ -173,19 +174,22 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
                         "decrypter not initialized");
   }
   if (ciphertext.size() > get_ciphertext_segment_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too long");
   }
   if (ciphertext.size() < AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   if (plaintext_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "plaintext_buffer must be non-null");
   }
   if (segment_number > std::numeric_limits<uint32_t>::max() ||
       (segment_number == std::numeric_limits<uint32_t>::max() &&
        !is_last_segment)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "too many segments");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "too many segments");
   }
 
   int pt_size =

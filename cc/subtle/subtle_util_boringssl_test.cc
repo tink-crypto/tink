@@ -389,7 +389,7 @@ TEST(X25519KeyFromEcKeyTest, RejectNistPCurves) {
   auto x25519_key_or_status =
       SubtleUtilBoringSSL::X25519KeyFromEcKey(ec_key_or_status.ValueOrDie());
   EXPECT_THAT(x25519_key_or_status.status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 using NistCurveParamTest = ::testing::TestWithParam<EllipticCurveType>;

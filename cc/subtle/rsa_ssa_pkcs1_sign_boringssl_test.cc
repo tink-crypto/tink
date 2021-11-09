@@ -106,7 +106,7 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsUnsafeHash) {
 
   internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA1};
   ASSERT_THAT(RsaSsaPkcs1SignBoringSsl::New(private_key_, params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
@@ -124,19 +124,22 @@ TEST_F(RsaPkcs1SignBoringsslTest, RejectsInvalidCrtParams) {
     internal::RsaPrivateKey key = private_key_;
     key.crt[0] ^= 0x80;
     auto signer_or = RsaSsaPkcs1SignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
   {
     internal::RsaPrivateKey key = private_key_;
     key.dq[0] ^= 0x08;
     auto signer_or = RsaSsaPkcs1SignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
   {
     internal::RsaPrivateKey key = private_key_;
     key.dp[0] ^= 0x04;
     auto signer_or = RsaSsaPkcs1SignBoringSsl::New(key, params);
-    EXPECT_THAT(signer_or.status(), StatusIs(util::error::INVALID_ARGUMENT));
+    EXPECT_THAT(signer_or.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 

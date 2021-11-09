@@ -18,6 +18,7 @@
 
 #include <cstring>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
@@ -37,7 +38,7 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> Ed25519VerifyBoringSsl::New(
 
   if (public_key.length() != ED25519_PUBLIC_KEY_LEN) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid ED25519 public key size (%d). "
                         "The only valid size is %d.",
                         public_key.length(), ED25519_PUBLIC_KEY_LEN));
@@ -54,7 +55,7 @@ util::Status Ed25519VerifyBoringSsl::Verify(absl::string_view signature,
 
   if (signature.size() != ED25519_SIGNATURE_LEN) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid ED25519 signature size (%d). "
                         "The signature must be %d bytes long.",
                         signature.size(), ED25519_SIGNATURE_LEN));
@@ -64,7 +65,7 @@ util::Status Ed25519VerifyBoringSsl::Verify(absl::string_view signature,
                reinterpret_cast<const uint8_t *>(data.data()), data.size(),
                reinterpret_cast<const uint8_t *>(signature.data()),
                reinterpret_cast<const uint8_t *>(public_key_.data()))) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
 

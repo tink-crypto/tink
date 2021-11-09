@@ -73,39 +73,42 @@ static util::Status DeriveKeys(const util::SecretData& ikm, HashType hkdf_algo,
 
 static util::Status Validate(const AesCtrHmacStreaming::Params& params) {
   if (params.ikm.size() < std::max(16, params.key_size)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "input key material too small");
   }
   if (!(params.hkdf_algo == SHA1 || params.hkdf_algo == SHA256 ||
         params.hkdf_algo == SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_algo");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "unsupported hkdf_algo");
   }
   if (params.key_size != 16 && params.key_size != 32) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "key_size must be 16 or 32");
   }
   int header_size =
       1 + params.key_size + AesCtrHmacStreaming::kNoncePrefixSizeInBytes;
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + header_size + params.tag_size) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_segment_size too small");
   }
   if (params.ciphertext_offset < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_offset must be non-negative");
   }
   if (params.tag_size < 10) {
-    return util::Status(util::error::INVALID_ARGUMENT, "tag_size too small");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "tag_size too small");
   }
   if (!(params.tag_algo == SHA1 || params.tag_algo == SHA256 ||
         params.tag_algo == SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "unsupported tag_algo");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "unsupported tag_algo");
   }
   if ((params.tag_algo == SHA1 && params.tag_size > 20) ||
       (params.tag_algo == SHA256 && params.tag_size > 32) ||
       (params.tag_algo == SHA512 && params.tag_size > 64)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "tag_size too big");
+    return util::Status(absl::StatusCode::kInvalidArgument, "tag_size too big");
   }
 
   return util::OkStatus();
@@ -184,16 +187,18 @@ util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(
     const std::vector<uint8_t>& plaintext, bool is_last_segment,
     std::vector<uint8_t>* ciphertext_buffer) {
   if (plaintext.size() > get_plaintext_segment_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "plaintext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "plaintext too long");
   }
   if (ciphertext_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_buffer must be non-null");
   }
   if (get_segment_number() > std::numeric_limits<uint32_t>::max() ||
       (get_segment_number() == std::numeric_limits<uint32_t>::max() &&
        !is_last_segment)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "too many segments");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "too many segments");
   }
 
   int ct_size = plaintext.size() + tag_size_;
@@ -260,12 +265,12 @@ util::Status AesCtrHmacStreamSegmentDecrypter::Init(
                         "decrypter alreday initialized");
   }
   if (header.size() != get_header_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("wrong header size, expected ",
                                      get_header_size(), " bytes"));
   }
   if (header[0] != header.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "corrupted header");
+    return util::Status(absl::StatusCode::kInvalidArgument, "corrupted header");
   }
 
   // Extract salt and nonce prefix.
@@ -304,19 +309,22 @@ util::Status AesCtrHmacStreamSegmentDecrypter::DecryptSegment(
                         "decrypter not initialized");
   }
   if (ciphertext.size() > get_ciphertext_segment_size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too long");
   }
   if (ciphertext.size() < tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   if (plaintext_buffer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "plaintext_buffer must be non-null");
   }
   if (segment_number > std::numeric_limits<uint32_t>::max() ||
       (segment_number == std::numeric_limits<uint32_t>::max() &&
        !is_last_segment)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "too many segments");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "too many segments");
   }
 
   int pt_size = ciphertext.size() - tag_size_;

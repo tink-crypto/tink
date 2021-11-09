@@ -16,6 +16,7 @@
 
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/evp.h"
@@ -81,7 +82,7 @@ util::Status RsaSsaPssVerifyBoringSsl::Verify(absl::string_view signature,
                salt_length_, reinterpret_cast<const uint8_t*>(signature.data()),
                signature.length())) {
     // Signature is invalid.
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
   return util::OkStatus();

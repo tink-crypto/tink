@@ -104,7 +104,7 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid public key: ", internal::GetSslErrors()));
   }
 
@@ -112,7 +112,7 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
       BN_bin2bn(ec_key.priv.data(), ec_key.priv.size(), nullptr));
   if (!EC_KEY_set_private_key(key.get(), priv_key.get())) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid private key: ", internal::GetSslErrors()));
   }
 

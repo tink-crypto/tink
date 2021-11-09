@@ -251,11 +251,11 @@ SubtleUtilBoringSSL::X25519KeyFromEcKey(
     const SubtleUtilBoringSSL::EcKey &ec_key) {
   auto x25519_key = absl::make_unique<SubtleUtilBoringSSL::X25519Key>();
   if (ec_key.curve != EllipticCurveType::CURVE25519) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "This key is not on curve 25519");
   }
   if (!ec_key.pub_y.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid X25519 key. pub_y is unexpectedly set.");
   }
   // Curve25519 public key is x, not (x,y).
@@ -539,7 +539,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
     const EC_GROUP *group, absl::string_view ieee_sig) {
   size_t field_size_in_bytes = (EC_GROUP_get_degree(group) + 7) / 8;
   if (ieee_sig.size() != field_size_in_bytes * 2) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
   internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
@@ -563,7 +563,7 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
   uint8_t *der = nullptr;
   size_t der_len;
   if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ECDSA_SIG_to_bytes error");
   }
   std::string result = std::string(reinterpret_cast<char *>(der), der_len);
@@ -580,11 +580,11 @@ util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
       return util::OkStatus();
     case HashType::SHA1: /* fall through */
     case HashType::SHA224:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Hash function ", EnumToString(sig_hash),
                                        " is not safe for digital signature"));
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Unsupported hash function");
   }
 }

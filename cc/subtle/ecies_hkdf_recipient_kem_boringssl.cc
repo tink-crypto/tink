@@ -59,7 +59,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
   if (!status.ok()) return status;
 
   if (priv_key.empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "empty priv_key");
+    return util::Status(absl::StatusCode::kInvalidArgument, "empty priv_key");
   }
   auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
   if (!status_or_ec_group.ok()) return status_or_ec_group.status();
@@ -85,7 +85,8 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
   auto status_or_ec_point =
       SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid KEM bytes: %s",
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Invalid KEM bytes: %s",
                      status_or_ec_point.status().message());
   }
   internal::SslUniquePtr<EC_POINT> pub_key =
@@ -115,11 +116,11 @@ EciesHkdfX25519RecipientKemBoringSsl::New(EllipticCurveType curve,
   if (!status.ok()) return status;
 
   if (curve != CURVE25519) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "curve is not CURVE25519");
   }
   if (priv_key.size() != X25519_PUBLIC_VALUE_LEN) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "pubx has unexpected length");
   }
 
@@ -134,12 +135,12 @@ EciesHkdfX25519RecipientKemBoringSsl::GenerateKey(
     EcPointFormat point_format) const {
   if (point_format != EcPointFormat::COMPRESSED) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "X25519 only supports compressed elliptic curve points");
   }
 
   if (kem_bytes.size() != X25519_PUBLIC_VALUE_LEN) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "kem_bytes has unexpected size");
   }
 

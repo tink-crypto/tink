@@ -234,10 +234,11 @@ bool IsValidKeySize(size_t key_size) {
 crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxAesni::New(
     const util::SecretData& key, size_t nonce_size_in_bytes) {
   if (!IsValidKeySize(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid key size");
   }
   if (!IsValidNonceSize(nonce_size_in_bytes)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid nonce size");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid nonce size");
   }
   auto eax = absl::WrapUnique(new AesEaxAesni(nonce_size_in_bytes));
   if (!eax->SetKey(key)) {
@@ -526,7 +527,8 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
   additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (SIZE_MAX - nonce_size_ - kTagSize <= plaintext.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Plaintext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Plaintext too long");
   }
   size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
   std::string ciphertext;
@@ -551,7 +553,8 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
   size_t out_size = ct_size - kTagSize - nonce_size_;
   absl::string_view nonce = ciphertext.substr(0, nonce_size_);

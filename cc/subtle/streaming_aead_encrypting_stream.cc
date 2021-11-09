@@ -68,11 +68,11 @@ StatusOr<std::unique_ptr<OutputStream>> StreamingAeadEncryptingStream::New(
     std::unique_ptr<StreamSegmentEncrypter> segment_encrypter,
     std::unique_ptr<OutputStream> ciphertext_destination) {
   if (segment_encrypter == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "segment_encrypter must be non-null");
   }
   if (ciphertext_destination == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "cipertext_destination must be non-null");
   }
   std::unique_ptr<StreamingAeadEncryptingStream> enc_stream(
