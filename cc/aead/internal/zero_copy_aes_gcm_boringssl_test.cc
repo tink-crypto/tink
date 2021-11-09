@@ -143,8 +143,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapEncrypt) {
   message_buffer.resize(message_buffer_size);
   EXPECT_EQ(cipher_->Encrypt(message_buffer, kAad, ciphertext_span)
                 .status()
-                .error_code(),
-            util::error::FAILED_PRECONDITION);
+                .code(),
+            absl::StatusCode::kFailedPrecondition);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapDecrypt) {
@@ -156,8 +156,8 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapDecrypt) {
                                          max_decryption_size + 1);
   ciphertext.resize(ciphertext_size);
   EXPECT_EQ(
-      cipher_->Decrypt(ciphertext, kAad, plaintext_span).status().error_code(),
-      util::error::FAILED_PRECONDITION);
+      cipher_->Decrypt(ciphertext, kAad, plaintext_span).status().code(),
+      absl::StatusCode::kFailedPrecondition);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {

@@ -61,7 +61,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
   absl::string_view buffer_string(buffer.data(), buffer.size());
   if (BuffersOverlap(plaintext, buffer_string)) {
     return util::Status(
-        util::error::FAILED_PRECONDITION,
+        absl::StatusCode::kFailedPrecondition,
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
@@ -101,7 +101,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
   absl::string_view buffer_string(buffer.data(), buffer.size());
   if (BuffersOverlap(ciphertext, buffer_string)) {
     return util::Status(
-        util::error::FAILED_PRECONDITION,
+        absl::StatusCode::kFailedPrecondition,
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
