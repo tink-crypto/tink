@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
@@ -210,5 +211,23 @@ public final class HpkePrivateKeyManagerTest {
     byte[] plaintext = hybridDecrypt.decrypt(ciphertext, contextInfo);
 
     assertThat(plaintext).isEqualTo(input);
+  }
+
+  @Test
+  public void registerPair() throws Exception {
+    String publicKeyUrl = new HpkePublicKeyManager().getKeyType();
+    String privateKeyUrl = new HpkePrivateKeyManager().getKeyType();
+
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class));
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class));
+
+    HpkePrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
+
+    Registry.getKeyManager(publicKeyUrl, HybridEncrypt.class);
+    Registry.getKeyManager(privateKeyUrl, HybridDecrypt.class);
   }
 }

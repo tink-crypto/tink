@@ -20,6 +20,7 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.PrivateKeyTypeManager;
+import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.proto.HpkeAead;
 import com.google.crypto.tink.proto.HpkeKdf;
 import com.google.crypto.tink.proto.HpkeKem;
@@ -55,6 +56,15 @@ public final class HpkePrivateKeyManager
             return HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
           }
         });
+  }
+
+  /**
+   * Registers an {@link HpkePrivateKeyManager} and an {@link HpkePublicKeyManager} with the
+   * registry, so that HpkePrivateKey and HpkePublicKey key types can be used with Tink.
+   */
+  public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
+    Registry.registerAsymmetricKeyManagers(
+        new HpkePrivateKeyManager(), new HpkePublicKeyManager(), newKeyAllowed);
   }
 
   @Override

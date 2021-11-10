@@ -123,6 +123,7 @@ java_library(
     srcs = ["HpkePrivateKeyManager.java"],
     deps = [
         ":hpke_decrypt",
+        ":hpke_public_key_manager",
         ":hpke_util",
         "//proto:hpke_java_proto",
         "//proto:tink_java_proto",
@@ -130,6 +131,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "//src/main/java/com/google/crypto/tink/subtle:x25519",
         "@com_google_protobuf//:protobuf_javalite",
@@ -295,6 +297,7 @@ android_library(
     srcs = ["HpkePrivateKeyManager.java"],
     deps = [
         ":hpke_decrypt-android",
+        ":hpke_public_key_manager-android",
         ":hpke_util-android",
         "//proto:hpke_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -302,6 +305,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "//src/main/java/com/google/crypto/tink/subtle:x25519",
         "@com_google_protobuf//:protobuf_javalite",
