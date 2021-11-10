@@ -17,6 +17,7 @@
 #ifndef TINK_AEAD_INTERNAL_ZERO_COPY_AES_GCM_BORINGSSL_H_
 #define TINK_AEAD_INTERNAL_ZERO_COPY_AES_GCM_BORINGSSL_H_
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -36,13 +37,13 @@ class ZeroCopyAesGcmBoringSsl : public ZeroCopyAead {
   static crypto::tink::util::StatusOr<std::unique_ptr<ZeroCopyAead>> New(
       const util::SecretData &key);
 
-  uint64_t MaxEncryptionSize(int64_t plaintext_size) const override;
+  int64_t MaxEncryptionSize(int64_t plaintext_size) const override;
 
   crypto::tink::util::StatusOr<int64_t> Encrypt(
       absl::string_view plaintext, absl::string_view associated_data,
       absl::Span<char> buffer) const override;
 
-  uint64_t MaxDecryptionSize(int64_t ciphertext_size) const override;
+  int64_t MaxDecryptionSize(int64_t ciphertext_size) const override;
 
   crypto::tink::util::StatusOr<int64_t> Decrypt(
       absl::string_view ciphertext, absl::string_view associated_data,
@@ -52,9 +53,6 @@ class ZeroCopyAesGcmBoringSsl : public ZeroCopyAead {
   static bool BuffersOverlap(absl::string_view first, absl::string_view second);
 
  private:
-  static constexpr int kIvSizeInBytes = 12;
-  static constexpr int kTagSizeInBytes = 16;
-
   explicit ZeroCopyAesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> ctx)
       : ctx_(std::move(ctx)) {}
 

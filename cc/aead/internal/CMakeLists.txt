@@ -78,6 +78,7 @@ tink_cc_library(
     absl::core_headers
     absl::memory
     absl::status
+    absl::strings
     crypto
     tink::aead::internal::aead_util
     tink::internal::ssl_unique_ptr

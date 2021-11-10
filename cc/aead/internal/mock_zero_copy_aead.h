@@ -29,7 +29,7 @@ class MockZeroCopyAead : public ZeroCopyAead {
  public:
   ~MockZeroCopyAead() override = default;
 
-  MOCK_METHOD(uint64_t, MaxEncryptionSize, (int64_t plaintext_size),
+  MOCK_METHOD(int64_t, MaxEncryptionSize, (int64_t plaintext_size),
               (const, override));
 
   MOCK_METHOD(crypto::tink::util::StatusOr<int64_t>, Encrypt,
@@ -37,7 +37,7 @@ class MockZeroCopyAead : public ZeroCopyAead {
                absl::Span<char> buffer),
               (const, override));
 
-  MOCK_METHOD(uint64_t, MaxDecryptionSize, (int64_t ciphertext_size),
+  MOCK_METHOD(int64_t, MaxDecryptionSize, (int64_t ciphertext_size),
               (const, override));
 
   MOCK_METHOD(crypto::tink::util::StatusOr<int64_t>, Decrypt,

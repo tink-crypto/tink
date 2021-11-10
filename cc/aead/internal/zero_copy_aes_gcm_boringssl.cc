@@ -20,6 +20,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "openssl/aead.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
@@ -31,6 +32,9 @@
 namespace crypto {
 namespace tink {
 namespace internal {
+
+constexpr int kIvSizeInBytes = 12;
+constexpr int kTagSizeInBytes = 16;
 
 util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
     const util::SecretData &key) {
@@ -48,17 +52,20 @@ util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
   return {absl::WrapUnique(new ZeroCopyAesGcmBoringSsl(std::move(ctx)))};
 }
 
-uint64_t ZeroCopyAesGcmBoringSsl::MaxEncryptionSize(
+int64_t ZeroCopyAesGcmBoringSsl::MaxEncryptionSize(
     int64_t plaintext_size) const {
   return kIvSizeInBytes + plaintext_size + kTagSizeInBytes;
 }
 
-crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
+util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data,
     absl::Span<char> buffer) const {
-  if (buffer.size() < MaxEncryptionSize(plaintext.size())) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Encryption buffer too small");
+  const int64_t max_encryption_size = MaxEncryptionSize(plaintext.size());
+  if (buffer.size() < max_encryption_size) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Encryption buffer too small; expected at least ",
+                     max_encryption_size, " bytes, got ", buffer.size()));
   }
   absl::string_view buffer_string(buffer.data(), buffer.size());
   if (BuffersOverlap(plaintext, buffer_string)) {
@@ -84,22 +91,34 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
   return kIvSizeInBytes + len;
 }
 
-uint64_t ZeroCopyAesGcmBoringSsl::MaxDecryptionSize(
+int64_t ZeroCopyAesGcmBoringSsl::MaxDecryptionSize(
     int64_t ciphertext_size) const {
-  return ciphertext_size - kIvSizeInBytes - kTagSizeInBytes;
+  const int64_t size = ciphertext_size - kIvSizeInBytes - kTagSizeInBytes;
+  if (size <= 0) {
+    return 0;
+  }
+  return size;
 }
 
-crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
+util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data,
     absl::Span<char> buffer) const {
-  if (buffer.size() < MaxDecryptionSize(ciphertext.size())) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Decryption buffer too small");
+  const size_t min_ciphertext_size = kIvSizeInBytes + kTagSizeInBytes;
+  if (ciphertext.size() < min_ciphertext_size) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid ciphertext size; expected at least ",
+                     min_ciphertext_size, " bytes, got ", ciphertext.size()));
   }
-  if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Ciphertext too short");
+
+  const int64_t max_decryption_size = MaxDecryptionSize(ciphertext.size());
+  if (buffer.size() < max_decryption_size) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Decryption buffer too small; expected at least ",
+                     max_decryption_size, " bytes, got ", buffer.size()));
   }
+
   absl::string_view buffer_string(buffer.data(), buffer.size());
   if (BuffersOverlap(ciphertext, buffer_string)) {
     return util::Status(
@@ -107,9 +126,9 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
-  // If buffer.empty() accessing the 0th element would result in an out of bound
-  // violation. This makes sure we pass a pointer to at least one byte when
-  // calling into OpenSSL.
+  // If buffer.empty() accessing the 0th element would result in an out of
+  // bound violation. This makes sure we pass a pointer to at least one byte
+  // when calling into OpenSSL.
   uint8_t buffer_if_buffer_is_empty = 0;
   uint8_t *buffer_ptr = &buffer_if_buffer_is_empty;
   if (!buffer.empty()) {
@@ -118,8 +137,7 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
 
   size_t len;
   if (EVP_AEAD_CTX_open(
-          ctx_.get(), buffer_ptr, &len,
-          buffer.size(),
+          ctx_.get(), buffer_ptr, &len, buffer.size(),
           // The IV is the first |kIvSizeInBytes| bytes of |ciphertext|.
           reinterpret_cast<const uint8_t *>(ciphertext.data()), kIvSizeInBytes,
           // The input is the remainder.

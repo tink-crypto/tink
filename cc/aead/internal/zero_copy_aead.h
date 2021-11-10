@@ -17,6 +17,8 @@
 #ifndef TINK_AEAD_INTERNAL_ZERO_COPY_AEAD_H_
 #define TINK_AEAD_INTERNAL_ZERO_COPY_AEAD_H_
 
+#include <cstdint>
+
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
 
@@ -42,11 +44,11 @@ class ZeroCopyAead {
 
   // Returns the maximum buffer size needed for encryption. The actual
   // size of the written cypertext may be smaller.
-  virtual uint64_t MaxEncryptionSize(int64_t plaintext_size) const = 0;
+  virtual int64_t MaxEncryptionSize(int64_t plaintext_size) const = 0;
 
-  // Encrypts 'plaintext' with 'associated_data' as associated data,
-  // and returns the size of the ciphertext that is written in 'buffer'.
-  // 'buffer' size must be at least MaxEncryptionSize to guarantee
+  // Encrypts `plaintext` with `associated_data` as associated data,
+  // and returns the size of the ciphertext that is written in `buffer`.
+  // `buffer` size must be at least MaxEncryptionSize to guarantee
   // enough space for encryption.
   // The ciphertext allows for checking authenticity and integrity
   // of the associated data, but does not guarantee its secrecy.
@@ -54,15 +56,16 @@ class ZeroCopyAead {
       absl::string_view plaintext, absl::string_view associated_data,
       absl::Span<char> buffer) const = 0;
 
-  // Returns the maximum buffer size needed for decryption. The actual
-  // size of the written plaintext may be smaller.
-  virtual uint64_t MaxDecryptionSize(int64_t ciphertext_size) const = 0;
+  // Returns an upper bound on the size of the plaintext based on
+  // `ciphertext_size`. The actual size of the written plaintext may be smaller.
+  // The returned value is always >= 0.
+  virtual int64_t MaxDecryptionSize(int64_t ciphertext_size) const = 0;
 
-  // Decrypts 'ciphertext' with 'associated_data' as associated data,
-  // and returns the size of the plaintext that is written in 'buffer'.
-  // 'buffer' size must be at least MaxDecryptionSize to guarantee
+  // Decrypts `ciphertext` with `associated_data` as associated data,
+  // and returns the size of the plaintext that is written in `buffer`.
+  // `buffer` size must be at least MaxDecryptionSize to guarantee
   // enough space for decryption.
-  // If the authentication tag does not validate, 'buffer' is zeroed.
+  // If the authentication tag does not validate, `buffer` is zeroed.
   // The decryption verifies the authenticity and integrity of the
   // associated data, but there are no guarantees wrt. secrecy of
   // that data.
