@@ -16,6 +16,8 @@
 
 #include "tink/aead/internal/zero_copy_aes_gcm_boringssl.h"
 
+#include <cstdint>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/aead.h"
@@ -105,9 +107,18 @@ crypto::tink::util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
+  // If buffer.empty() accessing the 0th element would result in an out of bound
+  // violation. This makes sure we pass a pointer to at least one byte when
+  // calling into OpenSSL.
+  uint8_t buffer_if_buffer_is_empty = 0;
+  uint8_t *buffer_ptr = &buffer_if_buffer_is_empty;
+  if (!buffer.empty()) {
+    buffer_ptr = reinterpret_cast<uint8_t *>(&buffer[0]);
+  }
+
   size_t len;
   if (EVP_AEAD_CTX_open(
-          ctx_.get(), reinterpret_cast<uint8_t *>(&buffer[0]), &len,
+          ctx_.get(), buffer_ptr, &len,
           buffer.size(),
           // The IV is the first |kIvSizeInBytes| bytes of |ciphertext|.
           reinterpret_cast<const uint8_t *>(ciphertext.data()), kIvSizeInBytes,

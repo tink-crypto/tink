@@ -34,19 +34,23 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::util::StatusOr;
 
 // TODO(b/198004452): Add test using Wycheproof vectors.
-
 constexpr absl::string_view kKeySecret = "000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kMessage = "Some data to encrypt.";
 constexpr absl::string_view kAad = "Some data to authenticate.";
 
-// The MaxSizes test verifies these constants.
-constexpr int64_t max_encryption_size = 49;
-constexpr int64_t max_decryption_size = 21;
+constexpr int kIvSize = 12;
+constexpr int kTagSize = 16;
 
 // The EncodedCiphertext test verifies this constant.
 constexpr absl::string_view encoded_ciphertext =
     "22889553081aa27f0f62ed2f32b068331cb3d8103e121c8b0c898cf70b613e334b7e913323"
     "128429226950dd2f4d42a6fc";
+
+// The MaxSizes test verifies these constants.
+// kMessage.size() + kIvSize + kTagSize.
+constexpr int64_t kMaxEncryptionSize = 49;
+// kMaxEncryptionSize - kIvSize - kTagSize.
+constexpr int64_t kMaxDecryptionSize = 21;
 
 class ZeroCopyAesGcmBoringSslTest : public testing::Test {
  protected:
@@ -67,18 +71,18 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, MaxSizes) {
   EXPECT_EQ(kMessage.size(), cipher_->MaxDecryptionSize(
                                  cipher_->MaxEncryptionSize(kMessage.size())));
 
-  EXPECT_EQ(max_encryption_size, cipher_->MaxEncryptionSize(kMessage.size()));
+  EXPECT_EQ(kMaxEncryptionSize, cipher_->MaxEncryptionSize(kMessage.size()));
   std::string ciphertext;
-  subtle::ResizeStringUninitialized(&ciphertext, max_encryption_size);
+  subtle::ResizeStringUninitialized(&ciphertext, kMaxEncryptionSize);
   StatusOr<int64_t> ciphertext_size =
       cipher_->Encrypt(kMessage, kAad, absl::MakeSpan(ciphertext));
   ASSERT_THAT(ciphertext_size.status(), IsOk());
-  EXPECT_EQ(max_decryption_size, cipher_->MaxDecryptionSize(*ciphertext_size));
+  EXPECT_EQ(kMaxDecryptionSize, cipher_->MaxDecryptionSize(*ciphertext_size));
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, EncodedCiphertext) {
   std::string plaintext;
-  subtle::ResizeStringUninitialized(&plaintext, max_decryption_size);
+  subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize);
   StatusOr<int64_t> plaintext_size =
       cipher_->Decrypt(test::HexDecodeOrDie(encoded_ciphertext), kAad,
                        absl::MakeSpan(plaintext));
@@ -88,14 +92,14 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncodedCiphertext) {
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
   std::string ciphertext;
-  subtle::ResizeStringUninitialized(&ciphertext, max_encryption_size);
+  subtle::ResizeStringUninitialized(&ciphertext, kMaxEncryptionSize);
   StatusOr<int64_t> ciphertext_size =
       cipher_->Encrypt(kMessage, kAad, absl::MakeSpan(ciphertext));
   ASSERT_THAT(ciphertext_size.status(), IsOk());
   ciphertext.resize(*ciphertext_size);
 
   std::string plaintext;
-  subtle::ResizeStringUninitialized(&plaintext, max_decryption_size);
+  subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize);
   StatusOr<int64_t> plaintext_size =
       cipher_->Decrypt(ciphertext, kAad, absl::MakeSpan(plaintext));
   ASSERT_THAT(plaintext_size.status(), IsOk());
@@ -113,9 +117,73 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, EncryptDecrypt) {
   EXPECT_EQ(*plaintext_string, kMessage);
 }
 
+TEST_F(ZeroCopyAesGcmBoringSslTest, EmptyBufferEncryptDecrypt) {
+  constexpr absl::string_view kEmptyPlaintext = "";
+  std::string ciphertext;
+  subtle::ResizeStringUninitialized(
+      &ciphertext, cipher_->MaxEncryptionSize(kEmptyPlaintext.size()));
+  util::StatusOr<int64_t> written_bytes =
+      cipher_->Encrypt(kEmptyPlaintext, kAad, absl::MakeSpan(ciphertext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, kIvSize + kTagSize);
+
+  std::string plaintext;
+  subtle::ResizeStringUninitialized(
+      &plaintext, cipher_->MaxDecryptionSize(ciphertext.size()));
+
+  written_bytes = cipher_->Decrypt(ciphertext, kAad, absl::MakeSpan(plaintext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, 0);
+  EXPECT_EQ(plaintext, "");
+}
+
+TEST_F(ZeroCopyAesGcmBoringSslTest, EmptyBufferEmptyAadEncryptDecrypt) {
+  constexpr absl::string_view kEmptyPlaintext = "";
+  constexpr absl::string_view kEmptyAad = "";
+  std::string ciphertext;
+  subtle::ResizeStringUninitialized(
+      &ciphertext, cipher_->MaxEncryptionSize(kEmptyPlaintext.size()));
+  util::StatusOr<int64_t> written_bytes =
+      cipher_->Encrypt(kEmptyPlaintext, kEmptyAad, absl::MakeSpan(ciphertext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, kIvSize + kTagSize);
+
+  std::string plaintext;
+  subtle::ResizeStringUninitialized(
+      &plaintext, cipher_->MaxDecryptionSize(ciphertext.size()));
+
+  written_bytes =
+      cipher_->Decrypt(ciphertext, kEmptyAad, absl::MakeSpan(plaintext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, 0);
+  EXPECT_EQ(plaintext, "");
+}
+
+TEST_F(ZeroCopyAesGcmBoringSslTest, EmptyBufferNullAadEncryptDecrypt) {
+  constexpr absl::string_view kEmptyPlaintext = "";
+  absl::string_view empty_aad;
+  std::string ciphertext;
+  subtle::ResizeStringUninitialized(
+      &ciphertext, cipher_->MaxEncryptionSize(kEmptyPlaintext.size()));
+  util::StatusOr<int64_t> written_bytes =
+      cipher_->Encrypt(kEmptyPlaintext, empty_aad, absl::MakeSpan(ciphertext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, kIvSize + kTagSize);
+
+  std::string plaintext;
+  subtle::ResizeStringUninitialized(
+      &plaintext, cipher_->MaxDecryptionSize(ciphertext.size()));
+
+  written_bytes =
+      cipher_->Decrypt(ciphertext, empty_aad, absl::MakeSpan(plaintext));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, 0);
+  EXPECT_EQ(plaintext, "");
+}
+
 TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferEncrypt) {
   std::string ciphertext;
-  subtle::ResizeStringUninitialized(&ciphertext, max_encryption_size - 1);
+  subtle::ResizeStringUninitialized(&ciphertext, kMaxEncryptionSize - 1);
   EXPECT_EQ(cipher_->Encrypt(kMessage, kAad, absl::MakeSpan(ciphertext))
                 .status()
                 .code(),
@@ -124,7 +192,7 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferEncrypt) {
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, SmallBufferDecrypt) {
   std::string plaintext;
-  subtle::ResizeStringUninitialized(&plaintext, max_decryption_size - 1);
+  subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize - 1);
   EXPECT_EQ(cipher_
                 ->Decrypt(test::HexDecodeOrDie(encoded_ciphertext), kAad,
                           absl::MakeSpan(plaintext))
@@ -137,32 +205,30 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapEncrypt) {
   // Create message and ciphertext buffers that overlap by 1 character.
   std::string message_buffer(kMessage);
   int64_t message_buffer_size = message_buffer.size();
-  message_buffer.resize(message_buffer_size + max_encryption_size);
+  message_buffer.resize(message_buffer_size + kMaxEncryptionSize);
   auto ciphertext_span = absl::Span<char>(
-      &message_buffer[0] + message_buffer_size - 1, max_encryption_size + 1);
+      &message_buffer[0] + message_buffer_size - 1, kMaxEncryptionSize + 1);
   message_buffer.resize(message_buffer_size);
-  EXPECT_EQ(cipher_->Encrypt(message_buffer, kAad, ciphertext_span)
-                .status()
-                .code(),
-            absl::StatusCode::kFailedPrecondition);
+  EXPECT_EQ(
+      cipher_->Encrypt(message_buffer, kAad, ciphertext_span).status().code(),
+      absl::StatusCode::kFailedPrecondition);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, BuffersOverlapDecrypt) {
   // Create ciphertext and plaintext buffers that overlap by 1 character.
   std::string ciphertext(test::HexDecodeOrDie(encoded_ciphertext));
   int64_t ciphertext_size = ciphertext.size();
-  ciphertext.resize(ciphertext_size + max_decryption_size);
+  ciphertext.resize(ciphertext_size + kMaxDecryptionSize);
   auto plaintext_span = absl::Span<char>(&ciphertext[0] + ciphertext_size - 1,
-                                         max_decryption_size + 1);
+                                         kMaxDecryptionSize + 1);
   ciphertext.resize(ciphertext_size);
-  EXPECT_EQ(
-      cipher_->Decrypt(ciphertext, kAad, plaintext_span).status().code(),
-      absl::StatusCode::kFailedPrecondition);
+  EXPECT_EQ(cipher_->Decrypt(ciphertext, kAad, plaintext_span).status().code(),
+            absl::StatusCode::kFailedPrecondition);
 }
 
 TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
   std::string plaintext;
-  subtle::ResizeStringUninitialized(&plaintext, max_decryption_size);
+  subtle::ResizeStringUninitialized(&plaintext, kMaxDecryptionSize);
   std::string decoded_ciphertext = test::HexDecodeOrDie(encoded_ciphertext);
 
   // Modify the ciphertext.
@@ -197,20 +263,20 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
       absl::StatusCode::kInternal);
 }
 
-TEST(BuffersOverlapTest, Empty) {
+TEST(BuffersOverlapTest, BufferOverlapEmpty) {
   absl::string_view empty = "";
   ASSERT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(empty, empty));
   ASSERT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(empty, ""));
 }
 
-TEST(BuffersOverlapTest, Separate) {
+TEST(BuffersOverlapTest, BufferOverlapSeparate) {
   absl::string_view first = "first";
   absl::string_view second = "second";
   ASSERT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(first, second));
   ASSERT_TRUE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(first, first));
 }
 
-TEST(BuffersOverlapTest, Overlap) {
+TEST(BuffersOverlapTest, BufferOverlap) {
   absl::string_view long_buffer = "a long buffer with \n several \n newlines";
 
   ASSERT_TRUE(
