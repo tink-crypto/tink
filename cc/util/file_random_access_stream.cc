@@ -79,7 +79,7 @@ Status FileRandomAccessStream::PRead(int64_t position, int count,
   }
   if (read_count < 0) {
     dest_buffer->set_size(0).IgnoreError();
-    return ToStatusF(util::error::UNKNOWN, "I/O error: %d", errno);
+    return ToStatusF(absl::StatusCode::kUnknown, "I/O error: %d", errno);
   }
   status = dest_buffer->set_size(read_count);
   if (!status.ok()) return status;

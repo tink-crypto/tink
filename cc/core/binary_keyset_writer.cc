@@ -41,7 +41,7 @@ util::Status WriteProto(const portable_proto::MessageLite& proto,
   std::string serialized_proto;
   (*destination) << proto.SerializeAsString();
   if (destination->fail()) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                         "Error writing to the destination stream.");
   }
   return util::OkStatus();

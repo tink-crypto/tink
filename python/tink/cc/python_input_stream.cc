@@ -21,6 +21,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/subtle_util.h"
@@ -34,7 +35,7 @@ namespace tink {
 namespace {
 
 bool is_eof(const util::Status& status) {
-  return status.error_code() == util::error::UNKNOWN &&
+  return status.code() == absl::StatusCode::kUnknown &&
          absl::StrContains(status.message(), "EOFError");
 }
 

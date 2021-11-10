@@ -177,7 +177,7 @@ util::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
 util::Status WriteData(absl::string_view data, std::ostream* destination) {
   (*destination) << data;
   if (destination->fail()) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                             "Error writing to the destination stream.");
   }
   return util::OkStatus();
