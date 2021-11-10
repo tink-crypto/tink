@@ -23,7 +23,7 @@
 static NSString *const kTinkErrorDomain = @"TinkErrorDomain";
 
 NSError *TINKStatusToError(const crypto::tink::util::Status &status) {
-  NSString *errorMessage = [NSString stringWithUTF8String:status.error_message().c_str()];
+  NSString *errorMessage = [NSString stringWithUTF8String:((std::string)status.message()).c_str()];
   NSDictionary *userInfo = @{
     NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
     NSLocalizedFailureReasonErrorKey : NSLocalizedString(errorMessage, nil),
@@ -37,4 +37,12 @@ NSError *TINKError(crypto::tink::util::error::Code code, NSString *message) {
     NSLocalizedFailureReasonErrorKey : NSLocalizedString(message, nil),
   };
   return [NSError errorWithDomain:kTinkErrorDomain code:code userInfo:userInfo];
+}
+
+NSError *TINKError(absl::StatusCode code, NSString *message) {
+  NSDictionary *userInfo = @{
+    NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
+    NSLocalizedFailureReasonErrorKey : NSLocalizedString(message, nil),
+  };
+  return [NSError errorWithDomain:kTinkErrorDomain code:(NSInteger)code userInfo:userInfo];
 }

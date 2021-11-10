@@ -209,6 +209,7 @@ objc_library(
         ":tink_cc_pb",
         "//cc/util:status",
         "//objc/util:errors",
+        "@com_google_absl//absl/status",
     ],
 )
 
