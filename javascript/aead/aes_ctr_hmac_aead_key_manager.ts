@@ -29,7 +29,6 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   ]);
 
   /**
-   * @override
    */
   newKey(keyFormat: PbMessage|Uint8Array) {
     let keyFormatProto: PbAesCtrHmacAeadKeyFormat;
@@ -71,7 +70,6 @@ class AesCtrHmacAeadKeyFactory implements KeyManager.KeyFactory {
   }
 
   /**
-   * @override
    */
   newKeyData(serializedKeyFormat: Uint8Array) {
     const key = (this.newKey(serializedKeyFormat));
@@ -178,7 +176,6 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
   private readonly keyFactory = new AesCtrHmacAeadKeyFactory();
 
   /**
-   * @override
    */
   async getPrimitive(
       primitiveType: Constructor<Aead>, key: PbKeyData|PbMessage) {
@@ -224,35 +221,30 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
   }
 
   /**
-   * @override
    */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
   /**
-   * @override
    */
   getKeyType() {
     return AesCtrHmacAeadKeyManager.KEY_TYPE;
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return AesCtrHmacAeadKeyManager.SUPPORTED_PRIMITIVE;
   }
 
   /**
-   * @override
    */
   getVersion() {
     return AesCtrHmacAeadKeyManager.VERSION;
   }
 
   /**
-   * @override
    */
   getKeyFactory() {
     return this.keyFactory;

@@ -44,12 +44,10 @@ describe('registry test', function() {
      function() {
        class DummyPrimitiveWrapper1Alternative implements
            PrimitiveWrapper<DummyPrimitive1> {
-         /** @override */
          wrap(): DummyPrimitive1 {
            throw new Error();
          }
 
-         /** @override */
          getPrimitiveType() {
            return DummyPrimitive1;
          }
@@ -605,7 +603,6 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
       private readonly newKeyMethodResult = new Uint8Array(10)) {}
 
   /**
-   * @override
    */
   newKey(keyFormat: PbMessage|Uint8Array) {
     const key = new PbAesCtrKey().setKeyValue(this.newKeyMethodResult);
@@ -613,7 +610,6 @@ class DummyKeyFactory implements KeyManager.KeyFactory {
   }
 
   /**
-   * @override
    */
   newKeyData(serializedKeyFormat: Uint8Array) {
     const keyData =
@@ -636,19 +632,16 @@ abstract class DummyPrimitive2 {
 
 // Primitive implementations for testing purposes.
 class DummyPrimitive1Impl1 extends DummyPrimitive1 {
-  /** @override */
   operation1() {
     return 1;
   }
 }
 class DummyPrimitive1Impl2 extends DummyPrimitive1 {
-  /** @override */
   operation1() {
     return 2;
   }
 }
 class DummyPrimitive2Impl extends DummyPrimitive2 {
-  /** @override */
   operation2() {
     return 'dummy';
   }
@@ -667,33 +660,27 @@ class DummyKeyManager1 implements KeyManager.KeyManager<DummyPrimitive1> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager1>, key: PbKeyData|PbMessage) {
     return this.primitive;
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType(): Constructor<DummyPrimitive1> {
     return this.primitiveType;
   }
 
-  /** @override */
   getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -710,33 +697,27 @@ class DummyKeyManager2 implements KeyManager.KeyManager<DummyPrimitive2> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManager2>, key: PbKeyData|PbMessage) {
     return this.primitive;
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }
 
-  /** @override */
   getVersion(): number {
     throw new SecurityException('Not implemented, only for testing purposes.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -751,34 +732,28 @@ class DummyKeyManagerForNewKeyTests implements KeyManager.KeyManager<string> {
     this.KEY_FACTORY = new DummyKeyFactory(keyType, opt_newKeyMethodResult);
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<DummyKeyManagerForNewKeyTests>,
       key: PbKeyData|PbMessage): Promise<string> {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return this.keyType;
   }
 
-  /** @override */
   getPrimitiveType(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   getVersion(): never {
     throw new SecurityException('Not implemented, function is not needed.');
   }
 
-  /** @override */
   getKeyFactory() {
     return this.KEY_FACTORY;
   }
@@ -792,12 +767,10 @@ class DummyPrimitiveWrapper1 implements PrimitiveWrapper<DummyPrimitive1> {
       private readonly primitive: DummyPrimitive1,
       private readonly primitiveType: Constructor<DummyPrimitive1>) {}
 
-  /** @override */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive1>) {
     return this.primitive;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }
@@ -809,12 +782,10 @@ class DummyPrimitiveWrapper2 implements PrimitiveWrapper<DummyPrimitive2> {
       private readonly primitive: DummyPrimitive2,
       private readonly primitiveType: Constructor<DummyPrimitive2>) {}
 
-  /** @override */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<DummyPrimitive2>) {
     return this.primitive;
   }
 
-  /** @override */
   getPrimitiveType() {
     return this.primitiveType;
   }

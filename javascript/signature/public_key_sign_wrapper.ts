@@ -34,7 +34,6 @@ class WrappedPublicKeySign extends PublicKeySign {
     return new WrappedPublicKeySign(primitiveSet);
   }
 
-  /** @override */
   async sign(data: Uint8Array) {
     Validators.requireUint8Array(data);
     const primary = this.primitiveSet.getPrimary();
@@ -50,14 +49,12 @@ class WrappedPublicKeySign extends PublicKeySign {
 
 export class PublicKeySignWrapper implements PrimitiveWrapper<PublicKeySign> {
   /**
-   * @override
    */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<PublicKeySign>) {
     return WrappedPublicKeySign.newPublicKeySign(primitiveSet);
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return PublicKeySign;

@@ -266,7 +266,6 @@ class DummyHybridEncrypt extends HybridEncrypt {
     super();
   }
 
-  /** @override */
   async encrypt(plaintext: Uint8Array, opt_contextInfo?: Uint8Array) {
     const ciphertext = Bytes.concat(plaintext, this.ciphertextSuffix);
     if (opt_contextInfo) {
@@ -282,7 +281,6 @@ class DummyHybridDecrypt extends HybridDecrypt {
     super();
   }
 
-  /** @override */
   async decrypt(ciphertext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (opt_contextInfo) {
       const infoLength = opt_contextInfo.length;

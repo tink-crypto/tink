@@ -125,7 +125,6 @@ function createDummyPrimitiveSet(opt_withPrimary: boolean = true):
 
 /** @final */
 class DummyPublicKeySign extends PublicKeySign {
-  /** @override */
   async sign(data: Uint8Array) {
     return data;
   }

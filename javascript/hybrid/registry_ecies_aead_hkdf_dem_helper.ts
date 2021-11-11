@@ -59,14 +59,12 @@ export class RegistryEciesAeadHkdfDemHelper implements EciesAeadHkdfDemHelper {
   }
 
   /**
-   * @override
    */
   getDemKeySizeInBytes() {
     return this.demKeySize;
   }
 
   /**
-   * @override
    */
   async getAead(demKey: Uint8Array): Promise<Aead> {
     if (demKey.length !== this.demKeySize) {

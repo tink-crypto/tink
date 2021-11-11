@@ -33,7 +33,6 @@ class WrappedPublicKeyVerify extends PublicKeyVerify {
     return new WrappedPublicKeyVerify(primitiveSet);
   }
 
-  /** @override */
   async verify(signature: Uint8Array, data: Uint8Array) {
     Validators.requireUint8Array(signature);
     Validators.requireUint8Array(data);
@@ -89,14 +88,12 @@ class WrappedPublicKeyVerify extends PublicKeyVerify {
 export class PublicKeyVerifyWrapper implements
     PrimitiveWrapper<PublicKeyVerify> {
   /**
-   * @override
    */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<PublicKeyVerify>) {
     return WrappedPublicKeyVerify.newPublicKeyVerify(primitiveSet);
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return PublicKeyVerify;

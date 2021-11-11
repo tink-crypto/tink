@@ -19,14 +19,12 @@ import {RegistryEciesAeadHkdfDemHelper} from './registry_ecies_aead_hkdf_dem_hel
  * @final
  */
 class EciesAeadHkdfPublicKeyFactory implements KeyManager.KeyFactory {
-  /** @override */
   newKey(keyFormat: PbMessage|Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EciesAeadHkdfPrivateKeyManager to generate new keys.');
   }
 
-  /** @override */
   newKeyData(serializedKeyFormat: Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
@@ -45,7 +43,6 @@ export class EciesAeadHkdfPublicKeyManager implements
   static VERSION: number = 0;
   keyFactory = new EciesAeadHkdfPublicKeyFactory();
 
-  /** @override */
   async getPrimitive(
       primitiveType: Util.Constructor<HybridEncrypt>,
       key: PbKeyData|PbMessage) {
@@ -77,27 +74,22 @@ export class EciesAeadHkdfPublicKeyManager implements
         recepientPublicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return EciesAeadHkdfPublicKeyManager.KEY_TYPE;
   }
 
-  /** @override */
   getPrimitiveType() {
     return EciesAeadHkdfPublicKeyManager.SUPPORTED_PRIMITIVE;
   }
 
-  /** @override */
   getVersion() {
     return EciesAeadHkdfPublicKeyManager.VERSION;
   }
 
-  /** @override */
   getKeyFactory() {
     return this.keyFactory;
   }

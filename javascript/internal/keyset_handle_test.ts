@@ -683,7 +683,6 @@ class DummyAead extends Aead {
     super();
   }
 
-  /** @override */
   // Encrypt method just append the primitive identifier to plaintext.
   async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array) {
     const result =
@@ -693,7 +692,6 @@ class DummyAead extends Aead {
     return result;
   }
 
-  /** @override */
   // Decrypt method throws an exception whenever ciphertext does not end with
   // ciphertext suffix, otherwise it returns the first part (without
   // ciphertext suffix).
@@ -719,7 +717,6 @@ class DummyMac extends Mac {
 
   /**
    * Just appends the tag to the data.
-   * @override
    */
   async computeMac(data: Uint8Array) {
     return this.tag;
@@ -727,7 +724,6 @@ class DummyMac extends Mac {
 
   /**
    * Returns whether data ends with tag.
-   * @override
    */
   async verifyMac(tag: Uint8Array, data: Uint8Array) {
     return [...tag].toString() === [...this.tag].toString();
@@ -739,7 +735,6 @@ class DummyHybridEncrypt extends HybridEncrypt {
     super();
   }
   // Async is used here just because real primitives returns Promise.
-  /** @override */
   async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array) {
     return Bytes.concat(plaintext, this.ciphertextSuffix);
   }
@@ -750,7 +745,6 @@ class DummyHybridDecrypt extends HybridDecrypt {
     super();
   }
 
-  /** @override */
   async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array) {
     const cipherLen = ciphertext.length;
     const suffixLen = this.ciphertextSuffix.length;

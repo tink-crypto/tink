@@ -14,7 +14,6 @@ import {PbEncryptedKeyset, PbKeyset} from './proto';
  * @final
  */
 export class BinaryKeysetWriter implements KeysetWriter {
-  /** @override */
   write(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array {
     if (!keyset) {
       throw new SecurityException('keyset has to be non-null.');

@@ -21,7 +21,6 @@ const VERSION = 0;
  * @final
  */
 class AesGcmKeyFactory implements KeyManager.KeyFactory {
-  /** @override */
   newKey(keyFormat: PbMessage|Uint8Array) {
     const keyFormatProto = AesGcmKeyFactory.getKeyFormatProto(keyFormat);
     AesGcmKeyFactory.validateKeyFormat(keyFormatProto);
@@ -31,7 +30,6 @@ class AesGcmKeyFactory implements KeyManager.KeyFactory {
     return key;
   }
 
-  /** @override */
   newKeyData(serializedKeyFormat: Uint8Array) {
     const key = (this.newKey(serializedKeyFormat));
     const keyData =
@@ -94,7 +92,6 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
     this.keyFactory = new AesGcmKeyFactory();
   }
 
-  /** @override */
   async getPrimitive(
       primitiveType: Constructor<Aead>, key: PbKeyData|PbMessage) {
     if (primitiveType != this.getPrimitiveType()) {
@@ -107,27 +104,22 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
     return await aesGcm.fromRawKey(keyProto.getKeyValue_asU8());
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return AesGcmKeyManager.KEY_TYPE;
   }
 
-  /** @override */
   getPrimitiveType() {
     return AesGcmKeyManager.SUPPORTED_PRIMITIVE;
   }
 
-  /** @override */
   getVersion() {
     return VERSION;
   }
 
-  /** @override */
   getKeyFactory() {
     return this.keyFactory;
   }

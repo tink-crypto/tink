@@ -34,7 +34,6 @@ class WrappedHybridEncrypt extends HybridEncrypt {
     return new WrappedHybridEncrypt(hybridEncryptPrimitiveSet);
   }
 
-  /** @override */
   async encrypt(plaintext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (!plaintext) {
       throw new SecurityException('Plaintext has to be non-null.');
@@ -52,14 +51,12 @@ class WrappedHybridEncrypt extends HybridEncrypt {
 
 export class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt> {
   /**
-   * @override
    */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<HybridEncrypt>) {
     return WrappedHybridEncrypt.newHybridEncrypt(primitiveSet);
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return HybridEncrypt;
