@@ -172,6 +172,11 @@ util::StatusOr<std::string> ConvertBioToString(BIO* bio) {
   return pem_material;
 }
 
+size_t FieldElementSizeInBytes(const EC_GROUP *group) {
+  unsigned degree_bits = EC_GROUP_get_degree(group);
+  return (degree_bits + 7) / 8;
+}
+
 }  // namespace
 
 // static.
@@ -373,9 +378,9 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
 
   // Convert public key parameters and construct Subtle ECKey
   auto x_string = internal::BignumToString(x_coordinate.get(),
-                                           BN_num_bytes(x_coordinate.get()));
+                                           FieldElementSizeInBytes(ec_group));
   auto y_string = internal::BignumToString(y_coordinate.get(),
-                                           BN_num_bytes(y_coordinate.get()));
+                                           FieldElementSizeInBytes(ec_group));
   auto curve = SubtleUtilBoringSSL::GetCurve(ec_group);
 
   if (!x_string.ok()) return x_string.status();

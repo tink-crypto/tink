@@ -117,6 +117,24 @@ AwEHoUQDQgAE7iGJOzQCYDYPGuPSa/CgZurcjGNpCy8d4wgiCADZ0avTNKWRfSvk
 lHWvJFT+6kHUQY6pnux5HRoMwcKJD4sz7g==
 -----END EC PRIVATE KEY-----)",
     },
+    {  // example EcKey with a pub_x with a leading zero.
+        /*.curve=*/subtle::NIST_P256,
+        /*.pub_x_hex_str=*/
+        "00b02778da7b7bfd7094c36f847eb32b3077547da49c8ecf667f7acc3145693c",
+        /*.pub_y_hex_str=*/
+        "710f3044af1cfe55f10d75de077297f7f2745cf2cd6cd4306f2aa72e367f7331",
+        /*.priv_hex_str=*/
+        "f4b9b38fd2817527e5b6ef7910bce594f06d87990f31a2e9005594951e2a2f2f",
+        /*.pub_pem=*/R"(-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEALAneNp7e/1wlMNvhH6zKzB3VH2k
+nI7PZn96zDFFaTxxDzBErxz+VfENdd4Hcpf38nRc8s1s1DBvKqcuNn9zMQ==
+-----END PUBLIC KEY-----)",
+        /*.priv_pem=*/R"(-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIPS5s4/SgXUn5bbveRC85ZTwbYeZDzGi6QBVlJUeKi8voAoGCCqGSM49
+AwEHoUQDQgAEALAneNp7e/1wlMNvhH6zKzB3VH2knI7PZn96zDFFaTxxDzBErxz+
+VfENdd4Hcpf38nRc8s1s1DBvKqcuNn9zMQ==
+-----END EC PRIVATE KEY-----)",
+    },
 
     // NIST P384
     {
@@ -510,6 +528,23 @@ TEST(PemParserEcTest, ReadEcPublicKeySuccess) {
     EXPECT_EQ(test_vector.curve, ecdsa_key->get()->curve);
   }
 }
+
+TEST(PemParserEcTest, GenWriteReadSuccess) {
+  util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key =
+      SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
+  ASSERT_THAT(ec_key.status(), IsOk());
+
+  util::StatusOr<std::string> public_pem =
+      PemParser::WriteEcPublicKey(*ec_key);
+  ASSERT_TRUE(public_pem.ok()) << public_pem.status();
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> public_key =
+      PemParser::ParseEcPublicKey(*public_pem);
+  EXPECT_THAT(public_key.status(), test::IsOk()) << internal::GetSslErrors();
+  EXPECT_EQ((*public_key)->pub_x, ec_key->pub_x);
+  EXPECT_EQ((*public_key)->pub_y, ec_key->pub_y);
+  EXPECT_EQ((*public_key)->curve, ec_key->curve);
+}
+
 
 TEST(PemParserEcTest, ReadEcPublicKeyInvalid) {
   for (auto &test_vector : *kEcKeyTestVectors) {
