@@ -6,11 +6,10 @@ tink_cc_library(
     aead_util.cc
     aead_util.h
   DEPS
-    tink::util::errors
-    tink::util::status
-    tink::util::statusor
-    crypto
     absl::status
+    crypto
+    tink::util::errors
+    tink::util::statusor
 )
 
 tink_cc_library(
@@ -19,19 +18,19 @@ tink_cc_library(
     cord_aes_gcm_boringssl.cc
     cord_aes_gcm_boringssl.h
   DEPS
+    tink::aead::internal::aead_util
+    absl::status
+    absl::strings
+    absl::cord
+    crypto
+    tink::aead::cord_aead
     tink::internal::ssl_unique_ptr
     tink::subtle::random
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
-    tink::aead::cord_aead
     tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    crypto
-    absl::status
-    absl::strings
-    absl::cord
 )
 
 tink_cc_library(
@@ -40,14 +39,13 @@ tink_cc_library(
     mock_zero_copy_aead.h
   DEPS
     tink::aead::internal::zero_copy_aead
-    tink::util::statusor
-    absl::strings
     gmock
+    absl::strings
+    tink::util::statusor
 )
 
 tink_cc_library(
-  NAME
-    aead_from_zero_copy
+  NAME aead_from_zero_copy
   SRCS
     aead_from_zero_copy.cc
     aead_from_zero_copy.h
@@ -63,10 +61,11 @@ tink_cc_library(
 
 tink_cc_library(
   NAME zero_copy_aead
-  SRCS zero_copy_aead.h
+  SRCS
+    zero_copy_aead.h
   DEPS
-    tink::util::statusor
     absl::strings
+    tink::util::statusor
 )
 
 tink_cc_library(
@@ -75,17 +74,16 @@ tink_cc_library(
     zero_copy_aes_gcm_boringssl.cc
     zero_copy_aes_gcm_boringssl.h
   DEPS
+    tink::aead::internal::aead_util
+    tink::aead::internal::zero_copy_aead
     absl::core_headers
     absl::memory
     absl::status
     absl::strings
     crypto
-    tink::aead::internal::aead_util
     tink::internal::ssl_unique_ptr
-    tink::aead::internal::zero_copy_aead
     tink::subtle::random
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -93,18 +91,17 @@ tink_cc_library(
 
 tink_cc_test(
   NAME aead_util_test
-  SRCS aead_util_test.cc
+  SRCS
+    aead_util_test.cc
   DEPS
     tink::aead::internal::aead_util
-    tink::util::statusor
-    tink::util::test_matchers
-    crypto
     gmock
+    crypto
+    tink::util::test_matchers
 )
 
 tink_cc_test(
-  NAME
-    aead_from_zero_copy_test
+  NAME aead_from_zero_copy_test
   SRCS
     aead_from_zero_copy_test.cc
   DEPS
