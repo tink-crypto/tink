@@ -34,7 +34,6 @@ export class AesGcm extends Aead {
   }
 
   /**
-   * @override
    */
   async encrypt(plaintext: Uint8Array, associatedData?: Uint8Array):
       Promise<Uint8Array> {
@@ -57,7 +56,6 @@ export class AesGcm extends Aead {
   }
 
   /**
-   * @override
    */
   async decrypt(ciphertext: Uint8Array, associatedData?: Uint8Array):
       Promise<Uint8Array> {

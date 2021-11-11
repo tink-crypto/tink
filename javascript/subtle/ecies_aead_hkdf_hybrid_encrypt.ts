@@ -57,7 +57,6 @@ export class EciesAeadHkdfHybridEncrypt extends HybridEncrypt {
    * Encrypts plaintext using opt_contextInfo as info parameter of the
    * underlying HKDF.
    *
-   * @override
    */
   async encrypt(
       plaintext: Uint8Array,
