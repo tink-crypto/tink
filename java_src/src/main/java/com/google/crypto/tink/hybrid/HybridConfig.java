@@ -18,6 +18,7 @@ package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.hybrid.internal.HpkePrivateKeyManager;
 import com.google.crypto.tink.proto.RegistryConfig;
 import java.security.GeneralSecurityException;
 
@@ -107,6 +108,7 @@ public final class HybridConfig {
     }
 
     EciesAeadHkdfPrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
+    HpkePrivateKeyManager.registerPair(/*newKeyAllowed=*/true);
   }
 
   private HybridConfig() {}

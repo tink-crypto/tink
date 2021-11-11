@@ -57,14 +57,26 @@ public class HybridConfigTest {
             GeneralSecurityException.class, () -> Registry.getCatalogue("tinkhybriddecrypt"));
     assertThat(e.toString()).contains("no catalogue found");
     assertThat(e.toString()).contains("HybridConfig.register()");
-    String typeUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
-    e = assertThrows(GeneralSecurityException.class, () -> Registry.getUntypedKeyManager(typeUrl));
+
+    String eciesPrivateKeyUrl = "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey";
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getUntypedKeyManager(eciesPrivateKeyUrl));
+    assertThat(e.toString()).contains("No key manager found");
+
+    String hpkePrivateKeyUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+    e =
+        assertThrows(
+            GeneralSecurityException.class,
+            () -> Registry.getUntypedKeyManager(hpkePrivateKeyUrl));
     assertThat(e.toString()).contains("No key manager found");
 
     // Initialize the config.
     HybridConfig.register();
 
-    Registry.getKeyManager(typeUrl, HybridDecrypt.class);
+    Registry.getKeyManager(eciesPrivateKeyUrl, HybridDecrypt.class);
+    Registry.getKeyManager(hpkePrivateKeyUrl, HybridDecrypt.class);
 
     // Running init() manually again should succeed.
     HybridConfig.register();
@@ -80,6 +92,7 @@ public class HybridConfigTest {
     // Check if all key types are registered when not using FIPS mode.
     String[] keyTypeUrls = {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
@@ -98,6 +111,7 @@ public class HybridConfigTest {
     // List of algorithms which are not part of FIPS and should not be registered.
     String[] keyTypeUrls = {
       "type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey",
+      "type.googleapis.com/google.crypto.tink.HpkePrivateKey",
     };
 
     for (String typeUrl : keyTypeUrls) {
