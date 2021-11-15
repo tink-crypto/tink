@@ -27,6 +27,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 namespace {
 
@@ -159,5 +160,6 @@ TEST(KeysetWrapperImplTest, OnlyEnabled) {
 
 }  // namespace
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
