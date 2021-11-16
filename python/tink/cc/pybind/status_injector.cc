@@ -17,7 +17,6 @@
 #include <pybind11/pybind11.h>
 
 #include "absl/memory/memory.h"
-#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/cc/pybind/status_casters.h"
 #include "pybind11/detail/common.h"
@@ -35,57 +34,57 @@ struct IntValue {
 
 class TestClass {
  public:
-  util::Status MakeStatus(absl::StatusCode code,
+  util::Status MakeStatus(util::error::Code code,
                           const std::string& text = "") {
     return util::Status(code, text);
   }
 
-  util::Status MakeStatusConst(absl::StatusCode code,
+  util::Status MakeStatusConst(util::error::Code code,
                                const std::string& text = "") const {
     return util::Status(code, text);
   }
 
-  util::StatusOr<int> MakeFailureStatusOr(absl::StatusCode code,
+  util::StatusOr<int> MakeFailureStatusOr(util::error::Code code,
                                           const std::string& text = "") {
     return util::Status(code, text);
   }
 };
 
-bool CheckStatus(const util::Status& status, absl::StatusCode code) {
+bool CheckStatus(const util::Status& status, util::error::Code code) {
   return status.code() == static_cast<absl::StatusCode>(code);
 }
 
-util::Status ReturnStatus(absl::StatusCode code,
+util::Status ReturnStatus(util::error::Code code,
                           const std::string& text = "") {
   return util::Status(code, text);
 }
 
-pybind11::object ReturnStatusManualCast(absl::StatusCode code,
+pybind11::object ReturnStatusManualCast(util::error::Code code,
                                         const std::string& text = "") {
   return pybind11::cast(
       google_tink::DoNotThrowStatus(util::Status(code, text)));
 }
 
-const util::Status& ReturnStatusRef(absl::StatusCode code,
+const util::Status& ReturnStatusRef(util::error::Code code,
                                     const std::string& text = "") {
   static util::Status static_status;
   static_status = util::Status(code, text);
   return static_status;
 }
 
-const util::Status* ReturnStatusPtr(absl::StatusCode code,
+const util::Status* ReturnStatusPtr(util::error::Code code,
                                     const std::string& text = "") {
   static util::Status static_status;
   static_status = util::Status(code, text);
   return &static_status;
 }
 
-util::StatusOr<int> ReturnFailureStatusOr(absl::StatusCode code,
+util::StatusOr<int> ReturnFailureStatusOr(util::error::Code code,
                                           const std::string& text = "") {
   return util::Status(code, text);
 }
 
-pybind11::object ReturnFailureStatusOrManualCast(absl::StatusCode code,
+pybind11::object ReturnFailureStatusOrManualCast(util::error::Code code,
                                                  const std::string& text = "") {
   return pybind11::cast(
       google_tink::DoNotThrowStatus(util::Status(code, text)));
