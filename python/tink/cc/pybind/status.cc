@@ -20,6 +20,8 @@
 #include <exception>
 #include <stdexcept>
 
+#include "absl/status/status.h"
+#include "pybind11/attr.h"
 #include "tink/util/status.h"
 #include "tink/cc/pybind/status_utils.h"
 
@@ -41,30 +43,33 @@ void PybindRegisterStatus(pybind11::module* module) {
   namespace py = pybind11;
   py::module& m = *module;
 
-  enum_<util::error::Code>(m, "ErrorCode")
-      .value("OK", util::error::Code::OK)
-      .value("CANCELLED", util::error::Code::CANCELLED)
-      .value("UNKNOWN", util::error::Code::UNKNOWN)
-      .value("INVALID_ARGUMENT", util::error::Code::INVALID_ARGUMENT)
-      .value("DEADLINE_EXCEEDED", util::error::Code::DEADLINE_EXCEEDED)
-      .value("NOT_FOUND", util::error::Code::NOT_FOUND)
-      .value("ALREADY_EXISTS", util::error::Code::ALREADY_EXISTS)
-      .value("PERMISSION_DENIED", util::error::Code::PERMISSION_DENIED)
-      .value("RESOURCE_EXHAUSTED", util::error::Code::RESOURCE_EXHAUSTED)
-      .value("FAILED_PRECONDITION", util::error::Code::FAILED_PRECONDITION)
-      .value("ABORTED", util::error::Code::ABORTED)
-      .value("OUT_OF_RANGE", util::error::Code::OUT_OF_RANGE)
-      .value("UNIMPLEMENTED", util::error::Code::UNIMPLEMENTED)
-      .value("INTERNAL", util::error::Code::INTERNAL)
-      .value("UNAVAILABLE", util::error::Code::UNAVAILABLE)
-      .value("DATA_LOSS", util::error::Code::DATA_LOSS);
+  // Make this import module-local to avoid clashing with the Abseil's binding
+  // for absl::StatusCode in code which uses both Tink and Abseil.
+  enum_<absl::StatusCode>(m, "ErrorCode", py::module_local())
+      .value("OK", absl::StatusCode::kOk)
+      .value("CANCELLED", absl::StatusCode::kCancelled)
+      .value("UNKNOWN", absl::StatusCode::kUnknown)
+      .value("INVALID_ARGUMENT", absl::StatusCode::kInvalidArgument)
+      .value("DEADLINE_EXCEEDED", absl::StatusCode::kDeadlineExceeded)
+      .value("NOT_FOUND", absl::StatusCode::kNotFound)
+      .value("ALREADY_EXISTS", absl::StatusCode::kAlreadyExists)
+      .value("PERMISSION_DENIED", absl::StatusCode::kPermissionDenied)
+      .value("RESOURCE_EXHAUSTED", absl::StatusCode::kResourceExhausted)
+      .value("FAILED_PRECONDITION", absl::StatusCode::kFailedPrecondition)
+      .value("ABORTED", absl::StatusCode::kAborted)
+      .value("OUT_OF_RANGE", absl::StatusCode::kOutOfRange)
+      .value("UNIMPLEMENTED", absl::StatusCode::kUnimplemented)
+      .value("INTERNAL", absl::StatusCode::kInternal)
+      .value("UNAVAILABLE", absl::StatusCode::kUnavailable)
+      .value("DATA_LOSS", absl::StatusCode::kDataLoss);
 
   class_<util::Status>(m, "Status")
       .def(init())
-      .def(init<util::error::Code, std::string>())
+      .def(init<absl::StatusCode, absl::string_view>())
       .def("ok", &util::Status::ok)
-      .def("error_code", &util::Status::error_code)
-      .def("error_message", &util::Status::error_message)
+      .def("error_code", &util::Status::code)
+      .def("error_message",
+           [](const util::Status& self) { return std::string(self.message()); })
       .def("to_string", &util::Status::ToString)
       .def("__repr__", &util::Status::ToString);
 
