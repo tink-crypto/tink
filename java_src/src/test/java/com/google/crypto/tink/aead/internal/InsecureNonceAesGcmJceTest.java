@@ -232,17 +232,26 @@ public class InsecureNonceAesGcmJceTest {
         }
 
         try {
-          // TODO(b/202836020): Add Wycheproof-based tests for encryption.
           InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+          // Encryption.
+          byte[] encrypted = gcm.encrypt(iv, msg, aad);
+          boolean ciphertextMatches = TestUtil.arrayEquals(encrypted, ciphertext);
+          if (result.equals("valid") && !ciphertextMatches) {
+            System.out.printf(
+                "FAIL %s: incorrect encryption, result: %s, expected: %s%n",
+                tcId, Hex.encode(encrypted), Hex.encode(ciphertext));
+            errors++;
+          }
+          // Decryption.
           byte[] decrypted = gcm.decrypt(iv, ciphertext, aad);
-          boolean eq = TestUtil.arrayEquals(decrypted, msg);
+          boolean plaintextMatches = TestUtil.arrayEquals(decrypted, msg);
           if (result.equals("invalid")) {
             System.out.printf(
                 "FAIL %s: accepting invalid ciphertext, cleartext: %s, decrypted: %s%n",
                 tcId, Hex.encode(msg), Hex.encode(decrypted));
             errors++;
           } else {
-            if (!eq) {
+            if (!plaintextMatches) {
               System.out.printf(
                   "FAIL %s: incorrect decryption, result: %s, expected: %s%n",
                   tcId, Hex.encode(decrypted), Hex.encode(msg));
