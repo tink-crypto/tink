@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "pybind11/pybind11.h"
 #include "tink/key_manager.h"
@@ -69,7 +70,7 @@ class CcKeyManager {
     google::crypto::tink::KeyTemplate key_template;
     key_template.ParseFromString(serialized_key_template);
     if (key_manager_->get_key_type() != key_template.type_url()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Key type '", key_template.type_url(),
                                        "' is not supported by this manager."));
     }
@@ -88,7 +89,7 @@ class CcKeyManager {
     const PrivateKeyFactory* factory = dynamic_cast<const PrivateKeyFactory*>(
         &key_manager_->get_key_factory());
     if (factory == nullptr) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("KeyManager for type '",
                                        key_manager_->get_key_type().c_str(),
                                        "' does not have "

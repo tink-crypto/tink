@@ -50,7 +50,6 @@ namespace {
 using ::crypto::tink::test::EqualsKey;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::crypto::tink::util::error::Code;
 using ::google::crypto::tink::EcdsaPublicKey;
 using ::google::crypto::tink::EcdsaSignatureEncoding;
 using ::google::crypto::tink::EllipticCurveType;
@@ -231,7 +230,8 @@ TEST(SignaturePemKeysetReaderTest, BuildEmptyPemArray) {
   auto builder = SignaturePemKeysetReaderBuilder(
       SignaturePemKeysetReaderBuilder::PemReaderType::PUBLIC_KEY_SIGN);
   auto keyset_reader_or = builder.Build();
-  EXPECT_THAT(keyset_reader_or.status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader_or.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Make sure ReadUnencrypted returns an UNSUPPORTED error as expected.
@@ -408,7 +408,8 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).ValueOrDie();
 
-  EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader->Read().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Expects an INVLID_ARGUMENT when passing a private key to a
@@ -428,7 +429,8 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).ValueOrDie();
 
-  EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader->Read().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Expects an INVALID_ARGUMENT error as the key size is too small.
@@ -447,7 +449,8 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).ValueOrDie();
 
-  EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader->Read().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Expects an INVALID_ARGUMENT error as the key is 2048 bits, but PemKeyParams
@@ -467,7 +470,8 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).ValueOrDie();
 
-  EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader->Read().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Expects an INVALID_ARGUMENT error as SHA1 is not allowed.
@@ -486,7 +490,8 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
   std::unique_ptr<KeysetReader> keyset_reader =
       std::move(keyset_reader_or).ValueOrDie();
 
-  EXPECT_THAT(keyset_reader->Read().status(), StatusIs(Code::INVALID_ARGUMENT));
+  EXPECT_THAT(keyset_reader->Read().status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
@@ -565,7 +570,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongHashType) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongKeySize) {
@@ -581,7 +587,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongKeySize) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongAlgorithm) {
@@ -597,7 +604,8 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSAWrongAlgorithm) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadEd25519ShouldFail) {
@@ -613,7 +621,8 @@ TEST(SignaturePemKeysetReaderTest, ReadEd25519ShouldFail) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
@@ -629,7 +638,8 @@ TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {
@@ -645,7 +655,8 @@ TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(), StatusIs(Code::INVALID_ARGUMENT));
+  ASSERT_THAT(keyset_read.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace
