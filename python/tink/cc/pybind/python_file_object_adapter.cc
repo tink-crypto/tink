@@ -45,7 +45,7 @@ namespace tink {
     overload(__VA_ARGS__); /* Ignoring return value. */                   \
     return util::Status();                                                \
   } catch (const std::exception &e) {                                     \
-    return util::Status(util::error::UNKNOWN, e.what());                  \
+    return util::Status(absl::StatusCode::kUnknown, e.what());            \
   } catch (...) {                                                         \
     std::abort();                                                         \
   }
@@ -66,7 +66,7 @@ namespace tink {
     auto o = overload(__VA_ARGS__);                                          \
     return o.cast<statusor_payload_type>();                                  \
   } catch (const std::exception &e) {                                        \
-    return util::Status(util::error::UNKNOWN, e.what());                     \
+    return util::Status(absl::StatusCode::kUnknown, e.what());               \
   } catch (...) {                                                            \
     std::abort();                                                            \
   }
