@@ -114,7 +114,7 @@ crypto::tink::util::Status ValidateFalconPrivateKeySize(int32_t key_size) {
   switch (key_size) {
     case kFalcon512PrivateKeySize:
     case kFalcon1024PrivateKeySize:
-      return util::Status::OK;
+      return util::OkStatus();
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrFormat("Invalid private key size (%d). "
@@ -128,7 +128,7 @@ crypto::tink::util::Status ValidateFalconPublicKeySize(int32_t key_size) {
   switch (key_size) {
     case kFalcon512PublicKeySize:
     case kFalcon1024PublicKeySize:
-      return util::Status::OK;
+      return util::OkStatus();
     default:
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrFormat("Invalid public key size (%d). "

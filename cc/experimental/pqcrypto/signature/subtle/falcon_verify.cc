@@ -74,7 +74,7 @@ util::Status FalconVerify::Verify(absl::string_view signature,
     return util::Status(absl::StatusCode::kInternal, "Signature is not valid.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle
