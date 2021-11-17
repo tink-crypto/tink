@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@
 #include <memory>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/istreamwrapper.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/internal/test_file_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -75,15 +77,17 @@ std::string WycheproofUtil::GetBytes(const rapidjson::Value &val) {
 
 std::unique_ptr<rapidjson::Document> WycheproofUtil::ReadTestVectors(
     const std::string &filename) {
-  const std::string kTestVectors = "../wycheproof/testvectors/";
+  std::string test_vectors_path = crypto::tink::internal::RunfilesPath(
+      absl::StrCat(
+          "external/wycheproof/testvectors/", filename));
   std::ifstream input_stream;
-  input_stream.open(kTestVectors + filename);
+  input_stream.open(test_vectors_path);
   rapidjson::IStreamWrapper input(input_stream);
   std::unique_ptr<rapidjson::Document> root(
       new rapidjson::Document(rapidjson::kObjectType));
   if (root->ParseStream(input).HasParseError()) {
     std::cerr << "Failure parsing of test vectors from "
-              << kTestVectors + filename << "\n";
+              << test_vectors_path << std::endl;
     exit(1);
   }
   return root;

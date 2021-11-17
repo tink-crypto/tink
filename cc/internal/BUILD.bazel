@@ -21,6 +21,18 @@ cc_library(
 )
 
 cc_library(
+    name = "test_file_util",
+    testonly = 1,
+    srcs = ["test_file_util_bazel.cc"],
+    hdrs = ["test_file_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "keyset_wrapper_impl",
     hdrs = ["keyset_wrapper_impl.h"],
     include_prefix = "tink/internal",
@@ -147,8 +159,8 @@ cc_library(
         ":ssl_unique_ptr",
         "//config:tink_fips",
         "//subtle:common_enums",
-        "//util:secret_data",
         "//util:errors",
+        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
@@ -274,7 +286,6 @@ cc_test(
     ],
 )
 
-
 cc_test(
     name = "rsa_util_test",
     size = "small",
@@ -283,10 +294,10 @@ cc_test(
         ":bn_util",
         ":rsa_util",
         ":ssl_unique_ptr",
-        "@com_google_googletest//:gtest_main",
-        "@boringssl//:crypto",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_googletest//:gtest_main",
     ],
 )

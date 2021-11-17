@@ -647,6 +647,7 @@ tink_cc_library(
     wycheproof_util.h
   DEPS
     tink::subtle::common_enums
+    tink::internal::test_file_util
     tink::util::status
     tink::util::statusor
     absl::status

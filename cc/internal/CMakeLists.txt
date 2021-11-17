@@ -19,6 +19,15 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME test_file_util
+  SRCS
+    test_file_util_cmake.cc
+    test_file_util.h
+  DEPS
+    absl::strings
+)
+
+tink_cc_library(
   NAME keyset_wrapper_impl
   SRCS
     keyset_wrapper_impl.h

@@ -680,11 +680,13 @@ cc_library(
 
 cc_library(
     name = "wycheproof_util",
+    testonly = 1,
     srcs = ["wycheproof_util.cc"],
     hdrs = ["wycheproof_util.h"],
     include_prefix = "tink/subtle",
     deps = [
         ":common_enums",
+        "//internal:test_file_util",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/status",

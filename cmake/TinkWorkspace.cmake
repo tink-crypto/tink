@@ -59,7 +59,7 @@ http_archive(
 
 # Symlink the Wycheproof test data.
 # Paths are hard-coded in tests, which expects wycheproof/ in this location.
-add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/cc/wycheproof")
+add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wycheproof")
 
 if (NOT TINK_USE_SYSTEM_OPENSSL)
   http_archive(
