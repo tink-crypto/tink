@@ -13,6 +13,26 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME ssl_aead
+  SRCS
+    ssl_aead.cc
+    ssl_aead.h
+  DEPS
+    tink::aead::internal::aead_util
+    absl::memory
+    absl::status
+    absl::strings
+    absl::span
+    crypto
+    tink::internal::err_util
+    tink::internal::ssl_unique_ptr
+    tink::internal::util
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME cord_aes_gcm_boringssl
   SRCS
     cord_aes_gcm_boringssl.cc
@@ -82,6 +102,7 @@ tink_cc_library(
     absl::strings
     crypto
     tink::internal::ssl_unique_ptr
+    tink::internal::util
     tink::subtle::random
     tink::subtle::subtle_util
     tink::util::secret_data
@@ -97,6 +118,25 @@ tink_cc_test(
     tink::aead::internal::aead_util
     gmock
     crypto
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME ssl_aead_test
+  SRCS
+    ssl_aead_test.cc
+  DEPS
+    tink::aead::internal::ssl_aead
+    gmock
+    absl::flat_hash_set
+    absl::memory
+    absl::status
+    absl::strings
+    absl::span
+    tink::config::tink_fips
+    tink::subtle::subtle_util
+    tink::util::secret_data
+    tink::util::statusor
     tink::util::test_matchers
 )
 

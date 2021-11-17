@@ -268,36 +268,6 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, ModifiedStrings) {
       absl::StatusCode::kInternal);
 }
 
-TEST(BuffersOverlapTest, BufferOverlapEmpty) {
-  absl::string_view empty = "";
-  EXPECT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(empty, empty));
-  EXPECT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(empty, ""));
-}
-
-TEST(BuffersOverlapTest, BufferOverlapSeparate) {
-  absl::string_view first = "first";
-  absl::string_view second = "second";
-  EXPECT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(first, second));
-  EXPECT_TRUE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(first, first));
-}
-
-TEST(BuffersOverlapTest, BufferOverlap) {
-  absl::string_view long_buffer = "a long buffer with \n several \n newlines";
-
-  EXPECT_TRUE(
-      ZeroCopyAesGcmBoringSsl::BuffersOverlap(long_buffer, long_buffer));
-
-  EXPECT_TRUE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(
-      long_buffer.substr(0, 10), long_buffer.substr(9, 5)));
-  EXPECT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(
-      long_buffer.substr(0, 10), long_buffer.substr(10, 5)));
-
-  EXPECT_TRUE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(
-      long_buffer.substr(9, 5), long_buffer.substr(0, 10)));
-  EXPECT_FALSE(ZeroCopyAesGcmBoringSsl::BuffersOverlap(
-      long_buffer.substr(10, 5), long_buffer.substr(0, 10)));
-}
-
 }  // namespace
 }  // namespace internal
 }  // namespace tink

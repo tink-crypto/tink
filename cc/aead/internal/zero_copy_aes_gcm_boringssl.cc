@@ -25,6 +25,7 @@
 #include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
@@ -150,20 +151,7 @@ util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
   return len;
 }
 
-bool ZeroCopyAesGcmBoringSsl::BuffersOverlap(absl::string_view first,
-                                             absl::string_view second) {
-  // first begins within second's buffer.
-  bool first_begins_in_second =
-      std::less_equal<const char *>{}(second.begin(), first.begin()) &&
-      std::less<const char *>{}(first.begin(), second.end());
 
-  // second begins within first's buffer.
-  bool second_begins_in_first =
-      std::less_equal<const char *>{}(first.begin(), second.begin()) &&
-      std::less<const char *>{}(second.begin(), first.end());
-
-  return first_begins_in_second || second_begins_in_first;
-}
 
 }  // namespace internal
 }  // namespace tink

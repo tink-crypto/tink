@@ -49,9 +49,6 @@ class ZeroCopyAesGcmBoringSsl : public ZeroCopyAead {
       absl::string_view ciphertext, absl::string_view associated_data,
       absl::Span<char> buffer) const override;
 
-  // TODO(b/198004452): Move to common library.
-  static bool BuffersOverlap(absl::string_view first, absl::string_view second);
-
  private:
   explicit ZeroCopyAesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> ctx)
       : ctx_(std::move(ctx)) {}

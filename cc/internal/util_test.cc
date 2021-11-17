@@ -34,6 +34,34 @@ TEST(UtilTest, EnsureStringNonNull) {
   EXPECT_EQ(EnsureStringNonNull(regular_str), regular_str);
 }
 
+TEST(BuffersOverlapTest, BufferOverlapEmpty) {
+  absl::string_view empty = "";
+  EXPECT_FALSE(BuffersOverlap(empty, empty));
+  EXPECT_FALSE(BuffersOverlap(empty, ""));
+}
+
+TEST(BuffersOverlapTest, BufferOverlapSeparate) {
+  absl::string_view first = "first";
+  absl::string_view second = "second";
+  EXPECT_FALSE(BuffersOverlap(first, second));
+  EXPECT_TRUE(BuffersOverlap(first, first));
+}
+
+TEST(BuffersOverlapTest, BufferOverlap) {
+  absl::string_view long_buffer = "a long buffer with \n several \n newlines";
+
+  EXPECT_TRUE(BuffersOverlap(long_buffer, long_buffer));
+
+  EXPECT_TRUE(
+      BuffersOverlap(long_buffer.substr(0, 10), long_buffer.substr(9, 5)));
+  EXPECT_FALSE(
+      BuffersOverlap(long_buffer.substr(0, 10), long_buffer.substr(10, 5)));
+
+  EXPECT_TRUE(
+      BuffersOverlap(long_buffer.substr(9, 5), long_buffer.substr(0, 10)));
+  EXPECT_FALSE(
+      BuffersOverlap(long_buffer.substr(10, 5), long_buffer.substr(0, 10)));
+}
 }  // namespace
 }  // namespace internal
 }  // namespace tink

@@ -25,6 +25,9 @@ namespace internal {
 // Return an empty string if str.data() is nullptr; otherwise return str.
 absl::string_view EnsureStringNonNull(absl::string_view str);
 
+// Returns true if `first` overlaps with `second`.
+bool BuffersOverlap(absl::string_view first, absl::string_view second);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

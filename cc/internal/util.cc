@@ -15,6 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/util.h"
 
+#include <functional>
+
+#include "absl/strings/string_view.h"
+
 namespace crypto {
 namespace tink {
 namespace internal {
@@ -24,6 +28,20 @@ absl::string_view EnsureStringNonNull(absl::string_view str) {
     return absl::string_view("");
   }
   return str;
+}
+
+bool BuffersOverlap(absl::string_view first, absl::string_view second) {
+  // first begins within second's buffer.
+  bool first_begins_in_second =
+      std::less_equal<const char *>{}(second.begin(), first.begin()) &&
+      std::less<const char *>{}(first.begin(), second.end());
+
+  // second begins within first's buffer.
+  bool second_begins_in_first =
+      std::less_equal<const char *>{}(first.begin(), second.begin()) &&
+      std::less<const char *>{}(second.begin(), first.end());
+
+  return first_begins_in_second || second_begins_in_first;
 }
 
 }  // namespace internal
