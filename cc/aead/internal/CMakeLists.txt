@@ -141,6 +141,25 @@ tink_cc_test(
 )
 
 tink_cc_test(
+  NAME cord_aes_gcm_boringssl_test
+  SRCS
+    cord_aes_gcm_boringssl_test.cc
+  DATA wycheproof::testvectors
+  DEPS
+    tink::subtle::aes_gcm_boringssl
+    tink::subtle::wycheproof_util
+    tink::aead::cord_aead
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+    tink::util::test_util
+    tink::util::test_matchers
+    absl::strings
+    absl::cord
+    rapidjson
+)
+
+tink_cc_test(
   NAME aead_from_zero_copy_test
   SRCS
     aead_from_zero_copy_test.cc
