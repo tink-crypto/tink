@@ -20,7 +20,6 @@ It loads cleartext keys from disk - this is not recommended!
 
 from __future__ import absolute_import
 from __future__ import division
-# Placeholder for import for type annotations
 from __future__ import print_function
 
 import datetime
