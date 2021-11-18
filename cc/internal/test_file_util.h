@@ -14,12 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_UTIL_TEST_FILE_UTIL_H_
-#define TINK_UTIL_TEST_FILE_UTIL_H_
+#ifndef TINK_INTERNAL_TEST_FILE_UTIL_H_
+#define TINK_INTERNAL_TEST_FILE_UTIL_H_
 
-#include "absl/strings/str_cat.h"
+#include <string>
+
 #include "absl/strings/string_view.h"
-
 
 namespace crypto {
 namespace tink {
@@ -37,4 +37,4 @@ std::string RunfilesPath(absl::string_view path);
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_UTIL_TEST_FILE_UTIL_H_
+#endif  // TINK_INTERNAL_TEST_FILE_UTIL_H_
