@@ -17,6 +17,20 @@ cc_library(
 )
 
 cc_library(
+    name = "wycheproof_aead",
+    testonly = 1,
+    srcs = ["wycheproof_aead.cc"],
+    hdrs = ["wycheproof_aead.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
+        "//subtle:wycheproof_util",
+        "//util:statusor",
+    ],
+)
+
+cc_library(
     name = "ssl_aead",
     srcs = ["ssl_aead.cc"],
     hdrs = ["ssl_aead.h"],
@@ -72,7 +86,6 @@ cc_library(
     name = "mock_zero_copy_aead",
     testonly = 1,
     hdrs = ["mock_zero_copy_aead.h"],
-    copts = ["-Iexternal/gtest/include"],
     include_prefix = "tink/aead/internal",
     deps = [
         ":zero_copy_aead",
@@ -125,7 +138,6 @@ cc_test(
     name = "cord_aes_gcm_boringssl_test",
     size = "small",
     srcs = ["cord_aes_gcm_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     data = [
         "@wycheproof//testvectors:aes_gcm",
     ],
@@ -164,7 +176,6 @@ cc_test(
     name = "zero_copy_aes_gcm_boringssl_test",
     size = "small",
     srcs = ["zero_copy_aes_gcm_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":zero_copy_aes_gcm_boringssl",
         "//subtle:aes_gcm_boringssl",
@@ -181,7 +192,6 @@ cc_test(
 cc_test(
     name = "aead_from_zero_copy_test",
     srcs = ["aead_from_zero_copy_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead_from_zero_copy",
         ":mock_zero_copy_aead",
@@ -197,8 +207,14 @@ cc_test(
 cc_test(
     name = "ssl_aead_test",
     srcs = ["ssl_aead_test.cc"],
+    data = [
+        "@wycheproof//testvectors:aes_gcm",
+        "@wycheproof//testvectors:aes_gcm_siv",
+        "@wycheproof//testvectors:chacha20_poly1305",
+    ],
     deps = [
         ":ssl_aead",
+        ":wycheproof_aead",
         "//config:tink_fips",
         "//subtle:subtle_util",
         "//util:secret_data",

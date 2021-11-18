@@ -13,6 +13,18 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME wycheproof_aead
+  SRCS
+    wycheproof_aead.cc
+    wycheproof_aead.h
+  DEPS
+    absl::flat_hash_set
+    absl::strings
+    tink::subtle::wycheproof_util
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME ssl_aead
   SRCS
     ssl_aead.cc
@@ -125,8 +137,11 @@ tink_cc_test(
   NAME ssl_aead_test
   SRCS
     ssl_aead_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::aead::internal::ssl_aead
+    tink::aead::internal::wycheproof_aead
     gmock
     absl::flat_hash_set
     absl::memory
@@ -144,7 +159,8 @@ tink_cc_test(
   NAME cord_aes_gcm_boringssl_test
   SRCS
     cord_aes_gcm_boringssl_test.cc
-  DATA wycheproof::testvectors
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::subtle::aes_gcm_boringssl
     tink::subtle::wycheproof_util

@@ -30,6 +30,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "tink/aead/internal/wycheproof_aead.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
@@ -44,7 +45,9 @@ namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::Not;
-using ::testing::Test;
+using ::testing::TestParamInfo;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
 constexpr absl::string_view kMessage = "Some data to encrypt.";
 constexpr absl::string_view kAad = "Some data to authenticate.";
@@ -59,8 +62,51 @@ constexpr absl::string_view kAesGcmIvHex = "0123456789012345678901234";
 constexpr absl::string_view kXchacha20Poly1305IvHex =
     "012345678901234567890123456789012345678901234567";
 
-// Tests that encryption of `message` with `aad`, and `iv` succeeds; writes the
-// result in `ciphertext_buffer`.
+struct SslOneShotAeadTestParams {
+  std::string test_name;
+  std::string cipher;
+  int tag_size;
+  absl::string_view iv_hex;
+  absl::string_view key_hex;
+};
+
+// Returns a SslOneShotAead from `cipher_name` and `key`.
+util::StatusOr<std::unique_ptr<SslOneShotAead>> CipherFromName(
+    absl::string_view cipher, const util::SecretData& key) {
+  if (cipher == "aes_gcm") {
+    return CreateAesGcmOneShotCrypter(key);
+  }
+  if (cipher == "aes_gcm_siv") {
+    return CreateAesGcmSivOneShotCrypter(key);
+  }
+  if (cipher == "xchacha20_poly1305") {
+    return CreateXchacha20Poly1305OneShotCrypter(key);
+  }
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      absl::StrCat("Invalid cipher ", cipher));
+}
+
+using SslOneShotAeadTest = TestWithParam<SslOneShotAeadTestParams>;
+
+TEST_P(SslOneShotAeadTest, CiphertextPlaintextSize) {
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
+  ASSERT_THAT(aead.status(), IsOk());
+
+  EXPECT_EQ((*aead)->CiphertextSize(kMessage.size()),
+            kMessage.size() + test_param.tag_size);
+  EXPECT_EQ((*aead)->PlaintextSize(kMessage.size() + test_param.tag_size),
+            kMessage.size());
+  // Minimum size.
+  EXPECT_EQ((*aead)->PlaintextSize(test_param.tag_size), 0);
+  // Smaller than the minumum.
+  EXPECT_EQ((*aead)->PlaintextSize(0), 0);
+}
+
+// Tests that encryption of `message` with `aad`, and `iv` succeeds; writes
+// the result in `ciphertext_buffer`.
 void DoTestEncrypt(SslOneShotAead* aead, absl::string_view message,
                    absl::string_view aad, size_t tag_size, absl::string_view iv,
                    absl::Span<char> ciphertext_buffer) {
@@ -71,8 +117,8 @@ void DoTestEncrypt(SslOneShotAead* aead, absl::string_view message,
   EXPECT_EQ(*res, message.size() + tag_size);
 }
 
-// Tests that decryption of `ciphertext_buffer` with `aad` and `iv` succeeds and
-// equals `message`.
+// Tests that decryption of `ciphertext_buffer` with `aad` and `iv` succeeds
+// and equals `message`.
 void DoTestDecrypt(SslOneShotAead* aead, absl::string_view message,
                    absl::string_view aad, absl::string_view iv,
                    absl::string_view ciphertext_buffer) {
@@ -85,94 +131,20 @@ void DoTestDecrypt(SslOneShotAead* aead, absl::string_view message,
   EXPECT_EQ(plaintext_buff, message);
 }
 
-TEST(SslOneShotAeadTest, AesGcmCiphertextPLaintextSize) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+TEST_P(SslOneShotAeadTest, AesGcmEncryptDecrypt) {
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  EXPECT_EQ((*aead)->CiphertextSize(kMessage.size()),
-            kMessage.size() + kAesGcmTagSizeInBytes);
-  EXPECT_EQ((*aead)->PlaintextSize(kMessage.size() + kAesGcmTagSizeInBytes),
-            kMessage.size());
-  // Minimum size.
-  EXPECT_EQ((*aead)->PlaintextSize(kAesGcmTagSizeInBytes), 0);
-  // Smaller than the minumum.
-  EXPECT_EQ((*aead)->PlaintextSize(0), 0);
-}
 
-TEST(SslOneShotAeadTest, AesGcmSivCiphertextPLaintextSize) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  EXPECT_EQ((*aead)->CiphertextSize(kMessage.size()),
-            kMessage.size() + kAesGcmTagSizeInBytes);
-  EXPECT_EQ((*aead)->PlaintextSize(kMessage.size() + kAesGcmTagSizeInBytes),
-            kMessage.size());
-  // Minimum size.
-  EXPECT_EQ((*aead)->PlaintextSize(kAesGcmTagSizeInBytes), 0);
-  // Smaller than the minumum.
-  EXPECT_EQ((*aead)->PlaintextSize(0), 0);
-}
-
-TEST(SslOneShotAeadTest, Xchacha20Poly1305CiphertextPLaintextSize) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  EXPECT_EQ((*aead)->CiphertextSize(kMessage.size()),
-            kMessage.size() + kXchacha20Poly1305TagSizeInBytes);
-  EXPECT_EQ((*aead)->PlaintextSize(kMessage.size() +
-                                   kXchacha20Poly1305TagSizeInBytes),
-            kMessage.size());
-  // Minimum size.
-  EXPECT_EQ((*aead)->PlaintextSize(kXchacha20Poly1305TagSizeInBytes), 0);
-  // Smaller than the minumum.
-  EXPECT_EQ((*aead)->PlaintextSize(0), 0);
-}
-
-TEST(SslOneShotAeadTest, AesGcmEncryptDecrypt) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
+  std::string iv = absl::HexStringToBytes(test_param.iv_hex);
   std::string ciphertext_buffer;
   // Length of the message + tag.
   subtle::ResizeStringUninitialized(&ciphertext_buffer,
                                     (*aead)->CiphertextSize(kMessage.size()));
-  DoTestEncrypt(aead->get(), kMessage, kAad, kAesGcmTagSizeInBytes, iv,
+  DoTestEncrypt(aead->get(), kMessage, kAad, test_param.tag_size, iv,
                 absl::MakeSpan(ciphertext_buffer));
-  DoTestDecrypt(aead->get(), kMessage, kAad, iv, ciphertext_buffer);
-}
-
-TEST(SslOneShotAeadTest, AesGcmSivEncryptDecrypt) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
-  std::string ciphertext_buffer;
-  // Length of the message + tag.
-  subtle::ResizeStringUninitialized(&ciphertext_buffer,
-                                    (*aead)->CiphertextSize(kMessage.size()));
-  DoTestEncrypt(aead->get(), kMessage, kAad, kAesGcmTagSizeInBytes, iv,
-                absl::MakeSpan(ciphertext_buffer));
-  DoTestDecrypt(aead->get(), kMessage, kAad, iv, ciphertext_buffer);
-}
-
-TEST(SslOneShotAeadTest, Xchacha20Poly1305EncryptDecrypt) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kXchacha20Poly1305IvHex);
-  std::string ciphertext_buffer;
-  // Length of the message + tag.
-  subtle::ResizeStringUninitialized(&ciphertext_buffer,
-                                    (*aead)->CiphertextSize(kMessage.size()));
-  DoTestEncrypt(aead->get(), kMessage, kAad, kXchacha20Poly1305TagSizeInBytes,
-                iv, absl::MakeSpan(ciphertext_buffer));
   DoTestDecrypt(aead->get(), kMessage, kAad, iv, ciphertext_buffer);
 }
 
@@ -226,44 +198,20 @@ void DoTestEncryptDecryptWithModifiedCiphertext(SslOneShotAead* aead,
   }
 }
 
-TEST(SslOneShotAeadTest, AesGcmTestModification) {
+TEST_P(SslOneShotAeadTest, TestModification) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
+
   DoTestEncryptDecryptWithModifiedCiphertext(
-      aead->get(), kAesGcmTagSizeInBytes, absl::HexStringToBytes(kAesGcmIvHex));
-}
-
-TEST(SslOneShotAeadTest, AesGcmSivTestModification) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  DoTestEncryptDecryptWithModifiedCiphertext(
-      aead->get(), kAesGcmTagSizeInBytes, absl::HexStringToBytes(kAesGcmIvHex));
-}
-
-TEST(SslOneShotAeadTest, Xchacha20Poly1305TestModification) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  DoTestEncryptDecryptWithModifiedCiphertext(
-      aead->get(), kXchacha20Poly1305TagSizeInBytes,
-      absl::HexStringToBytes(kXchacha20Poly1305IvHex));
+      aead->get(), test_param.tag_size,
+      absl::HexStringToBytes(test_param.iv_hex));
 }
 
 void TestDecryptWithEmptyAad(SslOneShotAead* aead, absl::string_view ciphertext,
@@ -294,46 +242,19 @@ void DoTestWithEmptyAad(SslOneShotAead* aead, absl::string_view iv,
   }
 }
 
-TEST(SslOneShotAeadTest, AesGcmTestEmptyAad) {
+TEST_P(SslOneShotAeadTest, EmptyAad) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  DoTestWithEmptyAad(aead->get(), absl::HexStringToBytes(kAesGcmIvHex),
-                     kAesGcmTagSizeInBytes);
+  DoTestWithEmptyAad(aead->get(), absl::HexStringToBytes(test_param.iv_hex),
+                     test_param.tag_size);
 }
 
-TEST(SslOneShotAeadTest, AesGcmSivTestEmptyAad) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-
-  DoTestWithEmptyAad(aead->get(), absl::HexStringToBytes(kAesGcmIvHex),
-                     kAesGcmTagSizeInBytes);
-}
-
-TEST(SslOneShotAeadTest, Xchacha20Poly1305TestEmptyAad) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  DoTestWithEmptyAad(aead->get(),
-                     absl::HexStringToBytes(kXchacha20Poly1305IvHex),
-                     kXchacha20Poly1305TagSizeInBytes);
-}
-
-// Tests encryption/decryption with empty, default and null message
 // string_views, with `iv` and `aad`.
 void DoTestEmptyMessageEncryptDecrypt(SslOneShotAead* aead,
                                       absl::string_view iv, size_t tag_size,
@@ -359,100 +280,115 @@ void DoTestEmptyMessageEncryptDecrypt(SslOneShotAead* aead,
   }
 }
 
-TEST(SslOneShotAeadTest, AesGcmEmptyMessage) {
+TEST_P(SslOneShotAeadTest, EmptyMessage) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes);
+  std::string iv = absl::HexStringToBytes(test_param.iv_hex);
+  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, test_param.tag_size);
 }
 
-TEST(SslOneShotAeadTest, AesGcmSivEmptyMessage) {
+TEST_P(SslOneShotAeadTest, EmptyMessageAndAad) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes);
-}
-
-TEST(SslOneShotAeadTest, Xchacha20Poly1305EmptyMessage) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kXchacha20Poly1305IvHex);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv,
-                                   kXchacha20Poly1305TagSizeInBytes);
-}
-
-TEST(SslOneShotAeadTest, AesGcmEmptyMessageAndAad) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
+  std::string iv = absl::HexStringToBytes(test_param.iv_hex);
   const absl::string_view aad_default;
   const absl::string_view aad_empty = "";
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
+  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, test_param.tag_size,
                                    aad_default);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
+  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, test_param.tag_size,
                                    /*aad=*/absl::string_view());
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
+  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, test_param.tag_size,
                                    aad_empty);
 }
 
-TEST(SslOneShotAeadTest, AesGcmSivEmptyMessageAndAad) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmSivOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+TEST_P(SslOneShotAeadTest, BufferOverlapEncryptFails) {
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
-  const absl::string_view aad_default;
-  const absl::string_view aad_empty = "";
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
-                                   aad_default);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
-                                   /*aad=*/absl::string_view());
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv, kAesGcmTagSizeInBytes,
-                                   aad_empty);
+
+  std::string ciphertext_buffer(kMessage.data(), kMessage.size());
+  subtle::ResizeStringUninitialized(&ciphertext_buffer,
+                                    (*aead)->CiphertextSize(kMessage.size()));
+
+  EXPECT_THAT(
+      (*aead)
+          ->Encrypt(
+              absl::string_view(ciphertext_buffer).substr(0, kMessage.size()),
+              kAad, test_param.iv_hex, absl::MakeSpan(ciphertext_buffer))
+          .status(),
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(SslOneShotAeadTest, Xchacha20Poly1305EmptyMessageAndAad) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateXchacha20Poly1305OneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
+TEST_P(SslOneShotAeadTest, BufferOverlapDecryptFails) {
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
   ASSERT_THAT(aead.status(), IsOk());
-  std::string iv = absl::HexStringToBytes(kXchacha20Poly1305IvHex);
-  const absl::string_view aad_default;
-  const absl::string_view aad_empty = "";
-  DoTestEmptyMessageEncryptDecrypt(
-      aead->get(), iv, kXchacha20Poly1305TagSizeInBytes, aad_default);
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv,
-                                   kXchacha20Poly1305TagSizeInBytes,
-                                   /*aad=*/absl::string_view());
-  DoTestEmptyMessageEncryptDecrypt(aead->get(), iv,
-                                   kXchacha20Poly1305TagSizeInBytes, aad_empty);
+
+  std::string iv = absl::HexStringToBytes(test_param.iv_hex);
+  std::string ciphertext_buffer;
+  // Length of the message + tag.
+  subtle::ResizeStringUninitialized(&ciphertext_buffer,
+                                    (*aead)->CiphertextSize(kMessage.size()));
+  DoTestEncrypt(aead->get(), kMessage, kAad, test_param.tag_size, iv,
+                absl::MakeSpan(ciphertext_buffer));
+
+  EXPECT_THAT(
+      (*aead)
+          ->Decrypt(
+              ciphertext_buffer, kAad, iv,
+              absl::MakeSpan(ciphertext_buffer).subspan(0, kMessage.size()))
+          .status(),
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
+
+std::vector<SslOneShotAeadTestParams> GetSslOneShotAeadTestParams() {
+  std::vector<SslOneShotAeadTestParams> params = {
+      {/*test_name=*/"AesGcm256", /*cipher=*/"aes_gcm",
+       /*tag_size=*/kAesGcmTagSizeInBytes,
+       /*iv_hex=*/kAesGcmIvHex,
+       /*key_hex=*/k256Key},
+      {/*test_name=*/"AesGcm128", /*cipher=*/"aes_gcm",
+       /*tag_size=*/kAesGcmTagSizeInBytes,
+       /*iv_hex=*/kAesGcmIvHex,
+       /*key_hex=*/k128Key},
+      {/*test_name=*/"AesGcmSiv256", /*cipher=*/"aes_gcm_siv",
+       /*tag_size=*/kAesGcmTagSizeInBytes,
+       /*iv_hex=*/kAesGcmIvHex,
+       /*key_hex=*/k256Key},
+      {/*test_name=*/"AesGcmSiv128", /*cipher=*/"aes_gcm_siv",
+       /*tag_size=*/kAesGcmTagSizeInBytes,
+       /*iv_hex=*/kAesGcmIvHex,
+       /*key_hex=*/k128Key},
+      {/*test_name=*/"Xchacha20Poly1305", /*cipher=*/"xchacha20_poly1305",
+       /*tag_size=*/kXchacha20Poly1305TagSizeInBytes,
+       /*iv_hex=*/kXchacha20Poly1305IvHex,
+       /*key_hex=*/k256Key},
+  };
+  return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SslOneShotAeadTests, SslOneShotAeadTest,
+    testing::ValuesIn(GetSslOneShotAeadTestParams()),
+    [](const TestParamInfo<SslOneShotAeadTest::ParamType>& info) {
+      return info.param.test_name;
+    });
 
 TEST(SslOneShotAeadTest, AesGcmTestInvalidKeySizes) {
   if (IsFipsModeEnabled()) {
@@ -564,49 +500,92 @@ TEST(AesGcmSivBoringSslTest, AesGcmTestSivTestFipsOnly) {
               StatusIs(absl::StatusCode::kInternal));
 }
 
-TEST(SslOneShotAeadTest, BufferOverlapEncryptFails) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
+// Collects parameters for SslOneShotAeadWycheproofTest.
+struct SslOneShotAeadWycheproofTestParams {
+  std::string test_name;
+  std::string cipher;
+  int allowed_iv_size_bytes;
+  int allowed_tag_size_bytes;
+  absl::flat_hash_set<int> allowed_key_sizes_bits;
+};
 
-  std::string ciphertext_buffer(kMessage.data(), kMessage.size());
-  subtle::ResizeStringUninitialized(&ciphertext_buffer,
-                                    (*aead)->CiphertextSize(kMessage.size()));
+using SslOneShotAeadWycheproofTest =
+    TestWithParam<SslOneShotAeadWycheproofTestParams>;
 
-  EXPECT_THAT(
-      (*aead)
-          ->Encrypt(
-              absl::string_view(ciphertext_buffer).substr(0, kMessage.size()),
-              kAad, kAesGcmIvHex, absl::MakeSpan(ciphertext_buffer))
-          .status(),
-      StatusIs(absl::StatusCode::kInvalidArgument));
+TEST_P(SslOneShotAeadWycheproofTest, TestVectors) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  SslOneShotAeadWycheproofTestParams test_param = GetParam();
+  std::vector<WycheproofTestVector> test_vectors = ReadWycheproofTestVectors(
+      absl::StrCat(test_param.cipher, "_test.json"),
+      test_param.allowed_tag_size_bytes, test_param.allowed_iv_size_bytes,
+      test_param.allowed_key_sizes_bits);
+
+  int errors = 0;
+  for (const auto& test_vector : test_vectors) {
+    util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+    util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
+        CipherFromName(test_param.cipher, key);
+    ASSERT_THAT(aead.status(), IsOk());
+    std::string ciphertext_and_tag =
+        absl::StrCat(test_vector.ct, test_vector.tag);
+    std::string plaintext_buffer;
+    subtle::ResizeStringUninitialized(
+        &plaintext_buffer, (*aead)->PlaintextSize(ciphertext_and_tag.size()));
+    util::StatusOr<int64_t> written_bytes = (*aead)->Decrypt(
+        absl::StrCat(test_vector.ct, test_vector.tag), test_vector.aad,
+        test_vector.nonce, absl::MakeSpan(plaintext_buffer));
+
+    if (written_bytes.ok()) {
+      if (test_vector.expected == "invalid") {
+        ADD_FAILURE() << "Decrypted invalid ciphertext: " << test_vector.id;
+        errors++;
+      } else if (test_vector.msg != plaintext_buffer) {
+        ADD_FAILURE() << "Incorrect decryption:" << test_vector.id;
+        errors++;
+      }
+    } else {
+      if (test_vector.expected == "valid" ||
+          test_vector.expected == "acceptable") {
+        ADD_FAILURE() << "Could not decrypt test with tcId: " << test_vector.id
+                      << " iv_size: " << test_vector.nonce.size()
+                      << " tag_size: " << test_vector.tag.size()
+                      << " key_size: " << key.size()
+                      << " error: " << written_bytes.status();
+        errors++;
+      }
+    }
+  }
+  EXPECT_EQ(errors, 0);
 }
 
-TEST(SslOneShotAeadTest, BufferOverlapDecryptFails) {
-  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-      CreateAesGcmOneShotCrypter(
-          util::SecretDataFromStringView(absl::HexStringToBytes(k256Key)));
-  ASSERT_THAT(aead.status(), IsOk());
-
-  std::string iv = absl::HexStringToBytes(kAesGcmIvHex);
-  std::string ciphertext_buffer;
-  // Length of the message + tag.
-  subtle::ResizeStringUninitialized(&ciphertext_buffer,
-                                    (*aead)->CiphertextSize(kMessage.size()));
-  DoTestEncrypt(aead->get(), kMessage, kAad, kAesGcmTagSizeInBytes, iv,
-                absl::MakeSpan(ciphertext_buffer));
-
-  EXPECT_THAT(
-      (*aead)
-          ->Decrypt(
-              ciphertext_buffer, kAad, iv,
-              absl::MakeSpan(ciphertext_buffer).subspan(0, kMessage.size()))
-          .status(),
-      StatusIs(absl::StatusCode::kInvalidArgument));
+std::vector<SslOneShotAeadWycheproofTestParams>
+GetSslOneShotAeadWycheproofTestParams() {
+  std::vector<SslOneShotAeadWycheproofTestParams> params = {
+      {/*test_name=*/"AesGcm", /*cipher=*/"aes_gcm",
+       /*allowed_iv_size_bytes=*/12,
+       /*allowed_tag_size_bytes=*/16,
+       /*allowed_key_sizes_bits=*/{128, 256}},
+      {/*test_name=*/"AesGcmSiv", /*cipher=*/"aes_gcm_siv",
+       /*allowed_iv_size_bytes=*/12,
+       /*allowed_tag_size_bytes=*/16,
+       /*allowed_key_sizes_bits=*/{128, 256}},
+      {/*test_name=*/"Xchacha20Poly1305",
+       /*cipher=*/"xchacha20_poly1305",
+       /*allowed_iv_size_bytes=*/24,
+       /*allowed_tag_size_bytes=*/16,
+       /*allowed_key_sizes_bits=*/{256}},
+  };
+  return params;
 }
 
-// TODO(ambrosin): Move wycheproof tests here.
+INSTANTIATE_TEST_SUITE_P(
+    SslOneShotAeadWycheproofTests, SslOneShotAeadWycheproofTest,
+    ValuesIn(GetSslOneShotAeadWycheproofTestParams()),
+    [](const TestParamInfo<SslOneShotAeadWycheproofTest::ParamType>& info) {
+      return info.param.test_name;
+    });
 
 }  // namespace
 }  // namespace internal
