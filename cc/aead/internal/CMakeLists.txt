@@ -190,3 +190,25 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
 )
+
+tink_cc_test(
+  NAME zero_copy_aes_gcm_boringssl_test
+  SRCS
+    zero_copy_aes_gcm_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
+  DEPS
+    tink::aead::internal::zero_copy_aes_gcm_boringssl
+    gmock
+    absl::status
+    absl::strings
+    absl::span
+    crypto
+    rapidjson
+    tink::internal::err_util
+    tink::subtle::aes_gcm_boringssl
+    tink::subtle::subtle_util
+    tink::subtle::wycheproof_util
+    tink::util::statusor
+    tink::util::test_matchers
+)

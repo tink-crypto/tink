@@ -176,16 +176,23 @@ cc_test(
     name = "zero_copy_aes_gcm_boringssl_test",
     size = "small",
     srcs = ["zero_copy_aes_gcm_boringssl_test.cc"],
+    data = [
+        "@wycheproof//testvectors:aes_gcm",
+    ],
     deps = [
         ":zero_copy_aes_gcm_boringssl",
+        "//internal:err_util",
         "//subtle:aes_gcm_boringssl",
         "//subtle:subtle_util",
+        "//subtle:wycheproof_util",
+        "//util:statusor",
         "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/memory",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
 
@@ -226,5 +233,6 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
+        "@rapidjson",
     ],
 )
