@@ -75,8 +75,7 @@ def _base64_decode(data: str) -> bytes:
   return _jwt_format.base64_decode(data.encode('utf8'))
 
 
-def from_keyset_handle(keyset_handle: tink.KeysetHandle,
-                       key_access: Optional[tink.KeyAccess] = None) -> str:
+def from_public_keyset_handle(keyset_handle: tink.KeysetHandle) -> str:
   """Converts a Tink KeysetHandle with JWT keys into a Json Web Key (JWK) set.
 
   JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
@@ -91,7 +90,6 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
 
   Args:
     keyset_handle: A Tink KeysetHandle that contains JWT Keys.
-    key_access: An optional KeyAccess object. Currently not needed.
 
   Returns:
     A JWK set, which is a JSON encoded string.
@@ -102,7 +100,6 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
   """
   output_stream = io.BytesIO()
   writer = tink.BinaryKeysetWriter(output_stream)
-  _ = key_access  # currently not used, since we only support public keys.
   keyset_handle.write_no_secret(writer)
   keyset = tink_pb2.Keyset.FromString(output_stream.getvalue())
 
@@ -123,6 +120,13 @@ def from_keyset_handle(keyset_handle: tink.KeysetHandle,
     else:
       raise tink.TinkError('unknown key type: %s' % key.key_data.type_url)
   return json.dumps({'keys': keys}, separators=(',', ':'))
+
+
+# Deprecated. Use from_public_keyset_handle instead.
+def from_keyset_handle(keyset_handle: tink.KeysetHandle,
+                       key_access: Optional[tink.KeyAccess] = None) -> str:
+  _ = key_access
+  return from_public_keyset_handle(keyset_handle)
 
 
 def _convert_jwt_ecdsa_key(
@@ -205,21 +209,18 @@ def _generate_unused_key_id(keyset: tink_pb2.Keyset) -> int:
       return key_id
 
 
-def to_keyset_handle(
-    jwk_set: str,
-    key_access: Optional[tink.KeyAccess] = None) -> tink.KeysetHandle:
+def to_public_keyset_handle(jwk_set: str) -> tink.KeysetHandle:
   """Converts a Json Web Key (JWK) set into a Tink KeysetHandle with JWT keys.
 
   JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
 
   All keys are converted into Tink keys with output prefix type "RAW".
 
-  Currently, only public keys for algorithms ES256, ES384 and ES512 are
-  supported.
+  Currently, public keys for algorithms ES256, ES384, ES512, RS256, RS384,
+  RS512, PS256, PS384 and PS512 supported.
 
   Args:
     jwk_set: A JWK set, which is a JSON encoded string.
-    key_access: An optional KeyAccess object. Currently not needed.
 
   Returns:
     A tink.KeysetHandle.
@@ -227,7 +228,6 @@ def to_keyset_handle(
   Raises:
     TinkError if the key cannot be converted.
   """
-  _ = key_access
   try:
     keys_dict = json.loads(jwk_set)
   except json.decoder.JSONDecodeError as e:
@@ -255,6 +255,14 @@ def to_keyset_handle(
     # simply set it to the last key.
     proto_keyset.primary_key_id = new_id
   return cleartext_keyset_handle.from_keyset(proto_keyset)
+
+
+# Deprecated. Use to_public_keyset_handle instead.
+def to_keyset_handle(
+    jwk_set: str,
+    key_access: Optional[tink.KeyAccess] = None) -> tink.KeysetHandle:
+  _ = key_access
+  return to_public_keyset_handle(jwk_set)
 
 
 def _validate_use_and_key_ops(key: Dict[str, Union[str, List[str]]]):

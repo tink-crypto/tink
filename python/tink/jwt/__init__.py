@@ -42,8 +42,8 @@ JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 new_raw_jwt = _raw_jwt.new_raw_jwt
 new_validator = _jwt_validator.new_validator
 
-jwk_set_from_keyset_handle = _jwk_set_converter.from_keyset_handle
-jwk_set_to_keyset_handle = _jwk_set_converter.to_keyset_handle
+jwk_set_from_public_keyset_handle = _jwk_set_converter.from_public_keyset_handle
+jwk_set_to_public_keyset_handle = _jwk_set_converter.to_public_keyset_handle
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
 raw_jwt_hs256_template = _jwt_key_templates.raw_jwt_hs256_template
@@ -83,3 +83,9 @@ def register_jwt_mac() -> None:
 def register_jwt_signature() -> None:
   _jwt_signature_key_manager.register()
   _jwt_signature_wrappers.register()
+
+
+# Deprecated. Use jwk_set_from_public_keyset_handle instead.
+jwk_set_from_keyset_handle = _jwk_set_converter.from_keyset_handle
+# Deprecated. Use jwk_set_to_public_keyset_handle instead.
+jwk_set_to_keyset_handle = _jwk_set_converter.to_keyset_handle

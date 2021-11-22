@@ -59,7 +59,7 @@ def main(argv):
       return 1
 
   # Export Public Keyset as JWK set
-  public_jwk_set = jwt.jwk_set_from_keyset_handle(
+  public_jwk_set = jwt.jwk_set_from_public_keyset_handle(
       keyset_handle.public_keyset_handle())
   with open(FLAGS.public_jwk_set_path, 'wt') as public_jwk_set_file:
     public_jwk_set_file.write(public_jwk_set)
