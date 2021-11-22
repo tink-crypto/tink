@@ -15,7 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/ssl_aead.h"
 
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
+#include <limits>
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -61,6 +64,14 @@ constexpr absl::string_view kAesGcmIvHex = "0123456789012345678901234";
 // 24 bytes IV.
 constexpr absl::string_view kXchacha20Poly1305IvHex =
     "012345678901234567890123456789012345678901234567";
+
+bool IsBoringSsl() {
+#ifdef OPENSSL_IS_BORINGSSL
+  return true;
+#else
+  return false;
+#endif
+}
 
 struct SslOneShotAeadTestParams {
   std::string test_name;
@@ -131,7 +142,7 @@ void DoTestDecrypt(SslOneShotAead* aead, absl::string_view message,
   EXPECT_EQ(plaintext_buff, message);
 }
 
-TEST_P(SslOneShotAeadTest, AesGcmEncryptDecrypt) {
+TEST_P(SslOneShotAeadTest, EncryptDecrypt) {
   SslOneShotAeadTestParams test_param = GetParam();
   util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
       test_param.cipher, util::SecretDataFromStringView(
@@ -366,20 +377,22 @@ std::vector<SslOneShotAeadTestParams> GetSslOneShotAeadTestParams() {
       {/*test_name=*/"AesGcm128", /*cipher=*/"aes_gcm",
        /*tag_size=*/kAesGcmTagSizeInBytes,
        /*iv_hex=*/kAesGcmIvHex,
-       /*key_hex=*/k128Key},
-      {/*test_name=*/"AesGcmSiv256", /*cipher=*/"aes_gcm_siv",
-       /*tag_size=*/kAesGcmTagSizeInBytes,
-       /*iv_hex=*/kAesGcmIvHex,
-       /*key_hex=*/k256Key},
-      {/*test_name=*/"AesGcmSiv128", /*cipher=*/"aes_gcm_siv",
-       /*tag_size=*/kAesGcmTagSizeInBytes,
-       /*iv_hex=*/kAesGcmIvHex,
-       /*key_hex=*/k128Key},
-      {/*test_name=*/"Xchacha20Poly1305", /*cipher=*/"xchacha20_poly1305",
-       /*tag_size=*/kXchacha20Poly1305TagSizeInBytes,
-       /*iv_hex=*/kXchacha20Poly1305IvHex,
-       /*key_hex=*/k256Key},
-  };
+       /*key_hex=*/k128Key}};
+  if (IsBoringSsl()) {
+    params.push_back({/*test_name=*/"AesGcmSiv256", /*cipher=*/"aes_gcm_siv",
+                      /*tag_size=*/kAesGcmTagSizeInBytes,
+                      /*iv_hex=*/kAesGcmIvHex,
+                      /*key_hex=*/k256Key});
+    params.push_back({/*test_name=*/"AesGcmSiv128", /*cipher=*/"aes_gcm_siv",
+                      /*tag_size=*/kAesGcmTagSizeInBytes,
+                      /*iv_hex=*/kAesGcmIvHex,
+                      /*key_hex=*/k128Key});
+    params.push_back({/*test_name=*/"Xchacha20Poly1305",
+                      /*cipher=*/"xchacha20_poly1305",
+                      /*tag_size=*/kXchacha20Poly1305TagSizeInBytes,
+                      /*iv_hex=*/kXchacha20Poly1305IvHex,
+                      /*key_hex=*/k256Key});
+  }
   return params;
 }
 
@@ -408,6 +421,9 @@ TEST(SslOneShotAeadTest, AesGcmTestInvalidKeySizes) {
 }
 
 TEST(SslOneShotAeadTest, AesGcmSivTestInvalidKeySizes) {
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "AES-GCM-SIV not supported with OpenSSL";
+  }
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -425,6 +441,9 @@ TEST(SslOneShotAeadTest, AesGcmSivTestInvalidKeySizes) {
 }
 
 TEST(SslOneShotAeadTest, Xchacha20Poly1305TestInvalidKeySizes) {
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "Xchacha20-Poly1305 not supported with OpenSSL";
+  }
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -442,6 +461,9 @@ TEST(SslOneShotAeadTest, Xchacha20Poly1305TestInvalidKeySizes) {
 }
 
 TEST(SslOneShotAeadTest, Xchacha20Poly1305TestFipsOnly) {
+  if (!IsBoringSsl()) {
+    GTEST_SKIP() << "Xchacha20-Poly1305 not supported with OpenSSL";
+  }
   if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
@@ -562,21 +584,22 @@ TEST_P(SslOneShotAeadWycheproofTest, TestVectors) {
 
 std::vector<SslOneShotAeadWycheproofTestParams>
 GetSslOneShotAeadWycheproofTestParams() {
-  std::vector<SslOneShotAeadWycheproofTestParams> params = {
-      {/*test_name=*/"AesGcm", /*cipher=*/"aes_gcm",
-       /*allowed_iv_size_bytes=*/12,
-       /*allowed_tag_size_bytes=*/16,
-       /*allowed_key_sizes_bits=*/{128, 256}},
-      {/*test_name=*/"AesGcmSiv", /*cipher=*/"aes_gcm_siv",
-       /*allowed_iv_size_bytes=*/12,
-       /*allowed_tag_size_bytes=*/16,
-       /*allowed_key_sizes_bits=*/{128, 256}},
-      {/*test_name=*/"Xchacha20Poly1305",
-       /*cipher=*/"xchacha20_poly1305",
-       /*allowed_iv_size_bytes=*/24,
-       /*allowed_tag_size_bytes=*/16,
-       /*allowed_key_sizes_bits=*/{256}},
-  };
+  std::vector<SslOneShotAeadWycheproofTestParams> params;
+  params.push_back({/*test_name=*/"AesGcm", /*cipher=*/"aes_gcm",
+                    /*allowed_iv_size_bytes=*/12,
+                    /*allowed_tag_size_bytes=*/16,
+                    /*allowed_key_sizes_bits=*/{128, 256}});
+  if (IsBoringSsl()) {
+    params.push_back({/*test_name=*/"AesGcmSiv", /*cipher=*/"aes_gcm_siv",
+                      /*allowed_iv_size_bytes=*/12,
+                      /*allowed_tag_size_bytes=*/16,
+                      /*allowed_key_sizes_bits=*/{128, 256}});
+    params.push_back({/*test_name=*/"Xchacha20Poly1305",
+                      /*cipher=*/"xchacha20_poly1305",
+                      /*allowed_iv_size_bytes=*/24,
+                      /*allowed_tag_size_bytes=*/16,
+                      /*allowed_key_sizes_bits=*/{256}});
+  }
   return params;
 }
 

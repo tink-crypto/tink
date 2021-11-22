@@ -212,3 +212,22 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
 )
+
+tink_cc_test(
+  NAME ssl_aead_large_inputs_test
+  SRCS
+    ssl_aead_large_inputs_test.cc
+  DEPS
+    tink::aead::internal::ssl_aead
+    gmock
+    absl::flat_hash_set
+    absl::memory
+    absl::status
+    absl::strings
+    absl::span
+    tink::config::tink_fips
+    tink::subtle::subtle_util
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
+)

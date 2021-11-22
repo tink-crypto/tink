@@ -236,3 +236,24 @@ cc_test(
         "@rapidjson",
     ],
 )
+
+cc_test(
+    name = "ssl_aead_large_inputs_test",
+    size = "enormous",
+    srcs = ["ssl_aead_large_inputs_test.cc"],
+    deps = [
+        ":ssl_aead",
+        "//config:tink_fips",
+        "//subtle:subtle_util",
+        "//util:secret_data",
+        "//util:statusor",
+        "//util:test_matchers",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
