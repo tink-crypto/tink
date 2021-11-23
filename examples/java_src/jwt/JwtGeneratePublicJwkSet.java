@@ -21,7 +21,6 @@ import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.jwt.JwkSetConverter;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
-import com.google.crypto.tink.tinkkey.KeyAccess;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -65,8 +64,7 @@ public final class JwtGeneratePublicJwkSet {
 
     // Export the public keyset as JWK set.
     String publicJwkSet =
-        JwkSetConverter.fromKeysetHandle(
-            privateKeysetHandle.getPublicKeysetHandle(), KeyAccess.publicAccess());
+        JwkSetConverter.fromPublicKeysetHandle(privateKeysetHandle.getPublicKeysetHandle());
     try (FileOutputStream stream = new FileOutputStream(publicJwkSetFile)) {
       stream.write(publicJwkSet.getBytes(UTF_8));
     }

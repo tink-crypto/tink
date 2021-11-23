@@ -30,7 +30,6 @@ java_binary(
         "@tink_java//src/main/java/com/google/crypto/tink:registry_cluster",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwk_set_converter",
         "@tink_java//src/main/java/com/google/crypto/tink/jwt:jwt_signature_config",
-        "@tink_java//src/main/java/com/google/crypto/tink/tinkkey:key_access",
     ],
 )
 

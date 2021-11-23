@@ -45,7 +45,6 @@ import com.google.crypto.tink.proto.testing.JwtVerifyResponse;
 import com.google.crypto.tink.proto.testing.NullValue;
 import com.google.crypto.tink.proto.testing.StringValue;
 import com.google.crypto.tink.proto.testing.Timestamp;
-import com.google.crypto.tink.tinkkey.SecretKeyAccess;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Status;
@@ -348,8 +347,7 @@ public final class JwtServiceImpl extends JwtImplBase {
       KeysetHandle keysetHandle =
           CleartextKeysetHandle.read(
               BinaryKeysetReader.withBytes(request.getKeyset().toByteArray()));
-      String jwkSet =
-          JwkSetConverter.fromKeysetHandle(keysetHandle, SecretKeyAccess.insecureSecretAccess());
+      String jwkSet = JwkSetConverter.fromPublicKeysetHandle(keysetHandle);
       response = JwtToJwkSetResponse.newBuilder().setJwkSet(jwkSet).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
       response = JwtToJwkSetResponse.newBuilder().setErr(e.toString()).build();
@@ -367,9 +365,7 @@ public final class JwtServiceImpl extends JwtImplBase {
       JwtFromJwkSetRequest request, StreamObserver<JwtFromJwkSetResponse> responseObserver) {
     JwtFromJwkSetResponse response;
     try {
-      KeysetHandle keysetHandle =
-          JwkSetConverter.toKeysetHandle(
-              request.getJwkSet(), SecretKeyAccess.insecureSecretAccess());
+      KeysetHandle keysetHandle = JwkSetConverter.toPublicKeysetHandle(request.getJwkSet());
 
       Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
       ByteArrayOutputStream keysetStream = new ByteArrayOutputStream();

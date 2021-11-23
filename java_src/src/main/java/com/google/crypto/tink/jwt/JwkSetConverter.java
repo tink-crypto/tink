@@ -38,6 +38,7 @@ import com.google.crypto.tink.subtle.Base64;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
 import com.google.crypto.tink.tinkkey.internal.ProtoKey;
+import com.google.errorprone.annotations.InlineMe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -54,19 +55,20 @@ import java.security.GeneralSecurityException;
 import java.util.Optional;
 
 /**
- * Provides functions to import and export Json Web Key (JWK) sets.
+ * Provides functions to import and export public Json Web Key (JWK) sets.
  *
- * <p>It currently supports public keys for algorithms ES256, ES384, ES512, RS256, RS384 and RS512.
+ * <p>The currently supported algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256, PS384
+ * and PS512.
  */
 public final class JwkSetConverter {
 
   /**
-   * Converts a Tink KeysetHandle into a Json Web Key (JWK) set.
+   * Converts a Tink KeysetHandle with JWT public keys into a Json Web Key (JWK) set.
    *
-   * <p>Currently, only public keys for algorithms ES256, ES384, ES512, RS256, RS384 and RS512 are
-   * supported. JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
+   * <p>The currently supported algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256,
+   * PS384 and PS512. JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.txt.
    */
-  public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
+  public static String fromPublicKeysetHandle(KeysetHandle handle)
       throws IOException, GeneralSecurityException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     handle.writeNoSecret(new JwkSetWriter(outputStream));
@@ -74,13 +76,13 @@ public final class JwkSetConverter {
   }
 
   /**
-   * Converts a Json Web Key (JWK) set into a Tink KeysetHandle.
+   * Converts a Json Web Key (JWK) set with public keys into a Tink KeysetHandle.
    *
-   * <p>It requires that all keys in the set have the "algo" field set. Currently, only public keys
-   * for algorithms ES256, ES384, ES512, RS256, RS384 and RS512 are supported. JWK is defined in
-   * https://www.rfc-editor.org/rfc/rfc7517.txt.
+   * <p>It requires that all keys in the set have the "alg" field set. The currently supported
+   * algorithms are ES256, ES384, ES512, RS256, RS384, RS512, PS256, PS384 and PS512. JWK is defined
+   * in https://www.rfc-editor.org/rfc/rfc7517.txt.
    */
-  public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
+  public static KeysetHandle toPublicKeysetHandle(String jwkSet)
       throws IOException, GeneralSecurityException {
     JsonObject jsonKeyset;
     try {
@@ -112,7 +114,7 @@ public final class JwkSetConverter {
       manager.add(
           KeyHandle.createFromKey(
               new ProtoKey(keyData, com.google.crypto.tink.KeyTemplate.OutputPrefixType.RAW),
-              keyAccess));
+              KeyAccess.publicAccess()));
     }
     KeysetInfo info = manager.getKeysetHandle().getKeysetInfo();
     if (info.getKeyInfoCount() <= 0) {
@@ -477,6 +479,26 @@ public final class JwkSetConverter {
         .setValue(ecdsaPubKeyBuilder.build().toByteString())
         .setKeyMaterialType(KeyMaterialType.ASYMMETRIC_PUBLIC)
         .build();
+  }
+
+  /** @deprecated Use JwkSetConverter.fromPublicKeysetHandle(handle) instead. */
+  @InlineMe(
+      replacement = "JwkSetConverter.fromPublicKeysetHandle(handle)",
+      imports = "com.google.crypto.tink.jwt.JwkSetConverter")
+  @Deprecated
+  public static String fromKeysetHandle(KeysetHandle handle, KeyAccess keyAccess)
+      throws IOException, GeneralSecurityException {
+    return fromPublicKeysetHandle(handle);
+  }
+
+  /** @deprecated Use JwkSetConverter.toPublicKeysetHandle(jwkSet) instead. */
+  @InlineMe(
+      replacement = "JwkSetConverter.toPublicKeysetHandle(jwkSet)",
+      imports = "com.google.crypto.tink.jwt.JwkSetConverter")
+  @Deprecated
+  public static KeysetHandle toKeysetHandle(String jwkSet, KeyAccess keyAccess)
+      throws IOException, GeneralSecurityException {
+    return toPublicKeysetHandle(jwkSet);
   }
 
   private JwkSetConverter() {}
