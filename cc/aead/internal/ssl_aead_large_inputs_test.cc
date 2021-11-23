@@ -32,6 +32,7 @@
 #include "absl/types/span.h"
 #include "tink/aead/internal/ssl_aead.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -57,14 +58,6 @@ constexpr absl::string_view kAesGcmIvHex = "0123456789012345678901234";
 // 24 bytes IV.
 constexpr absl::string_view kXchacha20Poly1305IvHex =
     "012345678901234567890123456789012345678901234567";
-
-bool IsBoringSsl() {
-#ifdef OPENSSL_IS_BORINGSSL
-  return true;
-#else
-  return false;
-#endif
-}
 
 struct TestParams {
   std::string test_name;

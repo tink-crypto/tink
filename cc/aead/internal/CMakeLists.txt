@@ -149,6 +149,7 @@ tink_cc_test(
     absl::strings
     absl::span
     tink::config::tink_fips
+    tink::internal::ssl_util
     tink::subtle::subtle_util
     tink::util::secret_data
     tink::util::statusor
@@ -226,6 +227,7 @@ tink_cc_test(
     absl::strings
     absl::span
     tink::config::tink_fips
+    tink::internal::ssl_util
     tink::subtle::subtle_util
     tink::util::secret_data
     tink::util::statusor

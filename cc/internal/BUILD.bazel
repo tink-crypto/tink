@@ -3,6 +3,15 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 cc_library(
+    name = "ssl_util",
+    hdrs = ["ssl_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        "@boringssl//:crypto",
+    ],
+)
+
+cc_library(
     name = "keyset_wrapper",
     hdrs = ["keyset_wrapper.h"],
     include_prefix = "tink/internal",

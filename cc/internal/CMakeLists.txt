@@ -1,6 +1,14 @@
 tink_module(internal)
 
 tink_cc_library(
+  NAME ssl_util
+  SRCS
+    ssl_util.h
+  DEPS
+    crypto
+)
+
+tink_cc_library(
   NAME keyset_wrapper
   SRCS
     keyset_wrapper.h
@@ -274,3 +282,4 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
 )
+
