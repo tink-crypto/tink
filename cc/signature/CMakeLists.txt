@@ -444,10 +444,10 @@ tink_cc_test(
   SRCS
     ecdsa_verify_key_manager_test.cc
   DEPS
-    absl::status
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     gmock
+    absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::subtle::ecdsa_sign_boringssl
@@ -487,7 +487,6 @@ tink_cc_test(
   SRCS
     rsa_ssa_pkcs1_verify_key_manager_test.cc
   DEPS
-    tink::internal::ssl_unique_ptr
     tink::signature::rsa_ssa_pkcs1_sign_key_manager
     tink::signature::rsa_ssa_pkcs1_verify_key_manager
     gmock
@@ -498,6 +497,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::internal::bn_util
     tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
     tink::util::secret_data
     tink::util::status
@@ -523,6 +523,7 @@ tink_cc_test(
     tink::core::public_key_verify
     tink::internal::bn_util
     tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_sign_boringssl
     tink::util::secret_data
     tink::util::status
@@ -537,10 +538,10 @@ tink_cc_test(
   SRCS
     ecdsa_sign_key_manager_test.cc
   DEPS
-    absl::status
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     gmock
+    absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::subtle::ecdsa_verify_boringssl
@@ -575,7 +576,6 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::ed25519_cc_proto
-    tink::proto::ed25519_cc_proto
 )
 
 tink_cc_test(
@@ -605,7 +605,6 @@ tink_cc_test(
   SRCS
     rsa_ssa_pss_sign_key_manager_test.cc
   DEPS
-    tink::internal::ssl_unique_ptr
     tink::signature::rsa_ssa_pss_sign_key_manager
     tink::signature::rsa_ssa_pss_verify_key_manager
     tink::signature::signature_key_templates
@@ -615,6 +614,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::internal::bn_util
     tink::internal::rsa_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_verify_boringssl
     tink::util::status
     tink::util::statusor
@@ -652,7 +652,6 @@ tink_cc_test(
   SRCS
     signature_key_templates_test.cc
   DEPS
-    tink::internal::ssl_unique_ptr
     tink::signature::ecdsa_sign_key_manager
     tink::signature::ecdsa_verify_key_manager
     tink::signature::ed25519_sign_key_manager
