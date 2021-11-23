@@ -555,7 +555,12 @@ cc_library(
     include_prefix = "tink/subtle",
     visibility = ["//visibility:public"],
     deps = [
+        ":subtle_util",
         "//util:secret_data",
+        "//util:status",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
         "@boringssl//:crypto",
     ],
 )
@@ -1534,7 +1539,9 @@ cc_test(
     deps = [
         ":random",
         "//util:secret_data",
+        "//util:test_matchers",
         "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )

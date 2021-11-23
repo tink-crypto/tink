@@ -511,8 +511,13 @@ tink_cc_library(
     random.cc
     random.h
   DEPS
+    tink::subtle::subtle_util
+    absl::status
+    absl::strings
+    absl::span
     crypto
     tink::util::secret_data
+    tink::util::status
 )
 
 tink_cc_library(
@@ -1336,7 +1341,9 @@ tink_cc_test(
     tink::subtle::random
     gmock
     absl::flat_hash_set
+    absl::span
     tink::util::secret_data
+    tink::util::test_matchers
 )
 
 tink_cc_test(
