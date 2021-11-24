@@ -279,7 +279,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  until 2030 (see https://www.keylength.com/en/4/).</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>modulusSize</code> is less than 2048-bit.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - if <code>modulusSize</code> is less than 2048-bit or if the modulus
+     violates FIPS restrictions if they have been enabled.</dd>
 </dl>
 </li>
 </ul>
