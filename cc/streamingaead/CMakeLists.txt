@@ -1,12 +1,13 @@
 tink_module(streamingaead)
 
-
 tink_cc_library(
   NAME streaming_aead_wrapper
   SRCS
     streaming_aead_wrapper.cc
     streaming_aead_wrapper.h
   DEPS
+    tink::streamingaead::decrypting_input_stream
+    tink::streamingaead::decrypting_random_access_stream
     absl::status
     absl::strings
     tink::core::crypto_format
@@ -15,13 +16,10 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::core::random_access_stream
-    tink::core::registry
     tink::core::streaming_aead
-    tink::proto::tink_cc_proto
-    tink::streamingaead::decrypting_input_stream
-    tink::streamingaead::decrypting_random_access_stream
     tink::util::status
     tink::util::statusor
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -30,16 +28,16 @@ tink_cc_library(
     streaming_aead_config.cc
     streaming_aead_config.h
   DEPS
-    absl::memory
-    tink::config::config_util
-    tink::config::tink_fips
-    tink::core::registry
-    tink::proto::config_cc_proto
     tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_wrapper
+    absl::core_headers
+    absl::memory
+    tink::core::registry
+    tink::config::config_util
+    tink::config::tink_fips
     tink::util::status
-    absl::base
+    tink::proto::config_cc_proto
 )
 
 tink_cc_library(
@@ -63,11 +61,9 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
-    tink::core::key_manager
     tink::core::key_type_manager
+    tink::core::key_manager
     tink::core::streaming_aead
-    tink::proto::aes_gcm_hkdf_streaming_cc_proto
-    tink::proto::tink_cc_proto
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::random
@@ -80,6 +76,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
+    tink::proto::aes_gcm_hkdf_streaming_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -91,11 +89,8 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
-    tink::core::key_manager
     tink::core::key_type_manager
     tink::core::streaming_aead
-    tink::proto::aes_ctr_hmac_streaming_cc_proto
-    tink::proto::tink_cc_proto
     tink::subtle::aes_ctr_hmac_streaming
     tink::subtle::random
     tink::util::constants
@@ -107,6 +102,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::util::validation
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_library(
@@ -118,7 +115,6 @@ tink_cc_library(
     absl::memory
     absl::status
     tink::core::input_stream
-    tink::core::registry
     tink::util::errors
     tink::util::status
     tink::util::statusor
@@ -126,19 +122,20 @@ tink_cc_library(
 
 tink_cc_library(
   NAME shared_input_stream
-  SRCS shared_input_stream.h
+  SRCS
+    shared_input_stream.h
+    shared_input_stream.h
   DEPS
-    absl::memory
     tink::core::input_stream
-    tink::util::errors
     tink::util::statusor
 )
 
 tink_cc_library(
   NAME shared_random_access_stream
-  SRCS shared_random_access_stream.h
+  SRCS
+    shared_random_access_stream.h
+    shared_random_access_stream.h
   DEPS
-    absl::memory
     tink::core::random_access_stream
     tink::util::buffer
     tink::util::status
@@ -151,16 +148,16 @@ tink_cc_library(
     decrypting_input_stream.cc
     decrypting_input_stream.h
   DEPS
+    tink::streamingaead::buffered_input_stream
+    tink::streamingaead::shared_input_stream
+    absl::memory
+    absl::status
     tink::core::input_stream
     tink::core::primitive_set
     tink::core::streaming_aead
-    tink::streamingaead::buffered_input_stream
-    tink::streamingaead::shared_input_stream
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    absl::memory
-    absl::status
 )
 
 tink_cc_library(
@@ -169,13 +166,13 @@ tink_cc_library(
     decrypting_random_access_stream.cc
     decrypting_random_access_stream.h
   DEPS
+    tink::streamingaead::shared_random_access_stream
     absl::memory
     absl::status
     absl::synchronization
     tink::core::primitive_set
     tink::core::random_access_stream
     tink::core::streaming_aead
-    tink::streamingaead::shared_random_access_stream
     tink::util::buffer
     tink::util::errors
     tink::util::status
@@ -186,8 +183,11 @@ tink_cc_library(
 
 tink_cc_test(
   NAME streaming_aead_wrapper_test
-  SRCS streaming_aead_wrapper_test.cc
+  SRCS
+    streaming_aead_wrapper_test.cc
   DEPS
+    tink::streamingaead::streaming_aead_wrapper
+    gmock
     absl::memory
     absl::status
     absl::strings
@@ -196,8 +196,6 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::random_access_stream
     tink::core::streaming_aead
-    tink::proto::tink_cc_proto
-    tink::streamingaead::streaming_aead_wrapper
     tink::subtle::random
     tink::subtle::test_util
     tink::util::buffer
@@ -207,20 +205,19 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME aes_gcm_hkdf_streaming_key_manager_test
-  SRCS aes_gcm_hkdf_streaming_key_manager_test.cc
+  SRCS
+    aes_gcm_hkdf_streaming_key_manager_test.cc
   DEPS
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    gmock
     absl::status
     absl::strings
     tink::core::streaming_aead
-    tink::proto::aes_eax_cc_proto
-    tink::proto::aes_gcm_hkdf_streaming_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::subtle::aes_gcm_hkdf_streaming
     tink::subtle::common_enums
     tink::subtle::random
@@ -232,20 +229,22 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::aes_eax_cc_proto
+    tink::proto::aes_gcm_hkdf_streaming_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME aes_ctr_hmac_streaming_key_manager_test
-  SRCS aes_ctr_hmac_streaming_key_manager_test.cc
+  SRCS
+    aes_ctr_hmac_streaming_key_manager_test.cc
   DEPS
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
+    gmock
     absl::status
     absl::strings
     tink::core::streaming_aead
-    tink::proto::aes_eax_cc_proto
-    tink::proto::aes_ctr_hmac_streaming_cc_proto
-    tink::proto::common_cc_proto
-    tink::proto::tink_cc_proto
-    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::subtle::aes_ctr_hmac_streaming
     tink::subtle::common_enums
     tink::subtle::random
@@ -257,52 +256,61 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    tink::proto::aes_ctr_hmac_streaming_cc_proto
+    tink::proto::aes_eax_cc_proto
+    tink::proto::common_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME streaming_aead_key_templates_test
-  SRCS streaming_aead_key_templates_test.cc
+  SRCS
+    streaming_aead_key_templates_test.cc
   DEPS
+    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
+    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
+    tink::streamingaead::streaming_aead_key_templates
+    gmock
+    tink::util::test_matchers
     tink::proto::aes_ctr_hmac_streaming_cc_proto
     tink::proto::aes_gcm_hkdf_streaming_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto
-    tink::streamingaead::aes_ctr_hmac_streaming_key_manager
-    tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
-    tink::streamingaead::streaming_aead_key_templates
-    tink::util::test_matchers
 )
 
 tink_cc_test(
   NAME streaming_aead_config_test
-  SRCS streaming_aead_config_test.cc
+  SRCS
+    streaming_aead_config_test.cc
   DEPS
-    absl::memory
-    tink::config::tink_fips
-    tink::core::config
-    tink::core::keyset_handle
-    tink::core::registry
-    tink::core::streaming_aead
     tink::streamingaead::aes_ctr_hmac_streaming_key_manager
     tink::streamingaead::aes_gcm_hkdf_streaming_key_manager
     tink::streamingaead::streaming_aead_config
     tink::streamingaead::streaming_aead_key_templates
+    gmock
+    absl::memory
+    absl::status
+    tink::core::config
+    tink::core::keyset_handle
+    tink::core::registry
+    tink::core::streaming_aead
+    tink::config::tink_fips
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
-    absl::status
 )
 
 tink_cc_test(
   NAME buffered_input_stream_test
-  SRCS buffered_input_stream_test.cc
+  SRCS
+    buffered_input_stream_test.cc
   DEPS
+    tink::streamingaead::buffered_input_stream
+    gmock
     absl::memory
     absl::status
     absl::strings
-    gmock
     tink::core::input_stream
-    tink::streamingaead::buffered_input_stream
     tink::subtle::random
     tink::subtle::test_util
     tink::util::istream_input_stream
@@ -312,17 +320,18 @@ tink_cc_test(
 
 tink_cc_test(
   NAME decrypting_input_stream_test
-  SRCS decrypting_input_stream_test.cc
+  SRCS
+    decrypting_input_stream_test.cc
   DEPS
+    tink::streamingaead::decrypting_input_stream
+    gmock
     absl::memory
     absl::status
     absl::strings
-    tink::streamingaead::decrypting_input_stream
     tink::core::input_stream
     tink::core::output_stream
     tink::core::primitive_set
     tink::core::streaming_aead
-    tink::proto::tink_cc_proto
     tink::subtle::random
     tink::subtle::test_util
     tink::util::istream_input_stream
@@ -330,12 +339,16 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME decrypting_random_access_stream_test
-  SRCS decrypting_random_access_stream_test.cc
+  SRCS
+    decrypting_random_access_stream_test.cc
   DEPS
+    tink::streamingaead::decrypting_random_access_stream
+    gmock
     absl::memory
     absl::status
     absl::strings
@@ -343,8 +356,6 @@ tink_cc_test(
     tink::core::primitive_set
     tink::core::random_access_stream
     tink::core::streaming_aead
-    tink::proto::tink_cc_proto
-    tink::streamingaead::decrypting_random_access_stream
     tink::subtle::random
     tink::subtle::test_util
     tink::util::file_random_access_stream
@@ -352,18 +363,21 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME shared_input_stream_test
-  SRCS shared_input_stream_test.cc
+  SRCS
+    shared_input_stream_test.cc
   DEPS
+    tink::streamingaead::buffered_input_stream
+    tink::streamingaead::shared_input_stream
+    gmock
     absl::memory
     absl::status
     absl::strings
     tink::core::input_stream
-    tink::streamingaead::buffered_input_stream
-    tink::streamingaead::shared_input_stream
     tink::subtle::random
     tink::subtle::test_util
     tink::util::istream_input_stream
@@ -373,12 +387,14 @@ tink_cc_test(
 
 tink_cc_test(
   NAME shared_random_access_stream_test
-  SRCS shared_random_access_stream_test.cc
+  SRCS
+    shared_random_access_stream_test.cc
   DEPS
+    tink::streamingaead::shared_random_access_stream
+    gmock
     absl::memory
     absl::strings
     tink::core::random_access_stream
-    tink::streamingaead::shared_random_access_stream
     tink::util::buffer
     tink::util::file_random_access_stream
     tink::util::status
