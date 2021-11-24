@@ -334,7 +334,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestRestrictedFipsModuli) {
   BN_set_u64(rsa_f4.get(), RSA_F4);
 
   EXPECT_THAT(
-      internal::NewRsaKeyPair(2048, rsa_f4.get(), &private_key, &public_key),
+      internal::NewRsaKeyPair(2560, rsa_f4.get(), &private_key, &public_key),
       IsOk());
 
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),

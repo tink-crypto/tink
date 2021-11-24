@@ -103,7 +103,8 @@ public final class Validators {
    * RSA key only has 112-bit security. Nevertheless, a 2048-bit RSA key is considered safe by NIST
    * until 2030 (see https://www.keylength.com/en/4/).
    *
-   * @throws GeneralSecurityException if {@code modulusSize} is less than 2048-bit.
+   * @throws GeneralSecurityException if {@code modulusSize} is less than 2048-bit or if the modulus
+   *     violates FIPS restrictions if they have been enabled.
    */
   public static void validateRsaModulusSize(int modulusSize) throws GeneralSecurityException {
     if (modulusSize < MIN_RSA_MODULUS_SIZE) {
@@ -111,15 +112,18 @@ public final class Validators {
           String.format(
               "Modulus size is %d; only modulus size >= 2048-bit is supported", modulusSize));
     }
-    // In FIPS only mode we check here if the modulus is 3072, as this is the
+    // In FIPS only mode we check here if the modulus is 2048 or 3072, as this is the
     // only size which is covered by the FIPS validation and supported by Tink.
     // See
     // https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3318
-    if (TinkFipsUtil.useOnlyFips() && (modulusSize != 3072)) {
-      throw new GeneralSecurityException(
-          String.format(
-              "Modulus size is %d; only modulus size 3072-bit is supported in FIPS mode",
-              modulusSize));
+    if (TinkFipsUtil.useOnlyFips()) {
+      if (modulusSize != 2048 && modulusSize != 3072) {
+        throw new GeneralSecurityException(
+            String.format(
+                "Modulus size is %d; only modulus size of 2048- or 3072-bit is supported in FIPS"
+                    + " mode.",
+                modulusSize));
+      }
     }
   }
 
