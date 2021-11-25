@@ -134,6 +134,31 @@ cc_library(
 )
 
 cc_library(
+    name = "jwk_set_converter",
+    srcs = ["jwk_set_converter.cc"],
+    hdrs = ["jwk_set_converter.h"],
+    include_prefix = "tink/jwt",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":jwt_public_key_sign",
+        ":raw_jwt",
+        "//:binary_keyset_writer",
+        "//:keyset_handle",
+        "//jwt/internal:json_util",
+        "//jwt/internal:jwt_format",
+        "//proto:common_cc_proto",
+        "//proto:jwt_ecdsa_cc_proto",
+        "//proto:jwt_hmac_cc_proto",
+        "//proto:jwt_rsa_ssa_pkcs1_cc_proto",
+        "//proto:jwt_rsa_ssa_pss_cc_proto",
+        "//proto:tink_cc_proto",
+        "//util:keyset_util",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "jwt_signature_config",
     srcs = ["jwt_signature_config.cc"],
     hdrs = ["jwt_signature_config.h"],
@@ -240,5 +265,29 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "jwk_set_converter_test",
+    srcs = ["jwk_set_converter_test.cc"],
+    deps = [
+        ":jwk_set_converter",
+        ":jwt_public_key_sign",
+        ":jwt_public_key_verify",
+        ":jwt_signature_config",
+        ":jwt_validator",
+        ":verified_jwt",
+        "//:cleartext_keyset_handle",
+        "//:json_keyset_reader",
+        "//:json_keyset_writer",
+        "//:keyset_handle",
+        "//jwt/internal:json_util",
+        "//proto:jwt_ecdsa_cc_proto",
+        "//proto:jwt_rsa_ssa_pkcs1_cc_proto",
+        "//util:test_matchers",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
     ],
 )

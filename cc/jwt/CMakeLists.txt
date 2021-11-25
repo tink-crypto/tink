@@ -137,6 +137,28 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME jwk_set_converter
+  SRCS
+    jwk_set_converter.cc
+    jwk_set_converter.h
+  DEPS
+    tink::jwt::jwt_public_key_sign
+    tink::jwt::raw_jwt
+    absl::strings
+    tink::core::binary_keyset_writer
+    tink::core::keyset_handle
+    tink::jwt::internal::json_util
+    tink::jwt::internal::jwt_format
+    tink::util::keyset_util
+    tink::util::statusor
+    tink::proto::common_cc_proto
+    tink::proto::jwt_ecdsa_cc_proto
+    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
+    tink::proto::jwt_rsa_ssa_pss_cc_proto
+    tink::proto::tink_cc_proto
+)
+
+tink_cc_library(
   NAME jwt_mac_config
   SRCS
     jwt_mac_config.cc
@@ -212,4 +234,28 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+)
+
+tink_cc_test(
+  NAME jwk_set_converter_test
+  SRCS
+    jwk_set_converter_test.cc
+  DEPS
+    tink::jwt::jwk_set_converter
+    tink::jwt::jwt_public_key_sign
+    tink::jwt::jwt_public_key_verify
+    tink::jwt::jwt_signature_config
+    tink::jwt::jwt_validator
+    tink::jwt::verified_jwt
+    protobuf::libprotobuf
+    gmock
+    absl::strings
+    tink::core::cleartext_keyset_handle
+    tink::core::json_keyset_reader
+    tink::core::json_keyset_writer
+    tink::core::keyset_handle
+    tink::jwt::internal::json_util
+    tink::util::test_matchers
+    tink::proto::jwt_ecdsa_cc_proto
+    tink::proto::jwt_rsa_ssa_pkcs1_cc_proto
 )
