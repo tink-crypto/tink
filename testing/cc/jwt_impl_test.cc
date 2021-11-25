@@ -35,7 +35,6 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::KeyTemplate;
-using ::proto2::Map;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::ElementsAre;
@@ -84,8 +83,7 @@ TEST_F(JwtImplMacTest, MacComputeVerifySuccess) {
   raw_jwt->mutable_not_before()->set_nanos(123000000);
   raw_jwt->mutable_issued_at()->set_seconds(23456);
   raw_jwt->mutable_expiration()->set_seconds(34567);
-  Map<std::string, JwtClaimValue>* custom_claims =
-      raw_jwt->mutable_custom_claims();
+  auto custom_claims = raw_jwt->mutable_custom_claims();
   (*custom_claims)["null_claim"].set_null_value(
       tink_testing_api::NullValue::NULL_VALUE);
   (*custom_claims)["bool_claim"].set_bool_value(true);
@@ -219,8 +217,7 @@ TEST_F(JwtImplSignatureTest, SignVerifySuccess) {
   raw_jwt->mutable_not_before()->set_seconds(12345);
   raw_jwt->mutable_issued_at()->set_seconds(23456);
   raw_jwt->mutable_expiration()->set_seconds(34567);
-  Map<std::string, JwtClaimValue>* custom_claims =
-      raw_jwt->mutable_custom_claims();
+  auto custom_claims = raw_jwt->mutable_custom_claims();
   (*custom_claims)["null_claim"].set_null_value(
       tink_testing_api::NullValue::NULL_VALUE);
   (*custom_claims)["bool_claim"].set_bool_value(true);
