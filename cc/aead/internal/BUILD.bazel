@@ -37,7 +37,6 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         ":aead_util",
-        ":zero_copy_aes_gcm_boringssl",
         "//internal:err_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
@@ -118,15 +117,14 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         ":zero_copy_aead",
+        ":ssl_aead",
         "//aead/internal:aead_util",
-        "//internal:ssl_unique_ptr",
         "//internal:util",
         "//subtle:random",
         "//subtle:subtle_util",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
-        "@boringssl//:crypto",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -181,8 +179,6 @@ cc_test(
     ],
     deps = [
         ":zero_copy_aes_gcm_boringssl",
-        "//internal:err_util",
-        "//subtle:aes_gcm_boringssl",
         "//subtle:subtle_util",
         "//subtle:wycheproof_util",
         "//util:statusor",
@@ -192,7 +188,6 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 

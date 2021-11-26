@@ -107,13 +107,12 @@ tink_cc_library(
     zero_copy_aes_gcm_boringssl.h
   DEPS
     tink::aead::internal::aead_util
+    tink::aead::internal::ssl_aead
     tink::aead::internal::zero_copy_aead
     absl::core_headers
     absl::memory
     absl::status
     absl::strings
-    crypto
-    tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::subtle::random
     tink::subtle::subtle_util
@@ -205,9 +204,6 @@ tink_cc_test(
     absl::strings
     absl::span
     crypto
-    rapidjson
-    tink::internal::err_util
-    tink::subtle::aes_gcm_boringssl
     tink::subtle::subtle_util
     tink::subtle::wycheproof_util
     tink::util::statusor

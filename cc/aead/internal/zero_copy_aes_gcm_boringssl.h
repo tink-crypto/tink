@@ -22,9 +22,8 @@
 #include <utility>
 
 #include "absl/base/macros.h"
-#include "openssl/aead.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/aead/internal/zero_copy_aead.h"
-#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -50,10 +49,10 @@ class ZeroCopyAesGcmBoringSsl : public ZeroCopyAead {
       absl::Span<char> buffer) const override;
 
  private:
-  explicit ZeroCopyAesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> ctx)
-      : ctx_(std::move(ctx)) {}
+  explicit ZeroCopyAesGcmBoringSsl(std::unique_ptr<SslOneShotAead> aead)
+      : aead_(std::move(aead)) {}
 
-  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
+  const std::unique_ptr<SslOneShotAead> aead_;
 };
 
 }  // namespace internal

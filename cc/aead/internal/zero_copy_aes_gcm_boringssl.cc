@@ -17,18 +17,19 @@
 #include "tink/aead/internal/zero_copy_aes_gcm_boringssl.h"
 
 #include <cstdint>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
-#include "openssl/aead.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/aead/internal/zero_copy_aead.h"
-#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -39,23 +40,17 @@ constexpr int kTagSizeInBytes = 16;
 
 util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
     const util::SecretData &key) {
-  util::StatusOr<const EVP_AEAD *> aead =
-      internal::GetAesGcmAeadForKeySize(key.size());
+  util::StatusOr<std::unique_ptr<internal::SslOneShotAead>> aead =
+      internal::CreateAesGcmSivOneShotCrypter(key);
   if (!aead.ok()) {
     return aead.status();
   }
-  internal::SslUniquePtr<EVP_AEAD_CTX> ctx(EVP_AEAD_CTX_new(
-      *aead, key.data(), key.size(), EVP_AEAD_DEFAULT_TAG_LENGTH));
-  if (ctx == nullptr) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "could not initialize EVP_AEAD_CTX");
-  }
-  return {absl::WrapUnique(new ZeroCopyAesGcmBoringSsl(std::move(ctx)))};
+  return {absl::WrapUnique(new ZeroCopyAesGcmBoringSsl(*std::move(aead)))};
 }
 
 int64_t ZeroCopyAesGcmBoringSsl::MaxEncryptionSize(
     int64_t plaintext_size) const {
-  return kIvSizeInBytes + plaintext_size + kTagSizeInBytes;
+  return kIvSizeInBytes + aead_->CiphertextSize(plaintext_size);
 }
 
 util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
@@ -75,21 +70,20 @@ util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Encrypt(
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
-  // TODO(b/198004452): Add GetRandomBytes(absl::Span<char>) to avoid copy.
-  std::string iv = subtle::Random::GetRandomBytes(kIvSizeInBytes);
-  std::memcpy(buffer.data(), iv.data(), kIvSizeInBytes);
-
-  size_t len;
-  if (EVP_AEAD_CTX_seal(
-          ctx_.get(), reinterpret_cast<uint8_t *>(&buffer[kIvSizeInBytes]),
-          &len, plaintext.size() + kTagSizeInBytes,
-          reinterpret_cast<const uint8_t *>(&buffer[0]), kIvSizeInBytes,
-          reinterpret_cast<const uint8_t *>(plaintext.data()), plaintext.size(),
-          reinterpret_cast<const uint8_t *>(associated_data.data()),
-          associated_data.size()) != 1) {
-    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
+  util::Status res =
+      subtle::Random::GetRandomBytes(buffer.subspan(0, kIvSizeInBytes));
+  if (!res.ok()) {
+    return res;
   }
-  return kIvSizeInBytes + len;
+  absl::string_view iv = buffer_string.substr(0, kIvSizeInBytes);
+  absl::Span<char> raw_cipher_and_tag_buffer = buffer.subspan(kIvSizeInBytes);
+
+  util::StatusOr<int64_t> written_bytes =
+      aead_->Encrypt(plaintext, associated_data, iv, raw_cipher_and_tag_buffer);
+  if (!written_bytes.ok()) {
+    return written_bytes.status();
+  }
+  return kIvSizeInBytes + *written_bytes;
 }
 
 int64_t ZeroCopyAesGcmBoringSsl::MaxDecryptionSize(
@@ -127,31 +121,11 @@ util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
         "Plaintext and ciphertext buffers overlap; this is disallowed");
   }
 
-  // If buffer.empty() accessing the 0th element would result in an out of
-  // bound violation. This makes sure we pass a pointer to at least one byte
-  // when calling into OpenSSL.
-  uint8_t buffer_if_buffer_is_empty = 0;
-  uint8_t *buffer_ptr = &buffer_if_buffer_is_empty;
-  if (!buffer.empty()) {
-    buffer_ptr = reinterpret_cast<uint8_t *>(&buffer[0]);
-  }
-
-  size_t len;
-  if (EVP_AEAD_CTX_open(
-          ctx_.get(), buffer_ptr, &len, buffer.size(),
-          // The IV is the first |kIvSizeInBytes| bytes of |ciphertext|.
-          reinterpret_cast<const uint8_t *>(ciphertext.data()), kIvSizeInBytes,
-          // The input is the remainder.
-          reinterpret_cast<const uint8_t *>(ciphertext.data()) + kIvSizeInBytes,
-          ciphertext.size() - kIvSizeInBytes,
-          reinterpret_cast<const uint8_t *>(associated_data.data()),
-          associated_data.size()) != 1) {
-    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
-  }
-  return len;
+  auto iv = ciphertext.substr(0, kIvSizeInBytes);
+  auto ciphertext_and_tag =
+      ciphertext.substr(kIvSizeInBytes, ciphertext.size() - kIvSizeInBytes);
+  return aead_->Decrypt(ciphertext_and_tag, associated_data, iv, buffer);
 }
-
-
 
 }  // namespace internal
 }  // namespace tink

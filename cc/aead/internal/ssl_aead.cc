@@ -271,6 +271,9 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
                           "Could not set authentication tag");
     }
 
+    // If out.empty() accessing the 0th element would result in an out of
+    // bound violation. This makes sure we pass a pointer to at least one byte
+    // when calling into OpenSSL.
     char buffer_if_size_is_zero = '\0';
     auto out_buffer = absl::Span<char>(&buffer_if_size_is_zero, /*length=*/1);
     if (!out.empty()) {
@@ -372,6 +375,9 @@ class BoringSslOneShotAeadImpl : public SslOneShotAead {
                        min_out_buff_size, " got ", out.size()));
     }
 
+    // If out.empty() accessing the 0th element would result in an out of
+    // bound violation. This makes sure we pass a pointer to at least one byte
+    // when calling into OpenSSL.
     uint8_t buffer_if_size_is_zero;
     uint8_t *buffer_ptr = &buffer_if_size_is_zero;
     if (!out.empty()) {
@@ -388,7 +394,7 @@ class BoringSslOneShotAeadImpl : public SslOneShotAead {
             /*ad_len=*/associated_data.size())) {
       return util::Status(
           absl::StatusCode::kInternal,
-          absl::StrCat("Encryption failed: ", internal::GetSslErrors()));
+          absl::StrCat("Decryption failed: ", internal::GetSslErrors()));
     }
 
     return out_len;
