@@ -20,12 +20,9 @@
 #include <memory>
 #include <utility>
 
-#include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
-#include "openssl/evp.h"
 #include "tink/aead.h"
 #include "tink/internal/fips_utils.h"
-#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -33,7 +30,7 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-class AesGcmBoringSsl : public Aead {
+class AesGcmBoringSsl {
  public:
   ABSL_DEPRECATED("Use AesGcmBoringSsl::New(const util::SecretData&) instead.")
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
@@ -44,30 +41,8 @@ class AesGcmBoringSsl : public Aead {
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       const util::SecretData& key);
 
-  crypto::tink::util::StatusOr<std::string> Encrypt(
-      absl::string_view plaintext,
-      absl::string_view additional_data) const override;
-
-  crypto::tink::util::StatusOr<std::string> Decrypt(
-      absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
-
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
-
- private:
-#ifdef OPENSSL_IS_BORINGSSL
-  explicit AesGcmBoringSsl(internal::SslUniquePtr<EVP_AEAD_CTX> context)
-      : context_(std::move(context)) {}
-
-  internal::SslUniquePtr<EVP_AEAD_CTX> context_;
-#else
-  explicit AesGcmBoringSsl(internal::SslUniquePtr<EVP_CIPHER_CTX> context)
-      : context_(std::move(context)) {}
-
-  // We cache the context to allow performing precomputations on the key.
-  const internal::SslUniquePtr<EVP_CIPHER_CTX> context_;
-#endif
 };
 
 }  // namespace subtle

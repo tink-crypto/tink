@@ -29,6 +29,8 @@ tink_cc_library(
     tink::core::aead
     tink::core::deterministic_aead
     tink::core::mac
+    tink::aead::internal::aead_from_zero_copy
+    tink::aead::internal::zero_copy_aead
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::util::secret_data
@@ -328,19 +330,13 @@ tink_cc_library(
     aes_gcm_boringssl.cc
     aes_gcm_boringssl.h
   DEPS
-    tink::subtle::random
-    tink::subtle::subtle_util
-    absl::core_headers
     absl::memory
-    absl::status
     absl::strings
-    absl::span
-    crypto
     tink::core::aead
-    tink::aead::internal::aead_util
+    tink::aead::internal::aead_from_zero_copy
+    tink::aead::internal::zero_copy_aead
+    tink::aead::internal::zero_copy_aes_gcm_boringssl
     tink::internal::fips_utils
-    tink::internal::ssl_unique_ptr
-    tink::internal::util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

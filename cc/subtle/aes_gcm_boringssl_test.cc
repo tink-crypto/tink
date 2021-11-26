@@ -76,11 +76,12 @@ TEST_F(AesGcmBoringSslTest, BasicEncryptDecrypt) {
 }
 
 TEST_F(AesGcmBoringSslTest, ModifyMessageAndAad) {
-  std::string ciphertext = cipher_->Encrypt(kMessage, kAad).ValueOrDie();
-  ASSERT_THAT(cipher_->Decrypt(ciphertext, kAad).status(), IsOk());
+  util::StatusOr<std::string> ciphertext = cipher_->Encrypt(kMessage, kAad);
+  ASSERT_THAT(ciphertext.status(), IsOk());
+  ASSERT_THAT(cipher_->Decrypt(*ciphertext, kAad).status(), IsOk());
   // Modify the ciphertext.
-  for (size_t i = 0; i < ciphertext.size() * 8; i++) {
-    std::string modified_ct = ciphertext;
+  for (size_t i = 0; i < ciphertext->size() * 8; i++) {
+    std::string modified_ct = *ciphertext;
     modified_ct[i / 8] ^= 1 << (i % 8);
     EXPECT_THAT(cipher_->Decrypt(modified_ct, kAad).status(), Not(IsOk())) << i;
   }
@@ -88,12 +89,12 @@ TEST_F(AesGcmBoringSslTest, ModifyMessageAndAad) {
   for (size_t i = 0; i < kAad.size() * 8; i++) {
     std::string modified_aad = std::string(kAad);
     modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher_->Decrypt(ciphertext, modified_aad);
+    auto decrypted = cipher_->Decrypt(*ciphertext, modified_aad);
     EXPECT_THAT(decrypted.status(), Not(IsOk())) << i << " pt:" << *decrypted;
   }
   // Truncate the ciphertext.
-  for (size_t i = 0; i < ciphertext.size(); i++) {
-    std::string truncated_ct(ciphertext, 0, i);
+  for (size_t i = 0; i < ciphertext->size(); i++) {
+    std::string truncated_ct(*ciphertext, 0, i);
     EXPECT_THAT(cipher_->Decrypt(truncated_ct, kAad).status(), Not(IsOk()))
         << i;
   }

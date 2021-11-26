@@ -24,14 +24,12 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-using ::crypto::tink::util::StatusOr;
-
-StatusOr<std::string> AeadFromZeroCopy::Encrypt(
+util::StatusOr<std::string> AeadFromZeroCopy::Encrypt(
     absl::string_view plaintext, absl::string_view associated_data) const {
   std::string result;
   subtle::ResizeStringUninitialized(&result,
                                     aead_->MaxEncryptionSize(plaintext.size()));
-  StatusOr<uint64_t> written_bytes = aead_->Encrypt(
+  util::StatusOr<uint64_t> written_bytes = aead_->Encrypt(
       plaintext, associated_data, absl::MakeSpan(&result[0], result.size()));
   if (!written_bytes.ok()) {
     return written_bytes.status();
@@ -40,12 +38,12 @@ StatusOr<std::string> AeadFromZeroCopy::Encrypt(
   return result;
 }
 
-StatusOr<std::string> AeadFromZeroCopy::Decrypt(
+util::StatusOr<std::string> AeadFromZeroCopy::Decrypt(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   std::string result;
   subtle::ResizeStringUninitialized(
       &result, aead_->MaxDecryptionSize(ciphertext.size()));
-  StatusOr<uint64_t> bytes_written = aead_->Decrypt(
+  util::StatusOr<uint64_t> bytes_written = aead_->Decrypt(
       ciphertext, associated_data, absl::MakeSpan(&result[0], result.size()));
   if (!bytes_written.ok()) {
     return bytes_written.status();

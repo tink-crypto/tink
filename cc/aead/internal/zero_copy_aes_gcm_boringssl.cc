@@ -102,7 +102,7 @@ util::StatusOr<int64_t> ZeroCopyAesGcmBoringSsl::Decrypt(
   if (ciphertext.size() < min_ciphertext_size) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
-        absl::StrCat("Invalid ciphertext size; expected at least ",
+        absl::StrCat("Ciphertext too short; expected at least ",
                      min_ciphertext_size, " bytes, got ", ciphertext.size()));
   }
 

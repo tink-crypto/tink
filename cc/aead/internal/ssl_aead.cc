@@ -394,7 +394,7 @@ class BoringSslOneShotAeadImpl : public SslOneShotAead {
             /*ad_len=*/associated_data.size())) {
       return util::Status(
           absl::StatusCode::kInternal,
-          absl::StrCat("Decryption failed: ", internal::GetSslErrors()));
+          absl::StrCat("Authentication failed: ", internal::GetSslErrors()));
     }
 
     return out_len;
