@@ -23,6 +23,7 @@
 namespace crypto {
 namespace tink {
 
+#ifndef TINK_USE_ABSL_STATUS
 // Constructs a Status with formatted error message.
 template <typename... Args>
 ABSL_DEPRECATED("Prefer using absl::StatusCode as a first argument.")
@@ -31,6 +32,7 @@ util::Status ToStatusF(util::error::Code code,
                        const Args&... args) {
   return util::Status(code, absl::StrFormat(format, args...));
 }
+#endif
 
 // Constructs a Status with formatted error message using absl::StatusCode.
 template <typename... Args>

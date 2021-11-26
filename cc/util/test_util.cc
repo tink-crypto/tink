@@ -54,7 +54,6 @@
 
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
-using crypto::tink::util::error::Code;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaSignatureEncoding;

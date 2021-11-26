@@ -25,6 +25,7 @@ namespace tink {
 namespace util {
 namespace {
 
+#ifndef TINK_USE_ABSL_STATUS
 TEST(StatusTest, CreateNonOkStatusWithAbslStatusCode) {
   Status util_status = Status(error::Code::CANCELLED, "message");
   Status absl_status = Status(absl::StatusCode::kCancelled, "message");
@@ -44,6 +45,7 @@ TEST(StatusTest, ConvertNonOkStatus) {
   ASSERT_EQ(util_status.code(), absl_status.code());
   ASSERT_EQ(util_status.message(), absl_status.message());
 }
+#endif
 
 TEST(StatusTest, ConvertOkStatus) {
   Status util_status = OkStatus();

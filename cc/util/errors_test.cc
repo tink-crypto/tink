@@ -24,6 +24,7 @@ namespace crypto {
 namespace tink {
 namespace {
 
+#ifndef TINK_USE_ABSL_STATUS
 TEST(ErrorsTest, ToStatusFTest) {
   const char* const msg1 = "test message 1";
   const char* const msg2 = "test message %s 2 %d";
@@ -51,6 +52,7 @@ TEST(ErrorsTest, ToAbslStatus) {
 
   EXPECT_EQ(::absl::Status(crypto::tink::util::OkStatus()), ::absl::OkStatus());
 }
+#endif
 
 TEST(ErrorsTest, ToStatusFAbslStatusCodeTest) {
   const char* const msg = "test message %s 2 %d";
@@ -59,7 +61,11 @@ TEST(ErrorsTest, ToStatusFAbslStatusCodeTest) {
       ToStatusF(absl::StatusCode::kUnknown, msg, "asdf", 42);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(expected_msg, status.error_message());
+  EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
+
+  #ifndef TINK_USE_ABSL_STATUS
   EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
+  #endif
 }
 
 }  // namespace

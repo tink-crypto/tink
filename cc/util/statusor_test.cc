@@ -45,8 +45,13 @@ TEST(StatusOrTest, ConvertOkToAbsl) {
 }
 
 TEST(StatusOrTest, ConvertErrorToAbsl) {
+  #ifndef TINK_USE_ABSL_STATUS
   StatusOr<int> instance{
       Status(error::Code::INVALID_ARGUMENT, "Error message")};
+  #else
+  StatusOr<int> instance{
+      Status(absl::StatusCode::kInvalidArgument, "Error message")};
+  #endif
 
   absl::StatusOr<int> converted = instance;
   ASSERT_FALSE(converted.ok());
@@ -79,7 +84,7 @@ class NoDefaultConstructor {
 TEST(StatusOrTest, WithNoDefaultConstructor) {
   StatusOr<NoDefaultConstructor> value = NoDefaultConstructor(13);
   StatusOr<NoDefaultConstructor> error =
-      Status(error::Code::INVALID_ARGUMENT, "Error message");
+      Status(absl::StatusCode::kInvalidArgument, "Error message");
 }
 
 // This tests that when we assign to something which is previously an error,
@@ -87,7 +92,7 @@ TEST(StatusOrTest, WithNoDefaultConstructor) {
 // the value of the optional instead.
 TEST(StatusOrTest, AssignToErrorStatus) {
   StatusOr<std::string> error_initially =
-      Status(error::Code::INVALID_ARGUMENT, "Error message");
+      Status(absl::StatusCode::kInvalidArgument, "Error message");
   ASSERT_THAT(error_initially.status(), Not(IsOk()));
   StatusOr<std::string> ok_initially = std::string("Hi");
   error_initially = ok_initially;
@@ -101,7 +106,7 @@ TEST(StatusOrTest, AssignToErrorStatus) {
 // optional instead.
 TEST(StatusOrTest, AssignToErrorStatusImplicitConvertible) {
   StatusOr<std::string> error_initially =
-      Status(error::Code::INVALID_ARGUMENT, "Error message");
+      Status(absl::StatusCode::kInvalidArgument, "Error message");
   ASSERT_THAT(error_initially.status(), Not(IsOk()));
   StatusOr<char const*> ok_initially = "Hi";
   error_initially = ok_initially;
