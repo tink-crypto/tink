@@ -25,6 +25,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/types/span.h"
+#include "tink/internal/err_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/statusor.h"
@@ -54,8 +55,8 @@ constexpr int64_t kMaxDecryptionSize = kMessage.size();
 
 // Encoded ciphertext of kMessage with kAdditionalData and kKey128Hex.
 constexpr absl::string_view kEncodedCiphertext =
-    "b123458852bdfb78ad0c1f962156cde8bd12da1ae3e9627daa422acc7ebd7d80644f1377cb"
-    "7b3f85a6cea22387eb0f3433";
+    "22889553081aa27f0f62ed2f32b068331cb3d8103e121c8b0c898cf70b613e334b7e913323"
+    "128429226950dd2f4d42a6fc";
 
 class ZeroCopyAesGcmBoringSslTest : public testing::Test {
  protected:
@@ -158,6 +159,67 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptOverlappingPlaintextCiphertext) {
   EXPECT_THAT(
       cipher_->Decrypt(ciphertext, kAdditionalData, out_buffer).status(),
       StatusIs(absl::StatusCode::kFailedPrecondition));
+}
+
+// TODO(cinlin): Clean up and abstract Wycheproof vector tests.
+TEST(ZeroCopyAesGcmBoringSslWycheproofTest, TestVectors) {
+  std::unique_ptr<rapidjson::Document> root =
+      subtle::WycheproofUtil::ReadTestVectors("aes_gcm_test.json");
+
+  int errors = 0;
+
+  for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
+    // ZeroCopyAesGcmBoringSsl only supports 12-byte IVs and 16-byte
+    // authentication tags. Also, 24-byte keys are not supported.
+    if (test_group["ivSize"].GetInt() != 96 ||
+        test_group["tagSize"].GetInt() != 128 ||
+        test_group["keySize"].GetInt() == 192) {
+      continue;
+    }
+
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      std::string comment = test["comment"].GetString();
+      std::string key = subtle::WycheproofUtil::GetBytes(test["key"]);
+      std::string iv = subtle::WycheproofUtil::GetBytes(test["iv"]);
+      std::string message = subtle::WycheproofUtil::GetBytes(test["msg"]);
+      std::string ciphertext = subtle::WycheproofUtil::GetBytes(test["ct"]);
+      std::string aad = subtle::WycheproofUtil::GetBytes(test["aad"]);
+      std::string tag = subtle::WycheproofUtil::GetBytes(test["tag"]);
+      std::string id = absl::StrCat(test["tcId"].GetInt());
+      std::string expected = test["result"].GetString();
+
+      StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
+          ZeroCopyAesGcmBoringSsl::New(util::SecretDataFromStringView(key));
+      ASSERT_THAT(cipher.status(), IsOk());
+
+      std::string plaintext;
+      plaintext.resize((*cipher)->MaxDecryptionSize(
+          iv.size() + ciphertext.size() + tag.size()));
+      absl::Span<char> plaintext_span = absl::Span<char>(plaintext);
+      StatusOr<int64_t> plaintext_size =
+          (*cipher)->Decrypt(iv + ciphertext + tag, aad, plaintext_span);
+
+      if (plaintext_size.ok()) {
+        if (expected == "invalid") {
+          ADD_FAILURE() << "Decrypted invalid ciphertext: " << id;
+          errors++;
+          continue;
+        }
+        if (plaintext_span.subspan(0, *plaintext_size) != message) {
+          ADD_FAILURE() << "Incorrect decryption: " << id;
+          errors++;
+        }
+      } else {
+        if (expected == "valid" || expected == "acceptable") {
+          ADD_FAILURE() << "Could not decrypt: " << id
+                        << ", error: " << GetSslErrors();
+          errors++;
+        }
+      }
+    }
+  }
+
+  EXPECT_EQ(errors, 0);
 }
 
 }  // namespace

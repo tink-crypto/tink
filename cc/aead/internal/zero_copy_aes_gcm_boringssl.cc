@@ -41,7 +41,7 @@ constexpr int kTagSizeInBytes = 16;
 util::StatusOr<std::unique_ptr<ZeroCopyAead>> ZeroCopyAesGcmBoringSsl::New(
     const util::SecretData &key) {
   util::StatusOr<std::unique_ptr<internal::SslOneShotAead>> aead =
-      internal::CreateAesGcmSivOneShotCrypter(key);
+      internal::CreateAesGcmOneShotCrypter(key);
   if (!aead.ok()) {
     return aead.status();
   }

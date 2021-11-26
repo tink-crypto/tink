@@ -204,6 +204,7 @@ tink_cc_test(
     absl::strings
     absl::span
     crypto
+    tink::internal::err_util
     tink::subtle::subtle_util
     tink::subtle::wycheproof_util
     tink::util::statusor
