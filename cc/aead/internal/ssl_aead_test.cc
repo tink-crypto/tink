@@ -48,6 +48,8 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::testing::AllOf;
+using ::testing::Eq;
 using ::testing::Not;
 using ::testing::TestParamInfo;
 using ::testing::TestWithParam;
@@ -553,23 +555,18 @@ TEST_P(SslOneShotAeadWycheproofTest, TestVectors) {
         test_vector.nonce, absl::MakeSpan(plaintext_buffer));
 
     if (written_bytes.ok()) {
-      if (test_vector.expected == "invalid") {
-        ADD_FAILURE() << "Decrypted invalid ciphertext: " << test_vector.id;
-        errors++;
-      } else if (test_vector.msg != plaintext_buffer) {
-        ADD_FAILURE() << "Incorrect decryption:" << test_vector.id;
-        errors++;
-      }
+      EXPECT_NE(test_vector.expected, "invalid")
+          << "Decrypted invalid ciphertext with ID " << test_vector.id;
+      EXPECT_EQ(plaintext_buffer, test_vector.msg)
+          << "Incorrect decryption: " << test_vector.id;
     } else {
-      if (test_vector.expected == "valid" ||
-          test_vector.expected == "acceptable") {
-        ADD_FAILURE() << "Could not decrypt test with tcId: " << test_vector.id
-                      << " iv_size: " << test_vector.nonce.size()
-                      << " tag_size: " << test_vector.tag.size()
-                      << " key_size: " << key.size()
-                      << " error: " << written_bytes.status();
-        errors++;
-      }
+      EXPECT_THAT(test_vector.expected,
+                  Not(AllOf(Eq("valid"), Eq("acceptable"))))
+          << "Could not decrypt test with tcId: " << test_vector.id
+          << " iv_size: " << test_vector.nonce.size()
+          << " tag_size: " << test_vector.tag.size()
+          << " key_size: " << key.size()
+          << "; error: " << written_bytes.status();
     }
   }
   EXPECT_EQ(errors, 0);

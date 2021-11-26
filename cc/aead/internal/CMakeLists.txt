@@ -198,6 +198,7 @@ tink_cc_test(
   DATA
     wycheproof::testvectors
   DEPS
+    tink::aead::internal::wycheproof_aead
     tink::aead::internal::zero_copy_aes_gcm_boringssl
     gmock
     absl::status
@@ -206,7 +207,6 @@ tink_cc_test(
     crypto
     tink::internal::err_util
     tink::subtle::subtle_util
-    tink::subtle::wycheproof_util
     tink::util::statusor
     tink::util::test_matchers
 )

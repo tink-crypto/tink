@@ -1063,8 +1063,8 @@ cc_test(
     ],
     deps = [
         ":aes_gcm_boringssl",
-        ":wycheproof_util",
         "//:aead",
+        "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
         "//util:secret_data",
         "//util:status",
@@ -1073,7 +1073,6 @@ cc_test(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 

@@ -959,12 +959,10 @@ tink_cc_test(
     wycheproof::testvectors
   DEPS
     tink::subtle::aes_gcm_boringssl
-    tink::subtle::wycheproof_util
     gmock
     absl::status
     absl::strings
-    crypto
-    rapidjson
+    tink::aead::internal::wycheproof_aead
     tink::config::tink_fips
     tink::util::secret_data
     tink::util::status

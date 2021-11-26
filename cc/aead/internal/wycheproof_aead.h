@@ -43,8 +43,9 @@ struct WycheproofTestVector {
 // Read test vectors from the Wycheproof project that are rooted at `root`.
 // Filter out instances with unsupported key sizes, iv size or tag size.
 std::vector<WycheproofTestVector> ReadWycheproofTestVectors(
-    absl::string_view file_name, int allowed_tag_size, int allowed_iv_size,
-    absl::flat_hash_set<int> allowed_key_sizes);
+    absl::string_view file_name, int allowed_tag_size_in_bytes,
+    int allowed_iv_size_in_bytes,
+    absl::flat_hash_set<int> allowed_key_sizes_in_bits);
 
 }  // namespace internal
 }  // namespace tink
