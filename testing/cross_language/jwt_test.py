@@ -146,7 +146,8 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
   def test_jwt_public_key_sign_export_import_verify(self, key_template_name):
-    supported_langs = ['java', 'python']
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        key_template_name]
     self.assertNotEmpty(supported_langs)
     key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
     # Take the first supported language to generate the private keyset.

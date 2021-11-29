@@ -16,31 +16,37 @@
 
 // Implementation of a JWT Service.
 #include "jwt_impl.h"
+
 #include <string>
+#include <utility>
 
 #include "absl/time/time.h"
 #include "tink/binary_keyset_reader.h"
+#include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/jwt/jwt_public_key_verify.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 #include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
+#include "tink/jwt/jwk_set_converter.h"
+#include "proto/testing/testing_api.grpc.pb.h"
 
 namespace tink_testing_api {
 
 using ::crypto::tink::BinaryKeysetReader;
+using ::crypto::tink::BinaryKeysetWriter;
 using ::crypto::tink::CleartextKeysetHandle;
-using ::crypto::tink::KeysetHandle;
-using ::crypto::tink::util::StatusOr;
+using ::crypto::tink::JwtMac;
 using ::crypto::tink::JwtPublicKeySign;
 using ::crypto::tink::JwtPublicKeyVerify;
-using ::crypto::tink::JwtMac;
+using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::KeysetReader;
 using ::crypto::tink::RawJwt;
 using ::crypto::tink::VerifiedJwt;
-using ::crypto::tink::KeysetReader;
+using ::crypto::tink::util::StatusOr;
 
+using ::crypto::tink::JwkSetToPublicKeysetHandle;
 using ::grpc::ServerContext;
 
 absl::Time TimestampToTime(tink_testing_api::Timestamp t) {
@@ -339,6 +345,56 @@ grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
   }
   *response->mutable_verified_jwt() = VerifiedJwtToProto(*verified_jwt);
   return grpc::Status::OK;
+}
+
+::grpc::Status JwtImpl::ToJwkSet(grpc::ServerContext* context,
+                                 const JwtToJwkSetRequest* request,
+                                 JwtToJwkSetResponse* response) {
+  StatusOr<std::unique_ptr<KeysetReader>> reader =
+      BinaryKeysetReader::New(request->keyset());
+  if (!reader.ok()) {
+    response->set_err(std::string(reader.status().message()));
+    return ::grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<KeysetHandle>> handle =
+      CleartextKeysetHandle::Read(*std::move(reader));
+  if (!handle.ok()) {
+    response->set_err(std::string(handle.status().message()));
+    return ::grpc::Status::OK;
+  }
+  StatusOr<std::string> jwk_set = JwkSetFromPublicKeysetHandle(**handle);
+  if (!jwk_set.ok()) {
+    response->set_err(std::string(jwk_set.status().message()));
+    return ::grpc::Status::OK;
+  }
+  response->set_jwk_set(*jwk_set);
+  return ::grpc::Status::OK;
+}
+
+::grpc::Status JwtImpl::FromJwkSet(grpc::ServerContext* context,
+                                   const JwtFromJwkSetRequest* request,
+                                   JwtFromJwkSetResponse* response) {
+  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      JwkSetToPublicKeysetHandle(request->jwk_set());
+  if (!keyset_handle.ok()) {
+    response->set_err(keyset_handle.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  std::stringbuf keyset;
+  StatusOr<std::unique_ptr<crypto::tink::BinaryKeysetWriter>> writer =
+      BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
+  if (!writer.ok()) {
+    response->set_err(writer.status().error_message());
+    return ::grpc::Status::OK;
+  }
+  crypto::tink::util::Status status =
+      CleartextKeysetHandle::Write(writer->get(), **keyset_handle);
+  if (!status.ok()) {
+    response->set_err(status.error_message());
+    return ::grpc::Status::OK;
+  }
+  response->set_keyset(keyset.str());
+  return ::grpc::Status::OK;
 }
 
 }  // namespace tink_testing_api

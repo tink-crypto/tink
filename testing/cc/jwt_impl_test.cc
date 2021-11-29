@@ -16,15 +16,17 @@
 
 #include "jwt_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/jwt/jwt_key_templates.h"
 #include "tink/jwt/jwt_mac_config.h"
 #include "tink/jwt/jwt_signature_config.h"
-#include "tink/jwt/jwt_key_templates.h"
-#include "proto/testing/testing_api.grpc.pb.h"
 #include "tink/util/test_matchers.h"
+#include "proto/testing/testing_api.grpc.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -35,12 +37,16 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::KeysetHandle;
 using ::crypto::tink::test::IsOk;
 using ::google::crypto::tink::KeyTemplate;
+using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::IsEmpty;
-using ::testing::ElementsAre;
-using ::tink_testing_api::JwtClaimValue;
+using ::testing::Not;
+using ::tink_testing_api::JwtFromJwkSetRequest;
+using ::tink_testing_api::JwtFromJwkSetResponse;
 using ::tink_testing_api::JwtSignRequest;
 using ::tink_testing_api::JwtSignResponse;
+using ::tink_testing_api::JwtToJwkSetRequest;
+using ::tink_testing_api::JwtToJwkSetResponse;
 using ::tink_testing_api::JwtToken;
 using ::tink_testing_api::JwtValidator;
 using ::tink_testing_api::JwtVerifyRequest;
@@ -295,6 +301,76 @@ TEST_F(JwtImplSignatureTest, VerifyWithWrongIssuerFails) {
       jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
           .ok());
   EXPECT_THAT(verify_response.err(), Not(IsEmpty()));
+}
+
+TEST_F(JwtImplSignatureTest, SignConvertToAndFromJwkVerifySuccess) {
+  tink_testing_api::JwtImpl jwt;
+
+  // Create a signed token
+  JwtSignRequest comp_request;
+  comp_request.set_keyset(private_keyset_);
+  JwtToken* raw_jwt = comp_request.mutable_raw_jwt();
+  raw_jwt->mutable_issuer()->set_value("issuer");
+  raw_jwt->mutable_expiration()->set_seconds(34567);
+  JwtSignResponse comp_response;
+  ASSERT_TRUE(
+      jwt.PublicKeySignAndEncode(nullptr, &comp_request, &comp_response).ok());
+  ASSERT_THAT(comp_response.err(), IsEmpty());
+
+  // Generate a JWK set from the public key
+  JwtToJwkSetRequest to_jwk_request;
+  to_jwk_request.set_keyset(public_keyset_);
+
+  JwtToJwkSetResponse to_jwk_response;
+  ASSERT_TRUE(jwt.ToJwkSet(nullptr, &to_jwk_request, &to_jwk_response).ok());
+  ASSERT_THAT(to_jwk_response.err(), IsEmpty());
+
+  // Generate a public keyset from the JWK set
+  JwtFromJwkSetRequest from_jwk_request;
+  from_jwk_request.set_jwk_set(to_jwk_response.jwk_set());
+
+  JwtFromJwkSetResponse from_jwk_response;
+  ASSERT_TRUE(
+      jwt.FromJwkSet(nullptr, &from_jwk_request, &from_jwk_response).ok());
+  ASSERT_THAT(from_jwk_response.err(), IsEmpty());
+
+  // Verify the token using the public keyset
+  JwtVerifyRequest verify_request;
+  verify_request.set_keyset(from_jwk_response.keyset());
+  verify_request.set_signed_compact_jwt(comp_response.signed_compact_jwt());
+  JwtValidator* validator = verify_request.mutable_validator();
+  validator->mutable_expected_issuer()->set_value("issuer");
+  validator->mutable_now()->set_seconds(23456);
+  JwtVerifyResponse verify_response;
+
+  ASSERT_TRUE(
+      jwt.PublicKeyVerifyAndDecode(nullptr, &verify_request, &verify_response)
+          .ok());
+  ASSERT_THAT(verify_response.err(), IsEmpty());
+  const JwtToken& verified_jwt = verify_response.verified_jwt();
+  EXPECT_THAT(verified_jwt.issuer().value(), Eq("issuer"));
+  EXPECT_THAT(verified_jwt.expiration().seconds(), Eq(34567));
+}
+
+TEST_F(JwtImplSignatureTest, FromJwkInvalidFails) {
+  tink_testing_api::JwtImpl jwt;
+  JwtFromJwkSetRequest from_jwk_request;
+  from_jwk_request.set_jwk_set("invalid");
+
+  JwtFromJwkSetResponse from_jwk_response;
+  ASSERT_TRUE(
+      jwt.FromJwkSet(nullptr, &from_jwk_request, &from_jwk_response).ok());
+  EXPECT_THAT(from_jwk_response.err(), Not(IsEmpty()));
+}
+
+TEST_F(JwtImplSignatureTest, ToJwkInvalidFails) {
+  tink_testing_api::JwtImpl jwt;
+  JwtToJwkSetRequest to_jwk_request;
+  to_jwk_request.set_keyset("invalid");
+
+  JwtToJwkSetResponse to_jwk_response;
+  ASSERT_TRUE(jwt.ToJwkSet(nullptr, &to_jwk_request, &to_jwk_response).ok());
+  EXPECT_THAT(to_jwk_response.err(), Not(IsEmpty()));
 }
 
 }  // namespace
