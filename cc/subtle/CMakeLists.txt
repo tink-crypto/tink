@@ -567,10 +567,10 @@ tink_cc_library(
     absl::memory
     absl::status
     absl::strings
-    crypto
+    absl::span
     tink::core::aead
+    tink::aead::internal::ssl_aead
     tink::internal::fips_utils
-    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -1313,18 +1313,17 @@ tink_cc_test(
     wycheproof::testvectors
   DEPS
     tink::subtle::aes_gcm_siv_boringssl
-    tink::subtle::wycheproof_util
+    tink::subtle::subtle_util
     gmock
     absl::status
     absl::strings
-    crypto
-    rapidjson
+    tink::aead::internal::wycheproof_aead
     tink::config::tink_fips
+    tink::internal::ssl_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(

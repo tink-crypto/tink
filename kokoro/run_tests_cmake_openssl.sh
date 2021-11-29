@@ -77,13 +77,14 @@ main() {
   # Currently there is a limited list of targets that can be built with OpenSSL.
   # This list is expected to grow larger as new targets can use OpenSSL.
   TEST_TARGETS=(
-    "tink_test_internal_err_util_test"
-    "tink_test_internal_rsa_util_test"
-    "tink_test_subtle_random_test"
-    "tink_test_subtle_aes_cmac_boringssl_test"
-    "tink_test_subtle_aes_gcm_boringssl_test"
     "tink_test_aead__internal_ssl_aead_test"
     "tink_test_aead__internal_ssl_aead_large_inputs_test"
+    "tink_test_internal_err_util_test"
+    "tink_test_internal_rsa_util_test"
+    "tink_test_subtle_aes_cmac_boringssl_test"
+    "tink_test_subtle_aes_gcm_boringssl_test"
+    "tink_test_subtle_aes_gcm_siv_boringssl_test"
+    "tink_test_subtle_random_test"
   )
 
   echo "========================================================= Running cmake"
