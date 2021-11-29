@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"
 
@@ -41,11 +40,8 @@ struct WycheproofTestVector {
 };
 
 // Read test vectors from the Wycheproof project that are rooted at `root`.
-// Filter out instances with unsupported key sizes, iv size or tag size.
 std::vector<WycheproofTestVector> ReadWycheproofTestVectors(
-    absl::string_view file_name, int allowed_tag_size_in_bytes,
-    int allowed_iv_size_in_bytes,
-    absl::flat_hash_set<int> allowed_key_sizes_in_bits);
+    absl::string_view file_name);
 
 }  // namespace internal
 }  // namespace tink

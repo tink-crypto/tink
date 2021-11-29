@@ -17,6 +17,7 @@
 #define TINK_AEAD_INTERNAL_SSL_AEAD_H_
 
 #include <cstdint>
+#include <memory>
 
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"

@@ -15,9 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/wycheproof_aead.h"
 
+#include <string>
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/subtle/wycheproof_util.h"
 
@@ -28,22 +29,11 @@ namespace internal {
 using ::crypto::tink::subtle::WycheproofUtil;
 
 std::vector<WycheproofTestVector> ReadWycheproofTestVectors(
-    absl::string_view file_name, int allowed_tag_size_in_bytes,
-    int allowed_iv_size_in_bytes,
-    absl::flat_hash_set<int> allowed_key_sizes_in_bits) {
+    absl::string_view file_name) {
   std::unique_ptr<rapidjson::Document> root =
       WycheproofUtil::ReadTestVectors(std::string(file_name));
   std::vector<WycheproofTestVector> test_vectors;
   for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
-    const int key_size_in_bits = test_group["keySize"].GetInt();
-    // Convert IV and TAG sizes to bytes.
-    const int iv_size_in_bytes = test_group["ivSize"].GetInt() / 8;
-    const int tag_size_in_bytes = test_group["tagSize"].GetInt() / 8;
-    if (!allowed_key_sizes_in_bits.contains(key_size_in_bits) ||
-        iv_size_in_bytes != allowed_iv_size_in_bytes ||
-        tag_size_in_bytes != allowed_tag_size_in_bytes) {
-      continue;
-    }
     for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
       test_vectors.push_back(WycheproofTestVector{
           test["comment"].GetString(),

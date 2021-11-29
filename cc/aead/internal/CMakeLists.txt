@@ -18,7 +18,6 @@ tink_cc_library(
     wycheproof_aead.cc
     wycheproof_aead.h
   DEPS
-    absl::flat_hash_set
     absl::strings
     tink::subtle::wycheproof_util
     tink::util::statusor

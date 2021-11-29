@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -42,6 +44,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
+using ::testing::IsEmpty;
 using ::testing::Not;
 
 constexpr absl::string_view kKey128Hex = "000102030405060708090a0b0c0d0e0f";
@@ -167,10 +170,14 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptOverlappingPlaintextCiphertext) {
 
 TEST(ZeroCopyAesGcmBoringSslWycheproofTest, TestVectors) {
   std::vector<WycheproofTestVector> test_vectors = ReadWycheproofTestVectors(
-      /*file_name=*/"aes_gcm_test.json",
-      /*allowed_tag_size_in_bytes=*/16, /*allowed_iv_size_in_bytes=*/12,
-      /*allowed_key_sizes_in_bytes*/ {16, 32});
+      /*file_name=*/"aes_gcm_test.json");
+  ASSERT_THAT(test_vectors, Not(IsEmpty()));
   for (const auto& test_vector : test_vectors) {
+    if (test_vector.key.size() != 16 || test_vector.key.size() != 32 ||
+        test_vector.nonce.size() != 12 || test_vector.tag.size() != 16) {
+      continue;
+    }
+
     util::SecretData key = util::SecretDataFromStringView(test_vector.key);
     util::StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
         ZeroCopyAesGcmBoringSsl::New(key);

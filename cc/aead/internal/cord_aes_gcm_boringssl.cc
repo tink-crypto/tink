@@ -20,11 +20,12 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
-#include "openssl/aead.h"
+#include "openssl/evp.h"
 #include "openssl/err.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/aead/internal/aead_util.h"

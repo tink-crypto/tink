@@ -17,6 +17,7 @@
 #include "tink/subtle/aes_gcm_boringssl.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -46,6 +47,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
+using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::Test;
 
@@ -217,10 +219,14 @@ TEST(AesGcmBoringSslWycheproofTest, TestVectors) {
   }
   std::vector<internal::WycheproofTestVector> test_vectors =
       internal::ReadWycheproofTestVectors(
-          /*file_name=*/"aes_gcm_test.json",
-          /*allowed_tag_size_in_bytes=*/16, /*allowed_iv_size_in_bytes=*/12,
-          /*allowed_key_sizes_in_bytes*/ {16, 32});
+          /*file_name=*/"aes_gcm_test.json");
+  ASSERT_THAT(test_vectors, Not(IsEmpty()));
   for (const auto& test_vector : test_vectors) {
+    if (test_vector.key.size() != 16 || test_vector.key.size() != 32 ||
+        test_vector.nonce.size() != 12 || test_vector.tag.size() != 16) {
+      continue;
+    }
+
     util::SecretData key = util::SecretDataFromStringView(test_vector.key);
     util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key);
     ASSERT_THAT(cipher.status(), IsOk());

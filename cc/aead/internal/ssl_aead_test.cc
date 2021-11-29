@@ -50,6 +50,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
+using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::TestParamInfo;
 using ::testing::TestWithParam;
@@ -534,13 +535,18 @@ TEST_P(SslOneShotAeadWycheproofTest, TestVectors) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   SslOneShotAeadWycheproofTestParams test_param = GetParam();
-  std::vector<WycheproofTestVector> test_vectors = ReadWycheproofTestVectors(
-      absl::StrCat(test_param.cipher, "_test.json"),
-      test_param.allowed_tag_size_bytes, test_param.allowed_iv_size_bytes,
-      test_param.allowed_key_sizes_bits);
+  std::vector<WycheproofTestVector> test_vectors =
+      ReadWycheproofTestVectors(absl::StrCat(test_param.cipher, "_test.json"));
+  ASSERT_THAT(test_vectors, Not(IsEmpty()));
 
   int errors = 0;
   for (const auto& test_vector : test_vectors) {
+    if (!test_param.allowed_key_sizes_bits.contains(test_vector.key.size()) ||
+        test_vector.nonce.size() != test_param.allowed_iv_size_bytes ||
+        test_vector.tag.size() != test_param.allowed_tag_size_bytes) {
+      continue;
+    }
+
     util::SecretData key = util::SecretDataFromStringView(test_vector.key);
     util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
         CipherFromName(test_param.cipher, key);

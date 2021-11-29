@@ -23,7 +23,6 @@ cc_library(
     hdrs = ["wycheproof_aead.h"],
     include_prefix = "tink/aead/internal",
     deps = [
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "//subtle:wycheproof_util",
         "//util:statusor",
