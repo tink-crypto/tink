@@ -633,4 +633,22 @@ public final class RawJwtTest {
     assertThat(fooToken.getSubject()).isEqualTo("foo");
     assertThat(barToken.getSubject()).isEqualTo("bar");
   }
+
+  @Test
+  public void toString_success() throws Exception {
+    RawJwt token1 =
+        RawJwt.newBuilder()
+            .setIssuer("issuer")
+            .setExpiration(Instant.ofEpochSecond(1234567))
+            .addNullClaim("nothing")
+            .build();
+    assertThat(token1.toString())
+        .isEqualTo("{}.{\"iss\":\"issuer\",\"exp\":1234567,\"nothing\":null}");
+    RawJwt token2 =
+        RawJwt.newBuilder()
+            .setTypeHeader("\"type\"")
+            .setExpiration(Instant.ofEpochSecond(42))
+            .build();
+    assertThat(token2.toString()).isEqualTo("{\"typ\":\"\\\"type\\\"\"}.{\"exp\":42}");
+  }
 }

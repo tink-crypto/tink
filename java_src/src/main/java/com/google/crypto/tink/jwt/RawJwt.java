@@ -399,7 +399,7 @@ public final class RawJwt {
   boolean isNullClaim(String name) {
     JwtNames.validate(name);
     try {
-      return (JsonNull.INSTANCE.equals(payload.get(name)));
+      return JsonNull.INSTANCE.equals(payload.get(name));
     } catch (JsonParseException ex) {
       return false;
     }
@@ -549,5 +549,18 @@ public final class RawJwt {
       }
     }
     return Collections.unmodifiableSet(names);
+  }
+
+  /**
+   * Returns a brief description of a RawJwt object. The exact details of the representation are
+   * unspecified and subject to change.
+   */
+  @Override
+  public String toString() {
+    JsonObject header = new JsonObject();
+    if (typeHeader.isPresent()) {
+      header.add("typ", new JsonPrimitive(typeHeader.get()));
+    }
+    return header + "." + payload;
   }
 }

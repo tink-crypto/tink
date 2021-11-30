@@ -260,4 +260,13 @@ public final class VerifiedJwt {
   public Set<String> customClaimNames() {
     return this.rawJwt.customClaimNames();
   }
+
+  /**
+   * Returns a brief description of a VerifiedJwt object. The exact details of the representation
+   * are unspecified and subject to change.
+   */
+  @Override
+  public String toString() {
+    return "verified{" + this.rawJwt + "}";
+  }
 }
