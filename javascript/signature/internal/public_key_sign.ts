@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC.
+// Copyright 2018 Google LLC
 /**
  * @license
  * Copyright 2020 Google LLC
