@@ -997,6 +997,7 @@ public final class JwkSetConverterTest {
 
 
   @Test
+  @SuppressWarnings("InlineMeInliner")
   public void deprecatedFromKeysetHandle_sameAs_fromPublicKeysetHandle()
       throws Exception {
     KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(ES256_KEYSET));
@@ -1006,6 +1007,7 @@ public final class JwkSetConverterTest {
   }
 
   @Test
+  @SuppressWarnings("InlineMeInliner")
   public void deprecatedToKeysetHandle_sameAs_toPublicKeysetHandle()
       throws Exception {
     KeysetHandle handle = JwkSetConverter.toPublicKeysetHandle(ES256_JWK_SET);
