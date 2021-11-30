@@ -69,9 +69,15 @@ constexpr absl::string_view kAesGcmIvHex = "0123456789012345678901234";
 constexpr absl::string_view kXchacha20Poly1305IvHex =
     "012345678901234567890123456789012345678901234567";
 
+enum CipherType {
+  kAesGcm,
+  kAesGcmSiv,
+  kXchacha20Poly1305,
+};
+
 struct SslOneShotAeadTestParams {
   std::string test_name;
-  std::string cipher;
+  CipherType cipher;
   int tag_size;
   absl::string_view iv_hex;
   absl::string_view key_hex;
@@ -79,18 +85,18 @@ struct SslOneShotAeadTestParams {
 
 // Returns a SslOneShotAead from `cipher_name` and `key`.
 util::StatusOr<std::unique_ptr<SslOneShotAead>> CipherFromName(
-    absl::string_view cipher, const util::SecretData& key) {
-  if (cipher == "aes_gcm") {
-    return CreateAesGcmOneShotCrypter(key);
+    CipherType cipher, const util::SecretData& key) {
+  switch (cipher) {
+    case CipherType::kAesGcm: {
+      return CreateAesGcmOneShotCrypter(key);
+    }
+    case CipherType::kAesGcmSiv: {
+      return CreateAesGcmSivOneShotCrypter(key);
+    }
+    case CipherType::kXchacha20Poly1305: {
+      return CreateXchacha20Poly1305OneShotCrypter(key);
+    }
   }
-  if (cipher == "aes_gcm_siv") {
-    return CreateAesGcmSivOneShotCrypter(key);
-  }
-  if (cipher == "xchacha20_poly1305") {
-    return CreateXchacha20Poly1305OneShotCrypter(key);
-  }
-  return util::Status(absl::StatusCode::kInvalidArgument,
-                      absl::StrCat("Invalid cipher ", cipher));
 }
 
 using SslOneShotAeadTest = TestWithParam<SslOneShotAeadTestParams>;
@@ -366,25 +372,27 @@ TEST_P(SslOneShotAeadTest, BufferOverlapDecryptFails) {
 
 std::vector<SslOneShotAeadTestParams> GetSslOneShotAeadTestParams() {
   std::vector<SslOneShotAeadTestParams> params = {
-      {/*test_name=*/"AesGcm256", /*cipher=*/"aes_gcm",
+      {/*test_name=*/"AesGcm256", /*cipher=*/CipherType::kAesGcm,
        /*tag_size=*/kAesGcmTagSizeInBytes,
        /*iv_hex=*/kAesGcmIvHex,
        /*key_hex=*/k256Key},
-      {/*test_name=*/"AesGcm128", /*cipher=*/"aes_gcm",
+      {/*test_name=*/"AesGcm128", /*cipher=*/CipherType::kAesGcm,
        /*tag_size=*/kAesGcmTagSizeInBytes,
        /*iv_hex=*/kAesGcmIvHex,
        /*key_hex=*/k128Key}};
   if (IsBoringSsl()) {
-    params.push_back({/*test_name=*/"AesGcmSiv256", /*cipher=*/"aes_gcm_siv",
+    params.push_back({/*test_name=*/"AesGcmSiv256",
+                      /*cipher=*/CipherType::kAesGcmSiv,
                       /*tag_size=*/kAesGcmTagSizeInBytes,
                       /*iv_hex=*/kAesGcmIvHex,
                       /*key_hex=*/k256Key});
-    params.push_back({/*test_name=*/"AesGcmSiv128", /*cipher=*/"aes_gcm_siv",
+    params.push_back({/*test_name=*/"AesGcmSiv128",
+                      /*cipher=*/CipherType::kAesGcmSiv,
                       /*tag_size=*/kAesGcmTagSizeInBytes,
                       /*iv_hex=*/kAesGcmIvHex,
                       /*key_hex=*/k128Key});
     params.push_back({/*test_name=*/"Xchacha20Poly1305",
-                      /*cipher=*/"xchacha20_poly1305",
+                      /*cipher=*/CipherType::kXchacha20Poly1305,
                       /*tag_size=*/kXchacha20Poly1305TagSizeInBytes,
                       /*iv_hex=*/kXchacha20Poly1305IvHex,
                       /*key_hex=*/k256Key});
@@ -472,8 +480,8 @@ TEST(SslOneShotAeadTest, Xchacha20Poly1305TestFipsOnly) {
 
 TEST(SslOneShotAeadTest, AesGcmTestFipsOnly) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
+    GTEST_SKIP() << "Test should not run in FIPS mode when BoringCrypto is "
+                    "unavailable.";
   }
 
   util::SecretData key_128 =
@@ -518,92 +526,137 @@ TEST(AesGcmSivBoringSslTest, AesGcmTestSivTestFipsOnly) {
               StatusIs(absl::StatusCode::kInternal));
 }
 
-// Collects parameters for SslOneShotAeadWycheproofTest.
+// Parameters for SslOneShotAeadWycheproofTest.
 struct SslOneShotAeadWycheproofTestParams {
   std::string test_name;
-  std::string cipher;
-  int allowed_iv_size_bytes;
-  int allowed_tag_size_bytes;
-  absl::flat_hash_set<int> allowed_key_sizes_bits;
+  CipherType cipher;
+  int nonce_size;
+  int tag_size;
+  absl::flat_hash_set<int> key_sizes;
+  WycheproofTestVector test_vector;
 };
 
-using SslOneShotAeadWycheproofTest =
-    TestWithParam<SslOneShotAeadWycheproofTestParams>;
-
-TEST_P(SslOneShotAeadWycheproofTest, TestVectors) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-  SslOneShotAeadWycheproofTestParams test_param = GetParam();
-  std::vector<WycheproofTestVector> test_vectors =
-      ReadWycheproofTestVectors(absl::StrCat(test_param.cipher, "_test.json"));
-  ASSERT_THAT(test_vectors, Not(IsEmpty()));
-
-  int errors = 0;
-  for (const auto& test_vector : test_vectors) {
-    if (!test_param.allowed_key_sizes_bits.contains(test_vector.key.size()) ||
-        test_vector.nonce.size() != test_param.allowed_iv_size_bytes ||
-        test_vector.tag.size() != test_param.allowed_tag_size_bytes) {
-      continue;
+class SslOneShotAeadWycheproofTest
+    : public TestWithParam<SslOneShotAeadWycheproofTestParams> {
+ public:
+  void SetUp() override {
+    if (IsFipsModeEnabled()) {
+      GTEST_SKIP() << "Not supported in FIPS-only mode";
     }
+    SslOneShotAeadWycheproofTestParams params = GetParam();
+    const WycheproofTestVector& test_vector = params.test_vector;
 
-    util::SecretData key = util::SecretDataFromStringView(test_vector.key);
-    util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
-        CipherFromName(test_param.cipher, key);
-    ASSERT_THAT(aead.status(), IsOk());
-    std::string ciphertext_and_tag =
-        absl::StrCat(test_vector.ct, test_vector.tag);
-    std::string plaintext_buffer;
-    subtle::ResizeStringUninitialized(
-        &plaintext_buffer, (*aead)->PlaintextSize(ciphertext_and_tag.size()));
-    util::StatusOr<int64_t> written_bytes = (*aead)->Decrypt(
-        absl::StrCat(test_vector.ct, test_vector.tag), test_vector.aad,
-        test_vector.nonce, absl::MakeSpan(plaintext_buffer));
+    if (!params.key_sizes.contains(test_vector.key.size()) ||
+        test_vector.nonce.size() != params.nonce_size ||
+        test_vector.tag.size() != params.tag_size) {
+      GTEST_SKIP() << "Unsupported parameters; key size: "
+                   << test_vector.key.size()
+                   << " nonce size: " << test_vector.nonce.size()
+                   << " tag size: " << test_vector.tag.size();
+    }
+  }
+};
 
+TEST_P(SslOneShotAeadWycheproofTest, Encrypt) {
+  SslOneShotAeadWycheproofTestParams params = GetParam();
+  const WycheproofTestVector& test_vector = params.test_vector;
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
+      CipherFromName(params.cipher, key);
+  ASSERT_THAT(aead.status(), IsOk());
+  std::string ciphertext_and_tag =
+      absl::StrCat(test_vector.ct, test_vector.tag);
+  std::string ciphertext_buffer;
+  subtle::ResizeStringUninitialized(
+      &ciphertext_buffer, (*aead)->CiphertextSize(test_vector.msg.size()));
+  util::StatusOr<int64_t> written_bytes =
+      (*aead)->Encrypt(test_vector.msg, test_vector.aad, test_vector.nonce,
+                       absl::MakeSpan(ciphertext_buffer));
+
+  std::string expected_ciphertext =
+      absl::StrCat(test_vector.ct, test_vector.tag);
+
+  std::cout << test_vector.expected << "\n";
+
+  if (test_vector.expected == "valid" || test_vector.expected == "acceptable") {
+    ASSERT_THAT(written_bytes.status(), IsOk());
+    EXPECT_EQ(ciphertext_buffer, expected_ciphertext);
+  } else {  // invalid.
+    // In this case, if the resulting ciphertext/tag are different, the
+    // testcase is correct.
     if (written_bytes.ok()) {
-      EXPECT_NE(test_vector.expected, "invalid")
-          << "Decrypted invalid ciphertext with ID " << test_vector.id;
-      EXPECT_EQ(plaintext_buffer, test_vector.msg)
-          << "Incorrect decryption: " << test_vector.id;
+      EXPECT_THAT(ciphertext_buffer, Not(Eq(expected_ciphertext)));
     } else {
-      EXPECT_THAT(test_vector.expected,
-                  Not(AllOf(Eq("valid"), Eq("acceptable"))))
-          << "Could not decrypt test with tcId: " << test_vector.id
-          << " iv_size: " << test_vector.nonce.size()
-          << " tag_size: " << test_vector.tag.size()
-          << " key_size: " << key.size()
-          << "; error: " << written_bytes.status();
+      GTEST_SUCCEED();
     }
   }
-  EXPECT_EQ(errors, 0);
 }
 
-std::vector<SslOneShotAeadWycheproofTestParams>
-GetSslOneShotAeadWycheproofTestParams() {
+TEST_P(SslOneShotAeadWycheproofTest, Decrypt) {
+  SslOneShotAeadWycheproofTestParams params = GetParam();
+  const WycheproofTestVector& test_vector = params.test_vector;
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead =
+      CipherFromName(params.cipher, key);
+  ASSERT_THAT(aead.status(), IsOk());
+  std::string ciphertext_and_tag =
+      absl::StrCat(test_vector.ct, test_vector.tag);
+  std::string plaintext_buffer;
+  subtle::ResizeStringUninitialized(
+      &plaintext_buffer, (*aead)->PlaintextSize(ciphertext_and_tag.size()));
+  util::StatusOr<int64_t> written_bytes = (*aead)->Decrypt(
+      absl::StrCat(test_vector.ct, test_vector.tag), test_vector.aad,
+      test_vector.nonce, absl::MakeSpan(plaintext_buffer));
+
+  if (written_bytes.ok()) {
+    EXPECT_NE(test_vector.expected, "invalid");
+    EXPECT_EQ(plaintext_buffer, test_vector.msg);
+  } else {
+    EXPECT_THAT(test_vector.expected, Not(AllOf(Eq("valid"), Eq("acceptable"))))
+        << "Could not decrypt valid/acceptable tId: " << test_vector.id
+        << " iv_size: " << test_vector.nonce.size()
+        << " tag_size: " << test_vector.tag.size()
+        << " key_size: " << key.size() << "; error: " << written_bytes.status();
+  }
+}
+
+std::vector<SslOneShotAeadWycheproofTestParams> GetWycheproofTestParams() {
   std::vector<SslOneShotAeadWycheproofTestParams> params;
-  params.push_back({/*test_name=*/"AesGcm", /*cipher=*/"aes_gcm",
-                    /*allowed_iv_size_bytes=*/12,
-                    /*allowed_tag_size_bytes=*/16,
-                    /*allowed_key_sizes_bits=*/{128, 256}});
+  for (const WycheproofTestVector& test_vector :
+       ReadWycheproofTestVectors("aes_gcm_test.json")) {
+    params.push_back({/*test_name=*/"AesGcm",
+                      /*cipher_name=*/CipherType::kAesGcm,
+                      /*nonce_size=*/12,
+                      /*tag_size=*/16,
+                      /*key_sizes=*/{16, 32}, test_vector});
+  }
   if (IsBoringSsl()) {
-    params.push_back({/*test_name=*/"AesGcmSiv", /*cipher=*/"aes_gcm_siv",
-                      /*allowed_iv_size_bytes=*/12,
-                      /*allowed_tag_size_bytes=*/16,
-                      /*allowed_key_sizes_bits=*/{128, 256}});
-    params.push_back({/*test_name=*/"Xchacha20Poly1305",
-                      /*cipher=*/"xchacha20_poly1305",
-                      /*allowed_iv_size_bytes=*/24,
-                      /*allowed_tag_size_bytes=*/16,
-                      /*allowed_key_sizes_bits=*/{256}});
+    for (const WycheproofTestVector& test_vector :
+         ReadWycheproofTestVectors("aes_gcm_siv_test.json")) {
+      params.push_back({/*test_name=*/"AesGcmSiv",
+                        /*cipher_name=*/CipherType::kAesGcmSiv,
+                        /*nonce_size=*/12,
+                        /*tag_size=*/16,
+                        /*key_sizes=*/{16, 32}, test_vector});
+    }
+    for (const WycheproofTestVector& test_vector :
+         ReadWycheproofTestVectors("xchacha20_poly1305_test.json")) {
+      params.push_back({/*test_name=*/"Xchacha20Poly1305",
+                        /*cipher_name=*/CipherType::kXchacha20Poly1305,
+                        /*nonce_size=*/24,
+                        /*tag_size=*/16,
+                        /*key_sizes=*/{32}, test_vector});
+    }
   }
   return params;
 }
 
 INSTANTIATE_TEST_SUITE_P(
     SslOneShotAeadWycheproofTests, SslOneShotAeadWycheproofTest,
-    ValuesIn(GetSslOneShotAeadWycheproofTestParams()),
+    ValuesIn(GetWycheproofTestParams()),
     [](const TestParamInfo<SslOneShotAeadWycheproofTest::ParamType>& info) {
-      return info.param.test_name;
+      return absl::StrCat(info.param.test_name, "Tid",
+                          info.param.test_vector.id);
     });
 
 }  // namespace
