@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -49,6 +51,7 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::testing::Eq;
 
 // Test vectors for ECDSA were generated using the `openssl` command.
 //
@@ -117,7 +120,8 @@ AwEHoUQDQgAE7iGJOzQCYDYPGuPSa/CgZurcjGNpCy8d4wgiCADZ0avTNKWRfSvk
 lHWvJFT+6kHUQY6pnux5HRoMwcKJD4sz7g==
 -----END EC PRIVATE KEY-----)",
     },
-    {  // example EcKey with a pub_x with a leading zero.
+    {
+        // example EcKey with a pub_x with a leading zero.
         /*.curve=*/subtle::NIST_P256,
         /*.pub_x_hex_str=*/
         "00b02778da7b7bfd7094c36f847eb32b3077547da49c8ecf667f7acc3145693c",
@@ -133,6 +137,25 @@ nI7PZn96zDFFaTxxDzBErxz+VfENdd4Hcpf38nRc8s1s1DBvKqcuNn9zMQ==
 MHcCAQEEIPS5s4/SgXUn5bbveRC85ZTwbYeZDzGi6QBVlJUeKi8voAoGCCqGSM49
 AwEHoUQDQgAEALAneNp7e/1wlMNvhH6zKzB3VH2knI7PZn96zDFFaTxxDzBErxz+
 VfENdd4Hcpf38nRc8s1s1DBvKqcuNn9zMQ==
+-----END EC PRIVATE KEY-----)",
+    },
+    {
+        // example EcKey with a priv with a leading zero.
+        /*.curve=*/subtle::NIST_P256,
+        /*.pub_x_hex_str=*/
+        "8b348ef165b90ea991c28f254a5caed293e42d6c64fa2db1f3991c007442bf68",
+        /*.pub_y_hex_str=*/
+        "2d45951a61ac6f99d9c6745fe129e86c74001d3c13f506f9bb2d10fd492069b4",
+        /*.priv_hex_str=*/
+        "006484950d48016cc524078de3e3216258d2bc563f2318cc49f0301059f5fd61",
+        /*.pub_pem=*/R"(-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEizSO8WW5DqmRwo8lSlyu0pPkLWxk
++i2x85kcAHRCv2gtRZUaYaxvmdnGdF/hKehsdAAdPBP1Bvm7LRD9SSBptA==
+-----END PUBLIC KEY-----)",
+        /*.priv_pem=*/R"(-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIABkhJUNSAFsxSQHjePjIWJY0rxWPyMYzEnwMBBZ9f1hoAoGCCqGSM49
+AwEHoUQDQgAEizSO8WW5DqmRwo8lSlyu0pPkLWxk+i2x85kcAHRCv2gtRZUaYaxv
+mdnGdF/hKehsdAAdPBP1Bvm7LRD9SSBptA==
 -----END EC PRIVATE KEY-----)",
     },
 
@@ -529,7 +552,7 @@ TEST(PemParserEcTest, ReadEcPublicKeySuccess) {
   }
 }
 
-TEST(PemParserEcTest, GenWriteReadSuccess) {
+TEST(PemParserEcTest, NewKeyWriteAndReadPublicKeySuccess) {
   util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key =
       SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
   ASSERT_THAT(ec_key.status(), IsOk());
@@ -545,6 +568,42 @@ TEST(PemParserEcTest, GenWriteReadSuccess) {
   EXPECT_EQ((*public_key)->curve, ec_key->curve);
 }
 
+TEST(PemParserEcTest, ReadEcPrivateKeySuccess) {
+  for (const auto &test_vector : *kEcKeyTestVectors) {
+    util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+        PemParser::ParseEcPrivateKey(
+            absl::StripAsciiWhitespace(test_vector.priv_pem));
+
+    EXPECT_THAT(ecdsa_key.status(), test::IsOk()) << internal::GetSslErrors();
+
+    std::string x_hex = absl::BytesToHexString((*ecdsa_key)->pub_x);
+    std::string y_hex = absl::BytesToHexString((*ecdsa_key)->pub_y);
+    std::string priv_hex = absl::BytesToHexString(
+        util::SecretDataAsStringView((*ecdsa_key)->priv));
+    EXPECT_THAT(x_hex, Eq(test_vector.pub_x_hex_str));
+    EXPECT_THAT(y_hex, Eq(test_vector.pub_y_hex_str));
+    EXPECT_THAT(priv_hex, Eq(absl::AsciiStrToLower(test_vector.priv_hex_str)));
+    EXPECT_THAT((*ecdsa_key)->curve, test_vector.curve);
+  }
+}
+
+TEST(PemParserEcTest, NewKeyWriteAndReadPrivateKeySuccess) {
+  util::StatusOr<SubtleUtilBoringSSL::EcKey> ec_key =
+      SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256);
+  ASSERT_THAT(ec_key.status(), IsOk());
+
+  util::StatusOr<std::string> private_pem =
+      PemParser::WriteEcPrivateKey(*ec_key);
+  ASSERT_TRUE(private_pem.ok()) << private_pem.status();
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> parsed_ec_key =
+      PemParser::ParseEcPrivateKey(*private_pem);
+  EXPECT_THAT(parsed_ec_key.status(), test::IsOk()) << internal::GetSslErrors();
+
+  EXPECT_EQ((*parsed_ec_key)->pub_x, ec_key->pub_x);
+  EXPECT_EQ((*parsed_ec_key)->pub_y, ec_key->pub_y);
+  EXPECT_EQ((*parsed_ec_key)->priv, ec_key->priv);
+  EXPECT_EQ((*parsed_ec_key)->curve, ec_key->curve);
+}
 
 TEST(PemParserEcTest, ReadEcPublicKeyInvalid) {
   for (auto &test_vector : *kEcKeyTestVectors) {
@@ -559,7 +618,20 @@ TEST(PemParserEcTest, ReadEcPublicKeyInvalid) {
   }
 }
 
-TEST(PemParserEcTest, ReadEcPublicKeyUnsupportedCurve) {
+TEST(PemParserEcTest, ReadEcPrivateKeyInvalid) {
+  for (auto &test_vector : *kEcKeyTestVectors) {
+    std::string corrupt_pem = test_vector.pub_pem;
+    Corrupt(&corrupt_pem);
+
+    util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+        PemParser::ParseEcPrivateKey(absl::StripAsciiWhitespace(corrupt_pem));
+
+    EXPECT_THAT(ecdsa_key.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  }
+}
+
+TEST(PemParserEcTest, ReadEcPublicKeyP224_Unimplemented) {
   constexpr absl::string_view kP224PublicKey =
       "-----BEGIN PUBLIC KEY-----\n"
       "ME4wEAYHKoZIzj0CAQYFK4EEACEDOgAE9PcDd+z3cVYhKnNbDVAXwDmShKBCPc88\n"
@@ -570,6 +642,68 @@ TEST(PemParserEcTest, ReadEcPublicKeyUnsupportedCurve) {
       PemParser::ParseEcPublicKey(absl::StripAsciiWhitespace(kP224PublicKey));
 
   EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kUnimplemented));
+}
+
+TEST(PemParserEcTest, ReadInvalidEcPublicKey) {
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+      PemParser::ParseEcPublicKey("invalid");
+
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(PemParserEcTest, ReadInvalidEcPrivateKey) {
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+      PemParser::ParseEcPrivateKey("invalid");
+
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(PemParserEcTest, ReadEcPublicKeySecp256k1_Invalid) {
+  constexpr absl::string_view kSecp256k1PublicKey =
+      "-----BEGIN PUBLIC KEY-----\n"
+      "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFO\n"
+      "BLrJS8EVf4tMw52zdhXpKBF2FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==\n"
+      "-----END PUBLIC KEY-----";
+
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+      PemParser::ParseEcPublicKey(
+          absl::StripAsciiWhitespace(kSecp256k1PublicKey));
+
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(PemParserEcTest, ReadEcPrivateKeySecp256k1_Invalid) {
+  constexpr absl::string_view kSecp256k1PrivateKey =
+      "-----BEGIN EC PRIVATE KEY-----\n"
+      "MHQCAQEEIKSqexQyySWB705oPctFx2roLMHdfJ/W/WBISaRNu1UHoAcGBSuBBAAK\n"
+      "oUQDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFOBLrJS8EVf4tMw52zdhXpKBF2\n"
+      "FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==\n"
+      "-----END EC PRIVATE KEY-----\n";
+
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+      PemParser::ParseEcPrivateKey(
+          absl::StripAsciiWhitespace(kSecp256k1PrivateKey));
+
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(PemParserEcTest, ParseEncryptedEcPrivateKey_Invalid) {
+  // This key was generated with the command:
+  // openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:prime256v1 -aes128
+  // using pass phrase "mypassword"
+  constexpr absl::string_view kPrivateKey =
+      "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
+      "MIHsMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAjurwMnDwdrOwICCAAw\n"
+      "DAYIKoZIhvcNAgkFADAdBglghkgBZQMEAQIEEJHshE1SbT5XZN1bToPLsuAEgZAA\n"
+      "xmCJjv1kTjWzwbE1SEM6lwMippywDf0JH+de4JwlrPiQAb5NExq96m6Per70tX4W\n"
+      "iJ76WplZagsJzsAg/5gIJ/YcTry266rP2SBVTsuCY/GOh2vU/x6XFbPi9JCM0nvH\n"
+      "GTi1cWyqIwzGqfw8ZGejtvg4SAGulZ7/MWVCZV51C6JakfY1v3z24BQG1m50jMs=\n"
+      "-----END ENCRYPTED PRIVATE KEY-----\n";
+
+  util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
+      PemParser::ParseEcPrivateKey(absl::StripAsciiWhitespace(kPrivateKey));
+
+  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(PemParserEcTest, WriteEcPublicKeySucceeds) {

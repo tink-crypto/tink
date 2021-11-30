@@ -16,6 +16,8 @@
 #include "tink/subtle/pem_parser_boringssl.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -42,6 +44,9 @@ namespace subtle {
 
 namespace {
 constexpr int kBsslOk = 1;
+
+// TODO(b/194277407): Replace calls to deprecated get0 functions.
+// See: https://www.openssl.org/docs/man3.0/man3/EVP_PKEY_get0_EC_KEY.html
 
 // Verifies that the given RSA pointer `rsa_key` points to a valid RSA key.
 util::Status VerifyRsaKey(const RSA* rsa_key) {
@@ -172,9 +177,21 @@ util::StatusOr<std::string> ConvertBioToString(BIO* bio) {
   return pem_material;
 }
 
-size_t FieldElementSizeInBytes(const EC_GROUP *group) {
+size_t ScalarSizeInBytes(const EC_GROUP* group) {
+  return BN_num_bytes(EC_GROUP_get0_order(group));
+}
+
+size_t FieldElementSizeInBytes(const EC_GROUP* group) {
   unsigned degree_bits = EC_GROUP_get_degree(group);
   return (degree_bits + 7) / 8;
+}
+
+// TODO(b/194277407): Use this as cb in parse functions.
+// We explicitly set a failing passphrase callback function to make sure no
+// default callback routine is used.
+static int FailingPassphraseCallback(char* buf, int buf_size, int rwflag,
+                                     void* u) {
+  return -1;
 }
 
 }  // namespace
@@ -397,8 +414,62 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
 
 util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>>
 PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
-  return util::Status(absl::StatusCode::kUnimplemented,
-                      "PEM EC Private Key parsing is unimplemented");
+  internal::SslUniquePtr<BIO> ecdsa_key_bio(BIO_new(BIO_s_mem()));
+  BIO_write(ecdsa_key_bio.get(), pem_serialized_key.data(),
+            pem_serialized_key.size());
+
+  internal::SslUniquePtr<EVP_PKEY> evp_ecdsa_key(
+      PEM_read_bio_PrivateKey(ecdsa_key_bio.get(), /*x=*/nullptr,
+                              &FailingPassphraseCallback, /*u=*/nullptr));
+
+  if (evp_ecdsa_key == nullptr) {
+    return util::Status(util::error::INVALID_ARGUMENT,
+                        "PEM Private Key parsing failed");
+  }
+
+  // No need to free bssl_ecdsa_key after use.
+  EC_KEY* bssl_ecdsa_key = EVP_PKEY_get0_EC_KEY(evp_ecdsa_key.get());
+  util::Status verify_result = VerifyEcdsaKey(bssl_ecdsa_key);
+  if (!verify_result.ok()) {
+    return verify_result;
+  }
+
+  internal::SslUniquePtr<BIGNUM> x_coordinate(BN_new());
+  internal::SslUniquePtr<BIGNUM> y_coordinate(BN_new());
+  const BIGNUM* priv_key = EC_KEY_get0_private_key(bssl_ecdsa_key);
+  const EC_POINT* public_point = EC_KEY_get0_public_key(bssl_ecdsa_key);
+  const EC_GROUP* ec_group = EC_KEY_get0_group(bssl_ecdsa_key);
+  EC_POINT_get_affine_coordinates(ec_group, public_point, x_coordinate.get(),
+                                  y_coordinate.get(), nullptr);
+
+  util::StatusOr<util::SecretData> priv =
+      internal::BignumToSecretData(priv_key, ScalarSizeInBytes(ec_group));
+  if (!priv.ok()) {
+    return priv.status();
+  }
+  util::StatusOr<std::string> x_string = internal::BignumToString(
+      x_coordinate.get(), FieldElementSizeInBytes(ec_group));
+  if (!x_string.ok()) {
+    return x_string.status();
+  }
+  util::StatusOr<std::string> y_string = internal::BignumToString(
+      y_coordinate.get(), FieldElementSizeInBytes(ec_group));
+  if (!y_string.ok()) {
+    return y_string.status();
+  }
+  util::StatusOr<EllipticCurveType> curve =
+      SubtleUtilBoringSSL::GetCurve(ec_group);
+  if (!curve.ok()) {
+    return curve.status();
+  }
+
+  auto ecdsa_private_key = absl::make_unique<SubtleUtilBoringSSL::EcKey>();
+  ecdsa_private_key->pub_x = *std::move(x_string);
+  ecdsa_private_key->pub_y = *std::move(y_string);
+  ecdsa_private_key->priv = *std::move(priv);
+  ecdsa_private_key->curve = *std::move(curve);
+
+  return ecdsa_private_key;
 }
 
 util::StatusOr<std::string> PemParser::WriteEcPublicKey(
