@@ -198,6 +198,7 @@ tink_cc_test(
     wycheproof::testvectors
   DEPS
     tink::aead::internal::wycheproof_aead
+    tink::aead::internal::zero_copy_aead
     tink::aead::internal::zero_copy_aes_gcm_boringssl
     gmock
     absl::status

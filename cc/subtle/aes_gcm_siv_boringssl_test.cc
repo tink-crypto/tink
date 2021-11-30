@@ -53,6 +53,8 @@ using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::SizeIs;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
 TEST(AesGcmSivBoringSslTest, EncryptDecrypt) {
   if (IsFipsModeEnabled()) {
@@ -121,44 +123,52 @@ TEST(AesGcmSivBoringSslTest, TestFipsOnly) {
               StatusIs(absl::StatusCode::kInternal));
 }
 
-TEST(AesGcmSivBoringSslTestWycheproofTest, TestVectors) {
-  if (!internal::IsBoringSsl()) {
-    GTEST_SKIP() << "Unimplemented with OpenSSL";
-  }
-  std::vector<internal::WycheproofTestVector> test_vectors =
-      internal::ReadWycheproofTestVectors(
-          /*file_name=*/"aes_gcm_siv_test.json");
-  ASSERT_THAT(test_vectors, Not(IsEmpty()));
-
-  for (const auto& test_vector : test_vectors) {
-    if (test_vector.key.size() != 16 || test_vector.key.size() != 32 ||
+class AesGcmSivBoringSslWycheproofTest
+    : public TestWithParam<internal::WycheproofTestVector> {
+  void SetUp() override {
+    if (!internal::IsBoringSsl()) {
+      GTEST_SKIP() << "Unimplemented with OpenSSL";
+    }
+    if (IsFipsModeEnabled()) {
+      GTEST_SKIP() << "Not supported in FIPS-only mode";
+    }
+    internal::WycheproofTestVector test_vector = GetParam();
+    if ((test_vector.key.size() != 16 && test_vector.key.size() != 32) ||
         test_vector.nonce.size() != kIvSizeInBytes ||
-        test_vector.tag.size() != 16) {
-      continue;
+        test_vector.tag.size() != kTagSizeInBytes) {
+      GTEST_SKIP() << "Unsupported parameters: key size "
+                   << test_vector.key.size()
+                   << " nonce size: " << test_vector.nonce.size()
+                   << " tag size: " << test_vector.tag.size();
     }
+  }
+};
 
-    util::SecretData key = util::SecretDataFromStringView(test_vector.key);
-    util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmSivBoringSsl::New(key);
-    ASSERT_THAT(cipher.status(), IsOk());
-    std::string ciphertext =
-        absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
-    util::StatusOr<std::string> plaintext =
-        (*cipher)->Decrypt(ciphertext, test_vector.aad);
-    if (plaintext.ok()) {
-      EXPECT_NE(test_vector.expected, "invalid")
-          << "Decrypted invalid ciphertext with ID " << test_vector.id;
-      EXPECT_EQ(*plaintext, test_vector.msg)
-          << "Incorrect decryption: " << test_vector.id;
-    } else {
-      EXPECT_THAT(test_vector.expected,
-                  Not(AllOf(Eq("valid"), Eq("acceptable"))))
-          << "Could not decrypt test with tcId: " << test_vector.id
-          << " iv_size: " << test_vector.nonce.size()
-          << " tag_size: " << test_vector.tag.size()
-          << " key_size: " << key.size() << "; error: " << plaintext.status();
-    }
+TEST_P(AesGcmSivBoringSslWycheproofTest, Decrypt) {
+  internal::WycheproofTestVector test_vector = GetParam();
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmSivBoringSsl::New(key);
+  ASSERT_THAT(cipher.status(), IsOk());
+  std::string ciphertext =
+      absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
+  util::StatusOr<std::string> plaintext =
+      (*cipher)->Decrypt(ciphertext, test_vector.aad);
+  if (plaintext.ok()) {
+    EXPECT_NE(test_vector.expected, "invalid");
+    EXPECT_EQ(*plaintext, test_vector.msg);
+  } else {
+    EXPECT_THAT(test_vector.expected, Not(AllOf(Eq("valid"), Eq("acceptable"))))
+        << "Could not decrypt test with tcId: " << test_vector.id
+        << " iv_size: " << test_vector.nonce.size()
+        << " tag_size: " << test_vector.tag.size()
+        << " key_size: " << key.size() << "; error: " << plaintext.status();
   }
 }
+
+INSTANTIATE_TEST_SUITE_P(AesGcmSivBoringSslWycheproofTests,
+                         AesGcmSivBoringSslWycheproofTest,
+                         ValuesIn(internal::ReadWycheproofTestVectors(
+                             /*file_name=*/"aes_gcm_siv_test.json")));
 
 }  // namespace
 }  // namespace subtle

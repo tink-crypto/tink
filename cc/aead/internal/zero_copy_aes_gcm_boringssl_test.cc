@@ -30,6 +30,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 #include "tink/aead/internal/wycheproof_aead.h"
+#include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/internal/err_util.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/statusor.h"
@@ -46,6 +47,8 @@ using ::testing::AllOf;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::Not;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
 constexpr absl::string_view kKey128Hex = "000102030405060708090a0b0c0d0e0f";
 constexpr absl::string_view kMessage = "Some data to encrypt.";
@@ -168,45 +171,49 @@ TEST_F(ZeroCopyAesGcmBoringSslTest, DecryptOverlappingPlaintextCiphertext) {
       StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
-TEST(ZeroCopyAesGcmBoringSslWycheproofTest, TestVectors) {
-  std::vector<WycheproofTestVector> test_vectors = ReadWycheproofTestVectors(
-      /*file_name=*/"aes_gcm_test.json");
-  ASSERT_THAT(test_vectors, Not(IsEmpty()));
-  for (const auto& test_vector : test_vectors) {
-    if (test_vector.key.size() != 16 || test_vector.key.size() != 32 ||
+class ZeroCopyAesGcmBoringSslWycheproofTest
+    : public TestWithParam<WycheproofTestVector> {
+  void SetUp() override {
+    WycheproofTestVector test_vector = GetParam();
+    if ((test_vector.key.size() != 16 && test_vector.key.size() != 32) ||
         test_vector.nonce.size() != 12 || test_vector.tag.size() != 16) {
-      continue;
-    }
-
-    util::SecretData key = util::SecretDataFromStringView(test_vector.key);
-    util::StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
-        ZeroCopyAesGcmBoringSsl::New(key);
-    ASSERT_THAT(cipher.status(), IsOk());
-
-    std::string ciphertext =
-        absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
-
-    std::string plaintext;
-    plaintext.resize((*cipher)->MaxDecryptionSize(ciphertext.size()));
-    util::StatusOr<int64_t> written_bytes = (*cipher)->Decrypt(
-        ciphertext, test_vector.aad, absl::MakeSpan(plaintext));
-
-    if (written_bytes.ok()) {
-      EXPECT_NE(test_vector.expected, "invalid")
-          << "Decrypted invalid ciphertext with ID " << test_vector.id;
-      EXPECT_EQ(plaintext.substr(0, *written_bytes), test_vector.msg)
-          << "Incorrect decryption: " << test_vector.id;
-    } else {
-      EXPECT_THAT(test_vector.expected,
-                  Not(AllOf(Eq("valid"), Eq("acceptable"))))
-          << "Could not decrypt test with tcId: " << test_vector.id
-          << " iv_size: " << test_vector.nonce.size()
-          << " tag_size: " << test_vector.tag.size()
-          << " key_size: " << key.size()
-          << "; error: " << written_bytes.status();
+      GTEST_SKIP() << "Unsupported parameters: key size "
+                   << test_vector.key.size()
+                   << " nonce size: " << test_vector.nonce.size()
+                   << " tag size: " << test_vector.tag.size();
     }
   }
+};
+
+TEST_P(ZeroCopyAesGcmBoringSslWycheproofTest, Decrypt) {
+  WycheproofTestVector test_vector = GetParam();
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<ZeroCopyAead>> cipher =
+      ZeroCopyAesGcmBoringSsl::New(key);
+  ASSERT_THAT(cipher.status(), IsOk());
+  std::string ciphertext =
+      absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
+  std::string plaintext;
+  subtle::ResizeStringUninitialized(
+      &plaintext, (*cipher)->MaxDecryptionSize(ciphertext.size()));
+  util::StatusOr<int64_t> written_bytes = (*cipher)->Decrypt(
+      ciphertext, test_vector.aad, absl::MakeSpan(plaintext));
+  if (written_bytes.ok()) {
+    EXPECT_NE(test_vector.expected, "invalid");
+    EXPECT_EQ(plaintext, test_vector.msg);
+  } else {
+    EXPECT_THAT(test_vector.expected, Not(AllOf(Eq("valid"), Eq("acceptable"))))
+        << "Could not decrypt test with tcId: " << test_vector.id
+        << " iv_size: " << test_vector.nonce.size()
+        << " tag_size: " << test_vector.tag.size()
+        << " key_size: " << key.size() << "; error: " << written_bytes.status();
+  }
 }
+
+INSTANTIATE_TEST_SUITE_P(ZeroCopyAesGcmBoringSslWycheproofTests,
+                         ZeroCopyAesGcmBoringSslWycheproofTest,
+                         ValuesIn(ReadWycheproofTestVectors(
+                             /*file_name=*/"aes_gcm_test.json")));
 
 }  // namespace
 }  // namespace internal

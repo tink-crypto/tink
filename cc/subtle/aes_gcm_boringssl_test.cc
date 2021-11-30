@@ -50,6 +50,8 @@ using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::Test;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
 class AesGcmBoringSslTest : public Test {
  protected:
@@ -212,44 +214,6 @@ TEST_F(AesGcmBoringSslTest, InvalidKeySizes) {
   }
 }
 
-TEST(AesGcmBoringSslWycheproofTest, TestVectors) {
-  if (IsFipsModeEnabled() && !FIPS_mode()) {
-    GTEST_SKIP()
-        << "Test should not run in FIPS mode when BoringCrypto is unavailable.";
-  }
-  std::vector<internal::WycheproofTestVector> test_vectors =
-      internal::ReadWycheproofTestVectors(
-          /*file_name=*/"aes_gcm_test.json");
-  ASSERT_THAT(test_vectors, Not(IsEmpty()));
-  for (const auto& test_vector : test_vectors) {
-    if (test_vector.key.size() != 16 || test_vector.key.size() != 32 ||
-        test_vector.nonce.size() != 12 || test_vector.tag.size() != 16) {
-      continue;
-    }
-
-    util::SecretData key = util::SecretDataFromStringView(test_vector.key);
-    util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key);
-    ASSERT_THAT(cipher.status(), IsOk());
-    std::string ciphertext =
-        absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
-    util::StatusOr<std::string> plaintext =
-        (*cipher)->Decrypt(ciphertext, test_vector.aad);
-    if (plaintext.ok()) {
-      EXPECT_NE(test_vector.expected, "invalid")
-          << "Decrypted invalid ciphertext with ID " << test_vector.id;
-      EXPECT_EQ(*plaintext, test_vector.msg)
-          << "Incorrect decryption: " << test_vector.id;
-    } else {
-      EXPECT_THAT(test_vector.expected,
-                  Not(AllOf(Eq("valid"), Eq("acceptable"))))
-          << "Could not decrypt test with tcId: " << test_vector.id
-          << " iv_size: " << test_vector.nonce.size()
-          << " tag_size: " << test_vector.tag.size()
-          << " key_size: " << key.size() << "; error: " << plaintext.status();
-    }
-  }
-}
-
 TEST(AesGcmBoringSslFipsTest, FipsOnly) {
   if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
@@ -281,6 +245,50 @@ TEST(AesGcmBoringSslFipsTest, FipsFailWithoutBoringCrypto) {
   EXPECT_THAT(AesGcmBoringSsl::New(key_256).status(),
               StatusIs(absl::StatusCode::kInternal));
 }
+
+class AesGcmBoringSslWycheproofTest
+    : public TestWithParam<internal::WycheproofTestVector> {
+  void SetUp() override {
+    if (IsFipsModeEnabled() && !FIPS_mode()) {
+      GTEST_SKIP() << "Test should not run in FIPS mode when BoringCrypto is "
+                      "unavailable.";
+    }
+    internal::WycheproofTestVector test_vector = GetParam();
+    if ((test_vector.key.size() != 16 && test_vector.key.size() != 32) ||
+        test_vector.nonce.size() != 12 || test_vector.tag.size() != 16) {
+      GTEST_SKIP() << "Unsupported parameters: key size "
+                   << test_vector.key.size()
+                   << " nonce size: " << test_vector.nonce.size()
+                   << " tag size: " << test_vector.tag.size();
+    }
+  }
+};
+
+TEST_P(AesGcmBoringSslWycheproofTest, Decrypt) {
+  internal::WycheproofTestVector test_vector = GetParam();
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<Aead>> cipher = AesGcmBoringSsl::New(key);
+  ASSERT_THAT(cipher.status(), IsOk());
+  std::string ciphertext =
+      absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
+  util::StatusOr<std::string> plaintext =
+      (*cipher)->Decrypt(ciphertext, test_vector.aad);
+  if (plaintext.ok()) {
+    EXPECT_NE(test_vector.expected, "invalid");
+    EXPECT_EQ(*plaintext, test_vector.msg);
+  } else {
+    EXPECT_THAT(test_vector.expected, Not(AllOf(Eq("valid"), Eq("acceptable"))))
+        << "Could not decrypt test with tcId: " << test_vector.id
+        << " iv_size: " << test_vector.nonce.size()
+        << " tag_size: " << test_vector.tag.size()
+        << " key_size: " << key.size() << "; error: " << plaintext.status();
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(AesGcmBoringSslWycheproofTests,
+                         AesGcmBoringSslWycheproofTest,
+                         ValuesIn(internal::ReadWycheproofTestVectors(
+                             /*file_name=*/"aes_gcm_test.json")));
 
 }  // namespace
 }  // namespace subtle

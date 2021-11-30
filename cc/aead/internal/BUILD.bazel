@@ -178,6 +178,7 @@ cc_test(
     ],
     deps = [
         ":wycheproof_aead",
+        ":zero_copy_aead",
         ":zero_copy_aes_gcm_boringssl",
         "//internal:err_util",
         "//subtle:subtle_util",
