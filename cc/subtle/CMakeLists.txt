@@ -524,12 +524,13 @@ tink_cc_library(
   DEPS
     tink::subtle::random
     tink::subtle::subtle_util
+    absl::memory
     absl::status
     absl::strings
-    crypto
+    absl::span
     tink::core::aead
+    tink::aead::internal::ssl_aead
     tink::internal::fips_utils
-    tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::util::errors
     tink::util::secret_data
@@ -1387,17 +1388,21 @@ tink_cc_test(
   NAME xchacha20_poly1305_boringssl_test
   SRCS
     xchacha20_poly1305_boringssl_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
+    tink::subtle::subtle_util
     tink::subtle::xchacha20_poly1305_boringssl
     gmock
     absl::status
     absl::strings
-    crypto
+    tink::aead::internal::wycheproof_aead
     tink::config::tink_fips
+    tink::internal::ssl_util
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(

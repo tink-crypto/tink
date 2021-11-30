@@ -85,6 +85,7 @@ main() {
     "tink_test_subtle_aes_gcm_boringssl_test"
     "tink_test_subtle_aes_gcm_siv_boringssl_test"
     "tink_test_subtle_random_test"
+    "tink_test_subtle_xchacha20_poly1305_boringssl_test"
   )
 
   echo "========================================================= Running cmake"

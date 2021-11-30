@@ -21,8 +21,8 @@
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "tink/aead.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -53,15 +53,11 @@ class XChacha20Poly1305BoringSsl : public Aead {
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  // The following constants are in bytes.
-  static constexpr int kNonceSize = 24;
-  static constexpr int kTagSize = 16;
+  explicit XChacha20Poly1305BoringSsl(
+      std::unique_ptr<internal::SslOneShotAead> aead)
+      : aead_(std::move(aead)) {}
 
-  XChacha20Poly1305BoringSsl(util::SecretData key, const EVP_AEAD* aead)
-      : key_(std::move(key)), aead_(aead) {}
-
-  const util::SecretData key_;
-  const EVP_AEAD* const aead_;
+  const std::unique_ptr<internal::SslOneShotAead> aead_;
 };
 
 }  // namespace subtle

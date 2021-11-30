@@ -16,250 +16,198 @@
 
 #include "tink/subtle/xchacha20_poly1305_boringssl.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
-#include "openssl/err.h"
+#include "tink/aead/internal/wycheproof_aead.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ssl_util.h"
+#include "tink/subtle/subtle_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
 
+constexpr int kNonceSizeInBytes = 24;
+constexpr int kTagSizeInBytes = 16;
+
+constexpr absl::string_view kKey256Hex =
+    "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f";
+constexpr absl::string_view kMessage = "Some data to encrypt.";
+constexpr absl::string_view kAdditionalData = "Some data to authenticate.";
+
+using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
+using ::testing::AllOf;
+using ::testing::Eq;
+using ::testing::Not;
+using ::testing::SizeIs;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
-TEST(XChacha20Poly1305BoringSslTest, TestBasic) {
+TEST(XChacha20Poly1305BoringSslTest, EncryptDecrypt) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
-  auto res = XChacha20Poly1305BoringSsl::New(key);
-  EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
-  std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  auto ct = cipher->Encrypt(message, aad);
-  EXPECT_TRUE(ct.ok()) << ct.status();
-  EXPECT_EQ(ct.ValueOrDie().size(),
-            message.size() + 24 /* nonce */ + 16 /* tag */);
-  auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
-  EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  util::SecretData key =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
+  if (!internal::IsBoringSsl()) {
+    EXPECT_THAT(XChacha20Poly1305BoringSsl::New(key).status(),
+                StatusIs(absl::StatusCode::kUnimplemented));
+  } else {
+    util::StatusOr<std::unique_ptr<Aead>> aead =
+        XChacha20Poly1305BoringSsl::New(key);
+    ASSERT_THAT(aead.status(), IsOk());
+
+    util::StatusOr<std::string> ciphertext =
+        (*aead)->Encrypt(kMessage, kAdditionalData);
+    ASSERT_THAT(ciphertext.status(), IsOk());
+    EXPECT_THAT(*ciphertext,
+                SizeIs(kMessage.size() + kNonceSizeInBytes + kTagSizeInBytes));
+    util::StatusOr<std::string> plaintext =
+        (*aead)->Decrypt(*ciphertext, kAdditionalData);
+    ASSERT_THAT(plaintext.status(), IsOk());
+    EXPECT_EQ(*plaintext, kMessage);
+  }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, TestModification) {
+// Test decryption with a known ciphertext, message, AAD and key tuple to make
+// sure this is using the correct algorithm. The values are taken from the test
+// vector tcId 1 of the Wycheproof tests:
+// https://github.com/google/wycheproof/blob/master/testvectors/xchacha20_poly1305_test.json#L21
+TEST(XChacha20Poly1305BoringSslTest, SimpleDecrypt) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP() << "Unimplemented with OpenSSL";
+  }
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
-  std::string message = "Some data to encrypt.";
-  std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
-  EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
-  // Modify the ciphertext
-  for (size_t i = 0; i < ct.size() * 8; i++) {
-    std::string modified_ct = ct;
-    modified_ct[i / 8] ^= 1 << (i % 8);
-    EXPECT_FALSE(cipher->Decrypt(modified_ct, aad).ok()) << i;
-  }
-  // Modify the additional data
-  for (size_t i = 0; i < aad.size() * 8; i++) {
-    std::string modified_aad = aad;
-    modified_aad[i / 8] ^= 1 << (i % 8);
-    auto decrypted = cipher->Decrypt(ct, modified_aad);
-    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.ValueOrDie();
-  }
-  // Truncate the ciphertext
-  for (size_t i = 0; i < ct.size(); i++) {
-    std::string truncated_ct(ct, 0, i);
-    EXPECT_FALSE(cipher->Decrypt(truncated_ct, aad).ok()) << i;
-  }
+  std::string message = absl::HexStringToBytes(
+      "4c616469657320616e642047656e746c656d656e206f662074686520636c617373206f66"
+      "202739393a204966204920636f756c64206f6666657220796f75206f6e6c79206f6e6520"
+      "74697020666f7220746865206675747572652c2073756e73637265656e20776f756c6420"
+      "62652069742e");
+  std::string raw_ciphertext = absl::HexStringToBytes(
+      "bd6d179d3e83d43b9576579493c0e939572a1700252bfaccbed2902c21396cbb731c7f1b"
+      "0b4aa6440bf3a82f4eda7e39ae64c6708c54c216cb96b72e1213b4522f8c9ba40db5d945"
+      "b11b69b982c1bb9e3f3fac2bc369488f76b2383565d3fff921f9664c97637da9768812f6"
+      "15c68b13b52e");
+  std::string iv = absl::HexStringToBytes(
+      "404142434445464748494a4b4c4d4e4f5051525354555657");
+  std::string tag = absl::HexStringToBytes("c0875924c1c7987947deafd8780acf49");
+  std::string aad = absl::HexStringToBytes("50515253c0c1c2c3c4c5c6c7");
+  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+      "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"));
+
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      XChacha20Poly1305BoringSsl::New(key);
+  ASSERT_THAT(aead.status(), IsOk());
+
+  util::StatusOr<std::string> plaintext =
+      (*aead)->Decrypt(absl::StrCat(iv, raw_ciphertext, tag), aad);
+  ASSERT_THAT(plaintext.status(), IsOk());
+  EXPECT_EQ(*plaintext, message);
 }
 
-void TestDecryptWithEmptyAad(crypto::tink::Aead* cipher, absl::string_view ct,
-                             absl::string_view message) {
+TEST(XChacha20Poly1305BoringSslTest, DecryptFailsIfCiphertextTooSmall) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP() << "Unimplemented with OpenSSL";
+  }
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
-  {  // AAD is a null string_view.
-    const absl::string_view aad;
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
-  }
-  {  // AAD is a an empty string.
-    auto pt_or_status = cipher->Decrypt(ct, "");
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
-  }
-  {  // AAD is a default-constructed string_view.
-    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ(message, pt);
+  util::SecretData key =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
+  util::StatusOr<std::unique_ptr<Aead>> aead =
+      XChacha20Poly1305BoringSsl::New(key);
+  ASSERT_THAT(aead.status(), IsOk());
+
+  for (int i = 1; i < kNonceSizeInBytes + kTagSizeInBytes; i++) {
+    std::string ciphertext;
+    ResizeStringUninitialized(&ciphertext, i);
+    EXPECT_THAT((*aead)->Decrypt(ciphertext, kAdditionalData).status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
-TEST(XChacha20Poly1305BoringSslTest, TestAadEmptyVersusNullStringView) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
+TEST(XChacha20Poly1305BoringSslTest, FailisOnFipsOnlyMode) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP() << "Unimplemented with OpenSSL";
   }
-
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
-  {  // AAD is a null string_view.
-    const std::string message = "Some data to encrypt.";
-    const absl::string_view aad;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
-  }
-  {  // AAD is a an empty string.
-    const std::string message = "Some data to encrypt.";
-    auto ct_or_status = cipher->Encrypt(message, "");
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
-  }
-  {  // AAD is a default-constructed string_view.
-    const std::string message = "Some data to encrypt.";
-    auto ct_or_status = cipher->Encrypt(message, absl::string_view());
-    EXPECT_TRUE(ct_or_status.ok()) << ct_or_status.status();
-    auto ct = ct_or_status.ValueOrDie();
-    TestDecryptWithEmptyAad(cipher.get(), ct, message);
-  }
-}
-
-TEST(XChacha20Poly1305BoringSslTest, TestMessageEmptyVersusNullStringView) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
-  const std::string aad = "Some data to authenticate.";
-  {  // Message is a null string_view.
-    const absl::string_view message;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-  {  // Message is an empty string.
-    const std::string message = "";
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-  {  // Message is a default-constructed string_view.
-    auto ct_or_status = cipher->Encrypt(absl::string_view(), aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-}
-
-TEST(XChacha20Poly1305BoringSslTest, TestBothMessageAndAadEmpty) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  const util::SecretData key =
-      util::SecretDataFromStringView(test::HexDecodeOrDie(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(XChacha20Poly1305BoringSsl::New(key).ValueOrDie());
-  {  // Both are null string_view.
-    const absl::string_view message;
-    const absl::string_view aad;
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-  {  // Both are empty string.
-    const std::string message = "";
-    const std::string aad = "";
-    auto ct_or_status = cipher->Encrypt(message, aad);
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, aad);
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-  {  // Both are default-constructed string_view.
-    auto ct_or_status =
-        cipher->Encrypt(absl::string_view(), absl::string_view());
-    EXPECT_TRUE(ct_or_status.ok());
-    auto ct = ct_or_status.ValueOrDie();
-    auto pt_or_status = cipher->Decrypt(ct, absl::string_view());
-    EXPECT_TRUE(pt_or_status.ok()) << pt_or_status.status();
-    auto pt = pt_or_status.ValueOrDie();
-    EXPECT_EQ("", pt);
-  }
-}
-
-TEST(XChacha20Poly1305BoringSslTest, TestInvalidKeySizes) {
-  if (IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Not supported in FIPS-only mode";
-  }
-
-  for (int keysize = 0; keysize < 65; keysize++) {
-    if (keysize == 32) {
-      continue;
-    }
-    util::SecretData key(keysize, 'x');
-    auto cipher = XChacha20Poly1305BoringSsl::New(key);
-    EXPECT_FALSE(cipher.ok());
-  }
-}
-
-TEST(XChacha20Poly1305BoringSslTest, TestFipsOnly) {
   if (!IsFipsModeEnabled()) {
-    GTEST_SKIP() << "Only supported in FIPS-only mode";
+    GTEST_SKIP() << "Only ran in in FIPS-only mode";
   }
 
-  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(kKey256Hex));
 
-  auto xchacha20_poly1305_res = subtle::XChacha20Poly1305BoringSsl::New(key256);
-  EXPECT_THAT(xchacha20_poly1305_res.status(),
+  EXPECT_THAT(XChacha20Poly1305BoringSsl::New(key256).status(),
               StatusIs(absl::StatusCode::kInternal));
 }
+
+class XChacha20Poly1305BoringSslWycheproofTest
+    : public TestWithParam<internal::WycheproofTestVector> {
+  void SetUp() override {
+    if (!internal::IsBoringSsl()) {
+      GTEST_SKIP() << "Unimplemented with OpenSSL";
+    }
+    if (IsFipsModeEnabled()) {
+      GTEST_SKIP() << "Not supported in FIPS-only mode";
+    }
+    internal::WycheproofTestVector test_vector = GetParam();
+    if (test_vector.key.size() != 32 ||
+        test_vector.nonce.size() != kNonceSizeInBytes ||
+        test_vector.tag.size() != kTagSizeInBytes) {
+      GTEST_SKIP() << "Unsupported parameters: key size "
+                   << test_vector.key.size()
+                   << " nonce size: " << test_vector.nonce.size()
+                   << " tag size: " << test_vector.tag.size();
+    }
+  }
+};
+
+TEST_P(XChacha20Poly1305BoringSslWycheproofTest, Decrypt) {
+  internal::WycheproofTestVector test_vector = GetParam();
+  util::SecretData key = util::SecretDataFromStringView(test_vector.key);
+  util::StatusOr<std::unique_ptr<Aead>> cipher =
+      XChacha20Poly1305BoringSsl::New(key);
+  ASSERT_THAT(cipher.status(), IsOk());
+  std::string ciphertext =
+      absl::StrCat(test_vector.nonce, test_vector.ct, test_vector.tag);
+  util::StatusOr<std::string> plaintext =
+      (*cipher)->Decrypt(ciphertext, test_vector.aad);
+  if (plaintext.ok()) {
+    EXPECT_NE(test_vector.expected, "invalid")
+        << "Decrypted invalid ciphertext with ID " << test_vector.id;
+    EXPECT_EQ(*plaintext, test_vector.msg)
+        << "Incorrect decryption: " << test_vector.id;
+  } else {
+    EXPECT_THAT(test_vector.expected, Not(AllOf(Eq("valid"), Eq("acceptable"))))
+        << "Could not decrypt test with tcId: " << test_vector.id
+        << " iv_size: " << test_vector.nonce.size()
+        << " tag_size: " << test_vector.tag.size()
+        << " key_size: " << key.size() << "; error: " << plaintext.status();
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(XChacha20Poly1305BoringSslWycheproofTests,
+                         XChacha20Poly1305BoringSslWycheproofTest,
+                         ValuesIn(internal::ReadWycheproofTestVectors(
+                             /*file_name=*/"xchacha20_poly1305_test.json")));
 
 }  // namespace
 }  // namespace subtle
