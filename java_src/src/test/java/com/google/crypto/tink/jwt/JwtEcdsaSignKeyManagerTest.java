@@ -368,20 +368,20 @@ public class JwtEcdsaSignKeyManagerTest {
     EcdsaSignJce rawSigner = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jid", "jwtId");
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
-    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    normalHeader.addProperty("alg", "ES256");
     String normalSignedCompact = generateSignedCompact(rawSigner, normalHeader, payload);
     verifier.verifyAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    goodHeader.addProperty("alg", "ES256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
@@ -397,7 +397,7 @@ public class JwtEcdsaSignKeyManagerTest {
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    badAlgoHeader.addProperty("alg", "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
@@ -405,7 +405,7 @@ public class JwtEcdsaSignKeyManagerTest {
 
     // for raw keys, the validation should work even if a "kid" header is present.
     JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    unknownKidHeader.addProperty("alg", "ES256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
     verifier.verifyAndDecode(unknownKidSignedCompact, validator);
@@ -431,7 +431,7 @@ public class JwtEcdsaSignKeyManagerTest {
         JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     JwtPublicKeyVerify verifier =
         handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
@@ -445,7 +445,7 @@ public class JwtEcdsaSignKeyManagerTest {
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();
-    headerWithoutKid.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    headerWithoutKid.addProperty("alg", "ES256");
     String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
@@ -460,14 +460,14 @@ public class JwtEcdsaSignKeyManagerTest {
     // token with an incorrect algorithm in the header
     JsonObject headerWithBadAlg = new JsonObject();
     headerWithBadAlg.addProperty("kid", kid);
-    headerWithBadAlg.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    headerWithBadAlg.addProperty("alg", "RS256");
     String badAlgToken = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(badAlgToken, validator));
 
     // token with an unknown kid header
     JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "ES256");
+    unknownKidHeader.addProperty("alg", "ES256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
     assertThrows(

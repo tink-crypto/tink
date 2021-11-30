@@ -161,17 +161,17 @@ public final class VerifiedJwtTest {
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_EXPIRATION));
-    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_ISSUER));
+        IllegalArgumentException.class, () -> token.getNumberClaim("exp"));
+    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim("iss"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_SUBJECT));
+        IllegalArgumentException.class, () -> token.getStringClaim("sub"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getJsonArrayClaim(JwtNames.CLAIM_AUDIENCE));
+        IllegalArgumentException.class, () -> token.getJsonArrayClaim("aud"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_ISSUED_AT));
-    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_JWT_ID));
+        IllegalArgumentException.class, () -> token.getNumberClaim("iat"));
+    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim("jti"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_NOT_BEFORE));
+        IllegalArgumentException.class, () -> token.getNumberClaim("nbf"));
   }
 
   @Test

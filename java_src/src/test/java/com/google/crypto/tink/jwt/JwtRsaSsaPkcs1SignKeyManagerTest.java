@@ -514,11 +514,11 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    goodHeader.addProperty("alg", "RS256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
@@ -534,7 +534,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // invalid token with an unknown algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS255");
+    badAlgoHeader.addProperty("alg", "RS255");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
@@ -542,7 +542,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    unknownKidHeader.addProperty("alg", "RS256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
     verifier.verifyAndDecode(unknownKidSignedCompact, validator);
@@ -568,18 +568,18 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
 
     // normal, valid token
     JsonObject normalHeader = new JsonObject();
-    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    normalHeader.addProperty("alg", "RS256");
     normalHeader.addProperty("kid", kid);
     String validToken = generateSignedCompact(rawSigner, normalHeader, payload);
     verifier.verifyAndDecode(validToken, validator);
 
     // token without kid are rejected, even if they are valid.
     JsonObject headerWithoutKid = new JsonObject();
-    headerWithoutKid.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    headerWithoutKid.addProperty("alg", "RS256");
     String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
     assertThrows(
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
@@ -594,7 +594,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // invalid token with an incorrect algorithm in the header
     JsonObject headerWithBadAlg = new JsonObject();
-    headerWithBadAlg.addProperty(JwtNames.HEADER_ALGORITHM, "PS256");
+    headerWithBadAlg.addProperty("alg", "PS256");
     headerWithBadAlg.addProperty("kid", kid);
     String tokenWithBadAlg = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
     assertThrows(
@@ -603,7 +603,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // token with an unknown "kid" in the header is invalid
     JsonObject headerWithUnknownKid = new JsonObject();
-    headerWithUnknownKid.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    headerWithUnknownKid.addProperty("alg", "RS256");
     headerWithUnknownKid.addProperty("kid", "unknown");
     String tokenWithUnknownKid = generateSignedCompact(rawSigner, headerWithUnknownKid, payload);
     assertThrows(

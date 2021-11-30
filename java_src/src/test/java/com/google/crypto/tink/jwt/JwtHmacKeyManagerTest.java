@@ -585,18 +585,18 @@ public class JwtHmacKeyManagerTest {
     JwtMac primitive = handle.getPrimitive(JwtMac.class);
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
-    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    normalHeader.addProperty("alg", "HS256");
     String normalSignedCompact = generateSignedCompact(rawPrimitive, normalHeader, payload);
     primitive.verifyMacAndDecode(normalSignedCompact, validator);
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    goodHeader.addProperty("alg", "HS256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawPrimitive, goodHeader, payload);
     primitive.verifyMacAndDecode(
@@ -612,7 +612,7 @@ public class JwtHmacKeyManagerTest {
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    badAlgoHeader.addProperty("alg", "RS256");
     String badAlgoSignedCompact = generateSignedCompact(rawPrimitive, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
@@ -620,7 +620,7 @@ public class JwtHmacKeyManagerTest {
 
     // for raw keys without customKid, the validation should work even if a "kid" header is present.
     JsonObject headerWithUnknownKid = new JsonObject();
-    headerWithUnknownKid.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithUnknownKid.addProperty("alg", "HS256");
     headerWithUnknownKid.addProperty("kid", "unknown");
     String tokenWithUnknownKid = generateSignedCompact(
         rawPrimitive, headerWithUnknownKid, payload);
@@ -644,19 +644,19 @@ public class JwtHmacKeyManagerTest {
         JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     // Normal, valid signed compact.
     JsonObject normalHeader = new JsonObject();
-    normalHeader.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    normalHeader.addProperty("alg", "HS256");
     normalHeader.addProperty("kid", kid);
     String normalToken = generateSignedCompact(rawPrimitive, normalHeader, payload);
     primitive.verifyMacAndDecode(normalToken, validator);
 
     // valid token, with "typ" set in the header
     JsonObject headerWithTyp = new JsonObject();
-    headerWithTyp.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithTyp.addProperty("alg", "HS256");
     headerWithTyp.addProperty("typ", "typeHeader");
     headerWithTyp.addProperty("kid", kid);
     String tokenWithTyp = generateSignedCompact(rawPrimitive, headerWithTyp, payload);
@@ -674,7 +674,7 @@ public class JwtHmacKeyManagerTest {
 
     // invalid token with a valid but incorrect algorithm in the header
     JsonObject headerWithBadAlg = new JsonObject();
-    headerWithBadAlg.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    headerWithBadAlg.addProperty("alg", "RS256");
     headerWithBadAlg.addProperty("kid", kid);
     String tokenWithBadAlg = generateSignedCompact(rawPrimitive, headerWithBadAlg, payload);
     assertThrows(
@@ -683,7 +683,7 @@ public class JwtHmacKeyManagerTest {
 
     // token with an unknown "kid" in the header is valid
     JsonObject headerWithUnknownKid = new JsonObject();
-    headerWithUnknownKid.addProperty(JwtNames.HEADER_ALGORITHM, "HS256");
+    headerWithUnknownKid.addProperty("alg", "HS256");
     headerWithUnknownKid.addProperty("kid", "unknown");
     String tokenWithUnknownKid = generateSignedCompact(
         rawPrimitive, headerWithUnknownKid, payload);

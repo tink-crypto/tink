@@ -136,49 +136,49 @@ public final class RawJwtTest {
   public void addStringClaim_issuer_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addStringClaim(JwtNames.CLAIM_ISSUER, "blah"));
+        () -> RawJwt.newBuilder().addStringClaim("iss", "blah"));
   }
 
   @Test
   public void addStringClaim_subject_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addStringClaim(JwtNames.CLAIM_SUBJECT, "blah"));
+        () -> RawJwt.newBuilder().addStringClaim("sub", "blah"));
   }
 
   @Test
   public void addEncodedJsonArrayClaim_audience_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addJsonArrayClaim(JwtNames.CLAIM_AUDIENCE, "[\"a\", \"b\"]"));
+        () -> RawJwt.newBuilder().addJsonArrayClaim("aud", "[\"a\", \"b\"]"));
   }
 
   @Test
   public void addStringClaim_jwtId_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addStringClaim(JwtNames.CLAIM_JWT_ID, "blah"));
+        () -> RawJwt.newBuilder().addStringClaim("jti", "blah"));
   }
 
   @Test
   public void addNumberClaim_expiration_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addNumberClaim(JwtNames.CLAIM_EXPIRATION, 1234567));
+        () -> RawJwt.newBuilder().addNumberClaim("exp", 1234567));
   }
 
   @Test
   public void addNumberClaim_issuedAt_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addNumberClaim(JwtNames.CLAIM_ISSUED_AT, 1234567));
+        () -> RawJwt.newBuilder().addNumberClaim("iat", 1234567));
   }
 
   @Test
   public void addNumberClaim_notBefore_shouldThrow() throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () -> RawJwt.newBuilder().addNumberClaim(JwtNames.CLAIM_NOT_BEFORE, 1234567));
+        () -> RawJwt.newBuilder().addNumberClaim("nbf", 1234567));
   }
 
   @Test
