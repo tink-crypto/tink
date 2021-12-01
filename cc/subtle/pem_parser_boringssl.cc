@@ -423,7 +423,7 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
                               &FailingPassphraseCallback, /*u=*/nullptr));
 
   if (evp_ecdsa_key == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "PEM Private Key parsing failed");
   }
 
