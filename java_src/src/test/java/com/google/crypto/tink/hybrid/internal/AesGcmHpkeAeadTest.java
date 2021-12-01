@@ -148,7 +148,7 @@ public final class AesGcmHpkeAeadTest {
     assertThrows(
         InvalidAlgorithmParameterException.class,
         () ->
-            aead.seal(
-                setup.key, encryption.nonce, encryption.plaintext, encryption.associatedData));
+            aead.open(
+                setup.key, encryption.nonce, encryption.ciphertext, encryption.associatedData));
   }
 }
