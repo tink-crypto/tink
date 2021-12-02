@@ -100,6 +100,22 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME zero_copy_aead_wrapper
+  SRCS
+    zero_copy_aead_wrapper.cc
+    zero_copy_aead_wrapper.h
+  DEPS
+    tink::aead::internal::zero_copy_aead
+    absl::strings
+    tink::core::aead
+    tink::core::crypto_format
+    tink::core::primitive_set
+    tink::core::primitive_wrapper
+    tink::subtle::subtle_util
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME zero_copy_aes_gcm_boringssl
   SRCS
     zero_copy_aes_gcm_boringssl.cc
@@ -228,5 +244,17 @@ tink_cc_test(
     tink::subtle::subtle_util
     tink::util::secret_data
     tink::util::statusor
+    tink::util::test_matchers
+)
+
+tink_cc_test(
+  NAME zero_copy_aead_wrapper_test
+  SRCS
+    zero_copy_aead_wrapper_test.cc
+  DEPS
+    tink::aead::internal::mock_zero_copy_aead
+    tink::aead::internal::zero_copy_aead_wrapper
+    gmock
+    tink::subtle::subtle_util
     tink::util::test_matchers
 )

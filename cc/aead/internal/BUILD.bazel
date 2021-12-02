@@ -23,9 +23,9 @@ cc_library(
     hdrs = ["wycheproof_aead.h"],
     include_prefix = "tink/aead/internal",
     deps = [
-        "@com_google_absl//absl/strings",
         "//subtle:wycheproof_util",
         "//util:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -110,13 +110,30 @@ cc_library(
 )
 
 cc_library(
+    name = "zero_copy_aead_wrapper",
+    srcs = ["zero_copy_aead_wrapper.cc"],
+    hdrs = ["zero_copy_aead_wrapper.h"],
+    include_prefix = "tink/aead/internal",
+    deps = [
+        ":zero_copy_aead",
+        "//:aead",
+        "//:crypto_format",
+        "//:primitive_set",
+        "//:primitive_wrapper",
+        "//subtle:subtle_util",
+        "//util:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "zero_copy_aes_gcm_boringssl",
     srcs = ["zero_copy_aes_gcm_boringssl.cc"],
     hdrs = ["zero_copy_aes_gcm_boringssl.h"],
     include_prefix = "tink/aead/internal",
     deps = [
-        ":zero_copy_aead",
         ":ssl_aead",
+        ":zero_copy_aead",
         "//aead/internal:aead_util",
         "//internal:util",
         "//subtle:random",
@@ -170,6 +187,20 @@ cc_test(
 )
 
 cc_test(
+    name = "zero_copy_aead_wrapper_test",
+    size = "small",
+    srcs = ["zero_copy_aead_wrapper_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":mock_zero_copy_aead",
+        ":zero_copy_aead_wrapper",
+        "//subtle:subtle_util",
+        "//util:test_matchers",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "zero_copy_aes_gcm_boringssl_test",
     size = "small",
     srcs = ["zero_copy_aes_gcm_boringssl_test.cc"],
@@ -186,6 +217,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
@@ -255,4 +287,3 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
-
