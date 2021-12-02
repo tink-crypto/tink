@@ -45,6 +45,7 @@ TEST(StatusTest, ConvertNonOkStatus) {
   ASSERT_EQ(util_status.code(), absl_status.code());
   ASSERT_EQ(util_status.message(), absl_status.message());
 }
+#endif
 
 TEST(StatusTest, ConvertOkStatus) {
   Status util_status = OkStatus();
@@ -52,7 +53,6 @@ TEST(StatusTest, ConvertOkStatus) {
   ASSERT_TRUE(absl_status.ok());
   ASSERT_EQ(absl_status.message(), "");
 }
-#endif
 
 }  // namespace
 }  // namespace util
