@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <memory>
 #include <utility>
 
 #include "absl/algorithm/container.h"
@@ -28,15 +29,15 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
-#include "openssl/aead.h"
-#include "tink/aead/internal/aead_util.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/internal/err_util.h"
-#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -103,7 +104,9 @@ AesGcmHkdfStreamSegmentDecrypter::AesGcmHkdfStreamSegmentDecrypter(
 util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>>
 AesGcmHkdfStreamSegmentDecrypter::New(Params params) {
   auto status = Validate(params);
-  if (!status.ok()) return status;
+  if (!status.ok()) {
+    return status;
+  }
   return {absl::WrapUnique(
       new AesGcmHkdfStreamSegmentDecrypter(std::move(params)))};
 }
@@ -135,28 +138,21 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::Init(
                nonce_prefix_.begin());
 
   // Derive symmetric key.
-  auto hkdf_result = Hkdf::ComputeHkdf(
+  util::StatusOr<util::SecretData> key = Hkdf::ComputeHkdf(
       hkdf_hash_, ikm_,
       absl::string_view(reinterpret_cast<const char*>(salt_.data()),
                         derived_key_size_),
       associated_data_, derived_key_size_);
-  if (!hkdf_result.ok()) return hkdf_result.status();
-  util::SecretData key = std::move(hkdf_result).ValueOrDie();
-
-  // Initialize ctx_.
-  util::StatusOr<const EVP_AEAD*> aead =
-      internal::GetAesGcmAeadForKeySize(key.size());
-  if (!aead.ok()) {
-    return aead.status();
+  if (!key.ok()) {
+    return key.status();
   }
 
-  ctx_ = internal::SslUniquePtr<EVP_AEAD_CTX>(
-      EVP_AEAD_CTX_new(*aead, key.data(), key.size(),
-                       AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes));
-  if (!ctx_) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "could not initialize EVP_AEAD_CTX");
+  util::StatusOr<std::unique_ptr<internal::SslOneShotAead>> aead_ptr =
+      internal::CreateAesGcmOneShotCrypter(*key);
+  if (!aead_ptr.ok()) {
+    return aead_ptr.status();
   }
+  aead_ = *std::move(aead_ptr);
   is_initialized_ = true;
   return util::OkStatus();
 }
@@ -192,9 +188,9 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
                         "too many segments");
   }
 
-  int pt_size =
+  const int64_t kPlaintextSize =
       ciphertext.size() - AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes;
-  plaintext_buffer->resize(pt_size);
+  plaintext_buffer->resize(kPlaintextSize);
 
   // Construct IV.
   std::vector<uint8_t> iv(AesGcmHkdfStreamSegmentEncrypter::kNonceSizeInBytes);
@@ -204,19 +200,15 @@ util::Status AesGcmHkdfStreamSegmentDecrypter::DecryptSegment(
       static_cast<uint32_t>(segment_number));
   iv.back() = is_last_segment ? 1 : 0;
 
-  // Decrypt.
-  size_t out_len;
-  if (!EVP_AEAD_CTX_open(ctx_.get(), plaintext_buffer->data(), &out_len,
-                         plaintext_buffer->size(), iv.data(), iv.size(),
-                         ciphertext.data(), ciphertext.size(),
-                         /* ad = */ nullptr, /* ad.length() = */ 0)) {
-    return util::Status(
-        absl::StatusCode::kInternal,
-        absl::StrCat("Decryption failed: ", internal::GetSslErrors()));
-  }
-  if (out_len != plaintext_buffer->size()) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "incorrect plaintext size");
+  util::StatusOr<uint64_t> written_bytes = aead_->Decrypt(
+      absl::string_view(reinterpret_cast<const char*>(ciphertext.data()),
+                        ciphertext.size()),
+      /*associated_data=*/absl::string_view(""),
+      absl::string_view(reinterpret_cast<const char*>(iv.data()), iv.size()),
+      absl::Span<char>(reinterpret_cast<char*>(plaintext_buffer->data()),
+                       plaintext_buffer->size()));
+  if (!written_bytes.ok()) {
+    return written_bytes.status();
   }
   return util::OkStatus();
 }

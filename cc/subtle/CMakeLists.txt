@@ -359,10 +359,8 @@ tink_cc_library(
     absl::status
     absl::strings
     absl::span
-    crypto
-    tink::aead::internal::aead_util
+    tink::aead::internal::ssl_aead
     tink::internal::err_util
-    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -376,15 +374,15 @@ tink_cc_library(
   DEPS
     tink::subtle::random
     tink::subtle::stream_segment_encrypter
+    tink::subtle::subtle_util
     absl::container
     absl::config
     absl::memory
+    absl::span
     absl::status
     absl::strings
-    crypto
-    tink::aead::internal::aead_util
+    tink::aead::internal::ssl_aead
     tink::internal::err_util
-    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor

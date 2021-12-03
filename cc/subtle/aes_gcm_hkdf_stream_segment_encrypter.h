@@ -21,8 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "openssl/aead.h"
-#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/subtle/stream_segment_encrypter.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -79,11 +78,9 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
     int ciphertext_segment_size;
   };
 
-  // A factory.
   static util::StatusOr<std::unique_ptr<StreamSegmentEncrypter>> New(
       Params params);
 
-  // Overridden methods of StreamSegmentEncrypter.
   util::Status EncryptSegment(const std::vector<uint8_t>& plaintext,
                               bool is_last_segment,
                               std::vector<uint8_t>* ciphertext_buffer) override;
@@ -100,10 +97,14 @@ class AesGcmHkdfStreamSegmentEncrypter : public StreamSegmentEncrypter {
   void IncSegmentNumber() override { segment_number_++; }
 
  private:
-  AesGcmHkdfStreamSegmentEncrypter(internal::SslUniquePtr<EVP_AEAD_CTX> ctx,
-                                   const Params& params);
+  AesGcmHkdfStreamSegmentEncrypter(
+      std::unique_ptr<internal::SslOneShotAead> aead, const Params& params);
 
-  internal::SslUniquePtr<EVP_AEAD_CTX> ctx_;
+  // When OpenSSL is used, this uses a thread-safe implementation that makes a
+  // copy of the context for each EncryptSegment call, which may result in some
+  // extra latency compared to BoringSSL.
+  const std::unique_ptr<internal::SslOneShotAead> aead_;
+
   const std::string nonce_prefix_;
   const std::vector<uint8_t> header_;
   const int ciphertext_segment_size_;

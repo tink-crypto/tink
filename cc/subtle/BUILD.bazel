@@ -379,9 +379,8 @@ cc_library(
         ":hkdf",
         ":random",
         ":stream_segment_decrypter",
-        "//aead/internal:aead_util",
+        "//aead/internal:ssl_aead",
         "//internal:err_util",
-        "//internal:ssl_unique_ptr",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
@@ -401,11 +400,11 @@ cc_library(
     hdrs = ["aes_gcm_hkdf_stream_segment_encrypter.h"],
     include_prefix = "tink/subtle",
     deps = [
+        "subtle_util",
         ":random",
         ":stream_segment_encrypter",
-        "//aead/internal:aead_util",
+        "//aead/internal:ssl_aead",
         "//internal:err_util",
-        "//internal:ssl_unique_ptr",
         "//util:errors",
         "//util:secret_data",
         "//util:status",
@@ -553,10 +552,10 @@ cc_library(
         ":subtle_util",
         "//util:secret_data",
         "//util:status",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
-        "@boringssl//:crypto",
     ],
 )
 
@@ -1593,10 +1592,10 @@ cc_test(
     name = "xchacha20_poly1305_boringssl_test",
     size = "small",
     srcs = ["xchacha20_poly1305_boringssl_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
     data = [
         "@wycheproof//testvectors:chacha20_poly1305",
     ],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         "subtle_util",
         ":xchacha20_poly1305_boringssl",
