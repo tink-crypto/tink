@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 
+	// Placeholder for internal crypto/cipher allowlist, please ignore.
 	subtleaead "github.com/google/tink/go/aead/subtle"
 	subtlemac "github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/streamingaead/subtle/noncebased"
