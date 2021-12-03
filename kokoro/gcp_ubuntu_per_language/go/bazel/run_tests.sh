@@ -14,15 +14,24 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
-cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-
-./kokoro/copy_credentials.sh
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
+  ./kokoro/copy_credentials.sh
+fi
 
 cd go/
-
 use_bazel.sh "$(cat .bazelversion)"
 time bazel build -- ...
 time bazel test -- ...
+
+# Run manual tests which rely on test data only available via Bazel.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  declare -a MANUAL_TARGETS
+  MANUAL_TARGETS=(
+    "//integration/gcpkms:go_default_test"
+  )
+  readonly MANUAL_TARGETS
+  time bazel test -- "${MANUAL_TARGETS[@]}"
+fi
