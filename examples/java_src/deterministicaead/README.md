@@ -26,15 +26,16 @@ bazel build ...
 You can then encrypt a file
 
 ```shell
+_key_file_path="./deterministic_aead_test_keyset.json"
 echo "some data" > testdata.txt
-./bazel-bin/determinsiticaead/deterministic_aead_example encrypt \
-    testdata.txt testdata.txt.encrypted
+./bazel-bin/deterministicaead/deterministic_aead_example encrypt \
+    "${_key_file_path}" testdata.txt testdata.txt.encrypted
 ```
 
 or decrypt the file with
 
 ```shell
-./bazel-bin/determinsiticaead/deterministic_aead_example decrypt \
-    testdata.txt.encrypted testdata.txt.decrypted
+./bazel-bin/deterministicaead/deterministic_aead_example decrypt \
+    "${_key_file_path}" testdata.txt.encrypted testdata.txt.decrypted
 $ diff testdata.txt testdata.txt.decrypted
 ```
