@@ -648,6 +648,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "key_access",
+    hdrs = ["key_access.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "secret_key_access",
+    hdrs = ["secret_key_access.h"],
+    include_prefix = "tink",
+    deps = [":key_access"],
+)
+
 # Settings for building in various environments.
 config_setting(
     name = "linux_x86_64",
@@ -942,6 +955,16 @@ cc_test(
         "//util:test_util",
         "//util:validation",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/key_access_test",
+    srcs = ["core/key_access_test.cc"],
+    deps = [
+        ":key_access",
+        ":secret_key_access",
         "@com_google_googletest//:gtest_main",
     ],
 )

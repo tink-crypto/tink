@@ -607,6 +607,20 @@ tink_cc_library(
     tink::util::validation
 )
 
+tink_cc_library(
+  NAME key_access
+  SRCS
+    key_access.h
+)
+
+tink_cc_library(
+  NAME secret_key_access
+  SRCS
+    secret_key_access.h
+  DEPS
+    tink::core::key_access
+)
+
 # tests
 
 tink_cc_test(
@@ -863,4 +877,14 @@ tink_cc_test(
     tink::util::test_util
     tink::util::validation
     tink::proto::ecdsa_cc_proto
+)
+
+tink_cc_test(
+  NAME key_access_test
+  SRCS
+    core/key_access_test.cc
+  DEPS
+    tink::core::key_access
+    tink::core::secret_key_access
+    gmock
 )
