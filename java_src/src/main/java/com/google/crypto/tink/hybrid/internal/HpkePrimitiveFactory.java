@@ -69,6 +69,8 @@ public final class HpkePrimitiveFactory {
       return new AesGcmHpkeAead(16);
     } else if (Arrays.equals(aeadId, HpkeUtil.AES_256_GCM_AEAD_ID)) {
       return new AesGcmHpkeAead(32);
+    } else if (Arrays.equals(aeadId, HpkeUtil.CHACHA20_POLY1305_AEAD_ID)) {
+      return new ChaCha20Poly1305HpkeAead();
     }
     throw new IllegalArgumentException("Unrecognized HPKE AEAD identifier");
   }
@@ -82,6 +84,8 @@ public final class HpkePrimitiveFactory {
       return new AesGcmHpkeAead(16);
     } else if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.AES_256_GCM) {
       return new AesGcmHpkeAead(32);
+    } else if (params.getAead() == com.google.crypto.tink.proto.HpkeAead.CHACHA20_POLY1305) {
+      return new ChaCha20Poly1305HpkeAead();
     }
     throw new IllegalArgumentException("Unrecognized HPKE AEAD identifier");
   }

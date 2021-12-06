@@ -16,6 +16,17 @@ java_library(
 )
 
 java_library(
+    name = "chacha20_poly1305_hpke_aead",
+    srcs = ["ChaCha20Poly1305HpkeAead.java"],
+    deps = [
+        ":hpke_aead",
+        ":hpke_util",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+java_library(
     name = "hkdf_hpke_kdf",
     srcs = ["HkdfHpkeKdf.java"],
     deps = [
@@ -108,6 +119,7 @@ java_library(
     srcs = ["HpkePrimitiveFactory.java"],
     deps = [
         ":aes_gcm_hpke_aead",
+        ":chacha20_poly1305_hpke_aead",
         ":hkdf_hpke_kdf",
         ":hpke_aead",
         ":hpke_kdf",
@@ -185,6 +197,17 @@ android_library(
         ":hpke_aead-android",
         ":hpke_util-android",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce-android",
+        "@maven//:com_google_errorprone_error_prone_annotations",
+    ],
+)
+
+android_library(
+    name = "chacha20_poly1305_hpke_aead-android",
+    srcs = ["ChaCha20Poly1305HpkeAead.java"],
+    deps = [
+        ":hpke_aead-android",
+        ":hpke_util-android",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305-android",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -282,6 +305,7 @@ android_library(
     srcs = ["HpkePrimitiveFactory.java"],
     deps = [
         ":aes_gcm_hpke_aead-android",
+        ":chacha20_poly1305_hpke_aead-android",
         ":hkdf_hpke_kdf-android",
         ":hpke_aead-android",
         ":hpke_kdf-android",
