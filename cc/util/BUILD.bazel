@@ -43,6 +43,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":secret_data_internal",
+        "@com_google_absl//absl/base:config",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -300,8 +302,8 @@ cc_library(
     deps = [
         ":status",
         ":statusor",
-        "@com_google_googletest//:gtest",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest",
     ],
 )
 
