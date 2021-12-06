@@ -1139,6 +1139,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html#ChaCha20Poly1305-byte:A-">ChaCha20Poly1305(byte[])</a></span> - Constructor for class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal"><span class="typeNameLink">ChaCha20Poly1305HpkeAead</span></a> - Class in <a href="com/google/crypto/tink/hybrid/internal/package-summary.html">com.google.crypto.tink.hybrid.internal</a></dt>
+<dd>
+<div class="block">ChaCha20-Poly1305 HPKE AEAD variant.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#ChaCha20Poly1305HpkeAead--">ChaCha20Poly1305HpkeAead()</a></span> - Constructor for class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/proto/ChaCha20Poly1305Key.html" title="class in com.google.crypto.tink.proto"><span class="typeNameLink">ChaCha20Poly1305Key</span></a> - Class in <a href="com/google/crypto/tink/proto/package-summary.html">com.google.crypto.tink.proto</a></dt>
 <dd>
 <div class="block">
@@ -2164,6 +2170,10 @@
 <dd>
 <div class="block">Computes an HKDF.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/Poly1305.html#computeMac-byte:A-byte:A-">computeMac(byte[], byte[])</a></span> - Static method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></dt>
+<dd>
+<div class="block">Computes Poly1305 MAC over <code>data</code> using <code>key</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Mac.html#computeMac-byte:A-">computeMac(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></dt>
 <dd>
 <div class="block">Computes message authentication code (MAC) for <code>data</code>.</div>
@@ -2288,6 +2298,8 @@
 <dd>
 <div class="block">Returns an HPKE encryption primitive created from <code>recipientPublicKey</code></div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#createInitialState-int:A-int-">createInitialState(int[], int)</a></span> - Method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkePrimitiveFactory.html#createKdf-byte:A-">createKdf(byte[])</a></span> - Static method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkePrimitiveFactory.html" title="class in com.google.crypto.tink.hybrid.internal">HpkePrimitiveFactory</a></dt>
 <dd>
 <div class="block">Returns an <a href="com/google/crypto/tink/hybrid/internal/HpkeKdf.html" title="interface in com.google.crypto.tink.hybrid.internal"><code>HpkeKdf</code></a> primitive corresponding to <code>kdfId</code>.</div>
@@ -3569,6 +3581,8 @@
  Required.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html#getAeadId--">getAeadId()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">AesGcmHpkeAead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#getAeadId--">getAeadId()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html#getAeadId--">getAeadId()</a></span> - Method in interface com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeAead</a></dt>
 <dd>
@@ -4954,6 +4968,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html#getKeyLength--">getKeyLength()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">AesGcmHpkeAead</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#getKeyLength--">getKeyLength()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html#getKeyLength--">getKeyLength()</a></span> - Method in interface com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeAead</a></dt>
 <dd>
 <div class="block">Returns key length (in bytes) for this algorithm (i.e., parameter 'Nk' in HPKE I.-D.).</div>
@@ -5694,6 +5710,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EllipticCurves.html#getNistP521Params--">getNistP521Params()</a></span> - Static method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EllipticCurves.html" title="class in com.google.crypto.tink.subtle">EllipticCurves</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html#getNonceLength--">getNonceLength()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">AesGcmHpkeAead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#getNonceLength--">getNonceLength()</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html#getNonceLength--">getNonceLength()</a></span> - Method in interface com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeAead</a></dt>
 <dd>
@@ -8746,6 +8764,19 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html#InsecureNonceAesGcmJce-byte:A-boolean-">InsecureNonceAesGcmJce(byte[], boolean)</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceAesGcmJce.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceAesGcmJce</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">InsecureNonceChaCha20</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block">A stream cipher, as described in RFC 8439 https://tools.ietf.org/html/rfc8439, section 2.4.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#InsecureNonceChaCha20-byte:A-int-">InsecureNonceChaCha20(byte[], int)</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20Poly1305.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">InsecureNonceChaCha20Poly1305</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block">ChaCha20Poly1305 AEAD construction, as described in <a
+ href="https://tools.ietf.org/html/rfc8439#section-2.8">RFC 8439, section 2.8</a>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20Poly1305.html#InsecureNonceChaCha20Poly1305-byte:A-">InsecureNonceChaCha20Poly1305(byte[])</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20Poly1305.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html#insecureSecretAccess--">insecureSecretAccess()</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey">SecretKeyAccess</a></dt>
 <dd>
 <div class="block">Returns a <code>KeyAccess</code> instance where <code>canAccessSecret()</code> returns true.</div>
@@ -9439,6 +9470,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EngineFactory.html#MAC">MAC</a></span> - Static variable in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EngineFactory.html" title="class in com.google.crypto.tink.subtle">EngineFactory</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/Poly1305.html#MAC_KEY_SIZE_IN_BYTES">MAC_KEY_SIZE_IN_BYTES</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/Poly1305.html#MAC_TAG_SIZE_IN_BYTES">MAC_TAG_SIZE_IN_BYTES</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/mac/MacConfig.html" title="class in com.google.crypto.tink.mac"><span class="typeNameLink">MacConfig</span></a> - Class in <a href="com/google/crypto/tink/mac/package-summary.html">com.google.crypto.tink.mac</a></dt>
 <dd>
 <div class="block">Static methods and constants for registering with the <a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink"><code>Registry</code></a> all
@@ -10106,6 +10141,8 @@
 <dd>
 <div class="block">Prefix size of Tink, Legacy and Crunchy output prefix types.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#nonceSizeInBytes--">nonceSizeInBytes()</a></span> - Method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink"><span class="typeNameLink">NoSecretKeysetHandle</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
@@ -10125,6 +10162,8 @@
 <div class="block">Wrap an immutable byte array over a slice of a bytearray</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html#open-byte:A-byte:A-byte:A-byte:A-">open(byte[], byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">AesGcmHpkeAead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#open-byte:A-byte:A-byte:A-byte:A-">open(byte[], byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html#open-byte:A-byte:A-byte:A-byte:A-">open(byte[], byte[], byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeAead</a></dt>
 <dd>
@@ -12338,6 +12377,10 @@
 <dd>
 <div class="block">Encodes a point on an elliptic curve.</div>
 </dd>
+<dt><a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">Poly1305</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block">Poly1305 one-time MAC based on RFC 7539.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html#PREFIX">PREFIX</a></span> - Static variable in class com.google.crypto.tink.integration.android.<a href="com/google/crypto/tink/integration/android/AndroidKeystoreKmsClient.html" title="class in com.google.crypto.tink.integration.android">AndroidKeystoreKmsClient</a></dt>
 <dd>
 <div class="block">The prefix of all keys stored in Android Keystore.</div>
@@ -13253,6 +13296,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/proto/RsaSsaPssParams.html#SALT_LENGTH_FIELD_NUMBER">SALT_LENGTH_FIELD_NUMBER</a></span> - Static variable in class com.google.crypto.tink.proto.<a href="com/google/crypto/tink/proto/RsaSsaPssParams.html" title="class in com.google.crypto.tink.proto">RsaSsaPssParams</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html#seal-byte:A-byte:A-byte:A-byte:A-">seal(byte[], byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/AesGcmHpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">AesGcmHpkeAead</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html#seal-byte:A-byte:A-byte:A-byte:A-">seal(byte[], byte[], byte[], byte[])</a></span> - Method in class com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/ChaCha20Poly1305HpkeAead.html" title="class in com.google.crypto.tink.hybrid.internal">ChaCha20Poly1305HpkeAead</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html#seal-byte:A-byte:A-byte:A-byte:A-">seal(byte[], byte[], byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.hybrid.internal.<a href="com/google/crypto/tink/hybrid/internal/HpkeAead.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeAead</a></dt>
 <dd>
@@ -15336,6 +15381,10 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html#verify-byte:A-byte:A-">verify(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/RsaSsaPssVerifyJce.html" title="class in com.google.crypto.tink.subtle">RsaSsaPssVerifyJce</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/Poly1305.html#verifyMac-byte:A-byte:A-byte:A-">verifyMac(byte[], byte[], byte[])</a></span> - Static method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/Poly1305.html" title="class in com.google.crypto.tink.aead.internal">Poly1305</a></dt>
+<dd>
+<div class="block">Verifies Poly1305  over <code>data</code> using <code>key</code>.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Mac.html#verifyMac-byte:A-byte:A-">verifyMac(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/Mac.html" title="interface in com.google.crypto.tink">Mac</a></dt>
 <dd>
 <div class="block">Verifies whether <code>mac</code> is a correct authentication code (MAC) for <code>data</code>.</div>
