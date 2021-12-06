@@ -94,6 +94,10 @@ cc_library(
     hdrs = ["status.h"],
     include_prefix = "tink/util",
     visibility = ["//visibility:public"],
+    defines = select({
+        "//config:absl_status_enabled": ["TINK_USE_ABSL_STATUS"],
+        "//conditions:default": [],
+    }),
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
