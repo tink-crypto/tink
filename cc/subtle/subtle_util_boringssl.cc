@@ -36,6 +36,7 @@
 #include "tink/aead/internal/aead_util.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -220,50 +221,6 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
 
   return EcKeyFromBoringEcKey(curve_type, *key);
 #endif
-}
-
-// static
-std::unique_ptr<SubtleUtilBoringSSL::X25519Key>
-SubtleUtilBoringSSL::GenerateNewX25519Key() {
-  auto key = absl::make_unique<X25519Key>();
-  X25519_keypair(key->public_value, key->private_key);
-
-  return key;
-}
-
-// static
-SubtleUtilBoringSSL::EcKey SubtleUtilBoringSSL::EcKeyFromX25519Key(
-    const SubtleUtilBoringSSL::X25519Key *x25519_key) {
-  SubtleUtilBoringSSL::EcKey ec_key;
-  ec_key.curve = EllipticCurveType::CURVE25519;
-  // Curve25519 public key is x, not (x,y).
-  ec_key.pub_x =
-      std::string(reinterpret_cast<const char *>(x25519_key->public_value),
-                  X25519_PUBLIC_VALUE_LEN);
-  ec_key.priv = util::SecretData(std::begin(x25519_key->private_key),
-                                 std::end(x25519_key->private_key));
-  return ec_key;
-}
-
-// static
-util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::X25519Key>>
-SubtleUtilBoringSSL::X25519KeyFromEcKey(
-    const SubtleUtilBoringSSL::EcKey &ec_key) {
-  auto x25519_key = absl::make_unique<SubtleUtilBoringSSL::X25519Key>();
-  if (ec_key.curve != EllipticCurveType::CURVE25519) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "This key is not on curve 25519");
-  }
-  if (!ec_key.pub_y.empty()) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "Invalid X25519 key. pub_y is unexpectedly set.");
-  }
-  // Curve25519 public key is x, not (x,y).
-  std::copy_n(ec_key.pub_x.begin(), X25519_PUBLIC_VALUE_LEN,
-              std::begin(x25519_key->public_value));
-  std::copy_n(ec_key.priv.begin(), X25519_PRIVATE_KEY_LEN,
-              std::begin(x25519_key->private_key));
-  return std::move(x25519_key);
 }
 
 // static

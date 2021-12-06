@@ -139,7 +139,7 @@ cc_library(
         "//:core/private_key_type_manager",
         "//:hybrid_decrypt",
         "//:key_manager",
-        "//subtle:subtle_util_boringssl",
+        "//internal:ec_util",
         "//util:constants",
         "//util:status",
         "//util:statusor",

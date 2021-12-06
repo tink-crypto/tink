@@ -661,6 +661,7 @@ cc_library(
         "//aead/internal:aead_util",
         "//config:tink_fips",
         "//internal:bn_util",
+        "//internal:ec_util",
         "//internal:err_util",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",

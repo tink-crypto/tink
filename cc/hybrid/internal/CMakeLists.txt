@@ -105,7 +105,7 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::hybrid_decrypt
     tink::core::key_manager
-    tink::subtle::subtle_util_boringssl
+    tink::internal::ec_util
     tink::util::constants
     tink::util::status
     tink::util::statusor

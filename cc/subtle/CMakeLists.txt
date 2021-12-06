@@ -609,6 +609,7 @@ tink_cc_library(
     tink::aead::internal::aead_util
     tink::config::tink_fips
     tink::internal::bn_util
+    tink::internal::ec_util
     tink::internal::err_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr

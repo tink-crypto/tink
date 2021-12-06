@@ -120,6 +120,26 @@ tink_cc_library(
 )
 
 tink_cc_library(
+  NAME ec_util
+  SRCS
+    ec_util.cc
+    ec_util.h
+  DEPS
+    tink::internal::err_util
+    tink::internal::ssl_unique_ptr
+    absl::memory
+    absl::status
+    absl::strings
+    absl::span
+    crypto
+    tink::subtle::common_enums
+    tink::subtle::subtle_util
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_library(
   NAME bn_util
   SRCS
     bn_util.cc
@@ -283,3 +303,14 @@ tink_cc_test(
     tink::util::test_matchers
 )
 
+tink_cc_test(
+  NAME ec_util_test
+  SRCS
+    ec_util_test.cc
+  DEPS
+    tink::internal::ec_util
+    gmock
+    absl::span
+    tink::subtle::common_enums
+    tink::util::test_matchers
+)

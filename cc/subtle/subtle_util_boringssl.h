@@ -18,6 +18,8 @@
 #define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 
 #include <cstdint>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/base/attributes.h"
@@ -29,6 +31,7 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -44,23 +47,12 @@ namespace subtle {
 
 class SubtleUtilBoringSSL {
  public:
-  struct EcKey {
-    EllipticCurveType curve;
-    std::string pub_x;  // affine coordinates in bigendian representation
-    std::string pub_y;
-    util::SecretData priv;  // big integer in bigendian representation
-  };
-
-  struct X25519Key {
-    uint8_t public_value[X25519_PUBLIC_VALUE_LEN];
-    uint8_t private_key[X25519_PRIVATE_KEY_LEN];
-  };
-
-  struct Ed25519Key {
-    std::string public_key;
-    std::string private_key;
-  };
-
+  using EcKey ABSL_DEPRECATED("Use of this type is dicouraged outside Tink.") =
+      internal::EcKey;
+  using X25519Key ABSL_DEPRECATED(
+      "Use of this type is dicouraged outside Tink.") = internal::X25519Key;
+  using Ed25519Key ABSL_DEPRECATED(
+      "Use of this type is dicouraged outside Tink.") = internal::Ed25519Key;
   using RsaPublicKey ABSL_DEPRECATED(
       "Use of this type is dicouraged outside Tink.") = internal::RsaPublicKey;
   using RsaSsaPssParams ABSL_DEPRECATED(
@@ -121,14 +113,23 @@ class SubtleUtilBoringSSL {
       EllipticCurveType curve_type, const util::SecretData &secret_seed);
 
   // Returns a new X25519 key.
-  static std::unique_ptr<X25519Key> GenerateNewX25519Key();
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline std::unique_ptr<X25519Key> GenerateNewX25519Key() {
+    return internal::NewX25519Key();
+  }
 
   // Returns a X25519Key matching the specified EcKey.
-  static crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>>
-  X25519KeyFromEcKey(const EcKey &ec_key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>>
+  X25519KeyFromEcKey(const EcKey &ec_key) {
+    return internal::X25519KeyFromEcKey(ec_key);
+  }
 
   // Returns an EcKey matching the specified X25519Key.
-  static EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline EcKey EcKeyFromX25519Key(const X25519Key *x25519_key) {
+    return internal::EcKeyFromX25519Key(x25519_key);
+  }
 
   // Returns a new ED25519 key.
   static std::unique_ptr<Ed25519Key> GetNewEd25519Key();

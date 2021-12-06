@@ -85,6 +85,14 @@ struct Deleter<EC_KEY> {
   void operator()(EC_KEY* ptr) { EC_KEY_free(ptr); }
 };
 template <>
+struct Deleter<EVP_PKEY> {
+  void operator()(EVP_PKEY* ptr) { EVP_PKEY_free(ptr); }
+};
+template <>
+struct Deleter<EVP_PKEY_CTX> {
+  void operator()(EVP_PKEY_CTX* ptr) { EVP_PKEY_CTX_free(ptr); }
+};
+template <>
 struct Deleter<ECDSA_SIG> {
   void operator()(ECDSA_SIG* ptr) { ECDSA_SIG_free(ptr); }
 };

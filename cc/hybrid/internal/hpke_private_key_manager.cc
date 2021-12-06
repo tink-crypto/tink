@@ -18,8 +18,9 @@
 
 #include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/hpke.pb.h"
 
@@ -34,10 +35,9 @@ using ::google::crypto::tink::HpkePrivateKey;
 using ::google::crypto::tink::HpkePublicKey;
 
 void GenerateX25519Key(HpkePublicKey& public_key, HpkePrivateKey& private_key) {
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::X25519Key> key =
-      subtle::SubtleUtilBoringSSL::GenerateNewX25519Key();
-  public_key.set_public_key(key->public_value, X25519_PUBLIC_VALUE_LEN);
-  private_key.set_private_key(key->private_key, X25519_PRIVATE_KEY_LEN);
+  std::unique_ptr<internal::X25519Key> key = internal::NewX25519Key();
+  public_key.set_public_key(key->public_value, X25519KeyPubKeySize());
+  private_key.set_private_key(key->private_key, X25519KeyPrivKeySize());
 }
 
 }  // namespace
@@ -60,9 +60,10 @@ util::StatusOr<HpkePrivateKey> HpkePrivateKeyManager::CreateKey(
   *(public_key->mutable_params()) = key_format.params();
   // Generate key material.
   switch (key_format.params().kem()) {
-    case HpkeKem::DHKEM_X25519_HKDF_SHA256:
+    case HpkeKem::DHKEM_X25519_HKDF_SHA256: {
       GenerateX25519Key(*public_key, private_key);
       break;
+    }
     default:
       return util::Status(
           absl::StatusCode::kInvalidArgument,
