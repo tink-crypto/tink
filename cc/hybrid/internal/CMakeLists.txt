@@ -56,7 +56,7 @@ tink_cc_library(
     hpke_encrypt_boringssl.h
   DEPS
     tink::hybrid::internal::hpke_util_boringssl
-    absl::container
+    absl::algorithm_container
     absl::status
     absl::strings
     crypto

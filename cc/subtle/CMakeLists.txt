@@ -148,7 +148,7 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::subtle_util_boringssl
-    absl::container
+    absl::algorithm_container
     absl::status
     absl::strings
     crypto
@@ -353,7 +353,7 @@ tink_cc_library(
     tink::subtle::hkdf
     tink::subtle::random
     tink::subtle::stream_segment_decrypter
-    absl::container
+    absl::algorithm_container
     absl::config
     absl::memory
     absl::status
@@ -375,12 +375,12 @@ tink_cc_library(
     tink::subtle::random
     tink::subtle::stream_segment_encrypter
     tink::subtle::subtle_util
-    absl::container
+    absl::algorithm_container
     absl::config
     absl::memory
-    absl::span
     absl::status
     absl::strings
+    absl::span
     tink::aead::internal::ssl_aead
     tink::internal::err_util
     tink::util::secret_data
@@ -445,7 +445,7 @@ tink_cc_library(
   DEPS
     tink::subtle::random
     tink::subtle::subtle_util
-    absl::container
+    absl::algorithm_container
     absl::config
     absl::memory
     absl::status

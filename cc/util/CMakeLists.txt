@@ -241,7 +241,7 @@ tink_cc_library(
   DEPS
     tink::util::secret_data
     tink::util::statusor
-    absl::container
+    absl::algorithm_container
     absl::strings
     absl::span
     tink::core::input_stream
