@@ -112,10 +112,15 @@ class SubtleUtilBoringSSL {
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKeyFromSeed(
       EllipticCurveType curve_type, const util::SecretData &secret_seed);
 
-  // Returns a new X25519 key.
+  // Returns a new X25519 key, or nullptr if generation fails.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
   static inline std::unique_ptr<X25519Key> GenerateNewX25519Key() {
-    return internal::NewX25519Key();
+    util::StatusOr<std::unique_ptr<internal::X25519Key>> key =
+        internal::NewX25519Key();
+    if (!key.ok()) {
+      return nullptr;
+    }
+    return *std::move(key);
   }
 
   // Returns a X25519Key matching the specified EcKey.

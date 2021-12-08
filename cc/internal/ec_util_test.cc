@@ -33,17 +33,19 @@ using ::testing::ElementsAreArray;
 using ::testing::Not;
 
 TEST(EcUtilTest, NewX25519KeyGeneratesNewKeyEveryTime) {
-  std::unique_ptr<X25519Key> keypair1 = NewX25519Key();
-  std::unique_ptr<X25519Key> keypair2 = NewX25519Key();
+  util::StatusOr<std::unique_ptr<X25519Key>> keypair1 = NewX25519Key();
+  ASSERT_THAT(keypair1.status(), IsOk());
+  util::StatusOr<std::unique_ptr<X25519Key>> keypair2 = NewX25519Key();
+  ASSERT_THAT(keypair2.status(), IsOk());
 
   auto priv_key1 =
-      absl::MakeSpan(keypair1->private_key, X25519KeyPrivKeySize());
+      absl::MakeSpan((*keypair1)->private_key, X25519KeyPrivKeySize());
   auto priv_key2 =
-      absl::MakeSpan(keypair2->private_key, X25519KeyPrivKeySize());
+      absl::MakeSpan((*keypair2)->private_key, X25519KeyPrivKeySize());
   auto pub_key1 =
-      absl::MakeSpan(keypair1->public_value, X25519KeyPubKeySize());
+      absl::MakeSpan((*keypair1)->public_value, X25519KeyPubKeySize());
   auto pub_key2 =
-      absl::MakeSpan(keypair2->public_value, X25519KeyPubKeySize());
+      absl::MakeSpan((*keypair2)->public_value, X25519KeyPubKeySize());
   EXPECT_THAT(priv_key1, Not(ElementsAreArray(priv_key2)));
   EXPECT_THAT(pub_key1, Not(ElementsAreArray(pub_key2)));
 }

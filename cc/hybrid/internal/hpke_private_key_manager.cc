@@ -34,10 +34,16 @@ using ::google::crypto::tink::HpkeKeyFormat;
 using ::google::crypto::tink::HpkePrivateKey;
 using ::google::crypto::tink::HpkePublicKey;
 
-void GenerateX25519Key(HpkePublicKey& public_key, HpkePrivateKey& private_key) {
-  std::unique_ptr<internal::X25519Key> key = internal::NewX25519Key();
-  public_key.set_public_key(key->public_value, X25519KeyPubKeySize());
-  private_key.set_private_key(key->private_key, X25519KeyPrivKeySize());
+util::Status GenerateX25519Key(HpkePublicKey& public_key,
+                               HpkePrivateKey& private_key) {
+  util::StatusOr<std::unique_ptr<internal::X25519Key>> key =
+      internal::NewX25519Key();
+  if (!key.ok()) {
+    return key.status();
+  }
+  public_key.set_public_key((*key)->public_value, X25519KeyPubKeySize());
+  private_key.set_private_key((*key)->private_key, X25519KeyPrivKeySize());
+  return util::OkStatus();
 }
 
 }  // namespace
@@ -61,7 +67,10 @@ util::StatusOr<HpkePrivateKey> HpkePrivateKeyManager::CreateKey(
   // Generate key material.
   switch (key_format.params().kem()) {
     case HpkeKem::DHKEM_X25519_HKDF_SHA256: {
-      GenerateX25519Key(*public_key, private_key);
+      util::Status res = GenerateX25519Key(*public_key, private_key);
+      if (!res.ok()) {
+        return res;
+      }
       break;
     }
     default:

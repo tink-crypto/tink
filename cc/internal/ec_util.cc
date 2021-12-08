@@ -25,8 +25,8 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
-#include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -38,9 +38,32 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-std::unique_ptr<X25519Key> NewX25519Key() {
+util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
   auto key = absl::make_unique<X25519Key>();
-  X25519_keypair(key->public_value, key->private_key);
+  EVP_PKEY* private_key = nullptr;
+  SslUniquePtr<EVP_PKEY_CTX> pctx(
+      EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, /*e=*/nullptr));
+  if (EVP_PKEY_keygen_init(pctx.get()) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_keygen_init failed");
+  }
+  if (EVP_PKEY_keygen(pctx.get(), &private_key) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "EVP_PKEY_keygen failed");
+  }
+  SslUniquePtr<EVP_PKEY> private_key_ptr(private_key);
+
+  size_t len = X25519KeyPrivKeySize();
+  if (EVP_PKEY_get_raw_private_key(private_key_ptr.get(), key->private_key,
+                                   &len) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_get_raw_private_key failed");
+  }
+  len = X25519KeyPubKeySize();
+  if (EVP_PKEY_get_raw_public_key(private_key_ptr.get(), key->public_value,
+                                  &len) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_get_raw_public_key failed");
+  }
   return key;
 }
 

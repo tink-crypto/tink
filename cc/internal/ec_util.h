@@ -48,8 +48,9 @@ struct Ed25519Key {
   std::string private_key;
 };
 
-// Returns a new X25519Key key.
-std::unique_ptr<X25519Key> NewX25519Key();
+// Returns a new X25519Key key. It returns a `kInternal` error status if the
+// OpenSSL/BoringSSL APIs fail.
+util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key();
 
 // Returns a X25519Key matching the specified EcKey.
 crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
