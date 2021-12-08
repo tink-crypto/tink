@@ -289,27 +289,30 @@ describe('elliptic curves test', function() {
   });
 
   it('point encode decode', function() {
-    const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    for (const curveType
-             of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-                 EllipticCurves.CurveType.P521]) {
-      const curveTypeString = EllipticCurves.curveToString(curveType);
-      const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-      const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-      const point: JsonWebKey = ({
-        'kty': 'EC',
-        'crv': curveTypeString,
-        'x': Bytes.toBase64(x, /* websafe = */ true),
-        'y': Bytes.toBase64(y, /* websafe = */ true),
-        'ext': true,
-      });
+    for (const format of
+             [EllipticCurves.PointFormatType.UNCOMPRESSED,
+              EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED]) {
+      for (const curveType
+               of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+                   EllipticCurves.CurveType.P521]) {
+        const curveTypeString = EllipticCurves.curveToString(curveType);
+        const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
+        const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
+        const point: JsonWebKey = {
+          kty: 'EC',
+          crv: curveTypeString,
+          x: Bytes.toBase64(x, /* websafe = */ true),
+          y: Bytes.toBase64(y, /* websafe = */ true),
+          ext: true,
+        };
 
-      const encodedPoint =
-          EllipticCurves.pointEncode(assertExists(point['crv']), format, point);
-      const decodedPoint =
-          EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
+        const encodedPoint =
+            EllipticCurves.pointEncode(assertExists(point.crv), format, point);
+        const decodedPoint =
+            EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
 
-      expect(decodedPoint).toEqual(point);
+        expect(decodedPoint).toEqual(point);
+      }
     }
   });
 
