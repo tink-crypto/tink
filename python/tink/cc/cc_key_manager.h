@@ -58,7 +58,7 @@ class CcKeyManager {
 
   // Constructs an instance of P for the given 'key_data'.
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& serialized_key_data) {
+      const std::string& serialized_key_data) const {
     google::crypto::tink::KeyData key_data;
     key_data.ParseFromString(serialized_key_data);
     return key_manager_->GetPrimitive(key_data);
@@ -66,7 +66,7 @@ class CcKeyManager {
 
   // Creates a new random key, based on the specified 'key_format'.
   crypto::tink::util::StatusOr<pybind11::bytes> NewKeyData(
-      const std::string& serialized_key_template) {
+      const std::string& serialized_key_template) const {
     google::crypto::tink::KeyTemplate key_template;
     key_template.ParseFromString(serialized_key_template);
     if (key_manager_->get_key_type() != key_template.type_url()) {
@@ -106,7 +106,7 @@ class CcKeyManager {
   }
 
   // Returns the type_url identifying the key type handled by this manager.
-  std::string KeyType() { return key_manager_->get_key_type(); }
+  std::string KeyType() const { return key_manager_->get_key_type(); }
 
  private:
   const KeyManager<P>* key_manager_;
