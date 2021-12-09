@@ -10,12 +10,12 @@ def tink_cc_deps():
     """
 
     if not native.existing_rule("com_google_absl"):
-        # Commit from 2021-01-13
+        # Commit from 2021-12-03
         http_archive(
             name = "com_google_absl",
-            strip_prefix = "abseil-cpp-64461421222f8be8663c50e8e82c91c3f95a0d3c",
-            url = "https://github.com/abseil/abseil-cpp/archive/64461421222f8be8663c50e8e82c91c3f95a0d3c.zip",
-            sha256 = "41d725950d0d3ed4d00020881db84fdc79ac349d9b325ab010686c5a794a822e",
+            strip_prefix = "abseil-cpp-9336be04a242237cd41a525bedfcf3be1bb55377",
+            url = "https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip",
+            sha256 = "368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c",
         )
 
     if not native.existing_rule("boringssl"):

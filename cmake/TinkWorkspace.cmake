@@ -44,10 +44,11 @@ http_archive(
   SHA256 a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118
 )
 
+# Commit from 2021-12-03
 http_archive(
   NAME com_google_absl
-  URL https://github.com/abseil/abseil-cpp/archive/64461421222f8be8663c50e8e82c91c3f95a0d3c.zip
-  SHA256 41d725950d0d3ed4d00020881db84fdc79ac349d9b325ab010686c5a794a822e
+  URL https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip
+  SHA256 368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c
 )
 
 http_archive(
