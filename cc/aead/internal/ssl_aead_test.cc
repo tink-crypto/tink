@@ -227,6 +227,45 @@ TEST_P(SslOneShotAeadTest, TestModification) {
       absl::HexStringToBytes(test_param.iv_hex));
 }
 
+// Make sure that the buffer passed in to the Decrypt routine is cleared if
+// decryption fails.
+TEST_P(SslOneShotAeadTest, TestBufferClearsIfDecryptionFails) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  SslOneShotAeadTestParams test_param = GetParam();
+  util::StatusOr<std::unique_ptr<SslOneShotAead>> aead = CipherFromName(
+      test_param.cipher, util::SecretDataFromStringView(
+                             absl::HexStringToBytes(test_param.key_hex)));
+  ASSERT_THAT(aead.status(), IsOk());
+
+  const int64_t kCiphertextSize = kMessage.size() + test_param.tag_size;
+  std::string ciphertext_buffer;
+  // Length of the message + tag.
+  subtle::ResizeStringUninitialized(&ciphertext_buffer, kCiphertextSize);
+  std::string iv = absl::HexStringToBytes(test_param.iv_hex);
+  util::StatusOr<int64_t> written_bytes =
+      (*aead)->Encrypt(kMessage, kAad, iv, absl::MakeSpan(ciphertext_buffer));
+  ASSERT_THAT(written_bytes.status(), IsOk());
+  EXPECT_EQ(*written_bytes, kCiphertextSize);
+
+  std::string plaintext_buffer;
+  subtle::ResizeStringUninitialized(&plaintext_buffer, kMessage.size());
+  const std::string kExpectedClearedPlaintext(plaintext_buffer.size(), '\0');
+  // Alter the tag.
+  for (int i = kCiphertextSize - test_param.tag_size; i < kCiphertextSize;
+       i++) {
+    std::string modified_ciphertext = ModifyString(ciphertext_buffer, i);
+    EXPECT_THAT((*aead)
+                    ->Decrypt(modified_ciphertext, kAad, iv,
+                              absl::MakeSpan(plaintext_buffer))
+                    .status(),
+                Not(IsOk()));
+    EXPECT_EQ(plaintext_buffer, kExpectedClearedPlaintext);
+  }
+}
+
 void TestDecryptWithEmptyAad(SslOneShotAead* aead, absl::string_view ciphertext,
                              absl::string_view iv) {
   if (IsFipsModeEnabled()) {

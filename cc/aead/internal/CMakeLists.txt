@@ -30,6 +30,7 @@ tink_cc_library(
     ssl_aead.h
   DEPS
     tink::aead::internal::aead_util
+    absl::cleanup
     absl::memory
     absl::status
     absl::strings

@@ -22,11 +22,13 @@
 #include <string>
 #include <utility>
 
+#include "absl/cleanup/cleanup.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "openssl/crypto.h"
 #include "openssl/evp.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/internal/err_util.h"
@@ -280,6 +282,11 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
       out_buffer = out.subspan(0, min_out_buff_size - tag_size_);
     }
 
+    // Zero the plaintext buffer in case decryption fails before returning an
+    // error.
+    auto output_eraser =
+        absl::MakeCleanup([out] { OPENSSL_cleanse(out.data(), out.size()); });
+
     util::StatusOr<int64_t> written_bytes =
         UpdateCipher(context.get(), raw_ciphertext, out_buffer);
     if (!written_bytes.ok()) {
@@ -290,6 +297,8 @@ class OpenSslOneShotAeadImpl : public SslOneShotAead {
       return util::Status(absl::StatusCode::kInternal, "Authentication failed");
     }
 
+    // Decryption executed correctly, cancel cleanup on the output buffer.
+    std::move(output_eraser).Cancel();
     return *written_bytes;
   }
 

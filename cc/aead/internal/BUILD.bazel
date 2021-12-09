@@ -43,6 +43,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/cleanup",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
