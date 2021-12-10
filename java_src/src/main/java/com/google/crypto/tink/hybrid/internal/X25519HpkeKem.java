@@ -17,34 +17,34 @@
 package com.google.crypto.tink.hybrid.internal;
 
 import com.google.crypto.tink.subtle.Bytes;
-import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.X25519;
 import com.google.errorprone.annotations.Immutable;
 import java.security.GeneralSecurityException;
-import javax.crypto.Mac;
+import java.util.Arrays;
 
-/** Diffie-Hellman-based X25519 HPKE KEM variant. */
+/** Diffie-Hellman-based X25519-HKDF HPKE KEM variant. */
 @Immutable
 public final class X25519HpkeKem implements HpkeKem {
-  private final String macAlgorithm;
+  private final HkdfHpkeKdf hkdf;
 
-  /** Construct X25519-HKDF HPKE KEM using {@code macAlgorithm}. */
-  public X25519HpkeKem(String macAlgorithm) {
-    this.macAlgorithm = macAlgorithm;
+  /** Construct X25519-HKDF HPKE KEM using {@code hkdf}. */
+  public X25519HpkeKem(HkdfHpkeKdf hkdf) {
+    this.hkdf = hkdf;
   }
 
   private byte[] deriveKemSharedSecret(
       byte[] dhSharedSecret, byte[] senderPublicKey, byte[] recipientPublicKey)
       throws GeneralSecurityException {
     byte[] kemContext = Bytes.concat(senderPublicKey, recipientPublicKey);
-    int macLength = Mac.getInstance(macAlgorithm).getMacLength();
     byte[] kemSuiteId = HpkeUtil.kemSuiteId(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
-    return Hkdf.computeHkdf(
-        macAlgorithm,
-        HpkeUtil.labelIkm("eae_prk", dhSharedSecret, kemSuiteId),
+    return hkdf.extractAndExpand(
         /*salt=*/ null,
-        HpkeUtil.labelInfo("shared_secret", kemContext, kemSuiteId, macLength),
-        macLength);
+        dhSharedSecret,
+        "eae_prk",
+        kemContext,
+        "shared_secret",
+        kemSuiteId,
+        hkdf.getMacLength());
   }
 
   /** Helper function factored out to facilitate unit testing. */
@@ -72,11 +72,9 @@ public final class X25519HpkeKem implements HpkeKem {
 
   @Override
   public byte[] getKemId() throws GeneralSecurityException {
-    switch (macAlgorithm) {
-      case "HmacSha256":
-        return HpkeUtil.X25519_HKDF_SHA256_KEM_ID;
-      default:
-        throw new GeneralSecurityException("Could not determine HPKE KEM ID");
+    if (Arrays.equals(hkdf.getKdfId(), HpkeUtil.HKDF_SHA256_KDF_ID)) {
+      return HpkeUtil.X25519_HKDF_SHA256_KEM_ID;
     }
+    throw new GeneralSecurityException("Could not determine HPKE KEM ID");
   }
 }

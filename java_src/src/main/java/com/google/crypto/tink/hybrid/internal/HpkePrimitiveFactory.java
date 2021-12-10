@@ -28,7 +28,7 @@ public final class HpkePrimitiveFactory {
   /** Returns an {@link HpkeKem} primitive corresponding to {@code kemId}. */
   public static HpkeKem createKem(byte[] kemId) {
     if (Arrays.equals(kemId, HpkeUtil.X25519_HKDF_SHA256_KEM_ID)) {
-      return new X25519HpkeKem("HmacSha256");
+      return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
     }
     throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
   }
@@ -39,7 +39,7 @@ public final class HpkePrimitiveFactory {
    */
   public static HpkeKem createKem(HpkeParams params) {
     if (params.getKem() == com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256) {
-      return new X25519HpkeKem("HmacSha256");
+      return new X25519HpkeKem(new HkdfHpkeKdf("HmacSha256"));
     }
     throw new IllegalArgumentException("Unrecognized HPKE KEM identifier");
   }

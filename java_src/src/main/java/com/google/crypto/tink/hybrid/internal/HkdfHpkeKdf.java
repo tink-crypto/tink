@@ -114,4 +114,8 @@ public final class HkdfHpkeKdf implements HpkeKdf {
         throw new GeneralSecurityException("Could not determine HPKE KDF ID");
     }
   }
+
+  int getMacLength() throws GeneralSecurityException {
+    return Mac.getInstance(macAlgorithm).getMacLength();
+  }
 }

@@ -82,7 +82,7 @@ public final class X25519HpkeKemTest {
     HpkeTestId testId = new HpkeTestId(mode, kemId, kdfId, aeadId);
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
 
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeKemEncapOutput result =
         kem.encapsulate(testSetup.recipientPublicKey, testSetup.senderPrivateKey);
     expect.that(result.getSharedSecret()).isEqualTo(testSetup.sharedSecret);
@@ -94,7 +94,7 @@ public final class X25519HpkeKemTest {
     HpkeTestId testId = new HpkeTestId(mode, kemId, kdfId, aeadId);
     HpkeTestSetup testSetup = testVectors.get(testId).getTestSetup();
 
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     byte[] result = kem.decapsulate(testSetup.encapsulatedKey, testSetup.recipientPrivateKey);
     expect.that(result).isEqualTo(testSetup.sharedSecret);
   }
@@ -139,7 +139,7 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void encapsulate_failsWithInvalidMacAlgorithm() {
-    X25519HpkeKem kem = new X25519HpkeKem("BadMac");
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] validRecipientPublicKey = testSetup.recipientPublicKey;
     assertThrows(NoSuchAlgorithmException.class, () -> kem.encapsulate(validRecipientPublicKey));
@@ -147,7 +147,7 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void encapsulate_failsWithInvalidRecipientPublicKey() {
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] invalidRecipientPublicKey =
         Arrays.copyOf(testSetup.recipientPublicKey, testSetup.recipientPublicKey.length + 2);
@@ -194,7 +194,7 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void decapsulate_failsWithInvalidMacAlgorithm() {
-    X25519HpkeKem kem = new X25519HpkeKem("BadMac");
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
     byte[] validRecipientPrivateKey = testSetup.recipientPrivateKey;
@@ -205,7 +205,7 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void decapsulate_failsWithInvalidEncapsulatedPublicKey() {
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] invalidEncapsulatedKey =
         Arrays.copyOf(testSetup.encapsulatedKey, testSetup.encapsulatedKey.length + 2);
@@ -217,7 +217,7 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void decapsulate_failsWithInvalidRecipientPrivateKey() {
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     HpkeTestSetup testSetup = testVectors.get(getDefaultTestId()).getTestSetup();
     byte[] validEncapsulatedKey = testSetup.encapsulatedKey;
     byte[] invalidRecipientPrivateKey =
@@ -229,13 +229,13 @@ public final class X25519HpkeKemTest {
 
   @Test
   public void getKemId_succeeds() throws GeneralSecurityException {
-    X25519HpkeKem kem = new X25519HpkeKem(MAC_ALGORITHM);
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf(MAC_ALGORITHM));
     expect.that(kem.getKemId()).isEqualTo(HpkeUtil.X25519_HKDF_SHA256_KEM_ID);
   }
 
   @Test
   public void getKemId_failsWithInvalidMacAlgorithm() {
-    X25519HpkeKem kem = new X25519HpkeKem("BadMac");
+    X25519HpkeKem kem = new X25519HpkeKem(new HkdfHpkeKdf("BadMac"));
     assertThrows(GeneralSecurityException.class, kem::getKemId);
   }
 }

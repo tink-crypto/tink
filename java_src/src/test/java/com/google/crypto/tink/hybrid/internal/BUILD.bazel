@@ -165,6 +165,7 @@ java_test(
     srcs = ["X25519HpkeKemTest.java"],
     resources = [":test_vectors"],
     deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hkdf_hpke_kdf",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_kem_encap_output",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
         "//src/main/java/com/google/crypto/tink/hybrid/internal:x25519_hpke_kem",
