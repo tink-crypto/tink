@@ -112,8 +112,16 @@ class SubtleUtilBoringSSL {
 
   // Returns BoringSSL's EC_POINT constructed from the curve type, big-endian
   // representation of public key's x-coordinate and y-coordinate.
-  static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
-      EllipticCurveType curve, absl::string_view pubx, absl::string_view puby);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
+      EllipticCurveType curve, absl::string_view pubx, absl::string_view puby) {
+    util::StatusOr<internal::SslUniquePtr<EC_POINT>> ec_point =
+        internal::GetEcPoint(curve, pubx, puby);
+    if (!ec_point.ok()) {
+      return ec_point.status();
+    }
+    return ec_point->release();
+  }
 
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(

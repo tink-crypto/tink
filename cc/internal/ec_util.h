@@ -73,6 +73,12 @@ crypto::tink::util::StatusOr<SslUniquePtr<EC_GROUP>> EcGroupFromCurveType(
 crypto::tink::util::StatusOr<crypto::tink::subtle::EllipticCurveType>
 CurveTypeFromEcGroup(const EC_GROUP *group);
 
+// Returns OpenSSL/BoringSSL's EC_POINT constructed from the curve type,
+// big-endian representation of public key's x-coordinate and y-coordinate.
+crypto::tink::util::StatusOr<SslUniquePtr<EC_POINT>> GetEcPoint(
+    crypto::tink::subtle::EllipticCurveType curve, absl::string_view pubx,
+    absl::string_view puby);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

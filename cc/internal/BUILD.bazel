@@ -184,6 +184,7 @@ cc_library(
     hdrs = ["ec_util.h"],
     include_prefix = "tink/internal",
     deps = [
+        ":bn_util",
         ":err_util",
         ":ssl_unique_ptr",
         "//subtle:common_enums",
@@ -337,10 +338,13 @@ cc_test(
     size = "small",
     srcs = ["ec_util_test.cc"],
     deps = [
+        ":bn_util",
         ":ec_util",
         "//subtle:common_enums",
+        "//subtle:subtle_util",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],

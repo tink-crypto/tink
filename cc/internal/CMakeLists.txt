@@ -125,6 +125,7 @@ tink_cc_library(
     ec_util.cc
     ec_util.h
   DEPS
+    tink::internal::bn_util
     tink::internal::err_util
     tink::internal::ssl_unique_ptr
     absl::memory
@@ -308,10 +309,13 @@ tink_cc_test(
   SRCS
     ec_util_test.cc
   DEPS
+    tink::internal::bn_util
     tink::internal::ec_util
     gmock
+    absl::strings
     absl::span
     crypto
     tink::subtle::common_enums
+    tink::subtle::subtle_util
     tink::util::test_matchers
 )

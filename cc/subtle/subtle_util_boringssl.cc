@@ -106,32 +106,6 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
 }  // namespace
 
 // static
-util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
-    EllipticCurveType curve, absl::string_view pubx, absl::string_view puby) {
-  internal::SslUniquePtr<BIGNUM> bn_x(
-      BN_bin2bn(reinterpret_cast<const unsigned char *>(pubx.data()),
-                pubx.size(), nullptr));
-  internal::SslUniquePtr<BIGNUM> bn_y(
-      BN_bin2bn(reinterpret_cast<const unsigned char *>(puby.data()),
-                puby.length(), nullptr));
-  if (bn_x.get() == nullptr || bn_y.get() == nullptr) {
-    return util::Status(absl::StatusCode::kInternal, "BN_bin2bn failed");
-  }
-  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
-      internal::EcGroupFromCurveType(curve);
-  if (!group.ok()) {
-    return group.status();
-  }
-  internal::SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group->get()));
-  if (1 != EC_POINT_set_affine_coordinates_GFp(
-               group->get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "EC_POINT_set_affine_coordinates_GFp failed");
-  }
-  return pub_key.release();
-}
-
-// static
 util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
     EllipticCurveType curve_type) {
   if (curve_type == EllipticCurveType::CURVE25519) {

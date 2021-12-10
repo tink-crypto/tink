@@ -27,6 +27,7 @@
 #include "absl/types/span.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -142,6 +143,30 @@ util::StatusOr<EllipticCurveType> CurveTypeFromEcGroup(const EC_GROUP* group) {
       return util::Status(absl::StatusCode::kUnimplemented,
                           "Unsupported elliptic curve");
   }
+}
+
+util::StatusOr<SslUniquePtr<EC_POINT>> GetEcPoint(EllipticCurveType curve,
+                                                  absl::string_view pubx,
+                                                  absl::string_view puby) {
+  util::StatusOr<SslUniquePtr<BIGNUM>> bn_x = StringToBignum(pubx);
+  if (!bn_x.ok()) {
+    return bn_x.status();
+  }
+  util::StatusOr<SslUniquePtr<BIGNUM>> bn_y = StringToBignum(puby);
+  if (!bn_y.ok()) {
+    return bn_y.status();
+  }
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group = EcGroupFromCurveType(curve);
+  if (!group.ok()) {
+    return group.status();
+  }
+  SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group->get()));
+  if (EC_POINT_set_affine_coordinates(group->get(), pub_key.get(), bn_x->get(),
+                                      bn_y->get(), nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EC_POINT_set_affine_coordinates failed");
+  }
+  return std::move(pub_key);
 }
 
 }  // namespace internal

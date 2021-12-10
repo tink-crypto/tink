@@ -16,13 +16,19 @@
 #include "tink/internal/ec_util.h"
 
 #include <memory>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/strings/escaping.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "tink/internal/bn_util.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -129,6 +135,42 @@ TEST(EcUtilTest, EcGroupFromCurveTypeSuccess) {
 TEST(EcUtilTest, EcGroupFromCurveTypeUnimplemented) {
   EXPECT_THAT(EcGroupFromCurveType(EllipticCurveType::UNKNOWN_CURVE).status(),
               StatusIs(absl::StatusCode::kUnimplemented));
+}
+
+TEST(EcUtilTest, GetEcPointReturnsAValidPoint) {
+  SslUniquePtr<EC_GROUP> group(EC_GROUP_new_by_curve_name(NID_secp521r1));
+  const unsigned int kCurveSizeInBytes =
+      (EC_GROUP_get_degree(group.get()) + 7) / 8;
+
+  constexpr absl::string_view kXCoordinateHex =
+      "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"
+      "619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a";
+  constexpr absl::string_view kYCoordinateHex =
+      "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327a"
+      "caac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf";
+  util::StatusOr<SslUniquePtr<EC_POINT>> point = GetEcPoint(
+      EllipticCurveType::NIST_P521, absl::HexStringToBytes(kXCoordinateHex),
+      absl::HexStringToBytes(kYCoordinateHex));
+  ASSERT_THAT(point.status(), IsOk());
+
+  // We check that we can decode this point and the result is the same as the
+  // original coordinates.
+  std::string xy;
+  subtle::ResizeStringUninitialized(&xy, 2 * kCurveSizeInBytes);
+  SslUniquePtr<BIGNUM> x(BN_new());
+  SslUniquePtr<BIGNUM> y(BN_new());
+  ASSERT_EQ(EC_POINT_get_affine_coordinates(group.get(), point->get(), x.get(),
+                                            y.get(), /*ctx=*/nullptr),
+            1);
+  ASSERT_THAT(
+      BignumToBinaryPadded(absl::MakeSpan(&xy[0], kCurveSizeInBytes), x.get()),
+      IsOk());
+  ASSERT_THAT(
+      BignumToBinaryPadded(
+          absl::MakeSpan(&xy[kCurveSizeInBytes], kCurveSizeInBytes), y.get()),
+      IsOk());
+  EXPECT_EQ(xy, absl::StrCat(absl::HexStringToBytes(kXCoordinateHex),
+                             absl::HexStringToBytes(kYCoordinateHex)));
 }
 
 }  // namespace
