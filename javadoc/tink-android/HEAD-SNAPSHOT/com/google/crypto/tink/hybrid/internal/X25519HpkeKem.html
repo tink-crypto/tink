@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 public final class <span class="typeNameLabel">X25519HpkeKem</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../../../com/google/crypto/tink/hybrid/internal/HpkeKem.html" title="interface in com.google.crypto.tink.hybrid.internal">HpkeKem</a></pre>
-<div class="block">Diffie-Hellman-based X25519 HPKE KEM variant.</div>
+<div class="block">Diffie-Hellman-based X25519-HKDF HPKE KEM variant.</div>
 </li>
 </ul>
 </div>
@@ -135,8 +135,8 @@ implements <a href="../../../../../../com/google/crypto/tink/hybrid/internal/Hpk
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/internal/X25519HpkeKem.html#X25519HpkeKem-java.lang.String-">X25519HpkeKem</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;macAlgorithm)</code>
-<div class="block">Construct X25519-HKDF HPKE KEM using <code>macAlgorithm</code>.</div>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/hybrid/internal/X25519HpkeKem.html#X25519HpkeKem-com.google.crypto.tink.hybrid.internal.HkdfHpkeKdf-">X25519HpkeKem</a></span>(<a href="../../../../../../com/google/crypto/tink/hybrid/internal/HkdfHpkeKdf.html" title="class in com.google.crypto.tink.hybrid.internal">HkdfHpkeKdf</a>&nbsp;hkdf)</code>
+<div class="block">Construct X25519-HKDF HPKE KEM using <code>hkdf</code>.</div>
 </td>
 </tr>
 </table>
@@ -195,14 +195,14 @@ implements <a href="../../../../../../com/google/crypto/tink/hybrid/internal/Hpk
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="X25519HpkeKem-java.lang.String-">
+<a name="X25519HpkeKem-com.google.crypto.tink.hybrid.internal.HkdfHpkeKdf-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>X25519HpkeKem</h4>
-<pre>public&nbsp;X25519HpkeKem(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;macAlgorithm)</pre>
-<div class="block">Construct X25519-HKDF HPKE KEM using <code>macAlgorithm</code>.</div>
+<pre>public&nbsp;X25519HpkeKem(<a href="../../../../../../com/google/crypto/tink/hybrid/internal/HkdfHpkeKdf.html" title="class in com.google.crypto.tink.hybrid.internal">HkdfHpkeKdf</a>&nbsp;hkdf)</pre>
+<div class="block">Construct X25519-HKDF HPKE KEM using <code>hkdf</code>.</div>
 </li>
 </ul>
 </li>
