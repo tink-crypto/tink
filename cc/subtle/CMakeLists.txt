@@ -1375,6 +1375,7 @@ tink_cc_test(
     rapidjson
     tink::config::tink_fips
     tink::internal::bn_util
+    tink::internal::ec_util
     tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status

@@ -92,17 +92,28 @@ class SubtleUtilBoringSSL {
   static inline std::string GetErrors() { return internal::GetSslErrors(); }
 
   // Returns BoringSSL's EC_GROUP constructed from the curve type.
-  static crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(
-      EllipticCurveType curve_type);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<EC_GROUP *> GetEcGroup(
+      EllipticCurveType curve_type) {
+    util::StatusOr<internal::SslUniquePtr<EC_GROUP>> ec_group =
+        internal::EcGroupFromCurveType(curve_type);
+    if (!ec_group.ok()) {
+      return ec_group.status();
+    }
+    return ec_group->release();
+  }
+
+  // Returns the curve type associated with the EC_GROUP
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<EllipticCurveType> GetCurve(
+      const EC_GROUP *group) {
+    return internal::CurveTypeFromEcGroup(group);
+  }
 
   // Returns BoringSSL's EC_POINT constructed from the curve type, big-endian
   // representation of public key's x-coordinate and y-coordinate.
   static crypto::tink::util::StatusOr<EC_POINT *> GetEcPoint(
       EllipticCurveType curve, absl::string_view pubx, absl::string_view puby);
-
-  // Returns the curve type associated with the EC_GROUP
-  static crypto::tink::util::StatusOr<EllipticCurveType> GetCurve(
-      const EC_GROUP *group);
 
   // Returns a new EC key for the specified curve.
   static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(

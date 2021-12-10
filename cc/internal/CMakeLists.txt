@@ -311,6 +311,7 @@ tink_cc_test(
     tink::internal::ec_util
     gmock
     absl::span
+    crypto
     tink::subtle::common_enums
     tink::util::test_matchers
 )

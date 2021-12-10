@@ -34,6 +34,7 @@
 #include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ec_util.h"
@@ -50,9 +51,6 @@ namespace subtle {
 namespace {
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
-using ::testing::IsEmpty;
-using ::testing::Not;
-using ::testing::NotNull;
 using ::testing::StrEq;
 
 struct EncodingTestVector {
@@ -103,12 +101,14 @@ TEST(SubtleUtilBoringSSLTest, EcPointEncode) {
     internal::SslUniquePtr<BIGNUM> y(
         BN_bin2bn(reinterpret_cast<const unsigned char*>(y_str.data()),
                   y_str.length(), nullptr));
-    auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
-    internal::SslUniquePtr<EC_POINT> point(
-        EC_POINT_new(status_or_group.ValueOrDie()));
-    EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
-                     status_or_group.ValueOrDie(), point.get(), x.get(),
-                     y.get(), nullptr));
+    util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+        internal::EcGroupFromCurveType(test.curve);
+    ASSERT_THAT(group.status(), IsOk());
+
+    internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group->get()));
+    EXPECT_EQ(EC_POINT_set_affine_coordinates_GFp(group->get(), point.get(),
+                                                  x.get(), y.get(), nullptr),
+              1);
     auto encoded_or = SubtleUtilBoringSSL::EcPointEncode(
         test.curve, test.format, point.get());
     EXPECT_TRUE(encoded_or.ok());
@@ -127,16 +127,18 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
     internal::SslUniquePtr<BIGNUM> y(
         BN_bin2bn(reinterpret_cast<const unsigned char*>(y_str.data()),
                   y_str.length(), nullptr));
-    auto status_or_group = SubtleUtilBoringSSL::GetEcGroup(test.curve);
-    internal::SslUniquePtr<EC_POINT> point(
-        EC_POINT_new(status_or_group.ValueOrDie()));
+
+    util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+        internal::EcGroupFromCurveType(test.curve);
+    ASSERT_THAT(group.status(), IsOk());
+    internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group->get()));
+
     EXPECT_EQ(1, EC_POINT_set_affine_coordinates_GFp(
-                     status_or_group.ValueOrDie(), point.get(), x.get(),
-                     y.get(), nullptr));
+                     group->get(), point.get(), x.get(), y.get(), nullptr));
     auto status_or_ec_point = SubtleUtilBoringSSL::EcPointDecode(
         test.curve, test.format, encoded_str);
     EXPECT_TRUE(status_or_ec_point.ok());
-    EXPECT_EQ(0, EC_POINT_cmp(status_or_group.ValueOrDie(), point.get(),
+    EXPECT_EQ(0, EC_POINT_cmp(group->get(), point.get(),
                               status_or_ec_point.ValueOrDie().get(), nullptr));
     // Modify the 1st byte.
     encoded_str = std::string("0") + encoded_str.substr(1);
@@ -146,31 +148,6 @@ TEST(SubtleUtilBoringSSLTest, EcPointDecode) {
     EXPECT_LE(0, status_or_ec_point2.status().message().find(
                      "point should start with"));
   }
-}
-
-TEST(SubtleUtilBoringSSLTest, GetCurveSuccess) {
-  EC_GROUP* p256_group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-  EC_GROUP* p384_group = EC_GROUP_new_by_curve_name(NID_secp384r1);
-  EC_GROUP* p521_group = EC_GROUP_new_by_curve_name(NID_secp521r1);
-
-  auto p256_curve = SubtleUtilBoringSSL::GetCurve(p256_group);
-  auto p384_curve = SubtleUtilBoringSSL::GetCurve(p384_group);
-  auto p521_curve = SubtleUtilBoringSSL::GetCurve(p521_group);
-
-  EXPECT_THAT(p256_curve.status(), util::OkStatus());
-  EXPECT_THAT(p384_curve.status(), util::OkStatus());
-  EXPECT_THAT(p521_curve.status(), util::OkStatus());
-
-  EXPECT_EQ(p256_curve.ValueOrDie(), EllipticCurveType::NIST_P256);
-  EXPECT_EQ(p384_curve.ValueOrDie(), EllipticCurveType::NIST_P384);
-  EXPECT_EQ(p521_curve.ValueOrDie(), EllipticCurveType::NIST_P521);
-}
-
-TEST(SubtleUtilBoringSSLTest, GetCurveUnimplemented) {
-  EC_GROUP* unsupported_group = EC_GROUP_new_by_curve_name(NID_secp224r1);
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetCurve(unsupported_group).status(),
-              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {

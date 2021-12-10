@@ -1575,6 +1575,7 @@ cc_test(
         ":wycheproof_util",
         "//config:tink_fips",
         "//internal:bn_util",
+        "//internal:ec_util",
         "//internal:ssl_unique_ptr",
         "//util:secret_data",
         "//util:status",

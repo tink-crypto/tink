@@ -24,6 +24,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "absl/types/span.h"
+#include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/cipher.h"
 #include "openssl/curve25519.h"
@@ -63,7 +64,8 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
 
 util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
     EllipticCurveType curve, const EC_KEY &key) {
-  util::StatusOr<EC_GROUP *> group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(curve);
   if (!group.ok()) {
     return group.status();
   }
@@ -72,7 +74,8 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
   internal::SslUniquePtr<BIGNUM> pub_key_x_bn(BN_new());
   internal::SslUniquePtr<BIGNUM> pub_key_y_bn(BN_new());
-  if (!EC_POINT_get_affine_coordinates_GFp(*group, pub_key, pub_key_x_bn.get(),
+  if (!EC_POINT_get_affine_coordinates_GFp(group->get(), pub_key,
+                                           pub_key_x_bn.get(),
                                            pub_key_y_bn.get(), nullptr)) {
     return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_get_affine_coordinates_GFp failed");
@@ -80,19 +83,19 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
   SubtleUtilBoringSSL::EcKey ec_key;
   ec_key.curve = curve;
   util::StatusOr<std::string> pub_x_str = internal::BignumToString(
-      pub_key_x_bn.get(), FieldElementSizeInBytes(*group));
+      pub_key_x_bn.get(), FieldElementSizeInBytes(group->get()));
   if (!pub_x_str.ok()) {
     return pub_x_str.status();
   }
   ec_key.pub_x = std::move(*pub_x_str);
   util::StatusOr<std::string> pub_y_str = internal::BignumToString(
-      pub_key_y_bn.get(), FieldElementSizeInBytes(*group));
+      pub_key_y_bn.get(), FieldElementSizeInBytes(group->get()));
   if (!pub_y_str.ok()) {
     return pub_y_str.status();
   }
   ec_key.pub_y = std::move(*pub_y_str);
   util::StatusOr<util::SecretData> priv_key_or =
-      internal::BignumToSecretData(priv_key, ScalarSizeInBytes(*group));
+      internal::BignumToSecretData(priv_key, ScalarSizeInBytes(group->get()));
   if (!priv_key_or.ok()) {
     return priv_key_or.status();
   }
@@ -101,38 +104,6 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> EcKeyFromBoringEcKey(
 }
 
 }  // namespace
-
-// static
-util::StatusOr<EC_GROUP *> SubtleUtilBoringSSL::GetEcGroup(
-    EllipticCurveType curve_type) {
-  switch (curve_type) {
-    case EllipticCurveType::NIST_P256:
-      return EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-    case EllipticCurveType::NIST_P384:
-      return EC_GROUP_new_by_curve_name(NID_secp384r1);
-    case EllipticCurveType::NIST_P521:
-      return EC_GROUP_new_by_curve_name(NID_secp521r1);
-    default:
-      return util::Status(absl::StatusCode::kUnimplemented,
-                          "Unsupported elliptic curve");
-  }
-}
-
-// static
-util::StatusOr<EllipticCurveType> SubtleUtilBoringSSL::GetCurve(
-    const EC_GROUP *group) {
-  switch (EC_GROUP_get_curve_name(group)) {
-    case NID_X9_62_prime256v1:
-      return EllipticCurveType::NIST_P256;
-    case NID_secp384r1:
-      return EllipticCurveType::NIST_P384;
-    case NID_secp521r1:
-      return EllipticCurveType::NIST_P521;
-    default:
-      return util::Status(absl::StatusCode::kUnimplemented,
-                          "Unsupported elliptic curve");
-  }
-}
 
 // static
 util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
@@ -146,14 +117,14 @@ util::StatusOr<EC_POINT *> SubtleUtilBoringSSL::GetEcPoint(
   if (bn_x.get() == nullptr || bn_y.get() == nullptr) {
     return util::Status(absl::StatusCode::kInternal, "BN_bin2bn failed");
   }
-  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
-  if (!status_or_ec_group.ok()) {
-    return status_or_ec_group.status();
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(curve);
+  if (!group.ok()) {
+    return group.status();
   }
-  internal::SslUniquePtr<EC_GROUP> group(status_or_ec_group.ValueOrDie());
-  internal::SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group.get()));
+  internal::SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group->get()));
   if (1 != EC_POINT_set_affine_coordinates_GFp(
-               group.get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
+               group->get(), pub_key.get(), bn_x.get(), bn_y.get(), nullptr)) {
     return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_set_affine_coordinates_GFp failed");
   }
@@ -167,9 +138,11 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
     auto key = GenerateNewX25519Key();
     return EcKeyFromX25519Key(key.get());
   }
-  auto status_or_group(SubtleUtilBoringSSL::GetEcGroup(curve_type));
-  if (!status_or_group.ok()) return status_or_group.status();
-  internal::SslUniquePtr<EC_GROUP> group(status_or_group.ValueOrDie());
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(curve_type);
+  if (!group.ok()) {
+    return group.status();
+  }
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
 
   if (key.get() == nullptr) {
@@ -177,7 +150,7 @@ util::StatusOr<SubtleUtilBoringSSL::EcKey> SubtleUtilBoringSSL::GetNewEcKey(
                         "EC key generation failed in BoringSSL.");
   }
 
-  EC_KEY_set_group(key.get(), group.get());
+  EC_KEY_set_group(key.get(), group->get());
   EC_KEY_generate_key(key.get());
 
   return EcKeyFromBoringEcKey(curve_type, *key);
@@ -205,14 +178,14 @@ SubtleUtilBoringSSL::GetNewEcKeyFromSeed(EllipticCurveType curve_type,
                         "Creating a X25519 key from a seed is not supported.");
   }
 
-  util::StatusOr<EC_GROUP *> group =
-      SubtleUtilBoringSSL::GetEcGroup(curve_type);
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(curve_type);
   if (!group.ok()) {
     return group.status();
   }
 
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_derive_from_secret(
-      *group, secret_seed.data(), secret_seed.size()));
+      group->get(), secret_seed.data(), secret_seed.size()));
 
   if (key.get() == nullptr) {
     return util::Status(absl::StatusCode::kInternal,
@@ -276,40 +249,41 @@ util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
 // static
 util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
-  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
-  if (!status_or_ec_group.ok()) {
-    return status_or_ec_group.status();
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> priv_group =
+      internal::EcGroupFromCurveType(curve);
+  if (!priv_group.ok()) {
+    return priv_group.status();
   }
-  internal::SslUniquePtr<EC_GROUP> priv_group(status_or_ec_group.ValueOrDie());
-  internal::SslUniquePtr<EC_POINT> shared_point(EC_POINT_new(priv_group.get()));
+  internal::SslUniquePtr<EC_POINT> shared_point(
+      EC_POINT_new(priv_group->get()));
   // BoringSSL's EC_POINT_set_affine_coordinates_GFp documentation says that
   // "unlike with OpenSSL, it's considered an error if the point is not on the
   // curve". To be sure, we double check here.
-  if (1 != EC_POINT_is_on_curve(priv_group.get(), pub_key, nullptr)) {
+  if (1 != EC_POINT_is_on_curve(priv_group->get(), pub_key, nullptr)) {
     return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
   // Compute the shared point.
-  if (1 != EC_POINT_mul(priv_group.get(), shared_point.get(), nullptr, pub_key,
+  if (1 != EC_POINT_mul(priv_group->get(), shared_point.get(), nullptr, pub_key,
                         priv_key, nullptr)) {
     return util::Status(absl::StatusCode::kInternal,
                         "Point multiplication failed");
   }
   // Check for buggy computation.
   if (1 !=
-      EC_POINT_is_on_curve(priv_group.get(), shared_point.get(), nullptr)) {
+      EC_POINT_is_on_curve(priv_group->get(), shared_point.get(), nullptr)) {
     return util::Status(absl::StatusCode::kInternal,
                         "Shared point is not on curve");
   }
   // Get shared point's x coordinate.
   internal::SslUniquePtr<BIGNUM> shared_x(BN_new());
   if (1 !=
-      EC_POINT_get_affine_coordinates_GFp(priv_group.get(), shared_point.get(),
+      EC_POINT_get_affine_coordinates_GFp(priv_group->get(), shared_point.get(),
                                           shared_x.get(), nullptr, nullptr)) {
     return util::Status(absl::StatusCode::kInternal,
                         "EC_POINT_get_affine_coordinates_GFp failed");
   }
   return internal::BignumToSecretData(
-      shared_x.get(), FieldElementSizeInBytes(priv_group.get()));
+      shared_x.get(), FieldElementSizeInBytes(priv_group->get()));
 }
 
 // static

@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "openssl/ec.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -48,9 +50,11 @@ struct Ed25519Key {
   std::string private_key;
 };
 
-// Returns a new X25519Key key. It returns a `kInternal` error status if the
+// X25519 Key Utils.
+
+// Returns a new X25519Key key. It returns a kInternal error status if the
 // OpenSSL/BoringSSL APIs fail.
-util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key();
+crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key();
 
 // Returns a X25519Key matching the specified EcKey.
 crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
@@ -58,6 +62,16 @@ crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
 
 // Returns an EcKey matching the specified X25519Key.
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
+
+// EC_GROUP Utils.
+
+// Returns OpenSSL/BoringSSL's EC_GROUP constructed from the given `curve_type`.
+crypto::tink::util::StatusOr<SslUniquePtr<EC_GROUP>> EcGroupFromCurveType(
+    crypto::tink::subtle::EllipticCurveType curve_type);
+
+// Returns the curve type associated with the given `group`.
+crypto::tink::util::StatusOr<crypto::tink::subtle::EllipticCurveType>
+CurveTypeFromEcGroup(const EC_GROUP *group);
 
 }  // namespace internal
 }  // namespace tink

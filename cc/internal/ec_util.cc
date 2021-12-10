@@ -27,7 +27,6 @@
 #include "absl/types/span.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
-#include "openssl/pem.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -37,6 +36,8 @@
 namespace crypto {
 namespace tink {
 namespace internal {
+
+using ::crypto::tink::subtle::EllipticCurveType;
 
 util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
   auto key = absl::make_unique<X25519Key>();
@@ -96,6 +97,51 @@ util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
   std::copy_n(ec_key.priv.begin(), X25519KeyPrivKeySize(),
               std::begin(x25519_key->private_key));
   return std::move(x25519_key);
+}
+
+util::StatusOr<SslUniquePtr<EC_GROUP>> EcGroupFromCurveType(
+    EllipticCurveType curve_type) {
+  EC_GROUP* ec_group = nullptr;
+  switch (curve_type) {
+    case EllipticCurveType::NIST_P256: {
+      ec_group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+      break;
+    }
+    case EllipticCurveType::NIST_P384: {
+      ec_group = EC_GROUP_new_by_curve_name(NID_secp384r1);
+      break;
+    }
+    case EllipticCurveType::NIST_P521: {
+      ec_group = EC_GROUP_new_by_curve_name(NID_secp521r1);
+      break;
+    }
+    default:
+      return util::Status(absl::StatusCode::kUnimplemented,
+                          "Unsupported elliptic curve");
+  }
+  if (ec_group == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EC_GROUP_new_by_curve_name failed");
+  }
+  return {SslUniquePtr<EC_GROUP>(ec_group)};
+}
+
+util::StatusOr<EllipticCurveType> CurveTypeFromEcGroup(const EC_GROUP* group) {
+  if (group == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Null group provided");
+  }
+  switch (EC_GROUP_get_curve_name(group)) {
+    case NID_X9_62_prime256v1:
+      return EllipticCurveType::NIST_P256;
+    case NID_secp384r1:
+      return EllipticCurveType::NIST_P384;
+    case NID_secp521r1:
+      return EllipticCurveType::NIST_P521;
+    default:
+      return util::Status(absl::StatusCode::kUnimplemented,
+                          "Unsupported elliptic curve");
+  }
 }
 
 }  // namespace internal

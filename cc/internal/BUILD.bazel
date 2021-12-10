@@ -186,16 +186,16 @@ cc_library(
     deps = [
         ":err_util",
         ":ssl_unique_ptr",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:span",
-        "@boringssl//:crypto",
         "//subtle:common_enums",
         "//subtle:subtle_util",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -338,10 +338,10 @@ cc_test(
     srcs = ["ec_util_test.cc"],
     deps = [
         ":ec_util",
-        "@com_google_absl//absl/types:span",
         "//subtle:common_enums",
         "//util:test_matchers",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )
