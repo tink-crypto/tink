@@ -151,6 +151,8 @@ class Status {
   // Abseil-compatible constructor from an error and a message
   Status(absl::StatusCode code, absl::string_view error_message);
 
+  Status(const Status& other) = default;
+
   Status& operator=(const Status& other);
 
   #ifndef TINK_USE_ABSL_STATUS
