@@ -621,6 +621,8 @@ tink_cc_library(
     tink::core::key_access
 )
 
+add_library(tink::core::secret_key_access_testonly ALIAS tink_internal_core_secret_key_access)
+
 # tests
 
 tink_cc_test(
@@ -885,6 +887,6 @@ tink_cc_test(
     core/key_access_test.cc
   DEPS
     tink::core::key_access
-    tink::core::secret_key_access
+    tink::core::secret_key_access_testonly
     gmock
 )

@@ -59,7 +59,7 @@ cc_library(
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@boringssl//:crypto",
-        "//:registry",
+        "//internal:registry_impl",
         "//util:status",
     ],
 )
