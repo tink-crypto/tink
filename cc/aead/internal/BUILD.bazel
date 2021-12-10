@@ -9,7 +9,6 @@ cc_library(
     include_prefix = "tink/aead/internal",
     deps = [
         "//util:errors",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
@@ -57,17 +56,19 @@ cc_library(
     hdrs = ["cord_aes_gcm_boringssl.h"],
     include_prefix = "tink/aead/internal",
     deps = [
+        ":aead_util",
         "//aead:cord_aead",
         "//internal:ssl_unique_ptr",
         "//subtle:random",
         "//subtle:subtle_util",
-        "//subtle:subtle_util_boringssl",
+        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
     ],
 )
 
@@ -133,9 +134,9 @@ cc_library(
     hdrs = ["zero_copy_aes_gcm_boringssl.h"],
     include_prefix = "tink/aead/internal",
     deps = [
+        ":aead_util",
         ":ssl_aead",
         ":zero_copy_aead",
-        "//aead/internal:aead_util",
         "//internal:util",
         "//subtle:random",
         "//subtle:subtle_util",
@@ -153,20 +154,16 @@ cc_test(
     name = "cord_aes_gcm_boringssl_test",
     size = "small",
     srcs = ["cord_aes_gcm_boringssl_test.cc"],
-    data = [
-        "@wycheproof//testvectors:aes_gcm",
-    ],
+    data = ["@wycheproof//testvectors:aes_gcm"],
     deps = [
         ":cord_aes_gcm_boringssl",
-        "//aead:cord_aead",
         "//subtle:aes_gcm_boringssl",
         "//subtle:wycheproof_util",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
-        "//util:test_util",
-        "@com_google_absl//absl/status",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/strings:cord_test_helpers",
@@ -189,9 +186,7 @@ cc_test(
 
 cc_test(
     name = "zero_copy_aead_wrapper_test",
-    size = "small",
     srcs = ["zero_copy_aead_wrapper_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":mock_zero_copy_aead",
         ":zero_copy_aead_wrapper",
@@ -203,22 +198,17 @@ cc_test(
 
 cc_test(
     name = "zero_copy_aes_gcm_boringssl_test",
-    size = "small",
     srcs = ["zero_copy_aes_gcm_boringssl_test.cc"],
-    data = [
-        "@wycheproof//testvectors:aes_gcm",
-    ],
+    data = ["@wycheproof//testvectors:aes_gcm"],
     deps = [
         ":wycheproof_aead",
         ":zero_copy_aead",
         ":zero_copy_aes_gcm_boringssl",
         "//internal:err_util",
         "//subtle:subtle_util",
-        "//subtle:wycheproof_util",
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
@@ -234,6 +224,7 @@ cc_test(
         ":mock_zero_copy_aead",
         "//util:statusor",
         "//util:test_matchers",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
@@ -264,7 +255,6 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 
