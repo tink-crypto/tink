@@ -161,10 +161,11 @@ util::StatusOr<SslUniquePtr<EC_POINT>> GetEcPoint(EllipticCurveType curve,
     return group.status();
   }
   SslUniquePtr<EC_POINT> pub_key(EC_POINT_new(group->get()));
-  if (EC_POINT_set_affine_coordinates(group->get(), pub_key.get(), bn_x->get(),
-                                      bn_y->get(), nullptr) != 1) {
+  if (EC_POINT_set_affine_coordinates_GFp(group->get(), pub_key.get(),
+                                          bn_x->get(), bn_y->get(),
+                                          nullptr) != 1) {
     return util::Status(absl::StatusCode::kInternal,
-                        "EC_POINT_set_affine_coordinates failed");
+                        "EC_POINT_set_affine_coordinates_GFp failed");
   }
   return std::move(pub_key);
 }
