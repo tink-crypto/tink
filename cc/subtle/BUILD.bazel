@@ -69,7 +69,6 @@ cc_library(
         "//internal:ssl_unique_ptr",
         "//util:errors",
         "//util:secret_data",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -90,7 +89,6 @@ cc_library(
         "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//util:secret_data",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -162,7 +160,6 @@ cc_library(
     deps = [
         ":common_enums",
         ":subtle_util_boringssl",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
@@ -226,11 +223,11 @@ cc_library(
         ":subtle_util_boringssl",
         "//:public_key_sign",
         "//internal:bn_util",
+        "//internal:err_util",
         "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//internal:util",
         "//util:errors",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
@@ -253,7 +250,6 @@ cc_library(
         "//internal:util",
         "//util:errors",
         "//util:status",
-        "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -269,6 +265,7 @@ cc_library(
         ":common_enums",
         ":subtle_util_boringssl",
         "//:public_key_verify",
+        "//internal:fips_utils",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
@@ -291,11 +288,10 @@ cc_library(
         ":subtle_util_boringssl",
         "//:public_key_sign",
         "//internal:err_util",
+        "//internal:fips_utils",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
-        "//util:errors",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -313,6 +309,7 @@ cc_library(
         ":common_enums",
         ":subtle_util_boringssl",
         "//:public_key_verify",
+        "//internal:fips_utils",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
@@ -340,8 +337,6 @@ cc_library(
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
-        "//util:errors",
-        "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
@@ -356,6 +351,7 @@ cc_library(
     hdrs = ["aes_gcm_boringssl.h"],
     include_prefix = "tink/subtle",
     deps = [
+        "//:aead",
         "//aead/internal:aead_from_zero_copy",
         "//aead/internal:zero_copy_aead",
         "//aead/internal:zero_copy_aes_gcm_boringssl",
@@ -384,7 +380,6 @@ cc_library(
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
-        "@boringssl//:crypto",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/memory",
@@ -400,21 +395,20 @@ cc_library(
     hdrs = ["aes_gcm_hkdf_stream_segment_encrypter.h"],
     include_prefix = "tink/subtle",
     deps = [
-        "subtle_util",
         ":random",
         ":stream_segment_encrypter",
+        ":subtle_util",
         "//aead/internal:ssl_aead",
         "//internal:err_util",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
-        "@boringssl//:crypto",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -430,20 +424,13 @@ cc_library(
         ":hkdf",
         ":nonce_based_streaming_aead",
         ":random",
-        ":stream_segment_decrypter",
-        ":stream_segment_encrypter",
-        ":subtle_util_boringssl",
-        "//:input_stream",
-        "//:output_stream",
         "//internal:fips_utils",
-        "//util:errors",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -493,7 +480,6 @@ cc_library(
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/algorithm:container",
-        "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -564,9 +550,7 @@ cc_library(
     srcs = ["xchacha20_poly1305_boringssl.cc"],
     hdrs = ["xchacha20_poly1305_boringssl.h"],
     include_prefix = "tink/subtle",
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":random",
         ":subtle_util",
@@ -587,17 +571,11 @@ cc_library(
 
 cc_library(
     name = "aes_siv_boringssl",
-    srcs = [
-        "aes_siv_boringssl.cc",
-    ],
+    srcs = ["aes_siv_boringssl.cc"],
     hdrs = ["aes_siv_boringssl.h"],
     include_prefix = "tink/subtle",
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
-        ":random",
-        ":subtle_util_boringssl",
         "//:deterministic_aead",
         "//internal:fips_utils",
         "//util:errors",
@@ -671,6 +649,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -699,18 +678,14 @@ cc_library(
     name = "stream_segment_decrypter",
     hdrs = ["stream_segment_decrypter.h"],
     include_prefix = "tink/subtle",
-    deps = [
-        "//util:status",
-    ],
+    deps = ["//util:status"],
 )
 
 cc_library(
     name = "stream_segment_encrypter",
     hdrs = ["stream_segment_encrypter.h"],
     include_prefix = "tink/subtle",
-    deps = [
-        "//util:status",
-    ],
+    deps = ["//util:status"],
 )
 
 cc_library(
@@ -858,7 +833,9 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         "//:mac",
+        "//:output_stream_with_result",
         "//:streaming_mac",
+        "//:tink_cc",
         "//subtle/mac:stateful_mac",
         "//util:status",
         "//util:statusor",
@@ -884,7 +861,6 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -904,7 +880,6 @@ cc_library(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -914,6 +889,7 @@ cc_library(
     hdrs = ["pem_parser_boringssl.h"],
     include_prefix = "tink/subtle",
     deps = [
+        ":common_enums",
         ":subtle_util_boringssl",
         "//internal:bn_util",
         "//internal:rsa_util",
@@ -921,6 +897,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
@@ -932,10 +909,7 @@ cc_test(
     name = "ecies_hkdf_recipient_kem_boringssl_test",
     size = "small",
     srcs = ["ecies_hkdf_recipient_kem_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":ecies_hkdf_recipient_kem_boringssl",
@@ -954,10 +928,7 @@ cc_test(
     name = "ecies_hkdf_sender_kem_boringssl_test",
     size = "small",
     srcs = ["ecies_hkdf_sender_kem_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":ecies_hkdf_recipient_kem_boringssl",
@@ -978,8 +949,8 @@ cc_test(
     name = "ec_util_test",
     size = "small",
     srcs = ["ec_util_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
+        ":common_enums",
         ":ec_util",
         "//util:status",
         "//util:statusor",
@@ -992,7 +963,6 @@ cc_test(
     name = "hkdf_test",
     size = "small",
     srcs = ["hkdf_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":common_enums",
         ":hkdf",
@@ -1008,10 +978,7 @@ cc_test(
     name = "aes_cmac_boringssl_test",
     size = "small",
     srcs = ["aes_cmac_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_cmac_boringssl",
         ":common_enums",
@@ -1031,10 +998,7 @@ cc_test(
     name = "hmac_boringssl_test",
     size = "small",
     srcs = ["hmac_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":hmac_boringssl",
@@ -1054,16 +1018,10 @@ cc_test(
     name = "aes_gcm_boringssl_test",
     size = "small",
     srcs = ["aes_gcm_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:aes_gcm",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:aes_gcm"],
+    tags = ["fips"],
     deps = [
         ":aes_gcm_boringssl",
-        "//:aead",
         "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
         "//util:secret_data",
@@ -1086,13 +1044,10 @@ cc_test(
         ":common_enums",
         ":hkdf",
         ":random",
-        ":stream_segment_decrypter",
         ":stream_segment_encrypter",
-        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_util",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -1120,9 +1075,7 @@ cc_test(
     name = "aes_gcm_hkdf_streaming_test",
     size = "small",
     srcs = ["aes_gcm_hkdf_streaming_test.cc"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_gcm_hkdf_streaming",
         ":common_enums",
@@ -1136,7 +1089,7 @@ cc_test(
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
-        "//util:test_util",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -1147,9 +1100,7 @@ cc_test(
     name = "aes_ctr_hmac_streaming_test",
     size = "small",
     srcs = ["aes_ctr_hmac_streaming_test.cc"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_ctr_hmac_streaming",
         ":common_enums",
@@ -1158,12 +1109,10 @@ cc_test(
         ":stream_segment_encrypter",
         ":streaming_aead_test_util",
         "//config:tink_fips",
-        "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -1174,28 +1123,21 @@ cc_test(
     name = "aes_eax_boringssl_test",
     size = "small",
     srcs = ["aes_eax_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:aes_eax",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:aes_eax"],
+    tags = ["fips"],
     deps = [
         ":aes_eax_boringssl",
-        ":common_enums",
         ":wycheproof_util",
-        "//:aead",
         "//config:tink_fips",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 
@@ -1203,15 +1145,12 @@ cc_test(
     name = "encrypt_then_authenticate_test",
     size = "small",
     srcs = ["encrypt_then_authenticate_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aes_ctr_boringssl",
         ":common_enums",
         ":encrypt_then_authenticate",
         ":hmac_boringssl",
         ":random",
-        "//:aead",
-        "//:mac",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
@@ -1225,10 +1164,7 @@ cc_test(
     name = "aes_ctr_boringssl_test",
     size = "small",
     srcs = ["aes_ctr_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_ctr_boringssl",
         ":random",
@@ -1247,18 +1183,11 @@ cc_test(
     name = "aes_siv_boringssl_test",
     size = "small",
     srcs = ["aes_siv_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:aes_siv_cmac",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:aes_siv_cmac"],
+    tags = ["fips"],
     deps = [
         ":aes_siv_boringssl",
-        ":common_enums",
         ":wycheproof_util",
-        "//:deterministic_aead",
         "//config:tink_fips",
         "//util:secret_data",
         "//util:status",
@@ -1266,9 +1195,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 
@@ -1276,15 +1203,13 @@ cc_test(
     name = "ecdsa_sign_boringssl_test",
     size = "small",
     srcs = ["ecdsa_sign_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":ec_util",
         ":ecdsa_sign_boringssl",
         ":ecdsa_verify_boringssl",
+        ":subtle_util_boringssl",
         "//:public_key_sign",
         "//:public_key_verify",
         "//config:tink_fips",
@@ -1301,17 +1226,16 @@ cc_test(
     name = "ecdsa_verify_boringssl_test",
     size = "small",
     srcs = ["ecdsa_verify_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     data = [
-        "@wycheproof//testvectors:all",
+        "@wycheproof//testvectors:ecdsa",
+        "@wycheproof//testvectors:ecdsa_webcrypto",
     ],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":ecdsa_sign_boringssl",
         ":ecdsa_verify_boringssl",
+        ":subtle_util_boringssl",
         ":wycheproof_util",
         "//:public_key_sign",
         "//:public_key_verify",
@@ -1331,10 +1255,7 @@ cc_test(
     name = "ed25519_sign_boringssl_test",
     size = "small",
     srcs = ["ed25519_sign_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":ed25519_sign_boringssl",
         ":ed25519_verify_boringssl",
@@ -1359,13 +1280,8 @@ cc_test(
     name = "ed25519_verify_boringssl_test",
     size = "small",
     srcs = ["ed25519_verify_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:eddsa"],
+    tags = ["fips"],
     deps = [
         ":ed25519_sign_boringssl",
         ":ed25519_verify_boringssl",
@@ -1390,13 +1306,8 @@ cc_test(
     name = "rsa_ssa_pss_verify_boringssl_test",
     size = "small",
     srcs = ["rsa_ssa_pss_verify_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:rsa_pss"],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":rsa_ssa_pss_verify_boringssl",
@@ -1411,7 +1322,6 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
-        "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -1421,12 +1331,8 @@ cc_test(
 
 cc_test(
     name = "rsa_ssa_pss_sign_boringssl_test",
-    size = "medium",
     srcs = ["rsa_ssa_pss_sign_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":rsa_ssa_pss_sign_boringssl",
         ":rsa_ssa_pss_verify_boringssl",
@@ -1445,13 +1351,8 @@ cc_test(
     name = "rsa_ssa_pkcs1_verify_boringssl_test",
     size = "small",
     srcs = ["rsa_ssa_pkcs1_verify_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:all",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:rsa_signature"],
+    tags = ["fips"],
     deps = [
         ":common_enums",
         ":rsa_ssa_pkcs1_verify_boringssl",
@@ -1461,6 +1362,7 @@ cc_test(
         "//config:tink_fips",
         "//internal:err_util",
         "//internal:rsa_util",
+        "//internal:ssl_unique_ptr",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
@@ -1475,12 +1377,8 @@ cc_test(
 
 cc_test(
     name = "rsa_ssa_pkcs1_sign_boringssl_test",
-    size = "medium",
     srcs = ["rsa_ssa_pkcs1_sign_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":rsa_ssa_pkcs1_sign_boringssl",
         ":rsa_ssa_pkcs1_verify_boringssl",
@@ -1499,17 +1397,11 @@ cc_test(
     name = "aes_gcm_siv_boringssl_test",
     size = "small",
     srcs = ["aes_gcm_siv_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:aes_gcm_siv",
-    ],
-    tags = [
-        "fips",
-    ],
+    data = ["@wycheproof//testvectors:aes_gcm_siv"],
+    tags = ["fips"],
     deps = [
         ":aes_gcm_siv_boringssl",
         ":subtle_util",
-        "//:aead",
         "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
         "//internal:ssl_util",
@@ -1527,7 +1419,6 @@ cc_test(
     name = "random_test",
     size = "small",
     srcs = ["random_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":random",
         "//util:secret_data",
@@ -1542,8 +1433,6 @@ cc_test(
     name = "common_enums_test",
     size = "small",
     srcs = ["common_enums_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    linkopts = ["-pthread"],
     deps = [
         ":common_enums",
         "@com_google_googletest//:gtest_main",
@@ -1562,14 +1451,11 @@ cc_test(
 
 cc_test(
     name = "subtle_util_boringssl_test",
-    size = "medium",
+    size = "large",
     srcs = ["subtle_util_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:ecdh",
-    ],
-    linkopts = ["-pthread"],
+    data = ["@wycheproof//testvectors:ecdh"],
     deps = [
+        ":common_enums",
         ":ec_util",
         ":subtle_util_boringssl",
         ":wycheproof_util",
@@ -1594,12 +1480,10 @@ cc_test(
     name = "xchacha20_poly1305_boringssl_test",
     size = "small",
     srcs = ["xchacha20_poly1305_boringssl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "@wycheproof//testvectors:chacha20_poly1305",
-    ],
+    data = ["@wycheproof//testvectors:chacha20_poly1305"],
+    tags = ["fips"],
     deps = [
-        "subtle_util",
+        ":subtle_util",
         ":xchacha20_poly1305_boringssl",
         "//aead/internal:wycheproof_aead",
         "//config:tink_fips",
@@ -1616,10 +1500,7 @@ cc_test(
 
 cc_test(
     name = "streaming_aead_decrypting_stream_test",
-    size = "medium",
     srcs = ["streaming_aead_decrypting_stream_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    linkopts = ["-lpthread"],
     deps = [
         ":random",
         ":stream_segment_decrypter",
@@ -1637,10 +1518,7 @@ cc_test(
 
 cc_test(
     name = "streaming_aead_encrypting_stream_test",
-    size = "medium",
     srcs = ["streaming_aead_encrypting_stream_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
-    linkopts = ["-lpthread"],
     deps = [
         ":random",
         ":stream_segment_encrypter",
@@ -1692,14 +1570,15 @@ cc_test(
 
 cc_test(
     name = "decrypting_random_access_stream_test",
+    size = "small",
     srcs = ["decrypting_random_access_stream_test.cc"],
     deps = [
         ":decrypting_random_access_stream",
+        ":random",
+        ":test_util",
         "//:output_stream",
         "//:random_access_stream",
         "//:streaming_aead",
-        "//subtle:random",
-        "//subtle:test_util",
         "//util:file_random_access_stream",
         "//util:ostream_output_stream",
         "//util:status",
@@ -1720,6 +1599,7 @@ cc_test(
         ":random",
         ":streaming_mac_impl",
         ":test_util",
+        "//:output_stream_with_result",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",
@@ -1733,9 +1613,7 @@ cc_test(
     name = "stateful_hmac_boringssl_test",
     size = "small",
     srcs = ["stateful_hmac_boringssl_test.cc"],
-    data = [
-        "@wycheproof//testvectors:hmac",
-    ],
+    data = ["@wycheproof//testvectors:hmac"],
     deps = [
         ":common_enums",
         ":stateful_hmac_boringssl",
@@ -1755,9 +1633,7 @@ cc_test(
     name = "stateful_cmac_boringssl_test",
     size = "small",
     srcs = ["stateful_cmac_boringssl_test.cc"],
-    data = [
-        "@wycheproof//testvectors:aes_cmac",
-    ],
+    data = ["@wycheproof//testvectors:aes_cmac"],
     deps = [
         ":common_enums",
         ":stateful_cmac_boringssl",
@@ -1775,7 +1651,6 @@ cc_test(
 
 cc_test(
     name = "pem_parser_boringssl_test",
-    size = "small",
     srcs = ["pem_parser_boringssl_test.cc"],
     deps = [
         ":pem_parser_boringssl",
