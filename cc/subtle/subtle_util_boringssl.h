@@ -168,8 +168,12 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static util::StatusOr<internal::SslUniquePtr<EC_POINT>> EcPointDecode(
-      EllipticCurveType curve, EcPointFormat format, absl::string_view encoded);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<internal::SslUniquePtr<EC_POINT>>
+  EcPointDecode(EllipticCurveType curve, EcPointFormat format,
+                absl::string_view encoded) {
+    return internal::EcPointDecode(curve, format, encoded);
+  }
 
   // Returns the encoded public key based on curve type, point format and
   // BoringSSL's EC_POINT public key point. The uncompressed point is encoded as
@@ -177,8 +181,11 @@ class SubtleUtilBoringSSL {
   // The compressed point is encoded as 1-byte || x where x is
   // curve_size_in_bytes big-endian byte array and if the least significant bit
   // of y is 1, the 1st byte is 0x03, otherwise it's 0x02.
-  static crypto::tink::util::StatusOr<std::string> EcPointEncode(
-      EllipticCurveType curve, EcPointFormat format, const EC_POINT *point);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<std::string> EcPointEncode(
+      EllipticCurveType curve, EcPointFormat format, const EC_POINT *point) {
+    return internal::EcPointEncode(curve, format, point);
+  }
 
   // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.

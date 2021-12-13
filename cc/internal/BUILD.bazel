@@ -340,6 +340,7 @@ cc_test(
     deps = [
         ":bn_util",
         ":ec_util",
+        ":ssl_unique_ptr",
         "//subtle:common_enums",
         "//subtle:subtle_util",
         "//util:test_matchers",

@@ -311,6 +311,7 @@ tink_cc_test(
   DEPS
     tink::internal::bn_util
     tink::internal::ec_util
+    tink::internal::ssl_unique_ptr
     gmock
     absl::strings
     absl::span

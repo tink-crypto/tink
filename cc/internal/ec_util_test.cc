@@ -27,6 +27,7 @@
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
 #include "tink/util/test_matchers.h"
@@ -36,12 +37,17 @@ namespace tink {
 namespace internal {
 namespace {
 
+using ::crypto::tink::subtle::EcPointFormat;
 using ::crypto::tink::subtle::EllipticCurveType;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
 using ::testing::ElementsAreArray;
+using ::testing::HasSubstr;
 using ::testing::Not;
+using ::testing::TestParamInfo;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
 
 TEST(EcUtilTest, NewX25519KeyGeneratesNewKeyEveryTime) {
   util::StatusOr<std::unique_ptr<X25519Key>> keypair1 = NewX25519Key();
@@ -65,7 +71,7 @@ TEST(EcUtilTest, X25519KeyToEcKeyAndBack) {
   util::StatusOr<std::unique_ptr<X25519Key>> x25519_key = NewX25519Key();
   ASSERT_THAT(x25519_key.status(), IsOk());
   EcKey ec_key = EcKeyFromX25519Key(x25519_key->get());
-  ASSERT_EQ(ec_key.curve, subtle::EllipticCurveType::CURVE25519);
+  ASSERT_EQ(ec_key.curve, EllipticCurveType::CURVE25519);
 
   util::StatusOr<std::unique_ptr<X25519Key>> roundtrip_key =
       X25519KeyFromEcKey(ec_key);
@@ -79,6 +85,107 @@ TEST(EcUtilTest, X25519KeyToEcKeyAndBack) {
       ElementsAreArray(absl::MakeSpan((*roundtrip_key)->public_value,
                                       X25519KeyPubKeySize())));
 }
+
+struct EncodingTestVector {
+  EcPointFormat format;
+  std::string x_hex;
+  std::string y_hex;
+  std::string encoded_hex;
+  EllipticCurveType curve;
+};
+
+const std::vector<EncodingTestVector> GetEncodingTestVectors() {
+  return {
+      {EcPointFormat::UNCOMPRESSED,
+       "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"
+       "619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
+       "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327a"
+       "caac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+       "0400093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918e"
+       "c6619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a00aa3fb2"
+       "448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327acaac1fa4"
+       "0424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+       EllipticCurveType::NIST_P521},
+      {EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+       "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"
+       "619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
+       "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327a"
+       "caac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+       "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"
+       "619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a00aa3fb244"
+       "8335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327acaac1fa404"
+       "24c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+       EllipticCurveType::NIST_P521},
+      {EcPointFormat::COMPRESSED,
+       "00093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918ec6"
+       "619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
+       "00aa3fb2448335f694e3cda4ae0cc71b1b2f2a206fa802d7262f19983c44674fe15327a"
+       "caac1fa40424c395a6556cb8167312527fae5865ecffc14bbdc17da78cdcf",
+       "0300093057fb862f2ad2e82e581baeb3324e7b32946f2ba845a9beeed87d6995f54918e"
+       "c6619b9931955d5a89d4d74adf1046bb362192f2ef6bd3e3d2d04dd1f87054a",
+       EllipticCurveType::NIST_P521}};
+}
+
+using EcUtilEncodeDecodePointTest = TestWithParam<EncodingTestVector>;
+
+TEST_P(EcUtilEncodeDecodePointTest, EcPointEncode) {
+  const EncodingTestVector& test = GetParam();
+  util::StatusOr<SslUniquePtr<EC_POINT>> point =
+      GetEcPoint(test.curve, absl::HexStringToBytes(test.x_hex),
+                 absl::HexStringToBytes(test.y_hex));
+  ASSERT_THAT(point.status(), IsOk());
+
+  util::StatusOr<std::string> encoded_point =
+      EcPointEncode(test.curve, test.format, point->get());
+  ASSERT_THAT(encoded_point.status(), IsOk());
+  EXPECT_EQ(test.encoded_hex, absl::BytesToHexString(*encoded_point));
+}
+
+TEST_P(EcUtilEncodeDecodePointTest, EcPointDecode) {
+  const EncodingTestVector& test = GetParam();
+  // Get the test point and its encoded version.
+  util::StatusOr<SslUniquePtr<EC_POINT>> point =
+      GetEcPoint(test.curve, absl::HexStringToBytes(test.x_hex),
+                 absl::HexStringToBytes(test.y_hex));
+  ASSERT_THAT(point.status(), IsOk());
+  std::string encoded_str = absl::HexStringToBytes(test.encoded_hex);
+
+  util::StatusOr<SslUniquePtr<EC_GROUP>> ec_group =
+      EcGroupFromCurveType(test.curve);
+  util::StatusOr<SslUniquePtr<EC_POINT>> ec_point =
+      EcPointDecode(test.curve, test.format, encoded_str);
+  ASSERT_THAT(ec_point.status(), IsOk());
+  EXPECT_EQ(EC_POINT_cmp(ec_group->get(), point->get(), ec_point->get(),
+                         /*ctx=*/nullptr),
+            0);
+
+  // Modifying the 1st byte decoding fails.
+  encoded_str[0] = '0';
+  util::StatusOr<SslUniquePtr<EC_POINT>> ec_point2 =
+      EcPointDecode(test.curve, test.format, encoded_str);
+  EXPECT_THAT(ec_point2.status(), Not(IsOk()));
+  if (test.format == EcPointFormat::UNCOMPRESSED ||
+      test.format == EcPointFormat::COMPRESSED) {
+    EXPECT_THAT(std::string(ec_point2.status().message()),
+                HasSubstr("point should start with"));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EcUtilEncodeDecodePointTests, EcUtilEncodeDecodePointTest,
+    ValuesIn(GetEncodingTestVectors()),
+    [](const TestParamInfo<EcUtilEncodeDecodePointTest::ParamType>& info) {
+      switch (info.param.format) {
+        case EcPointFormat::UNCOMPRESSED:
+          return "Uncompressed";
+        case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+          return "DoNotUseCrunchyUncompressed";
+        case EcPointFormat::COMPRESSED:
+          return "Compressed";
+        default:
+          return "Unknown";
+      }
+    });
 
 TEST(EcUtilTest, CurveTypeFromEcGroupSuccess) {
   EC_GROUP* p256_group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);

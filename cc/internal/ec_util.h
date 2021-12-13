@@ -63,6 +63,28 @@ crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
 // Returns an EcKey matching the specified X25519Key.
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
 
+// EC_POINT Encode/Decode.
+
+// Given x, y as curve_size_in_bytes big-endian byte array, encoding is as
+// follows:
+// - The uncompressed point is encoded as 0x04 || x || y.
+// - The compressed point is encoded as:
+//   - 0x03 || x if the least significant bit of y is 1;
+//   - 0x02 || x otherwise.
+
+// Returns OpenSSL/BoringSSL's EC_POINT constructed from curve type
+// `curve_type`, point `format` and encoded public key's point `encoded_point`.
+crypto::tink::util::StatusOr<SslUniquePtr<EC_POINT>> EcPointDecode(
+    crypto::tink::subtle::EllipticCurveType curve_type,
+    crypto::tink::subtle::EcPointFormat format,
+    absl::string_view encoded_point);
+
+// Returns the encoded public key based on curve type `curve_type`, point
+// `format` and OpenSSL/BoringSSL's EC_POINT public key `point`.
+crypto::tink::util::StatusOr<std::string> EcPointEncode(
+    crypto::tink::subtle::EllipticCurveType curve_type,
+    crypto::tink::subtle::EcPointFormat format, const EC_POINT *point);
+
 // EC_GROUP Utils.
 
 // Returns OpenSSL/BoringSSL's EC_GROUP constructed from the given `curve_type`.
