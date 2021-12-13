@@ -170,6 +170,32 @@ util::StatusOr<SslUniquePtr<EC_POINT>> SslGetEcPointFromEncoded(
   return std::move(point);
 }
 
+// OpenSSL/BoringSSL's EC_POINT as a pair of BIGNUMs.
+struct EcPointCoordinates {
+  SslUniquePtr<BIGNUM> x;
+  SslUniquePtr<BIGNUM> y;
+};
+
+// Returns a given `point` as a pair of BIGNUMs. Precondition: `group` and
+// `point` are not null.
+util::StatusOr<EcPointCoordinates> SslGetEcPointCoordinates(
+    const EC_GROUP *group, const EC_POINT *point) {
+  EcPointCoordinates coordinates = {
+      SslUniquePtr<BIGNUM>(BN_new()),
+      SslUniquePtr<BIGNUM>(BN_new()),
+  };
+  if (coordinates.x == nullptr || coordinates.y == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Unable to allocate memory for the point coordinates");
+  }
+  if (EC_POINT_get_affine_coordinates_GFp(group, point, coordinates.x.get(),
+                                          coordinates.y.get(), nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EC_POINT_get_affine_coordinates_GFp failed");
+  }
+  return std::move(coordinates);
+}
+
 }  // namespace
 
 util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
@@ -242,10 +268,6 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
   if (EC_POINT_is_on_curve(group->get(), point, nullptr) != 1) {
     return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
-
-  const unsigned int kCurveSizeInBytes =
-      (EC_GROUP_get_degree(group->get()) + 7) / 8;
-
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
       return SslEcPointEncode(group->get(), point,
@@ -255,22 +277,17 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
       return SslEcPointEncode(group->get(), point, POINT_CONVERSION_COMPRESSED);
     }
     case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      util::StatusOr<EcPointCoordinates> ec_point_xy =
+          SslGetEcPointCoordinates(group->get(), point);
+      if (!ec_point_xy.ok()) {
+        return ec_point_xy.status();
+      }
+      const int kCurveSizeInBytes = (EC_GROUP_get_degree(group->get()) + 7) / 8;
       std::string encoded_point;
-      SslUniquePtr<BIGNUM> x(BN_new());
-      SslUniquePtr<BIGNUM> y(BN_new());
-      if (x == nullptr || y == nullptr) {
-        return util::Status(absl::StatusCode::kInternal,
-                            "Unable to allocate memory for coordinates");
-      }
       subtle::ResizeStringUninitialized(&encoded_point, 2 * kCurveSizeInBytes);
-      if (EC_POINT_get_affine_coordinates(group->get(), point, x.get(), y.get(),
-                                          /*ctx=*/nullptr) != 1) {
-        return util::Status(absl::StatusCode::kInternal,
-                            "EC_POINT_get_affine_coordinates failed");
-      }
-
       util::Status res = BignumToBinaryPadded(
-          absl::MakeSpan(&encoded_point[0], kCurveSizeInBytes), x.get());
+          absl::MakeSpan(&encoded_point[0], kCurveSizeInBytes),
+          ec_point_xy->x.get());
       if (!res.ok()) {
         return util::Status(
             absl::StatusCode::kInternal,
@@ -279,7 +296,7 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
 
       res = BignumToBinaryPadded(
           absl::MakeSpan(&encoded_point[kCurveSizeInBytes], kCurveSizeInBytes),
-          y.get());
+          ec_point_xy->y.get());
       if (!res.ok()) {
         return util::Status(
             absl::StatusCode::kInternal,
