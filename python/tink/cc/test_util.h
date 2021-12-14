@@ -91,7 +91,7 @@ class DummyStreamingAead : public StreamingAead {
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
   NewEncryptingStream(
       std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
-      absl::string_view associated_data) override {
+      absl::string_view associated_data) const override {
     return {absl::make_unique<DummyEncryptingStream>(
         std::move(ciphertext_destination),
         absl::StrCat(streaming_aead_name_, associated_data))};
@@ -100,7 +100,7 @@ class DummyStreamingAead : public StreamingAead {
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
-      absl::string_view associated_data) override {
+      absl::string_view associated_data) const override {
     return {absl::make_unique<DummyDecryptingStream>(
         std::move(ciphertext_source),
         absl::StrCat(streaming_aead_name_, associated_data))};
@@ -110,7 +110,7 @@ class DummyStreamingAead : public StreamingAead {
       std::unique_ptr<crypto::tink::RandomAccessStream>>
   NewDecryptingRandomAccessStream(
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
-      absl::string_view associated_data) override {
+      absl::string_view associated_data) const override {
     return {absl::make_unique<DummyDecryptingRandomAccessStream>(
         std::move(ciphertext_source),
         absl::StrCat(streaming_aead_name_, associated_data))};
