@@ -30,6 +30,7 @@
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
@@ -196,7 +197,120 @@ util::StatusOr<EcPointCoordinates> SslGetEcPointCoordinates(
   return std::move(coordinates);
 }
 
+size_t ScalarSizeInBytes(const EC_GROUP *group) {
+  return BN_num_bytes(EC_GROUP_get0_order(group));
+}
+
+size_t FieldElementSizeInBytes(const EC_GROUP *group) {
+  unsigned degree_bits = EC_GROUP_get_degree(group);
+  return (degree_bits + 7) / 8;
+}
+
+// Given an OpenSSL/BoringSSL key EC_KEY `key` and curve type `curve` return an
+// EcKey.
+util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
+                                        const EC_KEY &key) {
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group = EcGroupFromCurveType(curve);
+  if (!group.ok()) {
+    return group.status();
+  }
+  const BIGNUM *priv_key = EC_KEY_get0_private_key(&key);
+  const EC_POINT *pub_key = EC_KEY_get0_public_key(&key);
+
+  util::StatusOr<EcPointCoordinates> pub_key_bns =
+      SslGetEcPointCoordinates(group->get(), pub_key);
+  if (!pub_key_bns.ok()) {
+    return pub_key_bns.status();
+  }
+
+  const int kFieldElementSizeInBytes = FieldElementSizeInBytes(group->get());
+  util::StatusOr<std::string> pub_x_str =
+      BignumToString(pub_key_bns->x.get(), kFieldElementSizeInBytes);
+  if (!pub_x_str.ok()) {
+    return pub_x_str.status();
+  }
+  util::StatusOr<std::string> pub_y_str =
+      BignumToString(pub_key_bns->y.get(), kFieldElementSizeInBytes);
+  if (!pub_y_str.ok()) {
+    return pub_y_str.status();
+  }
+  util::StatusOr<util::SecretData> priv_key_data =
+      BignumToSecretData(priv_key, ScalarSizeInBytes(group->get()));
+  if (!priv_key_data.ok()) {
+    return priv_key_data.status();
+  }
+  EcKey ec_key = {
+      /*curve=*/curve,
+      /*pub_x=*/*std::move(pub_x_str),
+      /*pub_y=*/*std::move(pub_y_str),
+      /*priv=*/*std::move(priv_key_data),
+  };
+  return ec_key;
+}
+
 }  // namespace
+
+util::StatusOr<EcKey> NewEcKey(EllipticCurveType curve_type) {
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    util::StatusOr<std::unique_ptr<X25519Key>> key = NewX25519Key();
+    if (!key.ok()) {
+      return key.status();
+    }
+    return EcKeyFromX25519Key(key->get());
+  }
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group =
+      EcGroupFromCurveType(curve_type);
+  if (!group.ok()) {
+    return group.status();
+  }
+  SslUniquePtr<EC_KEY> key(EC_KEY_new());
+
+  if (key.get() == nullptr) {
+    return util::Status(absl::StatusCode::kInternal, "EC_KEY_new failed");
+  }
+  EC_KEY_set_group(key.get(), group->get());
+  EC_KEY_generate_key(key.get());
+  return EcKeyFromSslEcKey(curve_type, *key);
+}
+
+util::StatusOr<EcKey> NewEcKey(EllipticCurveType curve_type,
+                               const util::SecretData &secret_seed) {
+  // EC_KEY_derive_from_secret() is neither defined in the version of BoringSSL
+  // used when FIPS-only mode is enabled at compile time, nor currently
+  // implemented for OpenSSL.
+#if defined(TINK_USE_ONLY_FIPS)
+  return util::Status(
+      absl::StatusCode::kUnimplemented,
+      "Deriving EC keys from a secret seed is not allowed in FIPS mode");
+#elif !defined(OPENSSL_IS_BORINGSSL)
+  return util::Status(
+      absl::StatusCode::kUnimplemented,
+      "Deriving EC keys from a secret seed is not supported with OpenSSL");
+#else
+  if (IsFipsModeEnabled()) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        "Deriving EC keys from a secret seed is not allowed in FIPS mode");
+  }
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        "Creating a X25519 key from a secret seed is not supported");
+  }
+  util::StatusOr<SslUniquePtr<EC_GROUP>> group =
+      EcGroupFromCurveType(curve_type);
+  if (!group.ok()) {
+    return group.status();
+  }
+  SslUniquePtr<EC_KEY> key(EC_KEY_derive_from_secret(
+      group->get(), secret_seed.data(), secret_seed.size()));
+  if (key.get() == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EC_KEY_derive_from_secret failed");
+  }
+  return EcKeyFromSslEcKey(curve_type, *key);
+#endif
+}
 
 util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
   auto key = absl::make_unique<X25519Key>();
@@ -268,6 +382,7 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
   if (EC_POINT_is_on_curve(group->get(), point, nullptr) != 1) {
     return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
+
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
       return SslEcPointEncode(group->get(), point,
@@ -282,7 +397,7 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
       if (!ec_point_xy.ok()) {
         return ec_point_xy.status();
       }
-      const int kCurveSizeInBytes = (EC_GROUP_get_degree(group->get()) + 7) / 8;
+      const int kCurveSizeInBytes = FieldElementSizeInBytes(group->get());
       std::string encoded_point;
       subtle::ResizeStringUninitialized(&encoded_point, 2 * kCurveSizeInBytes);
       util::Status res = BignumToBinaryPadded(
@@ -322,7 +437,7 @@ util::StatusOr<SslUniquePtr<EC_POINT>> EcPointDecode(
       if (!group.ok()) {
         return group.status();
       }
-      const int kCurveSizeInBytes = (EC_GROUP_get_degree(group->get()) + 7) / 8;
+      const int kCurveSizeInBytes = FieldElementSizeInBytes(group->get());
       if (encoded.size() != 2 * kCurveSizeInBytes) {
         return util::Status(
             absl::StatusCode::kInternal,

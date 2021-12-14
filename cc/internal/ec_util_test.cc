@@ -27,6 +27,7 @@
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
@@ -42,12 +43,105 @@ using ::crypto::tink::subtle::EllipticCurveType;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
+using ::testing::AllOf;
 using ::testing::ElementsAreArray;
+using ::testing::Eq;
+using ::testing::Field;
 using ::testing::HasSubstr;
+using ::testing::IsEmpty;
+using ::testing::Matcher;
 using ::testing::Not;
+using ::testing::SizeIs;
 using ::testing::TestParamInfo;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
+
+TEST(EcUtilTest, NewEcKeyReturnsWellFormedX25519Key) {
+  util::StatusOr<EcKey> ec_key =
+      NewEcKey(subtle::EllipticCurveType::CURVE25519);
+  ASSERT_THAT(ec_key.status(), IsOk());
+  EXPECT_THAT(
+      *ec_key,
+      AllOf(Field(&EcKey::curve, Eq(subtle::EllipticCurveType::CURVE25519)),
+            Field(&EcKey::pub_x, SizeIs(X25519KeyPubKeySize())),
+            Field(&EcKey::pub_y, IsEmpty()),
+            Field(&EcKey::priv, SizeIs(X25519KeyPrivKeySize()))));
+}
+
+#ifdef OPENSSL_IS_BORINGSSL
+
+using EcUtilNewEcKeyWithSeed = TestWithParam<subtle::EllipticCurveType>;
+
+// Matcher for the equality of two EcKeys.
+Matcher<EcKey> EqualsEcKey(const EcKey& expected) {
+  return AllOf(Field(&EcKey::priv, Eq(expected.priv)),
+               Field(&EcKey::pub_x, Eq(expected.pub_x)),
+               Field(&EcKey::pub_y, Eq(expected.pub_y)),
+               Field(&EcKey::curve, Eq(expected.curve)));
+}
+
+TEST_P(EcUtilNewEcKeyWithSeed, KeysFromDifferentSeedAreDifferent) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+
+  util::SecretData seed1 = util::SecretDataFromStringView(
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData seed2 = util::SecretDataFromStringView(
+      absl::HexStringToBytes("0f0e0d0c0b0a09080706050403020100"));
+  subtle::EllipticCurveType curve = GetParam();
+
+  util::StatusOr<EcKey> keypair1 = NewEcKey(curve, seed1);
+  ASSERT_THAT(keypair1.status(), IsOk());
+  util::StatusOr<EcKey> keypair2 = NewEcKey(curve, seed2);
+  ASSERT_THAT(keypair2.status(), IsOk());
+  EXPECT_THAT(*keypair1, Not(EqualsEcKey(*keypair2)));
+}
+
+TEST_P(EcUtilNewEcKeyWithSeed, SameSeedGivesSameKey) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  util::SecretData seed1 = util::SecretDataFromStringView(
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
+  subtle::EllipticCurveType curve = GetParam();
+
+  util::StatusOr<EcKey> keypair1 = NewEcKey(curve, seed1);
+  ASSERT_THAT(keypair1.status(), IsOk());
+  util::StatusOr<EcKey> keypair2 = NewEcKey(curve, seed1);
+  ASSERT_THAT(keypair2.status(), IsOk());
+  EXPECT_THAT(*keypair1, EqualsEcKey(*keypair2));
+}
+
+INSTANTIATE_TEST_SUITE_P(EcUtilNewEcKeyWithSeeds, EcUtilNewEcKeyWithSeed,
+                         ValuesIn({subtle::NIST_P256, subtle::NIST_P384,
+                                   subtle::NIST_P521}));
+
+TEST(EcUtilTest, GenerationWithSeedFailsWithWrongCurve) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  util::SecretData seed = util::SecretDataFromStringView(
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
+  util::StatusOr<EcKey> keypair =
+      NewEcKey(subtle::EllipticCurveType::CURVE25519, seed);
+  EXPECT_THAT(keypair.status(), StatusIs(absl::StatusCode::kInternal));
+}
+
+#else
+
+TEST(EcUtilTest, NewEcKeyFromSeedUnimplemented) {
+  if (IsFipsModeEnabled()) {
+    GTEST_SKIP() << "Not supported in FIPS-only mode";
+  }
+  util::SecretData seed = util::SecretDataFromStringView(
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
+  util::StatusOr<EcKey> keypair =
+      NewEcKey(subtle::EllipticCurveType::CURVE25519, seed);
+  EXPECT_THAT(keypair.status(), StatusIs(absl::StatusCode::kUnimplemented));
+}
+
+#endif
 
 TEST(EcUtilTest, NewX25519KeyGeneratesNewKeyEveryTime) {
   util::StatusOr<std::unique_ptr<X25519Key>> keypair1 = NewX25519Key();

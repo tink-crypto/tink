@@ -186,6 +186,7 @@ cc_library(
     deps = [
         ":bn_util",
         ":err_util",
+        ":fips_utils",
         ":ssl_unique_ptr",
         "//subtle:common_enums",
         "//subtle:subtle_util",
@@ -340,6 +341,7 @@ cc_test(
     deps = [
         ":bn_util",
         ":ec_util",
+        ":fips_utils",
         ":ssl_unique_ptr",
         "//subtle:common_enums",
         "//subtle:subtle_util",

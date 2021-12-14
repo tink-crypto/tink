@@ -124,12 +124,18 @@ class SubtleUtilBoringSSL {
   }
 
   // Returns a new EC key for the specified curve.
-  static crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
-      EllipticCurveType curve_type);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<EcKey> GetNewEcKey(
+      EllipticCurveType curve_type) {
+    return internal::NewEcKey(curve_type);
+  }
 
   // Returns a new EC key for the specified curve derived from a seed.
-  static crypto::tink::util::StatusOr<EcKey> GetNewEcKeyFromSeed(
-      EllipticCurveType curve_type, const util::SecretData &secret_seed);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<EcKey> GetNewEcKeyFromSeed(
+      EllipticCurveType curve_type, const util::SecretData &secret_seed) {
+    return internal::NewEcKey(curve_type, secret_seed);
+  }
 
   // Returns a new X25519 key, or nullptr if generation fails.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")

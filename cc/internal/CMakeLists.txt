@@ -127,6 +127,7 @@ tink_cc_library(
   DEPS
     tink::internal::bn_util
     tink::internal::err_util
+    tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     absl::memory
     absl::status
@@ -311,6 +312,7 @@ tink_cc_test(
   DEPS
     tink::internal::bn_util
     tink::internal::ec_util
+    tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     gmock
     absl::strings

@@ -50,6 +50,17 @@ struct Ed25519Key {
   std::string private_key;
 };
 
+// EcKey.
+
+// Returns a new EC key for the specified curve.
+crypto::tink::util::StatusOr<EcKey> NewEcKey(
+    crypto::tink::subtle::EllipticCurveType curve_type);
+
+// Returns a new EC key for the specified curve derived from a secret seed.
+crypto::tink::util::StatusOr<EcKey> NewEcKey(
+    crypto::tink::subtle::EllipticCurveType curve_type,
+    const crypto::tink::util::SecretData &secret_seed);
+
 // X25519 Key Utils.
 
 // Returns a new X25519Key key. It returns a kInternal error status if the
