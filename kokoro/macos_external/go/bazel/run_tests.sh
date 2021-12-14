@@ -24,7 +24,7 @@ fi
 cd go/
 use_bazel.sh "$(cat .bazelversion)"
 time bazel build -- ...
-time bazel test -- ...
+time bazel test --test_output="errors" -- ...
 
 # Run manual tests which rely on test data only available via Bazel.
 if [[ -n "${KOKORO_ROOT}" ]]; then
@@ -33,5 +33,5 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
     "//integration/gcpkms:go_default_test"
   )
   readonly MANUAL_TARGETS
-  time bazel test -- "${MANUAL_TARGETS[@]}"
+  time bazel test --test_output="errors" -- "${MANUAL_TARGETS[@]}"
 fi
