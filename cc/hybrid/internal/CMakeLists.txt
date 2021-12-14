@@ -11,8 +11,8 @@ tink_cc_library(
     absl::status
     absl::strings
     tink::core::hybrid_decrypt
+    tink::internal::ec_util
     tink::subtle::common_enums
-    tink::subtle::ec_util
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto

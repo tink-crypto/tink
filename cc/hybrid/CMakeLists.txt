@@ -155,7 +155,7 @@ tink_cc_library(
     absl::memory
     absl::status
     tink::core::hybrid_decrypt
-    tink::subtle::ec_util
+    tink::internal::ec_util
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::util::enums
     tink::util::secret_data

@@ -25,7 +25,7 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
 #include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "tink/hybrid_decrypt.h"
-#include "tink/subtle/ec_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -90,16 +90,17 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> Cecpq2AeadHkdfHybridDecrypt::New(
 
 util::StatusOr<std::string> Cecpq2AeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
-  util::StatusOr<uint32_t> cecpq2_header_size_result =
-      subtle::EcUtil::EncodingSizeInBytes(
+  util::StatusOr<int32_t> cecpq2_header_point_encoding_size =
+      internal::EcPointEncodingSizeInBytes(
           util::Enums::ProtoToSubtle(
               recipient_key_params_.kem_params().curve_type()),
           util::Enums::ProtoToSubtle(
               recipient_key_params_.kem_params().ec_point_format()));
-  if (!cecpq2_header_size_result.ok())
-    return cecpq2_header_size_result.status();
-  uint32_t cecpq2_header_size =
-      cecpq2_header_size_result.ValueOrDie() + HRSS_CIPHERTEXT_BYTES;
+  if (!cecpq2_header_point_encoding_size.ok()) {
+    return cecpq2_header_point_encoding_size.status();
+  }
+  int32_t cecpq2_header_size =
+      *cecpq2_header_point_encoding_size + HRSS_CIPHERTEXT_BYTES;
   if (ciphertext.size() < cecpq2_header_size) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext too short");

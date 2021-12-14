@@ -281,6 +281,48 @@ INSTANTIATE_TEST_SUITE_P(
       }
     });
 
+TEST(EcUtilTest, EcFieldSizeInBytes) {
+  EXPECT_THAT(EcFieldSizeInBytes(EllipticCurveType::NIST_P256),
+              IsOkAndHolds(256 / 8));
+  EXPECT_THAT(EcFieldSizeInBytes(EllipticCurveType::NIST_P384),
+              IsOkAndHolds(384 / 8));
+  EXPECT_THAT(EcFieldSizeInBytes(EllipticCurveType::NIST_P521),
+              IsOkAndHolds((521 + 7) / 8));
+  EXPECT_THAT(EcFieldSizeInBytes(EllipticCurveType::CURVE25519),
+              IsOkAndHolds(256 / 8));
+  EXPECT_THAT(EcFieldSizeInBytes(EllipticCurveType::UNKNOWN_CURVE).status(),
+              Not(IsOk()));
+}
+
+TEST(EcUtilTest, EcPointEncodingSizeInBytes) {
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P256,
+                                         EcPointFormat::UNCOMPRESSED),
+              IsOkAndHolds(2 * (256 / 8) + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P256,
+                                         EcPointFormat::COMPRESSED),
+              IsOkAndHolds(256 / 8 + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P384,
+                                         EcPointFormat::UNCOMPRESSED),
+              IsOkAndHolds(2 * (384 / 8) + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P384,
+                                         EcPointFormat::COMPRESSED),
+              IsOkAndHolds(384 / 8 + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P521,
+                                         EcPointFormat::UNCOMPRESSED),
+              IsOkAndHolds(2 * ((521 + 7) / 8) + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P521,
+                                         EcPointFormat::COMPRESSED),
+              IsOkAndHolds((521 + 7) / 8 + 1));
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::CURVE25519,
+                                         EcPointFormat::COMPRESSED),
+              IsOkAndHolds(256 / 8));
+
+  EXPECT_THAT(EcPointEncodingSizeInBytes(EllipticCurveType::NIST_P256,
+                                         EcPointFormat::UNKNOWN_FORMAT)
+                  .status(),
+              Not(IsOk()));
+}
+
 TEST(EcUtilTest, CurveTypeFromEcGroupSuccess) {
   EC_GROUP* p256_group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
   EC_GROUP* p384_group = EC_GROUP_new_by_curve_name(NID_secp384r1);

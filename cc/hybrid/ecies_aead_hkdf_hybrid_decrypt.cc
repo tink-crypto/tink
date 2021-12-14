@@ -22,7 +22,7 @@
 #include "absl/status/status.h"
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "tink/hybrid_decrypt.h"
-#include "tink/subtle/ec_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
@@ -85,7 +85,7 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> EciesAeadHkdfHybridDecrypt::New(
 util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
   // Extract KEM-bytes from the ciphertext.
-  auto header_size_result = subtle::EcUtil::EncodingSizeInBytes(
+  auto header_size_result = internal::EcPointEncodingSizeInBytes(
       util::Enums::ProtoToSubtle(
           recipient_key_params_.kem_params().curve_type()),
       util::Enums::ProtoToSubtle(recipient_key_params_.ec_point_format()));

@@ -96,6 +96,17 @@ crypto::tink::util::StatusOr<std::string> EcPointEncode(
     crypto::tink::subtle::EllipticCurveType curve_type,
     crypto::tink::subtle::EcPointFormat format, const EC_POINT *point);
 
+// Returns the encoding size of a point on the specified elliptic curve
+// `curve_type` when the given point `format` is used.
+util::StatusOr<int32_t> EcPointEncodingSizeInBytes(
+    crypto::tink::subtle::EllipticCurveType curve_type,
+    crypto::tink::subtle::EcPointFormat format);
+
+// Returns the size (in bytes) of an element of the field over which
+// the curve `curve_type` is defined.
+util::StatusOr<int32_t> EcFieldSizeInBytes(
+    crypto::tink::subtle::EllipticCurveType curve_type);
+
 // EC_GROUP Utils.
 
 // Returns OpenSSL/BoringSSL's EC_GROUP constructed from the given `curve_type`.

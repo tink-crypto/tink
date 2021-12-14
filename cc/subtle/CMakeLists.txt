@@ -92,16 +92,12 @@ tink_cc_library(
 tink_cc_library(
   NAME ec_util
   SRCS
-    ec_util.cc
     ec_util.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
-    absl::status
-    absl::strings
+    absl::core_headers
     crypto
-    tink::internal::ssl_unique_ptr
-    tink::util::errors
+    tink::internal::ec_util
     tink::util::status
     tink::util::statusor
 )
@@ -785,13 +781,9 @@ tink_cc_library(
   DEPS
     absl::memory
     absl::status
-    tink::core::cc
-    tink::core::mac
-    tink::core::output_stream_with_result
     tink::core::streaming_mac
     tink::subtle::mac::stateful_mac
     tink::util::status
-    tink::util::statusor
 )
 
 tink_cc_library(
@@ -889,19 +881,6 @@ tink_cc_test(
 )
 
 tink_cc_test(
-  NAME ec_util_test
-  SRCS
-    ec_util_test.cc
-  DEPS
-    tink::subtle::common_enums
-    tink::subtle::ec_util
-    gmock
-    tink::util::status
-    tink::util::statusor
-    tink::util::test_util
-)
-
-tink_cc_test(
   NAME hkdf_test
   SRCS
     hkdf_test.cc
@@ -995,9 +974,7 @@ tink_cc_test(
   DEPS
     tink::subtle::aes_gcm_hkdf_stream_segment_encrypter
     tink::subtle::random
-    tink::subtle::stream_segment_encrypter
     gmock
-    absl::memory
     absl::status
     absl::strings
     tink::util::status
@@ -1130,7 +1107,6 @@ tink_cc_test(
     ecdsa_sign_boringssl_test.cc
   DEPS
     tink::subtle::common_enums
-    tink::subtle::ec_util
     tink::subtle::ecdsa_sign_boringssl
     tink::subtle::ecdsa_verify_boringssl
     tink::subtle::subtle_util_boringssl
@@ -1139,6 +1115,7 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::config::tink_fips
+    tink::internal::ec_util
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
@@ -1365,7 +1342,6 @@ tink_cc_test(
     wycheproof::testvectors
   DEPS
     tink::subtle::common_enums
-    tink::subtle::ec_util
     tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
     gmock
@@ -1507,7 +1483,6 @@ tink_cc_test(
     tink::subtle::test_util
     gmock
     absl::status
-    tink::core::output_stream_with_result
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

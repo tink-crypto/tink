@@ -37,7 +37,6 @@
 #include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/ec_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -122,17 +121,17 @@ bool WycheproofTest(const rapidjson::Value& root) {
       if (skip) {
         continue;
       }
-      auto status_or_point_size = EcUtil::EncodingSizeInBytes(curve, format);
-      if (!status_or_point_size.ok()) {
+      util::StatusOr<int32_t> point_size =
+          internal::EcPointEncodingSizeInBytes(curve, format);
+      if (!point_size.ok()) {
         continue;
       }
-      size_t point_size = status_or_point_size.ValueOrDie();
-      if (point_size > pub_bytes.size()) {
+      if (*point_size > pub_bytes.size()) {
         continue;
       }
-      pub_bytes = pub_bytes.substr(pub_bytes.size() - point_size, point_size);
+      pub_bytes = pub_bytes.substr(pub_bytes.size() - *point_size, *point_size);
       auto status_or_ec_point =
-          SubtleUtilBoringSSL ::EcPointDecode(curve, format, pub_bytes);
+          SubtleUtilBoringSSL::EcPointDecode(curve, format, pub_bytes);
       if (!status_or_ec_point.ok()) {
         if (result == "valid") {
           ADD_FAILURE() << "Could not decode public key with tcId:" << id

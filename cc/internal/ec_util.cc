@@ -94,29 +94,6 @@ util::StatusOr<SslUniquePtr<EC_POINT>> SslGetEcPointFromCoordinates(
   return std::move(pub_key);
 }
 
-// Returns the encoding size for the given `curve` and point `format`.
-util::StatusOr<int32_t> EncodingSizeInBytes(EllipticCurveType curve,
-                                            EcPointFormat format) {
-  util::StatusOr<SslUniquePtr<EC_GROUP>> group = EcGroupFromCurveType(curve);
-  if (!group.ok()) {
-    return group.status();
-  }
-  const int kCurveSizeInBytes = (EC_GROUP_get_degree(group->get()) + 7) / 8;
-  switch (format) {
-    case EcPointFormat::UNCOMPRESSED:
-      return 2 * kCurveSizeInBytes + 1;
-    case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
-      return 2 * kCurveSizeInBytes;
-    case EcPointFormat::COMPRESSED:
-      return kCurveSizeInBytes + 1;
-    default:
-      return util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat("Unsupported elliptic curve point format: %s",
-                       subtle::EnumToString(format)));
-  }
-}
-
 // Returns an EC_POINT from an `encoded` point with format `format` and curve
 // type `curve`. `format` is either COMPRESSED or UNCOMPRESSED.
 util::StatusOr<SslUniquePtr<EC_POINT>> SslGetEcPointFromEncoded(
@@ -132,7 +109,8 @@ util::StatusOr<SslUniquePtr<EC_POINT>> SslGetEcPointFromEncoded(
     return group.status();
   }
 
-  util::StatusOr<int32_t> encoding_size = EncodingSizeInBytes(curve, format);
+  util::StatusOr<int32_t> encoding_size =
+      EcPointEncodingSizeInBytes(curve, format);
   if (!encoding_size.ok()) {
     return encoding_size.status();
   }
@@ -201,7 +179,7 @@ size_t ScalarSizeInBytes(const EC_GROUP *group) {
   return BN_num_bytes(EC_GROUP_get0_order(group));
 }
 
-size_t FieldElementSizeInBytes(const EC_GROUP *group) {
+size_t SslEcFieldSizeInBytes(const EC_GROUP *group) {
   unsigned degree_bits = EC_GROUP_get_degree(group);
   return (degree_bits + 7) / 8;
 }
@@ -223,7 +201,8 @@ util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
     return pub_key_bns.status();
   }
 
-  const int kFieldElementSizeInBytes = FieldElementSizeInBytes(group->get());
+  const int kFieldElementSizeInBytes = SslEcFieldSizeInBytes(group->get());
+
   util::StatusOr<std::string> pub_x_str =
       BignumToString(pub_key_bns->x.get(), kFieldElementSizeInBytes);
   if (!pub_x_str.ok()) {
@@ -249,6 +228,47 @@ util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
 }
 
 }  // namespace
+
+util::StatusOr<int32_t> EcFieldSizeInBytes(EllipticCurveType curve_type) {
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    return 32;
+  }
+  util::StatusOr<SslUniquePtr<EC_GROUP>> ec_group =
+      EcGroupFromCurveType(curve_type);
+  if (!ec_group.ok()) {
+    return ec_group.status();
+  }
+  return SslEcFieldSizeInBytes(ec_group->get());
+}
+
+util::StatusOr<int32_t> EcPointEncodingSizeInBytes(EllipticCurveType curve_type,
+                                                   EcPointFormat point_format) {
+  util::StatusOr<int32_t> coordinate_size = EcFieldSizeInBytes(curve_type);
+  if (!coordinate_size.ok()) {
+    return coordinate_size.status();
+  }
+  if (curve_type == EllipticCurveType::CURVE25519) {
+    return coordinate_size;
+  }
+  if (*coordinate_size == 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        absl::StrCat("Unsupported elliptic curve type: ",
+                                     EnumToString(curve_type)));
+  }
+  switch (point_format) {
+    case EcPointFormat::UNCOMPRESSED:
+      return 2 * (*coordinate_size) + 1;
+    case EcPointFormat::COMPRESSED:
+      return (*coordinate_size) + 1;
+    case EcPointFormat::DO_NOT_USE_CRUNCHY_UNCOMPRESSED:
+      return 2 * (*coordinate_size);
+    default:
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrCat("Unsupported elliptic curve point format: ",
+                       EnumToString(point_format)));
+  }
+}
 
 util::StatusOr<EcKey> NewEcKey(EllipticCurveType curve_type) {
   if (curve_type == EllipticCurveType::CURVE25519) {
@@ -382,7 +402,6 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
   if (EC_POINT_is_on_curve(group->get(), point, nullptr) != 1) {
     return util::Status(absl::StatusCode::kInternal, "Point is not on curve");
   }
-
   switch (format) {
     case EcPointFormat::UNCOMPRESSED: {
       return SslEcPointEncode(group->get(), point,
@@ -397,7 +416,7 @@ util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
       if (!ec_point_xy.ok()) {
         return ec_point_xy.status();
       }
-      const int kCurveSizeInBytes = FieldElementSizeInBytes(group->get());
+      const int kCurveSizeInBytes = SslEcFieldSizeInBytes(group->get());
       std::string encoded_point;
       subtle::ResizeStringUninitialized(&encoded_point, 2 * kCurveSizeInBytes);
       util::Status res = BignumToBinaryPadded(
@@ -437,7 +456,7 @@ util::StatusOr<SslUniquePtr<EC_POINT>> EcPointDecode(
       if (!group.ok()) {
         return group.status();
       }
-      const int kCurveSizeInBytes = FieldElementSizeInBytes(group->get());
+      const int kCurveSizeInBytes = SslEcFieldSizeInBytes(group->get());
       if (encoded.size() != 2 * kCurveSizeInBytes) {
         return util::Status(
             absl::StatusCode::kInternal,

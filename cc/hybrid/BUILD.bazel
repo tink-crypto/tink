@@ -178,8 +178,8 @@ cc_library(
     deps = [
         ":ecies_aead_hkdf_dem_helper",
         "//:hybrid_decrypt",
+        "//internal:ec_util",
         "//proto:ecies_aead_hkdf_cc_proto",
-        "//subtle:ec_util",
         "//subtle:ecies_hkdf_recipient_kem_boringssl",
         "//util:enums",
         "//util:secret_data",
