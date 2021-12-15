@@ -23,7 +23,6 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
-#include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
@@ -31,6 +30,8 @@
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/subtle/wycheproof_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -40,6 +41,7 @@ namespace {
 
 using ::crypto::tink::subtle::EcPointFormat;
 using ::crypto::tink::subtle::EllipticCurveType;
+using ::crypto::tink::subtle::WycheproofUtil;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::crypto::tink::test::StatusIs;
@@ -49,12 +51,52 @@ using ::testing::Eq;
 using ::testing::Field;
 using ::testing::HasSubstr;
 using ::testing::IsEmpty;
+using ::testing::IsNull;
 using ::testing::Matcher;
 using ::testing::Not;
 using ::testing::SizeIs;
 using ::testing::TestParamInfo;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
+
+// Use wycheproof test vectors to verify Ed25519 key generation from a seed (the
+// private key) results in the public/private key.
+TEST(EcUtilTest, NewEd25519KeyWithWycheproofTestVectors) {
+  std::unique_ptr<rapidjson::Document> test_vectors =
+      WycheproofUtil::ReadTestVectors("eddsa_test.json");
+  ASSERT_THAT(test_vectors, Not(IsNull()));
+
+  // For this test we are only interested in Ed25519 keys.
+  for (const auto& test_group : (*test_vectors)["testGroups"].GetArray()) {
+    std::string private_key = WycheproofUtil::GetBytes(test_group["key"]["sk"]);
+    std::string public_key = WycheproofUtil::GetBytes(test_group["key"]["pk"]);
+
+    util::StatusOr<std::unique_ptr<Ed25519Key>> key =
+        NewEd25519Key(util::SecretDataFromStringView(private_key));
+    ASSERT_THAT(key.status(), IsOk());
+    EXPECT_EQ((*key)->public_key, public_key);
+    EXPECT_EQ((*key)->private_key, private_key);
+  }
+}
+
+TEST(EcUtilTest, NewEd25519KeyInvalidSeed) {
+  std::string valid_seed = absl::HexStringToBytes(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f");
+  // Seed that is too small.
+  for (int i = 0; i < 32; i++) {
+    EXPECT_THAT(
+        NewEd25519Key(util::SecretDataFromStringView(valid_seed.substr(0, i)))
+            .status(),
+        Not(IsOk()))
+        << " with seed of length " << i;
+  }
+  // Seed that is too large.
+  std::string large_seed = absl::StrCat(valid_seed, "a");
+  EXPECT_THAT(
+      NewEd25519Key(util::SecretDataFromStringView(large_seed)).status(),
+      Not(IsOk()))
+      << " with seed of length " << large_seed.size();
+}
 
 TEST(EcUtilTest, NewEcKeyReturnsWellFormedX25519Key) {
   util::StatusOr<EcKey> ec_key =

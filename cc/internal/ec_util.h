@@ -31,6 +31,9 @@ namespace internal {
 constexpr int64_t X25519KeyPubKeySize() { return 32; }
 constexpr int64_t X25519KeyPrivKeySize() { return 32; }
 
+constexpr int64_t Ed25519KeyPubKeySize() { return 32; }
+constexpr int64_t Ed25519KeyPrivKeySize() { return 32; }
+
 struct EcKey {
   subtle::EllipticCurveType curve;
   // Affine coordinates in bigendian representation.
@@ -61,7 +64,7 @@ crypto::tink::util::StatusOr<EcKey> NewEcKey(
     crypto::tink::subtle::EllipticCurveType curve_type,
     const crypto::tink::util::SecretData &secret_seed);
 
-// X25519 Key Utils.
+// X25519Key Utils.
 
 // Returns a new X25519Key key. It returns a kInternal error status if the
 // OpenSSL/BoringSSL APIs fail.
@@ -73,6 +76,15 @@ crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
 
 // Returns an EcKey matching the specified X25519Key.
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
+
+// Ed25519Key Utils.
+
+// Returns a new ED25519 key.
+crypto::tink::util::StatusOr<std::unique_ptr<Ed25519Key>> NewEd25519Key();
+
+// Returns a new ED25519 key generated from a 32-byte secret seed.
+crypto::tink::util::StatusOr<std::unique_ptr<Ed25519Key>> NewEd25519Key(
+    const crypto::tink::util::SecretData &secret_seed);
 
 // EC_POINT Encode/Decode.
 

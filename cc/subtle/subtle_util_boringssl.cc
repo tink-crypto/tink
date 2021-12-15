@@ -61,37 +61,6 @@ size_t FieldElementSizeInBytes(const EC_GROUP *group) {
 }  // namespace
 
 // static
-std::unique_ptr<SubtleUtilBoringSSL::Ed25519Key>
-SubtleUtilBoringSSL::GetNewEd25519Key() {
-  // Generate a new secret seed.
-  util::SecretData secret_seed = util::SecretDataFromStringView(
-      crypto::tink::subtle::Random::GetRandomBytes(32));
-  return GetNewEd25519KeyFromSeed(secret_seed);
-}
-
-// static
-std::unique_ptr<SubtleUtilBoringSSL::Ed25519Key>
-SubtleUtilBoringSSL::GetNewEd25519KeyFromSeed(
-    const util::SecretData &secret_seed) {
-  // Generate a new key pair.
-  uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
-  uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
-
-  ED25519_keypair_from_seed(out_public_key, out_private_key,
-                            secret_seed.data());
-
-  auto key = absl::make_unique<Ed25519Key>();
-  key->public_key = std::string(reinterpret_cast<const char *>(out_public_key),
-                                ED25519_PUBLIC_KEY_LEN);
-  std::string tmp = std::string(reinterpret_cast<const char *>(out_private_key),
-                                ED25519_PRIVATE_KEY_LEN);
-  // ED25519_keypair appends the public key at the end of the private key. Keep
-  // the first 32 bytes that contain the private key and discard the public key.
-  key->private_key = tmp.substr(0, 32);
-  return key;
-}
-
-// static
 util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
   util::StatusOr<internal::SslUniquePtr<EC_GROUP>> priv_group =

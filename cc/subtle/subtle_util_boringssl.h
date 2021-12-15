@@ -163,11 +163,26 @@ class SubtleUtilBoringSSL {
   }
 
   // Returns a new ED25519 key.
-  static std::unique_ptr<Ed25519Key> GetNewEd25519Key();
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline std::unique_ptr<Ed25519Key> GetNewEd25519Key() {
+    util::StatusOr<std::unique_ptr<Ed25519Key>> key = internal::NewEd25519Key();
+    if (!key.ok()) {
+      return nullptr;
+    }
+    return *std::move(key);
+  }
 
   // Returns a new ED25519 key generated from a 32-byte secret seed.
-  static std::unique_ptr<Ed25519Key> GetNewEd25519KeyFromSeed(
-      const util::SecretData &secret_seed);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline std::unique_ptr<Ed25519Key> GetNewEd25519KeyFromSeed(
+      const util::SecretData &secret_seed) {
+    util::StatusOr<std::unique_ptr<Ed25519Key>> key =
+        internal::NewEd25519Key(secret_seed);
+    if (!key.ok()) {
+      return nullptr;
+    }
+    return *std::move(key);
+  }
 
   // Returns BoringSSL's EC_POINT constructed from curve type, point format and
   // encoded public key's point. The uncompressed point is encoded as

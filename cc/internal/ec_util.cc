@@ -26,6 +26,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "openssl/bn.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
@@ -33,7 +34,9 @@
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
+#include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -227,6 +230,62 @@ util::StatusOr<EcKey> EcKeyFromSslEcKey(EllipticCurveType curve,
   return ec_key;
 }
 
+enum SslEvpPkeyType {
+  kX25519Key = EVP_PKEY_X25519,
+  kEd25519Key = EVP_PKEY_ED25519
+};
+
+// Returns a new EVP_PKEY key from the given `key_type`.
+util::StatusOr<SslUniquePtr<EVP_PKEY>> SslNewEvpKey(SslEvpPkeyType key_type) {
+  EVP_PKEY *private_key = nullptr;
+  SslUniquePtr<EVP_PKEY_CTX> pctx(EVP_PKEY_CTX_new_id(key_type, /*e=*/nullptr));
+  if (pctx == nullptr) {
+    return util::Status(
+        absl::StatusCode::kInternal,
+        absl::StrCat("EVP_PKEY_CTX_new_id failed for id ", key_type));
+  }
+
+  if (EVP_PKEY_keygen_init(pctx.get()) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_keygen_init failed");
+  }
+  if (EVP_PKEY_keygen(pctx.get(), &private_key) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "EVP_PKEY_keygen failed");
+  }
+  return {SslUniquePtr<EVP_PKEY>(private_key)};
+}
+
+// Given a private EVP_PKEY `evp_key` of key type `key_type` fills `priv_key`
+// and `pub_key` with raw private and public keys, respectively.
+util::Status SslNewKeyPairFromEcKey(SslEvpPkeyType key_type,
+                                    const EVP_PKEY &evp_key,
+                                    absl::Span<uint8_t> priv_key,
+                                    absl::Span<uint8_t> pub_key) {
+  size_t len = priv_key.size();
+  if (EVP_PKEY_get_raw_private_key(&evp_key, priv_key.data(), &len) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_get_raw_private_key failed");
+  }
+  if (len != priv_key.size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        absl::StrCat("Invalid private key size; expected ",
+                                     priv_key.size(), " got ", len));
+  }
+
+  len = pub_key.size();
+  if (EVP_PKEY_get_raw_public_key(&evp_key, pub_key.data(), &len) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_get_raw_public_key failed");
+  }
+  if (len != pub_key.size()) {
+    return util::Status(absl::StatusCode::kInternal,
+                        absl::StrCat("Invalid public key size; expected ",
+                                     pub_key.size(), " got ", len));
+  }
+
+  return util::OkStatus();
+}
+
 }  // namespace
 
 util::StatusOr<int32_t> EcFieldSizeInBytes(EllipticCurveType curve_type) {
@@ -333,30 +392,19 @@ util::StatusOr<EcKey> NewEcKey(EllipticCurveType curve_type,
 }
 
 util::StatusOr<std::unique_ptr<X25519Key>> NewX25519Key() {
-  auto key = absl::make_unique<X25519Key>();
-  EVP_PKEY *private_key = nullptr;
-  SslUniquePtr<EVP_PKEY_CTX> pctx(
-      EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, /*e=*/nullptr));
-  if (EVP_PKEY_keygen_init(pctx.get()) != 1) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "EVP_PKEY_keygen_init failed");
+  util::StatusOr<SslUniquePtr<EVP_PKEY>> private_key =
+      SslNewEvpKey(SslEvpPkeyType::kX25519Key);
+  if (!private_key.ok()) {
+    return private_key.status();
   }
-  if (EVP_PKEY_keygen(pctx.get(), &private_key) != 1) {
-    return util::Status(absl::StatusCode::kInternal, "EVP_PKEY_keygen failed");
-  }
-  SslUniquePtr<EVP_PKEY> private_key_ptr(private_key);
 
-  size_t len = X25519KeyPrivKeySize();
-  if (EVP_PKEY_get_raw_private_key(private_key_ptr.get(), key->private_key,
-                                   &len) != 1) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "EVP_PKEY_get_raw_private_key failed");
-  }
-  len = X25519KeyPubKeySize();
-  if (EVP_PKEY_get_raw_public_key(private_key_ptr.get(), key->public_value,
-                                  &len) != 1) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "EVP_PKEY_get_raw_public_key failed");
+  auto key = absl::make_unique<X25519Key>();
+  util::Status res = SslNewKeyPairFromEcKey(
+      SslEvpPkeyType::kX25519Key, **private_key,
+      absl::MakeSpan(key->private_key, X25519KeyPrivKeySize()),
+      absl::MakeSpan(key->public_value, X25519KeyPubKeySize()));
+  if (!res.ok()) {
+    return res;
   }
   return key;
 }
@@ -371,6 +419,48 @@ EcKey EcKeyFromX25519Key(const X25519Key *x25519_key) {
   ec_key.priv = util::SecretData(std::begin(x25519_key->private_key),
                                  std::end(x25519_key->private_key));
   return ec_key;
+}
+
+util::StatusOr<std::unique_ptr<Ed25519Key>> NewEd25519Key() {
+  util::SecretData seed =
+      subtle::Random::GetRandomKeyBytes(Ed25519KeyPrivKeySize());
+  return NewEd25519Key(seed);
+}
+
+util::StatusOr<std::unique_ptr<Ed25519Key>> NewEd25519Key(
+    const util::SecretData &secret_seed) {
+  if (secret_seed.size() != Ed25519KeyPrivKeySize()) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid seed of length ", secret_seed.size(),
+                     "; expected ", Ed25519KeyPrivKeySize()));
+  }
+
+  // In BoringSSL this calls ED25519_keypair_from_seed. Accessing the public key
+  // with EVP_PKEY_get_raw_public_key returns the last 32 bytes of the private
+  // key stored by BoringSSL.
+  SslUniquePtr<EVP_PKEY> priv_key(EVP_PKEY_new_raw_private_key(
+      SslEvpPkeyType::kEd25519Key, nullptr, secret_seed.data(),
+      Ed25519KeyPrivKeySize()));
+  if (priv_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_private_key failed");
+  }
+
+  auto key = absl::make_unique<Ed25519Key>();
+  subtle::ResizeStringUninitialized(&key->private_key, Ed25519KeyPrivKeySize());
+  subtle::ResizeStringUninitialized(&key->public_key, Ed25519KeyPubKeySize());
+  uint8_t *priv_key_ptr = reinterpret_cast<uint8_t *>(&key->private_key[0]);
+  uint8_t *pub_key_ptr = reinterpret_cast<uint8_t *>(&key->public_key[0]);
+  // The EVP_PKEY interface returns only the first 32 bytes of the private key.
+  util::Status res = SslNewKeyPairFromEcKey(
+      SslEvpPkeyType::kEd25519Key, *priv_key,
+      absl::MakeSpan(priv_key_ptr, Ed25519KeyPrivKeySize()),
+      absl::MakeSpan(pub_key_ptr, Ed25519KeyPubKeySize()));
+  if (!res.ok()) {
+    return res;
+  }
+  return std::move(key);
 }
 
 util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(

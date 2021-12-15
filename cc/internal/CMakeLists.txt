@@ -135,6 +135,7 @@ tink_cc_library(
     absl::span
     crypto
     tink::subtle::common_enums
+    tink::subtle::random
     tink::subtle::subtle_util
     tink::util::secret_data
     tink::util::status
@@ -309,6 +310,8 @@ tink_cc_test(
   NAME ec_util_test
   SRCS
     ec_util_test.cc
+  DATA
+    wycheproof::testvectors
   DEPS
     tink::internal::bn_util
     tink::internal::ec_util
@@ -320,6 +323,8 @@ tink_cc_test(
     crypto
     tink::subtle::common_enums
     tink::subtle::subtle_util
+    tink::subtle::wycheproof_util
+    tink::util::secret_data
     tink::util::test_matchers
 )
 

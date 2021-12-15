@@ -164,23 +164,6 @@ TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
       *WycheproofUtil ::ReadTestVectors("ecdh_secp521r1_test.json")));
 }
 
-TEST(CreatesNewEd25519KeyPairTest, BoringSSLPrivateKeySuffix) {
-  // Generate a new key pair.
-  uint8_t out_public_key[ED25519_PUBLIC_KEY_LEN];
-  uint8_t out_private_key[ED25519_PRIVATE_KEY_LEN];
-
-  ED25519_keypair(out_public_key, out_private_key);
-  std::string pk = std::string(reinterpret_cast<const char*>(out_public_key),
-                               ED25519_PUBLIC_KEY_LEN);
-  std::string sk = std::string(reinterpret_cast<const char*>(out_private_key),
-                               ED25519_PRIVATE_KEY_LEN);
-  ASSERT_EQ(pk.length(), 32);
-  ASSERT_EQ(sk.length(), 64);
-  // BoringSSL's ED25519_keypair returns a private key with the last 32-bytes
-  // equal to the public key. If this changes you must update
-  // SubtleUtilBoringSSL::GetNewEd25519Key().
-  ASSERT_EQ(sk.substr(32, std::string::npos), pk);
-}
 
 TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {
   EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(16),
