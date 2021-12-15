@@ -33,6 +33,7 @@
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
@@ -214,18 +215,24 @@ class SubtleUtilBoringSSL {
 
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.
-  static crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
-      HashType hash_type);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<const EVP_MD *> EvpHash(
+      HashType hash_type) {
+    return internal::EvpHashFromHashType(hash_type);
+  }
+
+  // Validates whether 'sig_hash' is safe to use for digital signature.
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::Status ValidateSignatureHash(
+      subtle::HashType sig_hash) {
+    return internal::IsHashTypeSafeForSignature(sig_hash);
+  }
 
   // Return an empty string if str.data() is nullptr; otherwise return str.
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
   static inline absl::string_view EnsureNonNull(absl::string_view str) {
     return internal::EnsureStringNonNull(str);
   }
-
-  // Validates whether 'sig_hash' is safe to use for digital signature.
-  static crypto::tink::util::Status ValidateSignatureHash(
-      subtle::HashType sig_hash);
 
   ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
   static inline crypto::tink::util::Status ValidateRsaModulusSize(
@@ -299,8 +306,15 @@ class SubtleUtilBoringSSL {
 namespace boringssl {
 
 // Computes hash of 'input' using the hash function 'hasher'.
-util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
-                                                 const EVP_MD &hasher);
+ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+inline util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
+                                                        const EVP_MD &hasher) {
+  util::StatusOr<std::string> res = internal::ComputeHash(input, hasher);
+  if (!res.ok()) {
+    return res.status();
+  }
+  return std::vector<uint8_t>(res->begin(), res->end());
+}
 
 }  // namespace boringssl
 }  // namespace subtle

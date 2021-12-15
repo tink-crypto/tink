@@ -637,6 +637,7 @@ cc_library(
         "//internal:bn_util",
         "//internal:ec_util",
         "//internal:err_util",
+        "//internal:md_util",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",

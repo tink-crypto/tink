@@ -322,3 +322,35 @@ tink_cc_test(
     tink::subtle::subtle_util
     tink::util::test_matchers
 )
+
+tink_cc_library(
+  NAME md_util
+  SRCS
+    md_util.cc
+    md_util.h
+  DEPS
+    tink::internal::err_util
+    tink::internal::util
+    absl::status
+    absl::strings
+    crypto
+    tink::subtle::common_enums
+    tink::subtle::subtle_util
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME md_util_test
+  SRCS
+    md_util_test.cc
+  DEPS
+    tink::internal::md_util
+    gmock
+    absl::strings
+    absl::span
+    crypto
+    tink::subtle::common_enums
+    tink::util::statusor
+    tink::util::test_matchers
+)

@@ -48,23 +48,6 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
-using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
-using ::testing::StrEq;
-
-TEST(SubtleUtilBoringSSLTest, ValidateSignatureHash) {
-  EXPECT_TRUE(
-      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA256).ok());
-  EXPECT_TRUE(
-      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA384).ok());
-  EXPECT_TRUE(
-      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA512).ok());
-  EXPECT_FALSE(SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA1).ok());
-  EXPECT_FALSE(
-      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::SHA224).ok());
-  EXPECT_FALSE(
-      SubtleUtilBoringSSL::ValidateSignatureHash(HashType::UNKNOWN_HASH).ok());
-}
 
 static std::string GetError() {
   auto err = ERR_peek_last_error();
@@ -205,58 +188,6 @@ TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {
   EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(32),
             EVP_aes_256_ctr());
   EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(64), nullptr);
-}
-
-TEST(ComputeHashTest, AcceptsNullStringView) {
-  auto null_hash =
-      boringssl::ComputeHash(absl::string_view(nullptr, 0), *EVP_sha512());
-  auto empty_hash = boringssl::ComputeHash("", *EVP_sha512());
-  std::string str;
-  auto empty_str_hash = boringssl::ComputeHash(str, *EVP_sha512());
-
-  ASSERT_THAT(null_hash.status(), IsOk());
-  ASSERT_THAT(empty_hash.status(), IsOk());
-  ASSERT_THAT(empty_str_hash.status(), IsOk());
-
-  EXPECT_EQ(null_hash.ValueOrDie(), empty_hash.ValueOrDie());
-  EXPECT_EQ(null_hash.ValueOrDie(), empty_str_hash.ValueOrDie());
-}
-
-using ComputeHashSamplesTest = ::testing::TestWithParam<
-    std::tuple<HashType, absl::string_view, absl::string_view>>;
-
-INSTANTIATE_TEST_SUITE_P(
-    NistSampleCases, ComputeHashSamplesTest,
-    ::testing::Values(
-        std::make_tuple(
-            HashType::SHA256, "af397a8b8dd73ab702ce8e53aa9f",
-            "d189498a3463b18e846b8ab1b41583b0b7efc789dad8a7fb885bbf8fb5b45c5c"),
-        std::make_tuple(
-            HashType::SHA256, "59eb45bbbeb054b0b97334d53580ce03f699",
-            "32c38c54189f2357e96bd77eb00c2b9c341ebebacc2945f97804f59a93238288"),
-        std::make_tuple(
-            HashType::SHA512,
-            "16b17074d3e3d97557f9ed77d920b4b1bff4e845b345a922",
-            "6884134582a760046433abcbd53db8ff1a89995862f305b887020f6da6c7b903a3"
-            "14721e972bf438483f452a8b09596298a576c903c91df4a414c7bd20fd1d07"),
-        std::make_tuple(
-            HashType::SHA512,
-            "7651ab491b8fa86f969d42977d09df5f8bee3e5899180b52c968b0db057a6f02a8"
-            "86ad617a84915a",
-            "f35e50e2e02b8781345f8ceb2198f068ba103476f715cfb487a452882c9f0de0c7"
-            "20b2a088a39d06a8a6b64ce4d6470dfeadc4f65ae06672c057e29f14c4daf9")));
-
-TEST_P(ComputeHashSamplesTest, ComputesHash) {
-  const EVP_MD* hasher =
-      SubtleUtilBoringSSL::EvpHash(std::get<0>(GetParam())).ValueOrDie();
-  std::string data = absl::HexStringToBytes(std::get<1>(GetParam()));
-  std::string expected_hash = absl::HexStringToBytes(std::get<2>(GetParam()));
-
-  auto hash_or = boringssl::ComputeHash(data, *hasher);
-  ASSERT_THAT(hash_or.status(), IsOk());
-  std::string hash(reinterpret_cast<char*>(hash_or.ValueOrDie().data()),
-                   hash_or.ValueOrDie().size());
-  EXPECT_THAT(hash, StrEq(expected_hash));
 }
 
 }  // namespace

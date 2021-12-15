@@ -92,25 +92,6 @@ SubtleUtilBoringSSL::GetNewEd25519KeyFromSeed(
 }
 
 // static
-util::StatusOr<const EVP_MD *> SubtleUtilBoringSSL::EvpHash(
-    HashType hash_type) {
-  switch (hash_type) {
-    case HashType::SHA1:
-      return EVP_sha1();
-    case HashType::SHA224:
-      return EVP_sha224();
-    case HashType::SHA256:
-      return EVP_sha256();
-    case HashType::SHA384:
-      return EVP_sha384();
-    case HashType::SHA512:
-      return EVP_sha512();
-    default:
-      return util::Status(absl::StatusCode::kUnimplemented, "Unsupported hash");
-  }
-}
-
-// static
 util::StatusOr<util::SecretData> SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
     EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
   util::StatusOr<internal::SslUniquePtr<EC_GROUP>> priv_group =
@@ -187,24 +168,6 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
   return result;
 }
 
-// static
-util::Status SubtleUtilBoringSSL::ValidateSignatureHash(HashType sig_hash) {
-  switch (sig_hash) {
-    case HashType::SHA256: /* fall through */
-    case HashType::SHA384:
-    case HashType::SHA512:
-      return util::OkStatus();
-    case HashType::SHA1: /* fall through */
-    case HashType::SHA224:
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          absl::StrCat("Hash function ", EnumToString(sig_hash),
-                                       " is not safe for digital signature"));
-    default:
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          "Unsupported hash function");
-  }
-}
-
 const EVP_CIPHER *SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
     uint32_t size_in_bytes) {
   util::StatusOr<const EVP_CIPHER *> res =
@@ -236,25 +199,6 @@ const EVP_AEAD *SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
   return *res;
 }
 #endif
-
-namespace boringssl {
-
-util::StatusOr<std::vector<uint8_t>> ComputeHash(absl::string_view input,
-                                                 const EVP_MD &hasher) {
-  input = internal::EnsureStringNonNull(input);
-  std::vector<uint8_t> digest(EVP_MAX_MD_SIZE);
-  uint32_t digest_length = 0;
-  if (EVP_Digest(input.data(), input.length(), digest.data(), &digest_length,
-                 &hasher, /*impl=*/nullptr) != 1) {
-    return util::Status(absl::StatusCode::kInternal,
-                        absl::StrCat("Openssl internal error computing hash: ",
-                                     internal::GetSslErrors()));
-  }
-  digest.resize(digest_length);
-  return digest;
-}
-
-}  // namespace boringssl
 
 }  // namespace subtle
 }  // namespace tink

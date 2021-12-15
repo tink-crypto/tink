@@ -201,6 +201,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "md_util",
+    srcs = ["md_util.cc"],
+    hdrs = ["md_util.h"],
+    include_prefix = "tink/internal",
+    deps = [
+        ":err_util",
+        ":util",
+        "//subtle:common_enums",
+        "//subtle:subtle_util",
+        "//util:status",
+        "//util:statusor",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_test(
     name = "util_test",
     srcs = ["util_test.cc"],
@@ -345,6 +363,22 @@ cc_test(
         ":ssl_unique_ptr",
         "//subtle:common_enums",
         "//subtle:subtle_util",
+        "//util:test_matchers",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "md_util_test",
+    size = "small",
+    srcs = ["md_util_test.cc"],
+    deps = [
+        ":md_util",
+        "//subtle:common_enums",
+        "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",
