@@ -165,14 +165,6 @@ TEST(SubtleUtilBoringSSLTest, ComputeEcdhSharedSecretWithWycheproofTest) {
 }
 
 
-TEST(SublteUtilBoringSSLTest, GetCipherForKeySize) {
-  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(16),
-            EVP_aes_128_ctr());
-  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(32),
-            EVP_aes_256_ctr());
-  EXPECT_EQ(SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(64), nullptr);
-}
-
 }  // namespace
 }  // namespace subtle
 }  // namespace tink

@@ -30,6 +30,7 @@
 #include "openssl/curve25519.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
@@ -304,17 +305,41 @@ class SubtleUtilBoringSSL {
   }
 
   // Returns BoringSSL's AES CTR EVP_CIPHER for the key size.
-  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
-  static const EVP_CIPHER *GetAesCtrCipherForKeySize(uint32_t size_in_bytes);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline const EVP_CIPHER *GetAesCtrCipherForKeySize(
+      uint32_t size_in_bytes) {
+    util::StatusOr<const EVP_CIPHER *> res =
+        internal::GetAesCtrCipherForKeySize(size_in_bytes);
+    if (!res.ok()) {
+      return nullptr;
+    }
+    return *res;
+  }
 
   // Returns BoringSSL's AES GCM EVP_CIPHER for the key size.
-  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
-  static const EVP_CIPHER *GetAesGcmCipherForKeySize(uint32_t size_in_bytes);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline const EVP_CIPHER *GetAesGcmCipherForKeySize(
+      uint32_t size_in_bytes) {
+    util::StatusOr<const EVP_CIPHER *> res =
+        internal::GetAesGcmCipherForKeySize(size_in_bytes);
+    if (!res.ok()) {
+      return nullptr;
+    }
+    return *res;
+  }
 
 #ifdef OPENSSL_IS_BORINGSSL
   // Returns BoringSSL's AES GCM EVP_AEAD for the key size.
-  ABSL_DEPRECATED("Use the equivalent in aead/internal/aead_util instead.")
-  static const EVP_AEAD *GetAesGcmAeadForKeySize(uint32_t size_in_bytes);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline const EVP_AEAD *GetAesGcmAeadForKeySize(
+      uint32_t size_in_bytes) {
+    util::StatusOr<const EVP_AEAD *> res =
+        internal::GetAesGcmAeadForKeySize(size_in_bytes);
+    if (!res.ok()) {
+      return nullptr;
+    }
+    return *res;
+  }
 #endif
 };
 

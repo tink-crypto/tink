@@ -137,38 +137,6 @@ util::StatusOr<std::string> SubtleUtilBoringSSL::EcSignatureIeeeToDer(
   return result;
 }
 
-const EVP_CIPHER *SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(
-    uint32_t size_in_bytes) {
-  util::StatusOr<const EVP_CIPHER *> res =
-      internal::GetAesCtrCipherForKeySize(size_in_bytes);
-  if (!res.ok()) {
-    return nullptr;
-  }
-  return *res;
-}
-
-const EVP_CIPHER *SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(
-    uint32_t size_in_bytes) {
-  util::StatusOr<const EVP_CIPHER *> res =
-      internal::GetAesGcmCipherForKeySize(size_in_bytes);
-  if (!res.ok()) {
-    return nullptr;
-  }
-  return *res;
-}
-
-#ifdef OPENSSL_IS_BORINGSSL
-const EVP_AEAD *SubtleUtilBoringSSL::GetAesGcmAeadForKeySize(
-    uint32_t size_in_bytes) {
-  util::StatusOr<const EVP_AEAD *> res =
-      internal::GetAesGcmAeadForKeySize(size_in_bytes);
-  if (!res.ok()) {
-    return nullptr;
-  }
-  return *res;
-}
-#endif
-
 }  // namespace subtle
 }  // namespace tink
 }  // namespace crypto

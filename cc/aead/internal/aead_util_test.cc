@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "openssl/evp.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -25,15 +26,16 @@ namespace internal {
 namespace {
 
 using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::testing::Not;
-using ::testing::NotNull;
 
 TEST(AeadUtilTest, GetAesCtrCipherForKeySize) {
   for (int i = 0; i < 64; i++) {
     util::StatusOr<const EVP_CIPHER*> cipher = GetAesCtrCipherForKeySize(i);
-    if (i == 16 || i == 32) {
-      ASSERT_THAT(cipher.status(), IsOk());
-      EXPECT_THAT(*cipher, NotNull());
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_ctr()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_ctr()));
     } else {
       EXPECT_THAT(cipher.status(), Not(IsOk()));
     }
@@ -43,9 +45,10 @@ TEST(AeadUtilTest, GetAesCtrCipherForKeySize) {
 TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
   for (int i = 0; i < 64; i++) {
     util::StatusOr<const EVP_CIPHER*> cipher = GetAesGcmCipherForKeySize(i);
-    if (i == 16 || i == 32) {
-      ASSERT_THAT(cipher.status(), IsOk());
-      EXPECT_THAT(*cipher, NotNull());
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_gcm()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_gcm()));
     } else {
       EXPECT_THAT(cipher.status(), Not(IsOk()));
     }
@@ -57,9 +60,10 @@ TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
 TEST(AeadUtilTest, GetAesAeadForKeySize) {
   for (int i = 0; i < 64; i++) {
     util::StatusOr<const EVP_AEAD*> cipher = GetAesGcmAeadForKeySize(i);
-    if (i == 16 || i == 32) {
-      ASSERT_THAT(cipher.status(), IsOk());
-      EXPECT_THAT(*cipher, NotNull());
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_128_gcm()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_256_gcm()));
     } else {
       EXPECT_THAT(cipher.status(), Not(IsOk()));
     }
