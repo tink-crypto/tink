@@ -718,3 +718,9 @@ def tink_go_deps_init():
         sum = "h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=",
         version = "v3.0.0-20200313102051-9f266ea9e77c",
     )
+    go_repository(
+        name = "com_github_golang_protobuf",
+        importpath = "github.com/golang/protobuf",
+        sum = "h1:+Z5KGCizgyZCbGh1KZqA0fcLLkwbsjIzS4aV2v7wJX0=",
+        version = "v1.4.2",
+    )
