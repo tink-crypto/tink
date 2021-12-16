@@ -43,6 +43,17 @@ run_bazel_tests() {
 
     time bazel build -- ...
     time bazel test --test_output=errors -- ...
+
+    # Run manual tests which rely on key material injected into the Kokoro
+    # environement.
+    if [[ -n "${KOKORO_ROOT}" ]]; then
+      declare -a MANUAL_TARGETS
+      MANUAL_TARGETS=(
+        "//tink/integration/gcpkms:_gcp_kms_aead_test"
+      )
+      readonly MANUAL_TARGETS
+      time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
+    fi
   )
 }
 

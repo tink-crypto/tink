@@ -86,6 +86,4 @@ class GcpKmsAeadTest(absltest.TestCase):
         aead.decrypt(corrupted_ciphertext, b'')
 
 if __name__ == '__main__':
-  # TODO(b/154273145): re-enable this.
-  pass
-  # absltest.main()
+  absltest.main()
