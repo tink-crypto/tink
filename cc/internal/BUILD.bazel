@@ -6,9 +6,7 @@ cc_library(
     name = "ssl_util",
     hdrs = ["ssl_util.h"],
     include_prefix = "tink/internal",
-    deps = [
-        "@boringssl//:crypto",
-    ],
+    deps = ["@boringssl//:crypto"],
 )
 
 cc_library(
@@ -60,9 +58,7 @@ cc_library(
     name = "ssl_unique_ptr",
     hdrs = ["ssl_unique_ptr.h"],
     include_prefix = "tink/internal",
-    deps = [
-        "@boringssl//:crypto",
-    ],
+    deps = ["@boringssl//:crypto"],
 )
 
 cc_library(
@@ -70,9 +66,7 @@ cc_library(
     srcs = ["key_info.cc"],
     hdrs = ["key_info.h"],
     include_prefix = "tink/internal",
-    deps = [
-        "//proto:tink_cc_proto",
-    ],
+    deps = ["//proto:tink_cc_proto"],
 )
 
 cc_library(
@@ -136,9 +130,7 @@ cc_library(
     srcs = ["err_util.cc"],
     hdrs = ["err_util.h"],
     include_prefix = "tink/internal",
-    deps = [
-        "@boringssl//:crypto",
-    ],
+    deps = ["@boringssl//:crypto"],
 )
 
 cc_library(
@@ -260,7 +252,7 @@ cc_test(
     name = "registry_impl_test",
     size = "small",
     srcs = ["registry_impl_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
+    tags = ["fips"],
     deps = [
         "//:aead",
         "//:catalogue",
@@ -292,6 +284,7 @@ cc_test(
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -300,6 +293,7 @@ cc_test(
     name = "fips_utils_test",
     size = "small",
     srcs = ["fips_utils_test.cc"],
+    tags = ["fips"],
     deps = [
         ":fips_utils",
         "//util:status",
@@ -329,6 +323,7 @@ cc_test(
     deps = [
         ":bn_util",
         ":ssl_unique_ptr",
+        "//util:secret_data",
         "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
