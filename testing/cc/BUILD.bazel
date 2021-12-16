@@ -9,8 +9,8 @@ licenses(["notice"])
 
 cpp_grpc_library(
     name = "testing_api_cpp_library",
+    protos = ["@tink_base//proto/testing:testing_api_proto"],
     service_namespace = "testing_api",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
 cc_library(

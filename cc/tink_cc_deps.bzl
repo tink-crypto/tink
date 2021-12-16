@@ -87,76 +87,73 @@ def tink_cc_deps():
 
     # gRPC needs rules_apple, which in turn needs rules_swift and apple_support
     if not native.existing_rule("build_bazel_rules_apple"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-10-29
         http_archive(
             name = "build_bazel_rules_apple",
-            strip_prefix = "rules_apple-3043ed832213cb979b6580d19f95ab8473814fb5",
-            url = "https://github.com/bazelbuild/rules_apple/archive/3043ed832213cb979b6580d19f95ab8473814fb5.zip",
-            sha256 = "ff18125271214a4e3633241bf3f9a8a0c6b4f4b208f9fee4b360e9fa15538f8a",
+            sha256 = "77e8bf6fda706f420a55874ae6ee4df0c9d95da6c7838228b26910fc82eea5a2",
+            url = "https://github.com/bazelbuild/rules_apple/releases/download/0.32.0/rules_apple.0.32.0.tar.gz",
         )
     if not native.existing_rule("build_bazel_rules_swift"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-10-04
         http_archive(
             name = "build_bazel_rules_swift",
-            strip_prefix = "rules_swift-8767e70f1a8b500f5f3683cb23258964737a3888",
-            url = "https://github.com/bazelbuild/rules_swift/archive/8767e70f1a8b500f5f3683cb23258964737a3888.zip",
-            sha256 = "cc9d87e67afa75c936eed4725e29ed05ba9a542bc586f943d3333cc6406d6bfc",
+            sha256 = "4f167e5dbb49b082c5b7f49ee688630d69fb96f15c84c448faa2e97a5780dbbc",
+            url = "https://github.com/bazelbuild/rules_swift/releases/download/0.24.0/rules_swift.0.24.0.tar.gz",
         )
     if not native.existing_rule("build_bazel_apple_support"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-06-11
         http_archive(
             name = "build_bazel_apple_support",
-            strip_prefix = "apple_support-501b4afb27745c4813a88ffa28acd901408014e4",
-            url = "https://github.com/bazelbuild/apple_support/archive/501b4afb27745c4813a88ffa28acd901408014e4.zip",
-            sha256 = "8aa07a6388e121763c0164624feac9b20841afa2dd87bac0ba0c3ed1d56feb70",
+            sha256 = "76df040ade90836ff5543888d64616e7ba6c3a7b33b916aa3a4b68f342d1b447",
+            url = "https://github.com/bazelbuild/apple_support/releases/download/0.11.0/apple_support.0.11.0.tar.gz",
         )
 
     # Needed for Cloud KMS API via gRPC.
     if not native.existing_rule("com_google_googleapis"):
-        # Commit from 2020-04-09
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
             name = "com_google_googleapis",
-            url = "https://github.com/googleapis/googleapis/archive/ee4ea76504aa60c2bff9b7c11269c155d8c21e0d.zip",
-            sha256 = "687e5b241d365a59d4b95c60d63df07931476c7d14b0c261202ae2aceb44d119",
-            strip_prefix = "googleapis-ee4ea76504aa60c2bff9b7c11269c155d8c21e0d",
+            sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
+            strip_prefix = "googleapis-2f9af297c84c55c8b871ba4495e01ade42476c92",
+            url = "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz",
         )
 
     if "upb" not in native.existing_rules():
-        # Commit from 2020-12-18; matches version embedded in com_github_grpc_grpc
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
             name = "upb",
-            sha256 = "c0b97bf91dfea7e8d7579c24e2ecdd02d10b00f3c5defc3dce23d95100d0e664",
-            strip_prefix = "upb-60607da72e89ba0c84c84054d2e562d8b6b61177",
-            url = "https://github.com/protocolbuffers/upb/archive/60607da72e89ba0c84c84054d2e562d8b6b61177.tar.gz",
+            sha256 = "7c02096dceb6b1249feaf11e4531f6bf31b9abdbd2305038349d1f1749bf88ea",
+            strip_prefix = "upb-0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b",
+            url = "https://github.com/protocolbuffers/upb/archive/0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b.tar.gz",
         )
 
     if "envoy_api" not in native.existing_rules():
-        # Commit from 2021-05-05
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
             name = "envoy_api",
-            sha256 = "47429de51618f9b247c0ef44e23a06e8a9165efd1b1d6e35c86978b4f69adeba",
-            strip_prefix = "data-plane-api-1e94aaf06de0dbfee295f785bf49fcc61fb2fb14",
-            url = "https://github.com/envoyproxy/data-plane-api/archive/1e94aaf06de0dbfee295f785bf49fcc61fb2fb14.tar.gz",
+            sha256 = "e89d4dddbadf797dd2700ce45ee8abc82557a934a15fcad82673e7d13213b868",
+            strip_prefix = "data-plane-api-20b1b5fcee88a20a08b71051a961181839ec7268",
+            url = "https://github.com/envoyproxy/data-plane-api/archive/20b1b5fcee88a20a08b71051a961181839ec7268.tar.gz",
         )
 
     # gRPC.
     if not native.existing_rule("com_github_grpc_grpc"):
-        # Release from 2021-04-29
+        # Release from 2021-11-17
         http_archive(
             name = "com_github_grpc_grpc",
-            url = "https://github.com/grpc/grpc/archive/refs/tags/v1.37.1.zip",
-            sha256 = "2a0aef1d60660d4c4ff2bc7f43708e5df561e41c9f98d0351f9672f965a8461f",
-            strip_prefix = "grpc-1.37.1",
+            sha256 = "9f387689b7fdf6c003fd90ef55853107f89a2121792146770df5486f0199f400",
+            strip_prefix = "grpc-1.42.0",
+            url = "https://github.com/grpc/grpc/archive/v1.42.0.zip",
         )
 
     # Not used by Java Tink, but apparently needed for C++ gRPC library.
     if not native.existing_rule("io_grpc_grpc_java"):
-        # Release from 2021-04-08
+        # Release from 2021-11-17
         http_archive(
             name = "io_grpc_grpc_java",
-            strip_prefix = "grpc-java-1.37.0",
-            url = "https://github.com/grpc/grpc-java/archive/v1.37.0.tar.gz",
-            sha256 = "4796b6e434545ecc9e827f9ba52c0604a3c84e175c54f0882121965b1ee5c367",
+            sha256 = "1289abd750bee2ebc80679435301e046d587bdf0c0802a76907119725d18eef0",
+            strip_prefix = "grpc-java-1.42.0",
+            url = "https://github.com/grpc/grpc-java/archive/v1.42.0.tar.gz",
         )
 
     if not native.existing_rule("curl"):

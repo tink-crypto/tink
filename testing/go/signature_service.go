@@ -28,6 +28,7 @@ import (
 
 // SignatureService implements the Signature testing service.
 type SignatureService struct {
+	pb.SignatureServer
 }
 
 func (s *SignatureService) Sign(ctx context.Context, req *pb.SignatureSignRequest) (*pb.SignatureSignResponse, error) {

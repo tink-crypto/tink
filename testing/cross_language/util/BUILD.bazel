@@ -11,7 +11,7 @@ licenses(["notice"])
 
 python_grpc_library(
     name = "testing_api_python_library",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    protos = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
 py_library(

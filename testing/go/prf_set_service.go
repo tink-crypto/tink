@@ -28,6 +28,7 @@ import (
 
 // PrfSetService implements the PrfSet testing service.
 type PrfSetService struct {
+	pb.PrfSetServer
 }
 
 func (s *PrfSetService) KeyIds(ctx context.Context, req *pb.PrfSetKeyIdsRequest) (*pb.PrfSetKeyIdsResponse, error) {

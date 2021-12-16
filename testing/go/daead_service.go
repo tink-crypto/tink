@@ -28,6 +28,7 @@ import (
 
 // DeterministicAEADService implements the DeterministicAead testing service.
 type DeterministicAEADService struct {
+	pb.DeterministicAeadServer
 }
 
 func (s *DeterministicAEADService) EncryptDeterministically(ctx context.Context, req *pb.DeterministicAeadEncryptRequest) (*pb.DeterministicAeadEncryptResponse, error) {

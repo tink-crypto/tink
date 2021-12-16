@@ -39,6 +39,7 @@ import (
 // KeysetService implements the Keyset testing service.
 type KeysetService struct {
 	Templates map[string]*tinkpb.KeyTemplate
+	pb.KeysetServer
 }
 
 func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateRequest) (*pb.KeysetTemplateResponse, error) {

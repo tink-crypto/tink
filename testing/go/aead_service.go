@@ -28,6 +28,7 @@ import (
 
 // AEADService implements the Aead testing service.
 type AEADService struct {
+	pb.AeadServer
 }
 
 func (s *AEADService) Encrypt(ctx context.Context, req *pb.AeadEncryptRequest) (*pb.AeadEncryptResponse, error) {

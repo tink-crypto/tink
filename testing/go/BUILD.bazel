@@ -11,7 +11,7 @@ licenses(["notice"])
 go_grpc_library(
     name = "testing_api_go_grpc",
     importpath = "github.com/google/tink/proto/testing/testing_api_go_grpc",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    protos = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
 go_library(
@@ -71,8 +71,8 @@ go_binary(
     deps = [
         ":services",
         ":testing_api_go_grpc",
+        "@org_golang_google_grpc//:go_default_library",
         "@tink_go//core/registry:go_default_library",
         "@tink_go//testing/fakekms:go_default_library",
-        "@org_golang_google_grpc//:go_default_library",
     ],
 )

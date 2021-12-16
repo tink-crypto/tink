@@ -28,6 +28,7 @@ import (
 
 // HybridService implements the Hybrid encryption and decryption testing service.
 type HybridService struct {
+	pb.HybridServer
 }
 
 func (s *HybridService) Encrypt(ctx context.Context, req *pb.HybridEncryptRequest) (*pb.HybridEncryptResponse, error) {

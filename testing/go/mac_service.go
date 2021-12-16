@@ -28,6 +28,7 @@ import (
 
 // MacService implements the MAC testing service.
 type MacService struct {
+	pb.MacServer
 }
 
 func (s *MacService) ComputeMac(ctx context.Context, req *pb.ComputeMacRequest) (*pb.ComputeMacResponse, error) {
