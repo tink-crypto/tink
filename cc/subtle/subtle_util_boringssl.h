@@ -26,9 +26,6 @@
 #include "absl/base/macros.h"
 #include "absl/strings/string_view.h"
 #include "openssl/bn.h"
-#include "openssl/cipher.h"
-#include "openssl/curve25519.h"
-#include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead/internal/aead_util.h"
 #include "tink/internal/bn_util.h"
@@ -212,8 +209,12 @@ class SubtleUtilBoringSSL {
 
   // Returns the ECDH's shared secret based on our private key and peer's public
   // key. Returns error if the public key is not on private key's curve.
-  static crypto::tink::util::StatusOr<util::SecretData> ComputeEcdhSharedSecret(
-      EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<util::SecretData>
+  ComputeEcdhSharedSecret(EllipticCurveType curve, const BIGNUM *priv_key,
+                          const EC_POINT *pub_key) {
+    return internal::ComputeEcdhSharedSecret(curve, priv_key, pub_key);
+  }
 
   // Transforms ECDSA IEEE_P1363 signature encoding to DER encoding.
   //
@@ -226,8 +227,11 @@ class SubtleUtilBoringSSL {
   //   ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }.
   // In particular, the encoding is:
   //   0x30 || totalLength || 0x02 || r's length || r || 0x02 || s's length || s
-  static crypto::tink::util::StatusOr<std::string> EcSignatureIeeeToDer(
-      const EC_GROUP *group, absl::string_view ieee_sig);
+  ABSL_DEPRECATED("Use of this function is dicouraged outside Tink.")
+  static inline crypto::tink::util::StatusOr<std::string> EcSignatureIeeeToDer(
+      const EC_GROUP *group, absl::string_view ieee_sig) {
+    return internal::EcSignatureIeeeToDer(group, ieee_sig);
+  }
 
   // Returns an EVP structure for a hash function.
   // The EVP_MD instances are sigletons owned by BoringSSL.

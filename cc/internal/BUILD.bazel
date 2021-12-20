@@ -352,7 +352,11 @@ cc_test(
     name = "ec_util_test",
     size = "small",
     srcs = ["ec_util_test.cc"],
-    data = ["@wycheproof//testvectors:eddsa"],
+    data = [
+        "@wycheproof//testvectors:ecdh",
+        "@wycheproof//testvectors:ecdsa_webcrypto",
+        "@wycheproof//testvectors:eddsa",
+    ],
     deps = [
         ":bn_util",
         ":ec_util",
@@ -362,6 +366,7 @@ cc_test(
         "//subtle:subtle_util",
         "//subtle:wycheproof_util",
         "//util:secret_data",
+        "//util:statusor",
         "//util:test_matchers",
         "@boringssl//:crypto",
         "@com_google_absl//absl/strings",

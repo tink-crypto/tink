@@ -594,7 +594,6 @@ tink_cc_library(
 tink_cc_library(
   NAME subtle_util_boringssl
   SRCS
-    subtle_util_boringssl.cc
     subtle_util_boringssl.h
   DEPS
     tink::subtle::common_enums
@@ -1337,32 +1336,6 @@ tink_cc_test(
   DEPS
     tink::subtle::subtle_util
     gmock
-)
-
-tink_cc_test(
-  NAME subtle_util_boringssl_test
-  SRCS
-    subtle_util_boringssl_test.cc
-  DATA
-    wycheproof::testvectors
-  DEPS
-    tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
-    tink::subtle::wycheproof_util
-    gmock
-    absl::status
-    absl::strings
-    crypto
-    rapidjson
-    tink::config::tink_fips
-    tink::internal::bn_util
-    tink::internal::ec_util
-    tink::internal::ssl_unique_ptr
-    tink::util::secret_data
-    tink::util::status
-    tink::util::statusor
-    tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(

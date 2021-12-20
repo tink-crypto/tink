@@ -629,7 +629,6 @@ cc_library(
 
 cc_library(
     name = "subtle_util_boringssl",
-    srcs = ["subtle_util_boringssl.cc"],
     hdrs = ["subtle_util_boringssl.h"],
     include_prefix = "tink/subtle",
     deps = [
@@ -1427,32 +1426,6 @@ cc_test(
     deps = [
         ":subtle_util",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "subtle_util_boringssl_test",
-    size = "large",
-    srcs = ["subtle_util_boringssl_test.cc"],
-    data = ["@wycheproof//testvectors:ecdh"],
-    deps = [
-        ":common_enums",
-        ":subtle_util_boringssl",
-        ":wycheproof_util",
-        "//config:tink_fips",
-        "//internal:bn_util",
-        "//internal:ec_util",
-        "//internal:ssl_unique_ptr",
-        "//util:secret_data",
-        "//util:status",
-        "//util:statusor",
-        "//util:test_matchers",
-        "//util:test_util",
-        "@boringssl//:crypto",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-        "@com_google_googletest//:gtest_main",
-        "@rapidjson",
     ],
 )
 

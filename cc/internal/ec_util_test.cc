@@ -21,9 +21,12 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/ec.h"
+#include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/fips_utils.h"
@@ -32,6 +35,7 @@
 #include "tink/subtle/subtle_util.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -457,6 +461,191 @@ TEST(EcUtilTest, GetEcPointReturnsAValidPoint) {
   EXPECT_EQ(xy, absl::StrCat(absl::HexStringToBytes(kXCoordinateHex),
                              absl::HexStringToBytes(kYCoordinateHex)));
 }
+
+TEST(EcUtilTest, EcSignatureIeeeToDer) {
+  std::unique_ptr<rapidjson::Document> test_vectors =
+      WycheproofUtil::ReadTestVectors("ecdsa_webcrypto_test.json");
+  ASSERT_THAT(test_vectors, Not(IsNull()));
+  for (const auto& test_group : (*test_vectors)["testGroups"].GetArray()) {
+    EllipticCurveType curve =
+        WycheproofUtil::GetEllipticCurveType(test_group["key"]["curve"]);
+    if (curve == EllipticCurveType::UNKNOWN_CURVE) {
+      continue;
+    }
+    util::StatusOr<SslUniquePtr<EC_GROUP>> ec_group =
+        EcGroupFromCurveType(curve);
+    ASSERT_THAT(ec_group.status(), IsOk());
+    // Read all the valid signatures.
+    for (const auto& test : test_group["tests"].GetArray()) {
+      std::string result = test["result"].GetString();
+      if (result != "valid") {
+        continue;
+      }
+      std::string sig = WycheproofUtil::GetBytes(test["sig"]);
+      util::StatusOr<std::string> der_encoded =
+          EcSignatureIeeeToDer(ec_group->get(), sig);
+      ASSERT_THAT(der_encoded.status(), IsOk());
+
+      // Make sure we can reconstruct the IEEE format: [ s || r ].
+      const uint8_t* der_sig_data_ptr =
+          reinterpret_cast<const uint8_t*>(der_encoded->data());
+      SslUniquePtr<ECDSA_SIG> ecdsa_sig(d2i_ECDSA_SIG(
+          /*out=*/nullptr, &der_sig_data_ptr, der_encoded->size()));
+      ASSERT_THAT(ecdsa_sig, Not(IsNull()));
+      // Owned by OpenSSL/BoringSSL.
+      const BIGNUM* r(ECDSA_SIG_get0_r(ecdsa_sig.get()));
+      const BIGNUM* s(ECDSA_SIG_get0_s(ecdsa_sig.get()));
+      ASSERT_THAT(r, Not(IsNull()));
+      ASSERT_THAT(s, Not(IsNull()));
+
+      util::StatusOr<int32_t> field_size = EcFieldSizeInBytes(curve);
+      ASSERT_THAT(field_size.status(), IsOk());
+      util::StatusOr<std::string> r_str = BignumToString(r, *field_size);
+      ASSERT_THAT(r_str.status(), IsOk());
+      util::StatusOr<std::string> s_str = BignumToString(s, *field_size);
+      ASSERT_THAT(s_str.status(), IsOk());
+      EXPECT_EQ(absl::StrCat(*r_str, *s_str), sig);
+    }
+  }
+}
+
+// ECDH test vector.
+struct EcdhWycheproofTestVector {
+  std::string testcase_name;
+  EllipticCurveType curve;
+  std::string id;
+  std::string comment;
+  std::string pub_bytes;
+  std::string priv_bytes;
+  std::string expected_shared_bytes;
+  std::string result;
+  EcPointFormat format;
+};
+
+// Utility function to look for a `value` inside an array of flags `flags`.
+bool HasFlag(const rapidjson::Value& flags, absl::string_view value) {
+  if (!flags.IsArray()) {
+    return false;
+  }
+  for (const rapidjson::Value& flag : flags.GetArray()) {
+    if (std::string(flag.GetString()) == value) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Reads Wycheproof's ECDH test vectors from the given file `file_name`.
+std::vector<EcdhWycheproofTestVector> ReadEcdhWycheproofTestVectors(
+    absl::string_view file_name) {
+  std::unique_ptr<rapidjson::Document> root =
+      WycheproofUtil::ReadTestVectors(std::string(file_name));
+  std::vector<EcdhWycheproofTestVector> test_vectors;
+  for (const rapidjson::Value& test_group : (*root)["testGroups"].GetArray()) {
+    // Tink only supports secp256r1, secp384r1 or secp521r1.
+    EllipticCurveType curve =
+        WycheproofUtil::GetEllipticCurveType(test_group["curve"]);
+    if (curve == EllipticCurveType::UNKNOWN_CURVE) {
+      continue;
+    }
+
+    for (const rapidjson::Value& test : test_group["tests"].GetArray()) {
+      // Wycheproof's ECDH public key uses ASN encoding while Tink uses X9.62
+      // format point encoding. For the purpose of testing, we note the
+      // followings:
+      //  + The prefix of ASN encoding contains curve name, so we can skip test
+      //  vector with "UnnamedCurve".
+      //  + The suffix of ASN encoding is X9.62 format point encoding.
+      // TODO(quannguyen): Use X9.62 test vectors once it's available.
+      if (HasFlag(test["flags"], /*value=*/"UnnamedCurve")) {
+        continue;
+      }
+      // Get the format from "flags".
+      EcPointFormat format = EcPointFormat::UNCOMPRESSED;
+      if (HasFlag(test["flags"], /*value=*/"CompressedPoint")) {
+        format = EcPointFormat::COMPRESSED;
+      }
+      // Testcase name is of the form: <file_name_without_extension>_tcid<tcid>.
+      std::vector<std::string> file_name_tokens =
+          absl::StrSplit(file_name, '.');
+      test_vectors.push_back({
+          absl::StrCat(file_name_tokens[0], "_tcid", test["tcId"].GetInt()),
+          curve,
+          absl::StrCat(test["tcId"].GetInt()),
+          test["comment"].GetString(),
+          WycheproofUtil::GetBytes(test["public"]),
+          WycheproofUtil::GetBytes(test["private"]),
+          WycheproofUtil::GetBytes(test["shared"]),
+          test["result"].GetString(),
+          format,
+      });
+    }
+  }
+  return test_vectors;
+}
+
+using EcUtilComputeEcdhSharedSecretTest =
+    TestWithParam<EcdhWycheproofTestVector>;
+
+TEST_P(EcUtilComputeEcdhSharedSecretTest, ComputeEcdhSharedSecretWycheproof) {
+  EcdhWycheproofTestVector params = GetParam();
+
+  util::StatusOr<int32_t> point_size =
+      internal::EcPointEncodingSizeInBytes(params.curve, params.format);
+  ASSERT_THAT(point_size.status(), IsOk());
+  if (*point_size > params.pub_bytes.size()) {
+    GTEST_SKIP();
+  }
+
+  std::string pub_bytes = params.pub_bytes.substr(
+      params.pub_bytes.size() - *point_size, *point_size);
+
+  util::StatusOr<SslUniquePtr<EC_POINT>> pub_key =
+      EcPointDecode(params.curve, params.format, pub_bytes);
+  if (!pub_key.ok()) {
+    // Make sure we didn't fail decoding a valid point, then we can terminate
+    // testing;
+    ASSERT_NE(params.result, "valid");
+    return;
+  }
+
+  util::StatusOr<SslUniquePtr<BIGNUM>> priv_key =
+      StringToBignum(params.priv_bytes);
+  ASSERT_THAT(priv_key.status(), IsOk());
+
+  util::StatusOr<util::SecretData> shared_secret =
+      ComputeEcdhSharedSecret(params.curve, priv_key->get(), pub_key->get());
+
+  if (params.result == "invalid") {
+    EXPECT_THAT(shared_secret.status(), Not(IsOk()));
+  } else {
+    EXPECT_THAT(shared_secret, IsOkAndHolds(util::SecretDataFromStringView(
+                                   params.expected_shared_bytes)));
+  }
+}
+
+std::vector<EcdhWycheproofTestVector> GetEcUtilComputeEcdhSharedSecretParams() {
+  std::vector<EcdhWycheproofTestVector> test_vectors =
+      ReadEcdhWycheproofTestVectors(
+          /*file_name=*/"ecdh_secp256r1_test.json");
+  std::vector<EcdhWycheproofTestVector> others = ReadEcdhWycheproofTestVectors(
+      /*file_name=*/"ecdh_secp384r1_test.json");
+  test_vectors.insert(test_vectors.end(), others.begin(), others.end());
+  others = ReadEcdhWycheproofTestVectors(
+      /*file_name=*/"ecdh_secp521r1_test.json");
+  test_vectors.insert(test_vectors.end(), others.begin(), others.end());
+// placeholder_disabled_subtle_test, please ignore
+  others = ReadEcdhWycheproofTestVectors(
+      /*file_name=*/"ecdh_test.json");
+  test_vectors.insert(test_vectors.end(), others.begin(), others.end());
+  return test_vectors;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EcUtilComputeEcdhSharedSecretTests, EcUtilComputeEcdhSharedSecretTest,
+    ValuesIn(GetEcUtilComputeEcdhSharedSecretParams()),
+    [](const TestParamInfo<EcUtilComputeEcdhSharedSecretTest::ParamType>&
+           info) { return info.param.testcase_name; });
 
 }  // namespace
 }  // namespace internal

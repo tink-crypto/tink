@@ -28,6 +28,7 @@
 #include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
+#include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
@@ -617,6 +618,88 @@ util::StatusOr<SslUniquePtr<EC_POINT>> GetEcPoint(EllipticCurveType curve,
     return group.status();
   }
   return SslGetEcPointFromCoordinates(group->get(), pubx, puby);
+}
+
+util::StatusOr<util::SecretData> ComputeEcdhSharedSecret(
+    EllipticCurveType curve, const BIGNUM *priv_key, const EC_POINT *pub_key) {
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> priv_group =
+      internal::EcGroupFromCurveType(curve);
+  if (!priv_group.ok()) {
+    return priv_group.status();
+  }
+  if (EC_POINT_is_on_curve(priv_group->get(), pub_key, /*ctx=*/nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        absl::StrCat("Public key is not on curve ",
+                                     subtle::EnumToString(curve)));
+  }
+
+  // Compute the shared point and make sure it is on `curve`.
+  internal::SslUniquePtr<EC_POINT> shared_point(
+      EC_POINT_new(priv_group->get()));
+  if (EC_POINT_mul(priv_group->get(), shared_point.get(), /*n=*/nullptr,
+                   pub_key, priv_key, /*ctx=*/nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Point multiplication failed");
+  }
+  if (EC_POINT_is_on_curve(priv_group->get(), shared_point.get(),
+                           /*ctx=*/nullptr) != 1) {
+    return util::Status(absl::StatusCode::kInternal,
+                        absl::StrCat("Shared point is not on curve ",
+                                     subtle::EnumToString(curve)));
+  }
+
+  util::StatusOr<EcPointCoordinates> shared_point_coordinates =
+      SslGetEcPointCoordinates(priv_group->get(), shared_point.get());
+  if (!shared_point_coordinates.ok()) {
+    return shared_point_coordinates.status();
+  }
+
+  // We need only the x coordinate.
+  return internal::BignumToSecretData(shared_point_coordinates->x.get(),
+                                      SslEcFieldSizeInBytes(priv_group->get()));
+}
+
+util::StatusOr<std::string> EcSignatureIeeeToDer(const EC_GROUP *group,
+                                                 absl::string_view ieee_sig) {
+  const size_t kFieldSizeInBytes = SslEcFieldSizeInBytes(group);
+  if (ieee_sig.size() != kFieldSizeInBytes * 2) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Signature is not valid.");
+  }
+  util::StatusOr<SslUniquePtr<BIGNUM>> r =
+      internal::StringToBignum(ieee_sig.substr(0, kFieldSizeInBytes));
+  if (!r.ok()) {
+    return r.status();
+  }
+  util::StatusOr<SslUniquePtr<BIGNUM>> s =
+      internal::StringToBignum(ieee_sig.substr(kFieldSizeInBytes));
+  if (!s.ok()) {
+    return s.status();
+  }
+  internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_new());
+  if (ECDSA_SIG_set0(ecdsa.get(), r->get(), s->get()) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "ECDSA_SIG_set0 failed");
+  }
+  // ECDSA_SIG_set0 takes ownership of s and r's pointers.
+  r->release();
+  s->release();
+
+  uint8_t *der = nullptr;
+#ifdef OPENSSL_IS_BORINGSSL
+  size_t der_len = 0;
+  if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "ECDSA_SIG_to_bytes failed");
+  }
+#else
+  int der_len = i2d_ECDSA_SIG(ecdsa.get(), &der);
+  if (der_len <= 0) {
+    return util::Status(absl::StatusCode::kInternal, "i2d_ECDSA_SIG failed");
+  }
+#endif
+  auto result = std::string(reinterpret_cast<char *>(der), der_len);
+  OPENSSL_free(der);
+  return result;
 }
 
 }  // namespace internal

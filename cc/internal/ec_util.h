@@ -135,6 +135,27 @@ crypto::tink::util::StatusOr<SslUniquePtr<EC_POINT>> GetEcPoint(
     crypto::tink::subtle::EllipticCurveType curve, absl::string_view pubx,
     absl::string_view puby);
 
+// Transforms ECDSA IEEE_P1363 signature encoding to DER encoding.
+//
+// The IEEE_P1363 signature's format is r || s, where r and s are zero-padded
+// and have the same size in bytes as the order of the curve. For example, for
+// NIST P-256 curve, r and s are zero-padded to 32 bytes.
+//
+// The DER signature is encoded using ASN.1
+// (https://tools.ietf.org/html/rfc5480#appendix-A):
+//   ECDSA-Sig-Value :: = SEQUENCE { r INTEGER, s INTEGER }.
+// In particular, the encoding is:
+//   0x30 || totalLength || 0x02 || r's length || r || 0x02 || s's length || s
+util::StatusOr<std::string> EcSignatureIeeeToDer(const EC_GROUP *group,
+                                                 absl::string_view ieee_sig);
+
+// Returns the ECDH's shared secret between two peers A and B using A's private
+// key `priv_key` and B's public key `pub_key`. Returns error if `pub_key`
+// is not on `priv_key`'s curve `curve`.
+util::StatusOr<util::SecretData> ComputeEcdhSharedSecret(
+    crypto::tink::subtle::EllipticCurveType curve, const BIGNUM *priv_key,
+    const EC_POINT *pub_key);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
