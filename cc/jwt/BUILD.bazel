@@ -28,6 +28,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":raw_jwt",
+        "//jwt/internal:json_util",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
@@ -49,9 +50,7 @@ cc_library(
         "//util:statusor",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/time",
-        "@com_google_protobuf//:protobuf",
     ],
 )
 
@@ -77,6 +76,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":raw_jwt",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
@@ -91,6 +91,7 @@ cc_library(
         ":jwt_validator",
         ":verified_jwt",
         "//util:status",
+        "//util:statusor",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -129,6 +130,7 @@ cc_library(
         "//proto:jwt_rsa_ssa_pss_cc_proto",
         "//proto:tink_cc_proto",
         "//subtle:subtle_util_boringssl",
+        "//util:statusor",
         "@boringssl//:crypto",
     ],
 )
@@ -148,7 +150,6 @@ cc_library(
         "//jwt/internal:jwt_format",
         "//proto:common_cc_proto",
         "//proto:jwt_ecdsa_cc_proto",
-        "//proto:jwt_hmac_cc_proto",
         "//proto:jwt_rsa_ssa_pkcs1_cc_proto",
         "//proto:jwt_rsa_ssa_pss_cc_proto",
         "//proto:tink_cc_proto",
@@ -191,14 +192,11 @@ cc_test(
     srcs = ["raw_jwt_test.cc"],
     deps = [
         ":raw_jwt",
-        "//util:status",
-        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
     ],
 )
 
@@ -212,21 +210,18 @@ cc_test(
         ":raw_jwt",
         ":verified_jwt",
         "//jwt/internal:jwt_mac_impl",
+        "//jwt/internal:jwt_mac_internal",
         "//subtle:hmac_boringssl",
         "//util:constants",
         "//util:enums",
         "//util:errors",
         "//util:protobuf_helper",
         "//util:secret_data",
-        "//util:status",
-        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
     ],
 )
 
@@ -237,14 +232,10 @@ cc_test(
     deps = [
         ":jwt_validator",
         ":raw_jwt",
-        "//util:status",
-        "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest_main",
-        "@com_google_protobuf//:protobuf",
     ],
 )
 
