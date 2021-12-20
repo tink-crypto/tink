@@ -174,6 +174,7 @@ google::crypto::tink::EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding);
 
+// TODO(ambrosin): Remove because it is unused.
 // Generates a fresh test key for ED25519.
 google::crypto::tink::Ed25519PrivateKey GetEd25519TestPrivateKey();
 

@@ -28,7 +28,6 @@
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/jwt/internal/jwt_rsa_ssa_pkcs1_verify_key_manager.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"

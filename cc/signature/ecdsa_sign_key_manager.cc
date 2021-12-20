@@ -20,10 +20,10 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/subtle/ecdsa_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/input_stream_util.h"
@@ -47,7 +47,7 @@ using google::crypto::tink::EcdsaPublicKey;
 StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::CreateKey(
     const EcdsaKeyFormat& ecdsa_key_format) const {
   // Generate new EC key.
-  auto ec_key_result = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+  auto ec_key_result = internal::NewEcKey(
       util::Enums::ProtoToSubtle(ecdsa_key_format.params().curve()));
   if (!ec_key_result.ok()) return ec_key_result.status();
   auto ec_key = ec_key_result.ValueOrDie();
@@ -107,8 +107,8 @@ StatusOr<EcdsaPrivateKey> EcdsaSignKeyManager::DeriveKey(
   }
 
   // Generate new EC key from the seed.
-  crypto::tink::util::StatusOr<subtle::SubtleUtilBoringSSL::EcKey> ec_key =
-      subtle::SubtleUtilBoringSSL::GetNewEcKeyFromSeed(
+  crypto::tink::util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(
           util::Enums::ProtoToSubtle(ecdsa_key_format.params().curve()),
           *randomness);
 
@@ -133,7 +133,7 @@ StatusOr<std::unique_ptr<PublicKeySign>>
 EcdsaSignKeyManager::PublicKeySignFactory::Create(
     const EcdsaPrivateKey& ecdsa_private_key) const {
   const EcdsaPublicKey& public_key = ecdsa_private_key.public_key();
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();

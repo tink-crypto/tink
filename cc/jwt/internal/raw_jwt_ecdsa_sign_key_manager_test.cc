@@ -21,11 +21,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/internal/ec_util.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -157,7 +157,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, Create) {
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
   ASSERT_THAT(signer.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
   ec_key.pub_x = public_key->x();
   ec_key.pub_y = public_key->y();
@@ -183,7 +183,7 @@ TEST(RawJwtEcdsaSignKeyManagerTest, CreateDifferentKey) {
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
   ASSERT_THAT(signer.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
   ec_key.pub_x = public_key->x();
   ec_key.pub_y = public_key->y();

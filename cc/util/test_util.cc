@@ -37,7 +37,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
@@ -262,7 +262,7 @@ EciesAeadHkdfPrivateKey GetEciesAeadHkdfTestKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::EcPointFormat ec_point_format,
     google::crypto::tink::HashType hash_type) {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+  auto test_key = internal::NewEcKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
@@ -378,7 +378,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding) {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+  auto test_key = internal::NewEcKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EcdsaPrivateKey ecdsa_key;
   ecdsa_key.set_version(0);
@@ -396,7 +396,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
 }
 
 Ed25519PrivateKey GetEd25519TestPrivateKey() {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEd25519Key();
+  auto test_key = internal::NewEd25519Key().ValueOrDie();
   Ed25519PrivateKey ed25519_key;
   ed25519_key.set_version(0);
   ed25519_key.set_key_value(test_key->private_key);

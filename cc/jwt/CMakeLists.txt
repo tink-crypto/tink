@@ -118,8 +118,8 @@ tink_cc_library(
   SRCS
     jwt_public_key_sign.h
   DEPS
-    absl::strings
     tink::jwt::raw_jwt
+    absl::strings
     tink::util::status
     tink::util::statusor
 )
@@ -129,9 +129,9 @@ tink_cc_library(
   SRCS
     jwt_public_key_verify.h
   DEPS
-    absl::strings
     tink::jwt::jwt_validator
     tink::jwt::verified_jwt
+    absl::strings
     tink::util::status
     tink::util::statusor
 )
@@ -205,8 +205,8 @@ tink_cc_library(
     jwt_key_templates.h
   DEPS
     crypto
+    tink::internal::bn_util
     tink::internal::ssl_unique_ptr
-    tink::subtle::subtle_util_boringssl
     tink::util::statusor
     tink::proto::common_cc_proto
     tink::proto::jwt_ecdsa_cc_proto

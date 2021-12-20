@@ -21,10 +21,10 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/ec_util.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/subtle/ecdsa_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -55,9 +55,8 @@ StatusOr<JwtEcdsaPrivateKey> RawJwtEcdsaSignKeyManager::CreateKey(
     return curve.status();
   }
 
-  util::StatusOr<subtle::SubtleUtilBoringSSL::EcKey> ec_key =
-      subtle::SubtleUtilBoringSSL::GetNewEcKey(
-          util::Enums::ProtoToSubtle(*curve));
+  util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(util::Enums::ProtoToSubtle(*curve));
   if (!ec_key.ok()) return ec_key.status();
 
   // Build EcdsaPrivateKey.
@@ -77,7 +76,7 @@ StatusOr<std::unique_ptr<PublicKeySign>>
 RawJwtEcdsaSignKeyManager::PublicKeySignFactory::Create(
     const JwtEcdsaPrivateKey& jwt_ecdsa_private_key) const {
   const JwtEcdsaPublicKey& public_key = jwt_ecdsa_private_key.public_key();
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   util::StatusOr<google::crypto::tink::EllipticCurveType> curve =
       RawJwtEcdsaVerifyKeyManager::CurveForEcdsaAlgorithm(
           public_key.algorithm());

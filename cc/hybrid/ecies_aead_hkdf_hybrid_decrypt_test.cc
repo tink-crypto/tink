@@ -24,9 +24,9 @@
 #include "tink/daead/aes_siv_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/internal/ec_util.h"
 #include "tink/registry.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
@@ -49,10 +49,8 @@ namespace {
 
 class EciesAeadHkdfHybridDecryptTest : public ::testing::Test {
  protected:
-  void SetUp() override {
-  }
-  void TearDown() override {
-  }
+  void SetUp() override {}
+  void TearDown() override {}
 
   struct CommonHybridKeyParams {
     EllipticCurveType ec_curve;
@@ -194,8 +192,8 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
 
   {  // Unsupported DEM key type.
     EllipticCurveType curve = EllipticCurveType::NIST_P256;
-    auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
-        util::Enums::ProtoToSubtle(curve)).ValueOrDie();
+    auto test_key =
+        internal::NewEcKey(util::Enums::ProtoToSubtle(curve)).ValueOrDie();
     EciesAeadHkdfPrivateKey recipient_key;
     recipient_key.set_version(0);
     recipient_key.set_key_value("some key value bytes");
@@ -217,11 +215,9 @@ TEST_F(EciesAeadHkdfHybridDecryptTest, testInvalidKeys) {
 TEST_F(EciesAeadHkdfHybridDecryptTest, testGettingHybridEncryptWithoutManager) {
   // Prepare an ECIES key.
   Registry::Reset();
-  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(
-      EllipticCurveType::NIST_P256,
-      EcPointFormat::UNCOMPRESSED,
-      HashType::SHA256,
-      32);
+  auto ecies_key = test::GetEciesAesGcmHkdfTestKey(EllipticCurveType::NIST_P256,
+                                                   EcPointFormat::UNCOMPRESSED,
+                                                   HashType::SHA256, 32);
 
   // Try to get a HybridEncrypt primitive without DEM key manager.
   auto bad_result(EciesAeadHkdfHybridDecrypt::New(ecies_key));

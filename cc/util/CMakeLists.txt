@@ -189,9 +189,9 @@ tink_cc_library(
     tink::aead::cord_aead
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
+    tink::internal::ec_util
     tink::subtle::common_enums
     tink::subtle::random
-    tink::subtle::subtle_util_boringssl
     tink::subtle::mac::stateful_mac
     tink::proto::aes_ctr_hmac_aead_cc_proto
     tink::proto::aes_siv_cc_proto

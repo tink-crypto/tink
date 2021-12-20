@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "tink/internal/ec_util.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
@@ -48,9 +49,8 @@ namespace {
 class JwtSignatureImplTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    util::StatusOr<crypto::tink::subtle::SubtleUtilBoringSSL::EcKey> ec_key =
-        subtle::SubtleUtilBoringSSL::GetNewEcKey(
-            subtle::EllipticCurveType::NIST_P256);
+    util::StatusOr<internal::EcKey> ec_key =
+        internal::NewEcKey(subtle::EllipticCurveType::NIST_P256);
     ASSERT_THAT(ec_key.status(), IsOk());
 
     util::StatusOr<std::unique_ptr<subtle::EcdsaSignBoringSsl>> sign =

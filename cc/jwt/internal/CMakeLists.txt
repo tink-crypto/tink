@@ -245,8 +245,8 @@ tink_cc_library(
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
+    tink::internal::ec_util
     tink::subtle::ecdsa_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -269,8 +269,8 @@ tink_cc_test(
     absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::status
     tink::util::statusor
@@ -290,8 +290,8 @@ tink_cc_library(
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -314,8 +314,8 @@ tink_cc_test(
     absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::secret_data
     tink::util::status
@@ -573,6 +573,7 @@ tink_cc_test(
     tink::jwt::internal::jwt_public_key_verify_impl
     gmock
     absl::strings
+    tink::internal::ec_util
     tink::jwt::jwt_public_key_sign
     tink::jwt::jwt_public_key_verify
     tink::jwt::jwt_validator
@@ -738,7 +739,6 @@ tink_cc_test(
     crypto
     tink::internal::bn_util
     tink::internal::ssl_unique_ptr
-    tink::subtle::subtle_util_boringssl
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers

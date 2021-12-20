@@ -198,7 +198,7 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::hybrid_decrypt
     tink::core::key_manager
-    tink::subtle::subtle_util_boringssl
+    tink::internal::ec_util
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -401,8 +401,8 @@ tink_cc_test(
     tink::aead::aes_gcm_key_manager
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
+    tink::internal::ec_util
     tink::subtle::random
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::statusor
     tink::util::test_matchers
@@ -423,7 +423,7 @@ tink_cc_test(
     tink::core::hybrid_encrypt
     tink::core::registry
     tink::aead::aes_gcm_key_manager
-    tink::subtle::subtle_util_boringssl
+    tink::internal::ec_util
     tink::util::enums
     tink::util::statusor
     tink::util::test_util

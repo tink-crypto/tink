@@ -16,17 +16,17 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
-#include "tink/hybrid_encrypt.h"
-#include "tink/registry.h"
 #include "tink/aead/aes_gcm_key_manager.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/hybrid_encrypt.h"
+#include "tink/internal/ec_util.h"
+#include "tink/registry.h"
 #include "tink/util/enums.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_util.h"
 #include "proto/common.pb.h"
 #include "proto/ecies_aead_hkdf.pb.h"
-#include "gtest/gtest.h"
 
 using google::crypto::tink::EciesAeadHkdfPublicKey;
 using google::crypto::tink::EcPointFormat;
@@ -83,7 +83,7 @@ TEST_F(EciesAeadHkdfHybridEncryptTest, testInvalidKeys) {
 
   {  // Unsupported DEM key type.
     EllipticCurveType curve = EllipticCurveType::NIST_P256;
-    auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+    auto test_key = internal::NewEcKey(
         util::Enums::ProtoToSubtle(curve)).ValueOrDie();
     EciesAeadHkdfPublicKey recipient_key;
     recipient_key.set_version(0);

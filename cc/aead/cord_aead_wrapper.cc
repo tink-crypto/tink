@@ -20,7 +20,6 @@
 #include "tink/aead/cord_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 

@@ -16,16 +16,17 @@
 
 #include "tink/signature/ecdsa_sign_key_manager.h"
 
+#include <string>
 #include <tuple>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"
@@ -217,7 +218,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
   ASSERT_THAT(signer_or.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();
@@ -242,7 +243,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
   ASSERT_THAT(signer_or.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();

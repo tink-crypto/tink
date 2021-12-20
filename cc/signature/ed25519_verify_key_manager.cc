@@ -20,7 +20,6 @@
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"

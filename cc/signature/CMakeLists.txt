@@ -101,8 +101,8 @@ tink_cc_library(
     tink::core::private_key_type_manager
     tink::core::public_key_sign
     tink::config::tink_fips
+    tink::internal::ec_util
     tink::subtle::ecdsa_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -126,8 +126,8 @@ tink_cc_library(
     absl::strings
     tink::core::key_type_manager
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -150,8 +150,8 @@ tink_cc_library(
     absl::strings
     tink::core::private_key_type_manager
     tink::core::public_key_sign
+    tink::internal::ec_util
     tink::subtle::ed25519_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -176,7 +176,6 @@ tink_cc_library(
     tink::core::key_type_manager
     tink::core::public_key_verify
     tink::subtle::ed25519_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::errors
     tink::util::protobuf_helper
@@ -215,7 +214,6 @@ tink_cc_library(
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pkcs1_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -299,7 +297,6 @@ tink_cc_library(
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::subtle::rsa_ssa_pss_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::constants
     tink::util::enums
     tink::util::errors
@@ -351,9 +348,9 @@ tink_cc_library(
     absl::status
     absl::strings
     tink::core::keyset_reader
+    tink::internal::ec_util
     tink::internal::rsa_util
     tink::subtle::pem_parser_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::keyset_util
     tink::util::secret_data
@@ -451,8 +448,8 @@ tink_cc_test(
     absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_sign_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::secret_data
     tink::util::status
@@ -545,8 +542,8 @@ tink_cc_test(
     absl::status
     tink::core::public_key_sign
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::subtle::ecdsa_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::util::enums
     tink::util::istream_input_stream
     tink::util::status

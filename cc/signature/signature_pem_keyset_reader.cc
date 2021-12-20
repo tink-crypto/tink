@@ -24,6 +24,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/keyset_reader.h"
 #include "tink/signature/ecdsa_verify_key_manager.h"
@@ -32,7 +33,6 @@
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 #include "tink/subtle/pem_parser_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/keyset_util.h"
 #include "tink/util/secret_data.h"
@@ -270,7 +270,7 @@ util::Status AddEcdsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
       subtle::PemParser::ParseEcPublicKey(pem_key.serialized_key);
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::EcKey> public_key_subtle =
+  std::unique_ptr<internal::EcKey> public_key_subtle =
       std::move(public_key_subtle_or).ValueOrDie();
 
   EcdsaPublicKey ecdsa_key;

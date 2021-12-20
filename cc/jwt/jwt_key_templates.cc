@@ -18,8 +18,8 @@
 
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 #include "proto/common.pb.h"
 #include "proto/jwt_ecdsa.pb.h"

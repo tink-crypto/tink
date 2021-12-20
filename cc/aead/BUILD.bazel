@@ -32,7 +32,6 @@ cc_library(
         "//:primitive_set",
         "//:primitive_wrapper",
         "//proto:tink_cc_proto",
-        "//subtle:subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/status",

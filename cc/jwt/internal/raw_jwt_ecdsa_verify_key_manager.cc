@@ -20,9 +20,9 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -46,7 +46,7 @@ using google::crypto::tink::HashType;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
       const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   util::StatusOr<google::crypto::tink::EllipticCurveType> curve =
       CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
   if (!curve.ok()) {
