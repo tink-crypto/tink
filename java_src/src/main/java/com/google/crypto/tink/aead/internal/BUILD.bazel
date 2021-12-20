@@ -49,6 +49,22 @@ java_library(
 )
 
 java_library(
+    name = "insecure_nonce_x_cha_cha20",
+    srcs = ["InsecureNonceXChaCha20.java"],
+    deps = [":insecure_nonce_cha_cha20_base"],
+)
+
+java_library(
+    name = "insecure_nonce_x_cha_cha20_poly1305",
+    srcs = ["InsecureNonceXChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base",
+        ":insecure_nonce_cha_cha20_poly1305_base",
+        ":insecure_nonce_x_cha_cha20",
+    ],
+)
+
+java_library(
     name = "poly1305",
     srcs = ["Poly1305.java"],
     deps = ["//src/main/java/com/google/crypto/tink/subtle:bytes"],
@@ -97,6 +113,22 @@ android_library(
         ":insecure_nonce_cha_cha20_base-android",
         ":poly1305-android",
         "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_x_cha_cha20-android",
+    srcs = ["InsecureNonceXChaCha20.java"],
+    deps = [":insecure_nonce_cha_cha20_base-android"],
+)
+
+android_library(
+    name = "insecure_nonce_x_cha_cha20_poly1305-android",
+    srcs = ["InsecureNonceXChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base-android",
+        ":insecure_nonce_cha_cha20_poly1305_base-android",
+        ":insecure_nonce_x_cha_cha20-android",
     ],
 )
 

@@ -31,6 +31,9 @@ import java.security.InvalidKeyException;
  *
  * <p>Concrete implementations of this class are meant to be used to construct an {@link
  * com.google.crypto.tink.Aead} with {@link com.google.crypto.tink.subtle.Poly1305}.
+ *
+ * <p>Since this class supports user-supplied nonces, which would be insecure if the nonce ever
+ * repeates, most users should not use this class directly.
  */
 abstract class InsecureNonceChaCha20Base {
   public static final int BLOCK_SIZE_IN_INTS = 16;
@@ -55,14 +58,14 @@ abstract class InsecureNonceChaCha20Base {
   }
 
   /** Returns the initial state from {@code nonce} and {@code counter}. */
-  public abstract int[] createInitialState(final int[] nonce, int counter);
+  abstract int[] createInitialState(final int[] nonce, int counter);
 
   /**
    * The size of the randomly generated nonces.
    *
    * <p>ChaCha20 uses 12-byte nonces, but XChaCha20 use 24-byte nonces.
    */
-  public abstract int nonceSizeInBytes();
+  abstract int nonceSizeInBytes();
 
   /** Encrypts {@code plaintext} using {@code nonce}. */
   public byte[] encrypt(final byte[] nonce, final byte[] plaintext)
