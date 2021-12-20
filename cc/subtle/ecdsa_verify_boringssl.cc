@@ -23,6 +23,7 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
@@ -33,7 +34,6 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// static
 util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
     const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
@@ -57,23 +57,26 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   return New(std::move(key), hash_type, encoding);
 }
 
-// static
 util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
     internal::SslUniquePtr<EC_KEY> ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
-  auto status = internal::CheckFipsCompatibility<EcdsaVerifyBoringSsl>();
-  if (!status.ok()) return status;
-
-  // Check hash.
-  auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
-  if (!hash_status.ok()) {
-    return hash_status;
+  util::Status status =
+      internal::CheckFipsCompatibility<EcdsaVerifyBoringSsl>();
+  if (!status.ok()) {
+    return status;
   }
-  auto hash_result = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!hash_result.ok()) return hash_result.status();
-  const EVP_MD* hash = hash_result.ValueOrDie();
+
+  // Check if the hash type is safe to use.
+  util::Status is_safe = internal::IsHashTypeSafeForSignature(hash_type);
+  if (!is_safe.ok()) {
+    return is_safe;
+  }
+  util::StatusOr<const EVP_MD*> hash = internal::EvpHashFromHashType(hash_type);
+  if (!hash.ok()) {
+    return hash.status();
+  }
   std::unique_ptr<EcdsaVerifyBoringSsl> verify(
-      new EcdsaVerifyBoringSsl(std::move(ec_key), hash, encoding));
+      new EcdsaVerifyBoringSsl(std::move(ec_key), *hash, encoding));
   return std::move(verify);
 }
 

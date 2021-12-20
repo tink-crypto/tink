@@ -16,12 +16,14 @@
 
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/evp.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -30,12 +32,11 @@ namespace subtle {
 
 util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
     HashType hash_type, uint32_t tag_size, const util::SecretData& key_value) {
-  util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!res.ok()) {
-    return res.status();
+  util::StatusOr<const EVP_MD*> md = internal::EvpHashFromHashType(hash_type);
+  if (!md.ok()) {
+    return md.status();
   }
-  const EVP_MD* md = res.ValueOrDie();
-  if (EVP_MD_size(md) < tag_size) {
+  if (EVP_MD_size(*md) < tag_size) {
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
@@ -48,7 +49,7 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
   // Create and initialize the HMAC context
   internal::SslUniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
   // Initialize the HMAC
-  if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), md)) {
+  if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), *md)) {
     return util::Status(absl::StatusCode::kFailedPrecondition,
                         "HMAC initialization failed");
   }

@@ -16,15 +16,17 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -85,9 +87,11 @@ Status RsaSsaPssVerifyKeyManager::ValidateKey(
 
 Status RsaSsaPssVerifyKeyManager::ValidateParams(
     const RsaSsaPssParams& params) const {
-  auto hash_result = subtle::SubtleUtilBoringSSL::ValidateSignatureHash(
+  util::Status hash_result = internal::IsHashTypeSafeForSignature(
       Enums::ProtoToSubtle(params.sig_hash()));
-  if (!hash_result.ok()) return hash_result;
+  if (!hash_result.ok()) {
+    return hash_result;
+  }
   // The most common use case is that MGF1 hash is the same as signature hash.
   // This is recommended by RFC https://tools.ietf.org/html/rfc8017#section-8.1.
   // While using different hashes doesn't cause security vulnerabilities, there

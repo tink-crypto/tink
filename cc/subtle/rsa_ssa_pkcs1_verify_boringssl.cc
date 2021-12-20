@@ -16,17 +16,19 @@
 
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 
@@ -34,21 +36,26 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// static
 util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>>
 RsaSsaPkcs1VerifyBoringSsl::New(const internal::RsaPublicKey& pub_key,
                                 const internal::RsaSsaPkcs1Params& params) {
-  auto status = internal::CheckFipsCompatibility<RsaSsaPkcs1VerifyBoringSsl>();
-  if (!status.ok()) return status;
-
-  // Check hash.
-  auto hash_status =
-      SubtleUtilBoringSSL::ValidateSignatureHash(params.hash_type);
-  if (!hash_status.ok()) {
-    return hash_status;
+  util::Status status =
+      internal::CheckFipsCompatibility<RsaSsaPkcs1VerifyBoringSsl>();
+  if (!status.ok()) {
+    return status;
   }
-  auto sig_hash_result = SubtleUtilBoringSSL::EvpHash(params.hash_type);
-  if (!sig_hash_result.ok()) return sig_hash_result.status();
+
+  // Check if the hash type is safe to use.
+  util::Status is_safe = internal::IsHashTypeSafeForSignature(params.hash_type);
+  if (!is_safe.ok()) {
+    return is_safe;
+  }
+
+  util::StatusOr<const EVP_MD*> sig_hash =
+      internal::EvpHashFromHashType(params.hash_type);
+  if (!sig_hash.ok()) {
+    return sig_hash.status();
+  }
 
   // The RSA modulus and exponent are checked as part of the conversion to
   // internal::SslUniquePtr<RSA>.
@@ -59,8 +66,7 @@ RsaSsaPkcs1VerifyBoringSsl::New(const internal::RsaPublicKey& pub_key,
   }
 
   std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl> verify(
-      new RsaSsaPkcs1VerifyBoringSsl(std::move(rsa).ValueOrDie(),
-                                     sig_hash_result.ValueOrDie()));
+      new RsaSsaPkcs1VerifyBoringSsl(*std::move(rsa), *sig_hash));
   return std::move(verify);
 }
 
@@ -70,17 +76,17 @@ util::Status RsaSsaPkcs1VerifyBoringSsl::Verify(absl::string_view signature,
   // regardless of whether the size is 0.
   data = internal::EnsureStringNonNull(data);
 
-  auto digest_result = boringssl::ComputeHash(data, *sig_hash_);
-  if (!digest_result.ok()) return digest_result.status();
-  auto digest = std::move(digest_result.ValueOrDie());
+  util::StatusOr<std::string> digest = internal::ComputeHash(data, *sig_hash_);
+  if (!digest.ok()) {
+    return digest.status();
+  }
 
-  if (1 !=
-      RSA_verify(EVP_MD_type(sig_hash_),
-                 /*msg=*/digest.data(),
-                 /*msg_len=*/digest.size(),
+  if (RSA_verify(EVP_MD_type(sig_hash_),
+                 /*digest=*/reinterpret_cast<const uint8_t*>(digest->data()),
+                 /*digest_len=*/digest->size(),
                  /*sig=*/reinterpret_cast<const uint8_t*>(signature.data()),
                  /*sig_len=*/signature.length(),
-                 /*rsa=*/rsa_.get())) {
+                 /*rsa=*/rsa_.get()) != 1) {
     // Signature is invalid.
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");

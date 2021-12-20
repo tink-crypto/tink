@@ -17,6 +17,7 @@
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
 #include <algorithm>
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
@@ -25,9 +26,9 @@
 #include "openssl/base.h"
 #include "openssl/hkdf.h"
 #include "openssl/hmac.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -191,13 +192,13 @@ HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Too short secret for HkdfStreamingPrf");
   }
-  auto evp_md_or = SubtleUtilBoringSSL::EvpHash(hash);
-  if (!evp_md_or.ok()) {
+  util::StatusOr<const EVP_MD *> evp_md = internal::EvpHashFromHashType(hash);
+  if (!evp_md.ok()) {
     return util::Status(absl::StatusCode::kUnimplemented, "Unsupported hash");
   }
 
-  return {absl::WrapUnique(
-      new HkdfStreamingPrf(evp_md_or.ValueOrDie(), std::move(secret), salt))};
+  return {
+      absl::WrapUnique(new HkdfStreamingPrf(*evp_md, std::move(secret), salt))};
 }
 
 }  // namespace subtle

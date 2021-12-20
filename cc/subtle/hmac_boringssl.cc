@@ -17,6 +17,7 @@
 #include "tink/subtle/hmac_boringssl.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
@@ -25,10 +26,10 @@
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
 #include "openssl/mem.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -37,19 +38,17 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// static
 util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
                                                         uint32_t tag_size,
                                                         util::SecretData key) {
   auto status = internal::CheckFipsCompatibility<HmacBoringSsl>();
   if (!status.ok()) return status;
 
-  util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!res.ok()) {
-    return res.status();
+  util::StatusOr<const EVP_MD*> md = internal::EvpHashFromHashType(hash_type);
+  if (!md.ok()) {
+    return md.status();
   }
-  const EVP_MD* md = res.ValueOrDie();
-  if (EVP_MD_size(md) < tag_size) {
+  if (EVP_MD_size(*md) < tag_size) {
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
@@ -58,7 +57,7 @@ util::StatusOr<std::unique_ptr<Mac>> HmacBoringSsl::New(HashType hash_type,
   if (key.size() < kMinKeySize) {
     return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
-  return {absl::WrapUnique(new HmacBoringSsl(md, tag_size, std::move(key)))};
+  return {absl::WrapUnique(new HmacBoringSsl(*md, tag_size, std::move(key)))};
 }
 
 util::StatusOr<std::string> HmacBoringSsl::ComputeMac(

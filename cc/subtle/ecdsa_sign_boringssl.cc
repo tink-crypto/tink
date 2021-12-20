@@ -26,6 +26,7 @@
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/common_enums.h"
@@ -80,14 +81,15 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   auto status = internal::CheckFipsCompatibility<EcdsaSignBoringSsl>();
   if (!status.ok()) return status;
 
-  // Check hash.
-  auto hash_status = SubtleUtilBoringSSL::ValidateSignatureHash(hash_type);
-  if (!hash_status.ok()) {
-    return hash_status;
+  // Check if the hash type is safe to use.
+  util::Status is_safe = internal::IsHashTypeSafeForSignature(hash_type);
+  if (!is_safe.ok()) {
+    return is_safe;
   }
-  auto hash_result = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!hash_result.ok()) return hash_result.status();
-  const EVP_MD* hash = hash_result.ValueOrDie();
+  util::StatusOr<const EVP_MD*> hash = internal::EvpHashFromHashType(hash_type);
+  if (!hash.ok()) {
+    return hash.status();
+  }
 
   // Check curve.
   auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
@@ -118,7 +120,7 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
 
   // Sign.
   std::unique_ptr<EcdsaSignBoringSsl> sign(
-      new EcdsaSignBoringSsl(std::move(key), hash, encoding));
+      new EcdsaSignBoringSsl(std::move(key), *hash, encoding));
   return std::move(sign);
 }
 

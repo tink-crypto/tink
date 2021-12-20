@@ -16,14 +16,16 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 
+#include <utility>
+
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "openssl/bn.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pkcs1_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -36,12 +38,10 @@ namespace crypto {
 namespace tink {
 
 using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
 using google::crypto::tink::RsaSsaPkcs1Params;
 using google::crypto::tink::RsaSsaPkcs1PublicKey;
 
-StatusOr<std::unique_ptr<PublicKeyVerify>>
+util::StatusOr<std::unique_ptr<PublicKeyVerify>>
 RsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
     const RsaSsaPkcs1PublicKey& rsa_ssa_pkcs1_public_key) const {
   internal::RsaPublicKey rsa_pub_key;
@@ -58,27 +58,27 @@ RsaSsaPkcs1VerifyKeyManager::PublicKeyVerifyFactory::Create(
   return {std::move(rsa_ssa_pkcs1_result.ValueOrDie())};
 }
 
-Status RsaSsaPkcs1VerifyKeyManager::ValidateParams(
+util::Status RsaSsaPkcs1VerifyKeyManager::ValidateParams(
     const RsaSsaPkcs1Params& params) const {
-  return subtle::SubtleUtilBoringSSL::ValidateSignatureHash(
+  return internal::IsHashTypeSafeForSignature(
       Enums::ProtoToSubtle(params.hash_type()));
 }
 
-Status RsaSsaPkcs1VerifyKeyManager::ValidateKey(
+util::Status RsaSsaPkcs1VerifyKeyManager::ValidateKey(
     const RsaSsaPkcs1PublicKey& key) const {
-  Status status = ValidateVersion(key.version(), get_version());
+  util::Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   util::StatusOr<internal::SslUniquePtr<BIGNUM>> n =
       internal::StringToBignum(key.n());
   if (!n.ok()) {
     return n.status();
   }
-  Status modulus_status =
+  util::Status modulus_status =
       internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
   if (!modulus_status.ok()) {
     return modulus_status;
   }
-  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
+  util::Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
   if (!exponent_status.ok()) {
     return exponent_status;
   }

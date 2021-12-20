@@ -143,11 +143,11 @@ tink_cc_library(
     hkdf.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
     absl::algorithm_container
     absl::status
     absl::strings
     crypto
+    tink::internal::md_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -180,13 +180,13 @@ tink_cc_library(
     hmac_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
     absl::memory
     absl::status
     absl::strings
     crypto
     tink::core::mac
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::util
     tink::util::errors
     tink::util::secret_data
@@ -209,6 +209,7 @@ tink_cc_library(
     tink::internal::bn_util
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::util::errors
@@ -229,6 +230,7 @@ tink_cc_library(
     tink::core::public_key_verify
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::util::errors
@@ -242,12 +244,12 @@ tink_cc_library(
     rsa_ssa_pss_verify_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
     absl::status
     absl::strings
     crypto
     tink::core::public_key_verify
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -263,7 +265,7 @@ tink_cc_library(
     rsa_ssa_pss_sign_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
+    tink::subtle::subtle_util
     absl::memory
     absl::status
     absl::strings
@@ -271,6 +273,7 @@ tink_cc_library(
     tink::core::public_key_sign
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -284,12 +287,12 @@ tink_cc_library(
     rsa_ssa_pkcs1_verify_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
     absl::status
     absl::strings
     crypto
     tink::core::public_key_verify
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -305,7 +308,7 @@ tink_cc_library(
     rsa_ssa_pkcs1_sign_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
+    tink::subtle::subtle_util
     absl::memory
     absl::status
     absl::strings
@@ -314,6 +317,7 @@ tink_cc_library(
     tink::internal::bn_util
     tink::internal::err_util
     tink::internal::fips_utils
+    tink::internal::md_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -794,10 +798,10 @@ tink_cc_library(
     stateful_hmac_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::subtle_util_boringssl
     absl::memory
     absl::status
     crypto
+    tink::internal::md_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::subtle::mac::stateful_mac

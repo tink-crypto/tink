@@ -16,13 +16,16 @@
 
 #include "tink/subtle/hkdf.h"
 
+#include <string>
+
 #include "absl/algorithm/container.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/evp.h"
 #include "openssl/hkdf.h"
+#include "tink/internal/md_util.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -30,19 +33,17 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-// static
 util::StatusOr<util::SecretData> Hkdf::ComputeHkdf(HashType hash,
                                                    const util::SecretData &ikm,
                                                    absl::string_view salt,
                                                    absl::string_view info,
                                                    size_t out_len) {
-  auto status_or_evp_md = SubtleUtilBoringSSL::EvpHash(hash);
-  if (!status_or_evp_md.ok()) {
-    return status_or_evp_md.status();
+  util::StatusOr<const EVP_MD *> evp_md = internal::EvpHashFromHashType(hash);
+  if (!evp_md.ok()) {
+    return evp_md.status();
   }
   util::SecretData out_key(out_len);
-  if (1 != HKDF(out_key.data(), out_len, status_or_evp_md.ValueOrDie(),
-                ikm.data(), ikm.size(),
+  if (1 != HKDF(out_key.data(), out_len, *evp_md, ikm.data(), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
     return util::Status(absl::StatusCode::kInternal, "BoringSSL's HKDF failed");
@@ -55,13 +56,12 @@ util::StatusOr<std::string> Hkdf::ComputeHkdf(HashType hash,
                                               absl::string_view salt,
                                               absl::string_view info,
                                               size_t out_len) {
-  auto status_or_evp_md = SubtleUtilBoringSSL::EvpHash(hash);
-  if (!status_or_evp_md.ok()) {
-    return status_or_evp_md.status();
+  util::StatusOr<const EVP_MD *> evp_md = internal::EvpHashFromHashType(hash);
+  if (!evp_md.ok()) {
+    return evp_md.status();
   }
   std::string out_key(out_len, '\0');
-  if (1 != HKDF(reinterpret_cast<uint8_t *>(&out_key[0]), out_len,
-                status_or_evp_md.ValueOrDie(),
+  if (1 != HKDF(reinterpret_cast<uint8_t *>(&out_key[0]), out_len, *evp_md,
                 reinterpret_cast<const uint8_t *>(ikm.data()), ikm.size(),
                 reinterpret_cast<const uint8_t *>(salt.data()), salt.size(),
                 reinterpret_cast<const uint8_t *>(info.data()), info.size())) {
