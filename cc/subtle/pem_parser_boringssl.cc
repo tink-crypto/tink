@@ -186,7 +186,6 @@ size_t FieldElementSizeInBytes(const EC_GROUP* group) {
   return (degree_bits + 7) / 8;
 }
 
-// TODO(b/194277407): Use this as cb in parse functions.
 // We explicitly set a failing passphrase callback function to make sure no
 // default callback routine is used.
 static int FailingPassphraseCallback(char* buf, int buf_size, int rwflag,
@@ -204,8 +203,9 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   BIO_write(rsa_key_bio.get(), pem_serialized_key.data(),
             pem_serialized_key.size());
 
-  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PUBKEY(
-      rsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
+  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(
+      PEM_read_bio_PUBKEY(rsa_key_bio.get(), /*x=*/nullptr,
+                          &FailingPassphraseCallback, /*u=*/nullptr));
 
   if (evp_rsa_key == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -253,8 +253,9 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
             pem_serialized_key.size());
 
   // BoringSSL APIs to parse the PEM data.
-  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(PEM_read_bio_PrivateKey(
-      rsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
+  internal::SslUniquePtr<EVP_PKEY> evp_rsa_key(
+      PEM_read_bio_PrivateKey(rsa_key_bio.get(), /*x=*/nullptr,
+                              &FailingPassphraseCallback, /*u=*/nullptr));
 
   if (evp_rsa_key == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
@@ -371,8 +372,9 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
   BIO_write(ecdsa_key_bio.get(), pem_serialized_key.data(),
             pem_serialized_key.size());
 
-  internal::SslUniquePtr<EVP_PKEY> evp_ecdsa_key(PEM_read_bio_PUBKEY(
-      ecdsa_key_bio.get(), /*x=*/nullptr, /*cb=*/nullptr, /*u=*/nullptr));
+  internal::SslUniquePtr<EVP_PKEY> evp_ecdsa_key(
+      PEM_read_bio_PUBKEY(ecdsa_key_bio.get(), /*x=*/nullptr,
+                          &FailingPassphraseCallback, /*u=*/nullptr));
 
   if (evp_ecdsa_key == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
