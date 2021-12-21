@@ -108,7 +108,7 @@ export class KeysetHandle {
    */
   writeNoSecret(writer: KeysetWriter): Uint8Array {
     assertNoSecretKeyMaterial(this.keyset_);
-    return writer.write(this.keyset_);
+    return writer.encodeBinary(this.keyset_);
   }
 
   /**
