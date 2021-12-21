@@ -87,17 +87,12 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   }
 
   // Set the key's group (EC curve).
-  auto group_statusor = SubtleUtilBoringSSL::GetEcGroup(subtle_ec_key.curve);
-  if (!group_statusor.ok()) {
-    return group_statusor.status();
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(subtle_ec_key.curve);
+  if (!group.ok()) {
+    return group.status();
   }
-  internal::SslUniquePtr<EC_GROUP> group(group_statusor.ValueOrDie());
-  if (group.get() == nullptr) {
-    return util::Status(
-        absl::StatusCode::kInternal,
-        absl::StrCat("failed to set EC group to curve ", subtle_ec_key.curve));
-  }
-  if (!EC_KEY_set_group(openssl_ec_key, group.get())) {
+  if (!EC_KEY_set_group(openssl_ec_key, group->get())) {
     return util::Status(
         absl::StatusCode::kInternal,
         absl::StrCat("failed to set key group from EC group for curve ",
@@ -105,7 +100,7 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   }
 
   // Create an EC point and initialize it from the key proto.
-  internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group.get()));
+  internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group->get()));
   if (!point.get()) {
     return util::Status(absl::StatusCode::kInternal,
                         "failed to allocate EC_POINT");
@@ -116,12 +111,12 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
   internal::SslUniquePtr<BIGNUM> y(BN_bin2bn(
       reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_y.data()),
       subtle_ec_key.pub_y.length(), nullptr));
-  if (!EC_POINT_set_affine_coordinates_GFp(group.get(), point.get(), x.get(),
+  if (!EC_POINT_set_affine_coordinates_GFp(group->get(), point.get(), x.get(),
                                            y.get(), nullptr)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "failed to set affine coordinates");
   }
-  if (!EC_POINT_is_on_curve(group.get(), point.get(), nullptr)) {
+  if (!EC_POINT_is_on_curve(group->get(), point.get(), nullptr)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "failed to confirm EC point is on curve");
   }
@@ -400,7 +395,8 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
                                            FieldElementSizeInBytes(ec_group));
   auto y_string = internal::BignumToString(y_coordinate.get(),
                                            FieldElementSizeInBytes(ec_group));
-  auto curve = SubtleUtilBoringSSL::GetCurve(ec_group);
+  util::StatusOr<EllipticCurveType> curve =
+      internal::CurveTypeFromEcGroup(ec_group);
 
   if (!x_string.ok()) return x_string.status();
   if (!y_string.ok()) return y_string.status();
@@ -460,7 +456,7 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
     return y_string.status();
   }
   util::StatusOr<EllipticCurveType> curve =
-      SubtleUtilBoringSSL::GetCurve(ec_group);
+      internal::CurveTypeFromEcGroup(ec_group);
   if (!curve.ok()) {
     return curve.status();
   }

@@ -27,7 +27,6 @@
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

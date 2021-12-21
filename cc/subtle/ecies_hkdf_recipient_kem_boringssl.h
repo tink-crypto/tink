@@ -73,9 +73,9 @@ class EciesHkdfNistPCurveRecipientKemBoringSsl
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  EciesHkdfNistPCurveRecipientKemBoringSsl(EllipticCurveType curve,
-                                           util::SecretData priv_key_value,
-                                           EC_GROUP* ec_group);
+  EciesHkdfNistPCurveRecipientKemBoringSsl(
+      EllipticCurveType curve, util::SecretData priv_key_value,
+      internal::SslUniquePtr<EC_GROUP> ec_group);
 
   EllipticCurveType curve_;
   util::SecretData priv_key_value_;

@@ -25,6 +25,7 @@
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -32,6 +33,7 @@
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -92,19 +94,22 @@ util::StatusOr<std::unique_ptr<EcdsaSignBoringSsl>> EcdsaSignBoringSsl::New(
   }
 
   // Check curve.
-  auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
-  if (!group_result.ok()) return group_result.status();
-  internal::SslUniquePtr<EC_GROUP> group(group_result.ValueOrDie());
+  util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
+      internal::EcGroupFromCurveType(ec_key.curve);
+  if (!group.ok()) {
+    return group.status();
+  }
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
-  EC_KEY_set_group(key.get(), group.get());
+  EC_KEY_set_group(key.get(), group->get());
 
   // Check key.
-  auto ec_point_result =
-      SubtleUtilBoringSSL::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
-  if (!ec_point_result.ok()) return ec_point_result.status();
+  util::StatusOr<internal::SslUniquePtr<EC_POINT>> pub_key =
+      internal::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
+  if (!pub_key.ok()) {
+    return pub_key.status();
+  }
 
-  internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
-  if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
+  if (!EC_KEY_set_public_key(key.get(), pub_key->get())) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid public key: ", internal::GetSslErrors()));

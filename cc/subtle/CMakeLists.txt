@@ -58,11 +58,11 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hkdf
-    tink::subtle::subtle_util_boringssl
     absl::memory
     absl::status
     absl::strings
     crypto
+    tink::internal::ec_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::util::errors
@@ -78,11 +78,11 @@ tink_cc_library(
   DEPS
     tink::subtle::common_enums
     tink::subtle::hkdf
-    tink::subtle::subtle_util_boringssl
     absl::memory
     absl::status
     absl::strings
     crypto
+    tink::internal::ec_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::util::secret_data
@@ -207,6 +207,7 @@ tink_cc_library(
     crypto
     tink::core::public_key_sign
     tink::internal::bn_util
+    tink::internal::ec_util
     tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::md_util
@@ -228,6 +229,7 @@ tink_cc_library(
     absl::strings
     crypto
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::md_util
@@ -873,10 +875,10 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     tink::subtle::ecies_hkdf_sender_kem_boringssl
-    tink::subtle::subtle_util_boringssl
     gmock
     absl::status
     tink::config::tink_fips
+    tink::internal::ec_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -1159,7 +1161,6 @@ tink_cc_test(
     tink::subtle::ed25519_sign_boringssl
     tink::subtle::ed25519_verify_boringssl
     tink::subtle::random
-    tink::subtle::subtle_util_boringssl
     gmock
     absl::status
     absl::strings
@@ -1183,7 +1184,6 @@ tink_cc_test(
   DEPS
     tink::subtle::ed25519_sign_boringssl
     tink::subtle::ed25519_verify_boringssl
-    tink::subtle::subtle_util_boringssl
     tink::subtle::wycheproof_util
     gmock
     absl::status

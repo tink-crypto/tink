@@ -22,6 +22,7 @@
 #include "openssl/ec.h"
 #include "openssl/ecdsa.h"
 #include "openssl/evp.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/md_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
@@ -38,17 +39,18 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
     const SubtleUtilBoringSSL::EcKey& ec_key, HashType hash_type,
     EcdsaSignatureEncoding encoding) {
   // Check curve.
-  auto group_result(SubtleUtilBoringSSL::GetEcGroup(ec_key.curve));
+  auto group_result = internal::EcGroupFromCurveType(ec_key.curve);
   if (!group_result.ok()) return group_result.status();
-  internal::SslUniquePtr<EC_GROUP> group(group_result.ValueOrDie());
+  internal::SslUniquePtr<EC_GROUP> group = std::move(group_result.ValueOrDie());
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
   EC_KEY_set_group(key.get(), group.get());
 
   // Check key.
   auto ec_point_result =
-      SubtleUtilBoringSSL::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
+      internal::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
   if (!ec_point_result.ok()) return ec_point_result.status();
-  internal::SslUniquePtr<EC_POINT> pub_key(ec_point_result.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> pub_key =
+      std::move(ec_point_result.ValueOrDie());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
@@ -98,8 +100,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
   std::string derSig(signature);
   if (encoding_ == subtle::EcdsaSignatureEncoding::IEEE_P1363) {
     const EC_GROUP* group = EC_KEY_get0_group(key_.get());
-    auto status_or_der =
-        SubtleUtilBoringSSL::EcSignatureIeeeToDer(group, signature);
+    auto status_or_der = internal::EcSignatureIeeeToDer(group, signature);
 
     if (!status_or_der.ok()) {
       return status_or_der.status();

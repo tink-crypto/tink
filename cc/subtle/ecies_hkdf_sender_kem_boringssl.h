@@ -92,10 +92,9 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  EciesHkdfNistPCurveSendKemBoringSsl(EllipticCurveType curve,
-                                      const std::string& pubx,
-                                      const std::string& puby,
-                                      EC_POINT* peer_pub_key);
+  EciesHkdfNistPCurveSendKemBoringSsl(
+      EllipticCurveType curve, const std::string& pubx, const std::string& puby,
+      internal::SslUniquePtr<EC_POINT> peer_pub_key);
 
   EllipticCurveType curve_;
   std::string pubx_;

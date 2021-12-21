@@ -26,7 +26,6 @@
 #include "tink/public_key_verify.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/ed25519_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"

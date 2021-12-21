@@ -21,10 +21,10 @@
 #include "openssl/bn.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 
 namespace crypto {
@@ -61,21 +61,21 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::New(EllipticCurveType curve,
   if (priv_key.empty()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "empty priv_key");
   }
-  auto status_or_ec_group = SubtleUtilBoringSSL::GetEcGroup(curve);
+  auto status_or_ec_group = internal::EcGroupFromCurveType(curve);
   if (!status_or_ec_group.ok()) return status_or_ec_group.status();
-  // TODO(przydatek): consider refactoring SubtleUtilBoringSSL,
+  // TODO(przydatek): consider refactoring internal/ec_util,
   //     so that the saved group can be used for KEM operations.
   return {absl::WrapUnique(new EciesHkdfNistPCurveRecipientKemBoringSsl(
-      curve, std::move(priv_key), status_or_ec_group.ValueOrDie()))};
+      curve, std::move(priv_key), std::move(status_or_ec_group.ValueOrDie())))};
 }
 
 EciesHkdfNistPCurveRecipientKemBoringSsl::
-    EciesHkdfNistPCurveRecipientKemBoringSsl(EllipticCurveType curve,
-                                             util::SecretData priv_key_value,
-                                             EC_GROUP* ec_group)
+    EciesHkdfNistPCurveRecipientKemBoringSsl(
+        EllipticCurveType curve, util::SecretData priv_key_value,
+        internal::SslUniquePtr<EC_GROUP> ec_group)
     : curve_(curve),
       priv_key_value_(std::move(priv_key_value)),
-      ec_group_(ec_group) {}
+      ec_group_(std::move(ec_group)) {}
 
 util::StatusOr<util::SecretData>
 EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
@@ -83,7 +83,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
     absl::string_view hkdf_info, uint32_t key_size_in_bytes,
     EcPointFormat point_format) const {
   auto status_or_ec_point =
-      SubtleUtilBoringSSL::EcPointDecode(curve_, point_format, kem_bytes);
+      internal::EcPointDecode(curve_, point_format, kem_bytes);
   if (!status_or_ec_point.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Invalid KEM bytes: %s",
@@ -93,7 +93,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
       std::move(status_or_ec_point.ValueOrDie());
   internal::SslUniquePtr<BIGNUM> priv_key(
       BN_bin2bn(priv_key_value_.data(), priv_key_value_.size(), nullptr));
-  auto shared_secret_or = SubtleUtilBoringSSL::ComputeEcdhSharedSecret(
+  auto shared_secret_or = internal::ComputeEcdhSharedSecret(
       curve_, priv_key.get(), pub_key.get());
   if (!shared_secret_or.ok()) {
     return shared_secret_or.status();
