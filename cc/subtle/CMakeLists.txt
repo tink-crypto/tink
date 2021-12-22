@@ -143,11 +143,14 @@ tink_cc_library(
     hkdf.h
   DEPS
     tink::subtle::common_enums
+    tink::subtle::subtle_util
     absl::algorithm_container
     absl::status
     absl::strings
+    absl::span
     crypto
     tink::internal::md_util
+    tink::internal::ssl_unique_ptr
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
@@ -894,10 +897,10 @@ tink_cc_test(
     tink::subtle::common_enums
     tink::subtle::hkdf
     gmock
+    absl::strings
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
-    tink::util::test_util
 )
 
 tink_cc_test(

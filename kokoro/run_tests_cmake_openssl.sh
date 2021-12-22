@@ -86,6 +86,7 @@ main() {
     "tink_test_subtle_aes_cmac_boringssl_test"
     "tink_test_subtle_aes_gcm_boringssl_test"
     "tink_test_subtle_aes_gcm_siv_boringssl_test"
+    "tink_test_subtle_hkdf_test"
     "tink_test_subtle_random_test"
     "tink_test_subtle_xchacha20_poly1305_boringssl_test"
   )
