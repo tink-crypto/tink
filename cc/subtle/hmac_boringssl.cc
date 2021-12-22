@@ -21,11 +21,10 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "openssl/digest.h"
-#include "openssl/err.h"
+#include "absl/strings/string_view.h"
+#include "openssl/crypto.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
-#include "openssl/mem.h"
 #include "tink/internal/md_util.h"
 #include "tink/internal/util.h"
 #include "tink/mac.h"
