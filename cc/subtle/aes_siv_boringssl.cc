@@ -22,7 +22,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/aes.h"
-#include "openssl/mem.h"
+#include "openssl/evp.h"
 #include "tink/deterministic_aead.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -60,12 +60,20 @@ AesSivBoringSsl::New(const util::SecretData& key) {
     return k1_or.status();
   }
   util::SecretUniquePtr<AES_KEY> k1 = std::move(k1_or).ValueOrDie();
-  auto k2_or = InitializeAesKey(absl::MakeSpan(key).subspan(key.size() / 2));
-  if (!k2_or.ok()) {
-    return k2_or.status();
+
+  internal::SslUniquePtr<EVP_CIPHER_CTX> k2_ctx(EVP_CIPHER_CTX_new());
+  auto k2_data = absl::MakeSpan(key).subspan(key.size() / 2);
+  // We are sure at this point that the key is 32 bytes. Initialize the context
+  // with just the key and mode.
+  if (EVP_CipherInit_ex(k2_ctx.get(), EVP_aes_256_ctr(), /*engine=*/nullptr,
+                        reinterpret_cast<const uint8_t*>(k2_data.data()),
+                        /*iv=*/nullptr, /*enc=*/1) <= 0) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_CipherInit_ex failed");
   }
-  util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).ValueOrDie();
-  return {absl::WrapUnique(new AesSivBoringSsl(std::move(k1), std::move(k2)))};
+
+  return {
+      absl::WrapUnique(new AesSivBoringSsl(std::move(k1), std::move(k2_ctx)))};
 }
 
 util::SecretData AesSivBoringSsl::ComputeCmacK1() const {
@@ -81,18 +89,22 @@ util::SecretData AesSivBoringSsl::ComputeCmacK2() const {
   return cmac_k2;
 }
 
-void AesSivBoringSsl::CtrCrypt(const uint8_t siv[kBlockSize],
-                               absl::Span<const uint8_t> in,
-                               uint8_t* out) const {
+util::Status AesSivBoringSsl::CtrCrypt(const uint8_t siv[kBlockSize],
+                                       absl::Span<const uint8_t> in,
+                                       uint8_t* out) const {
   uint8_t iv[kBlockSize];
   std::copy_n(siv, kBlockSize, iv);
   iv[8] &= 0x7f;
   iv[12] &= 0x7f;
-  unsigned int num = 0;
-  uint8_t ecount_buf[kBlockSize];
-  std::fill(std::begin(ecount_buf), std::end(ecount_buf), 0);
-  AES_ctr128_encrypt(in.data(), out, in.size(), k2_.get(), iv, ecount_buf,
-                     &num);
+  int len = 0;
+  // Encrypt/Decrypt are the same in AES-CTR so we always use enc=1.
+  if (EVP_CipherInit_ex(k2_ctx_.get(), /*cipher=*/nullptr, /*engine=*/nullptr,
+                        /*key=*/nullptr, iv, /*enc=*/1) != 1 ||
+      EVP_CipherUpdate(k2_ctx_.get(), out, &len, in.data(), in.size()) != 1 ||
+      EVP_CipherFinal_ex(k2_ctx_.get(), out + len, &len) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
+  }
+  return util::OkStatus();
 }
 
 void AesSivBoringSsl::EncryptBlock(const uint8_t in[kBlockSize],
@@ -210,10 +222,14 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
   size_t ciphertext_size = plaintext.size() + kBlockSize;
   std::vector<uint8_t> ct(ciphertext_size);
   std::copy(std::begin(siv), std::end(siv), ct.begin());
-  CtrCrypt(siv,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
-                          plaintext.size()),
-           ct.data() + kBlockSize);
+  util::Status crypt_result = CtrCrypt(
+      siv,
+      absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
+                     plaintext.size()),
+      ct.data() + kBlockSize);
+  if (!crypt_result.ok()) {
+    return crypt_result;
+  }
   return std::string(reinterpret_cast<const char*>(ct.data()), ciphertext_size);
 }
 
@@ -225,10 +241,14 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
   }
   size_t plaintext_size = ciphertext.size() - kBlockSize;
   std::vector<uint8_t> pt(plaintext_size);
-  const uint8_t *siv = reinterpret_cast<const uint8_t*>(&ciphertext[0]);
+  const uint8_t* siv = reinterpret_cast<const uint8_t*>(&ciphertext[0]);
   const uint8_t* ct =
       reinterpret_cast<const uint8_t*>(&ciphertext[0]) + kBlockSize;
-  CtrCrypt(siv, absl::MakeSpan(ct, plaintext_size), pt.data());
+  util::Status crypt_result =
+      CtrCrypt(siv, absl::MakeSpan(ct, plaintext_size), pt.data());
+  if (!crypt_result.ok()) {
+    return crypt_result;
+  }
 
   uint8_t s2v[kBlockSize];
   S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),

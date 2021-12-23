@@ -22,8 +22,10 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aes.h"
+#include "openssl/evp.h"
 #include "tink/deterministic_aead.h"
 #include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -78,9 +80,9 @@ class AesSivBoringSsl : public DeterministicAead {
   static constexpr size_t kBlockSize = 16;
 
   AesSivBoringSsl(util::SecretUniquePtr<AES_KEY> k1,
-                  util::SecretUniquePtr<AES_KEY> k2)
+                  internal::SslUniquePtr<EVP_CIPHER_CTX> k2_ctx)
       : k1_(std::move(k1)),
-        k2_(std::move(k2)),
+        k2_ctx_(std::move(k2_ctx)),
         cmac_k1_(ComputeCmacK1()),
         cmac_k2_(ComputeCmacK2()) {}
 
@@ -89,10 +91,10 @@ class AesSivBoringSsl : public DeterministicAead {
   // Precomputes cmac_k2
   util::SecretData ComputeCmacK2() const;
 
-  // Encrypts (or decrypts) the bytes in in using an SIV and
-  // writes the result to out.
-  void CtrCrypt(const uint8_t siv[kBlockSize], absl::Span<const uint8_t> in,
-                uint8_t* out) const;
+  // Encrypts (or decrypts) the bytes from `in`  using an SIV `siv` and writes
+  // the result to `out`.
+  util::Status CtrCrypt(const uint8_t siv[kBlockSize],
+                        absl::Span<const uint8_t> in, uint8_t* out) const;
 
   // Encrypts a single block using k2_.
   // This is used for CMACs.
@@ -121,7 +123,7 @@ class AesSivBoringSsl : public DeterministicAead {
            uint8_t siv[kBlockSize]) const;
 
   const util::SecretUniquePtr<AES_KEY> k1_;
-  const util::SecretUniquePtr<AES_KEY> k2_;
+  const internal::SslUniquePtr<EVP_CIPHER_CTX> k2_ctx_;
   const util::SecretData cmac_k1_;
   const util::SecretData cmac_k2_;
 };
