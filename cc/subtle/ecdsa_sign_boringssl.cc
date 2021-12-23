@@ -55,19 +55,25 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
                                                     const EC_KEY* key) {
   size_t field_size_in_bytes =
       (EC_GROUP_get_degree(EC_KEY_get0_group(key)) + 7) / 8;
-  internal::SslUniquePtr<ECDSA_SIG> ecdsa(ECDSA_SIG_from_bytes(
-      reinterpret_cast<const uint8_t*>(der.data()), der.size()));
+
+  ECDSA_SIG* ecdsa_ptr = nullptr;
+  const uint8_t* der_ptr = reinterpret_cast<const uint8_t*>(der.data());
+  // Note: d2i_ECDSA_SIG is deprecated in BoringSSL, but it isn't in OpenSSL.
+  internal::SslUniquePtr<ECDSA_SIG> ecdsa(
+      d2i_ECDSA_SIG(&ecdsa_ptr, &der_ptr, der.size()));
   if (ecdsa == nullptr) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "Internal BoringSSL ECDSA_SIG_from_bytes's error");
+    return util::Status(absl::StatusCode::kInternal, "d2i_ECDSA_SIG failed");
   }
+
+  const BIGNUM* r_bn = ECDSA_SIG_get0_r(ecdsa.get());
+  const BIGNUM* s_bn = ECDSA_SIG_get0_s(ecdsa.get());
   util::StatusOr<std::string> r =
-      internal::BignumToString(ecdsa->r, field_size_in_bytes);
+      internal::BignumToString(r_bn, field_size_in_bytes);
   if (!r.ok()) {
     return r.status();
   }
   util::StatusOr<std::string> s =
-      internal::BignumToString(ecdsa->s, field_size_in_bytes);
+      internal::BignumToString(s_bn, field_size_in_bytes);
   if (!s.ok()) {
     return s.status();
   }
