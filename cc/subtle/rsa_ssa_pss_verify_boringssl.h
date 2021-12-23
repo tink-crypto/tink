@@ -36,19 +36,17 @@ namespace subtle {
 
 // RSA SSA (Signature Schemes with Appendix) using  PSS  (Probabilistic
 // Signature Scheme) encoding is defined at
-// https://tools.ietf.org/html/rfc8017#section-8.1). This implemention uses
-// Boring SSL for the underlying cryptographic operations.
+// https://tools.ietf.org/html/rfc8017#section-8.1).
 class RsaSsaPssVerifyBoringSsl : public PublicKeyVerify {
  public:
   static crypto::tink::util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>>
   New(const internal::RsaPublicKey& pub_key,
       const internal::RsaSsaPssParams& params);
 
-  // Verifies that 'signature' is a digital signature for 'data'.
+  ~RsaSsaPssVerifyBoringSsl() override = default;
+
   crypto::tink::util::Status Verify(absl::string_view signature,
                                     absl::string_view data) const override;
-
-  ~RsaSsaPssVerifyBoringSsl() override = default;
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;

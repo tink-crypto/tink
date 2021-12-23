@@ -22,6 +22,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
+#include "openssl/bn.h"
 #include "include/rapidjson/document.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/err_util.h"
@@ -331,7 +332,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, TestAllowedFipsModuli) {
   internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
                                    /*mgf1_hash=*/HashType::SHA256,
                                    /*salt_length=*/32};
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
   EXPECT_THAT(
       internal::NewRsaKeyPair(3072, rsa_f4.get(), &private_key, &public_key),
@@ -352,7 +353,7 @@ TEST_F(RsaSsaPssVerifyBoringSslTest, TestRestrictedFipsModuli) {
   internal::RsaSsaPssParams params{/*sig_hash=*/HashType::SHA256,
                                    /*mgf1_hash=*/HashType::SHA256,
                                    /*salt_length=*/32};
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
   EXPECT_THAT(
       internal::NewRsaKeyPair(2560, rsa_f4.get(), &private_key, &public_key),

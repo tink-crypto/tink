@@ -249,10 +249,12 @@ tink_cc_library(
     rsa_ssa_pss_verify_boringssl.h
   DEPS
     tink::subtle::common_enums
+    absl::memory
     absl::status
     absl::strings
     crypto
     tink::core::public_key_verify
+    tink::internal::err_util
     tink::internal::fips_utils
     tink::internal::md_util
     tink::internal::rsa_util
@@ -1217,6 +1219,7 @@ tink_cc_test(
     gmock
     absl::status
     absl::strings
+    crypto
     rapidjson
     tink::core::public_key_sign
     tink::core::public_key_verify

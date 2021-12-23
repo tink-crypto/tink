@@ -267,6 +267,7 @@ cc_library(
     deps = [
         ":common_enums",
         "//:public_key_verify",
+        "//internal:err_util",
         "//internal:fips_utils",
         "//internal:md_util",
         "//internal:rsa_util",
@@ -276,6 +277,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
@@ -1307,6 +1309,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@boringssl//:crypto",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
