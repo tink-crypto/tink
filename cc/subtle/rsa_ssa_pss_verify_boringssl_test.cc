@@ -35,7 +35,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 // TODO(quannguyen):
 //  + Add tests for parameters validation.

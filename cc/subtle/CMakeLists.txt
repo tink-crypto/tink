@@ -1231,7 +1231,6 @@ tink_cc_test(
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(
