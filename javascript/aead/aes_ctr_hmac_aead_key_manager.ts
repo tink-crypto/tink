@@ -193,7 +193,8 @@ export class AesCtrHmacAeadKeyManager implements KeyManager.KeyManager<Aead> {
             this.getKeyType() + '.');
       }
       try {
-        deserializedKey = PbAesCtrHmacAeadKey.deserializeBinary(key.getValue());
+        deserializedKey =
+            PbAesCtrHmacAeadKey.deserializeBinary(key.getValue_asU8());
       } catch (e) {
         throw new SecurityException(
             'Could not parse the key in key data as a serialized proto of ' +

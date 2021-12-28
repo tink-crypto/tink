@@ -22,7 +22,7 @@ export function validatePrivateKey(
     key: PbEcdsaPrivateKey, privateKeyManagerVersion: number,
     publicKeyManagerVersion: number) {
   Validators.validateVersion(key.getVersion(), privateKeyManagerVersion);
-  if (!key.getKeyValue()) {
+  if (!key.getKeyValue_asU8()) {
     throw new SecurityException(
         'Invalid private key - missing private key value.');
   }

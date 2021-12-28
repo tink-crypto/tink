@@ -257,7 +257,7 @@ function deserializePrivateKey(serializedPrivateKey: Uint8Array):
         'Input cannot be parsed as ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE +
         ' key-proto.');
   }
-  if (!key.getPublicKey() || !key.getKeyValue()) {
+  if (!key.getPublicKey() || !key.getKeyValue_asU8()) {
     throw new SecurityException(
         'Input cannot be parsed as ' + EciesAeadHkdfPrivateKeyManager.KEY_TYPE +
         ' key-proto.');

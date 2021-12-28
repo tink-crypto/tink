@@ -28,7 +28,7 @@ describe('signature key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue());
+        PbEcdsaKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
     const params = keyFormat.getParams();
     expect(params!.getEncoding()).toBe(expectedEncoding);
 

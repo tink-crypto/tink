@@ -269,17 +269,17 @@ describe('registry test', function() {
     const keyData = await Registry.newKeyData(keyTemplate);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
-    const keyFormat =
-        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
+        keyTemplate.getValue_asU8());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
     // Check AES CTR key.
     expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
-        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+        .toBe(key.getAesCtrKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getAesCtrKeyFormat()?.getParams())
         .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
     expect(keyFormat.getHmacKeyFormat()?.getKeySize())
-        .toBe(key.getHmacKey()?.getKeyValue().length);
+        .toBe(key.getHmacKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getHmacKeyFormat()?.getParams())
         .toEqual(key.getHmacKey()?.getParams());
   });
@@ -350,16 +350,16 @@ describe('registry test', function() {
         await Registry.newKey(keyTemplate), PbAesCtrHmacAeadKey);
 
     // Checks that correct AES CTR HMAC AEAD key was returned.
-    const keyFormat =
-        PbAesCtrHmacAeadKeyFormat.deserializeBinary(keyTemplate.getValue());
+    const keyFormat = PbAesCtrHmacAeadKeyFormat.deserializeBinary(
+        keyTemplate.getValue_asU8());
     // Check AES CTR key.
     expect(keyFormat.getAesCtrKeyFormat()?.getKeySize())
-        .toBe(key.getAesCtrKey()?.getKeyValue().length);
+        .toBe(key.getAesCtrKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getAesCtrKeyFormat()?.getParams())
         .toEqual(key.getAesCtrKey()?.getParams());
     // Check HMAC key.
     expect(keyFormat.getHmacKeyFormat()?.getKeySize())
-        .toBe(key.getHmacKey()?.getKeyValue().length);
+        .toBe(key.getHmacKey()?.getKeyValue_asU8().length);
     expect(keyFormat.getHmacKeyFormat()?.getParams())
         .toEqual(key.getHmacKey()?.getParams());
   });
@@ -421,7 +421,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
 
     const primitive = await Registry.getPrimitive(
         manager.getPrimitiveType(), key, keyData.getTypeUrl());
@@ -433,7 +433,7 @@ describe('registry test', function() {
     Registry.registerKeyManager(manager);
     const keyTemplate = createAesCtrHmacAeadTestKeyTemplate();
     const keyData = await Registry.newKeyData(keyTemplate);
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
 
     try {
       await Registry.getPrimitive(Mac, key, keyData.getTypeUrl());
@@ -474,7 +474,7 @@ describe('registry test', function() {
       const privateKeyData = await Registry.newKeyData(
           HybridKeyTemplates.eciesP256HkdfHmacSha256Aes128Gcm());
       const privateKey = PbEciesAeadHkdfPrivateKey.deserializeBinary(
-          privateKeyData.getValue());
+          privateKeyData.getValue_asU8());
 
       const publicKeyData = Registry.getPublicKeyData(
           privateKeyData.getTypeUrl(), privateKeyData.getValue_asU8());

@@ -116,13 +116,13 @@ export class EciesAeadHkdfPublicKeyManager implements
     }
     let key: PbEciesAeadHkdfPublicKey;
     try {
-      key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue());
+      key = PbEciesAeadHkdfPublicKey.deserializeBinary(keyData.getValue_asU8());
     } catch (e) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPublicKeyManager.KEY_TYPE + ' key-proto.');
     }
-    if (!key.getParams() || !key.getX() || !key.getY()) {
+    if (!key.getParams() || !key.getX_asU8() || !key.getY_asU8()) {
       throw new SecurityException(
           'Input cannot be parsed as ' +
           EciesAeadHkdfPublicKeyManager.KEY_TYPE + ' key-proto.');

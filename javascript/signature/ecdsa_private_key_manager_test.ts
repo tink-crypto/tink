@@ -167,7 +167,7 @@ describe('ecdsa private key manager test', function() {
       expect(keyData.getTypeUrl()).toBe(PRIVATE_KEY_TYPE);
       expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
-      const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue());
+      const key = PbEcdsaPrivateKey.deserializeBinary(keyData.getValue_asU8());
       expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
@@ -197,13 +197,15 @@ describe('ecdsa private key manager test', function() {
     expect(publicKeyData.getTypeUrl()).toBe(PUBLIC_KEY_TYPE);
     expect(publicKeyData.getKeyMaterialType()).toBe(PUBLIC_KEY_MATERIAL_TYPE);
     const publicKey =
-        PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue());
+        PbEcdsaPublicKey.deserializeBinary(publicKeyData.getValue_asU8());
     expect(publicKey.getVersion())
         .toEqual(privateKey.getPublicKey()!.getVersion());
     expect(publicKey.getParams())
         .toEqual(privateKey.getPublicKey()!.getParams());
-    expect(publicKey.getX()).toEqual(privateKey.getPublicKey()!.getX());
-    expect(publicKey.getY()).toEqual(privateKey.getPublicKey()!.getY());
+    expect(publicKey.getX_asU8())
+        .toEqual(privateKey.getPublicKey()!.getX_asU8());
+    expect(publicKey.getY_asU8())
+        .toEqual(privateKey.getPublicKey()!.getY_asU8());
   });
 
   it('get primitive, unsupported key data type', async function() {

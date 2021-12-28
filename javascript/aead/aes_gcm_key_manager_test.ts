@@ -69,7 +69,7 @@ describe('aes gcm key manager test', function() {
 
     const key = manager.getKeyFactory().newKey(keyFormat);
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   it('new key, via serialized format proto', function() {
@@ -80,7 +80,7 @@ describe('aes gcm key manager test', function() {
 
     const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -97,9 +97,9 @@ describe('aes gcm key manager test', function() {
     expect(keyData.getKeyMaterialType())
         .toBe(PbKeyData.KeyMaterialType.SYMMETRIC);
 
-    const key = PbAesGcmKey.deserializeBinary(keyData.getValue());
+    const key = PbAesGcmKey.deserializeBinary(keyData.getValue_asU8());
 
-    expect(key.getKeyValue().length).toBe(keyFormat.getKeySize());
+    expect(key.getKeyValue_asU8().length).toBe(keyFormat.getKeySize());
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ describe('aes gcm key manager test', function() {
 
   it('get primitive, bad serialization', async function() {
     const manager = new AesGcmKeyManager();
-    const keyData = createTestKeyData().setValue(new Uint8Array([]));
+    const keyData = createTestKeyData().setValue(new Uint8Array([0]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);

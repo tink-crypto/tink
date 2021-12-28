@@ -159,7 +159,7 @@ describe('ecdsa public key manager test', function() {
   it('get primitive, invalid key', async function() {
     const manager = new EcdsaPublicKeyManager();
     const key = await createKey();
-    const x = key.getX();
+    const x = key.getX_asU8();
     key.setX(new Uint8Array([0]));
 
     try {

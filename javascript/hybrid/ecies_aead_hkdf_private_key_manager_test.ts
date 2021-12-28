@@ -165,7 +165,7 @@ describe('ecies aead hkdf private key manager test', function() {
       expect(keyData.getKeyMaterialType()).toBe(PRIVATE_KEY_MATERIAL_TYPE);
 
       const key =
-          PbEciesAeadHkdfPrivateKey.deserializeBinary(keyData.getValue());
+          PbEciesAeadHkdfPrivateKey.deserializeBinary(keyData.getValue_asU8());
       expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
@@ -194,16 +194,16 @@ describe('ecies aead hkdf private key manager test', function() {
 
     expect(publicKeyData.getTypeUrl()).toBe(PUBLIC_KEY_TYPE);
     expect(publicKeyData.getKeyMaterialType()).toBe(PUBLIC_KEY_MATERIAL_TYPE);
-    const publicKey =
-        PbEciesAeadHkdfPublicKey.deserializeBinary(publicKeyData.getValue());
+    const publicKey = PbEciesAeadHkdfPublicKey.deserializeBinary(
+        publicKeyData.getValue_asU8());
     expect(publicKey.getVersion())
         .toEqual(assertExists(privateKey.getPublicKey()).getVersion());
     expect(publicKey.getParams())
         .toEqual(assertExists(privateKey.getPublicKey()).getParams());
-    expect(publicKey.getX())
-        .toEqual(assertExists(privateKey.getPublicKey()).getX());
-    expect(publicKey.getY())
-        .toEqual(assertExists(privateKey.getPublicKey()).getY());
+    expect(publicKey.getX_asU8())
+        .toEqual(assertExists(privateKey.getPublicKey()).getX_asU8());
+    expect(publicKey.getY_asU8())
+        .toEqual(assertExists(privateKey.getPublicKey()).getY_asU8());
   });
 
   it('get primitive, unsupported key data type', async function() {

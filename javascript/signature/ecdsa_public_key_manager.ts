@@ -99,13 +99,13 @@ export class EcdsaPublicKeyManager implements
     }
     let key: PbEcdsaPublicKey;
     try {
-      key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue());
+      key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue_asU8());
     } catch (e) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPublicKeyManager.KEY_TYPE +
           ' key-proto.');
     }
-    if (!key.getParams() || !key.getX() || !key.getY()) {
+    if (!key.getParams() || !key.getX_asU8() || !key.getY_asU8()) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPublicKeyManager.KEY_TYPE +
           ' key-proto.');

@@ -125,7 +125,7 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
   }
 
   private static validateKey(key: PbAesGcmKey) {
-    Validators.validateAesKeySize(key.getKeyValue().length);
+    Validators.validateAesKeySize(key.getKeyValue_asU8().length);
     Validators.validateVersion(key.getVersion(), VERSION);
   }
 
@@ -159,13 +159,13 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
     }
     let deserializedKey: PbAesGcmKey;
     try {
-      deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue());
+      deserializedKey = PbAesGcmKey.deserializeBinary(keyData.getValue_asU8());
     } catch (e) {
       throw new SecurityException(
           'Could not parse the input as a ' +
           'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');
     }
-    if (!deserializedKey.getKeyValue()) {
+    if (!deserializedKey.getKeyValue_asU8()) {
       throw new SecurityException(
           'Could not parse the input as a ' +
           'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');
