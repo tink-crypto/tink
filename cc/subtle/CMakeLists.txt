@@ -558,7 +558,6 @@ tink_cc_library(
     crypto
     tink::core::deterministic_aead
     tink::internal::fips_utils
-    tink::internal::ssl_unique_ptr
     tink::util::errors
     tink::util::secret_data
     tink::util::status
@@ -1107,12 +1106,12 @@ tink_cc_test(
     tink::subtle::wycheproof_util
     gmock
     absl::status
-    absl::strings
     tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
+    tink::util::test_util
 )
 
 tink_cc_test(

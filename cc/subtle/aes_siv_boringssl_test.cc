@@ -21,13 +21,13 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "absl/strings/escaping.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
+#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -56,7 +56,7 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -75,7 +75,7 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -109,7 +109,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptKeySizes) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData keymaterial =
-      util::SecretDataFromStringView(absl::HexStringToBytes(
+      util::SecretDataFromStringView(test::HexDecodeOrDie(
           "198371900187498172316311acf81d238ff7619873a61983d619c87b63a1987f"
           "987131819803719b847126381cd763871638aa71638176328761287361231321"
           "812731321de508761437195ff231765aa4913219873ac6918639816312130011"
@@ -131,7 +131,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -161,7 +161,7 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -182,7 +182,7 @@ TEST(AesSivBoringSslTest, testDecryptModification) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
-  util::SecretData key = util::SecretDataFromStringView(absl::HexStringToBytes(
+  util::SecretData key = util::SecretDataFromStringView(test::HexDecodeOrDie(
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
@@ -231,8 +231,8 @@ void WycheproofTest(const rapidjson::Document &root) {
       // Encryption should always succeed since msg and aad are valid inputs.
       std::string encrypted =
           cipher->EncryptDeterministically(msg, aad).ValueOrDie();
-      std::string encrypted_hex = absl::BytesToHexString(encrypted);
-      std::string ct_hex = absl::BytesToHexString(ct);
+      std::string encrypted_hex = test::HexEncode(encrypted);
+      std::string ct_hex = test::HexEncode(ct);
       if (result == "valid" || result == "acceptable") {
         EXPECT_EQ(ct_hex, encrypted_hex)
             << "incorrect encryption: " << id << " " << comment;
@@ -247,8 +247,8 @@ void WycheproofTest(const rapidjson::Document &root) {
         if (result == "invalid") {
           ADD_FAILURE() << "decrypted invalid ciphertext:" << id;
         } else {
-          EXPECT_EQ(absl::BytesToHexString(msg),
-                    absl::BytesToHexString(decrypted.ValueOrDie()))
+          EXPECT_EQ(test::HexEncode(msg),
+                    test::HexEncode(decrypted.ValueOrDie()))
               << "incorrect decryption: " << id << " " << comment;
         }
       } else {
@@ -274,10 +274,9 @@ TEST(AesEaxBoringSslTest, TestFipsOnly) {
   }
 
   util::SecretData key128 = util::SecretDataFromStringView(
-      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
-  util::SecretData key256 =
-      util::SecretDataFromStringView(absl::HexStringToBytes(
-          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
+      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
 
   EXPECT_THAT(subtle::AesSivBoringSsl::New(key128).status(),
               StatusIs(absl::StatusCode::kInternal));
