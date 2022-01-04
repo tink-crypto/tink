@@ -360,3 +360,36 @@ tink_cc_test(
     tink::util::statusor
     tink::util::test_matchers
 )
+
+tink_cc_library(
+  NAME aes_util
+  SRCS
+    aes_util.cc
+    aes_util.h
+  DEPS
+    tink::internal::util
+    absl::status
+    absl::strings
+    absl::span
+    crypto
+    tink::util::secret_data
+    tink::util::status
+    tink::util::statusor
+)
+
+tink_cc_test(
+  NAME aes_util_test
+  SRCS
+    aes_util_test.cc
+  DEPS
+    tink::internal::aes_util
+    gmock
+    absl::status
+    absl::strings
+    absl::span
+    crypto
+    tink::subtle::subtle_util
+    tink::util::secret_data
+    tink::util::statusor
+    tink::util::test_matchers
+)

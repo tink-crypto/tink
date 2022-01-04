@@ -79,6 +79,7 @@ main() {
   TEST_TARGETS=(
     "tink_test_aead__internal_ssl_aead_test"
     "tink_test_aead__internal_ssl_aead_large_inputs_test"
+    "tink_test_internal_aes_util_test"
     "tink_test_internal_err_util_test"
     "tink_test_internal_ec_util_test"
     "tink_test_internal_md_util_test"
