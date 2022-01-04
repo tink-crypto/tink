@@ -65,8 +65,9 @@ crypto::tink::util::StatusOr<std::string> DerToIeee(absl::string_view der,
     return util::Status(absl::StatusCode::kInternal, "d2i_ECDSA_SIG failed");
   }
 
-  const BIGNUM* r_bn = ECDSA_SIG_get0_r(ecdsa.get());
-  const BIGNUM* s_bn = ECDSA_SIG_get0_s(ecdsa.get());
+  const BIGNUM* r_bn;
+  const BIGNUM* s_bn;
+  ECDSA_SIG_get0(ecdsa.get(), &r_bn, &s_bn);
   util::StatusOr<std::string> r =
       internal::BignumToString(r_bn, field_size_in_bytes);
   if (!r.ok()) {

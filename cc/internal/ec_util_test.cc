@@ -493,8 +493,9 @@ TEST(EcUtilTest, EcSignatureIeeeToDer) {
           /*out=*/nullptr, &der_sig_data_ptr, der_encoded->size()));
       ASSERT_THAT(ecdsa_sig, Not(IsNull()));
       // Owned by OpenSSL/BoringSSL.
-      const BIGNUM* r(ECDSA_SIG_get0_r(ecdsa_sig.get()));
-      const BIGNUM* s(ECDSA_SIG_get0_s(ecdsa_sig.get()));
+      const BIGNUM* r;
+      const BIGNUM* s;
+      ECDSA_SIG_get0(ecdsa_sig.get(), &r, &s);
       ASSERT_THAT(r, Not(IsNull()));
       ASSERT_THAT(s, Not(IsNull()));
 
