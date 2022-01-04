@@ -28,6 +28,9 @@ absl::string_view EnsureStringNonNull(absl::string_view str);
 // Returns true if `first` overlaps with `second`.
 bool BuffersOverlap(absl::string_view first, absl::string_view second);
 
+// Returns true if `first` fully overlaps with `second`.
+bool BuffersAreIdentical(absl::string_view first, absl::string_view second);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

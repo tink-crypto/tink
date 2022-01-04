@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/util.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/strings/string_view.h"
@@ -23,6 +25,9 @@ namespace crypto {
 namespace tink {
 namespace internal {
 namespace {
+
+constexpr absl::string_view kLongString =
+    "a long buffer with \n several \n newlines";
 
 TEST(UtilTest, EnsureStringNonNull) {
   // Purposely create a string_view from nullptr.
@@ -48,7 +53,7 @@ TEST(BuffersOverlapTest, BufferOverlapSeparate) {
 }
 
 TEST(BuffersOverlapTest, BufferOverlap) {
-  absl::string_view long_buffer = "a long buffer with \n several \n newlines";
+  absl::string_view long_buffer = kLongString;
 
   EXPECT_TRUE(BuffersOverlap(long_buffer, long_buffer));
 
@@ -62,6 +67,36 @@ TEST(BuffersOverlapTest, BufferOverlap) {
   EXPECT_FALSE(
       BuffersOverlap(long_buffer.substr(10, 5), long_buffer.substr(0, 10)));
 }
+
+TEST(BuffersAreIdenticalTest, EmptyString) {
+  std::string empty_str = "";
+  absl::string_view empty = "";
+  EXPECT_FALSE(BuffersAreIdentical(empty, empty));
+  EXPECT_FALSE(BuffersAreIdentical(absl::string_view(empty_str),
+                                   absl::string_view(empty_str)));
+  EXPECT_FALSE(BuffersAreIdentical(empty, ""));
+  EXPECT_FALSE(BuffersAreIdentical(empty, absl::string_view(empty_str)));
+}
+
+TEST(BuffersAreIdenticalTest, BuffersAreIdentical) {
+  auto some_string = std::string(kLongString);
+  auto buffer = absl::string_view(some_string);
+  EXPECT_TRUE(BuffersAreIdentical(buffer, buffer));
+  // Make sure BuffersAreIdentical is not checking for string equality.
+  std::string identical_string = some_string;
+  EXPECT_FALSE(
+      BuffersAreIdentical(buffer, absl::string_view(identical_string)));
+}
+
+TEST(BuffersAreIdenticalTest, PartialOverlapFails) {
+  auto some_string = std::string(kLongString);
+  auto buffer = absl::string_view(some_string);
+  EXPECT_FALSE(BuffersAreIdentical(buffer.substr(0, 10), buffer.substr(9, 5)));
+  EXPECT_FALSE(BuffersAreIdentical(buffer.substr(0, 10), buffer.substr(10, 5)));
+  EXPECT_FALSE(BuffersAreIdentical(buffer.substr(9, 5), buffer.substr(0, 10)));
+  EXPECT_FALSE(BuffersAreIdentical(buffer.substr(10, 5), buffer.substr(0, 10)));
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace tink

@@ -44,6 +44,13 @@ bool BuffersOverlap(absl::string_view first, absl::string_view second) {
   return first_begins_in_second || second_begins_in_first;
 }
 
+bool BuffersAreIdentical(absl::string_view first, absl::string_view second) {
+  return !first.empty() && !second.empty() &&
+         std::equal_to<const char *>{}(first.begin(), second.begin()) &&
+         std::equal_to<const char *>{}(std::prev(first.end()),
+                                       std::prev(second.end()));
+}
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto
