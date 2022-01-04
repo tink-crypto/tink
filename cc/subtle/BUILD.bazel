@@ -138,10 +138,13 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         "//:public_key_verify",
+        "//internal:ec_util",
         "//internal:fips_utils",
+        "//internal:ssl_unique_ptr",
         "//internal:util",
         "//util:statusor",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",

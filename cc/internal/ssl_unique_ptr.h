@@ -100,6 +100,10 @@ template <>
 struct Deleter<CMAC_CTX> {
   void operator()(CMAC_CTX* ptr) { CMAC_CTX_free(ptr); }
 };
+template <>
+struct Deleter<EVP_MD_CTX> {
+  void operator()(EVP_MD_CTX* ptr) { EVP_MD_CTX_free(ptr); }
+};
 
 template <typename T>
 using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;

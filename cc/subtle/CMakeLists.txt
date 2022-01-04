@@ -126,12 +126,15 @@ tink_cc_library(
     ed25519_verify_boringssl.cc
     ed25519_verify_boringssl.h
   DEPS
+    absl::memory
     absl::status
     absl::strings
     absl::str_format
     crypto
     tink::core::public_key_verify
+    tink::internal::ec_util
     tink::internal::fips_utils
+    tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::util::statusor
 )
