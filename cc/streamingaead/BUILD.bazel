@@ -16,7 +16,6 @@ cc_library(
         "//:primitive_set",
         "//:primitive_wrapper",
         "//:random_access_stream",
-        "//:registry",
         "//:streaming_aead",
         "//proto:tink_cc_proto",
         "//util:status",
@@ -96,7 +95,6 @@ cc_library(
     include_prefix = "tink/streamingaead",
     deps = [
         "//:core/key_type_manager",
-        "//:key_manager",
         "//:streaming_aead",
         "//proto:aes_ctr_hmac_streaming_cc_proto",
         "//proto:tink_cc_proto",
@@ -139,9 +137,7 @@ cc_library(
     include_prefix = "tink/streamingaead",
     deps = [
         "//:input_stream",
-        "//util:errors",
         "//util:statusor",
-        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -203,7 +199,6 @@ cc_test(
     name = "streaming_aead_wrapper_test",
     size = "small",
     srcs = ["streaming_aead_wrapper_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":streaming_aead_wrapper",
         "//:input_stream",
@@ -305,9 +300,7 @@ cc_test(
     name = "streaming_aead_config_test",
     size = "small",
     srcs = ["streaming_aead_config_test.cc"],
-    tags = [
-        "fips",
-    ],
+    tags = ["fips"],
     deps = [
         ":aes_ctr_hmac_streaming_key_manager",
         ":aes_gcm_hkdf_streaming_key_manager",
@@ -331,7 +324,6 @@ cc_test(
     name = "buffered_input_stream_test",
     size = "small",
     srcs = ["buffered_input_stream_test.cc"],
-    linkopts = ["-lpthread"],
     deps = [
         ":buffered_input_stream",
         "//:input_stream",
@@ -401,7 +393,6 @@ cc_test(
     name = "shared_input_stream_test",
     size = "small",
     srcs = ["shared_input_stream_test.cc"],
-    linkopts = ["-lpthread"],
     deps = [
         ":buffered_input_stream",
         ":shared_input_stream",
@@ -422,7 +413,6 @@ cc_test(
     name = "shared_random_access_stream_test",
     size = "small",
     srcs = ["shared_random_access_stream_test.cc"],
-    linkopts = ["-lpthread"],
     deps = [
         ":shared_random_access_stream",
         "//:random_access_stream",
