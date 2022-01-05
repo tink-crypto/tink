@@ -120,6 +120,8 @@ cc_library(
     deps = [
         "//:public_key_sign",
         "//config:tink_fips",
+        "//internal:ec_util",
+        "//internal:ssl_unique_ptr",
         "//internal:util",
         "//util:secret_data",
         "//util:statusor",
