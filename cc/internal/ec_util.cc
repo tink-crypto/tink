@@ -483,6 +483,31 @@ util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
   return std::move(x25519_key);
 }
 
+util::StatusOr<util::SecretData> ComputeX25519SharedSecret(
+    EVP_PKEY *private_key, EVP_PKEY *peer_public_key) {
+  // Make sure the keys are actually X25519 keys.
+  if (EVP_PKEY_id(private_key) != SslEvpPkeyType::kX25519Key) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid type for private key");
+  }
+  if (EVP_PKEY_id(peer_public_key) != SslEvpPkeyType::kX25519Key) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid type for peer's public key");
+  }
+
+  internal::SslUniquePtr<EVP_PKEY_CTX> pctx(
+      EVP_PKEY_CTX_new(private_key, nullptr));
+  util::SecretData shared_secret(internal::X25519KeySharedKeySize());
+  size_t out_key_length = shared_secret.size();
+  if (EVP_PKEY_derive_init(pctx.get()) <= 0 ||
+      EVP_PKEY_derive_set_peer(pctx.get(), peer_public_key) <= 0 ||
+      EVP_PKEY_derive(pctx.get(), shared_secret.data(), &out_key_length) <= 0) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Secret generation failed");
+  }
+  return shared_secret;
+}
+
 util::StatusOr<std::string> EcPointEncode(EllipticCurveType curve,
                                           EcPointFormat format,
                                           const EC_POINT *point) {

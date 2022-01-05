@@ -78,6 +78,11 @@ crypto::tink::util::StatusOr<std::unique_ptr<X25519Key>> X25519KeyFromEcKey(
 // Returns an EcKey matching the specified X25519Key.
 EcKey EcKeyFromX25519Key(const X25519Key *x25519_key);
 
+// Generates a shared secret using `private_key` and `peer_public_key`; keys
+// must be X25519 keys otherwise an error is returned.
+crypto::tink::util::StatusOr<util::SecretData> ComputeX25519SharedSecret(
+    EVP_PKEY *private_key, EVP_PKEY *peer_public_key);
+
 // Ed25519Key Utils.
 
 // Returns a new ED25519 key.

@@ -226,6 +226,106 @@ TEST(EcUtilTest, X25519KeyToEcKeyAndBack) {
                                       X25519KeyPubKeySize())));
 }
 
+struct X25519SharedSecretTestVector {
+  std::string private_key;
+  std::string public_key;
+  std::string expected_shared_secret;
+};
+
+// Returns some X25519 test vectors taken from
+// https://datatracker.ietf.org/doc/html/rfc7748#section-5.2.
+std::vector<X25519SharedSecretTestVector> GetX25519SharedSecretTestVectors() {
+  return {
+      {
+          /*private_key=*/
+          absl::HexStringToBytes("a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5"
+                                 "a18506a2244ba449ac4"),
+          /*public_key=*/
+          absl::HexStringToBytes("e6db6867583030db3594c1a424b15f7c726624ec26b33"
+                                 "53b10a903a6d0ab1c4c"),
+          /*expected_shared_secret=*/
+          absl::HexStringToBytes("c3da55379de9c6908e94ea4df28d084f32eccf03491c7"
+                                 "1f754b4075577a28552"),
+      },
+      {
+          /*private_key=*/
+          absl::HexStringToBytes("4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea0"
+                                 "1d42ca4169e7918ba0d"),
+          /*public_key=*/
+          absl::HexStringToBytes("e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03"
+                                 "c3efc4cd549c715a493"),
+          /*expected_shared_secret=*/
+          absl::HexStringToBytes("95cbde9476e8907d7aade45cb4b873f88b595a68799fa"
+                                 "152e6f8f7647aac7957"),
+      },
+  };
+}
+
+using X25519SharedSecretTest = TestWithParam<X25519SharedSecretTestVector>;
+
+TEST_P(X25519SharedSecretTest, ComputeX25519SharedSecret) {
+  X25519SharedSecretTestVector test_vector = GetParam();
+
+  // Generate the EVP_PKEYs.
+  internal::SslUniquePtr<EVP_PKEY> ssl_priv_key(EVP_PKEY_new_raw_private_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/reinterpret_cast<const uint8_t*>(test_vector.private_key.data()),
+      /*len=*/Ed25519KeyPrivKeySize()));
+  ASSERT_THAT(ssl_priv_key, Not(IsNull()));
+  internal::SslUniquePtr<EVP_PKEY> ssl_pub_key(EVP_PKEY_new_raw_public_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/reinterpret_cast<const uint8_t*>(test_vector.public_key.data()),
+      /*len=*/Ed25519KeyPrivKeySize()));
+  ASSERT_THAT(ssl_pub_key, Not(IsNull()));
+
+  EXPECT_THAT(ComputeX25519SharedSecret(ssl_priv_key.get(), ssl_pub_key.get()),
+              IsOkAndHolds(util::SecretDataFromStringView(
+                  test_vector.expected_shared_secret)));
+}
+
+INSTANTIATE_TEST_SUITE_P(X25519SharedSecretTests, X25519SharedSecretTest,
+                         ValuesIn(GetX25519SharedSecretTestVectors()));
+
+TEST(EcUtilTest, ComputeX25519SharedSecretInvalidKeyType) {
+  // Key pair of an invalid type EVP_PKEY_ED25519.
+  SslUniquePtr<EVP_PKEY_CTX> pctx(EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519,
+                                                      /*e=*/nullptr));
+  ASSERT_THAT(pctx, Not(IsNull()));
+  ASSERT_EQ(EVP_PKEY_keygen_init(pctx.get()), 1);
+  EVP_PKEY* invalid_type_key_ptr = nullptr;
+  ASSERT_EQ(EVP_PKEY_keygen(pctx.get(), &invalid_type_key_ptr), 1);
+  SslUniquePtr<EVP_PKEY> invalid_type_key(invalid_type_key_ptr);
+
+  // Private and public key with valid type.
+  internal::SslUniquePtr<EVP_PKEY> ssl_priv_key(EVP_PKEY_new_raw_private_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/
+      reinterpret_cast<const uint8_t*>(
+          absl::HexStringToBytes("a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5"
+                                 "a18506a2244ba449ac4")
+              .data()),
+      /*len=*/Ed25519KeyPrivKeySize()));
+  ASSERT_THAT(ssl_priv_key, Not(IsNull()));
+  internal::SslUniquePtr<EVP_PKEY> ssl_pub_key(EVP_PKEY_new_raw_public_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/
+      reinterpret_cast<const uint8_t*>(
+          absl::HexStringToBytes("e6db6867583030db3594c1a424b15f7c726624ec26b33"
+                                 "53b10a903a6d0ab1c4c")
+              .data()),
+      /*len=*/Ed25519KeyPubKeySize()));
+  ASSERT_THAT(ssl_pub_key, Not(IsNull()));
+
+  EXPECT_THAT(
+      ComputeX25519SharedSecret(ssl_priv_key.get(), invalid_type_key.get())
+          .status(),
+      Not(IsOk()));
+  EXPECT_THAT(
+      ComputeX25519SharedSecret(invalid_type_key.get(), ssl_pub_key.get())
+          .status(),
+      Not(IsOk()));
+}
+
 struct EncodingTestVector {
   EcPointFormat format;
   std::string x_hex;

@@ -31,26 +31,6 @@
 namespace crypto {
 namespace tink {
 namespace subtle {
-namespace {
-
-// Generates a shared secret using `private_key` and `peer_public_key`.
-util::StatusOr<util::SecretData> X25519SharedSecret(
-    EVP_PKEY* private_key, EVP_PKEY* peer_public_key) {
-
-  internal::SslUniquePtr<EVP_PKEY_CTX> pctx(
-      EVP_PKEY_CTX_new(private_key, nullptr));
-  util::SecretData shared_secret(internal::X25519KeySharedKeySize());
-  size_t out_key_length = shared_secret.size();
-  if (EVP_PKEY_derive_init(pctx.get()) <= 0 ||
-      EVP_PKEY_derive_set_peer(pctx.get(), peer_public_key) <= 0 ||
-      EVP_PKEY_derive(pctx.get(), shared_secret.data(), &out_key_length) <= 0) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "Secret generation failed");
-  }
-  return shared_secret;
-}
-
-}  // namespace
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
@@ -183,7 +163,7 @@ EciesHkdfX25519RecipientKemBoringSsl::GenerateKey(
   }
 
   util::StatusOr<util::SecretData> shared_secret =
-      X25519SharedSecret(private_key_.get(), peer_key.get());
+      internal::ComputeX25519SharedSecret(private_key_.get(), peer_key.get());
   if (!shared_secret.ok()) {
     return shared_secret.status();
   }
