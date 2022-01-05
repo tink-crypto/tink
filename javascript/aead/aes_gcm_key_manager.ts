@@ -165,11 +165,6 @@ export class AesGcmKeyManager implements KeyManager.KeyManager<Aead> {
           'Could not parse the input as a ' +
           'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');
     }
-    if (!deserializedKey.getKeyValue_asU8()) {
-      throw new SecurityException(
-          'Could not parse the input as a ' +
-          'serialized proto of ' + AesGcmKeyManager.KEY_TYPE + ' key.');
-    }
     return deserializedKey;
   }
 

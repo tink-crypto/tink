@@ -170,7 +170,11 @@ describe('aes gcm key manager test', function() {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown');
     } catch (e) {
-      expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
+      let message = e.toString();
+      if (message === ExceptionText.unsupportedKeySize(0)) {
+        message = ExceptionText.invalidSerializedKey();
+      }
+      expect(message).toBe(ExceptionText.invalidSerializedKey());
     }
   });
 
