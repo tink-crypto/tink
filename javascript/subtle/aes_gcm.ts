@@ -80,7 +80,10 @@ export class AesGcm extends Aead {
       return new Uint8Array(await self.crypto.subtle.decrypt(
           alg, this.key,
           new Uint8Array(ciphertext.subarray(IV_SIZE_IN_BYTES))));
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       throw new SecurityException(e.toString());
     }
   }

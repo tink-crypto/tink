@@ -62,7 +62,10 @@ describe('ecdsa verify test', function() {
       await ecdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey!), 'SHA-1');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-256 (because curve is P-256) but got SHA-1');
@@ -73,7 +76,10 @@ describe('ecdsa verify test', function() {
       await ecdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey!), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
@@ -84,7 +90,10 @@ describe('ecdsa verify test', function() {
       await ecdsaVerify.fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.publicKey!), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
@@ -98,7 +107,10 @@ describe('ecdsa verify test', function() {
       jwk.crv = 'blah';
       await ecdsaVerify.fromJsonWebKey(jwk, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('SecurityException: unsupported curve: blah');
     }
   });

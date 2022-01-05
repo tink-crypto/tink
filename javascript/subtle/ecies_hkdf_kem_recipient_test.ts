@@ -64,7 +64,10 @@ describe('ecies hkdf kem recipient test', function() {
       await recipient.decapsulate(
           kemKeyToken['token'], NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
@@ -73,7 +76,10 @@ describe('ecies hkdf kem recipient test', function() {
       await recipient.decapsulate(
           kemKeyToken['token'], 1.8, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
@@ -129,7 +135,10 @@ describe('ecies hkdf kem recipient test', function() {
     try {
       new EciesHkdfKemRecipient(keyPair.publicKey!);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Expected crypto key of type: private.');
     }

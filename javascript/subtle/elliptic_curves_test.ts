@@ -269,7 +269,10 @@ describe('elliptic curves test', function() {
       try {
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         expect(e.toString()).toBe('InvalidArgumentsException: invalid point');
       }
     }
@@ -283,7 +286,10 @@ describe('elliptic curves test', function() {
     try {
       EllipticCurves.pointDecode(curve, format, point);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString().includes('unknown curve')).toBe(true);
     }
   });
@@ -328,7 +334,10 @@ describe('elliptic curves test', function() {
       try {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         expect(e.toString())
             .toBe('InvalidArgumentsException: invalid DER signature');
       }
@@ -376,13 +385,19 @@ async function runWycheproofTest(test: {
         return 'Fail on test ' + test['tcId'] + ': unexpected result was "' +
             sharedSecretHex + '".\n';
       }
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       if (test['result'] === 'valid') {
         return 'Fail on test ' + test['tcId'] + ': unexpected exception "' +
             e.toString() + '".\n';
       }
     }
-  } catch (e) {
+    // Preserving old behavior when moving to
+    // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+    // tslint:disable-next-line:no-any
+  } catch (e: any) {
     if (test['result'] === 'valid') {
       if (test['private']['crv'] == "P-256K") {
         // P-256K doesn't have to be supported. Hence failing to import the

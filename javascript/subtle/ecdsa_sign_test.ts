@@ -89,7 +89,10 @@ describe('ecdsa sign test', function() {
       await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-1');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-256 (because curve is P-256) but ' +
@@ -101,7 +104,10 @@ describe('ecdsa sign test', function() {
       await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
@@ -112,7 +118,10 @@ describe('ecdsa sign test', function() {
       await fromJsonWebKey(
           await EllipticCurves.exportCryptoKey(keyPair.privateKey!), 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
@@ -126,7 +135,10 @@ describe('ecdsa sign test', function() {
       jwk.crv = 'blah';
       await fromJsonWebKey(jwk, 'SHA-256');
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('SecurityException: unsupported curve: blah');
     }
   });

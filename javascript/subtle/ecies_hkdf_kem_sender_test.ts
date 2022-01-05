@@ -42,14 +42,20 @@ describe('ecies hkdf kem sender test', function() {
     try {
       await sender.encapsulate(NaN, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
     try {
       await sender.encapsulate(0, pointFormat, hkdfHash, hkdfInfo, hkdfSalt);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be positive');
     }
@@ -101,7 +107,10 @@ describe('ecies hkdf kem sender test', function() {
     try {
       new EciesHkdfKemSender(keyPair.privateKey!);
       fail('An exception should be thrown.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: Expected Crypto key of type: public.');
     }

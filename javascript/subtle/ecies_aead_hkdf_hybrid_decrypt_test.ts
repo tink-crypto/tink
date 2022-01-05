@@ -65,7 +65,10 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
     try {
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('SecurityException: Ciphertext is too short.');
     }
   });

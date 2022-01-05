@@ -23,7 +23,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'blah', Random.randBytes(16), 16);  // invalid HMAC algo name
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: blah is not supported');
     }
@@ -32,7 +35,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-1', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
@@ -41,7 +47,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-1', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too short, must be at least 10 bytes');
@@ -50,7 +59,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-1', Random.randBytes(16), 21);  // tag size too long
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too long, must not be larger than 20 bytes');
@@ -60,7 +72,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-256', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
@@ -69,7 +84,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-256', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too short, must be at least 10 bytes');
@@ -79,7 +97,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-256', Random.randBytes(16), 33);  // tag size too long
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too long, must not be larger than 32 bytes');
@@ -89,7 +110,11 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-512', Random.randBytes(15), 16);  // invalid key size
       // TODO(b/115974209): This case does not throw an exception.
-    } catch (e) {
+
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: key too short, must be at least 16 bytes');
     }
@@ -98,7 +123,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-512', Random.randBytes(16), 9);  // tag size too short
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too short, must be at least 10 bytes');
@@ -108,7 +136,10 @@ describe('hmac test', function() {
       await hmacFromRawKey(
           'SHA-512', Random.randBytes(16), 65);  // tag size too long
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: tag too long, must not be larger than 64 bytes');
@@ -119,7 +150,10 @@ describe('hmac test', function() {
     try {
       await hmacFromRawKey('SHA-512', Random.randBytes(16), NaN);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: invalid tag size, must be an integer');
@@ -128,7 +162,10 @@ describe('hmac test', function() {
     try {
       await hmacFromRawKey('SHA-512', Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'InvalidArgumentsException: invalid tag size, must be an integer');
