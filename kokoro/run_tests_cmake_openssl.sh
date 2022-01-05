@@ -88,6 +88,7 @@ main() {
     "tink_test_subtle_aes_gcm_boringssl_test"
     "tink_test_subtle_aes_gcm_siv_boringssl_test"
     "tink_test_subtle_ecdsa_sign_boringssl_test"
+    "tink_test_subtle_ed25519_verify_boringssl_test"
     "tink_test_subtle_hkdf_test"
     "tink_test_subtle_hmac_boringssl_test"
     "tink_test_subtle_random_test"
