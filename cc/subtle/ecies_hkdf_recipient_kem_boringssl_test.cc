@@ -18,13 +18,13 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -80,17 +80,17 @@ TEST_F(EciesHkdfRecipientKemBoringSslTest, TestBasic) {
   for (const TestVector& test : test_vector) {
     auto ecies_kem_or = EciesHkdfRecipientKemBoringSsl::New(
         test.curve,
-        util::SecretDataFromStringView(test::HexDecodeOrDie(test.priv_hex)));
+        util::SecretDataFromStringView(absl::HexStringToBytes(test.priv_hex)));
     ASSERT_TRUE(ecies_kem_or.ok());
     auto ecies_kem = std::move(ecies_kem_or).ValueOrDie();
     auto kem_key_or = ecies_kem->GenerateKey(
-        test::HexDecodeOrDie(test.pub_encoded_hex), test.hash,
-        test::HexDecodeOrDie(test.salt_hex),
-        test::HexDecodeOrDie(test.info_hex), test.out_len, test.point_format);
+        absl::HexStringToBytes(test.pub_encoded_hex), test.hash,
+        absl::HexStringToBytes(test.salt_hex),
+        absl::HexStringToBytes(test.info_hex), test.out_len, test.point_format);
     ASSERT_TRUE(kem_key_or.ok());
-    EXPECT_EQ(
-        test.out_key_hex,
-        test::HexEncode(util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
+    EXPECT_EQ(test.out_key_hex,
+              absl::BytesToHexString(
+                  util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
   }
 }
 
@@ -113,7 +113,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNew) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
       util::SecretDataFromStringView(
-          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
+          absl::HexStringToBytes(kNistP256PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
 }
 
@@ -124,7 +124,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestNewInvalidCurve) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
       util::SecretDataFromStringView(
-          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
+          absl::HexStringToBytes(kNistP256PrivateKeyHex)));
   EXPECT_EQ(status_or_recipient_kem.status().code(),
             absl::StatusCode::kUnimplemented);
 }
@@ -146,17 +146,17 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestGenerateKey) {
   auto status_or_recipient_kem = EciesHkdfNistPCurveRecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
       util::SecretDataFromStringView(
-          test::HexDecodeOrDie(kNistP256PrivateKeyHex)));
+          absl::HexStringToBytes(kNistP256PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
   auto recipient_kem = std::move(status_or_recipient_kem.ValueOrDie());
 
   auto status_or_shared_key = recipient_kem->GenerateKey(
-      test::HexDecodeOrDie(kNistP256PublicValueHex), HashType::SHA256,
-      test::HexDecodeOrDie(kSaltHex), test::HexDecodeOrDie(kInfoHex), 32,
+      absl::HexStringToBytes(kNistP256PublicValueHex), HashType::SHA256,
+      absl::HexStringToBytes(kSaltHex), absl::HexStringToBytes(kInfoHex), 32,
       EcPointFormat::UNCOMPRESSED);
   ASSERT_TRUE(status_or_shared_key.ok());
 
-  EXPECT_EQ(test::HexEncode(util::SecretDataAsStringView(
+  EXPECT_EQ(absl::BytesToHexString(util::SecretDataAsStringView(
                 status_or_shared_key.ValueOrDie())),
             kNistP256SharedKeyHex);
 }
@@ -170,7 +170,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNew) {
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519,
       util::SecretDataFromStringView(
-          test::HexDecodeOrDie(kX25519PrivateKeyHex)));
+          absl::HexStringToBytes(kX25519PrivateKeyHex)));
   ASSERT_TRUE(status_or_recipient_kem.ok());
 }
 
@@ -181,7 +181,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewInvalidCurve) {
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::NIST_P256,
       util::SecretDataFromStringView(
-          test::HexDecodeOrDie(kX25519PrivateKeyHex)));
+          absl::HexStringToBytes(kX25519PrivateKeyHex)));
   EXPECT_EQ(status_or_recipient_kem.status().code(),
             absl::StatusCode::kInvalidArgument);
 }
@@ -191,7 +191,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestNewShortKey) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie(kX25519PrivateKeyHex));
+      absl::HexStringToBytes(kX25519PrivateKeyHex));
   private_key.resize(private_key.size() / 2);
   auto status_or_recipient_kem = EciesHkdfX25519RecipientKemBoringSsl::New(
       EllipticCurveType::CURVE25519, private_key);
@@ -205,7 +205,7 @@ TEST_F(EciesHkdfNistPCurveRecipientKemBoringSslTest, TestFipsOnly) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie(kNistP256PrivateKeyHex));
+      absl::HexStringToBytes(kNistP256PrivateKeyHex));
   EXPECT_THAT(EciesHkdfRecipientKemBoringSsl::New(EllipticCurveType::NIST_P256,
                                                   private_key)
                   .status(),
@@ -217,7 +217,7 @@ TEST_F(EciesHkdfX25519RecipientKemBoringSslTest, TestFipsOnly) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   util::SecretData private_key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie(kX25519PrivateKeyHex));
+      absl::HexStringToBytes(kX25519PrivateKeyHex));
   EXPECT_THAT(EciesHkdfX25519RecipientKemBoringSsl::New(
                   EllipticCurveType::CURVE25519, private_key)
                   .status(),

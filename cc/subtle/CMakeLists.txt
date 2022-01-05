@@ -871,12 +871,12 @@ tink_cc_test(
     tink::subtle::ecies_hkdf_recipient_kem_boringssl
     gmock
     absl::status
+    absl::strings
     tink::config::tink_fips
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(
