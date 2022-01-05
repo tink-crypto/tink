@@ -18,8 +18,8 @@
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "openssl/evp.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
@@ -104,9 +104,10 @@ class EciesHkdfX25519RecipientKemBoringSsl
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  explicit EciesHkdfX25519RecipientKemBoringSsl(util::SecretData private_key);
+  explicit EciesHkdfX25519RecipientKemBoringSsl(
+      internal::SslUniquePtr<EVP_PKEY> private_key);
 
-  util::SecretData private_key_;
+  const internal::SslUniquePtr<EVP_PKEY> private_key_;
 };
 
 }  // namespace subtle

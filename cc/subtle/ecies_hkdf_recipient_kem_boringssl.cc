@@ -19,17 +19,38 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/bn.h"
-#include "openssl/curve25519.h"
 #include "openssl/ec.h"
+#include "openssl/evp.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/util/errors.h"
+#include "tink/util/secret_data.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
+namespace {
+
+// Generates a shared secret using `private_key` and `peer_public_key`.
+util::StatusOr<util::SecretData> X25519SharedSecret(
+    EVP_PKEY* private_key, EVP_PKEY* peer_public_key) {
+
+  internal::SslUniquePtr<EVP_PKEY_CTX> pctx(
+      EVP_PKEY_CTX_new(private_key, nullptr));
+  util::SecretData shared_secret(internal::X25519KeySharedKeySize());
+  size_t out_key_length = shared_secret.size();
+  if (EVP_PKEY_derive_init(pctx.get()) <= 0 ||
+      EVP_PKEY_derive_set_peer(pctx.get(), peer_public_key) <= 0 ||
+      EVP_PKEY_derive(pctx.get(), shared_secret.data(), &out_key_length) <= 0) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Secret generation failed");
+  }
+  return shared_secret;
+}
+
+}  // namespace
 
 // static
 util::StatusOr<std::unique_ptr<EciesHkdfRecipientKemBoringSsl>>
@@ -93,8 +114,8 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
       std::move(status_or_ec_point.ValueOrDie());
   internal::SslUniquePtr<BIGNUM> priv_key(
       BN_bin2bn(priv_key_value_.data(), priv_key_value_.size(), nullptr));
-  auto shared_secret_or = internal::ComputeEcdhSharedSecret(
-      curve_, priv_key.get(), pub_key.get());
+  auto shared_secret_or =
+      internal::ComputeEcdhSharedSecret(curve_, priv_key.get(), pub_key.get());
   if (!shared_secret_or.ok()) {
     return shared_secret_or.status();
   }
@@ -104,7 +125,7 @@ EciesHkdfNistPCurveRecipientKemBoringSsl::GenerateKey(
 }
 
 EciesHkdfX25519RecipientKemBoringSsl::EciesHkdfX25519RecipientKemBoringSsl(
-    util::SecretData private_key)
+    internal::SslUniquePtr<EVP_PKEY> private_key)
     : private_key_(std::move(private_key)) {}
 
 // static
@@ -119,13 +140,21 @@ EciesHkdfX25519RecipientKemBoringSsl::New(EllipticCurveType curve,
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "curve is not CURVE25519");
   }
-  if (priv_key.size() != X25519_PUBLIC_VALUE_LEN) {
+  if (priv_key.size() != internal::X25519KeyPubKeySize()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "pubx has unexpected length");
   }
 
+  internal::SslUniquePtr<EVP_PKEY> ssl_priv_key(EVP_PKEY_new_raw_private_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr, /*in=*/priv_key.data(),
+      /*len=*/internal::Ed25519KeyPrivKeySize()));
+  if (ssl_priv_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_private_key failed");
+  }
+
   return {absl::WrapUnique(
-      new EciesHkdfX25519RecipientKemBoringSsl(std::move(priv_key)))};
+      new EciesHkdfX25519RecipientKemBoringSsl(std::move(ssl_priv_key)))};
 }
 
 crypto::tink::util::StatusOr<util::SecretData>
@@ -139,17 +168,28 @@ EciesHkdfX25519RecipientKemBoringSsl::GenerateKey(
         "X25519 only supports compressed elliptic curve points");
   }
 
-  if (kem_bytes.size() != X25519_PUBLIC_VALUE_LEN) {
+  if (kem_bytes.size() != internal::X25519KeyPubKeySize()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "kem_bytes has unexpected size");
   }
 
-  util::SecretData shared_secret(X25519_SHARED_KEY_LEN);
-  X25519(shared_secret.data(), private_key_.data(),
-         reinterpret_cast<const uint8_t*>(kem_bytes.data()));
+  internal::SslUniquePtr<EVP_PKEY> peer_key(EVP_PKEY_new_raw_public_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/reinterpret_cast<const uint8_t*>(kem_bytes.data()),
+      /*len=*/internal::Ed25519KeyPubKeySize()));
+  if (peer_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_public_key failed");
+  }
+
+  util::StatusOr<util::SecretData> shared_secret =
+      X25519SharedSecret(private_key_.get(), peer_key.get());
+  if (!shared_secret.ok()) {
+    return shared_secret.status();
+  }
 
   return Hkdf::ComputeEciesHkdfSymmetricKey(
-      hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
+      hash, kem_bytes, *shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
 }
 
 }  // namespace subtle

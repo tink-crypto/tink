@@ -30,6 +30,7 @@ namespace internal {
 
 constexpr int64_t X25519KeyPubKeySize() { return 32; }
 constexpr int64_t X25519KeyPrivKeySize() { return 32; }
+constexpr int64_t X25519KeySharedKeySize() { return 32; }
 
 constexpr int64_t Ed25519KeyPubKeySize() { return 32; }
 constexpr int64_t Ed25519KeyPrivKeySize() { return 32; }
