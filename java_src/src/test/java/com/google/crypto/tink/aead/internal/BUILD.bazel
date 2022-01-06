@@ -3,6 +3,18 @@ package(default_testonly = 1)
 licenses(["notice"])
 
 java_test(
+    name = "ChaCha20UtilTest",
+    size = "small",
+    srcs = ["ChaCha20UtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/aead/internal:cha_cha20_util",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "InsecureNonceAesGcmJceTest",
     size = "medium",
     srcs = ["InsecureNonceAesGcmJceTest.java"],
@@ -84,7 +96,7 @@ java_test(
     size = "small",
     srcs = ["InsecureNonceXChaCha20Test.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_base",
+        "//src/main/java/com/google/crypto/tink/aead/internal:cha_cha20_util",
         "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:random",

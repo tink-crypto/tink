@@ -5,6 +5,11 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 java_library(
+    name = "cha_cha20_util",
+    srcs = ["ChaCha20Util.java"],
+)
+
+java_library(
     name = "insecure_nonce_aes_gcm_jce",
     srcs = ["InsecureNonceAesGcmJce.java"],
     deps = [
@@ -17,13 +22,17 @@ java_library(
 java_library(
     name = "insecure_nonce_cha_cha20",
     srcs = ["InsecureNonceChaCha20.java"],
-    deps = [":insecure_nonce_cha_cha20_base"],
+    deps = [
+        ":cha_cha20_util",
+        ":insecure_nonce_cha_cha20_base",
+    ],
 )
 
 java_library(
     name = "insecure_nonce_cha_cha20_base",
     srcs = ["InsecureNonceChaCha20Base.java"],
     deps = [
+        ":cha_cha20_util",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -51,7 +60,10 @@ java_library(
 java_library(
     name = "insecure_nonce_x_cha_cha20",
     srcs = ["InsecureNonceXChaCha20.java"],
-    deps = [":insecure_nonce_cha_cha20_base"],
+    deps = [
+        ":cha_cha20_util",
+        ":insecure_nonce_cha_cha20_base",
+    ],
 )
 
 java_library(
@@ -73,6 +85,11 @@ java_library(
 # Android libraries
 
 android_library(
+    name = "cha_cha20_util-android",
+    srcs = ["ChaCha20Util.java"],
+)
+
+android_library(
     name = "insecure_nonce_aes_gcm_jce-android",
     srcs = ["InsecureNonceAesGcmJce.java"],
     deps = [
@@ -85,13 +102,17 @@ android_library(
 android_library(
     name = "insecure_nonce_cha_cha20-android",
     srcs = ["InsecureNonceChaCha20.java"],
-    deps = [":insecure_nonce_cha_cha20_base-android"],
+    deps = [
+        ":cha_cha20_util-android",
+        ":insecure_nonce_cha_cha20_base-android",
+    ],
 )
 
 android_library(
     name = "insecure_nonce_cha_cha20_base-android",
     srcs = ["InsecureNonceChaCha20Base.java"],
     deps = [
+        ":cha_cha20_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -119,7 +140,10 @@ android_library(
 android_library(
     name = "insecure_nonce_x_cha_cha20-android",
     srcs = ["InsecureNonceXChaCha20.java"],
-    deps = [":insecure_nonce_cha_cha20_base-android"],
+    deps = [
+        ":cha_cha20_util-android",
+        ":insecure_nonce_cha_cha20_base-android",
+    ],
 )
 
 android_library(

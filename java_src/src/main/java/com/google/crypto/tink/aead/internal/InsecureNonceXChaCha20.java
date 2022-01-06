@@ -37,7 +37,7 @@ public class InsecureNonceXChaCha20 extends InsecureNonceChaCha20Base {
    * Constructs a new InsecureNonceXChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     InsecureNonceChaCha20Base#KEY_SIZE_IN_BYTES}.
+   *     ChaCha20Util#KEY_SIZE_IN_BYTES}.
    */
   public InsecureNonceXChaCha20(byte[] key, int initialCounter) throws InvalidKeyException {
     super(key, initialCounter);
@@ -52,8 +52,8 @@ public class InsecureNonceXChaCha20 extends InsecureNonceChaCha20Base {
     }
     // Set the initial state based on
     // https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.3.
-    int[] state = new int[InsecureNonceChaCha20Base.BLOCK_SIZE_IN_INTS];
-    InsecureNonceChaCha20Base.setSigmaAndKey(state, hChaCha20(this.key, nonce));
+    int[] state = new int[ChaCha20Util.BLOCK_SIZE_IN_INTS];
+    ChaCha20Util.setSigmaAndKey(state, hChaCha20(this.key, nonce));
     state[12] = counter;
     state[13] = 0;
     state[14] = nonce[4];
@@ -68,18 +68,18 @@ public class InsecureNonceXChaCha20 extends InsecureNonceChaCha20Base {
 
   // See https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.2.
   static int[] hChaCha20(final int[] key, final int[] nonce) {
-    int[] state = new int[InsecureNonceChaCha20Base.BLOCK_SIZE_IN_INTS];
-    InsecureNonceChaCha20Base.setSigmaAndKey(state, key);
+    int[] state = new int[ChaCha20Util.BLOCK_SIZE_IN_INTS];
+    ChaCha20Util.setSigmaAndKey(state, key);
     state[12] = nonce[0];
     state[13] = nonce[1];
     state[14] = nonce[2];
     state[15] = nonce[3];
-    InsecureNonceChaCha20Base.shuffleState(state);
+    ChaCha20Util.shuffleState(state);
     // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
     state[4] = state[12];
     state[5] = state[13];
     state[6] = state[14];
     state[7] = state[15];
-    return Arrays.copyOf(state, InsecureNonceChaCha20Base.KEY_SIZE_IN_INTS);
+    return Arrays.copyOf(state, ChaCha20Util.KEY_SIZE_IN_INTS);
   }
 }

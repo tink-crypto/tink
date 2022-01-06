@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Unit tests for {@link InsecureNonceXChaCha20} */
+/** Unit tests for {@link InsecureNonceXChaCha20}. */
 @RunWith(JUnit4.class)
 public class InsecureNonceXChaCha20Test {
   public InsecureNonceXChaCha20 createInstance(final byte[] key) throws InvalidKeyException {
@@ -91,9 +91,9 @@ public class InsecureNonceXChaCha20Test {
     public int[] out;
 
     public HChaCha20TestVector(String key, String in, String out) {
-      this.key = InsecureNonceChaCha20Base.toIntArray(Hex.decode(key));
-      this.in = InsecureNonceChaCha20Base.toIntArray(Hex.decode(in));
-      this.out = InsecureNonceChaCha20Base.toIntArray(Hex.decode(out));
+      this.key = ChaCha20Util.toIntArray(Hex.decode(key));
+      this.in = ChaCha20Util.toIntArray(Hex.decode(in));
+      this.out = ChaCha20Util.toIntArray(Hex.decode(out));
     }
   }
 

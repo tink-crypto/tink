@@ -35,11 +35,11 @@ public class InsecureNonceChaCha20 extends InsecureNonceChaCha20Base {
           String.format("ChaCha20 uses 96-bit nonces, but got a %d-bit nonce", nonce.length * 32));
     }
     // Set the initial state based on https://tools.ietf.org/html/rfc8439#section-2.3
-    int[] state = new int[InsecureNonceChaCha20Base.BLOCK_SIZE_IN_INTS];
+    int[] state = new int[ChaCha20Util.BLOCK_SIZE_IN_INTS];
     // The first four words (0-3) are constants: 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574.
     // The next eight words (4-11) are taken from the 256-bit key by reading the bytes in
     // little-endian order, in 4-byte chunks.
-    InsecureNonceChaCha20Base.setSigmaAndKey(state, this.key);
+    ChaCha20Util.setSigmaAndKey(state, this.key);
     // Word 12 is a block counter. Since each block is 64-byte, a 32-bit word is enough for 256
     // gigabytes of data. Ref: https://tools.ietf.org/html/rfc8439#section-2.3.
     state[12] = counter;

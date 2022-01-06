@@ -19,7 +19,6 @@ package com.google.crypto.tink.aead.internal;
 import com.google.crypto.tink.subtle.Bytes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 
@@ -36,24 +35,15 @@ import java.security.InvalidKeyException;
  * repeates, most users should not use this class directly.
  */
 abstract class InsecureNonceChaCha20Base {
-  public static final int BLOCK_SIZE_IN_INTS = 16;
-  public static final int BLOCK_SIZE_IN_BYTES = BLOCK_SIZE_IN_INTS * 4;
-  public static final int KEY_SIZE_IN_INTS = 8;
-  public static final int KEY_SIZE_IN_BYTES = KEY_SIZE_IN_INTS * 4;
-  private static final int[] SIGMA =
-      toIntArray(
-          new byte[] {
-            'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'
-          });
   int[] key;
   private final int initialCounter;
 
   public InsecureNonceChaCha20Base(final byte[] key, int initialCounter)
       throws InvalidKeyException {
-    if (key.length != KEY_SIZE_IN_BYTES) {
+    if (key.length != ChaCha20Util.KEY_SIZE_IN_BYTES) {
       throw new InvalidKeyException("The key length in bytes must be 32.");
     }
-    this.key = toIntArray(key);
+    this.key = ChaCha20Util.toIntArray(key);
     this.initialCounter = initialCounter;
   }
 
@@ -102,73 +92,29 @@ abstract class InsecureNonceChaCha20Base {
           "The nonce length (in bytes) must be " + nonceSizeInBytes());
     }
     int length = input.remaining();
-    int numBlocks = (length / BLOCK_SIZE_IN_BYTES) + 1;
+    int numBlocks = (length / ChaCha20Util.BLOCK_SIZE_IN_BYTES) + 1;
     for (int i = 0; i < numBlocks; i++) {
       ByteBuffer keyStreamBlock = chacha20Block(nonce, i + initialCounter);
       if (i == numBlocks - 1) {
         // last block
-        Bytes.xor(output, input, keyStreamBlock, length % BLOCK_SIZE_IN_BYTES);
+        Bytes.xor(output, input, keyStreamBlock, length % ChaCha20Util.BLOCK_SIZE_IN_BYTES);
       } else {
-        Bytes.xor(output, input, keyStreamBlock, BLOCK_SIZE_IN_BYTES);
+        Bytes.xor(output, input, keyStreamBlock, ChaCha20Util.BLOCK_SIZE_IN_BYTES);
       }
     }
   }
 
   // https://tools.ietf.org/html/rfc8439#section-2.3.
   ByteBuffer chacha20Block(final byte[] nonce, int counter) {
-    int[] state = createInitialState(toIntArray(nonce), counter);
+    int[] state = createInitialState(ChaCha20Util.toIntArray(nonce), counter);
     int[] workingState = state.clone();
-    shuffleState(workingState);
+    ChaCha20Util.shuffleState(workingState);
     for (int i = 0; i < state.length; i++) {
       state[i] += workingState[i];
     }
-    ByteBuffer out = ByteBuffer.allocate(BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
-    out.asIntBuffer().put(state, 0, BLOCK_SIZE_IN_INTS);
+    ByteBuffer out =
+        ByteBuffer.allocate(ChaCha20Util.BLOCK_SIZE_IN_BYTES).order(ByteOrder.LITTLE_ENDIAN);
+    out.asIntBuffer().put(state, 0, ChaCha20Util.BLOCK_SIZE_IN_INTS);
     return out;
-  }
-
-  static void setSigmaAndKey(int[] state, final int[] key) {
-    System.arraycopy(SIGMA, 0, state, 0, SIGMA.length);
-    System.arraycopy(key, 0, state, SIGMA.length, KEY_SIZE_IN_INTS);
-  }
-
-  static void shuffleState(final int[] state) {
-    for (int i = 0; i < 10; i++) {
-      quarterRound(state, 0, 4, 8, 12);
-      quarterRound(state, 1, 5, 9, 13);
-      quarterRound(state, 2, 6, 10, 14);
-      quarterRound(state, 3, 7, 11, 15);
-      quarterRound(state, 0, 5, 10, 15);
-      quarterRound(state, 1, 6, 11, 12);
-      quarterRound(state, 2, 7, 8, 13);
-      quarterRound(state, 3, 4, 9, 14);
-    }
-  }
-
-  /**
-   * Computes the ChaCha quarter round as described in
-   * https://datatracker.ietf.org/doc/html/rfc7539#section-2.1
-   */
-  public static void quarterRound(int[] x, int a, int b, int c, int d) {
-    x[a] += x[b];
-    x[d] = rotateLeft(x[d] ^ x[a], 16);
-    x[c] += x[d];
-    x[b] = rotateLeft(x[b] ^ x[c], 12);
-    x[a] += x[b];
-    x[d] = rotateLeft(x[d] ^ x[a], 8);
-    x[c] += x[d];
-    x[b] = rotateLeft(x[b] ^ x[c], 7);
-  }
-
-  /** Converts {@code input} byte array to an int array */
-  public static int[] toIntArray(final byte[] input) {
-    IntBuffer intBuffer = ByteBuffer.wrap(input).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer();
-    int[] ret = new int[intBuffer.remaining()];
-    intBuffer.get(ret);
-    return ret;
-  }
-
-  private static int rotateLeft(int x, int y) {
-    return (x << y) | (x >>> -y);
   }
 }
