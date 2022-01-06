@@ -62,6 +62,16 @@ tink_go_deps()
 load("@tink_go//:tink_go_deps_init.bzl", "tink_go_deps_init")
 tink_go_deps_init()
 
+# TODO(b/213404399): Remove after Gazelle issue is fixed.
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+gazelle_dependencies()
+go_repository(
+    name = "com_google_cloud_go_compute",
+    importpath = "cloud.google.com/go/compute",
+    sum = "h1:rSUBvAyVwNJ5uQCKNJFMwPtTvJkfN38b6Pvb9zZoqJ8=",
+    version = "v0.1.0",
+)
+
 # Release from 2021-10-26. Needed for the pip dependencies
 http_archive(
     name = "rules_python",
