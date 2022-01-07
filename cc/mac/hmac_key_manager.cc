@@ -17,6 +17,7 @@
 #include "tink/mac/hmac_key_manager.h"
 
 #include <map>
+#include <string>
 
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"

@@ -16,6 +16,9 @@
 
 #include "tink/mac/mac_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/key_info.h"
@@ -23,8 +26,8 @@
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_config.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"

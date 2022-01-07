@@ -16,6 +16,8 @@
 
 #include "tink/mac/mac_key_templates.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
