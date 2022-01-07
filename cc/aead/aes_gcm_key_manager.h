@@ -17,6 +17,7 @@
 #define TINK_AEAD_AES_GCM_KEY_MANAGER_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

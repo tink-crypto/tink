@@ -18,6 +18,8 @@
 #define TINK_AEAD_KMS_ENVELOPE_AEAD_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"

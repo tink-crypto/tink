@@ -17,6 +17,7 @@
 #include "tink/aead/kms_envelope_aead.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/base/internal/endian.h"
 #include "absl/status/status.h"

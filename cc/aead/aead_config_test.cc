@@ -17,6 +17,8 @@
 #include "tink/aead/aead_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -16,6 +16,9 @@
 
 #include "tink/aead/cord_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/crypto_format.h"

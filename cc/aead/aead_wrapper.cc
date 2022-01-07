@@ -16,6 +16,9 @@
 
 #include "tink/aead/aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
