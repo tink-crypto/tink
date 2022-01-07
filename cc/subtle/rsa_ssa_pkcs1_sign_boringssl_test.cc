@@ -44,7 +44,7 @@ using ::testing::Not;
 class RsaPkcs1SignBoringsslTest : public ::testing::Test {
  public:
   RsaPkcs1SignBoringsslTest() : rsa_f4_(BN_new()) {
-    EXPECT_TRUE(BN_set_u64(rsa_f4_.get(), RSA_F4));
+    EXPECT_TRUE(BN_set_word(rsa_f4_.get(), RSA_F4));
     EXPECT_THAT(
         internal::NewRsaKeyPair(/*modulus_size_in_bits=*/2048, rsa_f4_.get(),
                                 &private_key_, &public_key_),

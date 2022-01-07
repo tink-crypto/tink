@@ -23,7 +23,6 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
-#include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"

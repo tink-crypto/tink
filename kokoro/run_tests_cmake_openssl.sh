@@ -95,6 +95,8 @@ main() {
     "tink_test_subtle_random_test"
     "tink_test_subtle_rsa_ssa_pss_sign_boringssl_test"
     "tink_test_subtle_rsa_ssa_pss_verify_boringssl_test"
+    "tink_test_subtle_rsa_ssa_pkcs1_sign_boringssl_test"
+    "tink_test_subtle_rsa_ssa_pkcs1_verify_boringssl_test"
     "tink_test_subtle_xchacha20_poly1305_boringssl_test"
   )
 

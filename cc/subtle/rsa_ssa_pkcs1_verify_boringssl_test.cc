@@ -36,7 +36,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -311,7 +310,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestAllowedFipsModuli) {
   internal::SslUniquePtr<BIGNUM> rsa_f4(BN_new());
   internal::RsaPrivateKey private_key;
   internal::RsaPublicKey public_key;
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
   EXPECT_THAT(
       internal::NewRsaKeyPair(3072, rsa_f4.get(), &private_key, &public_key),
@@ -331,7 +330,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestRestrictedFipsModuli) {
   internal::RsaPrivateKey private_key;
   internal::RsaPublicKey public_key;
   internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
   EXPECT_THAT(
       internal::NewRsaKeyPair(2560, rsa_f4.get(), &private_key, &public_key),

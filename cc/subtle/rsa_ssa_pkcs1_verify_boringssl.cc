@@ -21,7 +21,6 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
-#include "openssl/digest.h"
 #include "openssl/evp.h"
 #include "openssl/rsa.h"
 #include "tink/internal/md_util.h"
