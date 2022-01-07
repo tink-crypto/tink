@@ -1179,11 +1179,11 @@ tink_cc_test(
     tink::core::public_key_sign
     tink::core::public_key_verify
     tink::config::tink_fips
+    tink::internal::ec_util
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(
