@@ -32,10 +32,7 @@ cc_library(
     tags = [
         "requires_boringcrypto_update",
     ],
-    visibility = [
-        "//:__subpackages__",
-        "//objc:__subpackages__",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
         "//:registry",
         "//aead:aead_config",

@@ -317,6 +317,7 @@ cc_binary(
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@tink_cc//config:tink_config",
+        "@tink_cc//hybrid:hpke_config",
         "@tink_cc//jwt:jwt_mac_config",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:fake_kms_client",

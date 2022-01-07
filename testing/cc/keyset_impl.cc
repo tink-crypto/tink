@@ -17,6 +17,9 @@
 // Implementation of a Keyset Service.
 #include "keyset_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/aead/aead_key_templates.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
@@ -42,8 +45,6 @@ using ::crypto::tink::JsonKeysetReader;
 using ::crypto::tink::JsonKeysetWriter;
 using ::crypto::tink::KeysetHandle;
 using ::google::crypto::tink::KeyTemplate;
-using ::grpc::ServerContext;
-using ::grpc::Status;
 
 KeysetImpl::KeysetImpl() {
   key_templates_["AES128_EAX"] = crypto::tink::AeadKeyTemplates::Aes128Eax();
@@ -87,6 +88,12 @@ KeysetImpl::KeysetImpl() {
       ["ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256"] =
           crypto::tink::HybridKeyTemplates::
               EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305();
   key_templates_["AES_CMAC"] = crypto::tink::MacKeyTemplates::AesCmac();
   key_templates_["HMAC_SHA256_128BITTAG"] =
       crypto::tink::MacKeyTemplates::HmacSha256HalfSizeTag();

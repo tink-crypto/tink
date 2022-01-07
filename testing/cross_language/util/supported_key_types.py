@@ -45,7 +45,7 @@ STREAMING_AEAD_KEY_TYPES = [
     'AesCtrHmacStreamingKey',
     'AesGcmHkdfStreamingKey',
 ]
-HYBRID_PRIVATE_KEY_TYPES = ['EciesAeadHkdfPrivateKey']
+HYBRID_PRIVATE_KEY_TYPES = ['EciesAeadHkdfPrivateKey', 'HpkePrivateKey']
 MAC_KEY_TYPES = [
     'AesCmacKey',
     'HmacKey',
@@ -90,6 +90,7 @@ SUPPORTED_LANGUAGES = {
     'AesCtrHmacStreamingKey': ['cc', 'java', 'go', 'python'],
     'AesGcmHkdfStreamingKey': ['cc', 'java', 'go', 'python'],
     'EciesAeadHkdfPrivateKey': ['cc', 'java', 'go', 'python'],
+    'HpkePrivateKey': ['cc', 'java'],
     'AesCmacKey': ['cc', 'java', 'go', 'python'],
     'HmacKey': ['cc', 'java', 'go', 'python'],
     'EcdsaPrivateKey': ['cc', 'java', 'go', 'python'],
@@ -148,6 +149,11 @@ KEY_TEMPLATE_NAMES = {
         'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM',
         'ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
         'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256',
+    ],
+    'HpkePrivateKey': [
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM',
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM',
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305'
     ],
     'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
@@ -268,6 +274,21 @@ KEY_TEMPLATE = {
     'ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256':
         hybrid.hybrid_key_templates
         .ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM':
+        tink_pb2.KeyTemplate(
+            type_url='type.googleapis.com/google.crypto.tink.HpkePrivateKey',
+            value=b'\n\006\b\001\020\001\030\001',
+            output_prefix_type=tink_pb2.TINK),
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM':
+        tink_pb2.KeyTemplate(
+            type_url='type.googleapis.com/google.crypto.tink.HpkePrivateKey',
+            value=b'\n\006\b\001\020\001\030\002',
+            output_prefix_type=tink_pb2.TINK),
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305':
+        tink_pb2.KeyTemplate(
+            type_url='type.googleapis.com/google.crypto.tink.HpkePrivateKey',
+            value=b'\n\006\b\001\020\001\030\003',
+            output_prefix_type=tink_pb2.TINK),
     'AES_CMAC':
         mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':

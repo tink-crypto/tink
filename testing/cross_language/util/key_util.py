@@ -63,6 +63,7 @@ from tink.proto import ed25519_pb2
 from tink.proto import hkdf_prf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import hpke_pb2
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
@@ -123,6 +124,8 @@ KeyProto.add_key_type(ecies_aead_hkdf_pb2.EciesAeadHkdfPrivateKey,
                       ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat)
 KeyProto.add_key_type(ecies_aead_hkdf_pb2.EciesAeadHkdfPublicKey,
                       ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat)
+KeyProto.add_key_type(hpke_pb2.HpkePrivateKey, hpke_pb2.HpkeKeyFormat)
+KeyProto.add_key_type(hpke_pb2.HpkePublicKey, hpke_pb2.HpkeKeyFormat)
 KeyProto.add_key_type(aes_cmac_pb2.AesCmacKey, aes_cmac_pb2.AesCmacKeyFormat)
 KeyProto.add_key_type(hmac_pb2.HmacKey, hmac_pb2.HmacKeyFormat)
 KeyProto.add_key_type(ecdsa_pb2.EcdsaPrivateKey, ecdsa_pb2.EcdsaKeyFormat)
@@ -189,8 +192,8 @@ def _text_format_message(msg: message.Message, indent: str,
     msg: the proto to be formated.
     indent: the indentation prefix of each line in the output.
     remove_value: if True, replaced the value fields of tink's custom any protos
-        with '<removed>'. This is useful to compare protos, but should not be
-        used otherwise.
+      with '<removed>'. This is useful to compare protos, but should not be used
+      otherwise.
 
   Returns:
     A proto text format output, where serialized fields are deserialized in
