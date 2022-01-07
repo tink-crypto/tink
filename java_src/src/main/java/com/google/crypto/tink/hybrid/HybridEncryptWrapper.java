@@ -46,6 +46,8 @@ public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, Hyb
     }
   }
 
+  HybridEncryptWrapper() {}
+
   @Override
   public HybridEncrypt wrap(final PrimitiveSet<HybridEncrypt> primitives) {
     return new WrappedHybridEncrypt(primitives);
