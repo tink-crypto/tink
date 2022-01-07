@@ -23,6 +23,7 @@
 #include "absl/types/span.h"
 #include "openssl/aes.h"
 #include "tink/deterministic_aead.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -67,15 +68,13 @@ class AesSivBoringSsl : public DeterministicAead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  static bool IsValidKeySizeInBytes(size_t size) {
-    return size == 64;
-  }
+  static bool IsValidKeySizeInBytes(size_t size) { return size == 64; }
 
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  static constexpr size_t kBlockSize = 16;
+  static constexpr size_t kBlockSize = internal::AesBlockSize();
 
   AesSivBoringSsl(util::SecretUniquePtr<AES_KEY> k1,
                   util::SecretUniquePtr<AES_KEY> k2)
@@ -88,11 +87,6 @@ class AesSivBoringSsl : public DeterministicAead {
   util::SecretData ComputeCmacK1() const;
   // Precomputes cmac_k2
   util::SecretData ComputeCmacK2() const;
-
-  // Encrypts (or decrypts) the bytes in in using an SIV and
-  // writes the result to out.
-  void CtrCrypt(const uint8_t siv[kBlockSize], absl::Span<const uint8_t> in,
-                uint8_t* out) const;
 
   // Encrypts a single block using k2_.
   // This is used for CMACs.
@@ -119,6 +113,11 @@ class AesSivBoringSsl : public DeterministicAead {
 
   void S2v(absl::Span<const uint8_t> aad, absl::Span<const uint8_t> msg,
            uint8_t siv[kBlockSize]) const;
+
+  // Encrypts (or decrypts) `in` using an SIV `siv` and key `key`, and writes
+  // the result to `out`.
+  util::Status AesCtrCrypt(absl::string_view in, const uint8_t siv[kBlockSize],
+                           const AES_KEY* key, absl::Span<char> out) const;
 
   const util::SecretUniquePtr<AES_KEY> k1_;
   const util::SecretUniquePtr<AES_KEY> k2_;
