@@ -31,9 +31,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * A <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT) that can be signed or
- * MAC'ed to obtain a compact JWT.
- * It can also be a token that has been parsed from a compact JWT, but not yet verified.
+ * An unencoded and unsigned <a href="https://tools.ietf.org/html/rfc7519">JSON Web Token</a> (JWT).
+ *
+ * <p>It contains all payload claims and a subset of the headers. It does not contain any headers
+ * that depend on the key, such as "alg" or "kid", because these headers are chosen when the token
+ * is signed and encoded, and should not be chosen by the user. This ensures that the key can be
+ * changed without any changes to the user code.
  */
 @Immutable
 public final class RawJwt {
@@ -396,7 +399,7 @@ public final class RawJwt {
   boolean isNullClaim(String name) {
     JwtNames.validate(name);
     try {
-      return (JsonNull.INSTANCE.equals(payload.get(name)));
+      return JsonNull.INSTANCE.equals(payload.get(name));
     } catch (JsonParseException ex) {
       return false;
     }
@@ -546,5 +549,18 @@ public final class RawJwt {
       }
     }
     return Collections.unmodifiableSet(names);
+  }
+
+  /**
+   * Returns a brief description of a RawJwt object. The exact details of the representation are
+   * unspecified and subject to change.
+   */
+  @Override
+  public String toString() {
+    JsonObject header = new JsonObject();
+    if (typeHeader.isPresent()) {
+      header.add("typ", new JsonPrimitive(typeHeader.get()));
+    }
+    return header + "." + payload;
   }
 }

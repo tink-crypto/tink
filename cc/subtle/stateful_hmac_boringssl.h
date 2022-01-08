@@ -17,9 +17,9 @@
 #ifndef TINK_SUBTLE_STATEFUL_HMAC_BORINGSSL_H_
 #define TINK_SUBTLE_STATEFUL_HMAC_BORINGSSL_H_
 
-#include "openssl/base.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/secret_data.h"
@@ -42,10 +42,10 @@ class StatefulHmacBoringSsl : public subtle::StatefulMac {
   // Minimum HMAC key size in bytes.
   static constexpr size_t kMinKeySize = 16;
 
-  StatefulHmacBoringSsl(uint32_t tag_size, bssl::UniquePtr<HMAC_CTX> ctx)
+  StatefulHmacBoringSsl(uint32_t tag_size, internal::SslUniquePtr<HMAC_CTX> ctx)
       : hmac_context_(std::move(ctx)), tag_size_(tag_size) {}
 
-  const bssl::UniquePtr<HMAC_CTX> hmac_context_;
+  const internal::SslUniquePtr<HMAC_CTX> hmac_context_;
   const uint32_t tag_size_;
 };
 

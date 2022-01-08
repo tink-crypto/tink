@@ -14,6 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/kms_clients.h"
@@ -34,13 +35,14 @@ using crypto::tink::test::DummyKmsClient;
 
 TEST(KmsClientsTest, Empty) {
   auto client_result = KmsClients::Get("some uri");
-  EXPECT_THAT(client_result.status(), StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(client_result.status(), StatusIs(absl::StatusCode::kNotFound));
 
   client_result = KmsClients::Get("");
-  EXPECT_THAT(client_result.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(client_result.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   auto status = KmsClients::Add(nullptr);
-  EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 struct UriData {
@@ -64,7 +66,7 @@ TEST(KmsClientsTest, AddAndGet) {
 
   // Verify there is no client for data_2.
   client_result = KmsClients::Get(data_2.uri);
-  EXPECT_THAT(client_result.status(), StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(client_result.status(), StatusIs(absl::StatusCode::kNotFound));
 
   // Add client for data_2, and verify it.
   status = KmsClients::Add(
@@ -78,7 +80,7 @@ TEST(KmsClientsTest, AddAndGet) {
 
   // Verify there is no client for data_3.
   client_result = KmsClients::Get(data_3.uri);
-  EXPECT_THAT(client_result.status(), StatusIs(util::error::NOT_FOUND));
+  EXPECT_THAT(client_result.status(), StatusIs(absl::StatusCode::kNotFound));
 
   // Add client for data_3, and verify it.
   status = KmsClients::Add(

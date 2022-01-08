@@ -49,4 +49,6 @@ public final class HybridDecryptFactory {
     Registry.registerPrimitiveWrapper(new HybridDecryptWrapper());
     return keysetHandle.getPrimitive(HybridDecrypt.class);
   }
+
+  private HybridDecryptFactory() {}
 }

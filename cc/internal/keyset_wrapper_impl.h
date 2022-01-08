@@ -26,6 +26,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 template <typename P, typename Q>
 class KeysetWrapperImpl : public KeysetWrapper<Q> {
@@ -70,6 +71,7 @@ class KeysetWrapperImpl : public KeysetWrapper<Q> {
   const PrimitiveWrapper<P, Q>& transforming_wrapper_;
 };
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 

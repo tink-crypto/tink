@@ -22,14 +22,12 @@ py_library(
     name = "_public_key_sign",
     srcs = ["_public_key_sign.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
     name = "_public_key_verify",
     srcs = ["_public_key_verify.py"],
     srcs_version = "PY3",
-    deps = [requirement("six")],
 )
 
 py_library(
@@ -91,29 +89,11 @@ py_library(
     srcs = ["_signature_key_templates.py"],
     srcs_version = "PY3",
     deps = [
+        "//tink/internal:big_integer_util",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecdsa_py_pb2",
         "//tink/proto:rsa_ssa_pkcs1_py_pb2",
         "//tink/proto:rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
-    ],
-)
-
-py_test(
-    name = "_signature_key_templates_test",
-    srcs = ["_signature_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
-    srcs_version = "PY3",
-    deps = [
-        ":signature",
-        requirement("absl-py"),
-        "//tink/proto:common_py_pb2",
-        "//tink/proto:ecdsa_py_pb2",
-        "//tink/proto:rsa_ssa_pkcs1_py_pb2",
-        "//tink/proto:rsa_ssa_pss_py_pb2",
-        "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )

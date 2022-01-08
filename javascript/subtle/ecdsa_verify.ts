@@ -36,7 +36,6 @@ export class EcdsaVerify extends PublicKeyVerify {
   }
 
   /**
-   * @override
    */
   async verify(signature: Uint8Array, message: Uint8Array): Promise<boolean> {
     Validators.requireUint8Array(signature);

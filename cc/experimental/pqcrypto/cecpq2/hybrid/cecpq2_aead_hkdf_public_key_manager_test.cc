@@ -17,6 +17,7 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
@@ -59,7 +60,7 @@ TEST(Cecpq2AeadHkdfPublicKeyManagerTest, Basics) {
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(
       Cecpq2AeadHkdfPublicKeyManager().ValidateKey(Cecpq2AeadHkdfPublicKey()),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 Cecpq2AeadHkdfPublicKey CreatePublicKey() {
@@ -89,28 +90,28 @@ TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateKeyNoPoint) {
   params.mutable_kem_params()->set_ec_point_format(
       EcPointFormat::UNKNOWN_FORMAT);
   EXPECT_THAT(Cecpq2AeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateKeyNoDem) {
   Cecpq2AeadHkdfParams params = CreatePublicKey().params();
   params.mutable_dem_params()->clear_aead_dem();
   EXPECT_THAT(Cecpq2AeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateKeyNoKemCurve) {
   Cecpq2AeadHkdfParams params = CreatePublicKey().params();
   params.mutable_kem_params()->set_curve_type(EllipticCurveType::UNKNOWN_CURVE);
   EXPECT_THAT(Cecpq2AeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateKeyNoKemHash) {
   Cecpq2AeadHkdfParams params = CreatePublicKey().params();
   params.mutable_kem_params()->set_hkdf_hash_type(HashType::UNKNOWN_HASH);
   EXPECT_THAT(Cecpq2AeadHkdfPublicKeyManager().ValidateParams(params),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateGeneratedKey) {

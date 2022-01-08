@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/random.h"
 #include "tink/util/status.h"
@@ -79,7 +80,7 @@ TEST(BufferTest, InternalMemoryBlock) {
 
 TEST(BufferTest, NullMemoryBlock) {
   auto buf_result = Buffer::NewNonOwning(nullptr, 42);
-  EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(buf_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                             HasSubstr("non-null")));
 }
 
@@ -88,8 +89,9 @@ TEST(BufferTest, BadAllocatedSize_ExternalMemoryBlock) {
     SCOPED_TRACE(absl::StrCat("allocated_size = ", allocated_size));
     auto mem_block = absl::make_unique<char[]>(42);
     auto buf_result = Buffer::NewNonOwning(mem_block.get(), allocated_size);
-    EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                              HasSubstr("allocated_size")));
+    EXPECT_THAT(buf_result.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument,
+                         HasSubstr("allocated_size")));
   }
 }
 
@@ -97,8 +99,9 @@ TEST(BufferTest, BadAllocatedSize_InternalMemoryBlock) {
   for (auto allocated_size : {-10, -1, 0}) {
     SCOPED_TRACE(absl::StrCat("allocated_size = ", allocated_size));
     auto buf_result = Buffer::New(allocated_size);
-    EXPECT_THAT(buf_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
-                                              HasSubstr("allocated_size")));
+    EXPECT_THAT(buf_result.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument,
+                         HasSubstr("allocated_size")));
   }
 }
 
@@ -109,7 +112,7 @@ TEST(BufferTest, BadNewSize_ExternalMemoryBlock) {
     for (auto new_size : {-10, -1, buf_size + 1, 2 * buf_size}) {
       SCOPED_TRACE(absl::StrCat("new_size = ", buf_size));
       EXPECT_THAT(buf->set_size(new_size),
-                  StatusIs(util::error::INVALID_ARGUMENT,
+                  StatusIs(absl::StatusCode::kInvalidArgument,
                            HasSubstr("new_size must satisfy")));
     }
   }
@@ -124,7 +127,7 @@ TEST(BufferTest, BadNewSize_InternalMemoryBlock) {
     for (auto new_size : {-10, -1, buf_size + 1, 2 * buf_size}) {
       SCOPED_TRACE(absl::StrCat("new_size = ", buf_size));
       EXPECT_THAT(buf->set_size(new_size),
-                  StatusIs(util::error::INVALID_ARGUMENT,
+                  StatusIs(absl::StatusCode::kInvalidArgument,
                            HasSubstr("new_size must satisfy")));
     }
   }

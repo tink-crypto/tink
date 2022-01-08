@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/istream_input_stream.h"
@@ -52,7 +53,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, Basics) {
 
 TEST(XChaCha20Poly1305KeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(XChaCha20Poly1305KeyManager().ValidateKey(XChaCha20Poly1305Key()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, ValidateValid32ByteKey) {
@@ -140,7 +141,7 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyWithoutEnoughEntropy) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  ASSERT_THAT(key_or.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("pseudorandomness")));
 }
 
@@ -152,8 +153,8 @@ TEST(XChaCha20Poly1305KeyManagerTest, DeriveKeyWrongVersion) {
   StatusOr<XChaCha20Poly1305Key> key_or =
       XChaCha20Poly1305KeyManager().DeriveKey(format, &input_stream);
 
-  ASSERT_THAT(key_or.status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(key_or.status(), StatusIs(absl::StatusCode::kInvalidArgument,
+                                        HasSubstr("version")));
 }
 
 TEST(XChaCha20Poly1305KeyManagerTest, CreateKeyValid) {

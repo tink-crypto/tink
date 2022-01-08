@@ -104,4 +104,6 @@ public final class TinkConfig {
     SignatureConfig.register();
     StreamingAeadConfig.register();
   }
+
+  private TinkConfig() {}
 }

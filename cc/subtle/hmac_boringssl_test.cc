@@ -19,6 +19,8 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "tink/mac.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
@@ -26,7 +28,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -43,9 +44,9 @@ class HmacBoringSslTest : public ::testing::Test {
                      const std::string &key_hex, const std::string &tag_hex,
                      const std::string &data_hex) {
     util::SecretData key =
-        util::SecretDataFromStringView(test::HexDecodeOrDie(key_hex));
-    std::string tag = test::HexDecodeOrDie(tag_hex);
-    std::string data = test::HexDecodeOrDie(data_hex);
+        util::SecretDataFromStringView(absl::HexStringToBytes(key_hex));
+    std::string tag = absl::HexStringToBytes(tag_hex);
+    std::string data = absl::HexStringToBytes(data_hex);
     auto hmac_result = HmacBoringSsl::New(hash, tag_size, key);
     EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
     auto hmac = std::move(hmac_result.ValueOrDie());
@@ -61,7 +62,7 @@ TEST_F(HmacBoringSslTest, testBasic) {
   }
 
   util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
   size_t tag_size = 16;
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, tag_size, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
@@ -72,9 +73,9 @@ TEST_F(HmacBoringSslTest, testBasic) {
     EXPECT_TRUE(res.ok()) << res.status().ToString();
     std::string tag = res.ValueOrDie();
     EXPECT_EQ(tag_size, tag.size());
-    EXPECT_EQ(tag, test::HexDecodeOrDie("9ccdca5b7fffb690df396e4ac49b9cd4"));
+    EXPECT_EQ(tag, absl::HexStringToBytes("9ccdca5b7fffb690df396e4ac49b9cd4"));
     auto status = hmac->VerifyMac(tag, data);
-    EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
+    EXPECT_TRUE(status.ok()) << "tag:" << absl::BytesToHexString(tag)
                              << " status:" << status.ToString();
   }
   { // Test with empty example data.
@@ -83,9 +84,9 @@ TEST_F(HmacBoringSslTest, testBasic) {
     EXPECT_TRUE(res.ok()) << res.status().ToString();
     std::string tag = res.ValueOrDie();
     EXPECT_EQ(tag_size, tag.size());
-    EXPECT_EQ(tag, test::HexDecodeOrDie("5433122f77bcf8a4d9b874b4149823ef"));
+    EXPECT_EQ(tag, absl::HexStringToBytes("5433122f77bcf8a4d9b874b4149823ef"));
     auto status = hmac->VerifyMac(tag, data);
-    EXPECT_TRUE(status.ok()) << "tag:" << test::HexEncode(tag)
+    EXPECT_TRUE(status.ok()) << "tag:" << absl::BytesToHexString(tag)
                              << " status:" << status.ToString();
   }
 }
@@ -97,7 +98,7 @@ TEST_F(HmacBoringSslTest, testModification) {
   }
 
   util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 16, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
@@ -110,8 +111,8 @@ TEST_F(HmacBoringSslTest, testModification) {
     std::string modified_tag = tag;
     modified_tag[i / 8] ^= 1 << (i % 8);
     EXPECT_FALSE(hmac->VerifyMac(modified_tag, data).ok())
-        << "tag:" << test::HexEncode(tag)
-        << " modified:" << test::HexEncode(modified_tag);
+        << "tag:" << absl::BytesToHexString(tag)
+        << " modified:" << absl::BytesToHexString(modified_tag);
   }
 }
 
@@ -122,7 +123,7 @@ TEST_F(HmacBoringSslTest, testTruncation) {
   }
 
   util::SecretData key = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
   auto hmac_result = HmacBoringSsl::New(HashType::SHA1, 20, key);
   EXPECT_TRUE(hmac_result.ok()) << hmac_result.status();
   auto hmac = std::move(hmac_result.ValueOrDie());
@@ -133,8 +134,8 @@ TEST_F(HmacBoringSslTest, testTruncation) {
   for (size_t i = 0; i < tag.size(); i++) {
     std::string modified_tag(tag, 0, i);
     EXPECT_FALSE(hmac->VerifyMac(modified_tag, data).ok())
-        << "tag:" << test::HexEncode(tag)
-        << " modified:" << test::HexEncode(modified_tag);
+        << "tag:" << absl::BytesToHexString(tag)
+        << " modified:" << absl::BytesToHexString(modified_tag);
   }
 }
 
@@ -164,20 +165,21 @@ TEST_F(HmacBoringSslTest, TestFipsFailWithoutBoringCrypto) {
   }
 
   util::SecretData key128 = util::SecretDataFromStringView(
-      test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  util::SecretData key256 = util::SecretDataFromStringView(test::HexDecodeOrDie(
-      "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
+      absl::HexStringToBytes("000102030405060708090a0b0c0d0e0f"));
+  util::SecretData key256 =
+      util::SecretDataFromStringView(absl::HexStringToBytes(
+          "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
 
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA1, 16, key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA224, 16, key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA256, 16, key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA384, 16, key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::HmacBoringSsl::New(HashType::SHA512, 16, key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 // TODO(bleichen): Stuff to test
 //  - Generate test vectors and share with Wycheproof.

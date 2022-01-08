@@ -6,8 +6,8 @@
 class Tinkey < Formula
   desc "A command line tool to generate and manipulate keysets for the Tink cryptography library"
   homepage "https://github.com/google/tink/tree/master/tools/tinkey"
-  url "https://storage.googleapis.com/tinkey/tinkey-1.6.0.tar.gz"
-  sha256 "51d9694a704d00fbac04862a6427ad5f17bf59f91d5e963517d8799141e737c0"
+  url "https://storage.googleapis.com/tinkey/tinkey-1.6.1.tar.gz"
+  sha256 "156e902e212f55b6747a55f92da69a7e10bcbd00f8942bc1568c0e7caefff3e1"
 
   bottle :unneeded
 

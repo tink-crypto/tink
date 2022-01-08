@@ -22,9 +22,6 @@ py_library(
     name = "_aead",
     srcs = ["_aead.py"],
     srcs_version = "PY3",
-    deps = [
-        requirement("six"),
-    ],
 )
 
 py_library(
@@ -101,9 +98,6 @@ py_library(
 py_test(
     name = "_aead_key_templates_test",
     srcs = ["_aead_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":aead",
@@ -116,7 +110,6 @@ py_test(
         "//tink/proto:kms_aead_py_pb2",
         "//tink/proto:kms_envelope_py_pb2",
         "//tink/proto:tink_py_pb2",
-        "//tink/testing:helper",
     ],
 )
 

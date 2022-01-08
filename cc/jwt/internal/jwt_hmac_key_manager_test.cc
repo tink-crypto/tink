@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "absl/time/time.h"
@@ -168,7 +169,7 @@ TEST(JwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
       absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
 
   ASSERT_THAT(JwtHmacKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
@@ -188,7 +189,7 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(raw_jwt.status(), IsOk());
 
   util::StatusOr<std::string> compact =
-      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, absl::nullopt);
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
   ASSERT_THAT(compact.status(), IsOk());
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
@@ -197,7 +198,8 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitive) {
   ASSERT_THAT(validator.status(), IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
-      (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
+      (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
+                                            /*kid=*/absl::nullopt);
   ASSERT_THAT(verified_jwt.status(), IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
   EXPECT_THAT(issuer, IsOkAndHolds("issuer"));
@@ -219,31 +221,47 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithKid) {
       RawJwtBuilder().SetIssuer("issuer").WithoutExpiration().Build();
   ASSERT_THAT(raw_jwt.status(), IsOk());
 
-  util::StatusOr<std::string> compact =
-      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, "kid-123");
-  ASSERT_THAT(compact.status(), IsOk());
+  util::StatusOr<std::string> token_with_kid =
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/"kid-123");
+  ASSERT_THAT(token_with_kid.status(), IsOk());
+  util::StatusOr<std::string> token_without_kid =
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
+  ASSERT_THAT(token_without_kid.status(), IsOk());
+
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
                                                .AllowMissingExpiration()
                                                .Build();
   ASSERT_THAT(validator.status(), IsOk());
 
-  util::StatusOr<VerifiedJwt> verified_jwt =
-      (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
-  ASSERT_THAT(verified_jwt.status(), IsOk());
-  util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
-  EXPECT_THAT(issuer, IsOkAndHolds("issuer"));
+  // A token with kid only fails if the wrong kid is passed.
+  ASSERT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(*token_with_kid, *validator,
+                                              /*kid=*/absl::nullopt)
+                  .status(),
+              IsOk());
+  ASSERT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(*token_with_kid, *validator,
+                                              /*kid=*/"kid-123")
+                  .status(),
+              IsOk());
+  ASSERT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(*token_with_kid, *validator,
+                                              /*kid=*/"wrong-kid")
+                  .status(),
+              Not(IsOk()));
 
-  // parse header to make sure kid value is set correctly.
-  std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
-  ASSERT_THAT(parts.size(), Eq(3));
-  std::string json_header;
-  ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
-  util::StatusOr<google::protobuf::Struct> header =
-      JsonStringToProtoStruct(json_header);
-  ASSERT_THAT(header.status(), IsOk());
-  EXPECT_THAT(header->fields().find("kid")->second.string_value(),
-              Eq("kid-123"));
+  // A token without kid is only valid if no kid is passed.
+  ASSERT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(*token_without_kid, *validator,
+                                              /*kid=*/absl::nullopt)
+                  .status(),
+              IsOk());
+  ASSERT_THAT(
+      (*jwt_mac)
+          ->VerifyMacAndDecodeWithKid(*token_without_kid, *validator, "kid-123")
+          .status(),
+      Not(IsOk()));
 }
 
 TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
@@ -264,7 +282,7 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
   ASSERT_THAT(raw_jwt.status(), IsOk());
 
   util::StatusOr<std::string> compact =
-      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, absl::nullopt);
+      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
   ASSERT_THAT(compact.status(), IsOk());
   util::StatusOr<JwtValidator> validator = JwtValidatorBuilder()
                                                .ExpectIssuer("issuer")
@@ -286,16 +304,18 @@ TEST(JwtHmacKeyManagerTest, GetAndUsePrimitiveWithCustomKid) {
 
   // validate token
   util::StatusOr<VerifiedJwt> verified_jwt =
-      (*jwt_mac)->VerifyMacAndDecode(*compact, *validator);
+      (*jwt_mac)->VerifyMacAndDecodeWithKid(*compact, *validator,
+                                            /*kid=*/absl::nullopt);
   ASSERT_THAT(verified_jwt.status(), IsOk());
   util::StatusOr<std::string> issuer = verified_jwt->GetIssuer();
   ASSERT_THAT(issuer.status(), IsOk());
   EXPECT_THAT(*issuer, testing::Eq("issuer"));
 
   // passing a kid when custom_kid is set should fail
-  util::StatusOr<std::string> compact2 =
-      (*jwt_mac)->ComputeMacAndEncodeWithKid(*raw_jwt, "kid123");
-  ASSERT_FALSE(compact2.ok());
+  EXPECT_THAT((*jwt_mac)
+                  ->ComputeMacAndEncodeWithKid(*raw_jwt, /*kid=*/"kid123")
+                  .status(),
+              Not(IsOk()));
 }
 
 TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
@@ -326,7 +346,8 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
   ASSERT_THAT(validator.status(), IsOk());
 
   util::StatusOr<VerifiedJwt> verified_jwt =
-      (*jwt_mac)->VerifyMacAndDecode(compact, *validator);
+      (*jwt_mac)->VerifyMacAndDecodeWithKid(compact, *validator,
+                                            /*kid=*/absl::nullopt);
   ASSERT_THAT(verified_jwt.status(), IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), IsOkAndHolds("joe"));
   EXPECT_THAT(verified_jwt->GetBooleanClaim("http://example.com/is_root"),
@@ -334,14 +355,21 @@ TEST(JwtHmacKeyManagerTest, ValidateTokenWithFixedKey) {
 
   util::StatusOr<JwtValidator> validator_now = JwtValidatorBuilder().Build();
   ASSERT_THAT(validator_now.status(), IsOk());
-  EXPECT_FALSE((*jwt_mac)->VerifyMacAndDecode(compact, *validator_now).ok());
+  EXPECT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(compact, *validator_now,
+                                              /*kid=*/absl::nullopt)
+                  .status(),
+              Not(IsOk()));
 
   std::string modified_compact =
       "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleH"
       "AiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ."
       "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXi";
-  EXPECT_FALSE(
-      (*jwt_mac)->VerifyMacAndDecode(modified_compact, *validator).ok());
+  EXPECT_THAT((*jwt_mac)
+                  ->VerifyMacAndDecodeWithKid(modified_compact, *validator,
+                                              /*kid=*/absl::nullopt)
+                  .status(),
+              Not(IsOk()));
 }
 
 }  // namespace

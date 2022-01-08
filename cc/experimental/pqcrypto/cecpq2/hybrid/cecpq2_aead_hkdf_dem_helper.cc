@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/deterministic_aead.h"
 #include "tink/registry.h"
@@ -49,7 +50,7 @@ class Cecpq2AeadHkdfDemHelperImpl : public Cecpq2AeadHkdfDemHelper {
       std::unique_ptr<crypto::tink::subtle::AeadOrDaead>>
   GetAeadOrDaead(const util::SecretData& seed) const override {
     if (seed.size() < 32) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "Seed length is smaller than 32 bytes "
                           "and thus not post-quantum secure.");
     }
@@ -77,7 +78,7 @@ class Cecpq2AeadHkdfDemHelperImpl : public Cecpq2AeadHkdfDemHelper {
             "type.googleapis.com/google.crypto.tink.XChaCha20Poly1305Key") {
       return 32;
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Unsupported DEM key type '%s'.", dem_type_url);
     }
   }
@@ -101,7 +102,7 @@ Cecpq2AeadHkdfDemHelper::New(const KeyTemplate& dem_key_template) {
     return {absl::make_unique<Cecpq2AeadHkdfDemHelperImpl<DeterministicAead>>(
         dem_key_template)};
   }
-  return ToStatusF(util::error::INVALID_ARGUMENT,
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
                    "Unsupported DEM key type '%s'.", dem_type_url);
 }
 

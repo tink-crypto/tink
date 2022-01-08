@@ -15,14 +15,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
+#include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/hybrid_decrypt.h"
+#include "tink/internal/ec_util.h"
 #include "tink/key_manager.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -46,37 +48,36 @@ using google::crypto::tink::EciesHkdfKemParams;
 Status EciesAeadHkdfPrivateKeyManager::ValidateKeyFormat(
     const EciesAeadHkdfKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return EciesAeadHkdfPublicKeyManager().ValidateParams(key_format.params());
 }
 
-StatusOr<EciesAeadHkdfPrivateKey>
-EciesAeadHkdfPrivateKeyManager::CreateKey(
+StatusOr<EciesAeadHkdfPrivateKey> EciesAeadHkdfPrivateKeyManager::CreateKey(
     const EciesAeadHkdfKeyFormat& ecies_key_format) const {
   // Generate new EC key.
   const EciesHkdfKemParams& kem_params = ecies_key_format.params().kem_params();
-  auto ec_key_result = subtle::SubtleUtilBoringSSL::GetNewEcKey(
-      util::Enums::ProtoToSubtle(kem_params.curve_type()));
-  if (!ec_key_result.ok()) return ec_key_result.status();
-  auto ec_key = ec_key_result.ValueOrDie();
+  util::StatusOr<internal::EcKey> ec_key =
+      internal::NewEcKey(util::Enums::ProtoToSubtle(kem_params.curve_type()));
+  if (!ec_key.ok()) {
+    return ec_key.status();
+  }
 
   // Build EciesAeadHkdfPrivateKey.
   EciesAeadHkdfPrivateKey ecies_private_key;
   ecies_private_key.set_version(get_version());
   ecies_private_key.set_key_value(
-      std::string(util::SecretDataAsStringView(ec_key.priv)));
+      std::string(util::SecretDataAsStringView(ec_key->priv)));
   auto ecies_public_key = ecies_private_key.mutable_public_key();
   ecies_public_key->set_version(get_version());
-  ecies_public_key->set_x(ec_key.pub_x);
-  ecies_public_key->set_y(ec_key.pub_y);
+  ecies_public_key->set_x(ec_key->pub_x);
+  ecies_public_key->set_y(ec_key->pub_y);
   *(ecies_public_key->mutable_params()) = ecies_key_format.params();
 
   return ecies_private_key;
 }
 
-StatusOr<EciesAeadHkdfPublicKey>
-EciesAeadHkdfPrivateKeyManager::GetPublicKey(
+StatusOr<EciesAeadHkdfPublicKey> EciesAeadHkdfPrivateKeyManager::GetPublicKey(
     const EciesAeadHkdfPrivateKey& private_key) const {
   return private_key.public_key();
 }
@@ -86,7 +87,7 @@ Status EciesAeadHkdfPrivateKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing public_key.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing public_key.");
   }
   return EciesAeadHkdfPublicKeyManager().ValidateKey(key.public_key());
 }

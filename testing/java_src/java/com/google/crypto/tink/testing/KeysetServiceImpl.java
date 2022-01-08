@@ -22,6 +22,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
 import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
 import com.google.crypto.tink.proto.Keyset;
@@ -32,6 +33,8 @@ import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc.KeysetImplBase;
 import com.google.crypto.tink.proto.testing.KeysetPublicRequest;
 import com.google.crypto.tink.proto.testing.KeysetPublicResponse;
+import com.google.crypto.tink.proto.testing.KeysetTemplateRequest;
+import com.google.crypto.tink.proto.testing.KeysetTemplateResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.protobuf.ByteString;
@@ -46,6 +49,23 @@ import java.security.GeneralSecurityException;
 public final class KeysetServiceImpl extends KeysetImplBase {
 
   public KeysetServiceImpl() throws GeneralSecurityException {
+  }
+
+  @Override
+  public void getTemplate(
+      KeysetTemplateRequest request, StreamObserver<KeysetTemplateResponse> responseObserver) {
+    KeysetTemplateResponse response;
+    try {
+      KeyTemplate template = KeyTemplates.get(request.getTemplateName());
+      response =
+          KeysetTemplateResponse.newBuilder()
+              .setKeyTemplate(ByteString.copyFrom(KeyTemplateProtoConverter.toByteArray(template)))
+              .build();
+    } catch (GeneralSecurityException e) {
+      response = KeysetTemplateResponse.newBuilder().setErr(e.toString()).build();
+    }
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
   }
 
   @Override

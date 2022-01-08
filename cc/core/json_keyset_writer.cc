@@ -20,6 +20,7 @@
 #include <istream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/prettywriter.h"
@@ -62,7 +63,7 @@ util::Status ToJson(const KeyData& key_data,
   key_value.SetString(base64_string.c_str(), *allocator);
   json_key_data->AddMember("value", key_value, *allocator);
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ToJson(const Keyset::Key& key,
@@ -85,7 +86,7 @@ util::Status ToJson(const Keyset::Key& key,
   auto status = ToJson(key.key_data(), &json_key_data, allocator);
   if (!status.ok()) return status;
   json_key->AddMember("keyData", json_key_data, *allocator);
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> ToJsonString(const Keyset& keyset) {
@@ -129,7 +130,7 @@ util::Status ToJson(const KeysetInfo::KeyInfo& key_info,
   prefix_type.SetString(Enums::OutputPrefixName(key_info.output_prefix_type()),
                         *allocator);
   json_key_info->AddMember("outputPrefixType", prefix_type, *allocator);
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ToJson(const KeysetInfo& keyset_info,
@@ -147,7 +148,7 @@ util::Status ToJson(const KeysetInfo& keyset_info,
     key_info_array.PushBack(json_key_info, *allocator);
   }
   json_keyset_info->AddMember("keyInfo", key_info_array, *allocator);
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
@@ -176,10 +177,10 @@ util::StatusOr<std::string> ToJsonString(const EncryptedKeyset& keyset) {
 util::Status WriteData(absl::string_view data, std::ostream* destination) {
   (*destination) << data;
   if (destination->fail()) {
-    return util::Status(util::error::UNKNOWN,
+    return util::Status(absl::StatusCode::kUnknown,
                             "Error writing to the destination stream.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace
@@ -189,8 +190,8 @@ util::Status WriteData(absl::string_view data, std::ostream* destination) {
 util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
     std::unique_ptr<std::ostream> destination_stream) {
   if (destination_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "destination_stream must be non-null.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "destination_stream must be non-null.");
   }
   std::unique_ptr<JsonKeysetWriter> writer(
       new JsonKeysetWriter(std::move(destination_stream)));

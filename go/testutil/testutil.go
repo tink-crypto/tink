@@ -30,7 +30,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/ed25519"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	subtledaead "github.com/google/tink/go/daead/subtle"
 	subtlehybrid "github.com/google/tink/go/hybrid/subtle"
@@ -45,6 +45,7 @@ import (
 	ctrhmacpb "github.com/google/tink/go/proto/aes_ctr_hmac_streaming_go_proto"
 	gcmpb "github.com/google/tink/go/proto/aes_gcm_go_proto"
 	gcmhkdfpb "github.com/google/tink/go/proto/aes_gcm_hkdf_streaming_go_proto"
+	gcmsivpb "github.com/google/tink/go/proto/aes_gcm_siv_go_proto"
 	aspb "github.com/google/tink/go/proto/aes_siv_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
@@ -199,6 +200,12 @@ func (d *DummyKMSClient) GetAEAD(keyURI string) (tink.AEAD, error) {
 // NewTestAESGCMKeyset creates a new Keyset containing an AESGCMKey.
 func NewTestAESGCMKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
 	keyData := NewAESGCMKeyData(16)
+	return NewTestKeyset(keyData, primaryOutputPrefixType)
+}
+
+// NewTestAESGCMSIVKeyset creates a new Keyset containing an AESGCMSIVKey.
+func NewTestAESGCMSIVKeyset(primaryOutputPrefixType tinkpb.OutputPrefixType) *tinkpb.Keyset {
+	keyData := NewAESGCMSIVKeyData(16)
 	return NewTestKeyset(keyData, primaryOutputPrefixType)
 }
 
@@ -359,6 +366,31 @@ func NewAESGCMKeyData(keySize uint32) *tinkpb.KeyData {
 // NewAESGCMKeyFormat returns a new AESGCMKeyFormat.
 func NewAESGCMKeyFormat(keySize uint32) *gcmpb.AesGcmKeyFormat {
 	return &gcmpb.AesGcmKeyFormat{
+		KeySize: keySize,
+	}
+}
+
+// NewAESGCMSIVKey creates a randomly generated AESGCMSIVKey.
+func NewAESGCMSIVKey(keyVersion uint32, keySize uint32) *gcmsivpb.AesGcmSivKey {
+	keyValue := random.GetRandomBytes(keySize)
+	return &gcmsivpb.AesGcmSivKey{
+		Version:  keyVersion,
+		KeyValue: keyValue,
+	}
+}
+
+// NewAESGCMSIVKeyData creates a KeyData containing a randomly generated AESGCMSIVKey.
+func NewAESGCMSIVKeyData(keySize uint32) *tinkpb.KeyData {
+	serializedKey, err := proto.Marshal(NewAESGCMSIVKey(AESGCMKeyVersion, keySize))
+	if err != nil {
+		log.Fatalf("NewAESGCMSIVKeyData(keySize=%d): Failed serializing proto; err=%v", keySize, err)
+	}
+	return NewKeyData(AESGCMTypeURL, serializedKey, tinkpb.KeyData_SYMMETRIC)
+}
+
+// NewAESGCMSIVKeyFormat returns a new AESGCMKeyFormat.
+func NewAESGCMSIVKeyFormat(keySize uint32) *gcmsivpb.AesGcmSivKeyFormat {
+	return &gcmsivpb.AesGcmSivKeyFormat{
 		KeySize: keySize,
 	}
 }

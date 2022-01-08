@@ -23,7 +23,7 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/subtle"
 	ed25519pb "github.com/google/tink/go/proto/ed25519_go_proto"
@@ -42,11 +42,6 @@ var errInvalidED25519SignKeyFormat = errors.New("ed25519_signer_key_manager: inv
 // ed25519SignerKeyManager is an implementation of KeyManager interface.
 // It generates new ED25519PrivateKeys and produces new instances of ED25519Sign subtle.
 type ed25519SignerKeyManager struct{}
-
-// newED25519SignerKeyManager creates a new ed25519SignerKeyManager.
-func newED25519SignerKeyManager() *ed25519SignerKeyManager {
-	return new(ed25519SignerKeyManager)
-}
 
 // Primitive creates an ED25519Sign subtle for the given serialized ED25519PrivateKey proto.
 func (km *ed25519SignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

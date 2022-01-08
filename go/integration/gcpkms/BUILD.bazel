@@ -29,12 +29,13 @@ go_test(
     ],
     data = [
         "@google_root_pem//file",  #keep
+        # Change this to your credentials.
         "@tink_base//testdata:credentials",
         "@tink_base//testdata:ecies_keysets",
         "@wycheproof//testvectors:all",  #keep
     ],
     embed = [":go_default_library"],
-    tags = ["no_rbe"],
+    tags = ["manual"],
     deps = [
         "//aead:go_default_library",
         "//core/registry:go_default_library",

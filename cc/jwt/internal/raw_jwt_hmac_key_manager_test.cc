@@ -163,8 +163,7 @@ TEST(RawJwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
 
   StatusOr<JwtHmacKey> key_or =
       RawJwtHmacKeyManager().DeriveKey(format, &input_stream);
-  EXPECT_THAT(key_or.status(),
-              StatusIs(::crypto::tink::util::error::Code::UNIMPLEMENTED));
+  EXPECT_THAT(key_or.status(), StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {

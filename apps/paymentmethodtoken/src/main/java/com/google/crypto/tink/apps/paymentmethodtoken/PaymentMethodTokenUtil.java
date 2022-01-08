@@ -30,7 +30,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /** Various helpers. */
-class PaymentMethodTokenUtil {
+final class PaymentMethodTokenUtil {
   static ECPublicKey rawUncompressedEcPublicKey(String rawUncompressedPublicKey)
       throws GeneralSecurityException {
     return EllipticCurves.getEcPublicKey(
@@ -74,4 +74,6 @@ class PaymentMethodTokenUtil {
     mac.init(key);
     return mac.doFinal(encryptedMessage);
   }
+
+  private PaymentMethodTokenUtil() {}
 }

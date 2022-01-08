@@ -17,6 +17,7 @@
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_encrypt.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/subtle/hybrid_test_util.h"
@@ -70,7 +71,7 @@ TEST(HpkePrivateKeyManagerTest, BasicAccessors) {
 
 TEST(HpkePrivateKeyManagerTest, ValidateEmptyKeyFormatFails) {
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKeyFormat(HpkeKeyFormat()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyFormatSucceeds) {
@@ -84,21 +85,21 @@ TEST(HpkePrivateKeyManagerTest, ValidateKeyFormatWithInvalidKemFails) {
   EXPECT_THAT(
       HpkePrivateKeyManager().ValidateKeyFormat(CreateKeyFormat(
           HpkeKem::KEM_UNKNOWN, HpkeKdf::HKDF_SHA256, HpkeAead::AES_128_GCM)),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyFormatWithInvalidKdfFails) {
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKeyFormat(
                   CreateKeyFormat(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                                   HpkeKdf::KDF_UNKNOWN, HpkeAead::AES_128_GCM)),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyFormatWithInvalidAeadFails) {
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKeyFormat(CreateKeyFormat(
                   HpkeKem::DHKEM_X25519_HKDF_SHA256, HpkeKdf::HKDF_SHA256,
                   HpkeAead::AEAD_UNKNOWN)),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, CreateKeySucceeds) {
@@ -125,12 +126,12 @@ TEST(HpkePrivateKeyManagerTest, CreateKeyWithInvalidKemFails) {
       HpkeKem::KEM_UNKNOWN, HpkeKdf::HKDF_SHA256, HpkeAead::AES_128_GCM);
 
   ASSERT_THAT(HpkePrivateKeyManager().CreateKey(key_format).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateEmptyKeyFails) {
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKey(HpkePrivateKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeySucceeds) {
@@ -150,7 +151,7 @@ TEST(HpkePrivateKeyManagerTest, ValidateKeyWithWrongVersionFails) {
   key->set_version(1);
 
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKey(*key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidKemFails) {
@@ -161,7 +162,7 @@ TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidKemFails) {
   key->mutable_public_key()->mutable_params()->set_kem(HpkeKem::KEM_UNKNOWN);
 
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKey(*key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidKdfFails) {
@@ -171,7 +172,7 @@ TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidKdfFails) {
   ASSERT_THAT(key.status(), IsOk());
 
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKey(*key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidAeadFails) {
@@ -181,7 +182,7 @@ TEST(HpkePrivateKeyManagerTest, ValidateKeyWithInvalidAeadFails) {
   ASSERT_THAT(key.status(), IsOk());
 
   EXPECT_THAT(HpkePrivateKeyManager().ValidateKey(*key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePrivateKeyManagerTest, GetPublicKeySucceeds) {

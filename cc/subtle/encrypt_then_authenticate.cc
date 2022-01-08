@@ -20,16 +20,16 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/string_view.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/subtle/ind_cpa_cipher.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-
 
 namespace crypto {
 namespace tink {
@@ -48,7 +48,8 @@ util::StatusOr<std::unique_ptr<Aead>> EncryptThenAuthenticate::New(
     std::unique_ptr<IndCpaCipher> ind_cpa_cipher, std::unique_ptr<Mac> mac,
     uint8_t tag_size) {
   if (tag_size < kMinTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT, "tag size too small");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "tag size too small");
   }
   std::unique_ptr<Aead> aead(new EncryptThenAuthenticate(
       std::move(ind_cpa_cipher), std::move(mac), tag_size));
@@ -59,13 +60,13 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 
@@ -82,7 +83,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
     return tag.status();
   }
   if (tag.ValueOrDie().size() != tag_size_) {
-    return util::Status(util::error::INTERNAL, "invalid tag size");
+    return util::Status(absl::StatusCode::kInternal, "invalid tag size");
   }
   return ciphertext.append(tag.ValueOrDie());
 }
@@ -91,16 +92,17 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (ciphertext.size() < tag_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   uint64_t aad_size_in_bytes = additional_data.size();
   uint64_t aad_size_in_bits = aad_size_in_bytes * 8;
   if (aad_size_in_bits / 8 != aad_size_in_bytes /* overflow occured! */) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "additional data too long");
   }
 

@@ -201,7 +201,7 @@ public final class SignaturePemKeysetReaderTest {
   }
 
   @Test
-  public void read_onePEM_oneRSAPublicKey_oneECPublicKey_ECPublicKeyShouldBeIgnored()
+  public void read_onePEM_oneRSAPublicKey_oneECPublicKey_eCPublicKeyShouldBeIgnored()
       throws Exception {
     String pem =
         "-----BEGIN PUBLIC KEY-----\n"

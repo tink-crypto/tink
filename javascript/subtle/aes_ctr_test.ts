@@ -47,7 +47,10 @@ describe('aes ctr test', function() {
     try {
       await aesCtrFromRawKey(Random.randBytes(16), 11);  // IV size too short
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: invalid IV length, must be at least 12 and at most 16');
@@ -55,7 +58,10 @@ describe('aes ctr test', function() {
     try {
       await aesCtrFromRawKey(Random.randBytes(16), 17);  // IV size too long
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: invalid IV length, must be at least 12 and at most 16');
@@ -64,7 +70,10 @@ describe('aes ctr test', function() {
       await aesCtrFromRawKey(
           Random.randBytes(24), 12);  // 192-bit keys not supported
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: unsupported AES key size: 24');
     }
@@ -74,7 +83,10 @@ describe('aes ctr test', function() {
     try {
       await aesCtrFromRawKey(Random.randBytes(16), NaN);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: invalid IV length, must be an integer');
     }
@@ -82,7 +94,10 @@ describe('aes ctr test', function() {
     try {
       await aesCtrFromRawKey(Random.randBytes(16), 12.5);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('SecurityException: invalid IV length, must be an integer');
     }
@@ -90,7 +105,10 @@ describe('aes ctr test', function() {
     try {
       await aesCtrFromRawKey(Random.randBytes(16), 0);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: invalid IV length, must be at least 12 and at most 16');

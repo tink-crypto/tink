@@ -19,10 +19,11 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
+#include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -80,7 +81,7 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestSenderRecipientBasic) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (const TestVector& test : test_vector) {
-    auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(test.curve);
+    auto status_or_test_key = internal::NewEcKey(test.curve);
     ASSERT_TRUE(status_or_test_key.ok());
     auto test_key = status_or_test_key.ValueOrDie();
     auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
@@ -114,8 +115,8 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestNewUnknownCurve) {
   }
   auto status_or_sender_kem = EciesHkdfSenderKemBoringSsl::New(
       EllipticCurveType::UNKNOWN_CURVE, "", "");
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 class EciesHkdfNistPCurveSendKemBoringSslTest : public ::testing::Test {};
@@ -125,7 +126,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNew) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
@@ -138,13 +139,13 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestNewInvalidCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
       EllipticCurveType::CURVE25519, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::UNIMPLEMENTED);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kUnimplemented);
 }
 
 TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestGenerateKey) {
@@ -152,7 +153,7 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestGenerateKey) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfNistPCurveSendKemBoringSsl::New(
@@ -177,7 +178,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNew) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
@@ -190,13 +191,13 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewInvalidCurve) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       EllipticCurveType::NIST_P256, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
@@ -204,14 +205,14 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubxTooLong) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   test_key.pub_x.resize(test_key.pub_x.size() / 2);
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       curve, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
@@ -219,14 +220,14 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestNewPubyNotEmpty) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   test_key.pub_y = test_key.pub_x;
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
       curve, test_key.pub_x, test_key.pub_y);
-  EXPECT_EQ(status_or_sender_kem.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_sender_kem.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
@@ -234,7 +235,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
@@ -257,7 +258,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKeyUncompressed) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::CURVE25519;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   ASSERT_TRUE(status_or_test_key.ok());
   auto test_key = status_or_test_key.ValueOrDie();
   auto status_or_sender_kem = EciesHkdfX25519SendKemBoringSsl::New(
@@ -268,8 +269,8 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKeyUncompressed) {
   auto status_or_kem_key =
       sender_kem->GenerateKey(HashType::SHA256, "hkdf_salt", "hkdf_info", 32,
                               EcPointFormat::UNCOMPRESSED);
-  EXPECT_EQ(status_or_kem_key.status().error_code(),
-            util::error::INVALID_ARGUMENT);
+  EXPECT_EQ(status_or_kem_key.status().code(),
+            absl::StatusCode::kInvalidArgument);
 }
 
 // Tests for FIPS only mode
@@ -278,13 +279,13 @@ TEST_F(EciesHkdfNistPCurveSendKemBoringSslTest, TestFipsOnly) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   auto test_key = status_or_test_key.ValueOrDie();
 
   EXPECT_THAT(EciesHkdfNistPCurveSendKemBoringSsl::New(curve, test_key.pub_x,
                                                        test_key.pub_y)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestFipsOnly) {
@@ -292,13 +293,13 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestFipsOnly) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   EllipticCurveType curve = EllipticCurveType::NIST_P256;
-  auto status_or_test_key = SubtleUtilBoringSSL::GetNewEcKey(curve);
+  auto status_or_test_key = internal::NewEcKey(curve);
   auto test_key = status_or_test_key.ValueOrDie();
 
   EXPECT_THAT(EciesHkdfX25519SendKemBoringSsl::New(curve, test_key.pub_x,
                                                    test_key.pub_y)
                   .status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

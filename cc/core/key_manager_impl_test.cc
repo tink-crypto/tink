@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
@@ -168,10 +169,10 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromMessageCallsValidate) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+      .WillOnce(Return(util::Status(absl::StatusCode::kOutOfRange,
                                     "FactoryNewKeyFromMessageCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory().NewKey(key_format).status(),
-              StatusIs(util::error::OUT_OF_RANGE,
+              StatusIs(absl::StatusCode::kOutOfRange,
                        HasSubstr("FactoryNewKeyFromMessageCallsValidate")));
 }
 
@@ -184,12 +185,12 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromStringViewCallsValidate) {
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
       .WillOnce(
-          Return(util::Status(util::error::OUT_OF_RANGE,
+          Return(util::Status(absl::StatusCode::kOutOfRange,
                               "FactoryNewKeyFromStringViewCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKey(key_format.SerializeAsString())
                   .status(),
-              StatusIs(util::error::OUT_OF_RANGE,
+              StatusIs(absl::StatusCode::kOutOfRange,
                        HasSubstr("FactoryNewKeyFromStringViewCallsValidate")));
 }
 
@@ -201,12 +202,12 @@ TEST(KeyManagerImplTest, FactoryNewKeyFromKeyDataCallsValidate) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
-      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+      .WillOnce(Return(util::Status(absl::StatusCode::kOutOfRange,
                                     "FactoryNewKeyFromKeyDataCallsValidate")));
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKeyData(key_format.SerializeAsString())
                   .status(),
-              StatusIs(util::error::OUT_OF_RANGE,
+              StatusIs(absl::StatusCode::kOutOfRange,
                        HasSubstr("FactoryNewKeyFromKeyDataCallsValidate")));
 }
 
@@ -257,14 +258,14 @@ TEST(CreateDeriverFunctionForTest, ValidateKeyFormatIsCalled) {
   ExampleKeyTypeManager internal_km;
   EXPECT_CALL(internal_km, ValidateKeyFormat(_))
       .WillOnce(Return(util::Status(
-          util::error::OUT_OF_RANGE,
+          absl::StatusCode::kOutOfRange,
           "CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
   auto deriver = CreateDeriverFunctionFor(&internal_km);
 
   EXPECT_THAT(
       deriver(AesGcmKeyFormat().SerializeAsString(), nullptr).status(),
       StatusIs(
-          util::error::OUT_OF_RANGE,
+          absl::StatusCode::kOutOfRange,
           HasSubstr("CreateDeriverFunctionForTest ValidateKeyFormatIsCalled")));
 }
 
@@ -274,7 +275,7 @@ TEST(CreateDeriverFunctionForTest, ValidateKeyIsCalled) {
       WillOnce(Return(AesGcmKey()));
   EXPECT_CALL(internal_km, ValidateKey(_))
       .WillOnce(Return(
-          util::Status(util::error::OUT_OF_RANGE,
+          util::Status(absl::StatusCode::kOutOfRange,
                        "CreateDeriverFunctionForTest ValidateKeyIsCalled")));
 
   auto deriver = CreateDeriverFunctionFor(&internal_km);
@@ -282,7 +283,7 @@ TEST(CreateDeriverFunctionForTest, ValidateKeyIsCalled) {
   EXPECT_THAT(
       deriver(AesGcmKeyFormat().SerializeAsString(), nullptr).status(),
       StatusIs(
-          util::error::OUT_OF_RANGE,
+          absl::StatusCode::kOutOfRange,
           HasSubstr("CreateDeriverFunctionForTest ValidateKeyIsCalled")));
 }
 
@@ -380,10 +381,10 @@ TEST(KeyManagerImplTest, GetPrimitiveCallsValidate) {
   key.ParseFromString(key_data.value());
 
   EXPECT_CALL(internal_km, ValidateKey(_))
-      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+      .WillOnce(Return(util::Status(absl::StatusCode::kOutOfRange,
                                     "GetPrimitiveCallsValidate")));
   EXPECT_THAT(key_manager->GetPrimitive(key_data).status(),
-              StatusIs(util::error::OUT_OF_RANGE,
+              StatusIs(absl::StatusCode::kOutOfRange,
                        HasSubstr("GetPrimitiveCallsValidate")));
 }
 
@@ -402,10 +403,10 @@ TEST(KeyManagerImplTest, GetPrimitiveFromKeyCallsValidate) {
   key.ParseFromString(key_data.value());
 
   EXPECT_CALL(internal_km, ValidateKey(_))
-      .WillOnce(Return(util::Status(util::error::OUT_OF_RANGE,
+      .WillOnce(Return(util::Status(absl::StatusCode::kOutOfRange,
                                     "GetPrimitiveFromKeyCallsValidate")));
   EXPECT_THAT(key_manager->GetPrimitive(key).status(),
-              StatusIs(util::error::OUT_OF_RANGE,
+              StatusIs(absl::StatusCode::kOutOfRange,
                        HasSubstr("GetPrimitiveFromKeyCallsValidate")));
 }
 
@@ -425,7 +426,7 @@ TEST(KeyManagerImplTest, GetPrimitiveFails) {
                        .ValueOrDie();
 
   EXPECT_THAT(key_manager->GetPrimitive(key_data).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("No PrimitiveFactory was registered")));
 }
 
@@ -503,7 +504,7 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromMessage) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
   EXPECT_THAT(key_manager->get_key_factory().NewKey(key_format).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromStringView) {
@@ -517,7 +518,7 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromStringView) {
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKey(key_format.SerializeAsString())
                   .status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromKeyData) {
@@ -530,14 +531,14 @@ TEST(KeyManagerImplTest, NonexistentFactoryNewKeyFromKeyData) {
   EXPECT_THAT(key_manager->get_key_factory()
                   .NewKeyData(key_format.SerializeAsString())
                   .status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(CreateDeriverFunctionForTest, DeriverWithoutFactory) {
   ExampleKeyTypeManagerWithoutFactory internal_km;
   auto deriver = CreateDeriverFunctionFor(&internal_km);
   EXPECT_THAT(deriver("", nullptr).status(),
-              StatusIs(util::error::UNIMPLEMENTED));
+              StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 

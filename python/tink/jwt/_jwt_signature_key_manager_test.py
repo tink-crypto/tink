@@ -15,7 +15,7 @@
 
 import datetime
 
-from typing import cast, Text
+from typing import cast
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -40,7 +40,7 @@ def setUpModule():
   jwt.register_jwt_signature()
 
 
-def gen_compact(json_header: Text, json_payload: Text, raw_sign) -> Text:
+def gen_compact(json_header: str, json_payload: str, raw_sign) -> str:
   unsigned_compact = (
       _jwt_format.encode_header(json_header) + b'.' +
       _jwt_format.encode_payload(json_payload))
@@ -94,11 +94,8 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
       verify.verify_and_decode(signed_compact + 'a', validator)
 
     # modified header
-    # TODO(juerg): Add better tests.
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode('a' + signed_compact, validator)
-
-    # TODO(juerg): Add tests with kid headers
 
   def test_create_sign_verify_with_type_header(self):
     handle = tink.new_keyset_handle(jwt.jwt_es256_template())
@@ -130,10 +127,10 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
           jwt.new_validator(
               expected_issuer='issuer', allow_missing_expiration=True))
 
-  def test_bad_tokens_with_valid_signatures_fail(self):
-    handle = tink.new_keyset_handle(jwt.jwt_es256_template())
+  def test_weird_tokens_with_valid_signatures(self):
+    handle = tink.new_keyset_handle(jwt.raw_jwt_es256_template())
     sign = handle.primitive(jwt.JwtPublicKeySign)
-    # get the raw sign primitive, so that we can create correct signatures
+    # Get the internal PublicKeySign primitive to create valid signatures.
     wrapped = cast(_jwt_signature_wrappers._WrappedJwtPublicKeySign, sign)
     raw_sign = cast(_jwt_signature_key_manager._JwtPublicKeySign,
                     wrapped._primitive_set.primary().primitive)._public_key_sign
@@ -142,22 +139,102 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
     validator = jwt.new_validator(
         expected_issuer='issuer', allow_missing_expiration=True)
 
-    valid_compact = gen_compact('{"alg":"ES256"}', '{"iss":"issuer"}', raw_sign)
-    verified_jwt = verify.verify_and_decode(valid_compact, validator)
+    # Normal token.
+    valid = gen_compact('{"alg":"ES256"}', '{"iss":"issuer"}', raw_sign)
+    verified_jwt = verify.verify_and_decode(valid, validator)
     self.assertEqual(verified_jwt.issuer(), 'issuer')
 
+    # Token with unknown header is valid.
+    unknown_header = gen_compact('{"alg":"ES256","unknown_header":"abc"} \n ',
+                                 '{"iss":"issuer" }', raw_sign)
+    verified_jwt = verify.verify_and_decode(unknown_header, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+
+    # Token with unknown kid is valid, since primitives with output prefix type
+    # RAW ignore kid headers.
+    unknown_header = gen_compact('{"alg":"ES256","kid":"unknown"} \n ',
+                                 '{"iss":"issuer" }', raw_sign)
+    verified_jwt = verify.verify_and_decode(unknown_header, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+
+    # Token with invalid alg header
     alg_invalid = gen_compact('{"alg":"ES384"}', '{"iss":"issuer"}', raw_sign)
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode(alg_invalid, validator)
 
+    # Token with empty header
+    empty_header = gen_compact('{}', '{"iss":"issuer"}', raw_sign)
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(empty_header, validator)
+
+    # Token header is not valid JSON
     header_invalid = gen_compact('{"alg":"ES256"', '{"iss":"issuer"}', raw_sign)
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode(header_invalid, validator)
 
+    # Token payload is not valid JSON
     payload_invalid = gen_compact('{"alg":"ES256"}', '{"iss":"issuer"',
                                   raw_sign)
     with self.assertRaises(tink.TinkError):
       verify.verify_and_decode(payload_invalid, validator)
+
+    # Token with whitespace in header JSON string is valid.
+    whitespace_in_header = gen_compact(' {"alg":   \n  "ES256"} \n ',
+                                       '{"iss":"issuer" }', raw_sign)
+    verified_jwt = verify.verify_and_decode(whitespace_in_header, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+
+    # Token with whitespace in payload JSON string is valid.
+    whitespace_in_payload = gen_compact('{"alg":"ES256"}',
+                                        ' {"iss": \n"issuer" } \n', raw_sign)
+    verified_jwt = verify.verify_and_decode(whitespace_in_payload, validator)
+    self.assertEqual(verified_jwt.issuer(), 'issuer')
+
+    # Token with whitespace in base64-encoded header is invalid.
+    with_whitespace = (
+        _jwt_format.encode_header('{"alg":"ES256"}') + b' .' +
+        _jwt_format.encode_payload('{"iss":"issuer"}'))
+    token_with_whitespace = _jwt_format.create_signed_compact(
+        with_whitespace, raw_sign.sign(with_whitespace))
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(token_with_whitespace, validator)
+
+    # Token with invalid character is invalid.
+    with_invalid_char = (
+        _jwt_format.encode_header('{"alg":"ES256"}') + b'.?' +
+        _jwt_format.encode_payload('{"iss":"issuer"}'))
+    token_with_invalid_char = _jwt_format.create_signed_compact(
+        with_invalid_char, raw_sign.sign(with_invalid_char))
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(token_with_invalid_char, validator)
+
+    # Token with additional '.' is invalid.
+    with_dot = (
+        _jwt_format.encode_header('{"alg":"ES256"}') + b'.' +
+        _jwt_format.encode_payload('{"iss":"issuer"}') + b'.')
+    token_with_dot = _jwt_format.create_signed_compact(
+        with_dot, raw_sign.sign(with_dot))
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(token_with_dot, validator)
+
+    # num_recursions has been chosen such that parsing of this token fails
+    # in all languages. We want to make sure that the algorithm does not
+    # hang or crash in this case, but only returns a parsing error.
+    num_recursions = 10000
+    rec_payload = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    rec_token = gen_compact('{"alg":"ES256"}', rec_payload, raw_sign)
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(
+          rec_token, validator=jwt.new_validator(allow_missing_expiration=True))
+
+    # test wrong types
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(cast(str, None), validator)
+    with self.assertRaises(tink.TinkError):
+      verify.verify_and_decode(cast(str, 123), validator)
+    with self.assertRaises(tink.TinkError):
+      valid_bytes = valid.encode('utf8')
+      verify.verify_and_decode(cast(str, valid_bytes), validator)
 
   def test_create_ecdsa_handle_with_invalid_algorithm_fails(self):
     key_format = jwt_ecdsa_pb2.JwtEcdsaKeyFormat(

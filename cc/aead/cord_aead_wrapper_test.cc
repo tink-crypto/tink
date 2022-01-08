@@ -18,9 +18,11 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/cord_test_helpers.h"
 #include "absl/strings/str_split.h"
 #include "tink/aead/cord_aead.h"
@@ -44,18 +46,18 @@ TEST(AeadSetWrapperTest, WrapNullptr) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(nullptr);
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(util::error::INTERNAL, aead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInternal, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 TEST(AeadSetWrapperTest, WrapEmpty) {
   CordAeadWrapper wrapper;
   auto aead_result = wrapper.Wrap(absl::make_unique<PrimitiveSet<CordAead>>());
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 std::unique_ptr<PrimitiveSet<CordAead>> setup_keyset() {
@@ -184,10 +186,9 @@ TEST(AeadSetWrapperTest, WrapperEncryptBadDecrypt) {
   bad_ciphertext.Append("some bad ciphertext");
   auto decrypt_result = aead->Decrypt(bad_ciphertext, aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, decrypt_result.status().code());
   EXPECT_THAT(decrypt_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        testing::HasSubstr("decryption failed")));
 }
 

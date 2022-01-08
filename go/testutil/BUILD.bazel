@@ -7,12 +7,8 @@ go_library(
     testonly = 1,
     srcs = [
         "constant.go",
-        "testdata.go",
         "testutil.go",
         "wycheproofutil.go",
-    ],
-    data = [
-        "@tink_base//testdata/templates",
     ],
     importpath = "github.com/google/tink/go/testutil",
     deps = [
@@ -28,6 +24,7 @@ go_library(
         "//proto:aes_ctr_hmac_streaming_go_proto",
         "//proto:aes_gcm_go_proto",
         "//proto:aes_gcm_hkdf_streaming_go_proto",
+        "//proto:aes_gcm_siv_go_proto",
         "//proto:aes_siv_go_proto",
         "//proto:common_go_proto",
         "//proto:ecdsa_go_proto",
@@ -42,7 +39,8 @@ go_library(
         "//subtle/random:go_default_library",
         "//testkeyset:go_default_library",
         "//tink:go_default_library",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//encoding/prototext",
+        "@org_golang_google_protobuf//proto:go_default_library",
         "@org_golang_x_crypto//ed25519:go_default_library",
     ],
 )
@@ -50,7 +48,6 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "testdata_test.go",
         "testutil_test.go",
         "wycheproofutil_test.go",
     ],

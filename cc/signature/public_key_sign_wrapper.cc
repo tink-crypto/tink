@@ -16,10 +16,11 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_sign.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
@@ -32,14 +33,14 @@ namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeySign>* public_key_sign_set) {
   if (public_key_sign_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "public_key_sign_set must be non-NULL");
   }
   if (public_key_sign_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "public_key_sign_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class PublicKeySignSetWrapper : public PublicKeySign {
@@ -61,7 +62,7 @@ util::StatusOr<std::string> PublicKeySignSetWrapper::Sign(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   auto primary = public_key_sign_set_->get_primary();
   std::string local_data;

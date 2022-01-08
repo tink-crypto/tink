@@ -39,7 +39,7 @@ public class HybridKeyTemplatesTest {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   @Test
-  public void testECIES_P256_HKDF_HMAC_SHA256_AES128_GCM() throws Exception {
+  public void eciesP256HkdfHmaSha256Aes128Gcm() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM;
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -61,8 +61,7 @@ public class HybridKeyTemplatesTest {
   }
 
   @Test
-  public void testECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX()
-      throws Exception {
+  public void eciesP256HkdfHmacSha256Aes128GcmCompressedWithoutPrefix() throws Exception {
     KeyTemplate template =
         HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_COMPRESSED_WITHOUT_PREFIX;
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
@@ -85,7 +84,7 @@ public class HybridKeyTemplatesTest {
   }
 
   @Test
-  public void testECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256() throws Exception {
+  public void eciesP256HkdfHmacSha256Aes128CtrHmacSha256() throws Exception {
     KeyTemplate template = HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256;
     assertEquals(new EciesAeadHkdfPrivateKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());

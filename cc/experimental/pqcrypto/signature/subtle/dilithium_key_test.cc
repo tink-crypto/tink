@@ -27,7 +27,12 @@
 #include "tink/util/test_matchers.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -37,28 +42,39 @@ namespace {
 
 using ::crypto::tink::test::IsOk;
 
-class DilithiumKeyTest : public ::testing::Test {};
+struct DilithiumTestCase {
+  std::string test_name;
+  int32_t private_key_size;
+  int32_t public_key_size;
+  DilithiumSeedExpansion seed_expansion;
+};
 
-TEST_F(DilithiumKeyTest, KeysLength) {
+using DilithiumKeyTest = testing::TestWithParam<DilithiumTestCase>;
+
+TEST_P(DilithiumKeyTest, DilithiumKeysLength) {
+  const DilithiumTestCase& test_case = GetParam();
+
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          test_case.private_key_size, test_case.seed_expansion);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
   // Check keys size.
-  EXPECT_EQ(((*key_pair).first).GetKeyData().size(),
-            PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
-  EXPECT_EQ(((*key_pair).second).GetKeyData().size(),
-            PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
+  EXPECT_EQ((key_pair->first).GetKeyData().size(), test_case.private_key_size);
+  EXPECT_EQ((key_pair->second).GetKeyData().size(), test_case.public_key_size);
 }
 
-TEST_F(DilithiumKeyTest, DifferentContent) {
+TEST_P(DilithiumKeyTest, DifferentContent) {
+  const DilithiumTestCase& test_case = GetParam();
+
   // Generate key pair.
   util::StatusOr<
       std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair();
+      key_pair = DilithiumPrivateKeyPqclean::GenerateKeyPair(
+          test_case.private_key_size, test_case.seed_expansion);
 
   ASSERT_THAT(key_pair.status(), IsOk());
 
@@ -66,6 +82,32 @@ TEST_F(DilithiumKeyTest, DifferentContent) {
   EXPECT_NE(util::SecretDataAsStringView(key_pair->first.GetKeyData()),
             key_pair->second.GetKeyData());
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    DilithiumKeyTesta, DilithiumKeyTest,
+    testing::ValuesIn<DilithiumTestCase>({
+        {"Dilithium2", PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
+        {"Dilithium3", PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
+        {"Dilithium5", PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_SHAKE},
+        {"Dilithium2Aes", PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
+        {"Dilithium3Aes", PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
+        {"Dilithium5Aes", PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_SECRETKEYBYTES,
+         PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_PUBLICKEYBYTES,
+         DilithiumSeedExpansion::SEED_EXPANSION_AES},
+    }),
+    [](const testing::TestParamInfo<DilithiumKeyTest::ParamType>& info) {
+      return info.param.test_name;
+    });
 
 }  // namespace
 }  // namespace subtle

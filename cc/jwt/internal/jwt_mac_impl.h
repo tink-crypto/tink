@@ -50,9 +50,10 @@ class JwtMacImpl : public JwtMacInternal {
       const crypto::tink::RawJwt& token,
       absl::optional<absl::string_view> kid) const override;
 
-  crypto::tink::util::StatusOr<crypto::tink::VerifiedJwt> VerifyMacAndDecode(
-      absl::string_view compact,
-      const crypto::tink::JwtValidator& validator) const override;
+  crypto::tink::util::StatusOr<crypto::tink::VerifiedJwt>
+  VerifyMacAndDecodeWithKid(
+      absl::string_view compact, const crypto::tink::JwtValidator& validator,
+      absl::optional<absl::string_view> kid) const override;
 
  private:
   std::unique_ptr<crypto::tink::Mac> mac_;

@@ -22,6 +22,7 @@
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKErrors.h"
 
+#include "absl/status/status.h"
 #include "tink/signature/signature_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -38,7 +39,7 @@
       break;
     case TINKEcdsaP384:
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
-          &crypto::tink::SignatureKeyTemplates::EcdsaP384());
+          &crypto::tink::SignatureKeyTemplates::EcdsaP384Sha512());
       break;
     case TINKEcdsaP521:
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
@@ -76,10 +77,18 @@
       ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
           &crypto::tink::SignatureKeyTemplates::Ed25519());
       break;
+    case TINKEcdsaP384Sha384:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::SignatureKeyTemplates::EcdsaP384Sha384());
+      break;
+    case TINKEcdsaP384Sha512:
+      ccKeyTemplate = const_cast<google::crypto::tink::KeyTemplate *>(
+          &crypto::tink::SignatureKeyTemplates::EcdsaP384Sha512());
+      break;
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT, "Invalid TINKSignatureKeyTemplate"));
+            absl::StatusCode::kInvalidArgument, "Invalid TINKSignatureKeyTemplate"));
       }
       return nil;
   }

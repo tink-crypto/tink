@@ -88,7 +88,7 @@ py_test(
     deps = [
         ":tink_bindings",
         requirement("absl-py"),
-        requirement("six"),
+        requirement("six"),  # required by absl-py
     ],
 )
 
@@ -170,6 +170,7 @@ tink_pybind_library(
     deps = [
         ":status_utils",
         "@pybind11",
+        "@com_google_absl//absl/status",
         "@tink_cc//util:status",
     ],
 )
@@ -181,6 +182,7 @@ tink_pybind_library(
     deps = [
         ":status_casters",
         "@pybind11",
+        "@com_google_absl//absl/status",
         "@tink_cc//util:status",
     ],
 )
@@ -191,7 +193,7 @@ py_test(
     deps = [
         ":tink_bindings",
         requirement("absl-py"),
-        requirement("six"),
+        requirement("six"),  # required by absl-py
     ],
 )
 

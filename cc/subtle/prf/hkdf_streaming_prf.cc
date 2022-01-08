@@ -17,15 +17,18 @@
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
 #include <algorithm>
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/hkdf.h"
 #include "openssl/hmac.h"
+#include "tink/internal/md_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -52,8 +55,8 @@ class HkdfInputStream : public InputStream {
       return returnDataFromPosition(data);
     }
     if (i_ == 255) {
-      stream_status_ = crypto::tink::util::Status(
-          crypto::tink::util::error::OUT_OF_RANGE, "EOF");
+      stream_status_ =
+          crypto::tink::util::Status(absl::StatusCode::kOutOfRange, "EOF");
       return stream_status_;
     }
     stream_status_ = UpdateTi();
@@ -80,27 +83,28 @@ class HkdfInputStream : public InputStream {
     size_t prk_len;
 
     if (!digest) {
-      return util::Status(util::error::INVALID_ARGUMENT, "Invalid digest");
+      return util::Status(absl::StatusCode::kInvalidArgument, "Invalid digest");
     }
     const size_t digest_size = EVP_MD_size(digest);
     if (digest_size == 0) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid digest size (0)");
     }
     ti_.resize(digest_size);
     if (1 != HKDF_extract(
                  prk.data(), &prk_len, digest, secret.data(), secret.size(),
                  reinterpret_cast<const uint8_t *>(salt.data()), salt.size())) {
-      return util::Status(util::error::INTERNAL, "BoringSSL's HKDF failed");
+      return util::Status(absl::StatusCode::kInternal,
+                          "BoringSSL's HKDF failed");
     }
     prk.resize(prk_len);
     if (!hmac_ctx_) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_CTX_new failed");
     }
     if (!HMAC_Init_ex(hmac_ctx_.get(), prk.data(), prk.size(), digest,
                       nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Init_ex failed");
     }
     return UpdateTi();
@@ -120,26 +124,26 @@ class HkdfInputStream : public InputStream {
   // for a single round; hence we implement this ourselves.
   util::Status UpdateTi() {
     if (!HMAC_Init_ex(hmac_ctx_.get(), nullptr, 0, nullptr, nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Init_ex failed");
     }
     if (i_ != 0 && !HMAC_Update(hmac_ctx_.get(), ti_.data(), ti_.size())) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on ti_");
     }
     if (!HMAC_Update(hmac_ctx_.get(),
                      reinterpret_cast<const uint8_t *>(&input_[0]),
                      input_.size())) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on input_");
     }
     uint8_t i_as_uint8 = i_ + 1;
     if (!HMAC_Update(hmac_ctx_.get(), &i_as_uint8, 1)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Update failed on i_");
     }
     if (!HMAC_Final(hmac_ctx_.get(), ti_.data(), nullptr)) {
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "BoringSSL's HMAC_Final failed");
     }
     i_++;
@@ -151,7 +155,7 @@ class HkdfInputStream : public InputStream {
   // problems and are permanent.
   util::Status stream_status_ = util::OkStatus();
 
-  bssl::UniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
+  internal::SslUniquePtr<HMAC_CTX> hmac_ctx_{HMAC_CTX_new()};
 
   // Current value T(i).
   util::SecretData ti_;
@@ -180,21 +184,21 @@ HkdfStreamingPrf::New(HashType hash, util::SecretData secret,
 
   if (hash != SHA256 && hash != SHA512 && hash != SHA1) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Hash ", hash, " not acceptable for HkdfStreamingPrf"));
   }
 
   if (secret.size() < 10) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Too short secret for HkdfStreamingPrf");
   }
-  auto evp_md_or = SubtleUtilBoringSSL::EvpHash(hash);
-  if (!evp_md_or.ok()) {
-    return util::Status(util::error::UNIMPLEMENTED, "Unsupported hash");
+  util::StatusOr<const EVP_MD *> evp_md = internal::EvpHashFromHashType(hash);
+  if (!evp_md.ok()) {
+    return util::Status(absl::StatusCode::kUnimplemented, "Unsupported hash");
   }
 
-  return {absl::WrapUnique(
-      new HkdfStreamingPrf(evp_md_or.ValueOrDie(), std::move(secret), salt))};
+  return {
+      absl::WrapUnique(new HkdfStreamingPrf(*evp_md, std::move(secret), salt))};
 }
 
 }  // namespace subtle

@@ -19,7 +19,7 @@ package signature
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/signature/subtle"
 	ecdsapb "github.com/google/tink/go/proto/ecdsa_go_proto"
@@ -38,11 +38,6 @@ var errECDSAVerifierNotImplemented = fmt.Errorf("ecdsa_verifier_key_manager: not
 // ecdsaVerifierKeyManager is an implementation of KeyManager interface.
 // It doesn't support key generation.
 type ecdsaVerifierKeyManager struct{}
-
-// newECDSAVerifierKeyManager creates a new ecdsaVerifierKeyManager.
-func newECDSAVerifierKeyManager() *ecdsaVerifierKeyManager {
-	return new(ecdsaVerifierKeyManager)
-}
 
 // Primitive creates an ECDSAVerifier subtle for the given serialized ECDSAPublicKey proto.
 func (km *ecdsaVerifierKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

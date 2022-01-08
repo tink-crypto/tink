@@ -13,11 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.testing._fake_kms."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 from absl.testing import absltest
 import tink
 from tink import aead

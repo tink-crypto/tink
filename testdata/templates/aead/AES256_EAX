@@ -1,9 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.AesEaxKey"
-# value: [type.googleapis.com/google.crypto.tink.AesEaxKeyFormat] {
-#   params {
-#     iv_size: 16
-#   }
-#   key_size: 32
-# }
-value: "\n\002\010\020\020 "
-output_prefix_type: TINK

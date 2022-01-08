@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/hpke.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
@@ -90,7 +91,8 @@ TEST_P(HpkeDecryptBoringSslWithBadParamTest, BadParamsFails) {
       HpkeDecryptBoringSsl::New(hpke_params, **hpke_key,
                                 params.encapsulated_key,
                                 params.application_info);
-  ASSERT_THAT(hpke_decrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_decrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

@@ -11,7 +11,7 @@ licenses(["notice"])
 
 python_grpc_library(
     name = "testing_api_python_library",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
+    protos = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
 py_library(
@@ -26,6 +26,7 @@ py_library(
         "@tink_py//tink/aead",
         "@tink_py//tink/daead",
         "@tink_py//tink/hybrid",
+        "@tink_py//tink/jwt",
         "@tink_py//tink/mac",
         "@tink_py//tink/prf",
         "@tink_py//tink/signature",

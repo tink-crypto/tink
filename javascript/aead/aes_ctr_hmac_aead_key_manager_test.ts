@@ -252,14 +252,14 @@ describe('aes ctr hmac aead key manager test', function() {
     const key = manager.getKeyFactory().newKey(keyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey()?.getKeyValue().length)
+    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
     expect(key.getAesCtrKey()?.getVersion()).toBe(0);
     expect(key.getAesCtrKey()?.getParams()?.getIvSize())
         .toBe(keyFormat.getAesCtrKeyFormat()?.getParams()?.getIvSize());
 
     // testing HMAC key
-    expect(key.getHmacKey()?.getKeyValue()?.length)
+    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
     expect(key.getHmacKey()?.getVersion()).toBe(0);
     expect(key.getHmacKey()?.getParams()?.getHash())
@@ -277,7 +277,7 @@ describe('aes ctr hmac aead key manager test', function() {
     const key = manager.getKeyFactory().newKey(serializedKeyFormat);
 
     // testing AES CTR key
-    expect(key.getAesCtrKey()?.getKeyValue().length)
+    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
     expect(key.getAesCtrKey()?.getVersion()).toBe(0);
     expect(key.getAesCtrKey()?.getParams()?.getIvSize())
@@ -285,7 +285,7 @@ describe('aes ctr hmac aead key manager test', function() {
 
 
     // testing HMAC key
-    expect(key.getHmacKey()?.getKeyValue()?.length)
+    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
     expect(key.getHmacKey()?.getVersion()).toBe(0);
     expect(key.getHmacKey()?.getParams()?.getHash())
@@ -329,11 +329,11 @@ describe('aes ctr hmac aead key manager test', function() {
     expect(keyData.getKeyMaterialType())
         .toBe(PbKeyData.KeyMaterialType.SYMMETRIC);
 
-    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue());
+    const key = PbAesCtrHmacAeadKey.deserializeBinary(keyData.getValue_asU8());
 
-    expect(key.getAesCtrKey()?.getKeyValue().length)
+    expect(key.getAesCtrKey()?.getKeyValue_asU8().length)
         .toBe(keyFormat.getAesCtrKeyFormat()?.getKeySize());
-    expect(key.getHmacKey()?.getKeyValue()?.length)
+    expect(key.getHmacKey()?.getKeyValue_asU8()?.length)
         .toBe(keyFormat.getHmacKeyFormat()?.getKeySize());
   });
 

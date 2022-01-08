@@ -25,7 +25,7 @@ import java.util.Arrays;
  * <p>Beware: some of the functions here are specific to the representation used for AES-CMAC and
  * SIV, as described in their RFCs. These might not work if used in other contexts.
  */
-class AesUtil {
+final class AesUtil {
 
   public static final int BLOCK_SIZE = 16;
 
@@ -76,4 +76,6 @@ class AesUtil {
     result[x.length] = (byte) 0x80;
     return result;
   }
+
+  private AesUtil() {}
 }

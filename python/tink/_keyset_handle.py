@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,6 @@
 # limitations under the License.
 """This module defines KeysetHandle."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import random
 
 from typing import Type, TypeVar
@@ -28,13 +23,27 @@ from tink import _keyset_reader
 from tink import _keyset_writer
 from tink import aead
 from tink import core
+from tink import secret_key_access
 
 P = TypeVar('P')
 
 MAX_INT32 = 2147483647  # = 2^31 - 1
 
 
-class KeysetHandle(object):
+class PublicKeyAccess(core.KeyAccess):
+  pass
+
+
+# KeyAccess token that gives access to public keys.
+PUBLIC_KEY_ACCESS_TOKEN = PublicKeyAccess()
+
+
+def has_secret_key_access(token: core.KeyAccess) -> bool:
+  """Returns True if token is secret_key_access.TOKEN, and False otherwise."""
+  return isinstance(token, secret_key_access.SecretKeyAccess)
+
+
+class KeysetHandle:
   """A KeysetHandle provides abstracted access to Keyset.
 
   KeysetHandle limits the exposure of actual protocol buffers that hold

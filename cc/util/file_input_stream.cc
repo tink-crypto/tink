@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -62,7 +63,7 @@ FileInputStream::FileInputStream(int file_descriptor, int buffer_size) :
   position_ = 0;
   buffer_ = absl::make_unique<uint8_t[]>(buffer_size_);
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {
@@ -79,10 +80,10 @@ crypto::tink::util::StatusOr<int> FileInputStream::Next(const void** data) {
   int read_result = read_ignoring_eintr(fd_, buffer_.get(), buffer_size_);
   if (read_result <= 0) {  // EOF or an I/O error.
     if (read_result == 0) {
-      status_ = Status(util::error::OUT_OF_RANGE, "EOF");
+      status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
       status_ =
-          ToStatusF(util::error::INTERNAL, "I/O error: %d", read_result);
+          ToStatusF(absl::StatusCode::kInternal, "I/O error: %d", read_result);
     }
     return status_;
   }

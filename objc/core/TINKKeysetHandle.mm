@@ -33,6 +33,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
@@ -62,8 +63,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
 - (instancetype)initWithNoSecretKeyset:(NSData *)keyset error:(NSError **)error {
   if (keyset == nil) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "keyset must be non-nil."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "keyset must be non-nil."));
     }
     return nil;
   }
@@ -85,8 +86,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
                                error:(NSError **)error {
   if (![aeadKey isKindOfClass:[TINKAeadInternal class]]) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Invalid instance of TINKAead."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "Invalid instance of TINKAead."));
     }
     return nil;
   }
@@ -95,8 +96,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   crypto::tink::Aead *ccAead = [aead ccAead];
   if (!ccAead) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Failed to get C++ Aead instance."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "Failed to get C++ Aead instance."));
     }
     return nil;
   }
@@ -106,7 +107,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       // A reader can only be used once.
       if (error) {
         *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+            crypto::tink::util::Status(absl::StatusCode::kResourceExhausted,
                                        "A KeysetReader can be used only once."));
       }
       return nil;
@@ -133,8 +134,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
                                             error:(NSError **)error {
   if (keysetName == nil) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "keysetName must be non-nil."));
     }
     return nil;
   }
@@ -154,7 +155,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       getQuery = [mutableGetQuery copy];
     }
 
-    crypto::tink::util::error::Code errorCode = crypto::tink::util::error::OK;
+    absl::StatusCode errorCode = absl::StatusCode::kOk;
     std::string errorMessage = "";
     CFTypeRef dataTypeRef = NULL;
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)getQuery, &dataTypeRef);
@@ -164,17 +165,17 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
         break;
       case errSecItemNotFound:
         errorMessage = "A keyset with the given name wasn't found in the keychain.";
-        errorCode = crypto::tink::util::error::NOT_FOUND;
+        errorCode = absl::StatusCode::kNotFound;
         break;
       default:
         std::ostringstream oss;
         oss << "An error occurred while trying to retrieve the keyset from the keychain.";
         oss << " Error code: " << status;
         errorMessage = oss.str();
-        errorCode = crypto::tink::util::error::UNKNOWN;
+        errorCode = absl::StatusCode::kUnknown;
     }
 
-    if (errorCode != crypto::tink::util::error::OK) {
+    if (errorCode != absl::StatusCode::kOk) {
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(errorCode, errorMessage));
       }
@@ -213,8 +214,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
                              error:(NSError **)error {
   if (keysetName == nil) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "keysetName must be non-nil."));
     }
     return NO;
   }
@@ -239,8 +240,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
       oss << "An error occurred while trying to delete the keyset from the keychain.";
       oss << " Keychain error code: " << status;
       std::string errorMessage = oss.str();
-      *error = TINKStatusToError(
-          crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+      *error =
+          TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kUnknown, errorMessage));
     }
     return NO;
   }
@@ -260,8 +261,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
                           error:(NSError **)error {
   if (keysetName == nil) {
     if (error) {
-      *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "keysetName must be non-nil."));
+      *error = TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                                            "keysetName must be non-nil."));
     }
     return NO;
   }
@@ -272,7 +273,7 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
   if (!keyset.SerializeToString(&serializedKeyset)) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INTERNAL, "Could not serialize C++ KeyTemplate."));
+          absl::StatusCode::kInternal, "Could not serialize C++ KeyTemplate."));
     }
     return NO;
   }
@@ -311,8 +312,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
         oss << "A keyset with the same keysetName already exists in the keychain.";
         oss << " Please delete it and try again. Keychain error code: " << status;
         std::string errorMessage = oss.str();
-        *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+        *error =
+            TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kUnknown, errorMessage));
       }
       return NO;
     default:
@@ -321,8 +322,8 @@ static NSString *const kTinkService = @"com.google.crypto.tink";
         oss << "An error occurred while trying to store the keyset in the keychain.";
         oss << " Error code: " << status;
         std::string errorMessage = oss.str();
-        *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::UNKNOWN, errorMessage));
+        *error =
+            TINKStatusToError(crypto::tink::util::Status(absl::StatusCode::kUnknown, errorMessage));
       }
       return NO;
   }

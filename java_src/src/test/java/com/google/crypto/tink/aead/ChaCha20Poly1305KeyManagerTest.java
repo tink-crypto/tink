@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -126,8 +127,8 @@ public class ChaCha20Poly1305KeyManagerTest {
   public void testCiphertextSize() throws Exception {
     Aead aead =
         new ChaCha20Poly1305KeyManager().getPrimitive(createChaCha20Poly1305Key(32), Aead.class);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     assertEquals(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */, ciphertext.length);
   }

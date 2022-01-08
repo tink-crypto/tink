@@ -26,9 +26,13 @@ import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.proto.testing.JwtClaimValue;
+import com.google.crypto.tink.proto.testing.JwtFromJwkSetRequest;
+import com.google.crypto.tink.proto.testing.JwtFromJwkSetResponse;
 import com.google.crypto.tink.proto.testing.JwtGrpc;
 import com.google.crypto.tink.proto.testing.JwtSignRequest;
 import com.google.crypto.tink.proto.testing.JwtSignResponse;
+import com.google.crypto.tink.proto.testing.JwtToJwkSetRequest;
+import com.google.crypto.tink.proto.testing.JwtToJwkSetResponse;
 import com.google.crypto.tink.proto.testing.JwtToken;
 import com.google.crypto.tink.proto.testing.JwtValidator;
 import com.google.crypto.tink.proto.testing.JwtVerifyRequest;
@@ -351,5 +355,56 @@ public final class JwtServiceImplTest {
 
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void jwtToFromJwt_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetPublicResponse pubResponse = publicKeyset(keysetStub, privateKeyset);
+    assertThat(pubResponse.getErr()).isEmpty();
+    byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
+
+    JwtToken token = generateToken("audience", 1245, 0);
+
+    JwtSignRequest signRequest =
+        JwtSignRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(privateKeyset))
+            .setRawJwt(token)
+            .build();
+    JwtSignResponse signResponse = jwtStub.publicKeySignAndEncode(signRequest);
+    assertThat(signResponse.getErr()).isEmpty();
+
+    // Convert the public keyset to a JWK set
+    JwtToJwkSetRequest toRequest =
+        JwtToJwkSetRequest.newBuilder().setKeyset(ByteString.copyFrom(publicKeyset)).build();
+    JwtToJwkSetResponse toResponse = jwtStub.toJwkSet(toRequest);
+    assertThat(toResponse.getErr()).isEmpty();
+    assertThat(toResponse.getJwkSet()).contains("{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-256\",");
+    // Convert the public keyset to a JWK set
+    JwtFromJwkSetRequest fromRequest =
+        JwtFromJwkSetRequest.newBuilder().setJwkSet(toResponse.getJwkSet()).build();
+    JwtFromJwkSetResponse fromResponse = jwtStub.fromJwkSet(fromRequest);
+    assertThat(fromResponse.getErr()).isEmpty();
+
+    // Use that output keyset to verify the token
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
+            .build();
+    JwtVerifyRequest verifyRequest =
+        JwtVerifyRequest.newBuilder()
+            .setKeyset(fromResponse.getKeyset())
+            .setSignedCompactJwt(signResponse.getSignedCompactJwt())
+            .setValidator(validator)
+            .build();
+    JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
+    assertThat(verifyResponse.getErr()).isEmpty();
   }
 }

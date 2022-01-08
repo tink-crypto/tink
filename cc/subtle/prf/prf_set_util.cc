@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/input_stream_util.h"
@@ -71,7 +72,7 @@ class PrfFromStatefulMacFactory : public Prf {
     std::string output = std::move(output_result.ValueOrDie());
     if (output.size() < output_length) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("PRF only supports outputs up to ", output.size(),
                        " bytes, but ", output_length, " bytes were requested"));
     }

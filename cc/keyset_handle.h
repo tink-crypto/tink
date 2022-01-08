@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/base/attributes.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
 #include "tink/key_manager.h"
@@ -188,7 +189,7 @@ template <class P>
 crypto::tink::util::StatusOr<std::unique_ptr<P>> KeysetHandle::GetPrimitive(
     const KeyManager<P>* custom_manager) const {
   if (custom_manager == nullptr) {
-    return crypto::tink::util::Status(util::error::INVALID_ARGUMENT,
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                       "custom_manager must not be null");
   }
   auto primitives_result = this->GetPrimitives<P>(custom_manager);

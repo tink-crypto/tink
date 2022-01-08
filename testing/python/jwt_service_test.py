@@ -16,8 +16,9 @@
 from absl.testing import absltest
 import grpc
 
-from proto.testing import testing_api_pb2
 from tink import jwt
+
+from proto.testing import testing_api_pb2
 import jwt_service
 import services
 
@@ -109,7 +110,6 @@ class JwtServiceTest(absltest.TestCase):
     verify_request = testing_api_pb2.JwtVerifyRequest(
         keyset=keyset, signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.expected_issuer.value = 'issuer'
-    verify_request.validator.expected_subject.value = 'subject'
     verify_request.validator.now.seconds = 1234
     verify_response = jwt_servicer.VerifyMacAndDecode(verify_request, self._ctx)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
@@ -143,7 +143,7 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
 
-  def test_generate_compute_verify_signature(self):
+  def test_generate_sign_export_import_verify_signature(self):
     keyset_servicer = services.KeysetServicer()
     jwt_servicer = jwt_service.JwtServicer()
 
@@ -167,15 +167,44 @@ class JwtServiceTest(absltest.TestCase):
     self.assertEqual(pub_response.WhichOneof('result'), 'public_keyset')
     public_keyset = pub_response.public_keyset
 
+    to_jwkset_request = testing_api_pb2.JwtToJwkSetRequest(keyset=public_keyset)
+    to_jwkset_response = jwt_servicer.ToJwkSet(to_jwkset_request, self._ctx)
+    self.assertEqual(to_jwkset_response.WhichOneof('result'), 'jwk_set')
+
+    self.assertStartsWith(to_jwkset_response.jwk_set, '{"keys":[{"')
+
+    from_jwkset_request = testing_api_pb2.JwtFromJwkSetRequest(
+        jwk_set=to_jwkset_response.jwk_set)
+    from_jwkset_response = jwt_servicer.FromJwkSet(
+        from_jwkset_request, self._ctx)
+    self.assertEqual(from_jwkset_response.WhichOneof('result'), 'keyset')
+
     verify_request = testing_api_pb2.JwtVerifyRequest(
-        keyset=public_keyset, signed_compact_jwt=signed_compact_jwt)
+        keyset=from_jwkset_response.keyset,
+        signed_compact_jwt=signed_compact_jwt)
     verify_request.validator.expected_issuer.value = 'issuer'
-    verify_request.validator.expected_subject.value = 'subject'
     verify_request.validator.allow_missing_expiration = True
     verify_response = jwt_servicer.PublicKeyVerifyAndDecode(
         verify_request, self._ctx)
     self.assertEqual(verify_response.WhichOneof('result'), 'verified_jwt')
     self.assertEqual(verify_response.verified_jwt.issuer.value, 'issuer')
+
+  def test_to_jwk_set_with_invalid_keyset_fails(self):
+    jwt_servicer = jwt_service.JwtServicer()
+
+    to_jwkset_request = testing_api_pb2.JwtToJwkSetRequest(keyset=b'invalid')
+    jwkset_response = jwt_servicer.ToJwkSet(to_jwkset_request, self._ctx)
+    self.assertEqual(jwkset_response.WhichOneof('result'), 'err')
+
+  def test_from_jwk_set_with_invalid_jwk_set_fails(self):
+    jwt_servicer = jwt_service.JwtServicer()
+
+    from_jwkset_request = testing_api_pb2.JwtFromJwkSetRequest(
+        jwk_set='invalid')
+    from_jwkset_response = jwt_servicer.FromJwkSet(from_jwkset_request,
+                                                   self._ctx)
+    self.assertEqual(from_jwkset_response.WhichOneof('result'), 'err')
+    print(from_jwkset_response.err)
 
 
 if __name__ == '__main__':

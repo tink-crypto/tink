@@ -16,9 +16,14 @@
 
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
-#include "openssl/base.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "absl/status/status.h"
+#include "openssl/evp.h"
+#include "tink/internal/md_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -27,26 +32,25 @@ namespace subtle {
 
 util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
     HashType hash_type, uint32_t tag_size, const util::SecretData& key_value) {
-  util::StatusOr<const EVP_MD*> res = SubtleUtilBoringSSL::EvpHash(hash_type);
-  if (!res.ok()) {
-    return res.status();
+  util::StatusOr<const EVP_MD*> md = internal::EvpHashFromHashType(hash_type);
+  if (!md.ok()) {
+    return md.status();
   }
-  const EVP_MD* md = res.ValueOrDie();
-  if (EVP_MD_size(md) < tag_size) {
+  if (EVP_MD_size(*md) < tag_size) {
     // The key manager is responsible to security policies.
     // The checks here just ensure the preconditions of the primitive.
     // If this fails then something is wrong with the key manager.
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid tag size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid tag size");
   }
   if (key_value.size() < kMinKeySize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
 
   // Create and initialize the HMAC context
-  bssl::UniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
+  internal::SslUniquePtr<HMAC_CTX> ctx(HMAC_CTX_new());
   // Initialize the HMAC
-  if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), md)) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+  if (!HMAC_Init(ctx.get(), key_value.data(), key_value.size(), *md)) {
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "HMAC initialization failed");
   }
 
@@ -57,12 +61,12 @@ util::StatusOr<std::unique_ptr<StatefulMac>> StatefulHmacBoringSsl::New(
 util::Status StatefulHmacBoringSsl::Update(absl::string_view data) {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   if (!HMAC_Update(hmac_context_.get(),
                    reinterpret_cast<const uint8_t*>(data.data()),
                    data.size())) {
-    return util::Status(util::error::FAILED_PRECONDITION,
+    return util::Status(absl::StatusCode::kFailedPrecondition,
                         "Inputs to HMAC Update invalid");
   }
   return util::OkStatus();
@@ -73,7 +77,8 @@ util::StatusOr<std::string> StatefulHmacBoringSsl::Finalize() {
   unsigned int out_len;
 
   if (!HMAC_Final(hmac_context_.get(), buf, &out_len)) {
-    return util::Status(util::error::INTERNAL, "HMAC finalization failed");
+    return util::Status(absl::StatusCode::kInternal,
+                        "HMAC finalization failed");
   }
   return std::string(reinterpret_cast<char*>(buf), tag_size_);
 }

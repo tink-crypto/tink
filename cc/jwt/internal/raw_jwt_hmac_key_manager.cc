@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -52,12 +53,12 @@ Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
     case JwtHmacAlgorithm::HS256:
     case JwtHmacAlgorithm::HS384:
     case JwtHmacAlgorithm::HS512:
-      return Status::OK;
+      return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported algorithm.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace
@@ -75,7 +76,7 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::CreateKey(
 StatusOr<JwtHmacKey> RawJwtHmacKeyManager::DeriveKey(
     const JwtHmacKeyFormat& jwt_hmac_key_format,
     InputStream* input_stream) const {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "RawJwtHmacKeyManager::DeriveKey is not implemented");
 }
 
@@ -83,7 +84,7 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JwtHmacKey: key_value is too short.");
   }
   return ValidateHmacAlgorithm(key.algorithm());
@@ -93,7 +94,7 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
 Status RawJwtHmacKeyManager::ValidateKeyFormat(
     const JwtHmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
   return ValidateHmacAlgorithm(key_format.algorithm());

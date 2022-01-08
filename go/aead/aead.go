@@ -26,22 +26,27 @@ import (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(newAESCTRHMACAEADKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(aesCTRHMACAEADKeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := registry.RegisterKeyManager(newAESGCMKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(aesGCMKeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := registry.RegisterKeyManager(newChaCha20Poly1305KeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(chaCha20Poly1305KeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 
-	if err := registry.RegisterKeyManager(newXChaCha20Poly1305KeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(xChaCha20Poly1305KeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newKMSEnvelopeAEADKeyManager()); err != nil {
+
+	if err := registry.RegisterKeyManager(new(kmsEnvelopeAEADKeyManager)); err != nil {
+		panic(fmt.Sprintf("aead.init() failed: %v", err))
+	}
+
+	if err := registry.RegisterKeyManager(new(aesGCMSIVKeyManager)); err != nil {
 		panic(fmt.Sprintf("aead.init() failed: %v", err))
 	}
 }

@@ -15,6 +15,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/status",
         "@com_google_googleapis//google/cloud/kms/v1:kms_cc_grpc",
     ],
 )
@@ -33,6 +34,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],
@@ -65,6 +67,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

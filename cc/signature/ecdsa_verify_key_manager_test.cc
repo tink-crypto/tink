@@ -18,11 +18,12 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
 #include "tink/subtle/ecdsa_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -90,9 +91,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP256) {
   params->set_curve(EllipticCurveType::NIST_P256);
   params->set_hash_type(HashType::SHA512);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
@@ -101,9 +101,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP384) {
   params->set_curve(EllipticCurveType::NIST_P384);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
@@ -112,9 +111,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateKeyBadHashP521) {
   params->set_curve(EllipticCurveType::NIST_P521);
   params->set_hash_type(HashType::SHA256);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateKey(key),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParams) {
@@ -139,9 +137,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP256) {
   params.set_curve(EllipticCurveType::NIST_P256);
   params.set_encoding(EcdsaSignatureEncoding::DER);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP384) {
@@ -150,9 +147,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP384) {
   params.set_hash_type(HashType::SHA256);
   params.set_encoding(EcdsaSignatureEncoding::DER);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP521) {
@@ -161,9 +157,8 @@ TEST(EcdsaSignKeyManagerTest, ValidateParamsBadHashP521) {
   params.set_hash_type(HashType::SHA256);
   params.set_encoding(EcdsaSignatureEncoding::DER);
   EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params), Not(IsOk()));
-  EXPECT_THAT(
-      EcdsaVerifyKeyManager().ValidateParams(params),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(EcdsaVerifyKeyManager().ValidateParams(params),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(EcdsaSignKeyManagerTest, Create) {
@@ -171,7 +166,7 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   EcdsaPublicKey public_key =
       EcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();
@@ -199,7 +194,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentPrivateKey) {
   EcdsaPublicKey public_key =
       EcdsaSignKeyManager().GetPublicKey(CreateValidPrivateKey()).ValueOrDie();
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(public_key.params().curve());
   ec_key.pub_x = public_key.x();
   ec_key.pub_y = public_key.y();

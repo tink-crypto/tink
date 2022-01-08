@@ -18,11 +18,14 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -35,17 +38,18 @@
 namespace crypto {
 namespace tink {
 
-using crypto::tink::util::Enums;
-using crypto::tink::util::Status;
-using crypto::tink::util::StatusOr;
-using google::crypto::tink::JwtRsaSsaPssAlgorithm;
-using google::crypto::tink::JwtRsaSsaPssPublicKey;
-using google::crypto::tink::HashType;
+using ::crypto::tink::subtle::RsaSsaPssVerifyBoringSsl;
+using ::crypto::tink::util::Enums;
+using ::crypto::tink::util::Status;
+using ::crypto::tink::util::StatusOr;
+using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
+using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
 
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtRsaSsaPssPublicKey& rsa_ssa_pss_public_key) const {
-  subtle::SubtleUtilBoringSSL::RsaPublicKey rsa_pub_key;
+  internal::RsaPublicKey rsa_pub_key;
   rsa_pub_key.n = rsa_ssa_pss_public_key.n();
   rsa_pub_key.e = rsa_ssa_pss_public_key.e();
   JwtRsaSsaPssAlgorithm algorithm = rsa_ssa_pss_public_key.algorithm();
@@ -53,33 +57,43 @@ RawJwtRsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
   if (!hash_or.ok()) {
     return hash_or.status();
   }
-  StatusOr<int> salt_length_or = SaltLengthForPssAlgorithm(algorithm);
-  if (!salt_length_or.ok()) {
-    return salt_length_or.status();
+  StatusOr<int> salt_length = SaltLengthForPssAlgorithm(algorithm);
+  if (!salt_length.ok()) {
+    return salt_length.status();
   }
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   params.sig_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
   params.mgf1_hash = Enums::ProtoToSubtle(hash_or.ValueOrDie());
-  params.salt_length = salt_length_or.ValueOrDie();
+  params.salt_length = *salt_length;
 
-  auto rsa_ssa_pss_result =
+  util::StatusOr<std::unique_ptr<RsaSsaPssVerifyBoringSsl>> verify =
       subtle::RsaSsaPssVerifyBoringSsl::New(rsa_pub_key, params);
-  if (!rsa_ssa_pss_result.ok()) return rsa_ssa_pss_result.status();
-  return {std::move(rsa_ssa_pss_result).ValueOrDie()};
+  if (!verify.ok()) {
+    return verify.status();
+  }
+  return {*std::move(verify)};
 }
 
 Status RawJwtRsaSsaPssVerifyKeyManager::ValidateKey(
     const JwtRsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
-  if (!status.ok()) return status;
-  auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
-  if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key.e());
-  if (!exponent_status.ok()) return exponent_status;
+  if (!status.ok()) {
+    return status;
+  }
+  StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n());
+  if (!n.ok()) {
+    return n.status();
+  }
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return ValidateAlgorithm(key.algorithm());
 }
 
@@ -89,12 +103,12 @@ Status RawJwtRsaSsaPssVerifyKeyManager::ValidateAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS256:
     case JwtRsaSsaPssAlgorithm::PS384:
     case JwtRsaSsaPssAlgorithm::PS512:
-      return Status::OK;
+      return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 StatusOr<HashType> RawJwtRsaSsaPssVerifyKeyManager::HashForPssAlgorithm(
@@ -107,7 +121,7 @@ StatusOr<HashType> RawJwtRsaSsaPssVerifyKeyManager::HashForPssAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS512:
       return HashType::SHA512;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
 }
@@ -122,7 +136,7 @@ StatusOr<int> RawJwtRsaSsaPssVerifyKeyManager::SaltLengthForPssAlgorithm(
     case JwtRsaSsaPssAlgorithm::PS512:
       return 64;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported RSA SSA PSS Algorithm");
   }
 }

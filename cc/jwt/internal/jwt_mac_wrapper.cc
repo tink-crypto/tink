@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/jwt_mac.h"
@@ -55,27 +56,29 @@ class JwtMacSetWrapper : public JwtMac {
 
 util::Status Validate(PrimitiveSet<JwtMacInternal>* jwt_mac_set) {
   if (jwt_mac_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "jwt_mac_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "jwt_mac_set must be non-NULL");
   }
   if (jwt_mac_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "jwt_mac_set has no primary");
   }
   for (const auto* entry : jwt_mac_set->get_all()) {
     if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
         (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> JwtMacSetWrapper::ComputeMacAndEncode(
     const crypto::tink::RawJwt& token) const {
   auto primary = jwt_mac_set_->get_primary();
-  return primary->get_primitive().ComputeMacAndEncodeWithKid(
-      token, GetKid(primary->get_key_id(), primary->get_output_prefix_type()));
+  absl::optional<std::string> kid =
+      GetKid(primary->get_key_id(), primary->get_output_prefix_type());
+  return primary->get_primitive().ComputeMacAndEncodeWithKid(token, kid);
 }
 
 util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
@@ -84,12 +87,14 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
   absl::optional<util::Status> interesting_status;
   for (const auto* mac_entry : jwt_mac_set_->get_all()) {
     JwtMacInternal& jwt_mac = mac_entry->get_primitive();
+    absl::optional<std::string> kid =
+        GetKid(mac_entry->get_key_id(), mac_entry->get_output_prefix_type());
     util::StatusOr<VerifiedJwt> verified_jwt =
-        jwt_mac.VerifyMacAndDecode(compact, validator);
+        jwt_mac.VerifyMacAndDecodeWithKid(compact, validator, kid);
     if (verified_jwt.ok()) {
       return verified_jwt;
-    } else if (verified_jwt.status().error_code() !=
-               util::error::UNAUTHENTICATED) {
+    } else if (verified_jwt.status().code() !=
+               absl::StatusCode::kUnauthenticated) {
       // errors that are not the result of a MAC verification
       interesting_status = verified_jwt.status();
     }
@@ -97,7 +102,8 @@ util::StatusOr<crypto::tink::VerifiedJwt> JwtMacSetWrapper::VerifyMacAndDecode(
   if (interesting_status.has_value()) {
     return *interesting_status;
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      "verification failed");
 }
 
 }  // namespace

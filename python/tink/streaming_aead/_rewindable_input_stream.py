@@ -13,11 +13,6 @@
 # limitations under the License.
 """A Raw Input stream wrapper that supports rewinding."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 from typing import Optional, BinaryIO
 
@@ -29,7 +24,7 @@ class RewindableInputStream(io.RawIOBase):
   """
 
   def __init__(self, input_stream: BinaryIO):
-    super(RewindableInputStream, self).__init__()
+    super().__init__()
     if not input_stream.readable():
       raise ValueError('input_stream must be readable')
     self._input_stream = input_stream
@@ -93,4 +88,4 @@ class RewindableInputStream(io.RawIOBase):
     if self.closed:  # pylint:disable=using-constant-test
       return
     self._input_stream.close()
-    super(RewindableInputStream, self).close()
+    super().close()

@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
@@ -54,11 +55,11 @@ TEST_F(Cecpq2HybridConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   Cecpq2AeadHkdfPrivateKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
                   Cecpq2AeadHkdfPublicKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Cecpq2HybridConfigRegister(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   Cecpq2AeadHkdfPrivateKeyManager().get_key_type())

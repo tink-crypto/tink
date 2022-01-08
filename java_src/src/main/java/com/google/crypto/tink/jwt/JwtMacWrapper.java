@@ -67,7 +67,8 @@ class JwtMacWrapper implements PrimitiveWrapper<JwtMacInternal, JwtMac> {
       for (List<PrimitiveSet.Entry<JwtMacInternal>> entries : primitives.getAll()) {
         for (PrimitiveSet.Entry<JwtMacInternal> entry : entries) {
           try {
-            return entry.getPrimitive().verifyMacAndDecode(compact, validator);
+            Optional<String> kid = JwtFormat.getKid(entry.getKeyId(), entry.getOutputPrefixType());
+            return entry.getPrimitive().verifyMacAndDecodeWithKid(compact, validator, kid);
           } catch (GeneralSecurityException e) {
             if (e instanceof JwtInvalidException) {
               // Keep this exception so that we are able to throw a meaningful message in the end

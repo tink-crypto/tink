@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
@@ -68,7 +69,7 @@ class JwtHmacKeyManager
           algorithm = "HS512";
           break;
         default:
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Unknown algorithm.");
       }
       crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =

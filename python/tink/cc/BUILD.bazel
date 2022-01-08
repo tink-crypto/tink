@@ -105,6 +105,7 @@ cc_test(
     deps = [
         ":output_stream_adapter",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//:output_stream",
         "@tink_cc//subtle:random",
@@ -162,9 +163,9 @@ cc_library(
     include_prefix = "tink/cc",
     deps = [
         ":python_file_object_adapter",
-        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/status",
         "@tink_cc//:input_stream",
         "@tink_cc//subtle:subtle_util",
         "@tink_cc//util:status",
@@ -180,6 +181,7 @@ cc_test(
         ":python_input_stream",
         ":test_util",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
         "@tink_cc//subtle:random",
     ],

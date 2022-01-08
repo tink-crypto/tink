@@ -11,6 +11,7 @@ py_library(
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
+        ":_jwk_set_converter",
         ":_jwt_error",
         ":_jwt_hmac_key_manager",
         ":_jwt_key_templates",
@@ -31,8 +32,8 @@ py_library(
     srcs = ["_raw_jwt.py"],
     srcs_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_error",
-        ":_jwt_format",
     ],
 )
 
@@ -93,6 +94,7 @@ py_library(
     srcs_version = "PY3",
     deps = [
         "//tink:tink_python",
+        "//tink/internal:big_integer_util",
         "//tink/proto:jwt_ecdsa_py_pb2",
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
@@ -104,14 +106,10 @@ py_library(
 py_test(
     name = "_jwt_key_templates_test",
     srcs = ["_jwt_key_templates_test.py"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
     srcs_version = "PY3",
     deps = [
         ":jwt",
         requirement("absl-py"),
-        "//tink/testing:helper",
     ],
 )
 
@@ -125,11 +123,31 @@ py_library(
 )
 
 py_library(
+    name = "_json_util",
+    srcs = ["_json_util.py"],
+    srcs_version = "PY3",
+    deps = [":_jwt_error"],
+)
+
+py_test(
+    name = "_json_util_test",
+    srcs = ["_json_util_test.py"],
+    python_version = "PY3",
+    deps = [
+        ":_json_util",
+        ":_jwt_error",
+        requirement("absl-py"),
+    ],
+)
+
+py_library(
     name = "_jwt_format",
     srcs = ["_jwt_format.py"],
     srcs_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_error",
+        ":_raw_jwt",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -139,8 +157,10 @@ py_test(
     srcs = ["_jwt_format_test.py"],
     python_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_error",
         ":_jwt_format",
+        ":_raw_jwt",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
     ],
@@ -179,6 +199,7 @@ py_library(
     srcs = ["_jwt_hmac_key_manager.py"],
     srcs_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_error",
         ":_jwt_format",
         ":_jwt_mac",
@@ -229,11 +250,13 @@ py_test(
     srcs = ["_jwt_mac_wrapper_test.py"],
     python_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_format",
         ":jwt",
         "//tink/proto:jwt_hmac_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
     ],
@@ -244,6 +267,7 @@ py_library(
     srcs = ["_jwt_signature_key_manager.py"],
     srcs_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_error",
         ":_jwt_format",
         ":_jwt_public_key_sign",
@@ -296,6 +320,7 @@ py_test(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        ":_json_util",
         ":_jwt_format",
         ":jwt",
         "//tink/proto:jwt_ecdsa_py_pb2",
@@ -303,7 +328,35 @@ py_test(
         "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
         "//tink/proto:tink_py_pb2",
         requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
+    ],
+)
+
+py_library(
+    name = "_jwk_set_converter",
+    srcs = ["_jwk_set_converter.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
+        "//tink/proto:jwt_ecdsa_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pkcs1_py_pb2",
+        "//tink/proto:jwt_rsa_ssa_pss_py_pb2",
+        "//tink/proto:tink_py_pb2",
+    ],
+)
+
+py_test(
+    name = "_jwk_set_converter_test",
+    srcs = ["_jwk_set_converter_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":jwt",
+        requirement("absl-py"),
+        "//tink:cleartext_keyset_handle",
+        "//tink:tink_python",
     ],
 )

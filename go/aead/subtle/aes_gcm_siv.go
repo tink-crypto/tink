@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 
+	// Placeholder for internal crypto/cipher allowlist, please ignore.
 	// Placeholder for internal crypto/subtle allowlist, please ignore. // to allow import of "crypto/subte"
 	"github.com/google/tink/go/subtle/random"
 )

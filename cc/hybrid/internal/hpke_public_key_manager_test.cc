@@ -17,6 +17,7 @@
 #include "tink/hybrid/internal/hpke_public_key_manager.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
@@ -48,7 +49,7 @@ TEST(HpkePublicKeyManagerTest, BasicAccessors) {
 
 TEST(HpkePublicKeyManagerTest, ValidateEmptyKeyFails) {
   EXPECT_THAT(HpkePublicKeyManager().ValidateKey(HpkePublicKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePublicKeyManagerTest, ValidateKeySucceeds) {
@@ -64,7 +65,7 @@ TEST(HpkePublicKeyManagerTest, ValidateKeyWithInvalidKemFails) {
                   CreateHpkeParams(HpkeKem::KEM_UNKNOWN, HpkeKdf::HKDF_SHA256,
                                    HpkeAead::AES_128_GCM),
                   /*raw_key_bytes=*/"")),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePublicKeyManagerTest, ValidateKeyWithInvalidKdfFails) {
@@ -72,7 +73,7 @@ TEST(HpkePublicKeyManagerTest, ValidateKeyWithInvalidKdfFails) {
                   CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                                    HpkeKdf::KDF_UNKNOWN, HpkeAead::AES_128_GCM),
                   /*raw_key_bytes=*/"")),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkePublicKeyManagerTest, ValidateKeyWithInvalidAeadFails) {
@@ -81,7 +82,7 @@ TEST(HpkePublicKeyManagerTest, ValidateKeyWithInvalidAeadFails) {
           CreateHpkeParams(HpkeKem::DHKEM_X25519_HKDF_SHA256,
                            HpkeKdf::HKDF_SHA256, HpkeAead::AEAD_UNKNOWN),
           /*raw_key_bytes=*/"")),
-      StatusIs(util::error::INVALID_ARGUMENT));
+      StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

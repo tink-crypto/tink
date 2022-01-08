@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -107,7 +108,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
     DummyAead wrong_aead("wrong aead");
     auto result = KeysetHandle::Read(std::move(reader), wrong_aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 
   {  // Ciphertext does not contain actual keyset.
@@ -121,7 +122,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
         encrypted_keyset.SerializeAsString()).ValueOrDie());
     auto result = KeysetHandle::Read(std::move(reader), aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 
   {  // Wrong ciphertext of encrypted keyset.
@@ -133,7 +134,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetBinary) {
         encrypted_keyset.SerializeAsString()).ValueOrDie());
     auto result = KeysetHandle::Read(std::move(reader), aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 }
 
@@ -189,7 +190,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
     DummyAead wrong_aead("wrong aead");
     auto result = KeysetHandle::Read(std::move(reader), wrong_aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 
   {  // Ciphertext does not contain actual keyset.
@@ -203,7 +204,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
         encrypted_keyset.SerializeAsString()).ValueOrDie());
     auto result = KeysetHandle::Read(std::move(reader), aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 
   {  // Wrong ciphertext of encrypted keyset.
@@ -215,7 +216,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetJson) {
         encrypted_keyset.SerializeAsString()).ValueOrDie());
     auto result = KeysetHandle::Read(std::move(reader), aead);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 }
 
@@ -257,7 +258,7 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeyset_Json) {
   // Try writing to a null-writer.
   status = keyset_handle->Write(nullptr, aead);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 }
 
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataGoodKeyset) {
@@ -304,7 +305,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataWrongAad) {
   auto result = KeysetHandle::ReadWithAssociatedData(std::move(reader), aead,
                                                      "different");
   EXPECT_THAT(result.status(), Not(IsOk()));
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
 }
 
 TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataEmptyAad) {
@@ -325,7 +326,7 @@ TEST_F(KeysetHandleTest, ReadEncryptedKeysetWithAssociatedDataEmptyAad) {
                     .ValueOrDie());
   auto result = KeysetHandle::Read(std::move(reader), aead);
   EXPECT_THAT(result.status(), Not(IsOk()));
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
 }
 
 TEST_F(KeysetHandleTest, WriteEncryptedKeysetWithAssociatedData) {
@@ -367,7 +368,7 @@ TEST_F(KeysetHandleTest, WriteEncryptedKeysetWithAssociatedData) {
   // Try writing to a null-writer.
   status = keyset_handle->Write(nullptr, aead);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 }
 
 TEST_F(KeysetHandleTest, GenerateNewKeysetHandle) {
@@ -392,7 +393,7 @@ TEST_F(KeysetHandleTest, GenerateNewKeysetHandleErrors) {
 
   auto handle_result = KeysetHandle::GenerateNew(templ);
   EXPECT_FALSE(handle_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, handle_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, handle_result.status().code());
 }
 
 TEST_F(KeysetHandleTest, UnknownPrefixIsInvalid) {
@@ -439,14 +440,14 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandle) {
                /* key_id= */ 623628,
                key_manager.CreateKey(key_format).ValueOrDie(),
                KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(
-        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP384Sha384().value()));
     AddLegacyKey(EcdsaSignKeyManager().get_key_type(),
                  /* key_id= */ 36285,
                  key_manager.CreateKey(key_format).ValueOrDie(),
                  KeyStatusType::DISABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
-    ASSERT_TRUE(
-        key_format.ParseFromString(SignatureKeyTemplates::EcdsaP384().value()));
+    ASSERT_TRUE(key_format.ParseFromString(
+        SignatureKeyTemplates::EcdsaP384Sha512().value()));
     AddRawKey(EcdsaSignKeyManager().get_key_type(),
               /* key_id= */ 42, key_manager.CreateKey(key_format).ValueOrDie(),
               KeyStatusType::ENABLED, KeyData::ASYMMETRIC_PRIVATE, &keyset);
@@ -476,7 +477,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_FALSE(public_handle_result.ok());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ASYMMETRIC_PRIVATE",
-                        public_handle_result.status().error_message());
+                        std::string(public_handle_result.status().message()));
   }
   { // A keyset with multiple keys.
     Keyset keyset;
@@ -501,7 +502,7 @@ TEST_F(KeysetHandleTest, GetPublicKeysetHandleErrors) {
     auto public_handle_result = handle->GetPublicKeysetHandle();
     ASSERT_FALSE(public_handle_result.ok());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
-                        public_handle_result.status().error_message());
+                        std::string(public_handle_result.status().message()));
   }
 }
 
@@ -554,7 +555,7 @@ TEST_F(KeysetHandleTest, GetPrimitiveNullptrKeyManager) {
   std::unique_ptr<KeysetHandle> keyset_handle =
       TestKeysetHandle::GetKeysetHandle(keyset);
   ASSERT_THAT(keyset_handle->GetPrimitive<Aead>(nullptr).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 // Test creating with custom key manager. For this, we reset the registry before
@@ -612,7 +613,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeUnknown) {
              KeyData::UNKNOWN_KEYMATERIAL, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
@@ -622,7 +623,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeSymmetric) {
              KeyData::SYMMETRIC, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
@@ -632,7 +633,7 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForTypeAssymmetricPrivate) {
              KeyData::ASYMMETRIC_PRIVATE, &keyset);
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
@@ -653,13 +654,13 @@ TEST_F(KeysetHandleTest, ReadNoSecretFailForHidden) {
 
   keyset.set_primary_key_id(42);
   auto result = KeysetHandle::ReadNoSecret(keyset.SerializeAsString());
-  EXPECT_THAT(result.status(), StatusIs(util::error::FAILED_PRECONDITION));
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kFailedPrecondition));
 }
 
 TEST_F(KeysetHandleTest, ReadNoSecretFailForInvalidString) {
   auto result = KeysetHandle::ReadNoSecret("bad serialized keyset");
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
 }
 
 TEST_F(KeysetHandleTest, WriteNoSecret) {

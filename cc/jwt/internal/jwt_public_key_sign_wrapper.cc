@@ -16,6 +16,7 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/jwt_public_key_sign.h"
@@ -48,20 +49,21 @@ class JwtPublicKeySignSetWrapper : public JwtPublicKeySign {
 
 util::Status Validate(PrimitiveSet<JwtPublicKeySignInternal>* jwt_sign_set) {
   if (jwt_sign_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "jwt_sign_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "jwt_sign_set must be non-NULL");
   }
   if (jwt_sign_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "jwt_sign_set has no primary");
   }
   for (const auto* entry : jwt_sign_set->get_all()) {
     if ((entry->get_output_prefix_type() != OutputPrefixType::RAW) &&
         (entry->get_output_prefix_type() != OutputPrefixType::TINK)) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "all JWT keys must be either RAW or TINK");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> JwtPublicKeySignSetWrapper::SignAndEncode(

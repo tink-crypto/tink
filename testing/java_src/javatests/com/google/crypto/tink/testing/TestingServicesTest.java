@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.BinaryKeysetReader;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivKeyManager;
@@ -45,6 +46,8 @@ import com.google.crypto.tink.proto.testing.KeysetFromJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
+import com.google.crypto.tink.proto.testing.KeysetTemplateRequest;
+import com.google.crypto.tink.proto.testing.KeysetTemplateResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
 import com.google.crypto.tink.proto.testing.MacGrpc;
@@ -74,7 +77,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
 
 @RunWith(JUnit4.class)
 public final class TestingServicesTest {
@@ -142,6 +144,25 @@ public final class TestingServicesTest {
     KeysetFromJsonRequest request =
         KeysetFromJsonRequest.newBuilder().setJsonKeyset(jsonKeyset).build();
     return keysetStub.fromJson(request);
+  }
+
+  @Test
+  public void template_success() throws Exception {
+    KeysetTemplateRequest request =
+        KeysetTemplateRequest.newBuilder().setTemplateName("AES256_GCM").build();
+    KeysetTemplateResponse response = keysetStub.getTemplate(request);
+    assertThat(response.getErr()).isEmpty();
+    KeyTemplate template =
+        KeyTemplateProtoConverter.fromByteArray(response.getKeyTemplate().toByteArray());
+    assertThat(template.getTypeUrl()).isEqualTo("type.googleapis.com/google.crypto.tink.AesGcmKey");
+  }
+
+  @Test
+  public void template_not_found() throws Exception {
+    KeysetTemplateRequest request =
+        KeysetTemplateRequest.newBuilder().setTemplateName("UNKNOWN_TEMPLATE").build();
+    KeysetTemplateResponse response = keysetStub.getTemplate(request);
+    assertThat(response.getErr()).isNotEmpty();
   }
 
   @Test

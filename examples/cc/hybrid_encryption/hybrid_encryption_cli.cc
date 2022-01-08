@@ -82,7 +82,7 @@ void GeneratePrivateKey(const std::string& output_filename) {
       crypto::tink::KeysetHandle::GenerateNew(key_template);
   if (!new_keyset_handle_result.ok()) {
     std::clog << "Generating new keyset failed: "
-              << new_keyset_handle_result.status().error_message() << std::endl;
+              << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
   auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
@@ -107,7 +107,7 @@ void ExtractPublicKey(const std::string& private_keyset_filename,
       private_keyset_handle->GetPublicKeysetHandle();
   if (!new_keyset_handle_result.ok()) {
     std::clog << "Getting the keyset failed: "
-              << new_keyset_handle_result.status().error_message() << std::endl;
+              << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
   auto public_keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
@@ -130,7 +130,7 @@ void Encrypt(const std::string& keyset_filename,
       keyset_handle->GetPrimitive<crypto::tink::HybridEncrypt>();
   if (!primitive_result.ok()) {
     std::clog << "Getting HybridEncryption-primitive from the factory failed: "
-              << primitive_result.status().error_message() << std::endl;
+              << primitive_result.status().message() << std::endl;
     exit(1);
   }
   auto hybrid_encrypt = std::move(primitive_result.ValueOrDie());
@@ -145,7 +145,7 @@ void Encrypt(const std::string& keyset_filename,
   auto encrypt_result = hybrid_encrypt->Encrypt(message, context_info);
   if (!encrypt_result.ok()) {
     std::clog << "Error while encrypting the message: "
-              << encrypt_result.status().error_message() << std::endl;
+              << encrypt_result.status().message() << std::endl;
     exit(1);
   }
   std::string encrypted_message = encrypt_result.ValueOrDie();
@@ -168,8 +168,7 @@ void Decrypt(const std::string& keyset_filename,
       keyset_handle->GetPrimitive<crypto::tink::HybridDecrypt>();
   if (!primitive_result.ok()) {
     std::clog << "Getting HybridDecrypt-primitive from the factory "
-              << "failed: " << primitive_result.status().error_message()
-              << std::endl;
+              << "failed: " << primitive_result.status().message() << std::endl;
     exit(1);
   }
   auto hybrid_decrypt = std::move(primitive_result.ValueOrDie());
@@ -186,7 +185,7 @@ void Decrypt(const std::string& keyset_filename,
   auto decrypt_status = hybrid_decrypt->Decrypt(message, context_info);
   if (!decrypt_status.ok()) {
     std::clog << "Error while decrypting the file: "
-              << decrypt_status.status().error_message() << std::endl;
+              << decrypt_status.status().message() << std::endl;
     exit(1);
   }
 

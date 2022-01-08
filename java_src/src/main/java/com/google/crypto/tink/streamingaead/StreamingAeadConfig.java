@@ -87,4 +87,6 @@ public final class StreamingAeadConfig {
     AesCtrHmacStreamingKeyManager.register(/* newKeyAllowed = */ true);
     AesGcmHkdfStreamingKeyManager.register(/* newKeyAllowed = */ true);
   }
+
+  private StreamingAeadConfig() {}
 }

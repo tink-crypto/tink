@@ -18,7 +18,9 @@
 
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/util/statusor.h"
 #include "proto/common.pb.h"
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/jwt_hmac.pb.h"
@@ -79,11 +81,11 @@ KeyTemplate* NewJwtRsaSsaPkcs1KeyTemplate(JwtRsaSsaPkcs1Algorithm algorithm,
   JwtRsaSsaPkcs1KeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
-  key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+  util::StatusOr<std::string> e_str =
+      internal::BignumToString(e.get(), BN_num_bytes(e.get()));
+  key_format.set_public_exponent(e_str.ValueOrDie());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -99,11 +101,11 @@ KeyTemplate* NewJwtRsaSsaPssKeyTemplate(JwtRsaSsaPssAlgorithm algorithm,
   JwtRsaSsaPssKeyFormat key_format;
   key_format.set_algorithm(algorithm);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
-  key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+  util::StatusOr<std::string> e_str =
+      internal::BignumToString(e.get(), BN_num_bytes(e.get()));
+  key_format.set_public_exponent(e_str.ValueOrDie());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }

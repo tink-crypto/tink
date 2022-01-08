@@ -163,4 +163,6 @@ public final class HybridKeyTemplates {
         .setEcPointFormat(ecPointFormat)
         .build();
   }
+
+  private HybridKeyTemplates() {}
 }

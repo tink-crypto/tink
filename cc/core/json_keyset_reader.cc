@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "include/rapidjson/document.h"
@@ -51,10 +52,10 @@ util::Status ValidateEncryptedKeyset(const rapidjson::Document& json_doc) {
       !json_doc["encryptedKeyset"].IsString() ||
       (json_doc.HasMember("keysetInfo") &&
        !json_doc["keysetInfo"].IsObject())) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON EncryptedKeyset");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON EncryptedKeyset");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
@@ -63,10 +64,10 @@ util::Status ValidateKeysetInfo(const rapidjson::Value& json_value) {
       !json_value.HasMember("keyInfo") ||
       !json_value["keyInfo"].IsArray() ||
       json_value["keyInfo"].Size() < 1) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON KeysetInfo");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON KeysetInfo");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
@@ -78,10 +79,10 @@ util::Status ValidateKeyInfo(const rapidjson::Value& json_value) {
       !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON KeyInfo");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON KeyInfo");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::unique_ptr<KeysetInfo::KeyInfo>>
@@ -119,8 +120,8 @@ EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
   std::string enc_keyset;
   if (!absl::Base64Unescape(
           json_doc["encryptedKeyset"].GetString(), &enc_keyset)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON EncryptedKeyset");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON EncryptedKeyset");
   }
   auto encrypted_keyset = absl::make_unique<EncryptedKeyset>();
   encrypted_keyset->set_encrypted_keyset(enc_keyset);
@@ -143,10 +144,10 @@ util::Status ValidateKeyset(const rapidjson::Document& json_doc) {
       !json_doc.HasMember("key") ||
       !json_doc["key"].IsArray() ||
       json_doc["key"].Size() < 1) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON Keyset");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON Keyset");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKey(const rapidjson::Value& json_value) {
@@ -158,10 +159,9 @@ util::Status ValidateKey(const rapidjson::Value& json_value) {
       !json_value["keyId"].IsUint() ||
       !json_value.HasMember("outputPrefixType") ||
       !json_value["outputPrefixType"].IsString()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON Key");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid JSON Key");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::Status ValidateKeyData(const rapidjson::Value& json_value) {
@@ -171,10 +171,10 @@ util::Status ValidateKeyData(const rapidjson::Value& json_value) {
       !json_value["value"].IsString() ||
       !json_value.HasMember("keyMaterialType") ||
       !json_value["keyMaterialType"].IsString()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON KeyData");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON KeyData");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::unique_ptr<KeyData>>
@@ -183,8 +183,8 @@ KeyDataFromJson(const rapidjson::Value& json_value) {
   if (!status.ok()) return status;
   std::string value_field;
   if (!absl::Base64Unescape(json_value["value"].GetString(), &value_field)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "Invalid JSON KeyData");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid JSON KeyData");
   }
   auto key_data = absl::make_unique<KeyData>();
   key_data->set_type_url(json_value["typeUrl"].GetString());
@@ -231,8 +231,8 @@ KeysetFromJson(const rapidjson::Document& json_doc) {
 util::StatusOr<std::unique_ptr<KeysetReader>> JsonKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                            "keyset_stream must be non-null.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "keyset_stream must be non-null.");
   }
   std::unique_ptr<KeysetReader> reader(
       new JsonKeysetReader(std::move(keyset_stream)));
@@ -259,7 +259,7 @@ util::StatusOr<std::unique_ptr<Keyset>> JsonKeysetReader::Read() {
   rapidjson::Document json_doc(rapidjson::kObjectType);
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat(
             "Invalid JSON Keyset: Error (offset ", json_doc.GetErrorOffset(),
             "): ", rapidjson::GetParseError_En(json_doc.GetParseError())));
@@ -281,7 +281,7 @@ JsonKeysetReader::ReadEncrypted() {
   rapidjson::Document json_doc;
   if (json_doc.Parse(serialized_keyset->c_str()).HasParseError()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid JSON EncryptedKeyset: Error (offset ",
                      json_doc.GetErrorOffset(), "): ",
                      rapidjson::GetParseError_En(json_doc.GetParseError())));

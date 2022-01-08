@@ -17,6 +17,7 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/util/enums.h"
@@ -31,7 +32,7 @@ util::Status Validate(
     const google::crypto::tink::Cecpq2AeadHkdfPublicKey& key) {
   if (key.x25519_public_key_x().empty() ||
       key.hrss_public_key_marshalled().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid Cecpq2AeadHkdfPublicKeyInternal: missing KEM "
                         "required fields.");
   }
@@ -40,11 +41,11 @@ util::Status Validate(
           google::crypto::tink::EllipticCurveType::CURVE25519 &&
       !key.x25519_public_key_y().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid Cecpq2AeadHkdfPublicKeyInternal: has KEM unexpected field.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace

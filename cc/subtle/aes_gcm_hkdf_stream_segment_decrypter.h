@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "openssl/aead.h"
+#include "tink/aead/internal/ssl_aead.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/secret_data.h"
@@ -69,11 +69,9 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
     std::string associated_data;
   };
 
-  // A factory.
   static util::StatusOr<std::unique_ptr<StreamSegmentDecrypter>> New(
       Params params);
 
-  // Overridden methods of StreamSegmentDecrypter.
   util::Status Init(const std::vector<uint8_t>& header) override;
 
   util::Status DecryptSegment(
@@ -112,7 +110,8 @@ class AesGcmHkdfStreamSegmentDecrypter : public StreamSegmentDecrypter {
   bool is_initialized_ = false;
   std::vector<uint8_t> salt_;
   std::vector<uint8_t> nonce_prefix_;
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
+
+  std::unique_ptr<internal::SslOneShotAead> aead_;
 };
 
 }  // namespace subtle

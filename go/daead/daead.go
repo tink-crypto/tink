@@ -27,7 +27,7 @@ import (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(newAESSIVKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(aesSIVKeyManager)); err != nil {
 		panic(fmt.Sprintf("daead.init() failed: %v", err))
 	}
 }

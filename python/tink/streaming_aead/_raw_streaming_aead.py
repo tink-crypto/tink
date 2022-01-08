@@ -13,21 +13,12 @@
 # limitations under the License.
 """This module defines the 'raw' interface for Streaming AEAD."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 import io
 from typing import BinaryIO
 
-# Special imports
-import six
 
-
-@six.add_metaclass(abc.ABCMeta)
-class RawStreamingAead(object):
+class RawStreamingAead(metaclass=abc.ABCMeta):
   """Raw interface for streaming authenticated encryption with associated data.
 
   Streaming encryption is typically used for encrypting large plaintexts such

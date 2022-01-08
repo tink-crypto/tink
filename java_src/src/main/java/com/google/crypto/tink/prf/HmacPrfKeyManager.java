@@ -19,6 +19,7 @@ package com.google.crypto.tink.prf;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -186,6 +187,11 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
   public static void register(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerKeyManager(new HmacPrfKeyManager(), newKeyAllowed);
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 
   /**
    * Returns a {@link KeyTemplate} that generates new instances of HMAC keys with the following

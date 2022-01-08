@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
@@ -229,4 +230,9 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
         .setHmacKeyFormat(hmacKeyFormat)
         .build();
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 }

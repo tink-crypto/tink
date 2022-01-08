@@ -7,8 +7,11 @@ tink_cc_library(
   SRCS
     aes_siv_key_manager.h
   DEPS
-    tink::core::aead
+    absl::memory
+    absl::status
+    absl::strings
     tink::core::key_type_manager
+    tink::core::deterministic_aead
     tink::subtle::aes_siv_boringssl
     tink::subtle::random
     tink::util::constants
@@ -20,8 +23,6 @@ tink_cc_library(
     tink::util::statusor
     tink::util::validation
     tink::proto::aes_siv_cc_proto
-    absl::memory
-    absl::strings
 )
 
 tink_cc_library(
@@ -30,15 +31,16 @@ tink_cc_library(
     deterministic_aead_wrapper.cc
     deterministic_aead_wrapper.h
   DEPS
+    absl::status
+    absl::strings
     tink::core::crypto_format
     tink::core::deterministic_aead
     tink::core::primitive_set
     tink::core::primitive_wrapper
-    tink::subtle::subtle_util_boringssl
+    tink::internal::util
     tink::util::status
     tink::util::statusor
     tink::proto::tink_cc_proto
-    absl::strings
 )
 
 tink_cc_library(
@@ -49,13 +51,13 @@ tink_cc_library(
   DEPS
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_wrapper
+    absl::core_headers
+    absl::memory
+    tink::core::registry
     tink::config::config_util
     tink::config::tink_fips
-    tink::mac::mac_config
     tink::util::status
     tink::proto::config_cc_proto
-    absl::base
-    absl::memory
 )
 
 tink_cc_library(
@@ -65,14 +67,13 @@ tink_cc_library(
     deterministic_aead_factory.h
   DEPS
     tink::daead::deterministic_aead_wrapper
+    absl::core_headers
     tink::core::deterministic_aead
     tink::core::key_manager
     tink::core::keyset_handle
-    tink::core::primitive_set
     tink::core::registry
     tink::util::status
     tink::util::statusor
-    absl::base
 )
 
 tink_cc_library(
@@ -90,76 +91,85 @@ tink_cc_library(
 
 tink_cc_test(
   NAME aes_siv_key_manager_test
-  SRCS aes_siv_key_manager_test.cc
+  SRCS
+    aes_siv_key_manager_test.cc
   DEPS
     tink::daead::aes_siv_key_manager
+    gmock
+    absl::status
     tink::core::deterministic_aead
     tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    tink::util::test_matchers
     tink::proto::aes_siv_cc_proto
-    gmock
 )
 
 tink_cc_test(
   NAME deterministic_aead_wrapper_test
-  SRCS deterministic_aead_wrapper_test.cc
+  SRCS
+    deterministic_aead_wrapper_test.cc
   DEPS
     tink::daead::deterministic_aead_wrapper
+    gmock
+    absl::memory
     tink::core::deterministic_aead
     tink::core::primitive_set
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
-    tink::proto::tink_cc_proto
-    absl::memory
 )
 
 tink_cc_test(
   NAME deterministic_aead_config_test
-  SRCS deterministic_aead_config_test.cc
+  SRCS
+    deterministic_aead_config_test.cc
   DEPS
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_key_templates
-    tink::config::tink_fips
+    gmock
+    absl::status
     tink::core::config
     tink::core::deterministic_aead
     tink::core::keyset_handle
     tink::core::registry
+    tink::config::tink_fips
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
-    absl::memory
 )
 
 tink_cc_test(
   NAME deterministic_aead_factory_test
-  SRCS deterministic_aead_factory_test.cc
+  SRCS
+    deterministic_aead_factory_test.cc
   DEPS
-    tink::core::key_manager_impl
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_config
     tink::daead::deterministic_aead_factory
+    gmock
+    tink::core::key_manager_impl
     tink::core::crypto_format
     tink::core::deterministic_aead
     tink::core::keyset_handle
     tink::internal::key_info
-    tink::util::test_keyset_handle
     tink::util::status
+    tink::util::test_keyset_handle
     tink::util::test_util
     tink::proto::aes_siv_cc_proto
-    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
   NAME deterministic_aead_key_templates_test
-  SRCS deterministic_aead_key_templates_test.cc
+  SRCS
+    deterministic_aead_key_templates_test.cc
   DEPS
-    tink::core::key_manager_impl
     tink::daead::aes_siv_key_manager
     tink::daead::deterministic_aead_key_templates
+    gmock
+    tink::core::key_manager_impl
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::tink_cc_proto

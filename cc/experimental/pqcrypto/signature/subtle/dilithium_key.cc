@@ -20,11 +20,18 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -33,30 +40,114 @@ namespace subtle {
 
 // static
 util::StatusOr<DilithiumPrivateKeyPqclean>
-DilithiumPrivateKeyPqclean::NewPrivateKey(util::SecretData key_data) {
-  return DilithiumPrivateKeyPqclean(key_data);
+DilithiumPrivateKeyPqclean::NewPrivateKey(
+    util::SecretData key_data, DilithiumSeedExpansion seed_expansion) {
+  return DilithiumPrivateKeyPqclean(key_data, seed_expansion);
 }
 
 // static
 util::StatusOr<std::pair<DilithiumPrivateKeyPqclean, DilithiumPublicKeyPqclean>>
-DilithiumPrivateKeyPqclean::GenerateKeyPair() {
+DilithiumPrivateKeyPqclean::GenerateKeyPair(
+    int32_t private_key_size, DilithiumSeedExpansion seed_expansion) {
   std::string public_key;
-  public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
-
   std::string private_key;
-  private_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES);
+  private_key.resize(private_key_size);
 
-  PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
-      reinterpret_cast<uint8_t*>(public_key.data()),
-      reinterpret_cast<uint8_t*>(private_key.data()));
+  // Check if the key_size parameter is correct.
+  switch (private_key_size) {
+    // Dilithium2.
+    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES: {
+      switch (seed_expansion) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          public_key.resize(PQCLEAN_DILITHIUM2AES_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          public_key.resize(PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM2_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInvalidArgument,
+                              "Invalid seed expansion");
+        }
+      }
+      break;
+    }
+    // Dilithium3.
+    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES: {
+      switch (seed_expansion) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          public_key.resize(PQCLEAN_DILITHIUM3AES_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          public_key.resize(PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM3_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInvalidArgument,
+                              "Invalid seed expansion");
+        }
+      }
+      break;
+    }
+    // Dilithium5.
+    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES: {
+      switch (seed_expansion) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          public_key.resize(PQCLEAN_DILITHIUM5AES_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          public_key.resize(PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES);
+          PQCLEAN_DILITHIUM5_AVX2_crypto_sign_keypair(
+              reinterpret_cast<uint8_t*>(public_key.data()),
+              reinterpret_cast<uint8_t*>(private_key.data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInvalidArgument,
+                              "Invalid seed expansion");
+        }
+      }
+      break;
+    }
+    // Invalid key size.
+    default: {
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
+          absl::StrFormat("Invalid private key size (%d). "
+                          "The only valid sizes are %d, %d, %d.",
+                          private_key_size,
+                          PQCLEAN_DILITHIUM2_AVX2_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM3_AVX2_CRYPTO_SECRETKEYBYTES,
+                          PQCLEAN_DILITHIUM5_AVX2_CRYPTO_SECRETKEYBYTES));
+    }
+  }
 
   util::SecretData private_key_data =
       util::SecretDataFromStringView(private_key);
 
   util::StatusOr<DilithiumPrivateKeyPqclean> dilithium_private_key =
-      DilithiumPrivateKeyPqclean::NewPrivateKey(std::move(private_key_data));
+      DilithiumPrivateKeyPqclean::NewPrivateKey(std::move(private_key_data),
+                                                seed_expansion);
   util::StatusOr<DilithiumPublicKeyPqclean> dilithium_public_key =
-      DilithiumPublicKeyPqclean::NewPublicKey(public_key);
+      DilithiumPublicKeyPqclean::NewPublicKey(public_key, seed_expansion);
 
   return std::make_pair(*dilithium_private_key, *dilithium_public_key);
 }
@@ -65,14 +156,25 @@ const util::SecretData& DilithiumPrivateKeyPqclean::GetKeyData() const {
   return key_data_;
 }
 
+const DilithiumSeedExpansion& DilithiumPrivateKeyPqclean::GetSeedExpansion()
+    const {
+  return seed_expansion_;
+}
+
 // static
 util::StatusOr<DilithiumPublicKeyPqclean>
-DilithiumPublicKeyPqclean::NewPublicKey(absl::string_view key_data) {
-  return DilithiumPublicKeyPqclean(key_data);
+DilithiumPublicKeyPqclean::NewPublicKey(absl::string_view key_data,
+                                        DilithiumSeedExpansion seed_expansion) {
+  return DilithiumPublicKeyPqclean(key_data, seed_expansion);
 }
 
 const std::string& DilithiumPublicKeyPqclean::GetKeyData() const {
   return key_data_;
+}
+
+const DilithiumSeedExpansion& DilithiumPublicKeyPqclean::GetSeedExpansion()
+    const {
+  return seed_expansion_;
 }
 
 }  // namespace subtle

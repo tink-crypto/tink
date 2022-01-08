@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "tink/internal/ec_util.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_impl.h"
@@ -37,6 +38,7 @@
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::testing::Eq;
+using ::testing::Not;
 
 namespace crypto {
 namespace tink {
@@ -47,9 +49,8 @@ namespace {
 class JwtSignatureImplTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    util::StatusOr<crypto::tink::subtle::SubtleUtilBoringSSL::EcKey> ec_key =
-        subtle::SubtleUtilBoringSSL::GetNewEcKey(
-            subtle::EllipticCurveType::NIST_P256);
+    util::StatusOr<internal::EcKey> ec_key =
+        internal::NewEcKey(subtle::EllipticCurveType::NIST_P256);
     ASSERT_THAT(ec_key.status(), IsOk());
 
     util::StatusOr<std::unique_ptr<subtle::EcdsaSignBoringSsl>> sign =
@@ -64,10 +65,10 @@ class JwtSignatureImplTest : public ::testing::Test {
             subtle::EcdsaSignatureEncoding::IEEE_P1363);
     ASSERT_THAT(verify.status(), IsOk());
 
-    jwt_sign_ = absl::make_unique<JwtPublicKeySignImpl>(*std::move(sign),
-                                                        "ES256", absl::nullopt);
-    jwt_verify_ =
-        absl::make_unique<JwtPublicKeyVerifyImpl>(*std::move(verify), "ES256");
+    jwt_sign_ = absl::make_unique<JwtPublicKeySignImpl>(
+        *std::move(sign), "ES256", /*custom_kid=*/absl::nullopt);
+    jwt_verify_ = absl::make_unique<JwtPublicKeyVerifyImpl>(
+        *std::move(verify), "ES256", /*custom_kid=*/absl::nullopt);
   }
   std::unique_ptr<JwtPublicKeySignImpl> jwt_sign_;
   std::unique_ptr<JwtPublicKeyVerifyImpl> jwt_verify_;
@@ -87,7 +88,7 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
   RawJwt raw_jwt = raw_jwt_or.ValueOrDie();
 
   util::StatusOr<std::string> compact =
-      jwt_sign_->SignAndEncodeWithKid(raw_jwt, absl::nullopt);
+      jwt_sign_->SignAndEncodeWithKid(raw_jwt, /*kid=*/absl::nullopt);
   ASSERT_THAT(compact.status(), IsOk());
 
   util::StatusOr<JwtValidator> validator =
@@ -96,22 +97,35 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateToken) {
 
   // Success
   util::StatusOr<VerifiedJwt> verified_jwt =
-      jwt_verify_->VerifyAndDecode(*compact, *validator);
+      jwt_verify_->VerifyAndDecodeWithKid(*compact, *validator,
+                                          /*kid=*/absl::nullopt);
   ASSERT_THAT(verified_jwt.status(), IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
+
+  // Fails because kid header is not present
+  EXPECT_THAT(
+      jwt_verify_->VerifyAndDecodeWithKid(*compact, *validator, "kid-123")
+          .status(),
+      Not(IsOk()));
 
   // Fails with wrong issuer
   util::StatusOr<JwtValidator> validator2 =
       JwtValidatorBuilder().ExpectIssuer("unknown").Build();
   ASSERT_THAT(validator2.status(), IsOk());
-  EXPECT_FALSE(jwt_verify_->VerifyAndDecode(*compact, *validator2).ok());
+  EXPECT_FALSE(
+      jwt_verify_
+          ->VerifyAndDecodeWithKid(*compact, *validator2, /*kid=*/absl::nullopt)
+          .ok());
 
   // Fails because token is not yet valid
   util::StatusOr<JwtValidator> validator_1970 =
       JwtValidatorBuilder().SetFixedNow(absl::FromUnixSeconds(12345)).Build();
   ASSERT_THAT(validator_1970.status(), IsOk());
-  EXPECT_FALSE(jwt_verify_->VerifyAndDecode(*compact, *validator_1970).ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid(*compact, *validator_1970,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
 }
 
 TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
@@ -133,10 +147,17 @@ TEST_F(JwtSignatureImplTest, CreateAndValidateTokenWithKid) {
       JwtValidatorBuilder().ExpectTypeHeader("typeHeader").Build();
 
   util::StatusOr<VerifiedJwt> verified_jwt =
-      jwt_verify_->VerifyAndDecode(*compact, *validator);
+      jwt_verify_->VerifyAndDecodeWithKid(*compact, *validator, "kid-123");
   ASSERT_THAT(verified_jwt.status(), IsOk());
   EXPECT_THAT(verified_jwt->GetTypeHeader(), IsOkAndHolds("typeHeader"));
   EXPECT_THAT(verified_jwt->GetJwtId(), IsOkAndHolds("id123"));
+
+  // Kid header in the token is ignored.
+  EXPECT_THAT(
+      jwt_verify_
+          ->VerifyAndDecodeWithKid(*compact, *validator, /*kid=*/absl::nullopt)
+          .status(),
+      IsOk());
 
   // parse header to make sure the kid value is set correctly.
   std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
@@ -156,49 +177,72 @@ TEST_F(JwtSignatureImplTest, FailsWithModifiedCompact) {
   ASSERT_THAT(raw_jwt.status(), IsOk());
 
   util::StatusOr<std::string> compact =
-      jwt_sign_->SignAndEncodeWithKid(*raw_jwt, absl::nullopt);
+      jwt_sign_->SignAndEncodeWithKid(*raw_jwt, /*kid=*/absl::nullopt);
   ASSERT_THAT(compact.status(), IsOk());
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().AllowMissingExpiration().Build();
   ASSERT_THAT(validator.status(), IsOk());
 
-  EXPECT_THAT(jwt_verify_->VerifyAndDecode(*compact, *validator).status(),
-              IsOk());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode(absl::StrCat(*compact, "x"), *validator)
-          .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode(absl::StrCat(*compact, " "), *validator)
-          .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode(absl::StrCat("x", *compact), *validator)
-          .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode(absl::StrCat(" ", *compact), *validator)
-          .ok());
+  EXPECT_THAT(
+      jwt_verify_
+          ->VerifyAndDecodeWithKid(*compact, *validator, /*kid=*/absl::nullopt)
+          .status(),
+      IsOk());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid(absl::StrCat(*compact, "x"),
+                                            *validator,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid(absl::StrCat(*compact, " "),
+                                            *validator,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid(absl::StrCat("x", *compact),
+                                            *validator,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid(absl::StrCat(" ", *compact),
+                                            *validator,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
 }
 
 TEST_F(JwtSignatureImplTest, FailsWithInvalidTokens) {
   util::StatusOr<JwtValidator> validator =
       JwtValidatorBuilder().AllowMissingExpiration().Build();
   ASSERT_THAT(validator.status(), IsOk());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.e30.YWJj.",
+                                            *validator, /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9?.e30.YWJj",
+                                            *validator, /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.e30?.YWJj",
+                                            *validator, /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.e30.YWJj?",
+                                            *validator, /*kid=*/absl::nullopt)
+                   .ok());
+  EXPECT_FALSE(jwt_verify_
+                   ->VerifyAndDecodeWithKid("eyJhbGciOiJIUzI1NiJ9.YWJj",
+                                            *validator,
+                                            /*kid=*/absl::nullopt)
+                   .ok());
   EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9.e30.YWJj.", *validator)
+      jwt_verify_->VerifyAndDecodeWithKid("", *validator, /*kid=*/absl::nullopt)
           .ok());
   EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9?.e30.YWJj", *validator)
+      jwt_verify_
+          ->VerifyAndDecodeWithKid("..", *validator, /*kid=*/absl::nullopt)
+
           .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9.e30?.YWJj", *validator)
-          .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9.e30.YWJj?", *validator)
-          .ok());
-  EXPECT_FALSE(
-      jwt_verify_->VerifyAndDecode("eyJhbGciOiJIUzI1NiJ9.YWJj", *validator)
-          .ok());
-  EXPECT_FALSE(jwt_verify_->VerifyAndDecode("", *validator).ok());
-  EXPECT_FALSE(jwt_verify_->VerifyAndDecode("..", *validator).ok());
 }
 
 }  // namespace

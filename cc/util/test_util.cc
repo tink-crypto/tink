@@ -26,6 +26,7 @@
 #include <cstdlib>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
@@ -36,7 +37,7 @@
 #include "tink/keyset_handle.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/secret_data.h"
@@ -53,7 +54,6 @@
 
 using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
-using crypto::tink::util::error::Code;
 using google::crypto::tink::AesGcmKeyFormat;
 using google::crypto::tink::EcdsaPrivateKey;
 using google::crypto::tink::EcdsaSignatureEncoding;
@@ -144,7 +144,8 @@ std::string ReadTestFile(std::string filename) {
 
 util::StatusOr<std::string> HexDecode(absl::string_view hex) {
   if (hex.size() % 2 != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Input has odd size.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Input has odd size.");
   }
   std::string decoded(hex.size() / 2, static_cast<char>(0));
   for (size_t i = 0; i < hex.size(); ++i) {
@@ -157,7 +158,8 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
     else if ('A' <= c && c <= 'F')
       val = c - 'A' + 10;
     else
-      return util::Status(util::error::INVALID_ARGUMENT, "Not hexadecimal");
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Not hexadecimal");
     decoded[i / 2] = (decoded[i / 2] << 4) | val;
   }
   return decoded;
@@ -178,11 +180,8 @@ std::string HexEncode(absl::string_view bytes) {
   return res;
 }
 
-#if defined(PLATFORM_GOOGLE)
-string TmpDir() { return FLAGS_test_tmpdir; }
-#else
 std::string TmpDir() {
-  // 'bazel test' sets TEST_TMPDIR
+  // The Bazel 'test' command sets TEST_TMPDIR.
   const char* env = getenv("TEST_TMPDIR");
   if (env && env[0] != '\0') {
     return env;
@@ -193,7 +192,6 @@ std::string TmpDir() {
   }
   return "/tmp";
 }
-#endif
 
 void AddKeyData(
     const google::crypto::tink::KeyData& key_data,
@@ -264,7 +262,7 @@ EciesAeadHkdfPrivateKey GetEciesAeadHkdfTestKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::EcPointFormat ec_point_format,
     google::crypto::tink::HashType hash_type) {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+  auto test_key = internal::NewEcKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EciesAeadHkdfPrivateKey ecies_key;
   ecies_key.set_version(0);
@@ -380,7 +378,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
     google::crypto::tink::EllipticCurveType curve_type,
     google::crypto::tink::HashType hash_type,
     google::crypto::tink::EcdsaSignatureEncoding encoding) {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEcKey(
+  auto test_key = internal::NewEcKey(
       Enums::ProtoToSubtle(curve_type)).ValueOrDie();
   EcdsaPrivateKey ecdsa_key;
   ecdsa_key.set_version(0);
@@ -398,7 +396,7 @@ EcdsaPrivateKey GetEcdsaTestPrivateKey(
 }
 
 Ed25519PrivateKey GetEd25519TestPrivateKey() {
-  auto test_key = subtle::SubtleUtilBoringSSL::GetNewEd25519Key();
+  auto test_key = internal::NewEd25519Key().ValueOrDie();
   Ed25519PrivateKey ed25519_key;
   ed25519_key.set_version(0);
   ed25519_key.set_key_value(test_key->private_key);
@@ -426,7 +424,7 @@ util::Status ZTestUniformString(absl::string_view bytes) {
     return util::OkStatus();
   }
   return util::Status(
-      util::error::INTERNAL,
+      absl::StatusCode::kInternal,
       absl::StrCat("Z test for uniformly distributed variable out of bounds; "
                    "Actual number of set bits was ",
                    num_set_bits, " expected was ", expected,
@@ -446,7 +444,7 @@ std::string Rotate(absl::string_view bytes) {
 util::Status ZTestCrosscorrelationUniformStrings(absl::string_view bytes1,
                                                  absl::string_view bytes2) {
   if (bytes1.size() != bytes2.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Strings are not of equal length");
   }
   std::string crossed(bytes1.size(), '\0');
@@ -470,7 +468,7 @@ util::Status ZTestAutocorrelationUniformString(absl::string_view bytes) {
     return util::OkStatus();
   }
   return util::Status(
-      util::error::INTERNAL,
+      absl::StatusCode::kInternal,
       absl::StrCat("Autocorrelation exceeded 10 standard deviation at ",
                    violations.size(),
                    " indices: ", absl::StrJoin(violations, ", ")));

@@ -47,9 +47,9 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
   { // pk_sign_set is nullptr.
     auto pk_sign_result = PublicKeySignWrapper().Wrap(nullptr);
     EXPECT_FALSE(pk_sign_result.ok());
-    EXPECT_EQ(util::error::INTERNAL, pk_sign_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal, pk_sign_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        pk_sign_result.status().error_message());
+                        std::string(pk_sign_result.status().message()));
   }
 
   { // pk_sign_set has no primary primitive.
@@ -57,10 +57,10 @@ TEST_F(PublicKeySignSetWrapperTest, testBasic) {
         pk_sign_set(new PrimitiveSet<PublicKeySign>());
     auto pk_sign_result = PublicKeySignWrapper().Wrap(std::move(pk_sign_set));
     EXPECT_FALSE(pk_sign_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-        pk_sign_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+        pk_sign_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        pk_sign_result.status().error_message());
+                        std::string(pk_sign_result.status().message()));
   }
 
   { // Correct pk_sign_set;
@@ -161,7 +161,7 @@ TEST_F(PublicKeySignSetWrapperTest, testLegacySignatures) {
         signature.substr(CryptoFormat::kNonRawPrefixSize);
     auto status = raw_pk_verify->Verify(raw_signature, data);
     EXPECT_FALSE(status.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
 
     // Verify on raw PublicKeyVerify-primitive using legacy-formatted data.
     std::string legacy_data = data;

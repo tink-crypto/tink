@@ -79,22 +79,22 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
   private static final class JwtHmac implements JwtMacInternal {
     private final PrfMac prfMac;
     private final String algorithm;
-    private final Optional<String> customKid;
+    private final Optional<String> customKidFromHmacKey;
 
-    public JwtHmac(String algorithm, Optional<String> customKid, PrfMac prfMac) {
+    public JwtHmac(String algorithm, Optional<String> customKidFromHmacKey, PrfMac prfMac) {
       this.algorithm = algorithm;
-      this.customKid = customKid;
+      this.customKidFromHmacKey = customKidFromHmacKey;
       this.prfMac = prfMac;
     }
 
     @Override
     public String computeMacAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
         throws GeneralSecurityException {
-      if (customKid.isPresent()) {
+      if (customKidFromHmacKey.isPresent()) {
         if (kid.isPresent()) {
           throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
         }
-        kid = customKid;
+        kid = customKidFromHmacKey;
       }
       String unsignedCompact = JwtFormat.createUnsignedCompact(algorithm, kid, rawJwt);
       return JwtFormat.createSignedCompact(
@@ -102,12 +102,13 @@ public final class JwtHmacKeyManager extends KeyTypeManager<JwtHmacKey> {
     }
 
     @Override
-    public VerifiedJwt verifyMacAndDecode(String compact, JwtValidator validator)
+    public VerifiedJwt verifyMacAndDecodeWithKid(
+        String compact, JwtValidator validator, Optional<String> kid)
         throws GeneralSecurityException {
       JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
       prfMac.verifyMac(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
       JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
-      JwtFormat.validateHeader(algorithm, parsedHeader);
+      JwtFormat.validateHeader(algorithm, kid, customKidFromHmacKey, parsedHeader);
       RawJwt token = RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
       return validator.validate(token);
     }

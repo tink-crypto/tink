@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -119,9 +120,13 @@ IsOkAndHolds(InnerMatcher&& inner_matcher) {
 }
 
 // Matches a Status with the specified 'code' as error_code().
+// TODO(lizatretyakova): remove the static_cast and fix the comment above to
+// use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P(StatusIs, code,
-          "is a Status with a " + util::ErrorCodeString(code) + " code") {
-  if (arg.CanonicalCode() == code) {
+          "is a Status with a " +
+              absl::StatusCodeToString(static_cast<absl::StatusCode>(code)) +
+              " code") {
+  if (arg.code() == static_cast<absl::StatusCode>(code)) {
     return true;
   }
   *result_listener << ::testing::PrintToString(arg);
@@ -130,9 +135,11 @@ MATCHER_P(StatusIs, code,
 
 // Matches a Status whose error_code() equals 'code', and whose
 // error_message() matches 'message_macher'.
+// TODO(lizatretyakova): remove the static_cast and fix the comment above to
+// use code() after all StatusIs usages are migrated to use absl::StatusCode.
 MATCHER_P2(StatusIs, code, message_matcher, "") {
-  return (arg.CanonicalCode() == code) &&
-         testing::Matches(message_matcher)(arg.error_message());
+  return (arg.code() == static_cast<absl::StatusCode>(code)) &&
+         testing::Matches(message_matcher)(std::string(arg.message()));
 }
 
 // Matches a Keyset::Key with `key`.

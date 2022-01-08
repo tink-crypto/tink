@@ -19,7 +19,6 @@ package com.google.crypto.tink;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -37,8 +36,7 @@ public final class KmsClients {
   // The list of KmsClients loaded automatically using ServiceLoader.
   private static List<KmsClient> autoClients;
 
-  private static final CopyOnWriteArrayList<KmsClient> clients =
-      new CopyOnWriteArrayList<KmsClient>();
+  private static final CopyOnWriteArrayList<KmsClient> clients = new CopyOnWriteArrayList<>();
 
   /** Adds a client to the list of known {@link KmsClient}-objects. */
   public static void add(KmsClient client) {
@@ -86,13 +84,18 @@ public final class KmsClients {
     throw new GeneralSecurityException("No KMS client does support: " + keyUri);
   }
 
+  static void reset() {
+    clients.clear();
+  }
+
   private static List<KmsClient> loadAutoKmsClients() {
-    List<KmsClient> clients = new ArrayList<KmsClient>();
+    List<KmsClient> clients = new ArrayList<>();
     ServiceLoader<KmsClient> clientLoader = ServiceLoader.load(KmsClient.class);
-    Iterator<KmsClient> i = clientLoader.iterator();
-    while (i.hasNext()) {
-      clients.add(i.next());
+    for (KmsClient element : clientLoader) {
+      clients.add(element);
     }
     return Collections.unmodifiableList(clients);
   }
+
+  private KmsClients() {}
 }

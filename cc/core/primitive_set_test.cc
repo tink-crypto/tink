@@ -159,10 +159,10 @@ TEST_F(PrimitiveSetTest, Basic) {
 
   PrimitiveSet<Mac> primitive_set;
   EXPECT_TRUE(primitive_set.get_primary() == nullptr);
-  EXPECT_EQ(util::error::NOT_FOUND,
-            primitive_set.get_raw_primitives().status().error_code());
-  EXPECT_EQ(util::error::NOT_FOUND,
-            primitive_set.get_primitives("prefix").status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound,
+            primitive_set.get_raw_primitives().status().code());
+  EXPECT_EQ(absl::StatusCode::kNotFound,
+            primitive_set.get_primitives("prefix").status().code());
 
   // Add all the primitives.
   auto add_primitive_result =
@@ -189,8 +189,8 @@ TEST_F(PrimitiveSetTest, Basic) {
   // Try adding a "consumed" unique_ptr as a primitive.
   add_primitive_result = primitive_set.AddPrimitive(std::move(mac_6), key_6);
   EXPECT_FALSE(add_primitive_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            add_primitive_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+            add_primitive_result.status().code());
 
   std::string data = "some data";
 

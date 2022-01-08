@@ -14,6 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "absl/status/status.h"
 #include "tink/prf/prf_set.h"
 
 namespace crypto {
@@ -24,7 +25,7 @@ util::StatusOr<std::string> PrfSet::ComputePrimary(absl::string_view input,
   auto prfs = GetPrfs();
   auto prf_it = prfs.find(GetPrimaryId());
   if (prf_it == prfs.end()) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "PrfSet has no PRF for primary ID.");
   }
   return prf_it->second->Compute(input, output_length);

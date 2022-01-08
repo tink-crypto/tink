@@ -43,6 +43,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+
+	// Placeholder for internal crypto/cipher allowlist, please ignore.
 )
 
 const (

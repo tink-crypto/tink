@@ -15,7 +15,10 @@ describe('hkdf test', function() {
     try {
       await Hkdf.compute(0, 'SHA-256', ikm, info);  // 0 output size
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be positive');
     }
@@ -23,7 +26,10 @@ describe('hkdf test', function() {
     try {
       await Hkdf.compute(-1, 'SHA-256', ikm, info);  // negative output size
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be positive');
     }
@@ -33,7 +39,10 @@ describe('hkdf test', function() {
           /** 255 * digestSize + 1 */ (255 * 20) + 1, 'SHA-1', ikm,
           info);  // size too large
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
@@ -42,7 +51,10 @@ describe('hkdf test', function() {
           /** 255 * digestSize + 1 */ (255 * 32) + 1, 'SHA-256', ikm,
           info);  // size too large
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
 
@@ -51,7 +63,10 @@ describe('hkdf test', function() {
           /** 255 * digestSize + 1 */ (255 * 64) + 1, 'SHA-512', ikm,
           info);  // size too large
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('InvalidArgumentsException: size too large');
     }
   });
@@ -62,7 +77,10 @@ describe('hkdf test', function() {
     try {
       await Hkdf.compute(NaN, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }
@@ -70,7 +88,10 @@ describe('hkdf test', function() {
     try {
       await Hkdf.compute(1.5, 'SHA-256', ikm, info);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString())
           .toBe('InvalidArgumentsException: size must be an integer');
     }

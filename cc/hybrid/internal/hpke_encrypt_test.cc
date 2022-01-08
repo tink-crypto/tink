@@ -19,6 +19,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/test_matchers.h"
@@ -101,7 +102,8 @@ TEST_P(HpkeEncryptWithBadParamTest, BadParamFails) {
   util::StatusOr<std::string> encryption =
       (*hpke_encrypt)->Encrypt(params.plaintext, params.application_info);
 
-  ASSERT_THAT(encryption.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(encryption.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HpkeEncryptWithZeroLengthPublicKey, ZeroLengthPublicKeyFails) {
@@ -115,7 +117,8 @@ TEST(HpkeEncryptWithZeroLengthPublicKey, ZeroLengthPublicKeyFails) {
   util::StatusOr<std::unique_ptr<HybridEncrypt>> hpke_encrypt =
       HpkeEncrypt::New(recipient_key);
 
-  ASSERT_THAT(hpke_encrypt.status(), StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(hpke_encrypt.status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

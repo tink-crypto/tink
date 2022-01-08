@@ -106,4 +106,6 @@ public final class SignatureConfig {
     RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
     Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
   }
+
+  private SignatureConfig() {}
 }

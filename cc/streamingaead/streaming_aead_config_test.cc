@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
@@ -55,11 +56,11 @@ TEST_F(StreamingAeadConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesCtrHmacStreamingKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(StreamingAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
@@ -120,7 +121,7 @@ TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

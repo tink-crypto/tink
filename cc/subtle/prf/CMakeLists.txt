@@ -16,6 +16,7 @@ tink_cc_library(
     tink::core::primitive_set
     tink::core::primitive_wrapper
     tink::util::statusor
+    absl::status
     absl::strings
 )
 
@@ -29,13 +30,15 @@ tink_cc_library(
     crypto
     tink::config::tink_fips
     tink::core::input_stream
+    tink::internal::md_util
+    tink::internal::ssl_unique_ptr
     tink::subtle::subtle
     tink::subtle::subtle_util
-    tink::subtle::subtle_util_boringssl
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     absl::memory
+    absl::status
     absl::strings
 )
 
@@ -52,6 +55,7 @@ tink_cc_library(
     tink::subtle::mac::stateful_mac
     tink::subtle::prf::streaming_prf
     absl::strings
+    absl::status
     absl::memory
 )
 
@@ -81,6 +85,7 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     gmock
+    absl::status
     absl::strings
 )
 
@@ -96,5 +101,6 @@ tink_cc_test(
     tink::subtle::prf::streaming_prf
     gmock
     absl::memory
+    absl::status
     absl::strings
 )

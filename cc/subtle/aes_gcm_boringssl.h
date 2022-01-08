@@ -20,8 +20,7 @@
 #include <memory>
 #include <utility>
 
-#include "absl/base/macros.h"
-#include "openssl/aead.h"
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
@@ -31,35 +30,19 @@ namespace crypto {
 namespace tink {
 namespace subtle {
 
-class AesGcmBoringSsl : public Aead {
+class AesGcmBoringSsl {
  public:
   ABSL_DEPRECATED("Use AesGcmBoringSsl::New(const util::SecretData&) instead.")
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       absl::string_view key_value) {
     return AesGcmBoringSsl::New(util::SecretDataFromStringView(key_value));
   }
+
   static crypto::tink::util::StatusOr<std::unique_ptr<Aead>> New(
       const util::SecretData& key);
 
-  crypto::tink::util::StatusOr<std::string> Encrypt(
-      absl::string_view plaintext,
-      absl::string_view additional_data) const override;
-
-  crypto::tink::util::StatusOr<std::string> Decrypt(
-      absl::string_view ciphertext,
-      absl::string_view additional_data) const override;
-
   static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
-
- private:
-  static constexpr int kIvSizeInBytes = 12;
-  static constexpr int kTagSizeInBytes = 16;
-
-  explicit AesGcmBoringSsl(bssl::UniquePtr<EVP_AEAD_CTX> ctx)
-      : ctx_(std::move(ctx)) {}
-
-  bssl::UniquePtr<EVP_AEAD_CTX> ctx_;
 };
 
 }  // namespace subtle

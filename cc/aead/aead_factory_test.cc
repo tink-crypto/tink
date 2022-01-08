@@ -15,14 +15,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/aead_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_gcm.pb.h"
 #include "proto/tink.pb.h"
@@ -49,9 +52,9 @@ TEST_F(AeadFactoryTest, testBasic) {
   auto aead_result =
       AeadFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(aead_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, aead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, aead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      aead_result.status().error_message());
+                      std::string(aead_result.status().message()));
 }
 
 TEST_F(AeadFactoryTest, testPrimitive) {
@@ -106,10 +109,10 @@ TEST_F(AeadFactoryTest, testPrimitive) {
 
   decrypt_result = aead->Decrypt("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+            decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 
   // Create raw ciphertext with 2nd key, and decrypt with Aead-instance.
   AesGcmKey raw_key;

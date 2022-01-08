@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 """Tests for tink.python.tink.jwt._verified_jwt."""
 
-
 import datetime
 
 from absl.testing import absltest

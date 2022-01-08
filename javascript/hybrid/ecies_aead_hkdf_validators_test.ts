@@ -401,7 +401,8 @@ async function createPrivateKey(
       new PbEciesAeadHkdfPublicKey().setVersion(0).setParams(createParams(
           opt_curveType, opt_hashType, opt_keyTemplate, opt_pointFormat));
   const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-  const jsonPublicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const jsonPublicKey =
+      await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   publicKeyProto.setX(Bytes.fromBase64(
       assertExists(jsonPublicKey['x']), /* opt_webSafe = */ true));
   publicKeyProto.setY(Bytes.fromBase64(
@@ -412,7 +413,7 @@ async function createPrivateKey(
       new PbEciesAeadHkdfPrivateKey().setVersion(0).setPublicKey(
           publicKeyProto);
   const jsonPrivateKey =
-      await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+      await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
   privateKeyProto.setKeyValue(Bytes.fromBase64(
       assertExists(jsonPrivateKey['d']), /* opt_webSafe = */ true));
 

@@ -17,10 +17,25 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-// Definitions for Dilithium Digital Signature Algorithm.
+enum DilithiumSeedExpansion {
+  SEED_EXPANSION_UNKNOWN = 0;
+  SEED_EXPANSION_SHAKE = 1;
+  SEED_EXPANSION_AES = 2;
+}
+
+// Protos for Dilithium Digital Signature Algorithm.
 // See https://pq-crystals.org/dilithium/data/dilithium-specification-round3.pdf
+message DilithiumParams {
+  // Required
+  int32 key_size = 1;
+  // Required.
+  DilithiumSeedExpansion seed_expansion = 2;
+}
+
 message DilithiumKeyFormat {
   uint32 version = 1;
+  // Required.
+  DilithiumParams params = 2;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.DilithiumPublicKey
@@ -29,6 +44,8 @@ message DilithiumPublicKey {
   uint32 version = 1;
   // Required.
   bytes key_value = 2;
+  // Required
+  DilithiumParams params = 3;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.DilithiumPrivateKey

@@ -158,7 +158,7 @@ class StatusOr {
 
 template <typename T>
 inline StatusOr<T>::StatusOr()
-    : status_(::crypto::tink::util::error::UNKNOWN, "") {
+    : status_(absl::StatusCode::kUnknown, "") {
 }
 
 template <typename T>

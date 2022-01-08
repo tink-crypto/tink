@@ -59,6 +59,9 @@ class DilithiumVerifyKeyManager
   crypto::tink::util::Status ValidateKey(
       const google::crypto::tink::DilithiumPublicKey& key) const override;
 
+  crypto::tink::util::Status ValidateParams(
+      const google::crypto::tink::DilithiumParams& params) const;
+
  private:
   const std::string key_type_ =
       absl::StrCat(kTypeGoogleapisCom,

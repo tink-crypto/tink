@@ -16,6 +16,7 @@
 
 #include "tink/streamingaead/streaming_aead_wrapper.h"
 
+#include "absl/status/status.h"
 #include "tink/streaming_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/input_stream.h"
@@ -37,19 +38,20 @@ namespace {
 
 Status Validate(PrimitiveSet<StreamingAead>* primitives) {
   if (primitives == nullptr) {
-    return Status(util::error::INTERNAL, "primitive set must be non-NULL");
+    return Status(absl::StatusCode::kInternal,
+                  "primitive set must be non-NULL");
   }
   if (primitives->get_primary() == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitive set has no primary");
   }
   auto raw_primitives_result = primitives->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "primitive set has no raw primitives");
   }
   // TODO(b/129044084)
-  return Status::OK;
+  return util::OkStatus();
 }
 
 class StreamingAeadSetWrapper: public StreamingAead {
@@ -61,18 +63,18 @@ class StreamingAeadSetWrapper: public StreamingAead {
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
   NewEncryptingStream(
       std::unique_ptr<crypto::tink::OutputStream> ciphertext_destination,
-      absl::string_view associated_data) override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
   NewDecryptingStream(
       std::unique_ptr<crypto::tink::InputStream> ciphertext_source,
-      absl::string_view associated_data) override;
+      absl::string_view associated_data) const override;
 
   crypto::tink::util::StatusOr<
       std::unique_ptr<crypto::tink::RandomAccessStream>>
   NewDecryptingRandomAccessStream(
       std::unique_ptr<crypto::tink::RandomAccessStream> ciphertext_source,
-      absl::string_view associated_data) override;
+      absl::string_view associated_data) const override;
 
   ~StreamingAeadSetWrapper() override {}
 
@@ -88,7 +90,7 @@ class StreamingAeadSetWrapper: public StreamingAead {
 StatusOr<std::unique_ptr<OutputStream>>
 StreamingAeadSetWrapper::NewEncryptingStream(
     std::unique_ptr<OutputStream> ciphertext_destination,
-    absl::string_view associated_data) {
+    absl::string_view associated_data) const {
   return primitives_->get_primary()->get_primitive().NewEncryptingStream(
           std::move(ciphertext_destination), associated_data);
 }
@@ -96,7 +98,7 @@ StreamingAeadSetWrapper::NewEncryptingStream(
 StatusOr<std::unique_ptr<InputStream>>
 StreamingAeadSetWrapper::NewDecryptingStream(
     std::unique_ptr<InputStream> ciphertext_source,
-    absl::string_view associated_data) {
+    absl::string_view associated_data) const {
   return {streamingaead::DecryptingInputStream::New(
       primitives_, std::move(ciphertext_source), associated_data)};
 }
@@ -104,7 +106,7 @@ StreamingAeadSetWrapper::NewDecryptingStream(
 StatusOr<std::unique_ptr<RandomAccessStream>>
 StreamingAeadSetWrapper::NewDecryptingRandomAccessStream(
     std::unique_ptr<RandomAccessStream> ciphertext_source,
-    absl::string_view associated_data) {
+    absl::string_view associated_data) const {
   return {streamingaead::DecryptingRandomAccessStream::New(
       primitives_, std::move(ciphertext_source), associated_data)};
 }

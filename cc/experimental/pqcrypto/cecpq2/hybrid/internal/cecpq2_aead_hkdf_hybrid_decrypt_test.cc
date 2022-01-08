@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
@@ -102,7 +103,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Regular Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
@@ -118,7 +119,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Empty Context Info Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
@@ -135,16 +136,16 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         }
         if (empty_plaintext != decrypt_result.ValueOrDie())
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Empty Context Info and Message Encryption-Decryption failed:"
               "ciphertext differs from plaintext");
       }
       {  // Short bad ciphertext
         auto decrypt_result =
             hybrid_decrypt->Decrypt(Random::GetRandomBytes(16), context_info);
-        if (decrypt_result.status().error_code() !=
-                util::error::INVALID_ARGUMENT ||
-            !absl::StrContains(decrypt_result.status().error_message(),
+        if (decrypt_result.status().code() !=
+                absl::StatusCode::kInvalidArgument ||
+            !absl::StrContains(decrypt_result.status().message(),
                                "ciphertext too short")) {
           return decrypt_result.status();
         }
@@ -153,7 +154,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
         auto decrypt_result =
             hybrid_decrypt->Decrypt(Random::GetRandomBytes(1198), context_info);
         if (decrypt_result.ok()) {
-          return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+          return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                             "Decrypted random ciphertext");
         }
       }
@@ -162,7 +163,7 @@ class Cecpq2AeadHkdfHybridDecryptTest : public ::testing::Test {
             hybrid_decrypt->Decrypt(ciphertext, Random::GetRandomBytes(14));
         if (decrypt_result.ok()) {
           return crypto::tink::util::Status(
-              crypto::tink::util::error::INTERNAL,
+              absl::StatusCode::kInternal,
               "Decrypted ciphertext with random context info");
         }
       }
@@ -230,7 +231,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyNoFieldsSet) {
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(
                   google::crypto::tink::Cecpq2AeadHkdfPrivateKey())
                   .status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -239,7 +240,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyX25519PrivKeyFieldMissing) {
       CreateValidKey();
   recipient_key.set_x25519_private_key("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -248,7 +249,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyX25519PubKeyFieldMissing) {
       CreateValidKey();
   recipient_key.mutable_public_key()->set_x25519_public_key_x("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -257,7 +258,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyHrssPrivKeyFieldMissing) {
       CreateValidKey();
   recipient_key.set_hrss_private_key_seed("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -266,7 +267,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyHrssPubKeyFieldMissing) {
       CreateValidKey();
   recipient_key.mutable_public_key()->set_hrss_public_key_marshalled("");
   EXPECT_THAT(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -279,7 +280,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyWrongEcType) {
       ->set_curve_type(google::crypto::tink::EllipticCurveType::NIST_P256);
   auto result(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key));
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::UNIMPLEMENTED,
+              StatusIs(absl::StatusCode::kUnimplemented,
                        HasSubstr("Unsupported elliptic curve")));
 }
 
@@ -300,7 +301,7 @@ TEST_F(Cecpq2AeadHkdfHybridDecryptTest, InvalidKeyUnsupportedDem) {
       ->mutable_aead_dem()
       ->set_type_url("some.type.url/that.is.not.supported");
   auto result(Cecpq2AeadHkdfHybridDecrypt::New(recipient_key));
-  EXPECT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("Unsupported DEM")));
 }
 

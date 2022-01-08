@@ -426,4 +426,6 @@ final class Curve25519 {
     Field25519.square(t, t);
     return Bytes.equal(Field25519.contract(lhs), Field25519.contract(t));
   }
+
+  private Curve25519() {}
 }

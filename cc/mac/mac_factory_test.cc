@@ -16,6 +16,9 @@
 
 #include "tink/mac/mac_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/key_info.h"
@@ -23,8 +26,8 @@
 #include "tink/mac.h"
 #include "tink/mac/hmac_key_manager.h"
 #include "tink/mac/mac_config.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/common.pb.h"
 #include "proto/hmac.pb.h"
@@ -52,9 +55,9 @@ TEST_F(MacFactoryTest, testBasic) {
   auto mac_result =
       MacFactory::GetPrimitive(*TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(mac_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, mac_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, mac_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      mac_result.status().error_message());
+                      std::string(mac_result.status().message()));
 }
 
 TEST_F(MacFactoryTest, testPrimitive) {
@@ -112,15 +115,15 @@ TEST_F(MacFactoryTest, testPrimitive) {
 
   status = mac->VerifyMac(mac_value, "bad data for mac");
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
-                      status.error_message());
+                      std::string(status.message()));
 
   status = mac->VerifyMac("some bad mac value", data);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "verification failed",
-                      status.error_message());
+                      std::string(status.message()));
 
   // Create raw MAC value with 2nd key, and verify with Mac-instance.
   auto raw_mac = std::move(

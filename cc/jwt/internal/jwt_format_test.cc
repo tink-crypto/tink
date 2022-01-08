@@ -92,8 +92,10 @@ TEST(JwtFormat, DecodeAndValidateFixedHeaderHS256) {
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
 
-  EXPECT_THAT(ValidateHeader(*header, "HS256"), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "RS256").ok());
+  EXPECT_THAT(ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "RS256", absl::nullopt, absl::nullopt).ok());
 }
 
 TEST(JwtFormat, DecodeAndValidateFixedHeaderRS256) {
@@ -108,8 +110,10 @@ TEST(JwtFormat, DecodeAndValidateFixedHeaderRS256) {
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
 
-  EXPECT_THAT(ValidateHeader(*header, "RS256"), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "HS256").ok());
+  EXPECT_THAT(ValidateHeader(*header, "RS256", absl::nullopt, absl::nullopt),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt).ok());
 }
 
 TEST(JwtFormat, CreateValidateHeader) {
@@ -124,8 +128,10 @@ TEST(JwtFormat, CreateValidateHeader) {
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
 
-  EXPECT_THAT(ValidateHeader(*header, "PS384"), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "HS256").ok());
+  EXPECT_THAT(ValidateHeader(*header, "PS384", absl::nullopt, absl::nullopt),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt).ok());
 }
 
 TEST(JwtFormat, CreateValidateHeaderWithTypeAndKid) {
@@ -141,8 +147,10 @@ TEST(JwtFormat, CreateValidateHeaderWithTypeAndKid) {
   EXPECT_THAT(header.status(), IsOk());
 
   EXPECT_THAT(GetTypeHeader(*header), Eq("JWT"));
-  EXPECT_THAT(ValidateHeader(*header, "PS384"), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "HS256").ok());
+  EXPECT_THAT(ValidateHeader(*header, "PS384", absl::nullopt, absl::nullopt),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt).ok());
 
   auto it = header->fields().find("kid");
   EXPECT_FALSE(it == header->fields().end());
@@ -153,7 +161,8 @@ TEST(JwtFormat, CreateValidateHeaderWithTypeAndKid) {
 
 TEST(JwtFormat, ValidateEmptyHeaderFails) {
   google::protobuf::Struct empty_header;
-  EXPECT_FALSE(ValidateHeader(empty_header, "HS256").ok());
+  EXPECT_FALSE(
+      ValidateHeader(empty_header, "HS256", absl::nullopt, absl::nullopt).ok());
 }
 
 TEST(JwtFormat, ValidateHeaderWithUnknownTypeOk) {
@@ -162,7 +171,8 @@ TEST(JwtFormat, ValidateHeaderWithUnknownTypeOk) {
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
 
-  EXPECT_THAT(ValidateHeader(*header, "HS256"), IsOk());
+  EXPECT_THAT(ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt),
+              IsOk());
 }
 
 TEST(JwtFormat, ValidateHeaderRejectsCrit) {
@@ -172,7 +182,8 @@ TEST(JwtFormat, ValidateHeaderRejectsCrit) {
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "HS256").ok());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt).ok());
 }
 
 TEST(JwtFormat, ValidateHeaderWithUnknownEntry) {
@@ -180,7 +191,8 @@ TEST(JwtFormat, ValidateHeaderWithUnknownEntry) {
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
-  EXPECT_THAT(ValidateHeader(*header, "HS256"), IsOk());
+  EXPECT_THAT(ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt),
+              IsOk());
 }
 
 TEST(JwtFormat, ValidateHeaderWithInvalidAlgTypFails) {
@@ -188,7 +200,58 @@ TEST(JwtFormat, ValidateHeaderWithInvalidAlgTypFails) {
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   EXPECT_THAT(header.status(), IsOk());
-  EXPECT_FALSE(ValidateHeader(*header, "HS256").ok());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, absl::nullopt).ok());
+}
+
+TEST(JwtFormat, ValidateHeaderWithTinkKid) {
+  std::string json_header = R"({"alg":"HS256","kid":"tink_kid"})";
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header.status(), IsOk());
+  EXPECT_THAT(ValidateHeader(*header, "HS256", "tink_kid", absl::nullopt),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", "other_tink_kid", absl::nullopt).ok());
+}
+
+TEST(JwtFormat, ValidateHeaderWithTinkKidMissingFails) {
+  std::string json_header = R"({"alg":"HS256"})";
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header.status(), IsOk());
+  // If tink_kid is set, then the kid is required in the header.
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", "tink_kid", absl::nullopt).ok());
+}
+
+TEST(JwtFormat, ValidateHeaderWithCustomKid) {
+  std::string json_header = R"({"alg":"HS256","kid":"custom_kid"})";
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header.status(), IsOk());
+  EXPECT_THAT(ValidateHeader(*header, "HS256", absl::nullopt, "custom_kid"),
+              IsOk());
+  EXPECT_FALSE(
+      ValidateHeader(*header, "HS256", absl::nullopt, "other_custom_kid").ok());
+}
+
+TEST(JwtFormat, ValidateHeaderWithCustomKidMissingFails) {
+  std::string json_header = R"({"alg":"HS256"})";
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header.status(), IsOk());
+  // If custom_kid is set, then the kid is not required in the header.
+  EXPECT_THAT(ValidateHeader(*header, "HS256", absl::nullopt, "custom_kid"),
+              IsOk());
+}
+
+TEST(JwtFormat, ValidateHeaderWithTinkAndCustomKidFails) {
+  std::string json_header = R"({"alg":"HS256","kid":"tink_kid"})";
+  util::StatusOr<google::protobuf::Struct> header =
+      JsonStringToProtoStruct(json_header);
+  EXPECT_THAT(header.status(), IsOk());
+  EXPECT_FALSE(ValidateHeader(*header, "HS256", "kid", "kid").ok());
 }
 
 TEST(JwtFormat, GetKidWithTinkOutputPrefixType) {

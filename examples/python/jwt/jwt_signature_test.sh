@@ -19,12 +19,14 @@ set -euo pipefail
 #############################################################################
 ##### Tests for digital signature example.
 
-CLI="$1"
-PRIVATE_KEYSET_PATH="$2"
-PUBLIC_KEYSET_PATH="$3"
+SIGN_CLI="$1"
+GEN_PUBLIC_JWK_SET_CLI="$2"
+VERIFY_CLI="$3"
+PRIVATE_KEYSET_PATH="$4"
 
-SUBJECT="subject"
+AUDIENCE="audience"
 TOKEN_PATH="${TEST_TMPDIR}/token.txt"
+PUBLIC_JWK_SET_PATH="${TEST_TMPDIR}/public_jwk_set.json"
 
 #############################################################################
 
@@ -47,80 +49,129 @@ print_test() {
 
 #############################################################################
 
-print_test "normal_signing_and_verification"
+print_test "generate_token"
 
-# Run signing
-test_command ${CLI} --mode sign \
+# Generate a signed token
+test_command ${SIGN_CLI} \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
-
-# Run verification
-test_command ${CLI} --mode verify \
-  --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --audience "${AUDIENCE}" \
+  --token_path "${TOKEN_PATH}"
 
 if (( TEST_STATUS == 0 )); then
-  echo "+++ Success: Signature is valid."
+  echo "+++ Success: Generating the token succeeded."
 else
-  echo "--- Failure: the Signature is invalid."
+  echo "--- Failure: Generating the token failed."
   exit 1
 fi
 
-
 #############################################################################
 
-print_test "signature_verification_fails_with_incorrect_signature"
+print_test "generate_public_keyset"
 
-# Create a wrong signature.
-echo "ABCABCABCD" > $TOKEN_PATH
-
-# Run verification.
-test_command ${CLI} --mode verify \
-  --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
-
-if (( TEST_STATUS != 0 )); then
-  echo "+++ Success: Signature verification failed for invalid signature."
-else
-  echo "--- Failure: Signature passed for an invalid signature."
-  exit 1
-fi
-
-
-#############################################################################
-
-print_test "signature_verification_fails_with_incorrect_subject"
-
-# Run signing
-test_command ${CLI} --mode sign \
+# Generate the public keyset in JWK format
+test_command ${GEN_PUBLIC_JWK_SET_CLI} \
   --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+  --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}"
 
-# Run verification.
-test_command ${CLI} --mode verify \
-  --keyset_path "${PUBLIC_KEYSET_PATH}" \
-  --subject "invalid subject" --token_path "${TOKEN_PATH}"
-
-if (( TEST_STATUS != 0 )); then
-  echo "+++ Success: Signature verification failed for invalid signature."
+if (( TEST_STATUS == 0 )); then
+  echo "+++ Success: Generating the public JWK set succeeded."
 else
-  echo "--- Failure: Signature passed for an invalid signature."
+  echo "--- Failure: Generating the public JWK set failed."
+  exit 1
+fi
+
+#############################################################################
+
+print_test "normal_verification"
+
+# Verify the token
+test_command ${VERIFY_CLI} \
+  --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}" \
+  --audience "${AUDIENCE}" \
+  --token_path "${TOKEN_PATH}"
+
+if (( TEST_STATUS == 0 )); then
+  echo "+++ Success: Verification passed for a valid token."
+else
+  echo "--- Failure: Verification failed for a valid token."
   exit 1
 fi
 
 
 #############################################################################
 
-print_test "singing_fails_with_a_wrong_keyset"
+print_test "verification_fails_with_invalid_token"
 
-# Run computation.
-test_command ${CLI} --mode verify \
-  --keyset_path "${PRIVATE_KEYSET_PATH}" \
-  --subject "${SUBJECT}" --token_path "${TOKEN_PATH}"
+# Create an invalid token.
+INVALID_TOKEN_PATH="${TEST_TMPDIR}/invalid_token.txt"
+echo "ABCABCABCD" > $INVALID_TOKEN_PATH
+
+# Verify the invalid token
+test_command ${VERIFY_CLI} \
+  --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}" \
+  --audience "${AUDIENCE}" \
+  --token_path "${INVALID_TOKEN_PATH}"
 
 if (( TEST_STATUS != 0 )); then
-  echo "+++ Success: Signature computation failed with public keyset."
+  echo "+++ Success: Verification failed for an invalid token."
 else
-  echo "--- Failure: Signature computation did not fail with public keyset."
+  echo "--- Failure: Verification passed for an invalid token."
+  exit 1
+fi
+
+
+#############################################################################
+
+print_test "verification_fails_with_incorrect_audience"
+
+# Verify the token with an invalid audience
+test_command ${VERIFY_CLI} \
+  --public_jwk_set_path "${PUBLIC_JWK_SET_PATH}" \
+  --audience "invalid audience" \
+  --token_path "${TOKEN_PATH}"
+
+if (( TEST_STATUS != 0 )); then
+  echo "+++ Success: Verification failed with an invalid audience."
+else
+  echo "--- Failure: Verification passed with an invalid audience."
+  exit 1
+fi
+
+
+#############################################################################
+
+print_test "generating_token_fails_with_invalid_keyset"
+
+# Use a different token path
+TOKEN2_PATH="${TEST_TMPDIR}/token2.txt"
+
+# Try to generate a signed token using the public keyset
+test_command ${SIGN_CLI} \
+  --keyset_path "${PUBLIC_JWK_SET_PATH}" \
+  --audience "${AUDIENCE}" \
+  --token_path "${TOKEN2_PATH} "
+
+if (( TEST_STATUS != 0 )); then
+  echo "+++ Success: Generating a token failed with invalid keyset."
+else
+  echo "--- Failure: Generating a token did not fail with invalid keyset."
+  exit 1
+fi
+
+
+#############################################################################
+
+print_test "verify_fails_with_a_invalid_keyset"
+
+# Try to verify the token using the private key
+test_command ${VERIFY_CLI} \
+  --public_jwk_set_path "${PRIVATE_KEYSET_PATH}" \
+  --audience "${AUDIENCE}" \
+  --token_path "${TOKEN_PATH}"
+
+if (( TEST_STATUS != 0 )); then
+  echo "+++ Success: Verification failed with invalid keyset."
+else
+  echo "--- Failure: Verification did not fail with invalid keyset."
   exit 1
 fi

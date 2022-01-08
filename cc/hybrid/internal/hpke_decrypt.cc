@@ -19,11 +19,12 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/hybrid/internal/hpke_decrypt_boringssl.h"
 #include "tink/hybrid/internal/hpke_key_boringssl.h"
+#include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/ec_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/hpke.pb.h"
@@ -36,15 +37,15 @@ using ::google::crypto::tink::HpkeKem;
 using ::google::crypto::tink::HpkeParams;
 using ::google::crypto::tink::HpkePrivateKey;
 
-util::StatusOr<uint32_t> EncodingSize(HpkeKem kem) {
+util::StatusOr<int32_t> EncodingSize(HpkeKem kem) {
   switch (kem) {
     case HpkeKem::DHKEM_X25519_HKDF_SHA256:
-      return subtle::EcUtil::EncodingSizeInBytes(
+      return internal::EcPointEncodingSizeInBytes(
           subtle::EllipticCurveType::CURVE25519,
           subtle::EcPointFormat::UNCOMPRESSED);
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unable to determine KEM-encoding length for ", kem));
   }
 }
@@ -54,15 +55,15 @@ util::StatusOr<uint32_t> EncodingSize(HpkeKem kem) {
 util::StatusOr<std::unique_ptr<HybridDecrypt>> HpkeDecrypt::New(
     const HpkePrivateKey& recipient_private_key) {
   if (recipient_private_key.private_key().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is empty.");
   }
   if (!recipient_private_key.has_public_key()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is missing public key.");
   }
   if (!recipient_private_key.public_key().has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Recipient private key is missing HPKE parameters.");
   }
   HpkeParams hpke_params = recipient_private_key.public_key().params();
@@ -77,14 +78,12 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> HpkeDecrypt::New(
 
 util::StatusOr<std::string> HpkeDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
-  util::StatusOr<uint32_t> encoding_size_result =
-      EncodingSize(hpke_params_.kem());
-  if (!encoding_size_result.ok()) {
-    return encoding_size_result.status();
+  util::StatusOr<int32_t> encoding_size = EncodingSize(hpke_params_.kem());
+  if (!encoding_size.ok()) {
+    return encoding_size.status();
   }
-  uint32_t length = *encoding_size_result;
-  absl::string_view encapsulated_key = ciphertext.substr(0, length);
-  absl::string_view ciphertext_payload = ciphertext.substr(length);
+  absl::string_view encapsulated_key = ciphertext.substr(0, *encoding_size);
+  absl::string_view ciphertext_payload = ciphertext.substr(*encoding_size);
   util::StatusOr<std::unique_ptr<internal::HpkeDecryptBoringSsl>>
       recipient_context = internal::HpkeDecryptBoringSsl::New(
           hpke_params_, *recipient_private_key_, encapsulated_key,

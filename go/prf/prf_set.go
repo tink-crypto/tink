@@ -76,13 +76,13 @@ func (s Set) ComputePrimaryPRF(input []byte, outputLength uint32) ([]byte, error
 }
 
 func init() {
-	if err := registry.RegisterKeyManager(newHMACPRFKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(hmacprfKeyManager)); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newHKDFPRFKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(hkdfprfKeyManager)); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
-	if err := registry.RegisterKeyManager(newAESCMACPRFKeyManager()); err != nil {
+	if err := registry.RegisterKeyManager(new(aescmacprfKeyManager)); err != nil {
 		panic(fmt.Sprintf("prf.init() failed: %v", err))
 	}
 }

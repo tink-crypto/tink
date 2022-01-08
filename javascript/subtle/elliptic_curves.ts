@@ -361,7 +361,7 @@ export function pointEncode(
     curve: string, format: PointFormatType, point: JsonWebKey): Uint8Array {
   const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
-    case PointFormatType.UNCOMPRESSED:
+    case PointFormatType.UNCOMPRESSED: {
       const {x, y} = point;
       if (x === undefined) {
         throw new InvalidArgumentsException('x must be provided');
@@ -378,16 +378,41 @@ export function pointEncode(
           /* opt_webSafe = */
           Bytes.fromBase64(y, true), 1 + fieldSize);
       return result;
+    }
+    case PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      const {x, y} = point;
+      if (x === undefined) {
+        throw new InvalidArgumentsException('x must be provided');
+      }
+      if (y === undefined) {
+        throw new InvalidArgumentsException('y must be provided');
+      }
+      let decodedX = Bytes.fromBase64(x, /* opt_webSafe = */ true);
+      let decodedY = Bytes.fromBase64(y, /* opt_webSafe = */ true);
+      if (decodedX.length > fieldSize) {
+        // x has leading 0's, strip them.
+        decodedX = decodedX.slice(decodedX.length - fieldSize, decodedX.length);
+      }
+      if (decodedY.length > fieldSize) {
+        // y has leading 0's, strip them.
+        decodedY = decodedY.slice(decodedY.length - fieldSize, decodedY.length);
+      }
+      const result = new Uint8Array(2 * fieldSize);
+      result.set(decodedX, 0);
+      result.set(decodedY, fieldSize);
+      return result;
+    }
+    default:
+      throw new InvalidArgumentsException('invalid format');
   }
-  throw new InvalidArgumentsException('invalid format');
 }
 
 export function pointDecode(
     curve: string, format: PointFormatType, point: Uint8Array): JsonWebKey {
   const fieldSize = fieldSizeInBytes(curveFromString(curve));
   switch (format) {
-    case PointFormatType.UNCOMPRESSED:
-      if (point.length != 1 + 2 * fieldSize || point[0] != 4) {
+    case PointFormatType.UNCOMPRESSED: {
+      if (point.length !== 1 + 2 * fieldSize || point[0] !== 4) {
         throw new InvalidArgumentsException('invalid point');
       }
       const result = ({
@@ -404,8 +429,26 @@ export function pointDecode(
         'ext': true
       } as JsonWebKey);
       return result;
+    }
+    case PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED: {
+      if (point.length !== 2 * fieldSize) {
+        throw new InvalidArgumentsException('invalid point');
+      }
+      const result = ({
+        'kty': 'EC',
+        'crv': curve,
+        'x': Bytes.toBase64(
+            new Uint8Array(point.subarray(0, fieldSize)), /* websafe */ true),
+        'y': Bytes.toBase64(
+            new Uint8Array(point.subarray(fieldSize, point.length)),
+            /* websafe */ true),
+        'ext': true
+      } as JsonWebKey);
+      return result;
+    }
+    default:
+      throw new InvalidArgumentsException('invalid format');
   }
-  throw new InvalidArgumentsException('invalid format');
 }
 
 export function getJsonWebKey(

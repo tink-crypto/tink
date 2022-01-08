@@ -92,6 +92,13 @@ java_library(
 )
 
 java_library(
+    name = "kms_clients_test_util",
+    testonly = 1,
+    srcs = ["KmsClientsTestUtil.java"],
+    deps = [":kms_clients"],
+)
+
+java_library(
     name = "keyset_writer",
     srcs = ["KeysetWriter.java"],
     deps = ["//proto:tink_java_proto"],
@@ -250,6 +257,7 @@ java_library(
         ":key_template",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )
@@ -261,6 +269,7 @@ android_library(
         ":key_template-android",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
         "@com_google_protobuf//:protobuf_javalite",
     ],
 )

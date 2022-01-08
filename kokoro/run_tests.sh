@@ -21,7 +21,6 @@ set -e
 # Display commands to stderr.
 set -x
 
-./kokoro/copy_credentials.sh
 
 readonly PLATFORM="$(uname | tr '[:upper:]' '[:lower:]')"
 
@@ -36,12 +35,26 @@ run_linux_tests() {
   shift 1
   local manual_targets=("$@")
 
+  # This is needed to handle recent Chrome distributions on macOS which have
+  # paths with spaces.
+  #
+  # Context:
+  # https://github.com/bazelbuild/bazel/issues/4327#issuecomment-627422865
+  local -a BAZEL_FLAGS
+  if [[ "${PLATFORM}" == 'darwin' && "${workspace_dir}" == 'javascript' ]]; then
+    BAZEL_FLAGS+=( --experimental_inprocess_symlink_creation )
+  fi
+  readonly BAZEL_FLAGS
+
   local -a TEST_FLAGS=( --strategy=TestRunner=standalone --test_output=all )
+  if [[ "${PLATFORM}" == 'darwin' ]]; then
+    TEST_FLAGS+=( --jvmopt="-Djava.net.preferIPv6Addresses=true" )
+  fi
   readonly TEST_FLAGS
   (
     cd "${workspace_dir}"
-    time bazel build -- ... || fail_with_debug_output
-    time bazel test "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel build "${BAZEL_FLAGS[@]}" -- ... || fail_with_debug_output
+    time bazel test "${BAZEL_FLAGS[@]}" "${TEST_FLAGS[@]}" -- ... || fail_with_debug_output
     if (( ${#manual_targets[@]} > 0 )); then
       time bazel test "${TEST_FLAGS[@]}"  -- "${manual_targets[@]}" \
         || fail_with_debug_output
@@ -89,10 +102,6 @@ run_all_linux_tests() {
 }
 
 run_macos_tests() {
-  # Default values for iOS SDK and Xcode. Can be overriden by another script.
-  : "${IOS_SDK_VERSION:=13.2}"
-  : "${XCODE_VERSION:=11.3}"
-
   local -a BAZEL_FLAGS=(
     --compilation_mode=dbg --dynamic_mode=off --cpu=ios_x86_64
     --ios_cpu=x86_64 --experimental_enable_objc_cc_deps
@@ -182,12 +191,20 @@ main() {
     fi
 
     if [[ "${PLATFORM}" == 'darwin' ]]; then
+      # Default values for iOS SDK and Xcode. Can be overriden by another script.
+      : "${IOS_SDK_VERSION:=13.2}"
+      : "${XCODE_VERSION:=11.3}"
+
       export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
       export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
+      export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
       # TODO(b/155225382): Avoid modifying the sytem Python installation.
       pip3 install --user protobuf
     fi
+
+    ./kokoro/copy_credentials.sh
+    ./kokoro/update_android_sdk.sh
   fi
 
   # Verify required environment variables.

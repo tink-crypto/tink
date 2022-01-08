@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -76,7 +77,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
     position = contents->size();
     status = ra_stream->PRead(position, chunk_size, buffer.get());
   }
-  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
     EXPECT_EQ(0, buffer->size());
   }
   return status;
@@ -118,18 +119,18 @@ TEST(StreamingAeadSetWrapperTest, WrapNullptr) {
   StreamingAeadWrapper wrapper;
   auto result = wrapper.Wrap(nullptr);
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INTERNAL, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInternal, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(StreamingAeadSetWrapperTest, WrapEmpty) {
   StreamingAeadWrapper wrapper;
   auto result = wrapper.Wrap(absl::make_unique<PrimitiveSet<StreamingAead>>());
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(StreamingAeadSetWrapperTest, BasicEncryptionAndDecryption) {
@@ -235,7 +236,7 @@ TEST(StreamingAeadSetWrapperTest, DecryptionWithRandomAccessStream) {
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
       status = ReadAll(dec_stream_result.ValueOrDie().get(), &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE,
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                    HasSubstr("EOF")));
       EXPECT_EQ(plaintext, decrypted);
     }
@@ -316,7 +317,7 @@ TEST(StreamingAeadSetWrapperTest, MissingRawPrimitives) {
   // Wrap saead_set and test the resulting StreamingAead.
   StreamingAeadWrapper wrapper;
   auto wrap_result = wrapper.Wrap(std::move(saead_set));
-  EXPECT_THAT(wrap_result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(wrap_result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                              HasSubstr("no raw primitives")));
 }
 

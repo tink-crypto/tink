@@ -13,24 +13,20 @@
 # limitations under the License.
 """Cross-language tests for the "kid" header set by JWT primitives."""
 
-# Placeholder for import for type annotations
-
 import base64
 import json
-from typing import Text, Optional
+from typing import Optional
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import tink
+from tink import jwt
 
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
-
-from tink import jwt
 from util import supported_key_types
 from util import testing_servers
 
@@ -52,7 +48,7 @@ def base64_decode(encoded_data: bytes) -> bytes:
   return base64.urlsafe_b64decode(padded_encoded_data)
 
 
-def decode_kid(compact: Text) -> Optional[Text]:
+def decode_kid(compact: str) -> Optional[str]:
   encoded_header, _, _ = compact.encode('utf8').split(b'.')
   json_header = base64_decode(encoded_header)
   header = json.loads(json_header)
@@ -60,7 +56,7 @@ def decode_kid(compact: Text) -> Optional[Text]:
 
 
 def generate_jwt_mac_keyset_with_custom_kid(
-    template_name: Text, custom_kid: Text) -> tink_pb2.Keyset:
+    template_name: str, custom_kid: str) -> tink_pb2.Keyset:
   key_template = supported_key_types.KEY_TEMPLATE[template_name]
   keyset_handle = tink.new_keyset_handle(key_template)
   # parse key_data.value, set custom_kid and serialize
@@ -76,7 +72,7 @@ def generate_jwt_mac_keyset_with_custom_kid(
 
 
 def generate_jwt_signature_keyset_with_custom_kid(
-    template_name: Text, custom_kid: Text) -> tink_pb2.Keyset:
+    template_name: str, custom_kid: str) -> tink_pb2.Keyset:
   key_template = supported_key_types.KEY_TEMPLATE[template_name]
   keyset_handle = tink.new_keyset_handle(key_template)
   # parse key_data.value, set custom_kid and serialize

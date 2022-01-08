@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/internal/key_info.h"
@@ -61,7 +62,7 @@ util::StatusOr<std::unique_ptr<Keyset>> Decrypt(
   auto keyset = absl::make_unique<Keyset>();
   if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Could not parse the decrypted data as a Keyset-proto.");
   }
   return std::move(keyset);
@@ -73,12 +74,12 @@ util::Status ValidateNoSecret(const Keyset& keyset) {
         key.key_data().key_material_type() == KeyData::SYMMETRIC ||
         key.key_data().key_material_type() == KeyData::ASYMMETRIC_PRIVATE) {
       return util::Status(
-          util::error::FAILED_PRECONDITION,
+          absl::StatusCode::kFailedPrecondition,
           "Cannot create KeysetHandle with secret key material from "
           "potentially unencrypted source.");
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace
@@ -96,17 +97,17 @@ KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
                                      absl::string_view associated_data) {
   auto enc_keyset_result = reader->ReadEncrypted();
   if (!enc_keyset_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error reading encrypted keyset data: %s",
-                     enc_keyset_result.status().error_message());
+                     enc_keyset_result.status().message());
   }
 
   auto keyset_result = Decrypt(*enc_keyset_result.ValueOrDie(), master_key_aead,
                                associated_data);
   if (!keyset_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error decrypting encrypted keyset: %s",
-                     keyset_result.status().error_message());
+                     keyset_result.status().message());
   }
 
   std::unique_ptr<KeysetHandle> handle(
@@ -119,7 +120,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> KeysetHandle::ReadNoSecret(
     const std::string& serialized_keyset) {
   Keyset keyset;
   if (!keyset.ParseFromString(serialized_keyset)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Could not parse the input string as a Keyset-proto.");
   }
   util::Status validation = ValidateNoSecret(keyset);
@@ -136,21 +137,21 @@ util::Status KeysetHandle::WriteWithAssociatedData(
     KeysetWriter* writer, const Aead& master_key_aead,
     absl::string_view associated_data) const {
   if (writer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Writer must be non-null");
   }
   auto encrypt_result = Encrypt(get_keyset(), master_key_aead, associated_data);
   if (!encrypt_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Encryption of the keyset failed: %s",
-                     encrypt_result.status().error_message());
+                     encrypt_result.status().message());
   }
   return writer->Write(*(encrypt_result.ValueOrDie()));
 }
 
 util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
   if (writer == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Writer must be non-null");
   }
 
@@ -175,7 +176,7 @@ util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
     const Keyset::Key& key) {
   if (key.key_data().key_material_type() != KeyData::ASYMMETRIC_PRIVATE) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Key material is not of type KeyData::ASYMMETRIC_PRIVATE");
   }
   auto key_data_result = Registry::GetPublicKeyData(key.key_data().type_url(),
@@ -205,7 +206,7 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
     Keyset* keyset) {
   if (key_template.output_prefix_type() ==
       google::crypto::tink::OutputPrefixType::UNKNOWN_PREFIX) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "key template has unknown prefix");
   }
   auto key_data_result = Registry::NewKeyData(key_template);

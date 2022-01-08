@@ -35,7 +35,7 @@
       // A reader can only be used once.
       if (error) {
         *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::RESOURCE_EXHAUSTED,
+            crypto::tink::util::Status(absl::StatusCode::kResourceExhausted,
                                        "A KeysetReader can be used only once."));
       }
       return nil;

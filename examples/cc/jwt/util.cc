@@ -49,7 +49,7 @@ std::unique_ptr<KeysetReader> GetBinaryKeysetReader(
       BinaryKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader.ok()) {
     std::clog << "Creation of the BinaryKeysetReader failed: "
-              << keyset_reader.status().error_message() << std::endl;
+              << keyset_reader.status().message() << std::endl;
     exit(1);
   }
   return std::move(*keyset_reader);
@@ -65,7 +65,7 @@ std::unique_ptr<KeysetWriter> GetBinaryKeysetWriter(
       keyset_writer = BinaryKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer.ok()) {
     std::clog << "Creation of the BinaryKeysetWriter failed: "
-              << keyset_writer.status().error_message() << std::endl;
+              << keyset_writer.status().message() << std::endl;
     exit(1);
   }
   return std::move(*keyset_writer);
@@ -80,7 +80,7 @@ std::unique_ptr<KeysetHandle> ReadKeyset(absl::string_view filename) {
       CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle.ok()) {
     std::clog << "Reading the keyset failed: "
-              << keyset_handle.status().error_message() << std::endl;
+              << keyset_handle.status().message() << std::endl;
     exit(1);
   }
   return std::move(*keyset_handle);
@@ -93,8 +93,7 @@ void WriteKeyset(const crypto::tink::KeysetHandle& keyset_handle,
   auto status =
       CleartextKeysetHandle::Write(keyset_writer.get(), keyset_handle);
   if (!status.ok()) {
-    std::clog << "Writing the keyset failed: "
-              << status.error_message() << std::endl;
+    std::clog << "Writing the keyset failed: " << status.message() << std::endl;
     exit(1);
   }
 }

@@ -47,7 +47,7 @@
   if (!publicKeySign) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKPublicKeySign"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKPublicKeySign"));
     }
     return nil;
   }

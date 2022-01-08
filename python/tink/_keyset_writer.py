@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,24 +14,15 @@
 
 """Writes Keysets to file."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
-
 from typing import BinaryIO, TextIO
-# Special imports
-import six
 
 from google.protobuf import json_format
 from tink.proto import tink_pb2
 from tink import core
 
 
-@six.add_metaclass(abc.ABCMeta)
-class KeysetWriter(object):
+class KeysetWriter(metaclass=abc.ABCMeta):
   """Knows how to write keysets to some storage system."""
 
   @abc.abstractmethod
@@ -58,10 +49,6 @@ class JsonKeysetWriter(KeysetWriter):
     if not isinstance(keyset, tink_pb2.Keyset):
       raise core.TinkError('invalid keyset.')
     json_keyset = json_format.MessageToJson(keyset)
-    # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
-    # unicode, but MessageToJson outputs UTF-8.
-    if isinstance(json_keyset, bytes):
-      json_keyset = json_keyset.decode('utf-8')
     self._io_stream.write(json_keyset)
     self._io_stream.flush()
 
@@ -69,10 +56,6 @@ class JsonKeysetWriter(KeysetWriter):
     if not isinstance(encrypted_keyset, tink_pb2.EncryptedKeyset):
       raise core.TinkError('invalid encrypted keyset.')
     json_keyset = json_format.MessageToJson(encrypted_keyset)
-    # TODO(b/141106504) Needed for python 2.7 compatibility. StringIO expects
-    # unicode, but MessageToJson outputs UTF-8.
-    if isinstance(json_keyset, bytes):
-      json_keyset = json_keyset.decode('utf-8')
     self._io_stream.write(json_keyset)
     self._io_stream.flush()
 

@@ -30,7 +30,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 
@@ -67,7 +67,7 @@ describe('hybrid key templates test', function() {
 
     // Test values in key format.
     const keyFormat =
-        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue());
+        PbEciesAeadHkdfKeyFormat.deserializeBinary(keyTemplate.getValue_asU8());
     const params = keyFormat.getParams();
     expect(params!.getEcPointFormat()).toBe(expectedPointFormat);
 

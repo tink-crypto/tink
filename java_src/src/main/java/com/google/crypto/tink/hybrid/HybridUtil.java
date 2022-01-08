@@ -25,7 +25,7 @@ import com.google.crypto.tink.subtle.EllipticCurves;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
-class HybridUtil {
+final class HybridUtil {
   /**
    * Validates EciesAeadHkdf params.
    *
@@ -94,4 +94,6 @@ class HybridUtil {
         throw new GeneralSecurityException("unknown point format: " + format);
     }
   }
+
+  private HybridUtil() {}
 }

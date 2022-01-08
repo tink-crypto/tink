@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -69,7 +70,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyNoFieldSet) {
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(
       google::crypto::tink::Cecpq2AeadHkdfPublicKey());
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -78,7 +79,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeySomeFieldsSet) {
   sender_key.set_x25519_public_key_x("");
   auto result(Cecpq2AeadHkdfHybridEncrypt::New(sender_key));
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("missing KEM required fields")));
 }
 
@@ -88,7 +89,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedEcType) {
       google::crypto::tink::EllipticCurveType::NIST_P256);
   auto result = Cecpq2AeadHkdfHybridEncrypt::New(sender_key);
   EXPECT_THAT(result.status(),
-              StatusIs(util::error::UNIMPLEMENTED,
+              StatusIs(absl::StatusCode::kUnimplemented,
                        HasSubstr("Unsupported elliptic curve")));
 }
 
@@ -104,7 +105,7 @@ TEST(Cecpq2AeadHkdfHybridEncryptTest, InvalidKeyUnsupportedDemKeyType) {
       ->mutable_aead_dem()
       ->set_type_url("some.type.url/that.is.not.supported");
   auto result(Cecpq2AeadHkdfHybridEncrypt::New(sender_key));
-  EXPECT_THAT(result.status(), StatusIs(util::error::INVALID_ARGUMENT,
+  EXPECT_THAT(result.status(), StatusIs(absl::StatusCode::kInvalidArgument,
                                         HasSubstr("Unsupported DEM key type")));
 }
 

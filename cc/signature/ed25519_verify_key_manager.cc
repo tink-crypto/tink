@@ -16,10 +16,10 @@
 
 #include "tink/signature/ed25519_verify_key_manager.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ed25519_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
 #include "tink/util/status.h"
@@ -45,10 +45,10 @@ Status Ed25519VerifyKeyManager::ValidateKey(const Ed25519PublicKey& key) const {
   if (!status.ok()) return status;
 
   if (key.key_value().length() != 32) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "The ED25519 public key must be 32-bytes long.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

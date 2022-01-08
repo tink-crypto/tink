@@ -16,9 +16,11 @@
 
 #include "tink/hybrid/internal/hpke_private_key_manager.h"
 
+#include "absl/status/status.h"
 #include "tink/hybrid/internal/hpke_key_manager_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "tink/util/validation.h"
 #include "proto/hpke.pb.h"
 
@@ -32,11 +34,16 @@ using ::google::crypto::tink::HpkeKeyFormat;
 using ::google::crypto::tink::HpkePrivateKey;
 using ::google::crypto::tink::HpkePublicKey;
 
-void GenerateX25519Key(HpkePublicKey& public_key, HpkePrivateKey& private_key) {
-  std::unique_ptr<subtle::SubtleUtilBoringSSL::X25519Key> key =
-      subtle::SubtleUtilBoringSSL::GenerateNewX25519Key();
-  public_key.set_public_key(key->public_value, X25519_PUBLIC_VALUE_LEN);
-  private_key.set_private_key(key->private_key, X25519_PRIVATE_KEY_LEN);
+util::Status GenerateX25519Key(HpkePublicKey& public_key,
+                               HpkePrivateKey& private_key) {
+  util::StatusOr<std::unique_ptr<internal::X25519Key>> key =
+      internal::NewX25519Key();
+  if (!key.ok()) {
+    return key.status();
+  }
+  public_key.set_public_key((*key)->public_value, X25519KeyPubKeySize());
+  private_key.set_private_key((*key)->private_key, X25519KeyPrivKeySize());
+  return util::OkStatus();
 }
 
 }  // namespace
@@ -44,7 +51,7 @@ void GenerateX25519Key(HpkePublicKey& public_key, HpkePrivateKey& private_key) {
 util::Status HpkePrivateKeyManager::ValidateKeyFormat(
     const HpkeKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return ValidateParams(key_format.params());
 }
@@ -59,12 +66,16 @@ util::StatusOr<HpkePrivateKey> HpkePrivateKeyManager::CreateKey(
   *(public_key->mutable_params()) = key_format.params();
   // Generate key material.
   switch (key_format.params().kem()) {
-    case HpkeKem::DHKEM_X25519_HKDF_SHA256:
-      GenerateX25519Key(*public_key, private_key);
+    case HpkeKem::DHKEM_X25519_HKDF_SHA256: {
+      util::Status res = GenerateX25519Key(*public_key, private_key);
+      if (!res.ok()) {
+        return res;
+      }
       break;
+    }
     default:
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unsupported KEM type: ", key_format.params().kem()));
   }
   return private_key;
@@ -80,7 +91,7 @@ util::Status HpkePrivateKeyManager::ValidateKey(
   util::Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Missing HPKE public key.");
   }
   return ValidateKeyAndVersion(key.public_key(), get_version());

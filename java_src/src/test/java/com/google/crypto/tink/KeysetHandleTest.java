@@ -35,6 +35,7 @@ import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureConfig;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
+import com.google.crypto.tink.subtle.Hex;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.testing.TestUtil;
 import com.google.crypto.tink.tinkkey.KeyAccess;
@@ -271,6 +272,42 @@ public class KeysetHandleTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> KeysetHandle.readWithAssociatedData(reader, masterKey, new byte[] {0x01, 0x03}));
+  }
+
+  /**
+   * A test vector for readWithAssociatedData, generated with this implementation. It uses a
+   * AES128_EAX template for the wrapping key, and a HMAC_SHA256_128BITTAG for the mac.
+   */
+  @Test
+  public void readWithAssociatedDataTestVector() throws Exception {
+    // An AEAD key, with which we encrypt the mac key below (using the encrypted keyset api).
+    final byte[] serializedWrappingKeyset =
+        Hex.decode(
+            "08b891f5a20412580a4c0a30747970652e676f6f676c65617069732e636f6d2f676f6f676c652e6372797"
+                + "0746f2e74696e6b2e4165734561784b65791216120208101a10e5d7d0cdd649e81e7952260689b2"
+                + "e1971801100118b891f5a2042001");
+    final byte[] associatedData = Hex.decode("abcdef330012");
+    // A Mac key, encrypted with the above, using ASSOCIATED_DATA as aad.
+    final byte[] encryptedSerializedKeyset =
+        Hex.decode(
+            "12950101445d48b8b5f591efaf73a46df9ebd7b6ac471cc0cf4f815a4f012fcaffc8f0b2b10b30c33194f"
+                + "0b291614bd8e1d2e80118e5d6226b6c41551e104ef8cd8ee20f1c14c1b87f6eed5fb04a91feafaa"
+                + "cbf6f368519f36f97f7d08b24c8e71b5e620c4f69615ef0479391666e2fb32e46b416893fc4e564"
+                + "ba927b22ebff2a77bd3b5b8d5afa162cbd35c94c155cdfa13c8a9c964cde21a4208f5909ce90112"
+                + "3a0a2e747970652e676f6f676c65617069732e636f6d2f676f6f676c652e63727970746f2e74696"
+                + "e6b2e486d61634b6579100118f5909ce9012001");
+    // A message whose tag we computed with the wrapped key.
+    final byte[] message = Hex.decode("");
+    final byte[] tag = Hex.decode("011d270875989dd6fbd5f54dbc9520bb41efd058d5");
+
+    KeysetReader wrappingReader = BinaryKeysetReader.withBytes(serializedWrappingKeyset);
+    Aead wrapperAead = CleartextKeysetHandle.read(wrappingReader).getPrimitive(Aead.class);
+
+    KeysetReader encryptedReader = BinaryKeysetReader.withBytes(encryptedSerializedKeyset);
+    Mac mac =
+        KeysetHandle.readWithAssociatedData(encryptedReader, wrapperAead, associatedData)
+            .getPrimitive(Mac.class);
+    mac.verifyMac(tag, message);
   }
 
   @Test

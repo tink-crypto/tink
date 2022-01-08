@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/mac.h"
@@ -64,7 +65,7 @@ class RawJwtHmacKeyManager
           tag_size = 64;
           break;
         default:
-          return util::Status(util::error::INVALID_ARGUMENT,
+          return util::Status(absl::StatusCode::kInvalidArgument,
                               "Unknown algorithm.");
       }
       return subtle::HmacBoringSsl::New(

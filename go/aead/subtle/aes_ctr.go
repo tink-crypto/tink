@@ -21,6 +21,7 @@ import (
 	"crypto/cipher"
 	"fmt"
 
+	// Placeholder for internal crypto/cipher allowlist, please ignore.
 	"github.com/google/tink/go/subtle/random"
 )
 

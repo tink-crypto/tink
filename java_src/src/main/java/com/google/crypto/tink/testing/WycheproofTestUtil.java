@@ -30,7 +30,7 @@ import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 
 /** Wycheproof Test helpers. */
-public class WycheproofTestUtil {
+public final class WycheproofTestUtil {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /**
@@ -141,4 +141,6 @@ public class WycheproofTestUtil {
     }
     return false;
   }
+
+  private WycheproofTestUtil() {}
 }

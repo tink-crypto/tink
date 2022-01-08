@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/jwt_format.h"
@@ -38,7 +39,7 @@ util::StatusOr<std::string> JwtPublicKeySignImpl::SignAndEncodeWithKid(
   }
   if (custom_kid_.has_value()) {
     if (kid.has_value()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "TINK keys are not allowed to have a kid value set.");
     }
     kid = *custom_kid_;

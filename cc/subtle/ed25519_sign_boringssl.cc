@@ -20,16 +20,21 @@
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
+#include "openssl/evp.h"
+#include "tink/internal/ec_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/public_key_sign.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
+
+constexpr int kEd25519SignatureLenInBytes = 64;
 
 // static
 util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
@@ -37,30 +42,51 @@ util::StatusOr<std::unique_ptr<PublicKeySign>> Ed25519SignBoringSsl::New(
   auto status = internal::CheckFipsCompatibility<Ed25519SignBoringSsl>();
   if (!status.ok()) return status;
 
-  if (private_key.size() != ED25519_PRIVATE_KEY_LEN) {
+  // OpenSSL/BoringSSL consider the ED25519's private key to be: private_key ||
+  // public_key.
+  const int kSslPrivateKeySize =
+      internal::Ed25519KeyPrivKeySize() + internal::Ed25519KeyPubKeySize();
+
+  if (private_key.size() != kSslPrivateKeySize) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid ED25519 private key size (%d). "
                         "The only valid size is %d.",
-                        private_key.size(), ED25519_PRIVATE_KEY_LEN));
+                        private_key.size(), kSslPrivateKeySize));
   }
-  return {absl::WrapUnique(new Ed25519SignBoringSsl(std::move(private_key)))};
+
+  internal::SslUniquePtr<EVP_PKEY> ssl_priv_key(EVP_PKEY_new_raw_private_key(
+      EVP_PKEY_ED25519, /*unused=*/nullptr, private_key.data(),
+      internal::Ed25519KeyPrivKeySize()));
+  if (ssl_priv_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_private_key failed");
+  }
+
+  return {absl::WrapUnique(new Ed25519SignBoringSsl(std::move(ssl_priv_key)))};
 }
 
 util::StatusOr<std::string> Ed25519SignBoringSsl::Sign(
     absl::string_view data) const {
-  data = SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
-  uint8_t out_sig[ED25519_SIGNATURE_LEN];
+  uint8_t out_sig[kEd25519SignatureLenInBytes];
   std::fill(std::begin(out_sig), std::end(out_sig), 0);
 
-  if (ED25519_sign(
-          out_sig, reinterpret_cast<const uint8_t *>(data.data()), data.size(),
-          reinterpret_cast<const uint8_t *>(private_key_.data())) != 1) {
-    return util::Status(util::error::INTERNAL, "Signing failed.");
+  internal::SslUniquePtr<EVP_MD_CTX> md_ctx(EVP_MD_CTX_create());
+  size_t sig_len = kEd25519SignatureLenInBytes;
+  // type must be set to nullptr with Ed25519.
+  // See https://www.openssl.org/docs/man1.1.1/man3/EVP_DigestSignInit.html.
+  if (EVP_DigestSignInit(md_ctx.get(), /*pctx=*/nullptr, /*type=*/nullptr,
+                         /*e=*/nullptr, priv_key_.get()) != 1 ||
+      EVP_DigestSign(md_ctx.get(), out_sig, &sig_len,
+                     /*data=*/reinterpret_cast<const uint8_t *>(data.data()),
+                     data.size()) != 1) {
+    return util::Status(absl::StatusCode::kInternal, "Signing failed.");
   }
 
-  return std::string(reinterpret_cast<char *>(out_sig), ED25519_SIGNATURE_LEN);
+  return std::string(reinterpret_cast<char *>(out_sig),
+                     kEd25519SignatureLenInBytes);
 }
 
 }  // namespace subtle

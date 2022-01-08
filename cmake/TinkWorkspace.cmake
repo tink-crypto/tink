@@ -44,32 +44,41 @@ http_archive(
   SHA256 a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118
 )
 
+# Commit from 2021-12-03
 http_archive(
   NAME com_google_absl
-  URL https://github.com/abseil/abseil-cpp/archive/64461421222f8be8663c50e8e82c91c3f95a0d3c.zip
-  SHA256 41d725950d0d3ed4d00020881db84fdc79ac349d9b325ab010686c5a794a822e
+  URL https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip
+  SHA256 368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c
 )
 
 http_archive(
   NAME wycheproof
-  URL https://github.com/google/wycheproof/archive/f89f4c53a8845fcefcdb9f14ee9191dbe167e3e3.zip
-  SHA256 b44bb0339ad149e6cdab1337445cf52440cbfc79684203a3db1c094d9ef8daea
+  URL https://github.com/google/wycheproof/archive/d8ed1ba95ac4c551db67f410c06131c3bc00a97c.zip
+  SHA256 eb1d558071acf1aa6d677d7f1cabec2328d1cf8381496c17185bd92b52ce7545
   DATA_ONLY
 )
 
 # Symlink the Wycheproof test data.
 # Paths are hard-coded in tests, which expects wycheproof/ in this location.
-add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/cc/wycheproof")
+add_directory_alias("${wycheproof_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/external/wycheproof")
 
-http_archive(
-  NAME boringssl
-  URL https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip
-  SHA256 73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84
-  CMAKE_SUBDIR src
-)
+if (NOT TINK_USE_SYSTEM_OPENSSL)
+  http_archive(
+    NAME boringssl
+    URL https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip
+    SHA256 73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84
+    CMAKE_SUBDIR src
+  )
 
-# BoringSSL targets do not carry include directory info, this fixes it.
-target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+  # BoringSSL targets do not carry include directory info, this fixes it.
+  target_include_directories(crypto PUBLIC "${boringssl_SOURCE_DIR}/src/include")
+else()
+  add_library(crypto INTERFACE)
+  # Support for ED25519 was added from 1.1.1.
+  find_package(OpenSSL 1.1.1 REQUIRED)
+  target_link_libraries(crypto INTERFACE OpenSSL::Crypto)
+  target_include_directories(crypto INTERFACE OpenSSL::Crypto)
+endif()
 
 set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "Tink dependency override" FORCE)
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Tink dependency override" FORCE)

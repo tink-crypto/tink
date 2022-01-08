@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/aes.h"
 #include "openssl/mem.h"
 #include "tink/deterministic_aead.h"
@@ -37,7 +38,8 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
   util::SecretUniquePtr<AES_KEY> aes_key = util::MakeSecretUniquePtr<AES_KEY>();
   if (AES_set_encrypt_key(reinterpret_cast<const uint8_t*>(key.data()),
                           8 * key.size(), aes_key.get()) != 0) {
-    return util::Status(util::error::INTERNAL, "could not initialize aes key");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize aes key");
   }
   return aes_key;
 }
@@ -51,7 +53,7 @@ AesSivBoringSsl::New(const util::SecretData& key) {
   if (!status.ok()) return status;
 
   if (!IsValidKeySizeInBytes(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
   auto k1_or = InitializeAesKey(absl::MakeSpan(key).subspan(0, key.size() / 2));
   if (!k1_or.ok()) {
@@ -218,7 +220,8 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
 util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < kBlockSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   size_t plaintext_size = ciphertext.size() - kBlockSize;
   std::vector<uint8_t> pt(plaintext_size);
@@ -232,7 +235,8 @@ util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
                      additional_data.size()),
       absl::MakeSpan(pt), s2v);
   if (CRYPTO_memcmp(siv, s2v, kBlockSize) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid ciphertext");
   }
   return std::string(reinterpret_cast<const char*>(pt.data()), plaintext_size);
 }

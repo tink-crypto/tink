@@ -7,6 +7,13 @@ licenses(["notice"])
 
 # public libraries
 
+alias(
+    name = "secret_key_access_testonly",
+    testonly = 1,
+    actual = ":secret_key_access",
+    visibility = ["//visibility:public"],
+)
+
 PUBLIC_APIS = [
     "aead.h",
     "aead_config.h",
@@ -309,10 +316,11 @@ cc_library(
         ":keyset_reader",
         "//proto:tink_cc_proto",
         "//util:errors",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
-        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -329,6 +337,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -345,8 +354,10 @@ cc_library(
         "//util:enums",
         "//util:errors",
         "//util:protobuf_helper",
+        "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -366,6 +377,7 @@ cc_library(
         "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@rapidjson",
     ],
@@ -401,6 +413,7 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -414,6 +427,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -428,6 +442,7 @@ cc_library(
         "//util:errors",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/synchronization",
     ],
 )
@@ -447,6 +462,7 @@ cc_library(
     hdrs = ["registry.h"],
     include_prefix = "tink",
     deps = [
+        "//config:tink_fips",
         "//internal:registry_impl",
         "//util:status",
         "//util:statusor",
@@ -489,6 +505,7 @@ cc_library(
         "//util:keyset_util",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -501,10 +518,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":keyset_handle",
+        ":keyset_reader",
         "//proto:tink_cc_proto",
         "//util:errors",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -537,11 +556,11 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:enums",
         "//util:errors",
-        "//util:protobuf_helper",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/synchronization",
     ],
 )
@@ -568,7 +587,8 @@ cc_library(
         "//util:errors",
         "//util:status",
         "//util:statusor",
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],
@@ -592,6 +612,7 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -606,8 +627,9 @@ cc_library(
         "//proto:tink_cc_proto",
         "//util:constants",
         "//util:status",
-        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -631,7 +653,21 @@ cc_library(
         ":core/private_key_type_manager",
         ":key_manager",
         "//util:validation",
+        "@com_google_absl//absl/status",
     ],
+)
+
+cc_library(
+    name = "key_access",
+    hdrs = ["key_access.h"],
+    include_prefix = "tink",
+)
+
+cc_library(
+    name = "secret_key_access",
+    hdrs = ["secret_key_access.h"],
+    include_prefix = "tink",
+    deps = [":key_access"],
 )
 
 # Settings for building in various environments.
@@ -651,7 +687,6 @@ cc_test(
     name = "version_test",
     size = "small",
     srcs = ["core/version_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":version",
         "@com_google_googletest//:gtest_main",
@@ -662,7 +697,6 @@ cc_test(
     name = "binary_keyset_reader_test",
     size = "small",
     srcs = ["core/binary_keyset_reader_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
         "//proto:tink_cc_proto",
@@ -675,7 +709,6 @@ cc_test(
     name = "binary_keyset_writer_test",
     size = "small",
     srcs = ["core/binary_keyset_writer_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_writer",
         "//proto:tink_cc_proto",
@@ -688,7 +721,6 @@ cc_test(
     name = "json_keyset_reader_test",
     size = "small",
     srcs = ["core/json_keyset_reader_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":json_keyset_reader",
         "//proto:aes_eax_cc_proto",
@@ -706,7 +738,6 @@ cc_test(
     name = "json_keyset_writer_test",
     size = "small",
     srcs = ["core/json_keyset_writer_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":json_keyset_reader",
         ":json_keyset_writer",
@@ -726,7 +757,6 @@ cc_test(
     name = "config_test",
     size = "small",
     srcs = ["core/config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":config",
         ":mac",
@@ -739,7 +769,6 @@ cc_test(
     name = "crypto_format_test",
     size = "small",
     srcs = ["core/crypto_format_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
         "//proto:tink_cc_proto",
@@ -751,11 +780,9 @@ cc_test(
     name = "keyset_handle_test",
     size = "small",
     srcs = ["core/keyset_handle_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
-        ":config",
         ":core/key_manager_impl",
         ":json_keyset_reader",
         ":json_keyset_writer",
@@ -772,6 +799,7 @@ cc_test(
         "//util:test_keyset_handle",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -780,12 +808,12 @@ cc_test(
     name = "key_manager_test",
     size = "small",
     srcs = ["core/key_manager_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":key_manager",
         "//proto:empty_cc_proto",
         "//util:status",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -794,7 +822,6 @@ cc_test(
     name = "keyset_manager_test",
     size = "small",
     srcs = ["core/keyset_manager_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":config",
         ":keyset_handle",
@@ -804,7 +831,6 @@ cc_test(
         "//proto:aes_gcm_cc_proto",
         "//proto:tink_cc_proto",
         "//util:test_keyset_handle",
-        "//util:test_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -813,12 +839,10 @@ cc_test(
     name = "cleartext_keyset_handle_test",
     size = "small",
     srcs = ["core/cleartext_keyset_handle_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":binary_keyset_reader",
         ":cleartext_keyset_handle",
         ":keyset_handle",
-        ":keyset_reader",
         "//proto:tink_cc_proto",
         "//util:test_keyset_handle",
         "//util:test_util",
@@ -830,13 +854,11 @@ cc_test(
     name = "primitive_set_test",
     size = "small",
     srcs = ["core/primitive_set_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":crypto_format",
         ":mac",
         ":primitive_set",
         "//proto:tink_cc_proto",
-        "//util:protobuf_helper",
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_googletest//:gtest_main",
@@ -847,7 +869,6 @@ cc_test(
     name = "kms_clients_test",
     size = "small",
     srcs = ["core/kms_clients_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aead",
         ":kms_client",
@@ -856,6 +877,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -884,6 +906,7 @@ cc_test(
         "//util:test_matchers",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -904,6 +927,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "//util:validation",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -923,6 +947,17 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "//util:validation",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "core/key_access_test",
+    srcs = ["core/key_access_test.cc"],
+    deps = [
+        ":key_access",
+        ":secret_key_access_testonly",
         "@com_google_googletest//:gtest_main",
     ],
 )

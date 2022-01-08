@@ -16,11 +16,15 @@
 
 #include "tink/mac/mac_wrapper.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/mac.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -51,20 +55,21 @@ class MacSetWrapper : public Mac {
 
 util::Status Validate(PrimitiveSet<Mac>* mac_set) {
   if (mac_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "mac_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "mac_set must be non-NULL");
   }
   if (mac_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "mac_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 util::StatusOr<std::string> MacSetWrapper::ComputeMac(
     absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
+  data = internal::EnsureStringNonNull(data);
 
   auto primary = mac_set_->get_primary();
   std::string local_data;
@@ -83,8 +88,8 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
 util::Status MacSetWrapper::VerifyMac(
     absl::string_view mac_value,
     absl::string_view data) const {
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
-  mac_value = subtle::SubtleUtilBoringSSL::EnsureNonNull(mac_value);
+  data = internal::EnsureStringNonNull(data);
+  mac_value = internal::EnsureStringNonNull(mac_value);
 
   if (mac_value.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =
@@ -123,7 +128,8 @@ util::Status MacSetWrapper::VerifyMac(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "verification failed");
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      "verification failed");
 }
 
 }  // namespace

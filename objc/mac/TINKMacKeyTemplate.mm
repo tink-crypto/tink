@@ -22,6 +22,7 @@
 #import "objc/core/TINKKeyTemplate_Internal.h"
 #import "objc/util/TINKErrors.h"
 
+#include "absl/status/status.h"
 #include "tink/mac/mac_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -55,7 +56,7 @@
     default:
       if (error) {
         *error = TINKStatusToError(crypto::tink::util::Status(
-            crypto::tink::util::error::INVALID_ARGUMENT, "Invalid TINKMacKeyTemplate"));
+            absl::StatusCode::kInvalidArgument, "Invalid TINKMacKeyTemplate"));
       }
       return nil;
   }

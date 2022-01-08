@@ -33,6 +33,7 @@ py_library(
     deps = [
         ":_keyset_reader",
         ":_keyset_writer",
+        ":secret_key_access",
         requirement("protobuf"),
         "//tink/aead",
         "//tink/core",
@@ -63,7 +64,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         requirement("protobuf"),
-        requirement("six"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -87,7 +87,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         requirement("protobuf"),
-        requirement("six"),
         "//tink/core",
         "//tink/proto:tink_py_pb2",
     ],
@@ -135,6 +134,27 @@ py_test(
         "//tink/prf",
         "//tink/signature",
         "//tink/streaming_aead",
+    ],
+)
+
+py_library(
+    name = "secret_key_access",
+    srcs = ["secret_key_access.py"],
+    srcs_version = "PY3",
+    deps = [
+        "//tink/core",
+    ],
+)
+
+py_test(
+    name = "secret_key_access_test",
+    srcs = ["secret_key_access_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":secret_key_access",
+        ":tink_python",
+        requirement("absl-py"),
     ],
 )
 

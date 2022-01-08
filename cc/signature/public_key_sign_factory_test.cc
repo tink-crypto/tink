@@ -63,10 +63,10 @@ TEST_F(PublicKeySignFactoryTest, testBasic) {
   auto public_key_sign_result = PublicKeySignFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(public_key_sign_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-      public_key_sign_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+      public_key_sign_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      public_key_sign_result.status().error_message());
+                      std::string(public_key_sign_result.status().message()));
 }
 
 TEST_F(PublicKeySignFactoryTest, testPrimitive) {

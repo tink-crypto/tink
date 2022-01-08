@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/random_access_stream.h"
@@ -95,7 +96,7 @@ util::Status ReadAll(RandomAccessStream* ra_stream, std::string* contents) {
     position = contents->size();
     status = ra_stream->PRead(position, chunk_size, buffer.get());
   }
-  if (status.error_code() == util::error::OUT_OF_RANGE) {  // EOF
+  if (status.code() == absl::StatusCode::kOutOfRange) {  // EOF
     EXPECT_EQ(0, buffer->size());
   }
   return status;
@@ -170,7 +171,7 @@ TEST(DecryptingRandomAccessStreamTest, BasicDecryption) {
         auto dec_stream = std::move(dec_stream_result.ValueOrDie());
         std::string decrypted;
         auto status = ReadAll(dec_stream.get(), &decrypted);
-        EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE,
+        EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange,
                                      HasSubstr("EOF")));
         EXPECT_EQ(pt_size, dec_stream->size().ValueOrDie());
         EXPECT_EQ(plaintext, decrypted);
@@ -277,15 +278,15 @@ TEST(DecryptingRandomAccessStreamTest, OutOfRangeDecryption) {
                                     ", position = ", position));
           // Negative chunk size.
           auto status = dec_stream->PRead(position, -1, buffer.get());
-          EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+          EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 
           // Negative position.
           status = dec_stream->PRead(-1, chunk_size, buffer.get());
-          EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+          EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
 
           // Reading past EOF.
           status = dec_stream->PRead(position, chunk_size, buffer.get());
-          EXPECT_THAT(status, StatusIs(util::error::OUT_OF_RANGE));
+          EXPECT_THAT(status, StatusIs(absl::StatusCode::kOutOfRange));
         }
         ct_number++;
       }
@@ -319,7 +320,7 @@ TEST(DecryptingRandomAccessStreamTest, WrongAssociatedData) {
       std::string decrypted;
       auto status = ReadAll(dec_stream_result.ValueOrDie().get(),
                             &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }
@@ -349,7 +350,7 @@ TEST(DecryptingRandomAccessStreamTest, WrongCiphertext) {
       EXPECT_THAT(dec_stream_result.status(), IsOk());
       std::string decrypted;
       auto status = ReadAll(dec_stream_result.ValueOrDie().get(), &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }
@@ -359,7 +360,7 @@ TEST(DecryptingRandomAccessStreamTest, NullPrimitiveSet) {
   auto dec_stream_result = DecryptingRandomAccessStream::New(
           nullptr, std::move(ct_stream), "some aad");
   EXPECT_THAT(dec_stream_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("primitives must be non-null")));
 }
 
@@ -371,7 +372,7 @@ TEST(DecryptingRandomAccessStreamTest, NullCiphertextSource) {
   auto dec_stream_result = DecryptingRandomAccessStream::New(
       saead_set, nullptr, "some aad");
   EXPECT_THAT(dec_stream_result.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_source must be non-null")));
 }
 

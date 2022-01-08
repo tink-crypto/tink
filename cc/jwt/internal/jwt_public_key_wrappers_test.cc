@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/strings/str_split.h"
+#include "tink/cleartext_keyset_handle.h"
 #include "tink/jwt/internal/json_util.h"
 #include "tink/jwt/internal/jwt_ecdsa_sign_key_manager.h"
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
@@ -33,10 +34,17 @@
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using ::google::crypto::tink::JwtEcdsaKeyFormat;
+using ::crypto::tink::CleartextKeysetHandle;
+using ::crypto::tink::test::IsOk;
+using ::crypto::tink::test::IsOkAndHolds;
 using ::google::crypto::tink::JwtEcdsaAlgorithm;
+using ::google::crypto::tink::JwtEcdsaKeyFormat;
+using ::google::crypto::tink::Keyset;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
+using ::testing::Eq;
+using ::testing::Not;
+using ::testing::SizeIs;
 
 namespace crypto {
 namespace tink {
@@ -55,6 +63,27 @@ KeyTemplate CreateTemplate(OutputPrefixType output_prefix) {
   key_format.set_algorithm(JwtEcdsaAlgorithm::ES256);
   key_format.SerializeToString(key_template.mutable_value());
   return key_template;
+}
+
+// KeysetHandleWithNewKeyId generates a new keyset handle with the exact same
+// keyset, except that the key ID of the first key is different.
+std::unique_ptr<KeysetHandle> KeysetHandleWithNewKeyId(
+    const KeysetHandle& keyset_handle) {
+  Keyset keyset(CleartextKeysetHandle::GetKeyset(keyset_handle));
+  // Modify the key ID by XORing it with a arbitrary constant value.
+  uint32_t new_key_id = keyset.mutable_key(0)->key_id() ^ 0xdeadbeef;
+  keyset.mutable_key(0)->set_key_id(new_key_id);
+  keyset.set_primary_key_id(new_key_id);
+  return CleartextKeysetHandle::GetKeysetHandle(keyset);
+}
+
+// KeysetHandleWithTinkPrefix generates a new keyset handle with the exact same
+// keyset, except that the output prefix type of the first key is set to TINK.
+std::unique_ptr<KeysetHandle> KeysetHandleWithTinkPrefix(
+    const KeysetHandle& keyset_handle) {
+  Keyset keyset(CleartextKeysetHandle::GetKeyset(keyset_handle));
+  keyset.mutable_key(0)->set_output_prefix_type(OutputPrefixType::TINK);
+  return CleartextKeysetHandle::GetKeysetHandle(keyset);
 }
 
 class JwtPublicKeyWrappersTest : public ::testing::Test {
@@ -144,7 +173,19 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateRawSignVerifySuccess) {
       (*jwt_verify)->VerifyAndDecode(*compact, *validator2);
   EXPECT_FALSE(verified_jwt2.ok());
   // Make sure the error message is interesting
-  EXPECT_THAT(verified_jwt2.status().error_message(), Eq("wrong issuer"));
+  EXPECT_THAT(verified_jwt2.status().message(), Eq("wrong issuer"));
+
+  // Raw primitives don't add a kid header, Tink primitives require a kid
+  // header to be set. Thefore, changing the output prefix to TINK makes the
+  // validation fail.
+  std::unique_ptr<KeysetHandle> tink_public_handle =
+      KeysetHandleWithTinkPrefix(**public_handle);
+  util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> tink_verify =
+      tink_public_handle->GetPrimitive<JwtPublicKeyVerify>();
+  ASSERT_THAT(tink_verify.status(), IsOk());
+
+  EXPECT_THAT((*tink_verify)->VerifyAndDecode(*compact, *validator).status(),
+              Not(IsOk()));
 }
 
 TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
@@ -180,19 +221,31 @@ TEST_F(JwtPublicKeyWrappersTest, GenerateTinkSignVerifySuccess) {
   ASSERT_THAT(verified_jwt.status(), IsOk());
   EXPECT_THAT(verified_jwt->GetIssuer(), test::IsOkAndHolds("issuer"));
 
-  // parse header to make sure that key ID is correctly encoded.
+  // Parse header to make sure that key ID is correctly encoded.
   google::crypto::tink::KeysetInfo keyset_info =
       (*public_handle)->GetKeysetInfo();
   uint32_t key_id = keyset_info.key_info(0).key_id();
   std::vector<absl::string_view> parts = absl::StrSplit(*compact, '.');
-  ASSERT_THAT(parts.size(), Eq(3));
+  ASSERT_THAT(parts, SizeIs(3));
   std::string json_header;
   ASSERT_TRUE(DecodeHeader(parts[0], &json_header));
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   ASSERT_THAT(header.status(), IsOk());
-  EXPECT_THAT(GetKeyId((*header).fields().find("kid")->second.string_value()),
-              key_id);
+  google::protobuf::Value value = (*header).fields().find("kid")->second;
+  EXPECT_THAT(GetKeyId(value.string_value()), Eq(key_id));
+
+  // For Tink primitives, the kid must be correctly set and verified.
+  // Therefore, changing the key_id makes the validation fail.
+  std::unique_ptr<KeysetHandle> public_handle_with_new_key_id =
+      KeysetHandleWithNewKeyId(**public_handle);
+  util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> verify_with_new_key_id =
+      public_handle_with_new_key_id->GetPrimitive<JwtPublicKeyVerify>();
+  ASSERT_THAT(verify_with_new_key_id.status(), IsOk());
+
+  util::StatusOr<VerifiedJwt> verified_jwt_2 =
+      (*verify_with_new_key_id)->VerifyAndDecode(*compact, *validator);
+  EXPECT_FALSE(verified_jwt_2.ok());
 }
 
 TEST_F(JwtPublicKeyWrappersTest, KeyRotation) {

@@ -47,7 +47,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /** Helpers for streaming tests. */
-public class StreamingTestUtil {
+public final class StreamingTestUtil {
   /**
    * Implements a SeekableByteChannel for testing.
    *
@@ -1225,4 +1225,6 @@ public class StreamingTestUtil {
     testFileEncryptionWithChannel(ags, tmpFile, plaintextSize);
     testFileEncryptionWithStream(ags, tmpFile, plaintextSize);
   }
+
+  private StreamingTestUtil() {}
 }

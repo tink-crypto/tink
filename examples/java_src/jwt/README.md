@@ -9,10 +9,8 @@ obtaining a primitive, and using the primitive to do crypto.
 The key material was generated with:
 
 ```shell
-tinkey create-keyset --key-template JWT_ES256 --out-format JSON \
+$ tinkey create-keyset --key-template JWT_ES256 --out-format JSON \
     --out jwt_test_private_keyset.json
-tinkey create-public-keyset --in jwt_test_private_keyset.json \
-    --in-format JSON --out-format JSON --out jwt_test_public_keyset.json
 ```
 
 ## Build and Run
@@ -20,13 +18,17 @@ tinkey create-public-keyset --in jwt_test_private_keyset.json \
 ### Bazel
 
 ```shell
-git clone https://github.com/google/tink
-cd tink/examples/java_src
-bazel build ...
-touch token_file.txt
+$ git clone https://github.com/google/tink
+$ cd tink/examples/java_src
+$ bazel build ...
+$ touch token.txt
 
-./bazel-bin/jwt/jwt_signature_example sign \
-    ./signature/jwt_test_private_keyset.json testSubject token_file.txt
-./bazel-bin/jwt_/jwt_signature_example verify \
-    ./signature/jwt_test_public_keyset.json testSubject token_file.txt
+$ ./bazel-bin/jwt/jwt_sign \
+    ./jwt/jwt_test_private_keyset.json example_audience token.txt
+
+$ ./bazel-bin/jwt/jwt_generate_public_jwk_set \
+    ./jwt/jwt_test_private_keyset.json public_jwk_set.json
+
+$ ./bazel-bin/jwt/jwt_verify \
+    public_jwk_set.json example_audience token.txt
 ```

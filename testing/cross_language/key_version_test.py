@@ -13,9 +13,7 @@
 # limitations under the License.
 """Tests that keys with higher version numbers are rejected."""
 
-# Placeholder for import for type annotations
-
-from typing import List, Text
+from typing import List
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -94,7 +92,7 @@ def gen_inc_versions(keyset):
     key.key_data.value = default_val
 
 
-def test_cases(key_types: List[Text]):
+def test_cases(key_types: List[str]):
   for key_type in key_types:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
       for lang in supported_key_types.SUPPORTED_LANGUAGES[key_type]:

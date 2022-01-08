@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_split.h"
@@ -64,8 +65,8 @@ StatusOr<Aws::Client::ClientConfiguration>
     GetAwsClientConfig(absl::string_view key_arn) {
   std::vector<std::string> key_arn_parts = absl::StrSplit(key_arn, ':');
   if (key_arn_parts.size() < 6) {
-    return ToStatusF(util::error::INVALID_ARGUMENT, "Invalid key ARN '%s'.",
-                     key_arn);
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Invalid key ARN '%s'.", key_arn);
   }
   Aws::Client::ClientConfiguration config;
   config.region = key_arn_parts[3].c_str();  // 4th part of key arn
@@ -80,8 +81,8 @@ StatusOr<std::string> Read(const std::string& filename) {
   std::ifstream input_stream;
   input_stream.open(filename, std::ifstream::in);
   if (!input_stream.is_open()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT, "Error opening file '%s'.",
-                     filename);
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Error opening file '%s'.", filename);
   }
   std::stringstream input;
   input << input_stream.rdbuf();
@@ -94,7 +95,7 @@ StatusOr<std::string> Read(const std::string& filename) {
 StatusOr<std::string> GetValue(absl::string_view name, absl::string_view line) {
   std::vector<std::string> parts = absl::StrSplit(line, '=');
   if (parts.size() != 2 || absl::StripAsciiWhitespace(parts[0]) != name) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Expected line in format '%s = some_value'.", name);
   }
   return std::string(absl::StripAsciiWhitespace(parts[1]));
@@ -131,20 +132,20 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     std::vector<std::string> creds_lines =
         absl::StrSplit(creds_result.ValueOrDie(), '\n');
     if (creds_lines.size() < 3) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Invalid format of credentials in file '%s'.",
                        credentials_path);
     }
     auto key_id_result = GetValue("aws_access_key_id", creds_lines[1]);
     if (!key_id_result.ok()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Invalid format of credentials in file '%s': %s",
                        credentials_path,
                        key_id_result.status().error_message());
     }
     auto secret_key_result = GetValue("aws_secret_access_key", creds_lines[2]);
     if (!secret_key_result.ok()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "Invalid format of credentials in file '%s': %s",
                        credentials_path,
                        secret_key_result.status().error_message());
@@ -197,8 +198,8 @@ AwsKmsClient::New(absl::string_view key_uri,
   if (!key_uri.empty()) {
     client->key_arn_ = GetKeyArn(key_uri);
     if (client->key_arn_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       key_uri);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Key '%s' not supported", key_uri);
     }
     auto config_result = GetAwsClientConfig(client->key_arn_);
     if (!config_result.ok()) return config_result.status();
@@ -222,11 +223,11 @@ StatusOr<std::unique_ptr<Aead>>
 AwsKmsClient::GetAead(absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!key_arn_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client is bound to '%s', and cannot use key '%s'.",
                        key_arn_, key_uri);
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client does not support key '%s'.", key_uri);
     }
   }

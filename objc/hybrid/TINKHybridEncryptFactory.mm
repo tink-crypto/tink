@@ -47,7 +47,7 @@
   if (!hybrid) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKHybridEncrypt"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKHybridEncrypt"));
     }
     return nil;
   }

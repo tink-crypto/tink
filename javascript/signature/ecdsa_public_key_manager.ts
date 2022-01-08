@@ -17,14 +17,12 @@ import {PublicKeyVerify} from './internal/public_key_verify';
  * @final
  */
 class EcdsaPublicKeyFactory implements KeyManager.KeyFactory {
-  /** @override */
   newKey(keyFormat: PbMessage|Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
         'Use EcdsaPrivateKeyManager to generate new keys.');
   }
 
-  /** @override */
   newKeyData(serializedKeyFormat: Uint8Array): never {
     throw new SecurityException(
         'This operation is not supported for public keys. ' +
@@ -43,7 +41,6 @@ export class EcdsaPublicKeyManager implements
   static VERSION: number = 0;
   keyFactory = new EcdsaPublicKeyFactory();
 
-  /** @override */
   async getPrimitive(
       primitiveType: Util.Constructor<PublicKeyVerify>,
       key: PbKeyData|PbMessage) {
@@ -61,27 +58,22 @@ export class EcdsaPublicKeyManager implements
     return ecdsaVerify.fromJsonWebKey(jwk, hash, encoding);
   }
 
-  /** @override */
   doesSupport(keyType: string) {
     return keyType === this.getKeyType();
   }
 
-  /** @override */
   getKeyType() {
     return EcdsaPublicKeyManager.KEY_TYPE;
   }
 
-  /** @override */
   getPrimitiveType() {
     return EcdsaPublicKeyManager.SUPPORTED_PRIMITIVE;
   }
 
-  /** @override */
   getVersion() {
     return EcdsaPublicKeyManager.VERSION;
   }
 
-  /** @override */
   getKeyFactory() {
     return this.keyFactory;
   }
@@ -107,13 +99,13 @@ export class EcdsaPublicKeyManager implements
     }
     let key: PbEcdsaPublicKey;
     try {
-      key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue());
+      key = PbEcdsaPublicKey.deserializeBinary(keyData.getValue_asU8());
     } catch (e) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPublicKeyManager.KEY_TYPE +
           ' key-proto.');
     }
-    if (!key.getParams() || !key.getX() || !key.getY()) {
+    if (!key.getParams() || !key.getX_asU8() || !key.getY_asU8()) {
       throw new SecurityException(
           'Input cannot be parsed as ' + EcdsaPublicKeyManager.KEY_TYPE +
           ' key-proto.');

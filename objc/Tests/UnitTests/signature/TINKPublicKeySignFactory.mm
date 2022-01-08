@@ -28,6 +28,7 @@
 #import "objc/signature/TINKPublicKeySignInternal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/keyset_handle.h"
 #include "tink/signature/ecdsa_sign_key_manager.h"
@@ -72,7 +73,7 @@ static EcdsaPrivateKey GetNewEcdsaPrivateKey() {
       [TINKPublicKeySignFactory primitiveWithKeysetHandle:handle error:&error];
   XCTAssertNil(publicKeySign);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 

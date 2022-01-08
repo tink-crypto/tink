@@ -32,6 +32,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
     ],
     alwayslink = 1,
 )
@@ -50,6 +51,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ],
@@ -88,6 +90,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

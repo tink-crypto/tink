@@ -18,8 +18,8 @@ bazel build ...
 ./bazel-bin/jwt/jwt_signature_cli get-public-key private_keyset.bin \
     public_keyset.bin
 ./bazel-bin/jwt/jwt_signature_cli sign private_keyset.bin \
-    my-subject token.txt
+    my-audience token.txt
 ./bazel-bin/jwt/jwt_signature_cli verify public_keyset.bin \
-    my-subject token.txt result.txt
+    my-audience token.txt result.txt
 cat result.txt
 ```

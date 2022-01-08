@@ -44,7 +44,6 @@ export class EncryptThenAuthenticate extends Aead {
    * represented as 64-bit bigendian unsigned integer. The final ciphertext
    * format is `ind-cpa ciphertext || mac`.
    *
-   * @override
    */
   async encrypt(plaintext: Uint8Array, associatedData = new Uint8Array(0)):
       Promise<Uint8Array> {
@@ -63,7 +62,6 @@ export class EncryptThenAuthenticate extends Aead {
   }
 
   /**
-   * @override
    */
   async decrypt(ciphertext: Uint8Array, associatedData = new Uint8Array(0)):
       Promise<Uint8Array> {

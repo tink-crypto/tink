@@ -19,10 +19,13 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/evp.h"
+#include "tink/aead/internal/aead_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -34,27 +37,28 @@ util::StatusOr<std::unique_ptr<IndCpaCipher>> AesCtrBoringSsl::New(
   auto status = internal::CheckFipsCompatibility<AesCtrBoringSsl>();
   if (!status.ok()) return status;
 
-  const EVP_CIPHER* cipher =
-      SubtleUtilBoringSSL::GetAesCtrCipherForKeySize(key.size());
-  if (cipher == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesCtrCipherForKeySize(key.size());
+  if (!cipher.ok()) {
+    return cipher.status();
   }
+
   if (iv_size < kMinIvSizeInBytes || iv_size > kBlockSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid iv size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid iv size");
   }
   return {
-      absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, cipher))};
+      absl::WrapUnique(new AesCtrBoringSsl(std::move(key), iv_size, *cipher))};
 }
 
 util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
     absl::string_view plaintext) const {
   // BoringSSL expects a non-null pointer for plaintext, regardless of whether
   // the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
+  plaintext = internal::EnsureStringNonNull(plaintext);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_CIPHER_CTX");
   }
   std::string ciphertext = Random::GetRandomBytes(iv_size_);
@@ -69,7 +73,8 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
       EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr /* engine */, key_.data(),
                          reinterpret_cast<const uint8_t*>(&iv_block[0]));
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL, "could not initialize ctx");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize ctx");
   }
   ResizeStringUninitialized(&ciphertext, iv_size_ + plaintext.size());
   int len;
@@ -77,10 +82,11 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
       ctx.get(), reinterpret_cast<uint8_t*>(&ciphertext[iv_size_]), &len,
       reinterpret_cast<const uint8_t*>(plaintext.data()), plaintext.size());
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL, "encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "encryption failed");
   }
   if (len != plaintext.size()) {
-    return util::Status(util::error::INTERNAL, "incorrect ciphertext size");
+    return util::Status(absl::StatusCode::kInternal,
+                        "incorrect ciphertext size");
   }
   return ciphertext;
 }
@@ -88,12 +94,13 @@ util::StatusOr<std::string> AesCtrBoringSsl::Encrypt(
 util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
     absl::string_view ciphertext) const {
   if (ciphertext.size() < iv_size_) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
   if (ctx.get() == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize EVP_CIPHER_CTX");
   }
 
@@ -104,7 +111,7 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
                                reinterpret_cast<const uint8_t*>(key_.data()),
                                reinterpret_cast<const uint8_t*>(&iv_block[0]));
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "could not initialize key or iv");
   }
 
@@ -118,11 +125,12 @@ util::StatusOr<std::string> AesCtrBoringSsl::Decrypt(
       reinterpret_cast<const uint8_t*>(&ciphertext.data()[read]),
       plaintext_size);
   if (ret != 1) {
-    return util::Status(util::error::INTERNAL, "decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "decryption failed");
   }
 
   if (len != plaintext_size) {
-    return util::Status(util::error::INTERNAL, "incorrect plaintext size");
+    return util::Status(absl::StatusCode::kInternal,
+                        "incorrect plaintext size");
   }
   return plaintext;
 }

@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_util_boringssl.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/base.h"
 #include "openssl/hpke.h"
@@ -37,7 +38,8 @@ util::StatusOr<const EVP_HPKE_KEM *> KemParam(const HpkeKem& kem) {
     case HpkeKem::DHKEM_X25519_HKDF_SHA256:
       return EVP_hpke_x25519_hkdf_sha256();
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unsupported HPKE KEM algorithm: ", kem));
   }
 }
@@ -51,7 +53,8 @@ util::StatusOr<const EVP_HPKE_KDF *> KdfParam(const HpkeParams& params) {
     case HpkeKdf::HKDF_SHA256:
       return EVP_hpke_hkdf_sha256();
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unsupported HPKE KDF algorithm: ", params.kdf()));
   }
 }
@@ -65,7 +68,8 @@ util::StatusOr<const EVP_HPKE_AEAD *> AeadParam(const HpkeParams& params) {
     case HpkeAead::CHACHA20_POLY1305:
       return EVP_hpke_chacha20_poly1305();
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Unsupported HPKE AEAD algorithm: ", params.aead()));
   }
 }

@@ -225,18 +225,6 @@ final class TinkeyUtil {
     }
   }
 
-  /** Manipulates a keyset */
-  public static void manipulateEncryptedKeyset(
-      CommandType type,
-      OutputStream outputStream,
-      String outFormat,
-      InputStream inputStream,
-      String inFormat,
-      String masterKeyUri,
-      String credentialPath,
-      String keyId)
-      throws GeneralSecurityException, IOException {}
-
   /**
    * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a {@code
    * EncryptedKeyset}, read from {@code inputStream}.

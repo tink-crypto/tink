@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 #include "tink/subtle/aead_test_util.h"
@@ -33,6 +34,7 @@ namespace tink {
 
 namespace {
 
+using ::crypto::tink::internal::CordAesGcmBoringSsl;
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::IstreamInputStream;
@@ -52,7 +54,7 @@ TEST(AesGcmKeyManagerTest, Basics) {
 
 TEST(AesGcmKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(AesGcmKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, ValidateValid16ByteKey) {
@@ -74,7 +76,7 @@ TEST(AesGcmKeyManagerTest, InvalidKeySizes15Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789abcde");
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, InvalidKeySizes17Bytes) {
@@ -82,7 +84,7 @@ TEST(AesGcmKeyManagerTest, InvalidKeySizes17Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789abcdefg");
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, InvalidKeySizes24Bytes) {
@@ -90,7 +92,7 @@ TEST(AesGcmKeyManagerTest, InvalidKeySizes24Bytes) {
   key.set_version(0);
   key.set_key_value("01234567890123");
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, InvalidKeySizes31Bytes) {
@@ -98,7 +100,7 @@ TEST(AesGcmKeyManagerTest, InvalidKeySizes31Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789012345678901234567890");
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, InvalidKeySizes33Bytes) {
@@ -106,7 +108,7 @@ TEST(AesGcmKeyManagerTest, InvalidKeySizes33Bytes) {
   key.set_version(0);
   key.set_key_value("012345678901234567890123456789012");
   EXPECT_THAT(AesGcmKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, ValidateKeyFormat) {
@@ -114,33 +116,33 @@ TEST(AesGcmKeyManagerTest, ValidateKeyFormat) {
 
   format.set_key_size(0);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(1);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(15);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(16);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format), IsOk());
 
   format.set_key_size(17);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(31);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(32);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format), IsOk());
 
   format.set_key_size(33);
   EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, Create16ByteKey) {
@@ -179,10 +181,10 @@ TEST(AesGcmKeyManagerTest, CreateAead) {
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                                 *boring_ssl_aead_or.ValueOrDie(),
-                                 "message", "aad"),
-              IsOk());
+  ASSERT_THAT(
+      EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
+      IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, CreateCordAead) {
@@ -197,14 +199,14 @@ TEST(AesGcmKeyManagerTest, CreateCordAead) {
   ASSERT_THAT(aead_or.status(), IsOk());
 
   StatusOr<std::unique_ptr<CordAead>> boring_ssl_aead_or =
-      crypto::tink::CordAesGcmBoringSsl::New(
+      CordAesGcmBoringSsl::New(
           util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
   ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
 
-  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie(),
-                                 *boring_ssl_aead_or.ValueOrDie(),
-                                 "message", "aad"),
-              IsOk());
+  ASSERT_THAT(
+      EncryptThenDecrypt(*aead_or.ValueOrDie(),
+                         *boring_ssl_aead_or.ValueOrDie(), "message", "aad"),
+      IsOk());
 }
 
 TEST(AesGcmKeyManagerTest, DeriveShortKey) {
@@ -241,12 +243,11 @@ TEST(AesGcmKeyManagerTest, DeriveKeyNotEnoughRandomness) {
   format.set_key_size(16);
   format.set_version(0);
 
-  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
-      "0123456789")};
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789")};
 
-  ASSERT_THAT(
-      AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  ASSERT_THAT(AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmKeyManagerTest, DeriveKeyWrongVersion) {
@@ -254,11 +255,12 @@ TEST(AesGcmKeyManagerTest, DeriveKeyWrongVersion) {
   format.set_key_size(16);
   format.set_version(1);
 
-  IstreamInputStream input_stream{absl::make_unique<std::stringstream>(
-      "0123456789abcdefghijklmnop")};
+  IstreamInputStream input_stream{
+      absl::make_unique<std::stringstream>("0123456789abcdefghijklmnop")};
 
-  ASSERT_THAT(AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      AesGcmKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 }  // namespace

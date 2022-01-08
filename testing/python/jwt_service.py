@@ -13,24 +13,20 @@
 # limitations under the License.
 """JWT testing service API implementations in Python."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import datetime
+import io
 import json
 
-from typing import Text, Tuple
+from typing import Tuple
 
 import grpc
 import tink
 from tink import cleartext_keyset_handle
 
+from tink import jwt
+
 from proto.testing import testing_api_pb2
 from proto.testing import testing_api_pb2_grpc
-
-from tink import jwt
 
 
 def _to_timestamp_tuple(t: datetime.datetime) -> Tuple[int, int]:
@@ -142,7 +138,7 @@ def verifiedjwt_to_proto(
       token.custom_claims[name].bool_value = value
     elif isinstance(value, (int, float)):
       token.custom_claims[name].number_value = value
-    elif isinstance(value, Text):
+    elif isinstance(value, str):
       token.custom_claims[name].string_value = value
     elif isinstance(value, dict):
       token.custom_claims[name].json_object_value = json.dumps(value)
@@ -162,9 +158,6 @@ def validator_from_proto(
   expected_issuer = None
   if proto_validator.HasField('expected_issuer'):
     expected_issuer = proto_validator.expected_issuer.value
-  expected_subject = None
-  if proto_validator.HasField('expected_subject'):
-    expected_subject = proto_validator.expected_subject.value
   expected_audience = None
   if proto_validator.HasField('expected_audience'):
     expected_audience = proto_validator.expected_audience.value
@@ -177,13 +170,12 @@ def validator_from_proto(
   return jwt.new_validator(
       expected_type_header=expected_type_header,
       expected_issuer=expected_issuer,
-      expected_subject=expected_subject,
       expected_audience=expected_audience,
       ignore_type_header=proto_validator.ignore_type_header,
       ignore_issuer=proto_validator.ignore_issuer,
-      ignore_subject=proto_validator.ignore_subject,
       ignore_audiences=proto_validator.ignore_audience,
       allow_missing_expiration=proto_validator.allow_missing_expiration,
+      expect_issued_in_the_past=proto_validator.expect_issued_in_the_past,
       fixed_now=fixed_now,
       clock_skew=clock_skew)
 
@@ -251,3 +243,28 @@ class JwtServicer(testing_api_pb2_grpc.JwtServicer):
           verified_jwt=verifiedjwt_to_proto(verified_jwt))
     except tink.TinkError as e:
       return testing_api_pb2.JwtVerifyResponse(err=str(e))
+
+  def ToJwkSet(
+      self, request: testing_api_pb2.JwtToJwkSetRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.JwtToJwkSetResponse:
+    """Converts a Tink Keyset with JWT keys into a JWK set."""
+    try:
+      keyset_handle = cleartext_keyset_handle.read(
+          tink.BinaryKeysetReader(request.keyset))
+      jwk_set = jwt.jwk_set_from_public_keyset_handle(keyset_handle)
+      return testing_api_pb2.JwtToJwkSetResponse(jwk_set=jwk_set)
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtToJwkSetResponse(err=str(e))
+
+  def FromJwkSet(
+      self, request: testing_api_pb2.JwtFromJwkSetRequest,
+      context: grpc.ServicerContext) -> testing_api_pb2.JwtFromJwkSetResponse:
+    """Converts a JWK set into a Tink Keyset."""
+    try:
+      keyset_handle = jwt.jwk_set_to_public_keyset_handle(request.jwk_set)
+      keyset = io.BytesIO()
+      cleartext_keyset_handle.write(
+          tink.BinaryKeysetWriter(keyset), keyset_handle)
+      return testing_api_pb2.JwtFromJwkSetResponse(keyset=keyset.getvalue())
+    except tink.TinkError as e:
+      return testing_api_pb2.JwtFromJwkSetResponse(err=str(e))

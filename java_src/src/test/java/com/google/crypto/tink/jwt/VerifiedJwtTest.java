@@ -161,17 +161,17 @@ public final class VerifiedJwtTest {
     VerifiedJwt token = new VerifiedJwt(rawToken);
 
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_EXPIRATION));
-    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_ISSUER));
+        IllegalArgumentException.class, () -> token.getNumberClaim("exp"));
+    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim("iss"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_SUBJECT));
+        IllegalArgumentException.class, () -> token.getStringClaim("sub"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getJsonArrayClaim(JwtNames.CLAIM_AUDIENCE));
+        IllegalArgumentException.class, () -> token.getJsonArrayClaim("aud"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_ISSUED_AT));
-    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim(JwtNames.CLAIM_JWT_ID));
+        IllegalArgumentException.class, () -> token.getNumberClaim("iat"));
+    assertThrows(IllegalArgumentException.class, () -> token.getStringClaim("jti"));
     assertThrows(
-        IllegalArgumentException.class, () -> token.getNumberClaim(JwtNames.CLAIM_NOT_BEFORE));
+        IllegalArgumentException.class, () -> token.getNumberClaim("nbf"));
   }
 
   @Test
@@ -244,7 +244,7 @@ public final class VerifiedJwtTest {
 
   @Test
   public void customClaimNames_success() throws Exception {
-    RawJwt token =
+    RawJwt rawToken =
         RawJwt.newBuilder()
             .setIssuer("issuer")
             .setExpiration(Instant.ofEpochSecond(1234567))
@@ -253,12 +253,23 @@ public final class VerifiedJwtTest {
             .addNumberClaim("number", 123.456)
             .addNullClaim("nothing")
             .build();
+    VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.customClaimNames()).containsExactly("string", "boolean", "number", "nothing");
   }
 
   @Test
   public void customClaimNames_empty() throws Exception {
-    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
+    RawJwt rawToken = RawJwt.newBuilder().withoutExpiration().build();
+    VerifiedJwt token = new VerifiedJwt(rawToken);
     assertThat(token.customClaimNames()).isEmpty();
+  }
+
+  @Test
+  public void toString_success() throws Exception {
+    RawJwt rawToken =
+        RawJwt.newBuilder().setTypeHeader("type").setExpiration(Instant.ofEpochSecond(42)).build();
+    VerifiedJwt token = new VerifiedJwt(rawToken);
+    assertThat(token.toString())
+        .isEqualTo("verified{{\"typ\":\"type\"}.{\"exp\":42}}");
   }
 }

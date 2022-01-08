@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -58,16 +59,17 @@ std::unique_ptr<InputStream> GetInputStream(absl::string_view contents) {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::string* output) {
   if (input_stream == nullptr || output == nullptr || count < 0) {
-    return util::Status(util::error::INTERNAL, "Illegal read from a stream");
+    return util::Status(absl::StatusCode::kInternal,
+                        "Illegal read from a stream");
   }
   const void* buffer;
   output->clear();
   int bytes_to_read = count;
   while (bytes_to_read > 0) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
-      return util::Status::OK;
+      return util::OkStatus();
     }
     if (!next_result.ok()) return next_result.status();
     auto read_bytes = next_result.ValueOrDie();
@@ -79,7 +81,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       if (bytes_to_read == 0) input_stream->BackUp(read_bytes - used_bytes);
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 TEST(SharedInputStreamTest, BasicOperations) {
@@ -163,7 +165,7 @@ TEST(SharedInputStreamTest, SingleBackup) {
           EXPECT_EQ(pos, shared_stream->Position());
         } else {
           EXPECT_THAT(next_result.status(),
-                      StatusIs(util::error::OUT_OF_RANGE));
+                      StatusIs(absl::StatusCode::kOutOfRange));
         }
 
         // Read the rest of the input.

@@ -20,6 +20,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
@@ -53,7 +54,7 @@ TEST_F(DeterministicAeadConfigTest, Basic) {
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(DeterministicAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
@@ -115,7 +116,7 @@ TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(),
-               StatusIs(util::error::NOT_FOUND));
+               StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

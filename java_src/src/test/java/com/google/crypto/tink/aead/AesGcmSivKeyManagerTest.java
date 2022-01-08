@@ -18,6 +18,7 @@ package com.google.crypto.tink.aead;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTemplateCompatible;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -144,8 +145,8 @@ public class AesGcmSivKeyManagerTest {
   public void testCiphertextSize() throws Exception {
     AesGcmSivKey key = factory.createKey(AesGcmSivKeyFormat.newBuilder().setKeySize(32).build());
     Aead aead = new AesGcmSivKeyManager().getPrimitive(key, Aead.class);
-    byte[] plaintext = "plaintext".getBytes("UTF-8");
-    byte[] associatedData = "associatedData".getBytes("UTF-8");
+    byte[] plaintext = "plaintext".getBytes(UTF_8);
+    byte[] associatedData = "associatedData".getBytes(UTF_8);
     byte[] ciphertext = aead.encrypt(plaintext, associatedData);
     assertThat(ciphertext.length)
         .isEqualTo(12 /* IV_SIZE */ + plaintext.length + 16 /* TAG_SIZE */);

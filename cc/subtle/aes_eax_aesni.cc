@@ -31,9 +31,10 @@
 #include <string>
 
 #include "absl/algorithm/container.h"
+#include "absl/status/status.h"
+#include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 
 namespace crypto {
 namespace tink {
@@ -233,14 +234,15 @@ bool IsValidKeySize(size_t key_size) {
 crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxAesni::New(
     const util::SecretData& key, size_t nonce_size_in_bytes) {
   if (!IsValidKeySize(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid key size");
   }
   if (!IsValidNonceSize(nonce_size_in_bytes)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid nonce size");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid nonce size");
   }
   auto eax = absl::WrapUnique(new AesEaxAesni(nonce_size_in_bytes));
   if (!eax->SetKey(key)) {
-    return util::Status(util::error::INTERNAL, "Setting AES key failed");
+    return util::Status(absl::StatusCode::kInternal, "Setting AES key failed");
   }
   return {std::move(eax)};
 }
@@ -521,11 +523,12 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
     absl::string_view plaintext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   if (SIZE_MAX - nonce_size_ - kTagSize <= plaintext.size()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Plaintext too long");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Plaintext too long");
   }
   size_t ciphertext_size = plaintext.size() + nonce_size_ + kTagSize;
   std::string ciphertext;
@@ -537,7 +540,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Encrypt(
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]),
                      ciphertext_size - nonce_size_));
   if (!result) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
   return ciphertext;
 }
@@ -546,11 +549,12 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   // BoringSSL expects a non-null pointer for additional_data,
   // regardless of whether the size is 0.
-  additional_data = SubtleUtilBoringSSL::EnsureNonNull(additional_data);
+  additional_data = internal::EnsureStringNonNull(additional_data);
 
   size_t ct_size = ciphertext.size();
   if (ct_size < nonce_size_ + kTagSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext too short");
   }
   size_t out_size = ct_size - kTagSize - nonce_size_;
   absl::string_view nonce = ciphertext.substr(0, nonce_size_);
@@ -562,7 +566,7 @@ crypto::tink::util::StatusOr<std::string> AesEaxAesni::Decrypt(
       nonce, encrypted, additional_data,
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&res[0]), res.size()));
   if (!result) {
-    return util::Status(util::error::INTERNAL, "Decryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Decryption failed");
   }
   return res;
 }

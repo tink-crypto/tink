@@ -19,11 +19,14 @@
 #include <random>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/registry.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
+#include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -83,44 +86,44 @@ Status KeysetManager::Enable(uint32_t key_id) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot enable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::ENABLED);
-      return Status::OK;
+      return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Disable(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot disable primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot disable key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.set_status(KeyStatusType::DISABLED);
-      return Status::OK;
+      return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Delete(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot delete primary key (key_id %u).", key_id);
   }
   auto key_field = keyset_.mutable_key();
@@ -130,17 +133,17 @@ Status KeysetManager::Delete(uint32_t key_id) {
     auto key = *key_iter;
     if (key.key_id() == key_id) {
       keyset_.mutable_key()->erase(key_iter);
-      return Status::OK;
+      return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
 Status KeysetManager::Destroy(uint32_t key_id) {
   absl::MutexLock lock(&keyset_mutex_);
   if (keyset_.primary_key_id() == key_id) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Cannot destroy primary key (key_id %u).", key_id);
   }
   for (auto& key : *(keyset_.mutable_key())) {
@@ -148,16 +151,16 @@ Status KeysetManager::Destroy(uint32_t key_id) {
       if (key.status() != KeyStatusType::DISABLED &&
           key.status() != KeyStatusType::DESTROYED &&
           key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "Cannot destroy key with key_id %u and status %s.",
                          key_id, Enums::KeyStatusName(key.status()));
       }
       key.clear_key_data();
       key.set_status(KeyStatusType::DESTROYED);
-      return Status::OK;
+      return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 
@@ -166,16 +169,16 @@ Status KeysetManager::SetPrimary(uint32_t key_id) {
   for (auto& key : keyset_.key()) {
     if (key.key_id() == key_id) {
       if (key.status() != KeyStatusType::ENABLED) {
-        return ToStatusF(util::error::INVALID_ARGUMENT,
+        return ToStatusF(absl::StatusCode::kInvalidArgument,
                          "The candidate for the primary key must be ENABLED"
                          " (key_id %u).",
                          key_id);
       }
       keyset_.set_primary_key_id(key_id);
-      return Status::OK;
+      return util::OkStatus();
     }
   }
-  return ToStatusF(util::error::NOT_FOUND,
+  return ToStatusF(absl::StatusCode::kNotFound,
                    "No key with key_id %u found in the keyset.", key_id);
 }
 

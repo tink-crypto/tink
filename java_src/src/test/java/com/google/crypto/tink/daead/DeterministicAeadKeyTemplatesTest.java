@@ -30,7 +30,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class DeterministicAeadKeyTemplatesTest {
   @Test
-  public void testAES256_SIV() throws Exception {
+  public void aes256Siv() throws Exception {
     KeyTemplate template = DeterministicAeadKeyTemplates.AES256_SIV;
     assertEquals(new AesSivKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());

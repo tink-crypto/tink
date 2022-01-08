@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	subtleMac "github.com/google/tink/go/mac/subtle"
 	"github.com/google/tink/go/subtle/random"

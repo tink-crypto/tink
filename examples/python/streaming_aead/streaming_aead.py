@@ -30,7 +30,6 @@ It requires 4 arguments (and one optional one):
 
 from __future__ import absolute_import
 from __future__ import division
-# Placeholder for import for type annotations
 from __future__ import print_function
 
 from typing import BinaryIO

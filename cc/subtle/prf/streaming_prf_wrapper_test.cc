@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/util/input_stream_util.h"
 #include "tink/util/istream_input_stream.h"
@@ -53,16 +54,17 @@ class DummyStreamingPrf : public StreamingPrf {
 
 TEST(AeadSetWrapperTest, WrapNullptr) {
   StreamingPrfWrapper wrapper;
-  EXPECT_THAT(wrapper.Wrap(nullptr).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("non-NULL")));
+  EXPECT_THAT(
+      wrapper.Wrap(nullptr).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("non-NULL")));
 }
 
 TEST(KeysetDeriverWrapperTest, WrapEmpty) {
-  EXPECT_THAT(
-      StreamingPrfWrapper()
-          .Wrap(absl::make_unique<PrimitiveSet<StreamingPrf>>())
-          .status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("exactly one key")));
+  EXPECT_THAT(StreamingPrfWrapper()
+                  .Wrap(absl::make_unique<PrimitiveSet<StreamingPrf>>())
+                  .status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("exactly one key")));
 }
 
 TEST(KeysetDeriverWrapperTest, WrapSingle) {
@@ -100,7 +102,7 @@ TEST(KeysetDeriverWrapperTest, WrapNonRaw) {
   EXPECT_THAT(prf_set->set_primary(entry_or.ValueOrDie()), IsOk());
 
   EXPECT_THAT(StreamingPrfWrapper().Wrap(std::move(prf_set)).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("output_prefix_type")));
 }
 
@@ -125,7 +127,7 @@ TEST(KeysetDeriverWrapperTest, WrapMultiple) {
       IsOk());
 
   EXPECT_THAT(StreamingPrfWrapper().Wrap(std::move(prf_set)).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("given set has 2 keys")));
 }
 

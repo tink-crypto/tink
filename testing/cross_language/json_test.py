@@ -13,8 +13,7 @@
 # limitations under the License.
 """Cross-language tests for JSON serialization."""
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text
+from typing import Iterable
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -51,7 +50,7 @@ def _is_equal_keyset(keyset1: bytes, keyset2: bytes) -> bool:
   return _keyset_proto(keyset1) == _keyset_proto(keyset2)
 
 
-def all_key_template_names() -> Iterable[Text]:
+def all_key_template_names() -> Iterable[str]:
   """Yields all key template names."""
   for key_type in supported_key_types.ALL_KEY_TYPES:
     for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:

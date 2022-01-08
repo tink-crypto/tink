@@ -17,7 +17,7 @@
 package prf
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	cmacpb "github.com/google/tink/go/proto/aes_cmac_prf_go_proto"
 	commonpb "github.com/google/tink/go/proto/common_go_proto"
 	hkdfpb "github.com/google/tink/go/proto/hkdf_prf_go_proto"

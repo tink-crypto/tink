@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_SIGNATURE_KEY_TEMPLATES_H_
 #define TINK_SIGNATURE_SIGNATURE_KEY_TEMPLATES_H_
 
+#include "absl/base/macros.h"
 #include "proto/tink.pb.h"
 
 namespace crypto {
@@ -49,7 +50,24 @@ class SignatureKeyTemplates {
   //   - hash function: SHA512
   //   - signature encoding: DER
   //   - OutputPrefixType: TINK
+  ABSL_DEPRECATED("Use EcdsaP384Sha384() or EcdsaP384Sha512() instead")
   static const google::crypto::tink::KeyTemplate& EcdsaP384();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-384
+  //   - hash function: SHA384
+  //   - signature encoding: DER
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& EcdsaP384Sha384();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-384
+  //   - hash function: SHA512
+  //   - signature encoding: DER
+  //   - OutputPrefixType: TINK
+  static const google::crypto::tink::KeyTemplate& EcdsaP384Sha512();
 
   // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
   // with the following parameters:
@@ -64,7 +82,19 @@ class SignatureKeyTemplates {
   //   - EC curve: NIST P-256
   //   - hash function: SHA256
   //   - signature encoding: IEEE_P1363
+  //   - OutputPrefixType: RAW
+  // This template will give you compatibility with most other libraries.
+  static const google::crypto::tink::KeyTemplate& EcdsaP256Raw();
+
+  // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
+  // with the following parameters:
+  //   - EC curve: NIST P-256
+  //   - hash function: SHA256
+  //   - signature encoding: IEEE_P1363
   //   - OutputPrefixType: TINK
+  // This key template does not make sense because IEEE P1363 mandates a raw
+  // signature.
+  ABSL_DEPRECATED("Use EcdsaP256() or EcdsaP256Raw() instead")
   static const google::crypto::tink::KeyTemplate& EcdsaP256Ieee();
 
   // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
@@ -73,6 +103,10 @@ class SignatureKeyTemplates {
   //   - hash function: SHA512
   //   - signature encoding: IEEE_P1363
   //   - OutputPrefixType: TINK
+  // This key template does not make sense because IEEE P1363 mandates a raw
+  // signature.
+  ABSL_DEPRECATED(
+      "Use EcdsaP384Sha384(), EcdsaP384Sha512() or EcdsaP256Raw() instead")
   static const google::crypto::tink::KeyTemplate& EcdsaP384Ieee();
 
   // Returns a KeyTemplate that generates new instances of EcdsaPrivateKey
@@ -81,6 +115,9 @@ class SignatureKeyTemplates {
   //   - hash function: SHA512
   //   - signature encoding: IEEE_P1363
   //   - OutputPrefixType: TINK
+  // This key template does not make sense because IEEE P1363 mandates a raw
+  // signature.
+  ABSL_DEPRECATED("Use EcdsaP521() or EcdsaP256Raw() instead")
   static const google::crypto::tink::KeyTemplate& EcdsaP521Ieee();
 
   // Returns a KeyTemplate that generates new instances of RsaSsaPkcs1PrivateKey

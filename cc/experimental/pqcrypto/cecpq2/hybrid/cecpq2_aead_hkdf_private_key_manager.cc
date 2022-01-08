@@ -17,6 +17,7 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "openssl/hrss.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_public_key_manager.h"
@@ -45,7 +46,7 @@ using google::crypto::tink::Cecpq2AeadHkdfPublicKey;
 Status Cecpq2AeadHkdfPrivateKeyManager::ValidateKeyFormat(
     const Cecpq2AeadHkdfKeyFormat& key_format) const {
   if (!key_format.has_params()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing params.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing params.");
   }
   return Cecpq2AeadHkdfPublicKeyManager().ValidateParams(key_format.params());
 }
@@ -90,7 +91,7 @@ Status Cecpq2AeadHkdfPrivateKeyManager::ValidateKey(
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (!key.has_public_key()) {
-    return Status(util::error::INVALID_ARGUMENT, "Missing public_key.");
+    return Status(absl::StatusCode::kInvalidArgument, "Missing public_key.");
   }
   return Cecpq2AeadHkdfPublicKeyManager().ValidateKey(key.public_key());
 }

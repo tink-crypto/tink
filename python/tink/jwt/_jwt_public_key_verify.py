@@ -13,23 +13,15 @@
 # limitations under the License.
 """Interface for JwtPublicKeyVerify."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import abc
 
-from typing import Text
-
-import six
+from typing import Optional
 
 from tink.jwt import _jwt_validator
 from tink.jwt import _verified_jwt
 
 
-@six.add_metaclass(abc.ABCMeta)
-class JwtPublicKeyVerify(object):
+class JwtPublicKeyVerify(metaclass=abc.ABCMeta):
   """Interface for verifying a signed JWT.
 
   Sees RFC 7519 and RFC 7515. Security guarantees: similar to PublicKeyVerify.
@@ -37,7 +29,7 @@ class JwtPublicKeyVerify(object):
 
   @abc.abstractmethod
   def verify_and_decode(
-      self, compact: Text,
+      self, compact: str,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a signed compact JWT token.
 
@@ -62,4 +54,18 @@ class JwtPublicKeyVerify(object):
     Raises:
       tink.TinkError if the operation fails.
     """
+    raise NotImplementedError()
+
+
+class JwtPublicKeyVerifyInternal(metaclass=abc.ABCMeta):
+  """Internal interface for creating a signed JWT.
+
+  "kid" is an optional value that is set by the wrapper for keys with output
+  prefix TINK. It is set to None for output prefix RAW.
+  """
+
+  @abc.abstractmethod
+  def verify_and_decode_with_kid(
+      self, compact: str, validator: _jwt_validator.JwtValidator,
+      kid: Optional[str]) -> _verified_jwt.VerifiedJwt:
     raise NotImplementedError()

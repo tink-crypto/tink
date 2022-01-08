@@ -23,13 +23,20 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "tink/experimental/pqcrypto/signature/subtle/dilithium_key.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/statusor.h"
 
 extern "C" {
-#include "third_party/pqclean/crypto_sign/dilithium2/avx2/sign.h"
+#include "third_party/pqclean/crypto_sign/dilithium2/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium2aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium3aes/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5/avx2/api.h"
+#include "third_party/pqclean/crypto_sign/dilithium5aes/avx2/api.h"
 }
 
 namespace crypto {
@@ -42,14 +49,18 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> DilithiumAvx2Verify::New(
   auto status = internal::CheckFipsCompatibility<DilithiumAvx2Verify>();
   if (!status.ok()) return status;
 
-  if (public_key.GetKeyData().length() !=
-      PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES) {
+  int32_t key_size = public_key.GetKeyData().size();
+
+  if (key_size != PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES &&
+      key_size != PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrFormat("Invalid public key size (%d). "
-                        "The only valid size is %d.",
-                        public_key.GetKeyData().length(),
-                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES));
+                        "The only valid sizes are %d, %d, %d.",
+                        key_size, PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES,
+                        PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES,
+                        PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES));
   }
 
   return {absl::WrapUnique(new DilithiumAvx2Verify(std::move(public_key)))};
@@ -57,24 +68,102 @@ util::StatusOr<std::unique_ptr<PublicKeyVerify>> DilithiumAvx2Verify::New(
 
 util::Status DilithiumAvx2Verify::Verify(absl::string_view signature,
                                          absl::string_view data) const {
-  if (signature.size() != PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrFormat("Invalid signature size (%d). "
-                                        "The signature must be %d bytes long.",
-                                        signature.size(),
-                                        PQCLEAN_DILITHIUM2_AVX2_CRYPTO_BYTES));
+  int32_t key_size = public_key_.GetKeyData().size();
+  int result = 1;
+
+  switch (key_size) {
+    case PQCLEAN_DILITHIUM2_AVX2_CRYPTO_PUBLICKEYBYTES: {
+      switch (public_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          result = PQCLEAN_DILITHIUM2AES_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          result = PQCLEAN_DILITHIUM2_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
+        }
+      }
+      break;
+    }
+    case PQCLEAN_DILITHIUM3_AVX2_CRYPTO_PUBLICKEYBYTES: {
+      switch (public_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          result = PQCLEAN_DILITHIUM3AES_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          result = PQCLEAN_DILITHIUM3_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
+        }
+      }
+      break;
+    }
+    case PQCLEAN_DILITHIUM5_AVX2_CRYPTO_PUBLICKEYBYTES: {
+      switch (public_key_.GetSeedExpansion()) {
+        case DilithiumSeedExpansion::SEED_EXPANSION_AES: {
+          result = PQCLEAN_DILITHIUM5AES_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+          break;
+        }
+        case DilithiumSeedExpansion::SEED_EXPANSION_SHAKE: {
+          result = PQCLEAN_DILITHIUM5_AVX2_crypto_sign_verify(
+              reinterpret_cast<const uint8_t *>(signature.data()),
+              signature.size(), reinterpret_cast<const uint8_t *>(data.data()),
+              data.size(),
+              reinterpret_cast<const uint8_t *>(
+                  public_key_.GetKeyData().data()));
+          break;
+        }
+        default: {
+          return util::Status(absl::StatusCode::kInternal,
+                              "Invalid seed expansion.");
+        }
+      }
+      break;
+    }
+    default:
+      return util::Status(absl::StatusCode::kInternal, "Invalid keysize.");
   }
 
-  if (0 !=
-      PQCLEAN_DILITHIUM2_AVX2_crypto_sign_verify(
-          reinterpret_cast<const uint8_t *>(signature.data()), signature.size(),
-          reinterpret_cast<const uint8_t *>(data.data()), data.size(),
-          reinterpret_cast<const uint8_t *>(public_key_.GetKeyData().data()))) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+  if (result != 0) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Signature is not valid.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace subtle

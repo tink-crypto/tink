@@ -36,26 +36,26 @@ using ::grpc::Status;
                                    HybridEncryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->public_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto public_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!public_handle_result.ok()) {
-    response->set_err(public_handle_result.status().error_message());
+    response->set_err(std::string(public_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto hybrid_encrypt_result =
       public_handle_result.ValueOrDie()
           ->GetPrimitive<crypto::tink::HybridEncrypt>();
   if (!hybrid_encrypt_result.ok()) {
-    response->set_err(hybrid_encrypt_result.status().error_message());
+    response->set_err(std::string(hybrid_encrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto enc_result = hybrid_encrypt_result.ValueOrDie()->Encrypt(
       request->plaintext(), request->context_info());
   if (!enc_result.ok()) {
-    response->set_err(enc_result.status().error_message());
+    response->set_err(std::string(enc_result.status().message()));
     return ::grpc::Status::OK;
   }
   response->set_ciphertext(enc_result.ValueOrDie());
@@ -68,26 +68,26 @@ using ::grpc::Status;
                                    HybridDecryptResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->private_keyset());
   if (!reader_result.ok()) {
-    response->set_err(reader_result.status().error_message());
+    response->set_err(std::string(reader_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto private_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!private_handle_result.ok()) {
-    response->set_err(private_handle_result.status().error_message());
+    response->set_err(std::string(private_handle_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto hybrid_decrypt_result =
       private_handle_result.ValueOrDie()
           ->GetPrimitive<crypto::tink::HybridDecrypt>();
   if (!hybrid_decrypt_result.ok()) {
-    response->set_err(hybrid_decrypt_result.status().error_message());
+    response->set_err(std::string(hybrid_decrypt_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto dec_result = hybrid_decrypt_result.ValueOrDie()->Decrypt(
       request->ciphertext(), request->context_info());
   if (!dec_result.ok()) {
-    response->set_err(dec_result.status().error_message());
+    response->set_err(std::string(dec_result.status().message()));
     return ::grpc::Status::OK;
   }
   response->set_plaintext(dec_result.ValueOrDie());

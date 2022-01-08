@@ -13,10 +13,6 @@
 # limitations under the License.
 """Tests for tink.python.tink.streaming_aead_key_manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import io
 
 from absl.testing import absltest

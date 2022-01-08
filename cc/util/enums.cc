@@ -16,6 +16,7 @@
 
 #include "tink/util/enums.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "proto/common.pb.h"
 #include "proto/ecdsa.pb.h"
@@ -193,7 +194,7 @@ util::StatusOr<int> Enums::HashLength(pb::HashType hash_type) {
     case pb::HashType::SHA512:
       return 64;
     default:
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Unsupported hashing algorithm ",
                                        util::Enums::HashName(hash_type)));
   }

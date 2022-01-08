@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/input_stream.h"
@@ -136,10 +137,10 @@ class HkdfPrfKeyManager
   crypto::tink::util::Status ValidateKeySize(int key_size) const {
     if (key_size < kMinKeySizeBytes) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid HkdfPrfKey: key_value is too short.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   crypto::tink::util::Status ValidateParams(
@@ -148,10 +149,10 @@ class HkdfPrfKeyManager
     if (params.hash() != google::crypto::tink::HashType::SHA256 &&
         params.hash() != google::crypto::tink::HashType::SHA512) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid HkdfPrfKey: unsupported hash.");
     }
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   // We use a somewhat larger minimum key size than usual, because PRFs might be

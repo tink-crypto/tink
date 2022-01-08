@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/crypto.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
@@ -59,11 +60,11 @@ TEST_F(SignatureConfigTest, testBasic) {
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   RsaSsaPssSignKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<PublicKeyVerify>(
                   RsaSsaPssVerifyKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(SignatureConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<PublicKeySign>(
                   RsaSsaPssSignKeyManager().get_key_type())
@@ -182,7 +183,8 @@ TEST_F(SignatureConfigTest, RegisterFipsValidTemplates) {
   std::list<google::crypto::tink::KeyTemplate> fips_key_templates;
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP256Ieee());
-  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha384());
+  fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Sha512());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP384Ieee());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521());
   fips_key_templates.push_back(SignatureKeyTemplates::EcdsaP521Ieee());

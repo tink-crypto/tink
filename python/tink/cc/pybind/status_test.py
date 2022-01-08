@@ -14,12 +14,8 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from absl.testing import absltest
-import six
 from tink.cc.pybind import tink_bindings
 
 
@@ -164,7 +160,7 @@ class UtilStatusOrTest(absltest.TestCase):
 
   def test_return_alpha_beta_gamma(self):
     d = tink_bindings.return_alpha_beta_gamma_decoded()
-    self.assertIsInstance(d, six.text_type)
+    self.assertIsInstance(d, str)
     b = d.encode('utf-8')
     self.assertEqual(b, b'EDD4f89 alpha=\xce\xb1 beta=\xce\xb2 gamma=\xce\xb3')
 

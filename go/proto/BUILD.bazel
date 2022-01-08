@@ -1,7 +1,8 @@
 # gazelle:ignore
 
-package(default_visibility = ["//:__subpackages__"])
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+package(default_visibility = ["//:__subpackages__"])
 
 # protos
 
@@ -29,20 +30,6 @@ go_proto_library(
     name = "aes_siv_go_proto",
     importpath = "github.com/google/tink/go/proto/aes_siv_go_proto",
     proto = "@tink_base//proto:aes_siv_proto",
-)
-
-go_proto_library(
-    name = "rsa_ssa_pkcs1_go_proto",
-    importpath = "github.com/google/tink/go/proto/rsa_ssa_pkcs1_go_proto",
-    proto = "@tink_base//proto:rsa_ssa_pkcs1_proto",
-    deps = [":common_go_proto"],
-)
-
-go_proto_library(
-    name = "rsa_ssa_pss_go_proto",
-    importpath = "github.com/google/tink/go/proto/rsa_ssa_pss_go_proto",
-    proto = "@tink_base//proto:rsa_ssa_pss_proto",
-    deps = [":common_go_proto"],
 )
 
 go_proto_library(

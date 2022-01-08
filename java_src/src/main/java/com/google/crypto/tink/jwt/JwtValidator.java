@@ -31,11 +31,10 @@ public final class JwtValidator {
   private final boolean ignoreTypeHeader;
   private final Optional<String> expectedIssuer;
   private final boolean ignoreIssuer;
-  private final Optional<String> expectedSubject;
-  private final boolean ignoreSubject;
   private final Optional<String> expectedAudience;
   private final boolean ignoreAudiences;
   private final boolean allowMissingExpiration;
+  private final boolean expectIssuedInThePast;
 
   @SuppressWarnings("Immutable") // We do not mutate the clock.
   private final Clock clock;
@@ -47,11 +46,10 @@ public final class JwtValidator {
     this.ignoreTypeHeader = builder.ignoreTypeHeader;
     this.expectedIssuer = builder.expectedIssuer;
     this.ignoreIssuer = builder.ignoreIssuer;
-    this.expectedSubject = builder.expectedSubject;
-    this.ignoreSubject = builder.ignoreSubject;
     this.expectedAudience = builder.expectedAudience;
     this.ignoreAudiences = builder.ignoreAudiences;
     this.allowMissingExpiration = builder.allowMissingExpiration;
+    this.expectIssuedInThePast = builder.expectIssuedInThePast;
     this.clock = builder.clock;
     this.clockSkew = builder.clockSkew;
   }
@@ -59,8 +57,8 @@ public final class JwtValidator {
   /**
    * Returns a new JwtValidator.Builder.
    *
-   * <p>By default, the JwtValidator requires that a token has a valid expiration claim, no issuer,
-   * no subject, and no audience claim. This can be changed using the expect...(),  ignore...() and
+   * <p>By default, the JwtValidator requires that a token has a valid expiration claim, no issuer
+   * and no audience claim. This can be changed using the expect...(),  ignore...() and
    * allowMissingExpiration() methods.
    *
    * <p>If present, the JwtValidator also validates the not-before claim. The validation time can
@@ -76,11 +74,10 @@ public final class JwtValidator {
     private boolean ignoreTypeHeader;
     private Optional<String> expectedIssuer;
     private boolean ignoreIssuer;
-    private Optional<String> expectedSubject;
-    private boolean ignoreSubject;
     private Optional<String> expectedAudience;
     private boolean ignoreAudiences;
     private boolean allowMissingExpiration;
+    private boolean expectIssuedInThePast;
     private Clock clock = Clock.systemUTC();
     private Duration clockSkew = Duration.ZERO;
 
@@ -89,11 +86,10 @@ public final class JwtValidator {
       this.ignoreTypeHeader = false;
       this.expectedIssuer = Optional.empty();
       this.ignoreIssuer = false;
-      this.expectedSubject = Optional.empty();
-      this.ignoreSubject = false;
       this.expectedAudience = Optional.empty();
       this.ignoreAudiences = false;
       this.allowMissingExpiration = false;
+      this.expectIssuedInThePast = false;
     }
 
     /**
@@ -145,30 +141,6 @@ public final class JwtValidator {
     }
 
     /**
-     * Sets the expected subject claim of the token. When this is set, all tokens with missing or
-     * different {@code sub} claims are rejected. When this is not set, all token that have a {@code
-     * sub} claim are rejected. So this must be set for token that have a {@code sub} claim.
-     *
-     * <p>If you want to ignore this claim or if you want to validate it yourself, use
-     * ignoreSubject().
-     *
-     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.2
-     */
-    public Builder expectSubject(String value) {
-      if (value == null) {
-        throw new NullPointerException("subject cannot be null");
-      }
-      this.expectedSubject = Optional.of(value);
-      return this;
-    }
-
-    /** Lets the validator ignore the {@code sub} claim. */
-    public Builder ignoreSubject() {
-      this.ignoreSubject = true;
-      return this;
-    }
-
-    /**
      * Sets the expected audience. When this is set, all tokens that do not contain this audience in
      * their {@code aud} claims are rejected. When this is not set, all token that have {@code aud}
      * claims are rejected. So this must be set for token that have {@code aud} claims.
@@ -189,6 +161,12 @@ public final class JwtValidator {
     /** Lets the validator ignore the {@code aud} claim. */
     public Builder ignoreAudiences() {
       this.ignoreAudiences = true;
+      return this;
+    }
+
+    /** Checks that the {@code iat} claim is in the past.*/
+    public Builder expectIssuedInThePast() {
+      this.expectIssuedInThePast = true;
       return this;
     }
 
@@ -236,10 +214,6 @@ public final class JwtValidator {
         throw new IllegalArgumentException(
             "ignoreIssuer() and expectedIssuer() cannot be used together.");
       }
-      if (this.ignoreSubject && this.expectedSubject.isPresent()) {
-        throw new IllegalArgumentException(
-            "ignoreSubject() and expectedSubject() cannot be used together.");
-      }
       if (this.ignoreAudiences && this.expectedAudience.isPresent()) {
         throw new IllegalArgumentException(
             "ignoreAudiences() and expectedAudience() cannot be used together.");
@@ -248,13 +222,7 @@ public final class JwtValidator {
     }
   }
 
-  /**
-   * Validates that all claims in this validator are also present in {@code target}.
-   * @throws JwtInvalidException when {@code target} contains an invalid claim or header
-   */
-  VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
-    validateTimestampClaims(target);
-
+  private void validateTypeHeader(RawJwt target) throws JwtInvalidException {
     if (this.expectedTypeHeader.isPresent()) {
       if (!target.hasTypeHeader()) {
         throw new JwtInvalidException(
@@ -272,6 +240,9 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has type header set, but validator not.");
       }
     }
+  }
+
+  private void validateIssuer(RawJwt target) throws JwtInvalidException {
     if (this.expectedIssuer.isPresent()) {
       if (!target.hasIssuer()) {
         throw new JwtInvalidException(
@@ -288,22 +259,9 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has issuer set, but validator not.");
       }
     }
-    if (this.expectedSubject.isPresent()) {
-      if (!target.hasSubject()) {
-        throw new JwtInvalidException(
-            String.format("invalid JWT; missing expected subject %s.", this.expectedSubject.get()));
-      }
-      if (!target.getSubject().equals(this.expectedSubject.get())) {
-        throw new JwtInvalidException(
-            String.format(
-                "invalid JWT; expected subject %s, but got %s",
-                this.expectedSubject.get(), target.getSubject()));
-      }
-    } else {
-      if (target.hasSubject() && !this.ignoreSubject) {
-        throw new JwtInvalidException("invalid JWT; token has subject set, but validator not.");
-      }
-    }
+  }
+
+  private void validateAudiences(RawJwt target) throws JwtInvalidException {
     if (this.expectedAudience.isPresent()) {
       if (!target.hasAudiences() || !target.getAudiences().contains(this.expectedAudience.get())) {
         throw new JwtInvalidException(
@@ -315,6 +273,17 @@ public final class JwtValidator {
         throw new JwtInvalidException("invalid JWT; token has audience set, but validator not.");
       }
     }
+  }
+
+  /**
+   * Validates that all claims in this validator are also present in {@code target}.
+   * @throws JwtInvalidException when {@code target} contains an invalid claim or header
+   */
+  VerifiedJwt validate(RawJwt target) throws JwtInvalidException {
+    validateTimestampClaims(target);
+    validateTypeHeader(target);
+    validateIssuer(target);
+    validateAudiences(target);
     return new VerifiedJwt(target);
   }
 
@@ -333,6 +302,17 @@ public final class JwtValidator {
     // If not_before = now.plus(clockSkew), then the token is fine.
     if (target.hasNotBefore() && target.getNotBefore().isAfter(now.plus(this.clockSkew))) {
       throw new JwtInvalidException("token cannot be used before " + target.getNotBefore());
+    }
+
+    // If issued_at = now.plus(clockSkew), then the token is fine.
+    if (this.expectIssuedInThePast) {
+      if (!target.hasIssuedAt()) {
+        throw new JwtInvalidException("token does not have an iat claim");
+      }
+      if (target.getIssuedAt().isAfter(now.plus(this.clockSkew))) {
+        throw new JwtInvalidException(
+            "token has a invalid iat claim in the future: " + target.getIssuedAt());
+      }
     }
   }
 }

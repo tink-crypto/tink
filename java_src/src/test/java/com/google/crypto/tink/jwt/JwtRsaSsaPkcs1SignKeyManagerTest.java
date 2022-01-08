@@ -497,9 +497,9 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
-  public void createSignVerify_withDifferentHeaders() throws Exception {
+  public void createSignVerifyRaw_withDifferentHeaders() throws Exception {
     assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
     KeysetHandle handle = KeysetHandle.generateNew(template);
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
     JwtRsaSsaPkcs1PrivateKey keyProto =
@@ -514,11 +514,11 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
 
     JsonObject payload = new JsonObject();
-    payload.addProperty(JwtNames.CLAIM_JWT_ID, "jwtId");
+    payload.addProperty("jti", "jwtId");
 
     // valid token, with "typ" set in the header
     JsonObject goodHeader = new JsonObject();
-    goodHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    goodHeader.addProperty("alg", "RS256");
     goodHeader.addProperty("typ", "typeHeader");
     String goodSignedCompact = generateSignedCompact(rawSigner, goodHeader, payload);
     verifier.verifyAndDecode(
@@ -534,7 +534,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // invalid token with an unknown algorithm in the header
     JsonObject badAlgoHeader = new JsonObject();
-    badAlgoHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS255");
+    badAlgoHeader.addProperty("alg", "RS255");
     String badAlgoSignedCompact = generateSignedCompact(rawSigner, badAlgoHeader, payload);
     assertThrows(
         GeneralSecurityException.class,
@@ -542,29 +542,85 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
 
     // token with an unknown "kid" in the header is valid
     JsonObject unknownKidHeader = new JsonObject();
-    unknownKidHeader.addProperty(JwtNames.HEADER_ALGORITHM, "RS256");
+    unknownKidHeader.addProperty("alg", "RS256");
     unknownKidHeader.addProperty("kid", "unknown");
     String unknownKidSignedCompact = generateSignedCompact(rawSigner, unknownKidHeader, payload);
     verifier.verifyAndDecode(unknownKidSignedCompact, validator);
   }
 
   @Test
-  public void signAndVerifyWithCustomKid() throws Exception {
-    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
-    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
+  public void createSignVerifyTink_withDifferentHeaders() throws Exception {
+    assumeFalse(TestUtil.isTsan());  // creating keys is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
     KeysetHandle handle = KeysetHandle.generateNew(template);
-
-    // Create a new handle with the "kid" value set.
     Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
+    JwtRsaSsaPkcs1PrivateKey keyProto =
+        JwtRsaSsaPkcs1PrivateKey.parseFrom(
+            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
+    RSAPrivateCrtKey privateKey = createPrivateKey(keyProto);
+    JwtRsaSsaPkcs1Algorithm algorithm = keyProto.getPublicKey().getAlgorithm();
+    Enums.HashType hash = JwtRsaSsaPkcs1VerifyKeyManager.hashForPkcs1Algorithm(algorithm);
+    RsaSsaPkcs1SignJce rawSigner = new RsaSsaPkcs1SignJce(privateKey, hash);
+    JwtPublicKeyVerify verifier =
+        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    String kid =
+        JwtFormat.getKid(keyset.getKey(0).getKeyId(), keyset.getKey(0).getOutputPrefixType()).get();
+
+    JsonObject payload = new JsonObject();
+    payload.addProperty("jti", "jwtId");
+
+    // normal, valid token
+    JsonObject normalHeader = new JsonObject();
+    normalHeader.addProperty("alg", "RS256");
+    normalHeader.addProperty("kid", kid);
+    String validToken = generateSignedCompact(rawSigner, normalHeader, payload);
+    verifier.verifyAndDecode(validToken, validator);
+
+    // token without kid are rejected, even if they are valid.
+    JsonObject headerWithoutKid = new JsonObject();
+    headerWithoutKid.addProperty("alg", "RS256");
+    String tokenWithoutKid = generateSignedCompact(rawSigner, headerWithoutKid, payload);
+    assertThrows(
+        GeneralSecurityException.class, () -> verifier.verifyAndDecode(tokenWithoutKid, validator));
+
+    // token without algorithm in header
+    JsonObject headerWithoutAlg = new JsonObject();
+    headerWithoutAlg.addProperty("kid", kid);
+    String tokenWithoutAlg = generateSignedCompact(rawSigner, headerWithoutAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithoutAlg, validator));
+
+    // invalid token with an incorrect algorithm in the header
+    JsonObject headerWithBadAlg = new JsonObject();
+    headerWithBadAlg.addProperty("alg", "PS256");
+    headerWithBadAlg.addProperty("kid", kid);
+    String tokenWithBadAlg = generateSignedCompact(rawSigner, headerWithBadAlg, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithBadAlg, validator));
+
+    // token with an unknown "kid" in the header is invalid
+    JsonObject headerWithUnknownKid = new JsonObject();
+    headerWithUnknownKid.addProperty("alg", "RS256");
+    headerWithUnknownKid.addProperty("kid", "unknown");
+    String tokenWithUnknownKid = generateSignedCompact(rawSigner, headerWithUnknownKid, payload);
+    assertThrows(
+        GeneralSecurityException.class,
+        () -> verifier.verifyAndDecode(tokenWithUnknownKid, validator));
+  }
+
+  /* Create a new keyset handle with the "custom_kid" value set. */
+  private KeysetHandle withCustomKid(KeysetHandle keysetHandle, String customKid)
+      throws Exception {
+    Keyset keyset = CleartextKeysetHandle.getKeyset(keysetHandle);
     JwtRsaSsaPkcs1PrivateKey privateKey =
         JwtRsaSsaPkcs1PrivateKey.parseFrom(
             keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
     JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
         privateKey.getPublicKey().toBuilder()
-            .setCustomKid(
-                CustomKid.newBuilder()
-                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
-                    .build())
+            .setCustomKid(CustomKid.newBuilder().setValue(customKid).build())
             .build();
     JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
         privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
@@ -573,68 +629,77 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
             .setValue(privateKeyWithKid.toByteString())
             .build();
     Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    return CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+  }
+
+  @Test
+  public void signAndVerifyWithCustomKid() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
-        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
-
+    JwtPublicKeySign signerWithoutKid = handleWithoutKid.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
     String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+    String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
 
-    // Verify that the kid is set in the header
-    String jsonHeader = JwtFormat.splitSignedCompact(signedCompactWithKid).header;
-    String kid = JsonUtil.parseJson(jsonHeader).get("kid").getAsString();
+    // Verify the kid in the header
+    String jsonHeaderWithKid = JwtFormat.splitSignedCompact(signedCompactWithKid).header;
+    String kid = JsonUtil.parseJson(jsonHeaderWithKid).get("kid").getAsString();
     assertThat(kid).isEqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+    String jsonHeaderWithoutKid = JwtFormat.splitSignedCompact(signedCompactWithoutKid).header;
+    assertThat(JsonUtil.parseJson(jsonHeaderWithoutKid).has("kid")).isFalse();
 
     JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
-    JwtPublicKeyVerify verifier =
-        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+    JwtPublicKeyVerify verifierWithoutKid =
+        handleWithoutKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
     JwtPublicKeyVerify verifierWithKid =
-        handle.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+        handleWithKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
 
-    // Both the verifiers accept signedCompactWithKid.
-    assertThat(verifier.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
+    // Even if custom_kid is set, we don't require a "kid" in the header.
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithKid, validator).getJwtId())
         .isEqualTo("jwtId");
 
-    JwtPublicKeySign signerWithoutKid = handle.getPrimitive(JwtPublicKeySign.class);
-    String signedCompactWithoutKid = signerWithoutKid.signAndEncode(rawToken);
-
-    // Both the verifiers accept signedCompactWithoutKid.
-    assertThat(verifier.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
+    assertThat(verifierWithoutKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
     assertThat(verifierWithKid.verifyAndDecode(signedCompactWithoutKid, validator).getJwtId())
         .isEqualTo("jwtId");
   }
 
   @Test
+  public void signAndVerifyWithWrongCustomKid_fails() throws Exception {
+    assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
+
+    KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4_RAW");
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
+    KeysetHandle handleWithKid = withCustomKid(handleWithoutKid, "kid");
+    KeysetHandle handleWithWrongKid = withCustomKid(handleWithoutKid, "wrong kid");
+
+    JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
+    RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();
+    String signedCompactWithKid = signerWithKid.signAndEncode(rawToken);
+
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    JwtPublicKeyVerify verifierWithWrongKid =
+        handleWithWrongKid.getPublicKeysetHandle().getPrimitive(JwtPublicKeyVerify.class);
+
+    assertThrows(
+        JwtInvalidException.class,
+        () -> verifierWithWrongKid.verifyAndDecode(signedCompactWithKid, validator));
+  }
+
+  @Test
   public void signWithTinkKeyAndCustomKid_fails() throws Exception {
     assumeFalse(TestUtil.isTsan()); // KeysetHandle.generateNew is too slow in Tsan.
     KeyTemplate template = KeyTemplates.get("JWT_RS256_2048_F4");
-    KeysetHandle handle = KeysetHandle.generateNew(template);
-
-    // Create a new handle with the "kid" value set.
-    Keyset keyset = CleartextKeysetHandle.getKeyset(handle);
-    JwtRsaSsaPkcs1PrivateKey privateKey =
-        JwtRsaSsaPkcs1PrivateKey.parseFrom(
-            keyset.getKey(0).getKeyData().getValue(), ExtensionRegistryLite.getEmptyRegistry());
-    JwtRsaSsaPkcs1PublicKey publicKeyWithKid =
-        privateKey.getPublicKey().toBuilder()
-            .setCustomKid(
-                CustomKid.newBuilder()
-                    .setValue("Lorem ipsum dolor sit amet, consectetur adipiscing elit")
-                    .build())
-            .build();
-    JwtRsaSsaPkcs1PrivateKey privateKeyWithKid =
-        privateKey.toBuilder().setPublicKey(publicKeyWithKid).build();
-    KeyData keyDataWithKid =
-        keyset.getKey(0).getKeyData().toBuilder()
-            .setValue(privateKeyWithKid.toByteString())
-            .build();
-    Keyset.Key keyWithKid = keyset.getKey(0).toBuilder().setKeyData(keyDataWithKid).build();
+    KeysetHandle handleWithoutKid = KeysetHandle.generateNew(template);
     KeysetHandle handleWithKid =
-        CleartextKeysetHandle.fromKeyset(keyset.toBuilder().setKey(0, keyWithKid).build());
+        withCustomKid(handleWithoutKid, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 
     JwtPublicKeySign signerWithKid = handleWithKid.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("jwtId").withoutExpiration().build();

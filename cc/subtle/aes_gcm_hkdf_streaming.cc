@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_decrypter.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/common_enums.h"
@@ -35,23 +36,24 @@ namespace {
 util::Status Validate(const AesGcmHkdfStreaming::Params& params) {
   if (!(params.hkdf_hash == SHA1 || params.hkdf_hash == SHA256 ||
         params.hkdf_hash == SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "unsupported hkdf_hash");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "unsupported hkdf_hash");
   }
   if (params.ikm.size() < 16 || params.ikm.size() < params.derived_key_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ikm too small");
+    return util::Status(absl::StatusCode::kInvalidArgument, "ikm too small");
   }
   if (params.derived_key_size != 16 && params.derived_key_size != 32) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "derived_key_size must be 16 or 32");
   }
   if (params.ciphertext_offset < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_offset must be non-negative");
   }
   if (params.ciphertext_segment_size <=
       params.ciphertext_offset + params.derived_key_size +
           AesGcmHkdfStreamSegmentEncrypter::kTagSizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "ciphertext_segment_size too small");
   }
   return util::OkStatus();

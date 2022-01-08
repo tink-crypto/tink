@@ -12,5 +12,5 @@ import {PbEncryptedKeyset, PbKeyset} from './proto';
  *
  */
 export interface KeysetWriter {
-  write(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array;
+  encodeBinary(keyset: PbKeyset|PbEncryptedKeyset): Uint8Array;
 }

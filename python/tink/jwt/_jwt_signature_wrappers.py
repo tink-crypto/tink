@@ -13,12 +13,7 @@
 # limitations under the License.
 """Python primitive set wrapper for the JwtMac primitive."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Type
+from typing import Optional, Type
 
 from tink.proto import tink_pb2
 from tink import core
@@ -37,7 +32,7 @@ class _WrappedJwtPublicKeySign(_jwt_public_key_sign.JwtPublicKeySign):
   def __init__(self, pset: core.PrimitiveSet):
     self._primitive_set = pset
 
-  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> Text:
+  def sign_and_encode(self, raw_jwt: _raw_jwt.RawJwt) -> str:
     primary = self._primitive_set.primary()
     kid = _jwt_format.get_kid(primary.key_id, primary.output_prefix_type)
     return primary.primitive.sign_and_encode_with_kid(raw_jwt, kid)
@@ -50,13 +45,15 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
     self._primitive_set = pset
 
   def verify_and_decode(
-      self, compact: Text,
+      self, compact: str,
       validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
     interesting_error = None
     for entries in self._primitive_set.all():
       for entry in entries:
         try:
-          return entry.primitive.verify_and_decode(compact, validator)
+          kid = _jwt_format.get_kid(entry.key_id, entry.output_prefix_type)
+          return entry.primitive.verify_and_decode_with_kid(
+              compact, validator, kid)
         except core.TinkError as e:
           if isinstance(e, _jwt_error.JwtInvalidError):
             interesting_error = e
@@ -67,7 +64,6 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
 
 
 def _validate_primitive_set(pset: core.PrimitiveSet):
-  # TODO(juerg): also validate that there is a primary
   for entries in pset.all():
     for entry in entries:
       if (entry.output_prefix_type != tink_pb2.RAW and
@@ -95,7 +91,7 @@ class _JwtPublicKeySignWrapper(
 
 
 class _JwtPublicKeyVerifyWrapper(
-    core.PrimitiveWrapper[_jwt_public_key_verify.JwtPublicKeyVerify,
+    core.PrimitiveWrapper[_jwt_public_key_verify.JwtPublicKeyVerifyInternal,
                           _jwt_public_key_verify.JwtPublicKeyVerify]):
   """A wrapper for JwtPublicKeyVerify."""
 
@@ -109,8 +105,8 @@ class _JwtPublicKeyVerifyWrapper(
     return _jwt_public_key_verify.JwtPublicKeyVerify
 
   def input_primitive_class(
-      self) -> Type[_jwt_public_key_verify.JwtPublicKeyVerify]:
-    return _jwt_public_key_verify.JwtPublicKeyVerify
+      self) -> Type[_jwt_public_key_verify.JwtPublicKeyVerifyInternal]:
+    return _jwt_public_key_verify.JwtPublicKeyVerifyInternal
 
 
 def register():

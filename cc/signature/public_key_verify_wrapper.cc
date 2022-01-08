@@ -16,11 +16,12 @@
 
 #include "tink/signature/public_key_verify_wrapper.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/crypto_format.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_verify.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -34,14 +35,14 @@ namespace {
 
 util::Status Validate(PrimitiveSet<PublicKeyVerify>* public_key_verify_set) {
   if (public_key_verify_set == nullptr) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "public_key_verify_set must be non-NULL");
   }
   if (public_key_verify_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "public_key_verify_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class PublicKeyVerifySetWrapper : public PublicKeyVerify {
@@ -59,18 +60,18 @@ class PublicKeyVerifySetWrapper : public PublicKeyVerify {
   std::unique_ptr<PrimitiveSet<PublicKeyVerify>> public_key_verify_set_;
 };
 
-util::Status PublicKeyVerifySetWrapper::Verify(
-    absl::string_view signature,
-    absl::string_view data) const {
+util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
+                                               absl::string_view data) const {
   // BoringSSL expects a non-null pointer for data,
   // regardless of whether the size is 0.
-  data = subtle::SubtleUtilBoringSSL::EnsureNonNull(data);
-  signature = subtle::SubtleUtilBoringSSL::EnsureNonNull(signature);
+  data = internal::EnsureStringNonNull(data);
+  signature = internal::EnsureStringNonNull(signature);
 
   if (signature.length() <= CryptoFormat::kNonRawPrefixSize) {
     // This also rejects raw signatures with size of 4 bytes or fewer.
     // We're not aware of any schemes that output signatures that small.
-    return util::Status(util::error::INVALID_ARGUMENT, "Signature too short.");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Signature too short.");
   }
   absl::string_view key_id =
       signature.substr(0, CryptoFormat::kNonRawPrefixSize);
@@ -89,7 +90,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(
       auto verify_result =
           public_key_verify.Verify(raw_signature, view_on_data_or_legacy_data);
       if (verify_result.ok()) {
-        return util::Status::OK;
+        return util::OkStatus();
       } else {
         // LOG that a matching key didn't verify the signature.
       }
@@ -100,15 +101,15 @@ util::Status PublicKeyVerifySetWrapper::Verify(
   auto raw_primitives_result = public_key_verify_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
     for (auto& public_key_verify_entry :
-             *(raw_primitives_result.ValueOrDie())) {
+         *(raw_primitives_result.ValueOrDie())) {
       auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {
-        return util::Status::OK;
+        return util::OkStatus();
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "Invalid signature.");
+  return util::Status(absl::StatusCode::kInvalidArgument, "Invalid signature.");
 }
 
 }  // anonymous namespace

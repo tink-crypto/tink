@@ -48,4 +48,6 @@ public final class HybridDecryptConfig {
   public static void registerStandardKeyTypes() throws GeneralSecurityException {
     Config.register(HybridConfig.TINK_1_0_0);
   }
+
+  private HybridDecryptConfig() {}
 }

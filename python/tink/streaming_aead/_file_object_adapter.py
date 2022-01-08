@@ -17,11 +17,6 @@ Used in conjunction with PythonOutputStream/PythonInputStream to allow a C++
 OutputStream/InputStream to interact with a Python file-like object.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 from typing import BinaryIO
 
@@ -33,7 +28,7 @@ class FileObjectAdapter(tink_bindings.PythonFileObjectAdapter):
 
   def __init__(self, file_object: BinaryIO):
     # Required to fix CLIF "Value invalidated due to capture by std::unique_ptr"
-    super(FileObjectAdapter, self).__init__()
+    super().__init__()
     self._file_object = file_object
 
   def write(self, data: bytes) -> int:

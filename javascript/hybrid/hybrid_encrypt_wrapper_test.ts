@@ -124,7 +124,6 @@ function createDummyPrimitiveSet(opt_withPrimary: boolean = true):
 
 /** @final */
 class DummyHybridEncrypt extends HybridEncrypt {
-  /** @override */
   async encrypt(plaintext: Uint8Array, opt_contextInfo: Uint8Array) {
     return plaintext;
   }

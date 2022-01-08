@@ -14,19 +14,19 @@
 
 import datetime
 
-from typing import Optional, Text
+from typing import Optional
 from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
 _MAX_CLOCK_SKEW = datetime.timedelta(minutes=10)
 
 
-class JwtValidator(object):
+class JwtValidator:
   """A JwtValidator defines how JSON Web Tokens (JWTs) should be validated.
 
     By default, the JwtValidator requires that a token has a valid expiration
-    claim, no issuer, no subject, and no audience claim. This can be changed
-    using the expect_... and  ignore_... arguments.
+    claim, no issuer and no audience claim. This can be changed using the
+    expect_... and  ignore_... arguments.
 
     If present, the JwtValidator also validates the not-before claim. The
     validation time can be changed using the fixed_now parameter. clock_skew can
@@ -36,15 +36,14 @@ class JwtValidator(object):
 
   def __init__(self,
                *,
-               expected_type_header: Optional[Text],
-               expected_issuer: Optional[Text],
-               expected_subject: Optional[Text],
-               expected_audience: Optional[Text],
+               expected_type_header: Optional[str],
+               expected_issuer: Optional[str],
+               expected_audience: Optional[str],
                ignore_type_header: bool,
                ignore_issuer: bool,
-               ignore_subject: bool,
                ignore_audiences: bool,
                allow_missing_expiration: bool,
+               expect_issued_in_the_past: bool,
                clock_skew: Optional[datetime.timedelta],
                fixed_now: Optional[datetime.datetime]) -> None:
     if expected_type_header and ignore_type_header:
@@ -53,21 +52,17 @@ class JwtValidator(object):
     if expected_issuer and ignore_issuer:
       raise ValueError(
           'expected_issuer and ignore_issuer cannot be used together')
-    if expected_subject and ignore_subject:
-      raise ValueError(
-          'expected_subject and ignore_subject cannot be used together')
     if expected_audience and ignore_audiences:
       raise ValueError(
           'expected_audience and ignore_audiences cannot be used together')
     self._expected_type_header = expected_type_header
     self._expected_issuer = expected_issuer
-    self._expected_subject = expected_subject
     self._expected_audience = expected_audience
     self._ignore_type_header = ignore_type_header
     self._ignore_issuer = ignore_issuer
-    self._ignore_subject = ignore_subject
     self._ignore_audiences = ignore_audiences
     self._allow_missing_expiration = allow_missing_expiration
+    self._expect_issued_in_the_past = expect_issued_in_the_past
     if clock_skew:
       if clock_skew > _MAX_CLOCK_SKEW:
         raise ValueError('clock skew too large, max is 10 minutes')
@@ -81,25 +76,19 @@ class JwtValidator(object):
   def has_expected_type_header(self) -> bool:
     return self._expected_type_header is not None
 
-  def expected_type_header(self) -> Text:
+  def expected_type_header(self) -> str:
     return self._expected_type_header
 
   def has_expected_issuer(self) -> bool:
     return self._expected_issuer is not None
 
-  def expected_issuer(self) -> Text:
+  def expected_issuer(self) -> str:
     return self._expected_issuer
-
-  def has_expected_subject(self) -> bool:
-    return self._expected_subject is not None
-
-  def expected_subject(self) -> Text:
-    return self._expected_subject
 
   def has_expected_audience(self) -> bool:
     return self._expected_audience is not None
 
-  def expected_audience(self) -> Text:
+  def expected_audience(self) -> str:
     return self._expected_audience
 
   def ignore_type_header(self) -> bool:
@@ -108,14 +97,14 @@ class JwtValidator(object):
   def ignore_issuer(self) -> bool:
     return self._ignore_issuer
 
-  def ignore_subject(self) -> bool:
-    return self._ignore_subject
-
   def ignore_audiences(self) -> bool:
     return self._ignore_audiences
 
   def allow_missing_expiration(self) -> bool:
     return self._allow_missing_expiration
+
+  def expect_issued_in_the_past(self) -> bool:
+    return self._expect_issued_in_the_past
 
   def clock_skew(self) -> datetime.timedelta:
     return self._clock_skew
@@ -125,6 +114,32 @@ class JwtValidator(object):
 
   def fixed_now(self) -> datetime.datetime:
     return self._fixed_now
+
+
+def new_validator(
+    *,
+    expected_type_header: Optional[str] = None,
+    expected_issuer: Optional[str] = None,
+    expected_audience: Optional[str] = None,
+    ignore_type_header: bool = False,
+    ignore_issuer: bool = False,
+    ignore_audiences: bool = False,
+    allow_missing_expiration: bool = False,
+    expect_issued_in_the_past: bool = False,
+    clock_skew: Optional[datetime.timedelta] = None,
+    fixed_now: Optional[datetime.datetime] = None) -> JwtValidator:
+  """Creates a new JwtValidator."""
+  return JwtValidator(
+      expected_type_header=expected_type_header,
+      expected_issuer=expected_issuer,
+      expected_audience=expected_audience,
+      ignore_type_header=ignore_type_header,
+      ignore_issuer=ignore_issuer,
+      ignore_audiences=ignore_audiences,
+      allow_missing_expiration=allow_missing_expiration,
+      expect_issued_in_the_past=expect_issued_in_the_past,
+      clock_skew=clock_skew,
+      fixed_now=fixed_now)
 
 
 def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
@@ -153,6 +168,13 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
       raw_jwt.not_before() > now + validator.clock_skew()):
     raise _jwt_error.JwtInvalidError('token cannot be used before %s' %
                                      raw_jwt.not_before())
+  if validator.expect_issued_in_the_past():
+    if not raw_jwt.has_issued_at():
+      raise _jwt_error.JwtInvalidError('token is missing iat claim')
+    if raw_jwt.issued_at() > now + validator.clock_skew():
+      raise _jwt_error.JwtInvalidError(
+          'token has a invalid iat claim in the future: %s' %
+          raw_jwt.issued_at())
   if validator.has_expected_type_header():
     if not raw_jwt.has_type_header():
       raise _jwt_error.JwtInvalidError(
@@ -179,19 +201,6 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     if raw_jwt.has_issuer() and not validator.ignore_issuer():
       raise _jwt_error.JwtInvalidError(
           'invalid JWT; token has issuer set, but validator not.')
-  if validator.has_expected_subject():
-    if not raw_jwt.has_subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; missing expected subject %s.' %
-          validator.expected_subject())
-    if validator.expected_subject() != raw_jwt.subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; expected subject %s, but got %s' %
-          (validator.expected_subject(), raw_jwt.subject()))
-  else:
-    if raw_jwt.has_subject() and not validator.ignore_subject():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; token has subject set, but validator not.')
   if validator.has_expected_audience():
     if (not raw_jwt.has_audiences() or
         validator.expected_audience() not in raw_jwt.audiences()):

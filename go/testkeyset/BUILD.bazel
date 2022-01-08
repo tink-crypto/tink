@@ -1,8 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
-
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -14,6 +14,5 @@ go_library(
         "//internal:go_default_library",
         "//keyset:go_default_library",
         "//proto:tink_go_proto",
-        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )

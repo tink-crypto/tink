@@ -142,16 +142,21 @@ updates, you may want to subscribe to our
 
 Tink is maintained by (A-Z):
 
+-   Moreno Ambrosin
 -   Taymon Beal
 -   Daniel Bleichenbacher
+-   William Conner
 -   Thai Duong
 -   Thomas Holenstein
 -   Stefan Kölbl
 -   Charles Lee
+-   Cindy Lin
+-   Fernando Lobato Meeser
 -   Atul Luykx
 -   Rafael Misoczki
 -   Sophie Schmieg
 -   Laurent Simon
+-   Elizaveta Tretiakova
 -   Jürg Wullschleger
 
 Alumni:

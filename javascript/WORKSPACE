@@ -8,11 +8,6 @@ local_repository(
     path = "..",
 )
 
-local_repository(
-    name = "tink_angular",
-    path = "../third_party/angular",
-)
-
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
 tink_base_deps()
 
@@ -29,13 +24,10 @@ yarn_install(
     yarn_lock = "//:yarn.lock",
 )
 
-load("@npm//@bazel/karma:package.bzl", "npm_bazel_karma_dependencies")
-npm_bazel_karma_dependencies()
-
 load("@io_bazel_rules_webtesting//web:repositories.bzl", "web_test_repositories")
 web_test_repositories()
 
-load("@io_bazel_rules_webtesting//web/versioned:browsers-0.3.2.bzl", "browser_repositories")
+load("@io_bazel_rules_webtesting//web/versioned:browsers-0.3.3.bzl", "browser_repositories")
 browser_repositories(
     chromium = True,
     firefox = True,
@@ -44,3 +36,6 @@ browser_repositories(
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 rules_closure_dependencies()
 rules_closure_toolchains()
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()

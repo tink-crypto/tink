@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 #include "tink/jwt/internal/json_util.h"
@@ -40,7 +41,7 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
   }
   if (custom_kid_.has_value()) {
     if (kid.has_value()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "TINK keys are not allowed to have a kid value set.");
     }
     kid = *custom_kid_;
@@ -65,45 +66,48 @@ util::StatusOr<std::string> JwtMacImpl::ComputeMacAndEncodeWithKid(
   return absl::StrCat(unsigned_token, ".", encoded_tag);
 }
 
-util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecode(
-    absl::string_view compact, const JwtValidator& validator) const {
+util::StatusOr<VerifiedJwt> JwtMacImpl::VerifyMacAndDecodeWithKid(
+    absl::string_view compact, const JwtValidator& validator,
+    absl::optional<absl::string_view> kid) const {
   std::size_t mac_pos = compact.find_last_of('.');
   if (mac_pos == absl::string_view::npos) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid token");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid token");
   }
   absl::string_view unsigned_token = compact.substr(0, mac_pos);
   std::string mac_value;
   if (!DecodeSignature(compact.substr(mac_pos + 1), &mac_value)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT MAC");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid JWT MAC");
   }
   util::Status verify_result = mac_->VerifyMac(mac_value, unsigned_token);
   if (!verify_result.ok()) {
     // Use a different error code so that we can distinguish it.
-    return util::Status(util::error::UNAUTHENTICATED,
-                        verify_result.error_message());
+    return util::Status(absl::StatusCode::kUnauthenticated,
+                        verify_result.message());
   }
   std::vector<absl::string_view> parts = absl::StrSplit(unsigned_token, '.');
   if (parts.size() != 2) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "only tokens in JWS compact serialization format are supported");
   }
   std::string json_header;
   if (!DecodeHeader(parts[0], &json_header)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid header");
   }
   util::StatusOr<google::protobuf::Struct> header =
       JsonStringToProtoStruct(json_header);
   if (!header.ok()) {
     return header.status();
   }
-  util::Status validate_header_result = ValidateHeader(*header, algorithm_);
+  util::Status validate_header_result =
+      ValidateHeader(*header, algorithm_, kid, custom_kid_);
   if (!validate_header_result.ok()) {
     return validate_header_result;
   }
   std::string json_payload;
   if (!DecodePayload(parts[1], &json_payload)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid JWT payload");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid JWT payload");
   }
   util::StatusOr<RawJwt> raw_jwt =
       RawJwtParser::FromJson(GetTypeHeader(*header), json_payload);

@@ -73,4 +73,6 @@ public final class NoSecretKeysetHandle {
       }
     }
   }
+
+  private NoSecretKeysetHandle() {}
 }

@@ -13,17 +13,13 @@
 # limitations under the License.
 """A JWT HMAC key manager."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Type
+from typing import Optional, Type
 
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
 from tink import core
 from tink.cc.pybind import tink_bindings
+from tink.jwt import _json_util
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_format
 from tink.jwt import _jwt_mac
@@ -43,8 +39,8 @@ _ALGORITHM_STRING = {
 class _JwtHmac(_jwt_mac.JwtMacInternal):
   """Interface for authenticating and verifying JWT with JWS MAC."""
 
-  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: Text,
-               custom_kid: Optional[Text]):
+  def __init__(self, cc_mac: tink_bindings.Mac, algorithm: str,
+               custom_kid: Optional[str]):
     self._cc_mac = cc_mac
     self._algorithm = algorithm
     self._custom_kid = custom_kid
@@ -58,7 +54,7 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
     self._cc_mac.verify_mac(mac_value, data)
 
   def compute_mac_and_encode_with_kid(self, raw_jwt: _raw_jwt.RawJwt,
-                                      kid: Optional[Text]) -> Text:
+                                      kid: Optional[str]) -> str:
     """Computes a MAC and encodes the token.
 
     Args:
@@ -71,30 +67,30 @@ class _JwtHmac(_jwt_mac.JwtMacInternal):
     Raises:
       tink.TinkError if the operation fails.
     """
-    if raw_jwt.has_type_header():
-      type_header = raw_jwt.type_header()
-    else:
-      type_header = None
     if self._custom_kid is not None:
       if kid is not None:
         raise _jwt_error.JwtInvalidError(
             'custom_kid must not be set for keys with output prefix type TINK')
       kid = self._custom_kid
-    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, type_header,
-                                                   kid, raw_jwt.json_payload())
+    unsigned = _jwt_format.create_unsigned_compact(self._algorithm, kid,
+                                                   raw_jwt)
     return _jwt_format.create_signed_compact(unsigned,
                                              self._compute_mac(unsigned))
 
-  def verify_mac_and_decode(
-      self, compact: Text,
-      validator: _jwt_validator.JwtValidator) -> _verified_jwt.VerifiedJwt:
+  def verify_mac_and_decode_with_kid(
+      self, compact: str, validator: _jwt_validator.JwtValidator,
+      kid: Optional[str]) -> _verified_jwt.VerifiedJwt:
     """Verifies, validates and decodes a MACed compact JWT token."""
     parts = _jwt_format.split_signed_compact(compact)
     unsigned_compact, json_header, json_payload, mac = parts
     self._verify_mac(mac, unsigned_compact)
-    header = _jwt_format.json_loads(json_header)
-    _jwt_format.validate_header(header, self._algorithm)
-    raw_jwt = _raw_jwt.RawJwt.from_json(
+    header = _json_util.json_loads(json_header)
+    _jwt_format.validate_header(
+        header=header,
+        algorithm=self._algorithm,
+        tink_kid=kid,
+        custom_kid=self._custom_kid)
+    raw_jwt = _raw_jwt.raw_jwt_from_json(
         _jwt_format.get_type_header(header), json_payload)
     _jwt_validator.validate(validator, raw_jwt)
     return _verified_jwt.VerifiedJwt._create(raw_jwt)  # pylint: disable=protected-access
@@ -123,7 +119,7 @@ class MacCcToPyJwtMacKeyManager(core.KeyManager[_jwt_mac.JwtMacInternal]):
       custom_kid = None
     return _JwtHmac(cc_mac, algorithm, custom_kid)
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @core.use_tink_errors

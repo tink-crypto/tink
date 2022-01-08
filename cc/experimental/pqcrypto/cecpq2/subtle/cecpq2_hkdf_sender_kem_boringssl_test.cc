@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "openssl/sha.h"
@@ -45,7 +46,7 @@ namespace {
 
 // This test evaluates the creation of a Cecpq2HkdfSenderKemBoringSsl instance
 // with an unknown curve type parameter. It should fail with an
-// util::error::UNIMPLEMENTED error.
+// absl::StatusCode::kUnimplemented error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
@@ -65,12 +66,13 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnknownCurve) {
 
   // The instance creation above should fail with an unimplemented algorithm
   // error given the UNKNOWN_CURVE parameter
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 // This test evaluates the case where an unsupported curve (NIST_P256) is
-// specified. This test should fail with an util::error::UNIMPLEMENTED error.
+// specified. This test should fail with an absl::StatusCode::kUnimplemented
+// error.
 TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
   if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
@@ -89,8 +91,8 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestUnsupportedCurve) {
       cecpq2_key_pair.hrss_key_pair.hrss_public_key_marshaled);
 
   // This test should fail with an unimplemented algorithm error
-  EXPECT_EQ(util::error::UNIMPLEMENTED,
-            status_or_sender_kem.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kUnimplemented,
+            status_or_sender_kem.status().code());
 }
 
 // This test checks that an error is triggered if an output key lenth smaller
@@ -126,7 +128,7 @@ TEST(Cecpq2HkdfSenderKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
       test::HexDecodeOrDie(info_hex), out_len, EcPointFormat::COMPRESSED);
 
   EXPECT_THAT(status_or_kem_key.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not post-quantum secure")));
 }
 

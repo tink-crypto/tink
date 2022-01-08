@@ -26,9 +26,9 @@ describe('elliptic curves test', function() {
     const aliceKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const bobKeyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
     const sharedSecret1 = await EllipticCurves.computeEcdhSharedSecret(
-        aliceKeyPair.privateKey, bobKeyPair.publicKey);
+        aliceKeyPair.privateKey!, bobKeyPair.publicKey!);
     const sharedSecret2 = await EllipticCurves.computeEcdhSharedSecret(
-        bobKeyPair.privateKey, aliceKeyPair.publicKey);
+        bobKeyPair.privateKey!, aliceKeyPair.publicKey!);
     expect(Bytes.toHex(sharedSecret2)).toBe(Bytes.toHex(sharedSecret1));
   });
 
@@ -54,8 +54,8 @@ describe('elliptic curves test', function() {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
-      expect(keyPair.privateKey != null).toBe(true);
-      expect(keyPair.publicKey != null).toBe(true);
+      expect(keyPair.privateKey! != null).toBe(true);
+      expect(keyPair.publicKey! != null).toBe(true);
     }
   });
 
@@ -69,8 +69,8 @@ describe('elliptic curves test', function() {
       const curveTypeString = EllipticCurves.curveToString(curve);
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
-      expect(keyPair.privateKey != null).toBe(true);
-      expect(keyPair.publicKey != null).toBe(true);
+      expect(keyPair.privateKey! != null).toBe(true);
+      expect(keyPair.publicKey! != null).toBe(true);
     }
   });
 
@@ -86,13 +86,13 @@ describe('elliptic curves test', function() {
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDH', curveTypeString);
 
-      const publicKey = keyPair.publicKey;
+      const publicKey = keyPair.publicKey!;
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDH', publicCryptoKey);
       expect(importedPublicKey).toEqual(publicKey);
 
-      const privateKey = keyPair.privateKey;
+      const privateKey = keyPair.privateKey!;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDH', privateCryptoKey);
@@ -112,13 +112,13 @@ describe('elliptic curves test', function() {
       const keyPair =
           await EllipticCurves.generateKeyPair('ECDSA', curveTypeString);
 
-      const publicKey = keyPair.publicKey;
+      const publicKey = keyPair.publicKey!;
       const publicCryptoKey = await EllipticCurves.exportCryptoKey(publicKey);
       const importedPublicKey =
           await EllipticCurves.importPublicKey('ECDSA', publicCryptoKey);
       expect(importedPublicKey).toEqual(publicKey);
 
-      const privateKey = keyPair.privateKey;
+      const privateKey = keyPair.privateKey!;
       const privateCryptoKey = await EllipticCurves.exportCryptoKey(privateKey);
       const importedPrivateKey =
           await EllipticCurves.importPrivateKey('ECDSA', privateCryptoKey);
@@ -269,7 +269,10 @@ describe('elliptic curves test', function() {
       try {
         EllipticCurves.pointDecode(curveTypeString, format, point);
         fail('Should throw an exception.');
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         expect(e.toString()).toBe('InvalidArgumentsException: invalid point');
       }
     }
@@ -283,33 +286,39 @@ describe('elliptic curves test', function() {
     try {
       EllipticCurves.pointDecode(curve, format, point);
       fail('Should throw an exception.');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString().includes('unknown curve')).toBe(true);
     }
   });
 
   it('point encode decode', function() {
-    const format = EllipticCurves.PointFormatType.UNCOMPRESSED;
-    for (const curveType
-             of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
-                 EllipticCurves.CurveType.P521]) {
-      const curveTypeString = EllipticCurves.curveToString(curveType);
-      const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-      const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
-      const point: JsonWebKey = ({
-        'kty': 'EC',
-        'crv': curveTypeString,
-        'x': Bytes.toBase64(x, /* websafe = */ true),
-        'y': Bytes.toBase64(y, /* websafe = */ true),
-        'ext': true,
-      });
+    for (const format of
+             [EllipticCurves.PointFormatType.UNCOMPRESSED,
+              EllipticCurves.PointFormatType.DO_NOT_USE_CRUNCHY_UNCOMPRESSED]) {
+      for (const curveType
+               of [EllipticCurves.CurveType.P256, EllipticCurves.CurveType.P384,
+                   EllipticCurves.CurveType.P521]) {
+        const curveTypeString = EllipticCurves.curveToString(curveType);
+        const x = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
+        const y = Random.randBytes(EllipticCurves.fieldSizeInBytes(curveType));
+        const point: JsonWebKey = {
+          kty: 'EC',
+          crv: curveTypeString,
+          x: Bytes.toBase64(x, /* websafe = */ true),
+          y: Bytes.toBase64(y, /* websafe = */ true),
+          ext: true,
+        };
 
-      const encodedPoint =
-          EllipticCurves.pointEncode(assertExists(point['crv']), format, point);
-      const decodedPoint =
-          EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
+        const encodedPoint =
+            EllipticCurves.pointEncode(assertExists(point.crv), format, point);
+        const decodedPoint =
+            EllipticCurves.pointDecode(curveTypeString, format, encodedPoint);
 
-      expect(decodedPoint).toEqual(point);
+        expect(decodedPoint).toEqual(point);
+      }
     }
   });
 
@@ -325,7 +334,10 @@ describe('elliptic curves test', function() {
       try {
         EllipticCurves.ecdsaDer2Ieee(
             Bytes.fromHex(test), 1 /* ieeeLength, ignored */);
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         expect(e.toString())
             .toBe('InvalidArgumentsException: invalid DER signature');
       }
@@ -370,16 +382,22 @@ async function runWycheproofTest(test: {
       }
       const sharedSecretHex = Bytes.toHex(sharedSecret);
       if (sharedSecretHex !== test['shared']) {
-        return 'Fail on test ' + test['tcId'] + ': unexpected result was \"' +
-            sharedSecretHex + '\".\n';
+        return 'Fail on test ' + test['tcId'] + ': unexpected result was "' +
+            sharedSecretHex + '".\n';
       }
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       if (test['result'] === 'valid') {
-        return 'Fail on test ' + test['tcId'] + ': unexpected exception \"' +
-            e.toString() + '\".\n';
+        return 'Fail on test ' + test['tcId'] + ': unexpected exception "' +
+            e.toString() + '".\n';
       }
     }
-  } catch (e) {
+    // Preserving old behavior when moving to
+    // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+    // tslint:disable-next-line:no-any
+  } catch (e: any) {
     if (test['result'] === 'valid') {
       if (test['private']['crv'] == "P-256K") {
         // P-256K doesn't have to be supported. Hence failing to import the
@@ -387,8 +405,8 @@ async function runWycheproofTest(test: {
         return '';
       }
       return 'Fail on test ' + test['tcId'] +
-          ': unexpected exception trying to import private key \"' +
-          e.toString() + '\".\n';
+          ': unexpected exception trying to import private key "' +
+          e.toString() + '".\n';
     }
   }
   // If the test passes return an empty string.

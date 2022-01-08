@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config/tink_fips.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
@@ -278,9 +279,9 @@ TEST(AesEaxBoringSslTest, TestFipsOnly) {
       "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f"));
 
   EXPECT_THAT(subtle::AesSivBoringSsl::New(key128).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
   EXPECT_THAT(subtle::AesSivBoringSsl::New(key256).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

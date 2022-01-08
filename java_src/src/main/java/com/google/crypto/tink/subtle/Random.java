@@ -51,4 +51,6 @@ public final class Random {
   public static final int randInt() {
     return localRandom.get().nextInt();
   }
+
+  private Random() {}
 }

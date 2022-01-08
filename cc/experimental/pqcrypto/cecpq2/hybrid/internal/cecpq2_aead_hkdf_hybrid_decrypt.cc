@@ -19,12 +19,13 @@
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "openssl/hrss.h"
 #include "openssl/nid.h"
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
 #include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_recipient_kem_boringssl.h"
 #include "tink/hybrid_decrypt.h"
-#include "tink/subtle/ec_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -38,7 +39,7 @@ util::Status Validate(
   if (key.hrss_private_key_seed().empty() || key.x25519_private_key().empty() ||
       key.public_key().hrss_public_key_marshalled().empty() ||
       key.public_key().x25519_public_key_x().empty()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid Cecpq2AeadHkdfPrivateKeyInternal: missing KEM "
                         "required fields.");
   }
@@ -46,7 +47,7 @@ util::Status Validate(
   if (key.public_key().params().kem_params().curve_type() ==
       google::crypto::tink::EllipticCurveType::CURVE25519) {
     if (!key.public_key().x25519_public_key_y().empty()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           "Invalid Cecpq2AeadHkdfPrivateKeyInternal: has KEM "
                           "unexpected field.");
     }
@@ -54,12 +55,12 @@ util::Status Validate(
     if (key.public_key().params().kem_params().ec_point_format() !=
         google::crypto::tink::EcPointFormat::COMPRESSED) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "X25519 only supports compressed elliptic curve points.");
     }
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 }  // namespace
 
@@ -89,18 +90,20 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> Cecpq2AeadHkdfHybridDecrypt::New(
 
 util::StatusOr<std::string> Cecpq2AeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
-  util::StatusOr<uint32_t> cecpq2_header_size_result =
-      subtle::EcUtil::EncodingSizeInBytes(
+  util::StatusOr<int32_t> cecpq2_header_point_encoding_size =
+      internal::EcPointEncodingSizeInBytes(
           util::Enums::ProtoToSubtle(
               recipient_key_params_.kem_params().curve_type()),
           util::Enums::ProtoToSubtle(
               recipient_key_params_.kem_params().ec_point_format()));
-  if (!cecpq2_header_size_result.ok())
-    return cecpq2_header_size_result.status();
-  uint32_t cecpq2_header_size =
-      cecpq2_header_size_result.ValueOrDie() + HRSS_CIPHERTEXT_BYTES;
+  if (!cecpq2_header_point_encoding_size.ok()) {
+    return cecpq2_header_point_encoding_size.status();
+  }
+  int32_t cecpq2_header_size =
+      *cecpq2_header_point_encoding_size + HRSS_CIPHERTEXT_BYTES;
   if (ciphertext.size() < cecpq2_header_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   // Get the key material size based on the DEM type_url.

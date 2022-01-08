@@ -17,23 +17,34 @@
  */
 #import "objc/util/TINKErrors.h"
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 static NSString *const kTinkErrorDomain = @"TinkErrorDomain";
 
 NSError *TINKStatusToError(const crypto::tink::util::Status &status) {
-  NSString *errorMessage = [NSString stringWithUTF8String:status.error_message().c_str()];
+  NSString *errorMessage = [NSString stringWithUTF8String:((std::string)status.message()).c_str()];
   NSDictionary *userInfo = @{
     NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
     NSLocalizedFailureReasonErrorKey : NSLocalizedString(errorMessage, nil),
   };
-  return [NSError errorWithDomain:kTinkErrorDomain code:status.error_code() userInfo:userInfo];
+  return [NSError errorWithDomain:kTinkErrorDomain code:(NSInteger)status.code() userInfo:userInfo];
 }
 
+#ifndef TINK_USE_ABSL_STATUS
 NSError *TINKError(crypto::tink::util::error::Code code, NSString *message) {
   NSDictionary *userInfo = @{
     NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
     NSLocalizedFailureReasonErrorKey : NSLocalizedString(message, nil),
   };
   return [NSError errorWithDomain:kTinkErrorDomain code:code userInfo:userInfo];
+}
+#endif
+
+NSError *TINKError(absl::StatusCode code, NSString *message) {
+  NSDictionary *userInfo = @{
+    NSLocalizedDescriptionKey : NSLocalizedString(@"Tink Error", nil),
+    NSLocalizedFailureReasonErrorKey : NSLocalizedString(message, nil),
+  };
+  return [NSError errorWithDomain:kTinkErrorDomain code:(NSInteger)code userInfo:userInfo];
 }

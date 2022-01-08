@@ -19,7 +19,7 @@ package daead
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/daead/subtle"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/subtle/random"
@@ -36,11 +36,6 @@ const (
 // aesSIVKeyManager is an implementation of KeyManager interface.
 // It generates new AesSivKey keys and produces new instances of AESSIV subtle.
 type aesSIVKeyManager struct{}
-
-// newAESSIVKeyManager creates a new aesSIVKeyManager.
-func newAESSIVKeyManager() *aesSIVKeyManager {
-	return new(aesSIVKeyManager)
-}
 
 // Primitive creates an AESSIV subtle for the given serialized AesSivKey proto.
 func (km *aesSIVKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

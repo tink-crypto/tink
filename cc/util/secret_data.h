@@ -133,7 +133,7 @@ class SecretValue {
   SecretUniquePtr<T> ptr_;
 };
 
-inline void SafeZeroMemory(char* ptr, std::size_t size) {
+inline void SafeZeroMemory(void* ptr, std::size_t size) {
   internal::SafeZeroMemory(ptr, size);
 }
 

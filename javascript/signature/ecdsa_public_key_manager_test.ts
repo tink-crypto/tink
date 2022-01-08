@@ -159,8 +159,8 @@ describe('ecdsa public key manager test', function() {
   it('get primitive, invalid key', async function() {
     const manager = new EcdsaPublicKeyManager();
     const key = await createKey();
-    const x = key.getX();
-    key.setX(new Uint8Array(0));
+    const x = key.getX_asU8();
+    key.setX(new Uint8Array([0]));
 
     try {
       await manager.getPrimitive(PRIMITIVE, key);
@@ -170,7 +170,7 @@ describe('ecdsa public key manager test', function() {
     }
 
     key.setX(x);
-    key.setY(new Uint8Array(0));
+    key.setY(new Uint8Array([0]));
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
@@ -321,7 +321,7 @@ async function createKey(
           .setVersion(0)
           .setParams(createParams(opt_curveType, opt_hashType, opt_encoding));
   const keyPair = await EllipticCurves.generateKeyPair('ECDSA', curveName);
-  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+  const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
   key.setX(
       Bytes.fromBase64(assertExists(publicKey['x']), /* opt_webSafe = */ true));
   key.setY(

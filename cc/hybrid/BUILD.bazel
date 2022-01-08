@@ -32,10 +32,7 @@ cc_library(
     tags = [
         "requires_boringcrypto_update",
     ],
-    visibility = [
-        "//:__subpackages__",
-        "//objc:__subpackages__",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
         "//:registry",
         "//aead:aead_config",
@@ -59,10 +56,11 @@ cc_library(
         "//:hybrid_decrypt",
         "//:primitive_set",
         "//:primitive_wrapper",
+        "//internal:util",
         "//proto:tink_cc_proto",
-        "//subtle:subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -78,10 +76,11 @@ cc_library(
         "//:hybrid_encrypt",
         "//:primitive_set",
         "//:primitive_wrapper",
+        "//internal:util",
         "//proto:tink_cc_proto",
-        "//subtle:subtle_util_boringssl",
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -163,6 +162,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -175,14 +175,15 @@ cc_library(
     deps = [
         ":ecies_aead_hkdf_dem_helper",
         "//:hybrid_decrypt",
+        "//internal:ec_util",
         "//proto:ecies_aead_hkdf_cc_proto",
-        "//subtle:ec_util",
         "//subtle:ecies_hkdf_recipient_kem_boringssl",
         "//util:enums",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -202,6 +203,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -224,7 +226,6 @@ cc_library(
         "//:key_manager",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//proto:tink_cc_proto",
-        "//subtle:subtle_util_boringssl",
         "//util:constants",
         "//util:enums",
         "//util:errors",
@@ -234,6 +235,7 @@ cc_library(
         "//util:statusor",
         "//util:validation",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -261,6 +263,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -287,6 +290,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -312,6 +316,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -426,6 +431,7 @@ cc_test(
         "//util:secret_data",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -446,7 +452,6 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//subtle:random",
-        "//subtle:subtle_util_boringssl",
         "//util:enums",
         "//util:status",
         "//util:statusor",
@@ -470,7 +475,6 @@ cc_test(
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",
         "//subtle:random",
-        "//subtle:subtle_util_boringssl",
         "//util:enums",
         "//util:status",
         "//util:statusor",
@@ -502,6 +506,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -526,6 +531,7 @@ cc_test(
         "//util:statusor",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

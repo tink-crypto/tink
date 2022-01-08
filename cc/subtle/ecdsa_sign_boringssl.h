@@ -20,13 +20,14 @@
 #include <memory>
 
 #include "absl/strings/string_view.h"
-#include "tink/internal/fips_utils.h"
-#include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
-#include "tink/public_key_sign.h"
-#include "tink/util/statusor.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
+#include "tink/public_key_sign.h"
+#include "tink/subtle/common_enums.h"
+#include "tink/subtle/subtle_util_boringssl.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -47,10 +48,10 @@ class EcdsaSignBoringSsl : public PublicKeySign {
       crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
-  EcdsaSignBoringSsl(bssl::UniquePtr<EC_KEY> key, const EVP_MD* hash,
+  EcdsaSignBoringSsl(internal::SslUniquePtr<EC_KEY> key, const EVP_MD* hash,
                      EcdsaSignatureEncoding encoding);
 
-  bssl::UniquePtr<EC_KEY> key_;
+  internal::SslUniquePtr<EC_KEY> key_;
   const EVP_MD* hash_;  // Owned by BoringSSL.
   EcdsaSignatureEncoding encoding_;
 };

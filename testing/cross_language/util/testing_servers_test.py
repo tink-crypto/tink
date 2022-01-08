@@ -23,12 +23,12 @@ import tink
 from tink import aead
 from tink import daead
 from tink import hybrid
+from tink import jwt
 from tink import mac
 from tink import prf
 from tink import signature
 from tink import streaming_aead
 
-from tink import jwt
 from util import testing_servers
 
 _SUPPORTED_LANGUAGES = testing_servers.SUPPORTED_LANGUAGES_BY_PRIMITIVE
@@ -69,6 +69,12 @@ class TestingServersTest(parameterized.TestCase):
   def tearDownClass(cls):
     testing_servers.stop()
     super(TestingServersTest, cls).tearDownClass()
+
+  @parameterized.parameters(['cc', 'java', 'go', 'python'])
+  def test_get_template(self, lang):
+    template = testing_servers.key_template(lang, 'AES128_GCM')
+    self.assertEqual(template.type_url,
+                     'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):
@@ -190,7 +196,6 @@ class TestingServersTest(parameterized.TestCase):
     compact = jwt_mac_primitive.compute_mac_and_encode(token)
     validator = jwt.new_validator(
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience1',
         fixed_now=now)
     verified_jwt = jwt_mac_primitive.verify_mac_and_decode(compact, validator)
@@ -207,9 +212,6 @@ class TestingServersTest(parameterized.TestCase):
 
   @parameterized.parameters(_SUPPORTED_LANGUAGES['jwt'])
   def test_jwt_public_key_sign_verify(self, lang):
-    if lang == 'python':
-      # TODO(juerg): Remove this once this key type is supported.
-      return
     private_keyset = testing_servers.new_keyset(lang, jwt.jwt_es256_template())
     public_keyset = testing_servers.public_keyset(lang, private_keyset)
 
@@ -227,7 +229,6 @@ class TestingServersTest(parameterized.TestCase):
     compact = signer.sign_and_encode(token)
     validator = jwt.new_validator(
         expected_issuer='issuer',
-        expected_subject='subject',
         expected_audience='audience1',
         fixed_now=now)
     verified_jwt = verifier.verify_and_decode(compact, validator)
@@ -241,6 +242,29 @@ class TestingServersTest(parameterized.TestCase):
         expected_audience='wrong_audience', fixed_now=now)
     with self.assertRaises(tink.TinkError):
       verifier.verify_and_decode(compact, validator2)
+
+  @parameterized.parameters(['java'])
+  def test_jwt_public_key_sign_export_import_verify(self, lang):
+    private_keyset = testing_servers.new_keyset(lang, jwt.jwt_es256_template())
+    public_keyset = testing_servers.public_keyset(lang, private_keyset)
+
+    # sign and export public key
+    signer = testing_servers.jwt_public_key_sign(lang, private_keyset)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    token = jwt.new_raw_jwt(
+        jwt_id='jwt_id', expiration=now + datetime.timedelta(seconds=100))
+    compact = signer.sign_and_encode(token)
+    public_jwk_set = testing_servers.jwk_set_from_keyset(lang, public_keyset)
+
+    # verify using public_jwk_set
+    imported_public_keyset = testing_servers.jwk_set_to_keyset(
+        lang, public_jwk_set)
+
+    verifier = testing_servers.jwt_public_key_verify(lang,
+                                                     imported_public_keyset)
+    validator = jwt.new_validator(fixed_now=now)
+    verified_jwt = verifier.verify_and_decode(compact, validator)
+    self.assertEqual(verified_jwt.jwt_id(), 'jwt_id')
 
 
 if __name__ == '__main__':

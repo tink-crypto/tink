@@ -16,11 +16,17 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include <utility>
+
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/md_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/rsa_ssa_pss_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -42,11 +48,11 @@ using google::crypto::tink::RsaSsaPssPublicKey;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RsaSsaPssVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const RsaSsaPssPublicKey& rsa_ssa_pss_public_key) const {
-  subtle::SubtleUtilBoringSSL::RsaPublicKey rsa_pub_key;
+  internal::RsaPublicKey rsa_pub_key;
   rsa_pub_key.n = rsa_ssa_pss_public_key.n();
   rsa_pub_key.e = rsa_ssa_pss_public_key.e();
 
-  subtle::SubtleUtilBoringSSL::RsaSsaPssParams params;
+  internal::RsaSsaPssParams params;
   RsaSsaPssParams rsa_ssa_pss_params = rsa_ssa_pss_public_key.params();
   params.sig_hash = Enums::ProtoToSubtle(rsa_ssa_pss_params.sig_hash());
   params.mgf1_hash = Enums::ProtoToSubtle(rsa_ssa_pss_params.mgf1_hash());
@@ -62,22 +68,30 @@ Status RsaSsaPssVerifyKeyManager::ValidateKey(
     const RsaSsaPssPublicKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
-  auto status_or_n = subtle::SubtleUtilBoringSSL::str2bn(key.n());
-  if (!status_or_n.ok()) return status_or_n.status();
-  auto modulus_status = subtle::SubtleUtilBoringSSL::ValidateRsaModulusSize(
-      BN_num_bits(status_or_n.ValueOrDie().get()));
-  if (!modulus_status.ok()) return modulus_status;
-  auto exponent_status = subtle::SubtleUtilBoringSSL::ValidateRsaPublicExponent(
-      key.e());
-  if (!exponent_status.ok()) return exponent_status;
+  StatusOr<internal::SslUniquePtr<BIGNUM>> n =
+      internal::StringToBignum(key.n());
+  if (!n.ok()) {
+    return n.status();
+  }
+  Status modulus_status =
+      internal::ValidateRsaModulusSize(BN_num_bits(n->get()));
+  if (!modulus_status.ok()) {
+    return modulus_status;
+  }
+  Status exponent_status = internal::ValidateRsaPublicExponent(key.e());
+  if (!exponent_status.ok()) {
+    return exponent_status;
+  }
   return ValidateParams(key.params());
 }
 
 Status RsaSsaPssVerifyKeyManager::ValidateParams(
     const RsaSsaPssParams& params) const {
-  auto hash_result = subtle::SubtleUtilBoringSSL::ValidateSignatureHash(
+  util::Status hash_result = internal::IsHashTypeSafeForSignature(
       Enums::ProtoToSubtle(params.sig_hash()));
-  if (!hash_result.ok()) return hash_result;
+  if (!hash_result.ok()) {
+    return hash_result;
+  }
   // The most common use case is that MGF1 hash is the same as signature hash.
   // This is recommended by RFC https://tools.ietf.org/html/rfc8017#section-8.1.
   // While using different hashes doesn't cause security vulnerabilities, there
@@ -90,18 +104,16 @@ Status RsaSsaPssVerifyKeyManager::ValidateParams(
   //
   //  - Conscrypt/BouncyCastle do not support different hashes.
   if (params.mgf1_hash() != params.sig_hash()) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                        absl::StrCat("MGF1 hash '",
-                                     params.mgf1_hash(),
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        absl::StrCat("MGF1 hash '", params.mgf1_hash(),
                                      "' is different from signature hash '",
-                                     params.sig_hash(),
-                                     "'"));
+                                     params.sig_hash(), "'"));
   }
   if (params.salt_length() < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "salt length is negative");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace tink

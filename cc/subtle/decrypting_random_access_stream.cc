@@ -22,6 +22,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/random_access_stream.h"
@@ -46,11 +47,11 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
     std::unique_ptr<StreamSegmentDecrypter> segment_decrypter,
     std::unique_ptr<RandomAccessStream> ciphertext_source) {
   if (segment_decrypter == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "segment_decrypter must be non-null");
   }
   if (ciphertext_source == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "cipertext_source must be non-null");
   }
   std::unique_ptr<DecryptingRandomAccessStream> dec_stream(
@@ -60,7 +61,7 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
   dec_stream->ct_source_ = std::move(ciphertext_source);
 
   if (dec_stream->segment_decrypter_->get_ciphertext_offset() < 0) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "The ciphertext offset must be non-negative");
   }
   int first_segment_size =
@@ -68,30 +69,33 @@ StatusOr<std::unique_ptr<RandomAccessStream>> DecryptingRandomAccessStream::New(
       dec_stream->segment_decrypter_->get_ciphertext_offset() -
       dec_stream->segment_decrypter_->get_header_size();
   if (first_segment_size <= 0) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Size of the first segment must be greater than 0.");
   }
   dec_stream->status_ =
-      Status(util::error::UNAVAILABLE, "The header hasn't been read yet.");
+      Status(absl::StatusCode::kUnavailable,
+             "The header hasn't been read yet.");
   return {std::move(dec_stream)};
 }
 
 util::Status DecryptingRandomAccessStream::PRead(int64_t position, int count,
                                                  Buffer* dest_buffer) {
   if (dest_buffer == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "dest_buffer must be non-null");
   }
   auto status = dest_buffer->set_size(0);
   if (!status.ok()) return status;
   if (count < 0) {
-    return Status(util::error::INVALID_ARGUMENT, "count cannot be negative");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "count cannot be negative");
   }
   if (count > dest_buffer->allocated_size()) {
-    return Status(util::error::INVALID_ARGUMENT, "buffer too small");
+    return Status(absl::StatusCode::kInvalidArgument, "buffer too small");
   }
   if (position < 0) {
-    return Status(util::error::INVALID_ARGUMENT, "position cannot be negative");
+    return Status(absl::StatusCode::kInvalidArgument,
+                  "position cannot be negative");
   }
 
   {  // Initialize, if not initialized yet.
@@ -101,7 +105,7 @@ util::Status DecryptingRandomAccessStream::PRead(int64_t position, int count,
   }
 
   if (position > pt_size_) {
-    return Status(util::error::INVALID_ARGUMENT, "position too large");
+    return Status(absl::StatusCode::kInvalidArgument, "position too large");
   }
   return PReadAndDecrypt(position, count, dest_buffer);
 }
@@ -117,7 +121,7 @@ util::Status DecryptingRandomAccessStream::PRead(int64_t position, int count,
 // streams can be added in the future if needed.
 void DecryptingRandomAccessStream::InitializeIfNeeded()
     ABSL_EXCLUSIVE_LOCKS_REQUIRED(status_mutex_) {
-  if (status_.error_code() != util::error::UNAVAILABLE) {
+  if (status_.code() != absl::StatusCode::kUnavailable) {
     // Already initialized or stream failed permanently.
     return;
   }
@@ -133,8 +137,9 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
   auto buf = std::move(buf_result.ValueOrDie());
   status_ = ct_source_->PRead(ct_offset_, header_size_, buf.get());
   if (!status_.ok()) {
-    if (status_.error_code() == util::error::OUT_OF_RANGE) {
-      status_ = Status(util::error::INVALID_ARGUMENT, "could not read header");
+    if (status_.code() == absl::StatusCode::kOutOfRange) {
+      status_ =
+          Status(absl::StatusCode::kInvalidArgument, "could not read header");
     }
     return;
   }
@@ -165,7 +170,7 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
   }
   // Tink supports up to 2^32 segments.
   if (segment_count_ - 1 > std::numeric_limits<uint32_t>::max()) {
-    status_ = Status(util::error::INVALID_ARGUMENT,
+    status_ = Status(absl::StatusCode::kInvalidArgument,
                      absl::StrCat("too many segments: ", segment_count_));
     return;
   }
@@ -176,7 +181,7 @@ void DecryptingRandomAccessStream::InitializeIfNeeded()
   auto overhead =
       ct_segment_overhead_ * segment_count_ + ct_offset_ + header_size_;
   if (overhead > ct_size) {
-    status_ = Status(util::error::INVALID_ARGUMENT,
+    status_ = Status(absl::StatusCode::kInvalidArgument,
                      "ciphertext stream is too short");
     return;
   }
@@ -201,7 +206,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
     int64_t segment_nr, Buffer* ct_buffer, std::vector<uint8_t>* pt_segment) {
   int64_t ct_position = segment_nr * ct_segment_size_;
   if (ct_position / ct_segment_size_ != segment_nr /* overflow occured! */) {
-    return Status(util::error::OUT_OF_RANGE,
+    return Status(absl::StatusCode::kOutOfRange,
                   absl::StrCat("segment_nr * ct_segment_size too large: ",
                                segment_nr, ct_segment_size_));
   }
@@ -217,7 +222,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
   auto pread_status = ct_source_->PRead(ct_position, segment_size, ct_buffer);
   if (pread_status.ok() ||
       (is_last_segment && ct_buffer->size() > 0 &&
-       pread_status.error_code() == util::error::OUT_OF_RANGE)) {
+       pread_status.code() == absl::StatusCode::kOutOfRange)) {
     // some bytes were read
     auto dec_status = segment_decrypter_->DecryptSegment(
         std::vector<uint8_t>(ct_buffer->get_mem_block(),
@@ -225,7 +230,7 @@ util::Status DecryptingRandomAccessStream::ReadAndDecryptSegment(
         segment_nr, is_last_segment, pt_segment);
     if (dec_status.ok()) {
       return is_last_segment ?
-          Status(util::error::OUT_OF_RANGE, "EOF") : Status::OK;
+          Status(absl::StatusCode::kOutOfRange, "EOF") : util::OkStatus();
     }
     return dec_status;
   }
@@ -236,13 +241,13 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
     int64_t position, int count, Buffer* dest_buffer) {
   if (position < 0 || count < 0 || dest_buffer == nullptr
       || count > dest_buffer->allocated_size() || dest_buffer->size() != 0) {
-    return Status(util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   "Invalid parameters to PReadAndDecrypt");
   }
 
   if (position > std::numeric_limits<int64_t>::max() - count) {
     return Status(
-        util::error::OUT_OF_RANGE,
+        absl::StatusCode::kOutOfRange,
         absl::StrCat(
             "Invalid parameters to PReadAndDecrypt; position too large: ",
             position));
@@ -252,15 +257,14 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
   if (pt_size_result.ok()) {
     auto pt_size = pt_size_result.ValueOrDie();
     if (position > pt_size) {
-      return Status(util::error::OUT_OF_RANGE,
+      return Status(absl::StatusCode::kOutOfRange,
                     "position is larger than stream size");
     }
   }
   auto ct_buffer_result = Buffer::New(ct_segment_size_);
   if (!ct_buffer_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
-                     "Invalid ciphertext segment size %d.",
-                     ct_segment_size_);
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Invalid ciphertext segment size %d.", ct_segment_size_);
   }
   auto ct_buffer = std::move(ct_buffer_result.ValueOrDie());
   std::vector<uint8_t> pt_segment;
@@ -271,7 +275,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
     auto segment_nr = GetSegmentNr(position + read_count);
     auto status =
         ReadAndDecryptSegment(segment_nr, ct_buffer.get(), &pt_segment);
-    if (status.ok() || status.error_code() == util::error::OUT_OF_RANGE) {
+    if (status.ok() || status.code() == absl::StatusCode::kOutOfRange) {
       int pt_count = pt_segment.size() - pt_offset;
       int to_copy_count = std::min(pt_count, remaining);
       auto s = dest_buffer->set_size(read_count + to_copy_count);
@@ -279,7 +283,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
       std::memcpy(dest_buffer->get_mem_block() + read_count,
                   pt_segment.data() + pt_offset, to_copy_count);
       pt_offset = 0;
-      if (status.error_code() == util::error::OUT_OF_RANGE &&
+      if (status.code() == absl::StatusCode::kOutOfRange &&
           to_copy_count == pt_count)
         return status;
       read_count += to_copy_count;
@@ -288,7 +292,7 @@ util::Status DecryptingRandomAccessStream::PReadAndDecrypt(
       return status;
     }
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 StatusOr<int64_t> DecryptingRandomAccessStream::size() {

@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -36,7 +37,7 @@ using google::crypto::tink::Keyset;
 util::StatusOr<std::unique_ptr<KeysetReader>> BinaryKeysetReader::New(
     std::unique_ptr<std::istream> keyset_stream) {
   if (keyset_stream == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "keyset_stream must be non-null.");
   }
   std::stringstream buffer;
@@ -55,7 +56,7 @@ util::StatusOr<std::unique_ptr<KeysetReader>> BinaryKeysetReader::New(
 util::StatusOr<std::unique_ptr<Keyset>> BinaryKeysetReader::Read() {
   auto keyset = absl::make_unique<Keyset>();
   if (!keyset->ParseFromString(serialized_keyset_)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Could not parse the input stream as a Keyset-proto.");
   }
   return std::move(keyset);
@@ -65,7 +66,8 @@ util::StatusOr<std::unique_ptr<EncryptedKeyset>>
 BinaryKeysetReader::ReadEncrypted() {
   auto enc_keyset = absl::make_unique<EncryptedKeyset>();
   if (!enc_keyset->ParseFromString(serialized_keyset_)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
         "Could not parse the input stream as an EncryptedKeyset-proto.");
   }
   return std::move(enc_keyset);

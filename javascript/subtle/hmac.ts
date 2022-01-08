@@ -33,7 +33,6 @@ export class Hmac extends Mac {
   }
 
   /**
-   * @override
    */
   async computeMac(data: Uint8Array): Promise<Uint8Array> {
     Validators.requireUint8Array(data);
@@ -43,7 +42,6 @@ export class Hmac extends Mac {
   }
 
   /**
-   * @override
    */
   async verifyMac(tag: Uint8Array, data: Uint8Array): Promise<boolean> {
     Validators.requireUint8Array(tag);

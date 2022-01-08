@@ -18,6 +18,7 @@
 
 #include <atomic>
 
+#include "absl/status/status.h"
 #include "openssl/crypto.h"
 
 namespace crypto {
@@ -41,7 +42,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
   switch (fips_status) {
     case FipsCompatibility::kNotFips:
       if (IsFipsModeEnabled()) {
-        return util::Status(util::error::INTERNAL,
+        return util::Status(absl::StatusCode::kInternal,
                             "Primitive not available in FIPS only mode.");
       } else {
         return util::OkStatus();
@@ -49,7 +50,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
     case FipsCompatibility::kRequiresBoringCrypto:
       if ((IsFipsModeEnabled()) && !FIPS_mode()) {
         return util::Status(
-            util::error::INTERNAL,
+            absl::StatusCode::kInternal,
             "BoringSSL not built with the BoringCrypto module. If you want to "
             "use FIPS only mode you have to build BoringSSL in FIPS Mode.");
 
@@ -57,7 +58,7 @@ crypto::tink::util::Status ChecksFipsCompatibility(
         return util::OkStatus();
       }
     default:
-      return util::Status(util::error::INTERNAL,
+      return util::Status(absl::StatusCode::kInternal,
                           "Could not determine FIPS status.");
   }
 }

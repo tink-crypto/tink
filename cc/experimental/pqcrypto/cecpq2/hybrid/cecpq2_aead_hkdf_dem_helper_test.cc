@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead/aes_gcm_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 #include "tink/config/tink_config.h"
@@ -47,7 +48,7 @@ crypto::tink::util::Status EncryptThenDecrypt(
       dem.Decrypt(encryption_or.ValueOrDie(), associated_data);
   if (!decryption_or.status().ok()) return decryption_or.status();
   if (decryption_or.ValueOrDie() != message) {
-    return crypto::tink::util::Status(crypto::tink::util::error::INTERNAL,
+    return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                       "Message/Decryption mismatch");
   }
   return util::OkStatus();
@@ -57,9 +58,9 @@ TEST(Cecpq2AeadHkdfDemHelperTest, InvalidKey) {
   google::crypto::tink::KeyTemplate dem_key_template;
   dem_key_template.set_type_url("some.type.url/that.is.not.supported");
   auto result = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
-  EXPECT_THAT(
-      Cecpq2AeadHkdfDemHelper::New(dem_key_template).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Unsupported DEM")));
+  EXPECT_THAT(Cecpq2AeadHkdfDemHelper::New(dem_key_template).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("Unsupported DEM")));
 }
 
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesGcmKeyType) {

@@ -20,6 +20,7 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.AesGcmKey;
 import com.google.crypto.tink.proto.AesGcmKeyFormat;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -225,4 +226,9 @@ public final class AesGcmKeyManager extends KeyTypeManager<AesGcmKey> {
     AesGcmKeyFormat format = AesGcmKeyFormat.newBuilder().setKeySize(keySize).build();
     return new KeyFactory.KeyFormat<>(format, prefixType);
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 }

@@ -17,6 +17,7 @@ package tink_testing_api;
 
 option java_package = "com.google.crypto.tink.proto.testing";
 option java_multiple_files = true;
+option go_package = "github.com/google/tink/proto/testing/testing_api_go_proto";
 
 // Service providing metadata about the server.
 service Metadata {
@@ -34,6 +35,8 @@ message ServerInfoResponse {
 
 // Service for Keyset operations.
 service Keyset {
+  // Generates a key template from a key template name.
+  rpc GetTemplate(KeysetTemplateRequest) returns (KeysetTemplateResponse) {}
   // Generates a new keyset from a template.
   rpc Generate(KeysetGenerateRequest) returns (KeysetGenerateResponse) {}
   // Generates a public-key keyset from a private-key keyset.
@@ -42,6 +45,17 @@ service Keyset {
   rpc ToJson(KeysetToJsonRequest) returns (KeysetToJsonResponse) {}
   // Converts a Keyset from Json to Binary Format
   rpc FromJson(KeysetFromJsonRequest) returns (KeysetFromJsonResponse) {}
+}
+
+message KeysetTemplateRequest {
+  string template_name = 1;  // template name used by Tinkey
+}
+
+message KeysetTemplateResponse {
+  oneof result {
+    bytes key_template = 1;  // serialized google.crypto.tink.KeyTemplate.
+    string err = 2;
+  }
 }
 
 message KeysetGenerateRequest {
@@ -335,12 +349,14 @@ service Jwt {
   rpc PublicKeySignAndEncode(JwtSignRequest) returns (JwtSignResponse) {}
   // Verifies the validity of the signed compact JWT token
   rpc PublicKeyVerifyAndDecode(JwtVerifyRequest) returns (JwtVerifyResponse) {}
+  // Converts a Keyset from Tink Binary to JWK Set Format
+  rpc ToJwkSet(JwtToJwkSetRequest) returns (JwtToJwkSetResponse) {}
+  // Converts a Keyset from JWK Set to Tink Binary Format
+  rpc FromJwkSet(JwtFromJwkSetRequest) returns (JwtFromJwkSetResponse) {}
 }
 
 //  Used to represent the JSON null value.
-enum NullValue {
-  NULL_VALUE = 0;
-}
+enum NullValue { NULL_VALUE = 0; }
 
 // TODO(b/179867503): Remove these copies of Timestamp, Duration and StringValue
 
@@ -406,13 +422,12 @@ message JwtToken {
 message JwtValidator {
   StringValue expected_type_header = 7;
   StringValue expected_issuer = 1;
-  StringValue expected_subject = 2;
   StringValue expected_audience = 3;
   bool ignore_type_header = 8;
   bool ignore_issuer = 9;
-  bool ignore_subject = 10;
   bool ignore_audience = 11;
   bool allow_missing_expiration = 12;
+  bool expect_issued_in_the_past = 13;
   Timestamp now = 5;
   Duration clock_skew = 6;
 }
@@ -438,6 +453,28 @@ message JwtVerifyRequest {
 message JwtVerifyResponse {
   oneof result {
     JwtToken verified_jwt = 1;
+    string err = 2;
+  }
+}
+
+message JwtToJwkSetRequest {
+  bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+}
+
+message JwtToJwkSetResponse {
+  oneof result {
+    string jwk_set = 1;
+    string err = 2;
+  }
+}
+
+message JwtFromJwkSetRequest {
+  string jwk_set = 1;
+}
+
+message JwtFromJwkSetResponse {
+  oneof result {
+    bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
     string err = 2;
   }
 }

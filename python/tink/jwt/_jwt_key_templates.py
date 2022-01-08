@@ -17,11 +17,10 @@ from tink.proto import jwt_hmac_pb2
 from tink.proto import jwt_rsa_ssa_pkcs1_pb2
 from tink.proto import jwt_rsa_ssa_pss_pb2
 from tink.proto import tink_pb2
+from tink.internal import big_integer_util
 
 
 _F4 = 65537
-
-# TODO(juerg): Add TINK key templates.
 
 
 def _create_jwt_hmac_template(
@@ -46,27 +45,13 @@ def _create_jwt_ecdsa_template(
       output_prefix_type=output_prefix_type)
 
 
-# TODO(juerg): Move this function into a util lib.
-def _num_to_bytes(n: int) -> bytes:
-  """Converts a number to bytes."""
-  if n < 0:
-    raise OverflowError("number can't be negative")
-  if n == 0:
-    return b'\x00'
-  octets = bytearray()
-  while n:
-    octets.append(n % 256)
-    n //= 256
-  return bytes(octets[::-1])
-
-
 def _create_jwt_rsa_ssa_pkcs1_template(
     algorithm: jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1Algorithm, modulus_size: int,
     output_prefix_type: tink_pb2.OutputPrefixType) -> tink_pb2.KeyTemplate:
   key_format = jwt_rsa_ssa_pkcs1_pb2.JwtRsaSsaPkcs1KeyFormat(
       algorithm=algorithm,
       modulus_size_in_bits=modulus_size,
-      public_exponent=_num_to_bytes(_F4))
+      public_exponent=big_integer_util.num_to_bytes(_F4))
   return tink_pb2.KeyTemplate(
       type_url='type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey',
       value=key_format.SerializeToString(),
@@ -79,7 +64,7 @@ def _create_jwt_rsa_ssa_pss_template(
   key_format = jwt_rsa_ssa_pss_pb2.JwtRsaSsaPssKeyFormat(
       algorithm=algorithm,
       modulus_size_in_bits=modulus_size,
-      public_exponent=_num_to_bytes(_F4))
+      public_exponent=big_integer_util.num_to_bytes(_F4))
   return tink_pb2.KeyTemplate(
       type_url='type.googleapis.com/google.crypto.tink.JwtRsaSsaPssPrivateKey',
       value=key_format.SerializeToString(),

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@
 
 #include <utility>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/errors.h"
 #include "tink/util/protobuf_helper.h"
@@ -45,23 +46,25 @@ using google::crypto::tink::HashType;
 StatusOr<std::unique_ptr<PublicKeyVerify>>
 RawJwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
       const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
-  auto curve_or = CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
-  if (!curve_or.ok()) {
-    return curve_or.status();
+  internal::EcKey ec_key;
+  util::StatusOr<google::crypto::tink::EllipticCurveType> curve =
+      CurveForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
+  if (!curve.ok()) {
+    return curve.status();
   }
-  ec_key.curve = Enums::ProtoToSubtle(curve_or.ValueOrDie());
+  ec_key.curve = Enums::ProtoToSubtle(*curve);
   ec_key.pub_x = jwt_ecdsa_public_key.x();
   ec_key.pub_y = jwt_ecdsa_public_key.y();
-  auto hash_type_or = HashForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
-  if (!hash_type_or.ok()) {
-    return hash_type_or.status();
+  util::StatusOr<google::crypto::tink::HashType> hash_type =
+      HashForEcdsaAlgorithm(jwt_ecdsa_public_key.algorithm());
+  if (!hash_type.ok()) {
+    return hash_type.status();
   }
   auto result = subtle::EcdsaVerifyBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(hash_type_or.ValueOrDie()),
+      ec_key, Enums::ProtoToSubtle(*hash_type),
       subtle::EcdsaSignatureEncoding::IEEE_P1363);
   if (!result.ok()) return result.status();
-  return {std::move(result.ValueOrDie())};
+  return {*std::move(result)};
 }
 
 StatusOr<EllipticCurveType>
@@ -75,7 +78,7 @@ RawJwtEcdsaVerifyKeyManager::CurveForEcdsaAlgorithm(
     case JwtEcdsaAlgorithm::ES512:
       return EllipticCurveType::NIST_P521;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
 }
@@ -90,7 +93,7 @@ StatusOr<HashType> RawJwtEcdsaVerifyKeyManager::HashForEcdsaAlgorithm(
     case JwtEcdsaAlgorithm::ES512:
       return HashType::SHA512;
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
 }
@@ -101,12 +104,12 @@ Status RawJwtEcdsaVerifyKeyManager::ValidateAlgorithm(
     case JwtEcdsaAlgorithm::ES256:
     case JwtEcdsaAlgorithm::ES384:
     case JwtEcdsaAlgorithm::ES512:
-      return Status::OK;
+      return util::OkStatus();
     default:
-      return Status(util::error::INVALID_ARGUMENT,
+      return Status(absl::StatusCode::kInvalidArgument,
                     "Unsupported Ecdsa Algorithm");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 Status RawJwtEcdsaVerifyKeyManager::ValidateKey(

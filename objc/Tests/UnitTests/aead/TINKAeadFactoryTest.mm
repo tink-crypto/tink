@@ -27,6 +27,7 @@
 #import "objc/core/TINKKeysetHandle_Internal.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -69,7 +70,7 @@ using google::crypto::tink::KeyStatusType;
   id<TINKAead> aead = [TINKAeadFactory primitiveWithKeysetHandle:handle error:&error];
   XCTAssertNil(aead);
   XCTAssertNotNil(error);
-  XCTAssertTrue(error.code == crypto::tink::util::error::INVALID_ARGUMENT);
+  XCTAssertEqual((absl::StatusCode)error.code, absl::StatusCode::kInvalidArgument);
   XCTAssertTrue([error.localizedFailureReason containsString:@"at least one key"]);
 }
 
