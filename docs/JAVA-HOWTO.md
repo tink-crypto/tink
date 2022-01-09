@@ -326,7 +326,7 @@ data:
 
 You can obtain and use a
 [DeterministicAEAD](PRIMITIVES.md#deterministic-authenticated-encryption-with-associated-data)
-(Deterministic Authenticated Encryption with Associated Data primitive to
+(Deterministic Authenticated Encryption with Associated Data) primitive to
 encrypt or decrypt data:
 
 ```java
