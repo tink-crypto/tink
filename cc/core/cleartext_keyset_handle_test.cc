@@ -17,6 +17,7 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_reader.h"

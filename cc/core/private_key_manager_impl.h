@@ -16,6 +16,9 @@
 #ifndef TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 #define TINK_CORE_PRIVATE_KEY_MANAGER_IMPL_H_
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/core/private_key_type_manager.h"

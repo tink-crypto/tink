@@ -15,6 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/daead/deterministic_aead_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/crypto_format.h"
@@ -23,8 +26,8 @@
 #include "tink/deterministic_aead.h"
 #include "tink/internal/key_info.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 

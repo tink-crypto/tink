@@ -16,6 +16,9 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/deterministic_aead.h"

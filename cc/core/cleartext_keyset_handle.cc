@@ -17,6 +17,7 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "tink/keyset_handle.h"

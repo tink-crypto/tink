@@ -16,9 +16,11 @@
 
 #include "tink/binary_keyset_writer.h"
 
-#include <ostream>
 #include <istream>
+#include <ostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "tink/util/errors.h"

@@ -19,6 +19,8 @@
 #include <iostream>
 #include <istream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -51,7 +53,7 @@ namespace {
 
 class JsonKeysetReaderTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     gcm_key_.set_key_value("some gcm key value");
     gcm_key_.set_version(0);
 

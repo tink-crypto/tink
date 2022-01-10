@@ -16,6 +16,9 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/deterministic_aead.h"

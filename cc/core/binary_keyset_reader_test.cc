@@ -19,9 +19,11 @@
 #include <iostream>
 #include <istream>
 #include <sstream>
+#include <string>
+#include <utility>
 
-#include "tink/util/test_util.h"
 #include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 #include "proto/tink.pb.h"
 
 using crypto::tink::test::AddRawKey;
@@ -38,7 +40,7 @@ namespace {
 
 class BinaryKeysetReaderTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     Keyset::Key key;
     AddTinkKey("some key type", 42, key, KeyStatusType::ENABLED,
                KeyData::SYMMETRIC, &keyset_);

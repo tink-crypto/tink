@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_manager.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_gcm_key_manager.h"

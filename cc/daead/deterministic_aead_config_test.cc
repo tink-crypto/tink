@@ -17,6 +17,7 @@
 #include "tink/daead/deterministic_aead_config.h"
 
 #include <list>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -17,6 +17,7 @@
 #ifndef TINK_CORE_KEY_TYPE_MANAGER_H_
 #define TINK_CORE_KEY_TYPE_MANAGER_H_
 
+#include <string>
 #include <tuple>
 
 #include "absl/status/status.h"

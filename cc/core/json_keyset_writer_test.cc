@@ -18,6 +18,8 @@
 
 #include <ostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"

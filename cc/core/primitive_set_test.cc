@@ -16,7 +16,9 @@
 
 #include "tink/primitive_set.h"
 
+#include <string>
 #include <thread>  // NOLINT(build/c++11)
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

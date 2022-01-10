@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/kms_clients.h"
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
