@@ -57,6 +57,10 @@ struct Deleter {
 
 // Here are all the custom deleters.
 template <>
+struct Deleter<BIO> {
+  void operator()(BIO* ptr) { BIO_free(ptr); }
+};
+template <>
 struct Deleter<EVP_CIPHER_CTX> {
   void operator()(EVP_CIPHER_CTX* ptr) { EVP_CIPHER_CTX_free(ptr); }
 };

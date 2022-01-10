@@ -26,13 +26,13 @@
 #include "openssl/bio.h"
 #include "openssl/bn.h"
 #include "openssl/ec.h"
-#include "openssl/ec_key.h"
 #include "openssl/evp.h"
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
@@ -207,10 +207,23 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
                         "PEM Public Key parsing failed");
   }
   // No need to free bssl_rsa_key after use.
-  RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
-  auto is_valid = VerifyRsaKey(bssl_rsa_key);
-  if (!is_valid.ok()) {
-    return is_valid;
+  const RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
+  // With OpenSSL, calls to RSA_check_key with RSA keys that have only the
+  // modulus and public exponent populated don't work [1]. We therefore skip it.
+  // TODO(b/213570585): Add some other way of verifying the public key.
+  //
+  // [1] https://www.openssl.org/docs/man1.1.1/man3/RSA_check_key.html
+  if (internal::IsBoringSsl()) {
+    util::Status verification_res = VerifyRsaKey(bssl_rsa_key);
+    if (!verification_res.ok()) {
+      return verification_res;
+    }
+  } else {
+    // This should never be true since we know this is an RSA key.
+    if (bssl_rsa_key == nullptr) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid RSA key format");
+    }
   }
 
   // Get the public key parameters.
@@ -258,7 +271,7 @@ PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   }
 
   // No need to free bssl_rsa_key after use.
-  RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
+  const RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
 
   auto is_valid_key = VerifyRsaKey(bssl_rsa_key);
   if (!is_valid_key.ok()) {

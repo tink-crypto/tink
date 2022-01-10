@@ -94,6 +94,7 @@ main() {
     "tink_test_subtle_ecies_hkdf_recipient_kem_boringssl_test"
     "tink_test_subtle_hkdf_test"
     "tink_test_subtle_hmac_boringssl_test"
+    "tink_test_subtle_pem_parser_boringssl_test"
     "tink_test_subtle_random_test"
     "tink_test_subtle_rsa_ssa_pss_sign_boringssl_test"
     "tink_test_subtle_rsa_ssa_pss_verify_boringssl_test"

@@ -37,12 +37,12 @@
 #include "tink/internal/err_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -398,14 +398,14 @@ class PemParserRsaTest : public ::testing::Test {
         1)
         << internal::GetSslErrors();
 
-    pem_rsa_pub_key_.resize(pub_key_pem_bio->num_write + 1);
-    pem_rsa_prv_key_.resize(prv_key_pem_bio->num_write + 1);
+    pem_rsa_pub_key_.resize(BIO_number_written(pub_key_pem_bio.get()) + 1);
+    pem_rsa_prv_key_.resize(BIO_number_written(prv_key_pem_bio.get()) + 1);
     EXPECT_EQ(BIO_read(pub_key_pem_bio.get(), pem_rsa_pub_key_.data(),
-                       pub_key_pem_bio->num_write),
-              pub_key_pem_bio->num_write);
+                       BIO_number_written(pub_key_pem_bio.get())),
+              BIO_number_written(pub_key_pem_bio.get()));
     EXPECT_EQ(BIO_read(prv_key_pem_bio.get(), pem_rsa_prv_key_.data(),
-                       prv_key_pem_bio->num_write),
-              prv_key_pem_bio->num_write);
+                       BIO_number_written(prv_key_pem_bio.get())),
+              BIO_number_written(prv_key_pem_bio.get()));
   }
 
   // Utility function that sets expectations to test that `bn_str` equals `bn`.
@@ -658,33 +658,67 @@ TEST(PemParserEcTest, ReadInvalidEcPrivateKey) {
   EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(PemParserEcTest, ReadEcPublicKeySecp256k1_Invalid) {
+// Makes sure parsing of a valid EC public key on secp256k1 fails because the
+// curve is unsupported.
+TEST(PemParserEcTest, ReadEcPublicKeyFailsBecauseSecp256k1Unsupported) {
+  // Generate private key with:
+  // > openssl ecparam -genkey -name secp256k1 -noout -out ec-key-pair.pem
+  // Extract the public key:
+  // > openssl ec -in ec-key-pair.pem -pubout
   constexpr absl::string_view kSecp256k1PublicKey =
-      "-----BEGIN PUBLIC KEY-----\n"
-      "MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFO\n"
-      "BLrJS8EVf4tMw52zdhXpKBF2FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==\n"
-      "-----END PUBLIC KEY-----";
+      R"(-----BEGIN PUBLIC KEY-----
+MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFO
+BLrJS8EVf4tMw52zdhXpKBF2FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==
+-----END PUBLIC KEY-----)";
 
   util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
       PemParser::ParseEcPublicKey(
           absl::StripAsciiWhitespace(kSecp256k1PublicKey));
-
-  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+  // With BoringSSL parsing of the PEM key fails when an unsupported curve is
+  // used [1]; Supported curves are defined here [2]. Tink doesn't distinguish
+  // between an error caused by a malformed PEM and an unsupported group by
+  // BoringSSL. On the other hand, with OpenSSL parsing succeeds, but this curve
+  // is unsupported by Tink. As a consequence, this fails with two different
+  // errors.
+  //
+  // [1]https://github.com/google/boringssl/blob/master/crypto/ec_extra/ec_asn1.c#L324
+  // [2]https://github.com/google/boringssl/blob/master/crypto/fipsmodule/ec/ec.c#L218
+  if (internal::IsBoringSsl()) {
+    EXPECT_THAT(ecdsa_key.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  } else {
+    EXPECT_THAT(ecdsa_key.status(),
+                StatusIs(absl::StatusCode::kUnimplemented));
+  }
 }
 
-TEST(PemParserEcTest, ReadEcPrivateKeySecp256k1_Invalid) {
+// Makes sure parsing of a valid EC private key on secp256k1 fails because the
+// curve is unsupported.
+TEST(PemParserEcTest, ReadEcPrivateKeyFailsBecauseSecp256k1Unsupported) {
+  // Generate private key with:
+  // > openssl ecparam -genkey -name secp256k1 -noout
   constexpr absl::string_view kSecp256k1PrivateKey =
-      "-----BEGIN EC PRIVATE KEY-----\n"
-      "MHQCAQEEIKSqexQyySWB705oPctFx2roLMHdfJ/W/WBISaRNu1UHoAcGBSuBBAAK\n"
-      "oUQDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFOBLrJS8EVf4tMw52zdhXpKBF2\n"
-      "FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==\n"
-      "-----END EC PRIVATE KEY-----\n";
+      R"(-----BEGIN EC PRIVATE KEY-----
+MHQCAQEEIKSqexQyySWB705oPctFx2roLMHdfJ/W/WBISaRNu1UHoAcGBSuBBAAK
+oUQDQgAEC9naJNDkHKVBjfDK90szJegpzatlUcFOBLrJS8EVf4tMw52zdhXpKBF2
+FGpD54dNo+Ut2s6JIE+LoaX/FSvifw==
+-----END EC PRIVATE KEY-----)";
 
   util::StatusOr<std::unique_ptr<SubtleUtilBoringSSL::EcKey>> ecdsa_key =
       PemParser::ParseEcPrivateKey(
           absl::StripAsciiWhitespace(kSecp256k1PrivateKey));
 
-  EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kInvalidArgument));
+  // PEM parsing fails in BoringSSL when the curve is unsupported, and Tink
+  // doesn't distinguish between an error caused by a malformed PEM and an
+  // unsupported group by BoringSSL. With OpenSSL parsing succeeds, but this
+  // curve is unsupported by Tink. As a consequence, this fails with two
+  // different errors.
+  if (internal::IsBoringSsl()) {
+    EXPECT_THAT(ecdsa_key.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  } else {
+    EXPECT_THAT(ecdsa_key.status(), StatusIs(absl::StatusCode::kUnimplemented));
+  }
 }
 
 TEST(PemParserEcTest, ParseEncryptedEcPrivateKey_Invalid) {
