@@ -2453,6 +2453,8 @@
 <dd>
 <div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridDecrypt.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridDecrypt.html" title="class in com.google.crypto.tink.subtle">EciesAeadHkdfHybridDecrypt</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EncryptThenAuthenticate.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EncryptThenAuthenticate.html" title="class in com.google.crypto.tink.subtle">EncryptThenAuthenticate</a></dt>
@@ -2463,6 +2465,8 @@
 <dd>
 <div class="block">Decrypts <code>ciphertext</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/XChaCha20Poly1305.html#decrypt-byte:A-byte:A-">decrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/XChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">XChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/DeterministicAead.html#decryptDeterministically-byte:A-byte:A-">decryptDeterministically(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink">DeterministicAead</a></dt>
 <dd>
 <div class="block">Deterministically decrypts <code>ciphertext</code> with <code>associatedData</code> as associated
@@ -3286,6 +3290,8 @@
 <dd>
 <div class="block">On Android KitKat (API level 19) this method does not support non null or non empty <code>associatedData</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/ChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">ChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/EciesAeadHkdfHybridEncrypt.html" title="class in com.google.crypto.tink.subtle">EciesAeadHkdfHybridEncrypt</a></dt>
 <dd>
 <div class="block">Encrypts <code>plaintext</code> using <code>contextInfo</code> as <b>info</b>-parameter of the underlying
@@ -3299,6 +3305,8 @@
 <dd>
 <div class="block">Encrypts <code>plaintext</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/XChaCha20Poly1305.html#encrypt-byte:A-byte:A-">encrypt(byte[], byte[])</a></span> - Method in class com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/XChaCha20Poly1305.html" title="class in com.google.crypto.tink.subtle">XChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/DeterministicAead.html#encryptDeterministically-byte:A-byte:A-">encryptDeterministically(byte[], byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/DeterministicAead.html" title="interface in com.google.crypto.tink">DeterministicAead</a></dt>
 <dd>
 <div class="block">Deterministically encrypts <code>plaintext</code> with <code>associatedData</code> as associated
@@ -8752,7 +8760,7 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#init--">init()</a></span> - Static method in class com.google.crypto.tink.streamingaead.<a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html" title="class in com.google.crypto.tink.streamingaead">StreamingAeadConfig</a></dt>
 <dd>
 <div class="block"><span class="deprecatedLabel">Deprecated.</span>
-<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>register()</code></a></span></div>
+<div class="block"><span class="deprecationComment">use <a href="com/google/crypto/tink/streamingaead/StreamingAeadConfig.html#register--"><code>StreamingAeadConfig.register()</code></a></span></div>
 </div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html#init-java.nio.ByteBuffer-byte:A-">init(ByteBuffer, byte[])</a></span> - Method in interface com.google.crypto.tink.subtle.<a href="com/google/crypto/tink/subtle/StreamSegmentDecrypter.html" title="interface in com.google.crypto.tink.subtle">StreamSegmentDecrypter</a></dt>
@@ -8776,6 +8784,23 @@
  href="https://tools.ietf.org/html/rfc8439#section-2.8">RFC 8439, section 2.8</a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20Poly1305.html#InsecureNonceChaCha20Poly1305-byte:A-">InsecureNonceChaCha20Poly1305(byte[])</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20Poly1305.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20Poly1305</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">InsecureNonceXChaCha20</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block"><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html" title="class in com.google.crypto.tink.aead.internal"><code>InsecureNonceXChaCha20</code></a> stream cipher based on
+ https://download.libsodium.org/doc/advanced/xchacha20.html and
+ https://tools.ietf.org/html/draft-arciszewski-xchacha-01.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html#InsecureNonceXChaCha20-byte:A-int-">InsecureNonceXChaCha20(byte[], int)</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceXChaCha20</a></dt>
+<dd>
+<div class="block">Constructs a new InsecureNonceXChaCha20 cipher with the supplied <code>key</code>.</div>
+</dd>
+<dt><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20Poly1305.html" title="class in com.google.crypto.tink.aead.internal"><span class="typeNameLink">InsecureNonceXChaCha20Poly1305</span></a> - Class in <a href="com/google/crypto/tink/aead/internal/package-summary.html">com.google.crypto.tink.aead.internal</a></dt>
+<dd>
+<div class="block">XChaCha20Poly1305 AEAD construction, as described in
+ https://tools.ietf.org/html/draft-arciszewski-xchacha-01.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20Poly1305.html#InsecureNonceXChaCha20Poly1305-byte:A-">InsecureNonceXChaCha20Poly1305(byte[])</a></span> - Constructor for class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20Poly1305.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceXChaCha20Poly1305</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html#insecureSecretAccess--">insecureSecretAccess()</a></span> - Static method in class com.google.crypto.tink.tinkkey.<a href="com/google/crypto/tink/tinkkey/SecretKeyAccess.html" title="class in com.google.crypto.tink.tinkkey">SecretKeyAccess</a></dt>
 <dd>
@@ -10141,6 +10166,8 @@
 <dd>
 <div class="block">Prefix size of Tink, Legacy and Crunchy output prefix types.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html#NONCE_SIZE_IN_BYTES">NONCE_SIZE_IN_BYTES</a></span> - Static variable in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceXChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceXChaCha20</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#nonceSizeInBytes--">nonceSizeInBytes()</a></span> - Method in class com.google.crypto.tink.aead.internal.<a href="com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html" title="class in com.google.crypto.tink.aead.internal">InsecureNonceChaCha20</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/NoSecretKeysetHandle.html" title="class in com.google.crypto.tink"><span class="typeNameLink">NoSecretKeysetHandle</span></a> - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
