@@ -17,6 +17,8 @@
 #include "tink/streamingaead/decrypting_input_stream.h"
 
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"

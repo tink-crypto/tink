@@ -16,11 +16,13 @@
 
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
-#include "tink/random_access_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/streamingaead/shared_random_access_stream.h"
 #include "tink/util/buffer.h"

@@ -16,6 +16,8 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

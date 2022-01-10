@@ -16,12 +16,15 @@
 
 #include "tink/streamingaead/shared_random_access_stream.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "tink/random_access_stream.h"
-#include "tink/util/file_random_access_stream.h"
 #include "tink/util/buffer.h"
+#include "tink/util/file_random_access_stream.h"
 #include "tink/util/status.h"
 #include "tink/util/test_util.h"
 

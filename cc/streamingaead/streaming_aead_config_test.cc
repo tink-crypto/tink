@@ -18,6 +18,7 @@
 
 #include <list>
 #include <sstream>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

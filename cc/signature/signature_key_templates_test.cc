@@ -16,6 +16,8 @@
 
 #include "tink/signature/signature_key_templates.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "openssl/base.h"
 #include "openssl/bn.h"

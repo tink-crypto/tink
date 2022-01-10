@@ -16,6 +16,8 @@
 
 #include "tink/streamingaead/aes_ctr_hmac_streaming_key_manager.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 #include "tink/subtle/random.h"

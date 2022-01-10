@@ -19,6 +19,8 @@
 #include <cstddef>
 #include <memory>
 #include <random>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

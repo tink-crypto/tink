@@ -16,6 +16,9 @@
 
 #include "tink/signature/public_key_sign_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/config.h"
 #include "tink/crypto_format.h"

@@ -16,7 +16,10 @@
 
 #include "tink/streamingaead/shared_input_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

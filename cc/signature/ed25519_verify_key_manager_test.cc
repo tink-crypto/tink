@@ -16,6 +16,8 @@
 
 #include "tink/signature/ed25519_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/public_key_sign.h"

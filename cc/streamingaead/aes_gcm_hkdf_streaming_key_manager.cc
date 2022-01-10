@@ -16,6 +16,8 @@
 
 #include "tink/streamingaead/aes_gcm_hkdf_streaming_key_manager.h"
 
+#include <string>
+
 #include "absl/status/status.h"
 #include "tink/subtle/aes_gcm_hkdf_stream_segment_encrypter.h"
 #include "tink/subtle/random.h"

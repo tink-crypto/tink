@@ -16,6 +16,8 @@
 
 #include "tink/signature/ecdsa_verify_key_manager.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/ec_util.h"

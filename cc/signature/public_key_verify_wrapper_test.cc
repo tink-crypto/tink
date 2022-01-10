@@ -16,6 +16,10 @@
 
 #include "tink/signature/public_key_verify_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/primitive_set.h"
 #include "tink/public_key_verify.h"

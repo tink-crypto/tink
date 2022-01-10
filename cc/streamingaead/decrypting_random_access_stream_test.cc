@@ -17,6 +17,8 @@
 #include "tink/streamingaead/decrypting_random_access_stream.h"
 
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -24,9 +26,9 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "tink/random_access_stream.h"
 #include "tink/output_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"

@@ -16,6 +16,8 @@
 
 #include "tink/signature/ed25519_sign_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"

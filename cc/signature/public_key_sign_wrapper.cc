@@ -16,6 +16,9 @@
 
 #include "tink/signature/public_key_sign_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/internal/util.h"

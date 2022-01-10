@@ -17,6 +17,8 @@
 #include "tink/signature/signature_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

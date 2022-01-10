@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 #define TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 
+#include <string>
 #include <utility>
 #include <vector>
 

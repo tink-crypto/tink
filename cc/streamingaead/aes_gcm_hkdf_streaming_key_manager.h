@@ -17,6 +17,7 @@
 #define TINK_STREAMINGAEAD_AES_GCM_HKDF_STREAMING_KEY_MANAGER_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
