@@ -9,5 +9,6 @@ cc_library(
     deps = [
         "//util:status",
         "//util:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )
