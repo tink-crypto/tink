@@ -79,38 +79,6 @@ public class ChaCha20Test {
     assertThat(e).hasMessageThat().containsMatch("ciphertext too short");
   }
 
-  /** https://tools.ietf.org/html/rfc7539#section-2.1.1 */
-  @Test
-  public void testQuarterRound() {
-    int[] x = TestUtil.twoCompInt(new long[] {0x11111111, 0x01020304, 0x9b8d6f43, 0x01234567});
-    ChaCha20.quarterRound(x, 0, 1, 2, 3);
-    Truth.assertThat(x).isEqualTo(
-        TestUtil.twoCompInt(new long[] {0xea2a92f4, 0xcb1cf8ce, 0x4581472e, 0x5881c4bb}));
-  }
-
-  /** https://tools.ietf.org/html/rfc7539#section-2.2.1 */
-  @Test
-  public void testQuarterRound16() {
-    int[] x =
-        TestUtil.twoCompInt(
-            new long[] {
-              0x879531e0, 0xc5ecf37d, 0x516461b1, 0xc9a62f8a,
-              0x44c20ef3, 0x3390af7f, 0xd9fc690b, 0x2a5f714c,
-              0x53372767, 0xb00a5631, 0x974c541a, 0x359e9963,
-              0x5c971061, 0x3d631689, 0x2098d9d6, 0x91dbd320
-            });
-    ChaCha20.quarterRound(x, 2, 7, 8, 13);
-    Truth.assertThat(x)
-        .isEqualTo(
-            TestUtil.twoCompInt(
-                new long[] {
-                  0x879531e0, 0xc5ecf37d, 0xbdb886dc, 0xc9a62f8a,
-                  0x44c20ef3, 0x3390af7f, 0xd9fc690b, 0xcfacafd2,
-                  0xe46bea80, 0xb00a5631, 0x974c541a, 0x359e9963,
-                  0x5c971061, 0xccc07c79, 0x2098d9d6, 0x91dbd320
-                }));
-  }
-
   /** https://tools.ietf.org/html/rfc7539#section-2.4.2 */
   private static class Rfc7539TestVector {
     public byte[] key;

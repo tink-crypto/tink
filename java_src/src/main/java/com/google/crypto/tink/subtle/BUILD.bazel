@@ -37,8 +37,10 @@ java_library(
     srcs = ["ChaCha20Poly1305.java"],
     deps = [
         ":cha_cha20",
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 
@@ -369,7 +371,11 @@ java_library(
 java_library(
     name = "x_cha_cha20",
     srcs = ["XChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20",
+    ],
 )
 
 java_library(
@@ -394,7 +400,11 @@ java_library(
 java_library(
     name = "cha_cha20",
     srcs = ["ChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20",
+    ],
 )
 
 java_library(
@@ -470,9 +480,11 @@ java_library(
     name = "x_cha_cha20_poly1305",
     srcs = ["XChaCha20Poly1305.java"],
     deps = [
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
         ":x_cha_cha20",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 

@@ -497,7 +497,6 @@ java_test(
     srcs = ["XChaCha20Test.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
-        "//src/main/java/com/google/crypto/tink/subtle:cha_cha20",
         "//src/main/java/com/google/crypto/tink/subtle:hex",
         "//src/main/java/com/google/crypto/tink/subtle:ind_cpa_cipher",
         "//src/main/java/com/google/crypto/tink/subtle:random",

@@ -16,6 +16,9 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.aead.internal.InsecureNonceXChaCha20;
+import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
 
@@ -26,54 +29,39 @@ import java.util.Arrays;
  *
  * <p>This cipher is meant to be used to construct an AEAD with Poly1305.
  */
-class XChaCha20 extends ChaCha20Base {
+class XChaCha20 implements IndCpaCipher {
+  static final int NONCE_LENGTH_IN_BYTES = 24;
+
+  private final InsecureNonceXChaCha20 cipher;
+
   /**
    * Constructs a new XChaCha20 cipher with the supplied {@code key}.
    *
    * @throws IllegalArgumentException when {@code key} length is not {@link
-   *     ChaCha20Base#KEY_SIZE_IN_BYTES}.
+   *     com.google.crypto.tink.aead.internal.ChaCha20Util#KEY_SIZE_IN_BYTES}.
    */
   XChaCha20(byte[] key, int initialCounter) throws InvalidKeyException {
-    super(key, initialCounter);
+    cipher = new InsecureNonceXChaCha20(key, initialCounter);
   }
 
   @Override
-  int[] createInitialState(final int[] nonce, int counter) {
-    if (nonce.length != nonceSizeInBytes() / 4) {
-      throw new IllegalArgumentException(
-          String.format(
-              "XChaCha20 uses 192-bit nonces, but got a %d-bit nonce", nonce.length * 32));
+  public byte[] encrypt(final byte[] plaintext) throws GeneralSecurityException {
+    ByteBuffer output = ByteBuffer.allocate(NONCE_LENGTH_IN_BYTES + plaintext.length);
+    byte[] nonce = Random.randBytes(NONCE_LENGTH_IN_BYTES);
+    output.put(nonce); // Prepend nonce to ciphertext output.
+    cipher.encrypt(output, nonce, plaintext);
+    return output.array();
+  }
+
+  @Override
+  public byte[] decrypt(final byte[] ciphertext) throws GeneralSecurityException {
+    if (ciphertext.length < NONCE_LENGTH_IN_BYTES) {
+      throw new GeneralSecurityException("ciphertext too short");
     }
-    // Set the initial state based on
-    // https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.3.
-    int[] state = new int[ChaCha20Base.BLOCK_SIZE_IN_INTS];
-    ChaCha20Base.setSigmaAndKey(state, hChaCha20(this.key, nonce));
-    state[12] = counter;
-    state[13] = 0;
-    state[14] = nonce[4];
-    state[15] = nonce[5];
-    return state;
-  }
-
-  @Override
-  int nonceSizeInBytes() {
-    return 24;
-  }
-
-  // See https://tools.ietf.org/html/draft-arciszewski-xchacha-01#section-2.2.
-  static int[] hChaCha20(final int[] key, final int[] nonce) {
-    int[] state = new int[ChaCha20Base.BLOCK_SIZE_IN_INTS];
-    ChaCha20Base.setSigmaAndKey(state, key);
-    state[12] = nonce[0];
-    state[13] = nonce[1];
-    state[14] = nonce[2];
-    state[15] = nonce[3];
-    ChaCha20Base.shuffleState(state);
-    // state[0] = state[0], state[1] = state[1], state[2] = state[2], state[3] = state[3]
-    state[4] = state[12];
-    state[5] = state[13];
-    state[6] = state[14];
-    state[7] = state[15];
-    return Arrays.copyOf(state, ChaCha20Base.KEY_SIZE_IN_INTS);
+    byte[] nonce = Arrays.copyOf(ciphertext, NONCE_LENGTH_IN_BYTES);
+    ByteBuffer rawCiphertext =
+        ByteBuffer.wrap(
+            ciphertext, NONCE_LENGTH_IN_BYTES, ciphertext.length - NONCE_LENGTH_IN_BYTES);
+    return cipher.decrypt(nonce, rawCiphertext);
   }
 }
