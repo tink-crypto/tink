@@ -16,6 +16,8 @@
 
 #include "tink/hybrid/hybrid_key_templates.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead/aead_key_templates.h"

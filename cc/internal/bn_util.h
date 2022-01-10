@@ -16,6 +16,8 @@
 #ifndef TINK_INTERNAL_BN_UTIL_H_
 #define TINK_INTERNAL_BN_UTIL_H_
 
+#include <string>
+
 #include "openssl/bn.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/util/secret_data.h"

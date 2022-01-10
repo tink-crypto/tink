@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/bn_util.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/types/span.h"
 #include "openssl/bn.h"
 #include "tink/internal/ssl_unique_ptr.h"

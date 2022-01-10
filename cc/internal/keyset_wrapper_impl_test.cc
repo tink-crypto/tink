@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/keyset_wrapper_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"

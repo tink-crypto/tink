@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_CONFIG_INTERNAL_FIPS_UTILS_H_
-#define TINK_CONFIG_INTERNAL_FIPS_UTILS_H_
+#ifndef TINK_INTERNAL_FIPS_UTILS_H_
+#define TINK_INTERNAL_FIPS_UTILS_H_
 
 #include "absl/base/attributes.h"
 #include "tink/util/status.h"
@@ -70,4 +70,4 @@ crypto::tink::util::Status CheckFipsCompatibility() {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CONFIG_INTERNAL__FIPS_UTILS_H_
+#endif  // TINK_INTERNAL_FIPS_UTILS_H_

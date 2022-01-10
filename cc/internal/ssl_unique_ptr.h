@@ -13,8 +13,8 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
-#define TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
+#ifndef TINK_INTERNAL_SSL_UNIQUE_PTR_H_
+#define TINK_INTERNAL_SSL_UNIQUE_PTR_H_
 
 #include <memory>
 // Every header in BoringSSL includes base.h, which in turn defines
@@ -114,4 +114,4 @@ using SslUniquePtr = std::unique_ptr<T, Deleter<T> >;
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTERNAL_UNIQUE_PTR_OPENSSL_H_
+#endif  // TINK_INTERNAL_SSL_UNIQUE_PTR_H_

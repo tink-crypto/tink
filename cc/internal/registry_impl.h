@@ -17,6 +17,9 @@
 #define TINK_INTERNAL_REGISTRY_IMPL_H_
 
 #include <algorithm>
+#include <functional>
+#include <initializer_list>
+#include <string>
 #include <tuple>
 #include <typeindex>
 #include <typeinfo>

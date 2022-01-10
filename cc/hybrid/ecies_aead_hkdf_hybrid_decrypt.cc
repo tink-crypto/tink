@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"

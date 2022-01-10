@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/hybrid_decrypt.h"

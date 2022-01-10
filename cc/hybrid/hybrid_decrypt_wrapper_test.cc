@@ -16,6 +16,10 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/primitive_set.h"

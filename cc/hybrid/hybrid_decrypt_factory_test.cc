@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_decrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/config.h"

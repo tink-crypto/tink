@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/rsa_util.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"

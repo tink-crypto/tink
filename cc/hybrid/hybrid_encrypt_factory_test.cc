@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_encrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/config.h"
 #include "tink/crypto_format.h"

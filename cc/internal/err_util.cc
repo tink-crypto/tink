@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/err_util.h"
 
+#include <string>
+
 #include "openssl/err.h"
 
 namespace crypto {
