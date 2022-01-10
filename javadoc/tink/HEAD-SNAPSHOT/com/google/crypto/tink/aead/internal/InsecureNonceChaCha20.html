@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -165,12 +165,27 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>byte[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#decrypt-byte:A-java.nio.ByteBuffer-">decrypt</a></span>(byte[]&nbsp;nonce,
+       <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext)</code>
+<div class="block">Decrypts <code>ciphertext</code> using <code>nonce</code>.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#encrypt-byte:A-byte:A-">encrypt</a></span>(byte[]&nbsp;nonce,
        byte[]&nbsp;plaintext)</code>
 <div class="block">Encrypts <code>plaintext</code> using <code>nonce</code>.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#encrypt-java.nio.ByteBuffer-byte:A-byte:A-">encrypt</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;output,
+       byte[]&nbsp;nonce,
+       byte[]&nbsp;plaintext)</code>
+<div class="block">Encrypts <code>plaintext</code> using <code>nonce</code> and writes result to <code>output</code>.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/internal/InsecureNonceChaCha20.html#nonceSizeInBytes--">nonceSizeInBytes</a></span>()</code>
 <div class="block">The size of the randomly generated nonces.</div>
@@ -260,14 +275,47 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="encrypt-java.nio.ByteBuffer-byte:A-byte:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>encrypt</h4>
+<pre>public&nbsp;void&nbsp;encrypt(<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;output,
+                    byte[]&nbsp;nonce,
+                    byte[]&nbsp;plaintext)
+             throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Encrypts <code>plaintext</code> using <code>nonce</code> and writes result to <code>output</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
 <a name="decrypt-byte:A-byte:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>decrypt</h4>
+<pre>public&nbsp;byte[]&nbsp;decrypt(byte[]&nbsp;nonce,
+                      byte[]&nbsp;ciphertext)
+               throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
+<div class="block">Decrypts <code>ciphertext</code> using <code>nonce</code>.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="decrypt-byte:A-java.nio.ByteBuffer-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>decrypt</h4>
 <pre>public&nbsp;byte[]&nbsp;decrypt(byte[]&nbsp;nonce,
-                      byte[]&nbsp;ciphertext)
+                      <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html?is-external=true" title="class or interface in java.nio">ByteBuffer</a>&nbsp;ciphertext)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
 <div class="block">Decrypts <code>ciphertext</code> using <code>nonce</code>.</div>
 <dl>

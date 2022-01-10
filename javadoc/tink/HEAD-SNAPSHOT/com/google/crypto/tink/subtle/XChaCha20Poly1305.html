@@ -74,13 +74,13 @@ var activeTableTab = "activeTableTab";
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -113,7 +113,8 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public final class <span class="typeNameLabel">XChaCha20Poly1305</span>
-extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
+extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+implements <a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></pre>
 <div class="block">XChaCha20Poly1305 AEAD construction, as described in
  https://tools.ietf.org/html/draft-arciszewski-xchacha-01.</div>
 </li>
@@ -122,25 +123,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
-<!-- =========== FIELD SUMMARY =========== -->
-<ul class="blockList">
-<li class="blockList"><a name="field.summary">
-<!--   -->
-</a>
-<h3>Field Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Field Summary table, listing fields, and an explanation">
-<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Field and Description</th>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static <a href="../../../../../com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal">TinkFipsUtil.AlgorithmFipsCompatibility</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/XChaCha20Poly1305.html#FIPS">FIPS</a></span></code>&nbsp;</td>
-</tr>
-</table>
-</li>
-</ul>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.summary">
@@ -174,15 +156,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/XChaCha20Poly1305.html#decrypt-byte:A-byte:A-">decrypt</a></span>(byte[]&nbsp;ciphertext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Decryptes <code>ciphertext</code> with the following format: <code>nonce || actual_ciphertext ||
- tag</code></div>
+<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/crypto/tink/subtle/XChaCha20Poly1305.html#encrypt-byte:A-byte:A-">encrypt</a></span>(byte[]&nbsp;plaintext,
        byte[]&nbsp;associatedData)</code>
-<div class="block">Encrypts the <code>plaintext</code> with Poly1305 authentication based on <code>associatedData</code>.</div>
+<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.</div>
 </td>
 </tr>
 </table>
@@ -201,23 +182,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
-<!-- ============ FIELD DETAIL =========== -->
-<ul class="blockList">
-<li class="blockList"><a name="field.detail">
-<!--   -->
-</a>
-<h3>Field Detail</h3>
-<a name="FIPS">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>FIPS</h4>
-<pre>public static final&nbsp;<a href="../../../../../com/google/crypto/tink/config/internal/TinkFipsUtil.AlgorithmFipsCompatibility.html" title="enum in com.google.crypto.tink.config.internal">TinkFipsUtil.AlgorithmFipsCompatibility</a> FIPS</pre>
-</li>
-</ul>
-</li>
-</ul>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.detail">
@@ -255,18 +219,23 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public&nbsp;byte[]&nbsp;encrypt(byte[]&nbsp;plaintext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Encrypts the <code>plaintext</code> with Poly1305 authentication based on <code>associatedData</code>.
-
- <p>Please note that nonce is randomly generated hence keys need to be rotated after encrypting
- a certain number of messages depending on the nonce size of the underlying <code>ChaCha20Base</code>.</div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html#encrypt-byte:A-byte:A-">Aead</a></code></span></div>
+<div class="block">Encrypts <code>plaintext</code> with <code>associatedData</code> as associated authenticated data.
+ The resulting ciphertext allows for checking authenticity and integrity of associated data
+ (<code>associatedData</code>), but does not guarantee its secrecy.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/Aead.html#encrypt-byte:A-byte:A-">encrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>plaintext</code> - data to encrypt</dd>
-<dd><code>associatedData</code> - associated authenticated data</dd>
+<dd><code>plaintext</code> - the plaintext to be encrypted. It must be non-null, but can also
+                        be an empty (zero-length) byte array</dd>
+<dd><code>associatedData</code> - associated data to be authenticated, but not encrypted.  Associated data
+                        is optional, so this parameter can be null.  In this case the null value
+                        is equivalent to an empty (zero-length) byte array.
+                        For successful decryption the same associatedData must be provided
+                        along with the ciphertext.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>ciphertext with the following format <code>nonce || actual_ciphertext || tag</code></dd>
+<dd>resulting ciphertext</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
@@ -281,20 +250,22 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <pre>public&nbsp;byte[]&nbsp;decrypt(byte[]&nbsp;ciphertext,
                       byte[]&nbsp;associatedData)
                throws <a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></pre>
-<div class="block">Decryptes <code>ciphertext</code> with the following format: <code>nonce || actual_ciphertext ||
- tag</code></div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html#decrypt-byte:A-byte:A-">Aead</a></code></span></div>
+<div class="block">Decrypts <code>ciphertext</code> with <code>associatedData</code> as associated authenticated data.
+ The decryption verifies the authenticity and integrity of the associated data, but there are
+ no guarantees wrt. secrecy of that data.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../com/google/crypto/tink/Aead.html#decrypt-byte:A-byte:A-">decrypt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../com/google/crypto/tink/Aead.html" title="interface in com.google.crypto.tink">Aead</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>ciphertext</code> - with format <code>nonce || actual_ciphertext || tag</code></dd>
-<dd><code>associatedData</code> - associated authenticated data</dd>
+<dd><code>ciphertext</code> - the plaintext to be decrypted. It must be non-null.</dd>
+<dd><code>associatedData</code> - associated data to be authenticated.  For successful decryption
+                        it must be the same as associatedData used during encryption.
+                        Can be null, which is equivalent to an empty (zero-length) byte array.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>plaintext if authentication is successful.</dd>
+<dd>resulting plaintext</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code> - when ciphertext is shorter than nonce size + tag size or when
-     computed tag based on <code>ciphertext</code> and <code>associatedData</code> does not match the tag
-     given in <code>ciphertext</code>.</dd>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/security/GeneralSecurityException.html?is-external=true" title="class or interface in java.security">GeneralSecurityException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -352,13 +323,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
