@@ -92,7 +92,7 @@ describe('ecies aead hkdf util test', function() {
        try {
          EciesAeadHkdfUtil.getJsonWebKeyFromProto(publicKey);
          fail('An exception should be thrown.');
-       } catch (e) {
+       } catch (e: any) {
          expect(e.toString())
              .toBe(
                  'SecurityException: Number needs more bytes to be represented.');

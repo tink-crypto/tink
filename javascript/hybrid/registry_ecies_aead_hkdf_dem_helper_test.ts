@@ -31,7 +31,7 @@ describe('registry ecies aead hkdf dem helper test', function() {
     try {
       new RegistryEciesAeadHkdfDemHelper(template);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.unsupportedTypeUrl(template.getTypeUrl()));
     }
@@ -52,7 +52,7 @@ describe('registry ecies aead hkdf dem helper test', function() {
         try {
           new RegistryEciesAeadHkdfDemHelper(template);
           fail('An exception should be thrown.');
-        } catch (e) {
+        } catch (e: any) {
           expect(e.toString())
               .toBe(ExceptionText.invalidKeyFormat(template.getTypeUrl()));
         }
@@ -110,7 +110,7 @@ describe('registry ecies aead hkdf dem helper test', function() {
     try {
       await helper.getAead(new Uint8Array(keyLength));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.invalidKeyLength(expectedKeyLength, keyLength));
     }

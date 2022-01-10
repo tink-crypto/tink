@@ -41,7 +41,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       manager.getKeyFactory().newKey(new Uint8Array(0));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notSupported());
     }
   });
@@ -52,7 +52,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       manager.getKeyFactory().newKeyData(new Uint8Array(0));
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notSupported());
     }
   });
@@ -65,7 +65,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
@@ -78,7 +78,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
   });
@@ -91,7 +91,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
   });
@@ -103,7 +103,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingParams());
     }
   });
@@ -117,7 +117,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownPointFormat());
     }
     key.getParams()?.setEcPointFormat(PbPointFormat.UNCOMPRESSED);
@@ -127,7 +127,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     key.getParams()?.setKemParams(createKemParams());
@@ -138,7 +138,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyTemplate(typeUrl));
     }
   });
@@ -150,7 +150,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingXY());
     }
     key.getParams()?.setEcPointFormat(PbPointFormat.UNCOMPRESSED);
@@ -160,7 +160,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.missingKemParams());
     }
     key.getParams()?.setKemParams(createKemParams());
@@ -171,7 +171,7 @@ describe('ecies aead hkdf public key manager test', function() {
     try {
       await manager.getPrimitive(PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyTemplate(typeUrl));
     }
   });
@@ -187,7 +187,7 @@ describe('ecies aead hkdf public key manager test', function() {
       try {
         await manager.getPrimitive(PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }

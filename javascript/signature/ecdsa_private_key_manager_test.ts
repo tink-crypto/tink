@@ -43,7 +43,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidSerializedKeyFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
     }
   });
@@ -55,7 +55,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(unsupportedKeyFormatProto);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyFormat());
     }
   });
@@ -67,7 +67,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.invalidKeyFormatMissingParams());
     }
   });
@@ -82,7 +82,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
     invalidFormat.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -92,7 +92,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
     invalidFormat.getParams()?.setHashType(PbHashType.SHA256);
@@ -102,7 +102,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownCurve());
     }
 
@@ -111,7 +111,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
@@ -120,7 +120,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getKeyFactory().newKey(invalidFormat);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
@@ -150,7 +150,7 @@ describe('ecdsa private key manager test', function() {
         fail(
             'An exception should be thrown for the string: ' +
             serializedKeyFormats[i]);
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.invalidSerializedKeyFormat());
         continue;
       }
@@ -181,7 +181,7 @@ describe('ecdsa private key manager test', function() {
     try {
       const factory = manager.getKeyFactory();
       factory.getPublicKeyData(privateKey);
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
     }
   });
@@ -218,7 +218,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(ExceptionText.unsupportedKeyType(keyData.getTypeUrl()));
     }
@@ -231,7 +231,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unsupportedKeyType());
     }
   });
@@ -247,7 +247,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.versionOutOfBounds());
     }
   });
@@ -264,7 +264,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownEncoding());
     }
     key.getPublicKey()?.getParams()?.setEncoding(PbEcdsaSignatureEncoding.DER);
@@ -274,7 +274,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownHash());
     }
     key.getPublicKey()?.getParams()?.setHashType(PbHashType.SHA256);
@@ -285,7 +285,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.unknownCurve());
     }
 
@@ -294,7 +294,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-384 or SHA-512 (because curve is P-384) but got SHA-256');
@@ -303,7 +303,7 @@ describe('ecdsa private key manager test', function() {
     try {
       await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, key);
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString())
           .toBe(
               'SecurityException: expected SHA-512 (because curve is P-521) but got SHA-256');
@@ -324,7 +324,7 @@ describe('ecdsa private key manager test', function() {
       try {
         await manager.getPrimitive(PRIVATE_KEY_MANAGER_PRIMITIVE, keyData);
         fail('An exception should be thrown ' + i.toString());
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.invalidSerializedKey());
       }
     }
