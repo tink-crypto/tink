@@ -249,7 +249,7 @@ TEST_F(EciesHkdfX25519SendKemBoringSslTest, TestGenerateKey) {
                               key_size_in_bytes, EcPointFormat::COMPRESSED);
   ASSERT_TRUE(status_or_kem_key.ok());
   auto kem_key = std::move(status_or_kem_key.ValueOrDie());
-  EXPECT_EQ(kem_key->get_kem_bytes().size(), X25519_PUBLIC_VALUE_LEN);
+  EXPECT_EQ(kem_key->get_kem_bytes().size(), internal::Ed25519KeyPubKeySize());
   EXPECT_EQ(kem_key->get_symmetric_key().size(), key_size_in_bytes);
 }
 

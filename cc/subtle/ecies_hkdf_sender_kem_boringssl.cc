@@ -18,12 +18,14 @@
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "openssl/bn.h"
-#include "openssl/curve25519.h"
+#include "openssl/evp.h"
 #include "tink/internal/ec_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"
+#include "tink/util/secret_data.h"
 
 namespace crypto {
 namespace tink {
@@ -104,9 +106,8 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
     return status_or_string_kem.status();
   }
   std::string kem_bytes = status_or_string_kem.ValueOrDie();
-  auto status_or_string_shared_secret =
-      internal::ComputeEcdhSharedSecret(curve_, ephemeral_priv,
-                                                   peer_pub_key_.get());
+  auto status_or_string_shared_secret = internal::ComputeEcdhSharedSecret(
+      curve_, ephemeral_priv, peer_pub_key_.get());
   if (!status_or_string_shared_secret.ok()) {
     return status_or_string_shared_secret.status();
   }
@@ -122,10 +123,8 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
 }
 
 EciesHkdfX25519SendKemBoringSsl::EciesHkdfX25519SendKemBoringSsl(
-    const std::string& peer_public_value) {
-  peer_public_value.copy(reinterpret_cast<char*>(peer_public_value_),
-                         X25519_PUBLIC_VALUE_LEN);
-}
+    internal::SslUniquePtr<EVP_PKEY> peer_public_key)
+    : peer_public_key_(std::move(peer_public_key)) {}
 
 // static
 util::StatusOr<std::unique_ptr<const EciesHkdfSenderKemBoringSsl>>
@@ -140,7 +139,7 @@ EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "curve is not CURVE25519");
   }
-  if (pubx.size() != X25519_PUBLIC_VALUE_LEN) {
+  if (pubx.size() != internal::X25519KeyPubKeySize()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "pubx has unexpected length");
   }
@@ -148,8 +147,17 @@ EciesHkdfX25519SendKemBoringSsl::New(subtle::EllipticCurveType curve,
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "puby is not empty");
   }
+
+  internal::SslUniquePtr<EVP_PKEY> peer_public_key(EVP_PKEY_new_raw_public_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/reinterpret_cast<const uint8_t*>(pubx.data()),
+      /*len=*/internal::Ed25519KeyPubKeySize()));
+  if (peer_public_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_public_key failed");
+  }
   std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
-      new EciesHkdfX25519SendKemBoringSsl(pubx));
+      new EciesHkdfX25519SendKemBoringSsl(std::move(peer_public_key)));
   return std::move(sender_kem);
 }
 
@@ -164,22 +172,37 @@ EciesHkdfX25519SendKemBoringSsl::GenerateKey(
         "X25519 only supports compressed elliptic curve points");
   }
 
-  util::SecretData ephemeral_private_key(X25519_PRIVATE_KEY_LEN);
-  std::string kem_bytes(X25519_PUBLIC_VALUE_LEN, '\0');
-  X25519_keypair(reinterpret_cast<uint8_t*>(&kem_bytes[0]),
-                 ephemeral_private_key.data());
+  // Generate an ephemeral key pair; the public key is the KEM key to use.
+  util::StatusOr<std::unique_ptr<internal::X25519Key>> ephemeral_key =
+      internal::NewX25519Key();
 
-  util::SecretData shared_secret(X25519_SHARED_KEY_LEN);
-  X25519(shared_secret.data(), ephemeral_private_key.data(),
-         peer_public_value_);
+  internal::SslUniquePtr<EVP_PKEY> ssl_priv_key(EVP_PKEY_new_raw_private_key(
+      /*type=*/EVP_PKEY_X25519, /*unused=*/nullptr,
+      /*in=*/(*ephemeral_key)->private_key,
+      /*len=*/internal::Ed25519KeyPrivKeySize()));
+  if (ssl_priv_key == nullptr) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "EVP_PKEY_new_raw_private_key failed");
+  }
 
-  auto symmetric_key_or = Hkdf::ComputeEciesHkdfSymmetricKey(
-      hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
+  util::StatusOr<util::SecretData> shared_secret =
+      internal::ComputeX25519SharedSecret(ssl_priv_key.get(),
+                                          peer_public_key_.get());
+
+  auto public_key = absl::string_view(
+      reinterpret_cast<const char*>((*ephemeral_key)->public_value),
+      internal::X25519KeyPubKeySize());
+
+  util::StatusOr<util::SecretData> symmetric_key_or =
+      Hkdf::ComputeEciesHkdfSymmetricKey(hash, public_key, *shared_secret,
+                                         hkdf_salt, hkdf_info,
+                                         key_size_in_bytes);
   if (!symmetric_key_or.ok()) {
     return symmetric_key_or.status();
   }
-  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
-  return absl::make_unique<const KemKey>(kem_bytes, symmetric_key);
+  util::SecretData symmetric_key = *symmetric_key_or;
+  return absl::make_unique<const KemKey>(std::string(public_key),
+                                         symmetric_key);
 }
 
 }  // namespace subtle
