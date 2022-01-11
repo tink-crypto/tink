@@ -33,7 +33,11 @@ import javax.crypto.AEADBadTagException;
  *
  * <p>This implementation produces ciphertext with the following format: {@code nonce ||
  * actual_ciphertext || tag} and only decrypts the same format.
+ *
+ * @deprecated replaced by {@link
+ *     com.google.crypto.tink.aead.internal.InsecureNonceChaCha20Poly1305Base}.
  */
+@Deprecated
 abstract class ChaCha20Poly1305Base implements Aead {
   public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
       TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
