@@ -85,6 +85,7 @@ main() {
     "tink_test_internal_md_util_test"
     "tink_test_internal_rsa_util_test"
     "tink_test_subtle_aes_cmac_boringssl_test"
+    "tink_test_subtle_aes_eax_boringssl_test"
     "tink_test_subtle_aes_gcm_boringssl_test"
     "tink_test_subtle_aes_gcm_siv_boringssl_test"
     "tink_test_subtle_aes_siv_boringssl_test"

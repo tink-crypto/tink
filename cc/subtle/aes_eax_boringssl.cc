@@ -26,9 +26,11 @@
 #include "absl/base/config.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/types/span.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
 #include "tink/aead.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
@@ -216,17 +218,12 @@ AesEaxBoringSsl::Block AesEaxBoringSsl::Omac(absl::Span<const uint8_t> data,
   return mac;
 }
 
-void AesEaxBoringSsl::CtrCrypt(const Block& N, absl::Span<const uint8_t> in,
-                               uint8_t* out) const {
-  // in.data() MUST NOT be null
+util::Status AesEaxBoringSsl::CtrCrypt(const Block& N, absl::string_view in,
+                               absl::Span<char> out) const {
   // Make a copy of N, since BoringSsl changes ctr.
   uint8_t ctr[kBlockSize];
   std::copy_n(N.begin(), kBlockSize, ctr);
-  unsigned int num = 0;
-  Block ecount_buf;
-  ecount_buf.fill(0);
-  AES_ctr128_encrypt(in.data(), out, in.size(), aeskey_.get(), ctr,
-                     ecount_buf.data(), &num);
+  return internal::AesCtr128Crypt(in, ctr, aeskey_.get(), out);
 }
 
 crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
@@ -243,10 +240,11 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Encrypt(
   const Block N = Omac(nonce, 0);
   const Block H = Omac(additional_data, 1);
   uint8_t* ct_start = reinterpret_cast<uint8_t*>(&ciphertext[nonce_size_]);
-  CtrCrypt(N,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
-                          plaintext.size()),
-           ct_start);
+  util::Status res =
+      CtrCrypt(N, plaintext, absl::MakeSpan(ciphertext).subspan(nonce_size_));
+  if (!res.ok()) {
+    return res;
+  }
   Block mac = Omac(absl::MakeSpan(ct_start, plaintext.size()), 2);
   XorBlock(N.data(), &mac);
   XorBlock(H.data(), &mac);
@@ -279,13 +277,13 @@ crypto::tink::util::StatusOr<std::string> AesEaxBoringSsl::Decrypt(
   if (!EqualBlocks(mac.data(), sig)) {
     return util::Status(absl::StatusCode::kInvalidArgument, "Tag mismatch");
   }
-  std::string res;
-  ResizeStringUninitialized(&res, out_size);
-  CtrCrypt(N,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(encrypted.data()),
-                          encrypted.size()),
-           reinterpret_cast<uint8_t*>(&res[0]));
-  return res;
+  std::string plaintext;
+  ResizeStringUninitialized(&plaintext, out_size);
+  util::Status res = CtrCrypt(N, encrypted, absl::MakeSpan(plaintext));
+  if (!res.ok()) {
+    return res;
+  }
+  return plaintext;
 }
 
 }  // namespace subtle

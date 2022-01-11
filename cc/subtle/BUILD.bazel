@@ -487,6 +487,7 @@ cc_library(
         ":random",
         ":subtle_util",
         "//:aead",
+        "//internal:aes_util",
         "//internal:fips_utils",
         "//internal:util",
         "//util:errors",

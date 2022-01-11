@@ -468,6 +468,7 @@ tink_cc_library(
     absl::span
     crypto
     tink::core::aead
+    tink::internal::aes_util
     tink::internal::fips_utils
     tink::internal::util
     tink::util::errors
