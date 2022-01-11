@@ -27,6 +27,7 @@
 #include "openssl/cmac.h"
 #include "openssl/ec.h"
 #include "openssl/evp.h"
+#include "openssl/hmac.h"
 #include "openssl/rsa.h"
 #endif
 
@@ -107,6 +108,10 @@ struct Deleter<CMAC_CTX> {
 template <>
 struct Deleter<EVP_MD_CTX> {
   void operator()(EVP_MD_CTX* ptr) { EVP_MD_CTX_free(ptr); }
+};
+template <>
+struct Deleter<HMAC_CTX> {
+  void operator()(HMAC_CTX* ptr) { HMAC_CTX_free(ptr); }
 };
 
 template <typename T>
