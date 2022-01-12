@@ -39,7 +39,8 @@ def tink_java_deps_init():
             "pl.pragmatists:JUnitParams:1.1.1",
         ],
         repositories = [
-            "https://jcenter.bintray.com/",
+            # TODO(b/214259089): Disable during bintray outage.
+            #"https://jcenter.bintray.com/",
             "https://maven.google.com",
             "https://repo1.maven.org/maven2",
         ],
