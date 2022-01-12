@@ -686,11 +686,10 @@ func NewKeyset(primaryKeyID uint32,
 
 // GenerateMutations generates different byte mutations for a given byte array.
 func GenerateMutations(src []byte) (all [][]byte) {
-	n := make([]byte, len(src))
-
 	// Flip bits
 	for i := 0; i < len(src); i++ {
 		for j := 0; j < 8; j++ {
+			n := make([]byte, len(src))
 			copy(n, src)
 			n[i] = n[i] ^ (1 << uint8(j))
 			all = append(all, n)
@@ -698,7 +697,8 @@ func GenerateMutations(src []byte) (all [][]byte) {
 	}
 
 	//truncate bytes
-	for i := 0; i < len(src); i++ {
+	for i := 1; i < len(src); i++ {
+		n := make([]byte, len(src[i:]))
 		copy(n, src[i:])
 		all = append(all, n)
 	}

@@ -18,6 +18,7 @@ package testutil_test
 
 import (
 	"bytes"
+	"encoding/hex"
 	"testing"
 
 	"github.com/google/tink/go/subtle/random"
@@ -138,5 +139,21 @@ func TestAutocorrelationUniformString(t *testing.T) {
 	}
 	if err := testutil.ZTestAutocorrelationUniformString(random.GetRandomBytes(32)); err != nil {
 		t.Errorf("Expected random 32 byte string to show not autocorrelation: %v", err)
+	}
+}
+
+func TestGenerateMutations(t *testing.T) {
+	original := random.GetRandomBytes(8)
+	mutations := testutil.GenerateMutations(original)
+	seen := make(map[string]bool)
+	for i, mutation := range mutations {
+		if bytes.Compare(original, mutation) == 0 {
+			t.Errorf("Expected mutation %x to differ from original %x", mutation, original)
+		}
+		mutationHex := hex.EncodeToString(mutation)
+		if seen[mutationHex] {
+			t.Errorf("Mutation %d (%s) matches an earlier mutation", i, mutationHex)
+		}
+		seen[mutationHex] = true
 	}
 }
