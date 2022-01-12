@@ -103,6 +103,7 @@ main() {
     "tink_test_subtle_rsa_ssa_pkcs1_verify_boringssl_test"
     "tink_test_subtle_stateful_hmac_boringssl_test"
     "tink_test_subtle_xchacha20_poly1305_boringssl_test"
+    "tink_test_subtle__prf_hkdf_streaming_prf_test"
   )
 
   echo "========================================================= Running cmake"
