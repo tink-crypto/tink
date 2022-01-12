@@ -138,7 +138,7 @@ void CheckNewKey(const JwtRsaSsaPssPrivateKey& private_key,
   // Check n = p * q.
   auto n_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mul(n_calc.get(), p->get(), q->get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(n_calc.get(), n->get()));
+  EXPECT_EQ(BN_cmp(n_calc.get(), n->get()), 0);
 
   // Check n size >= modulus_size_in_bits bit.
   EXPECT_GE(BN_num_bits(n->get()), key_format.modulus_size_in_bits());
@@ -148,14 +148,14 @@ void CheckNewKey(const JwtRsaSsaPssPrivateKey& private_key,
   EXPECT_TRUE(BN_sub_word(pm1.get(), 1));
   auto dp_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mod(dp_calc.get(), d->get(), pm1.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(dp_calc.get(), dp->get()));
+  EXPECT_EQ(BN_cmp(dp_calc.get(), dp->get()), 0);
 
   // dq = d mod (q - 1)
   auto qm1 = internal::SslUniquePtr<BIGNUM>(BN_dup(q->get()));
   EXPECT_TRUE(BN_sub_word(qm1.get(), 1));
   auto dq_calc = internal::SslUniquePtr<BIGNUM>(BN_new());
   EXPECT_TRUE(BN_mod(dq_calc.get(), d->get(), qm1.get(), ctx.get()));
-  EXPECT_TRUE(BN_equal_consttime(dq_calc.get(), dq->get()));
+  EXPECT_EQ(BN_cmp(dq_calc.get(), dq->get()), 0);
 }
 
 TEST(RawJwtRsaSsaPssSignKeyManagerTest, CreatePs256KeyValid) {
