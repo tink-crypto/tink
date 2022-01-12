@@ -19,7 +19,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "openssl/base.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/core/key_manager_impl.h"
