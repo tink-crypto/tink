@@ -55,7 +55,7 @@ func TestNewRawJWT(t *testing.T) {
 				Subject:    refString("tink-test-subject"),
 				Issuer:     refString("tink-test-issuer"),
 				JWTID:      refString("tink-jwt-id-1"),
-				Audience:   []string{"aud-1", "aud-2"},
+				Audiences:  []string{"aud-1", "aud-2"},
 				ExpiresAt:  refTime(validExpiration),
 				IssuedAt:   refTime(validExpiration - 100),
 				NotBefore:  refTime(validExpiration - 50),
@@ -136,6 +136,22 @@ func TestNewRawJWT(t *testing.T) {
 				},
 			},
 		},
+		{
+			tag: "declaring a single audience using the Audience field",
+			opts: &RawJWTOptions{
+				TypeHeader:        "typeHeader",
+				WithoutExpiration: true,
+				Audience:          refString("tink-aud"),
+			},
+			expected: &RawJWT{
+				typeHeader: "typeHeader",
+				jsonpb: &spb.Struct{
+					Fields: map[string]*spb.Value{
+						"aud": spb.NewStringValue("tink-aud"),
+					},
+				},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.tag, func(t *testing.T) {
@@ -159,35 +175,43 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "no ExpiresAt specified and WithoutExpiration = false fails",
 			opts: &RawJWTOptions{
-				Audience: []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 			},
 		},
 		{
 			tag: "ExpiresAt and WithoutExpiration = true fails",
 			opts: &RawJWTOptions{
-				Audience:          []string{"tink-foo"},
+				Audiences:         []string{"tink-foo"},
 				ExpiresAt:         refTime(validExpiration),
 				WithoutExpiration: true,
 			},
 		},
 		{
-			tag: "empty audience array fails",
+			tag: "specifying Audenience and Audiences fails",
 			opts: &RawJWTOptions{
-				ExpiresAt: refTime(validExpiration),
-				Audience:  []string{},
+				Audiences:         []string{"tink-foo"},
+				Audience:          refString("tink-bar"),
+				WithoutExpiration: true,
 			},
 		},
 		{
-			tag: "audience with invalid UTF-8 string fails",
+			tag: "empty audiences array fails",
+			opts: &RawJWTOptions{
+				ExpiresAt: refTime(validExpiration),
+				Audiences: []string{},
+			},
+		},
+		{
+			tag: "audiences with invalid UTF-8 string fails",
 			opts: &RawJWTOptions{
 				WithoutExpiration: true,
-				Audience:          []string{"valid", invalidUTF8},
+				Audiences:         []string{"valid", invalidUTF8},
 			},
 		},
 		{
 			tag: "custom claims containing registered subject claims fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
 					"sub": "overwrite",
@@ -197,7 +221,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "custom claims containing registered issuer claims fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
 					"iss": "overwrite",
@@ -207,7 +231,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "custom claims containing registered jwt id claims fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
 					"jti": "overwrite",
@@ -217,7 +241,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "custom claims containing registered expiration claims fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
 					"exp": "overwrite",
@@ -227,7 +251,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "custom claims containing registered audience claims fails",
 			opts: &RawJWTOptions{
-				Audience:          []string{"tink-foo"},
+				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				CustomClaims: map[string]interface{}{
 					"aud": []interface{}{"overwrite"},
@@ -237,7 +261,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "custom claims with non standard JSON types fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
 					"complex": time.Time{},
@@ -247,7 +271,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "non UTF-8 string on isser claim fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				Issuer:    refString(invalidUTF8),
 			},
@@ -255,7 +279,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "non UTF-8 string on subject claim fails",
 			opts: &RawJWTOptions{
-				Audience:          []string{"tink-foo"},
+				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				Subject:           refString(invalidUTF8),
 			},
@@ -263,7 +287,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "non UTF-8 string on JWT ID claim fails",
 			opts: &RawJWTOptions{
-				Audience:          []string{"tink-foo"},
+				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				JWTID:             refString(invalidUTF8),
 			},
@@ -271,7 +295,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "non UTF-8 string on custom claim fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				Issuer:    refString("ise-testing"),
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -282,7 +306,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "issued at timestamp greater than valid JWT max time fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				IssuedAt:  refTime(253402300800),
 			},
@@ -290,14 +314,14 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		{
 			tag: "expires at timestamp greater than valid JWT max time fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(253402300800),
 			},
 		},
 		{
 			tag: "not before timestamp smaller than valid JWT min time fails",
 			opts: &RawJWTOptions{
-				Audience:  []string{"tink-foo"},
+				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				NotBefore: refTime(-5),
 			},

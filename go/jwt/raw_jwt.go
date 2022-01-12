@@ -46,7 +46,8 @@ const (
 // be chosen by the user. This ensures that the key can be changed without any
 // changes to the user code.
 type RawJWTOptions struct {
-	Audience     []string
+	Audiences    []string
+	Audience     *string
 	Subject      *string
 	Issuer       *string
 	JWTID        *string
@@ -94,16 +95,21 @@ func createPayload(opts *RawJWTOptions) (*spb.Struct, error) {
 	if opts.ExpiresAt != nil && opts.WithoutExpiration {
 		return nil, fmt.Errorf("jwt options can't be marked WithoutExpiration when expiration is specified")
 	}
+	if opts.Audience != nil && opts.Audiences != nil {
+		return nil, fmt.Errorf("jwt options can either contain a single Audience or a list of Audiences but not both")
+	}
+
 	payload := &spb.Struct{
 		Fields: map[string]*spb.Value{},
 	}
 	setStringValue(payload, claimJWTID, opts.JWTID)
 	setStringValue(payload, claimIssuer, opts.Issuer)
 	setStringValue(payload, claimSubject, opts.Subject)
+	setStringValue(payload, claimAudience, opts.Audience)
 	setTimeValue(payload, claimIssuedAt, opts.IssuedAt)
 	setTimeValue(payload, claimNotBefore, opts.NotBefore)
 	setTimeValue(payload, claimExpiration, opts.ExpiresAt)
-	setAudiences(payload, claimAudience, opts.Audience)
+	setAudiences(payload, claimAudience, opts.Audiences)
 
 	for k, v := range opts.CustomClaims {
 		val, err := spb.NewValue(v)
@@ -130,14 +136,21 @@ func validatePayload(payload *spb.Struct) error {
 		}
 
 		if isRegisteredStringClaim(claim) {
-			v, ok := val.Kind.(*spb.Value_StringValue)
-			if !ok {
-				return fmt.Errorf("claim: '%q' MUST be a string", claim)
-			}
-			if !utf8.ValidString(v.StringValue) {
-				return fmt.Errorf("claim: '%q' isn't a valid UTF-8 string", claim)
+			if err := validateStringClaim(claim, val); err != nil {
+				return err
 			}
 		}
+	}
+	return nil
+}
+
+func validateStringClaim(claim string, val *spb.Value) error {
+	v, ok := val.Kind.(*spb.Value_StringValue)
+	if !ok {
+		return fmt.Errorf("claim: '%q' MUST be a string", claim)
+	}
+	if !utf8.ValidString(v.StringValue) {
+		return fmt.Errorf("claim: '%q' isn't a valid UTF-8 string", claim)
 	}
 	return nil
 }
@@ -157,9 +170,13 @@ func validateAudienceClaim(val *spb.Value) error {
 	if val == nil {
 		return nil
 	}
-	l, ok := val.Kind.(*spb.Value_ListValue)
-	if !ok {
-		return fmt.Errorf("audience claim MUST be a list with at least one string")
+	_, isString := val.Kind.(*spb.Value_StringValue)
+	l, isList := val.Kind.(*spb.Value_ListValue)
+	if !isList && !isString {
+		return fmt.Errorf("audience claim MUST be a list with at least one string or a single string value")
+	}
+	if isString {
+		return validateStringClaim(claimAudience, val)
 	}
 	if l.ListValue != nil && len(l.ListValue.Values) == 0 {
 		return fmt.Errorf("there MUST be at least one value present in the audience claim")
