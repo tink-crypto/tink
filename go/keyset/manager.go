@@ -184,31 +184,6 @@ func (km *Manager) Delete(keyID uint32) error {
 	return nil
 }
 
-// Destroy will destroy the key material associated with a given keyID
-// returns an error if the key is not found or it is the primary key
-func (km *Manager) Destroy(keyID uint32) error {
-	if km.ks == nil {
-		return errors.New("keyset_manager: cannot destroy key, no keyset")
-	}
-	if km.ks.PrimaryKeyId == keyID {
-		return errors.New("keyset_manager: cannot destroy the primary key")
-	}
-	for i, key := range km.ks.Key {
-		if key.KeyId != keyID {
-			continue
-		}
-		switch key.Status {
-		case tinkpb.KeyStatusType_ENABLED, tinkpb.KeyStatusType_DISABLED, tinkpb.KeyStatusType_DESTROYED:
-			km.ks.Key[i].Status = tinkpb.KeyStatusType_DESTROYED
-			km.ks.Key[i].KeyData = &tinkpb.KeyData{}
-			return nil
-		default:
-			return fmt.Errorf("keyset_manager: cannot destroy key with id %d with status %s", keyID, km.ks.Key[i].Status.String())
-		}
-	}
-	return fmt.Errorf("keyset_manager: key with id %d not found", keyID)
-}
-
 // Handle creates a new Handle for the managed keyset.
 func (km *Manager) Handle() (*Handle, error) {
 	return &Handle{km.ks}, nil
