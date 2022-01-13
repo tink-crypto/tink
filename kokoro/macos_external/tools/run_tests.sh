@@ -17,14 +17,13 @@
 
 set -euo pipefail
 
-cd ${KOKORO_ARTIFACTS_DIR}/git/tink
-./kokoro/copy_credentials.sh
 
 export XCODE_VERSION=11.3
 export DEVELOPER_DIR="/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
 export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
+cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 ./kokoro/copy_credentials.sh
 ./kokoro/update_android_sdk.sh
 
@@ -35,3 +34,14 @@ cd tools
 use_bazel.sh $(cat .bazelversion)
 time bazel build -- ...
 time bazel test --test_output=errors -- ...
+
+# Run manual tests which rely on key material injected into the Kokoro
+# environement.
+if [[ -n "${KOKORO_ROOT}" ]]; then
+  declare -a MANUAL_TARGETS
+  MANUAL_TARGETS=(
+    "//testing/cc:gcp_kms_aead_test"
+  )
+  readonly MANUAL_TARGETS
+  time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
+fi

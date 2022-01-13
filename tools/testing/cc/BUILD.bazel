@@ -85,5 +85,5 @@ sh_test(
         "@google_root_pem//file",
         "@tink_base//testdata:credentials",
     ],
-    tags = ["no_rbe"],
+    tags = ["manual"],
 )
