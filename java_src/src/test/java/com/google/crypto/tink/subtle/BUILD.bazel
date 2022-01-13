@@ -648,6 +648,19 @@ java_test(
 )
 
 java_test(
+    name = "Curve25519Test",
+    size = "small",
+    srcs = ["Curve25519Test.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/subtle:curve25519",
+        "//src/main/java/com/google/crypto/tink/subtle:field25519",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
     name = "X25519Test",
     size = "small",
     srcs = ["X25519Test.java"],

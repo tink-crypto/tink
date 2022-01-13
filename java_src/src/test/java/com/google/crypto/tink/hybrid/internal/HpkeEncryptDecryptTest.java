@@ -309,4 +309,28 @@ public final class HpkeEncryptDecryptTest {
     expect.that(hpkeDecrypt.decrypt(ciphertextWithNullContext, emptyContextInfo)).isEqualTo(input);
     expect.that(hpkeDecrypt.decrypt(ciphertextWithNullContext, nullContextInfo)).isEqualTo(input);
   }
+
+  @Test
+  public void flipMsbOfEncapsulatedKeyInCiphertext_fails() throws GeneralSecurityException {
+    HpkeParams params =
+        getParams(
+            com.google.crypto.tink.proto.HpkeKem.DHKEM_X25519_HKDF_SHA256,
+            com.google.crypto.tink.proto.HpkeKdf.HKDF_SHA256,
+            com.google.crypto.tink.proto.HpkeAead.AES_256_GCM);
+    HpkePublicKey recipientPublicKey = getPublicKey(params);
+    HpkePrivateKey recipientPrivateKey = getPrivateKey(recipientPublicKey);
+    HybridEncrypt hpkeEncrypt = HpkeEncrypt.createHpkeEncrypt(recipientPublicKey);
+    HybridDecrypt hpkeDecrypt = HpkeDecrypt.createHpkeDecrypt(recipientPrivateKey);
+
+    byte[] input = Random.randBytes(100);
+    byte[] contextInfo = Random.randBytes(100);
+    byte[] ciphertext = hpkeEncrypt.encrypt(input, contextInfo);
+
+    expect.that(hpkeDecrypt.decrypt(ciphertext, contextInfo)).isEqualTo(input);
+
+    // The first 32 bytes are the encapsulatedKey. Flip its MSB.
+    ciphertext[31] = (byte) (ciphertext[31] ^ 128);
+    assertThrows(
+        GeneralSecurityException.class, () -> hpkeDecrypt.decrypt(ciphertext, contextInfo));
+  }
 }

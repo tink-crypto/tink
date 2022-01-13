@@ -265,9 +265,9 @@ final class Curve25519 {
    * @throws IllegalStateException iff there is arithmetic error.
    */
   static void curveMult(long[] resultx, byte[] n, byte[] qBytes) throws InvalidKeyException {
-    validatePubKeyAndClearMsb(qBytes);
+    byte[] qBytesWithoutMsb = validatePubKeyAndClearMsb(qBytes);
 
-    long[] q = Field25519.expand(qBytes);
+    long[] q = Field25519.expand(qBytesWithoutMsb);
     long[] nqpqx = new long[19];
     long[] nqpqz = new long[19];
     nqpqz[0] = 1;
@@ -339,18 +339,20 @@ final class Curve25519 {
    * @throws InvalidKeyException iff the {@code pubKey} is in the banned list or its length is not
    *     32-byte.
    */
-  private static void validatePubKeyAndClearMsb(byte[] pubKey) throws InvalidKeyException {
+  private static byte[] validatePubKeyAndClearMsb(byte[] pubKey) throws InvalidKeyException {
     if (pubKey.length != 32) {
       throw new InvalidKeyException("Public key length is not 32-byte");
     }
     // Clears the most significant bit as in the method decodeUCoordinate() of RFC7748.
-    pubKey[31] &= (byte) 0x7f;
+    byte[] pubKeyWithoutMsb = Arrays.copyOf(pubKey, pubKey.length);
+    pubKeyWithoutMsb[31] &= (byte) 0x7f;
 
     for (int i = 0; i < BANNED_PUBLIC_KEYS.length; i++) {
-      if (Bytes.equal(BANNED_PUBLIC_KEYS[i], pubKey)) {
+      if (Bytes.equal(BANNED_PUBLIC_KEYS[i], pubKeyWithoutMsb)) {
         throw new InvalidKeyException("Banned public key: " + Hex.encode(BANNED_PUBLIC_KEYS[i]));
       }
     }
+    return pubKeyWithoutMsb;
   }
 
   /**
