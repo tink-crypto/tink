@@ -18,12 +18,14 @@ package com.google.crypto.tink.jwt;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -102,12 +104,8 @@ public final class RawJwt {
     if (!this.payload.has(JwtNames.CLAIM_AUDIENCE)) {
       return;
     }
-    // if aud is a string, convert it to a JsonArray.
     if (this.payload.get(JwtNames.CLAIM_AUDIENCE).isJsonPrimitive()
         && this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonPrimitive().isString()) {
-      JsonArray audiences = new JsonArray();
-      audiences.add(this.payload.get(JwtNames.CLAIM_AUDIENCE).getAsString());
-      this.payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
       return;
     }
 
@@ -183,17 +181,75 @@ public final class RawJwt {
     }
 
     /**
+     * Sets the audience that the JWT is intended for.
+     *
+     * Sets the {@code aud} claim as a string. This method can't be used
+     * together with {@code setAudiences} or {@code addAudience}.
+     *
+     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
+     */
+    public Builder setAudience(String value) {
+      if (payload.has(JwtNames.CLAIM_AUDIENCE)
+          && payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
+          throw new IllegalArgumentException(
+              "setAudience can't be used together with setAudiences or addAudience");
+      }
+      if (!JsonUtil.isValidString(value)) {
+        throw new IllegalArgumentException("invalid string");
+      }
+      payload.add(JwtNames.CLAIM_AUDIENCE, new JsonPrimitive(value));
+      return this;
+    }
+
+    /**
+     * Sets the audiences that the JWT is intended for.
+     *
+     * Sets the {@code aud} claim as an array of strings. This method can't be used
+     * together with {@code setAudience}.
+     *
+     * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
+     */
+    public Builder setAudiences(List<String> values) {
+      if (payload.has(JwtNames.CLAIM_AUDIENCE)
+              && !payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
+        throw new IllegalArgumentException("setAudiences can't be used together with setAudience");
+      }
+      if (values.isEmpty()) {
+        throw new IllegalArgumentException("audiences must not be empty");
+      }
+      JsonArray audiences = new JsonArray();
+      for (String value : values) {
+        if (!JsonUtil.isValidString(value)) {
+          throw new IllegalArgumentException("invalid string");
+        }
+        audiences.add(value);
+      }
+      payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
+      return this;
+    }
+
+    /**
      * Adds an audience that the JWT is intended for.
+     *
+     * The {@code aud} claim will always be encoded as an array of strings. This method
+     * can't be used together with {@code setAudience}.
      *
      * <p>https://tools.ietf.org/html/rfc7519#section-4.1.3
      */
     public Builder addAudience(String value) {
       if (!JsonUtil.isValidString(value)) {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("invalid string");
       }
-      JsonArray audiences = new JsonArray();
+      JsonArray audiences;
       if (payload.has(JwtNames.CLAIM_AUDIENCE)) {
-        audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
+        JsonElement aud = payload.get(JwtNames.CLAIM_AUDIENCE);
+        if (!aud.isJsonArray()) {
+          throw new IllegalArgumentException(
+              "addAudience can't be used together with setAudience");
+        }
+        audiences = aud.getAsJsonArray();
+      } else {
+        audiences = new JsonArray();
       }
       audiences.add(value);
       payload.add(JwtNames.CLAIM_AUDIENCE, audiences);
@@ -481,11 +537,19 @@ public final class RawJwt {
     if (!hasAudiences()) {
       throw new JwtInvalidException("claim aud does not exist");
     }
-    if (!payload.get(JwtNames.CLAIM_AUDIENCE).isJsonArray()) {
-      throw new JwtInvalidException("claim aud is not a JSON array");
+    JsonElement aud = payload.get(JwtNames.CLAIM_AUDIENCE);
+    if (aud.isJsonPrimitive()) {
+      if (!aud.getAsJsonPrimitive().isString()) {
+        throw new JwtInvalidException(
+            String.format("invalid audience: got %s; want a string", aud));
+      }
+      return Collections.unmodifiableList(Arrays.asList(aud.getAsString()));
+    }
+    if (!aud.isJsonArray()) {
+      throw new JwtInvalidException("claim aud is not a string or a JSON array");
     }
 
-    JsonArray audiences = payload.get(JwtNames.CLAIM_AUDIENCE).getAsJsonArray();
+    JsonArray audiences = aud.getAsJsonArray();
     List<String> result = new ArrayList<>(audiences.size());
     for (int i = 0; i < audiences.size(); i++) {
       if (!audiences.get(i).isJsonPrimitive()

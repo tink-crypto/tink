@@ -22,6 +22,9 @@ import static org.junit.Assert.assertThrows;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.Test;
@@ -79,10 +82,61 @@ public final class RawJwtTest {
   }
 
   @Test
+  public void setAudience_success() throws Exception {
+    RawJwt token = RawJwt.newBuilder().setAudience("foo").withoutExpiration().build();
+    assertThat(token.hasAudiences()).isTrue();
+    assertThat(token.getAudiences()).containsExactly("foo");
+  }
+
+  @Test
+  public void setAudiences_success() throws Exception {
+    RawJwt token =
+        RawJwt.newBuilder().setAudiences(Arrays.asList("foo", "bar")).withoutExpiration().build();
+    assertThat(token.hasAudiences()).isTrue();
+    assertThat(token.getAudiences()).containsExactly("foo", "bar");
+  }
+
+  @Test
+  public void callStringAndListAudienceMethodsTogether_fail() throws Exception {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> RawJwt.newBuilder().setAudience("a").setAudiences(Arrays.asList("b")));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> RawJwt.newBuilder().setAudiences(Arrays.asList("b")).setAudience("a"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> RawJwt.newBuilder().setAudience("a").addAudience("b"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> RawJwt.newBuilder().addAudience("a").setAudience("b"));
+  }
+
+  @Test
+  public void setAudiencesAndAddAudience_appendToList() throws Exception {
+    RawJwt token =
+        RawJwt.newBuilder()
+            .setAudiences(Arrays.asList("a", "b"))
+            .addAudience("c")
+            .withoutExpiration()
+            .build();
+    assertThat(token.hasAudiences()).isTrue();
+    assertThat(token.getAudiences()).containsExactly("a", "b", "c");
+  }
+
+  @Test
+  public void setEmptyAudiences_fails() throws Exception {
+    List<String> emptyList = new ArrayList<>();
+    assertThrows(IllegalArgumentException.class, () -> RawJwt.newBuilder().setAudiences(emptyList));
+  }
+
+  @Test
   public void setNullNameOrValue_shouldThrow() throws Exception {
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setIssuer(null));
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setSubject(null));
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().addAudience(null));
+    assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setAudience(null));
+    assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setAudiences(null));
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setJwtId(null));
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setExpiration(null));
     assertThrows(NullPointerException.class, () -> RawJwt.newBuilder().setNotBefore(null));
@@ -109,6 +163,10 @@ public final class RawJwtTest {
     assertThrows(IllegalArgumentException.class, () -> token.setIssuer("\uD834"));
     assertThrows(IllegalArgumentException.class, () -> token.setSubject("\uD834"));
     assertThrows(IllegalArgumentException.class, () -> token.addAudience("\uD834"));
+    assertThrows(IllegalArgumentException.class, () -> token.setAudience("\uD834"));
+    List<String> audiences = new ArrayList<>();
+    audiences.add("\uD834");
+    assertThrows(IllegalArgumentException.class, () -> token.setAudiences(audiences));
     assertThrows(IllegalArgumentException.class, () -> token.setJwtId("\uD834"));
     assertThrows(IllegalArgumentException.class, () -> token.addStringClaim("claim", "\uD834"));
     assertThrows(JwtInvalidException.class, () -> token.addJsonArrayClaim("claim", "[\"\uD834\"]"));
@@ -404,8 +462,28 @@ public final class RawJwtTest {
 
   @Test
   public void getJsonPayload_success() throws Exception {
-    RawJwt token = RawJwt.newBuilder().setJwtId("blah").withoutExpiration().build();
-    assertThat(token.getJsonPayload()).isEqualTo("{\"jti\":\"blah\"}");
+    RawJwt token = RawJwt.newBuilder().setJwtId("id").withoutExpiration().build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"jti\":\"id\"}");
+  }
+
+  @Test
+  public void addOneAudienceAndGetJsonPayload_audAsList() throws Exception {
+    RawJwt token = RawJwt.newBuilder().addAudience("a").withoutExpiration().build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":[\"a\"]}");
+  }
+
+  @Test
+  public void setAudienceAndGetJsonPayload_audAsString() throws Exception {
+    RawJwt token = RawJwt.newBuilder().setAudience("a").withoutExpiration().build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":\"a\"}");
+  }
+
+  @Test
+  public void setAudiencesWithOneEntryAndGetJsonPayload_audAsList() throws Exception {
+    List<String> audiences = new ArrayList<>();
+    audiences.add("a");
+    RawJwt token = RawJwt.newBuilder().setAudiences(audiences).withoutExpiration().build();
+    assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":[\"a\"]}");
   }
 
   @Test
@@ -538,9 +616,16 @@ public final class RawJwtTest {
   }
 
   @Test
-  public void fromJsonPayloadWithAudienceAsString_convertedToArray() throws Exception {
-    // According to https://tools.ietf.org/html/rfc7519#section-4.1.3, this should be accepted.
+  public void fromJsonPayloadWithAudienceAsString_preserveString() throws Exception {
     String input = "{\"aud\": \"me\"}";
+    RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
+    assertThat(token.getAudiences()).containsExactly("me");
+    assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":\"me\"}");
+  }
+
+  @Test
+  public void fromJsonPayloadWithSingleAudienceAsList_preserveList() throws Exception {
+    String input = "{\"aud\": [\"me\"]}";
     RawJwt token = RawJwt.fromJsonPayload(Optional.empty(), input);
     assertThat(token.getAudiences()).containsExactly("me");
     assertThat(token.getJsonPayload()).isEqualTo("{\"aud\":[\"me\"]}");
