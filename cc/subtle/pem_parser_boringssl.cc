@@ -208,22 +208,9 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   }
   // No need to free bssl_rsa_key after use.
   const RSA* bssl_rsa_key = EVP_PKEY_get0_RSA(evp_rsa_key.get());
-  // With OpenSSL, calls to RSA_check_key with RSA keys that have only the
-  // modulus and public exponent populated don't work [1]. We therefore skip it.
-  // TODO(b/213570585): Add some other way of verifying the public key.
-  //
-  // [1] https://www.openssl.org/docs/man1.1.1/man3/RSA_check_key.html
-  if (internal::IsBoringSsl()) {
-    util::Status verification_res = VerifyRsaKey(bssl_rsa_key);
-    if (!verification_res.ok()) {
-      return verification_res;
-    }
-  } else {
-    // This should never be true since we know this is an RSA key.
-    if (bssl_rsa_key == nullptr) {
-      return util::Status(absl::StatusCode::kInvalidArgument,
-                          "Invalid RSA key format");
-    }
+  util::Status verification_res = internal::RsaCheckPublicKey(bssl_rsa_key);
+  if (!verification_res.ok()) {
+    return verification_res;
   }
 
   // Get the public key parameters.

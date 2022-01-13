@@ -25,12 +25,26 @@
 #include "tink/internal/bn_util.h"
 #include "tink/internal/err_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/util/errors.h"
+#include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
 namespace internal {
+
+constexpr int kMaxRsaModulusSizeBits = 16 * 1024;
+// Mitigate DoS attacks by limiting the exponent size. 33 bits was chosen as
+// the limit based on the recommendations in [1] and [2]. Windows CryptoAPI
+// doesn't support values larger than 32 bits [3], so it is unlikely that
+// exponents larger than 32 bits are being used for anything Windows commonly
+// does.
+//
+// [1] https://www.imperialviolet.org/2012/03/16/rsae.html
+// [2] https://www.imperialviolet.org/2012/03/17/rsados.html
+// [3] https://msdn.microsoft.com/en-us/library/aa387685(VS.85).aspx
+constexpr int kMaxRsaExponentBits = 33;
 
 util::Status ValidateRsaModulusSize(size_t modulus_size) {
   if (modulus_size < 2048) {
@@ -331,6 +345,69 @@ util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
   n->release();
   e->release();
   return rsa;
+}
+
+util::Status RsaCheckPublicKey(const RSA *key) {
+  if (key == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument, "RSA key is null");
+  }
+
+  // BoringSSL `RSA_check_key` supports checking the public key.
+  if (internal::IsBoringSsl()) {
+    if (RSA_check_key(key) != 1) {
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "Invalid RSA key format");
+    }
+    return util::OkStatus();
+  }
+
+  const BIGNUM *n = nullptr;
+  const BIGNUM *e = nullptr;
+  const BIGNUM *d = nullptr;
+  RSA_get0_key(key, &n, &e, &d);
+
+  if (e == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "RSA key's public exponent is null");
+  }
+  if (n == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "RSA key's public modulus is null");
+  }
+
+  // Check the size of the public modulus.
+  unsigned n_bits = BN_num_bits(n);
+  if (n_bits > kMaxRsaModulusSizeBits) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat(
+            "RSA key's public modulus size is too large; expected at most ",
+            kMaxRsaModulusSizeBits, " bits, got ", n_bits));
+  }
+
+  unsigned e_bits = BN_num_bits(e);
+  // Valis size is 1 < e_bits <= kMaxRsaExponentBits.
+  if (e_bits > kMaxRsaExponentBits || e_bits < 2) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        absl::StrCat("Invalid public exponent size of ", e_bits, " bits"));
+  }
+
+  // The exponent must be odd to be relatively prime with phi(n).
+  if (!BN_is_odd(e)) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Public exponent is not odd");
+  }
+
+  // Verify |n > e| first taking the shortcut of making sure the size in bits of
+  // n is larger than the maximum modulus size; if this not the case, directly
+  // compare n and e.
+  if (n_bits <= kMaxRsaExponentBits || BN_ucmp(n, e) <= 0) {
+    return util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "RSA key's public exponent is smaller than the modulus");
+  }
+  return util::OkStatus();
 }
 
 }  // namespace internal

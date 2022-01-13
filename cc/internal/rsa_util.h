@@ -135,6 +135,16 @@ crypto::tink::util::StatusOr<internal::SslUniquePtr<RSA>> RsaPrivateKeyToRsa(
 crypto::tink::util::StatusOr<internal::SslUniquePtr<RSA>> RsaPublicKeyToRsa(
     const RsaPublicKey &public_key);
 
+// Performs some basic checks on the given RSA public key `key` as in [1] when
+// OpenSSL is used as a backend. This is needed because with OpenSSL calls to
+// RSA_check_key with RSA keys that have only the modulus and public exponent
+// populated don't work [2]. When BoringSSL is used, it uses BoringSSL's
+// RSA_check_key.
+//
+// [1] https://github.com/google/boringssl/blob/master/crypto/fipsmodule/rsa/rsa_impl.c#L76
+// [2] https://www.openssl.org/docs/man1.1.1/man3/RSA_check_key.html
+crypto::tink::util::Status RsaCheckPublicKey(const RSA *key);
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

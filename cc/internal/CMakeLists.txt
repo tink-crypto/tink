@@ -166,6 +166,7 @@ tink_cc_library(
     tink::internal::bn_util
     tink::internal::err_util
     tink::internal::ssl_unique_ptr
+    tink::internal::ssl_util
     absl::status
     absl::strings
     crypto
@@ -287,7 +288,9 @@ tink_cc_test(
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     gmock
+    absl::strings
     crypto
+    tink::subtle::random
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
