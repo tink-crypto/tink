@@ -24,7 +24,6 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.testing.TestUtil;
 import java.util.Optional;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,8 +40,6 @@ public class KmsEnvelopeAeadKeyManagerWithGcpTest {
     AeadConfig.register();
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
   public void testGcpKmsKeyRestricted() throws Exception {
     KeyTemplate dekTemplate = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
