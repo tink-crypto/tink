@@ -32,6 +32,7 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   declare -a MANUAL_TARGETS
   MANUAL_TARGETS=(
     "//testing/cc:gcp_kms_aead_test"
+    "//testing/cross_language:aead_envelope_test"
   )
   readonly MANUAL_TARGETS
   time bazel test --test_output=errors -- "${MANUAL_TARGETS[@]}"
