@@ -36,5 +36,5 @@ type hpkeKem interface {
 	// implementation.
 	//
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-encapsulation-mechanism
-	kemID() (uint16, error)
+	kemID() uint16
 }

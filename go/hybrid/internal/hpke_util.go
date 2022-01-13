@@ -64,16 +64,6 @@ func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 	return res
 }
 
-// getMACLength returns the length of the MAC alg in bytes.
-// TODO(b/201070904): Replace with
-// http://google3/third_party/tink/go/subtle/subtle.go;l=43;rcl=420909179.
-func getMACLength(alg string) (int, error) {
-	if alg == sha256 {
-		return 32, nil
-	}
-	return 0, fmt.Errorf("MAC algorithm %s is not supported", alg)
-}
-
 // labelIKM returns a labeled IKM according to LabeledExtract() defined at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.
 func labelIKM(label string, ikm, suiteID []byte) []byte {

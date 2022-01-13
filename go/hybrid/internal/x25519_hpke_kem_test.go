@@ -23,7 +23,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/google/tink/go/subtle"
@@ -66,7 +65,14 @@ type vector struct {
 	baseNonce           []byte
 }
 
-func TestX25519HpkeKemEncapsulateSucceeds(t *testing.T) {
+func TestX25519HpkeKemWithBadMacAlgFails(t *testing.T) {
+	if _, err := newX25519HpkeKem("BadMac"); err == nil {
+		t.Error("newX25519HpkeKem(BadMac): got success, want error")
+	}
+}
+
+// TODO(b/201070904): Add tests using hard-coded I-D vector.
+func TestX25519HpkeKemEncapsulateWithBoringSslVectors(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	for _, test := range aeadTests {
 		t.Run(test.name, func(t *testing.T) {
@@ -76,7 +82,10 @@ func TestX25519HpkeKemEncapsulateSucceeds(t *testing.T) {
 				t.Fatalf("failed to find vector %v", key)
 			}
 
-			kem := newX25519HpkeKem(sha256)
+			kem, err := newX25519HpkeKem(sha256)
+			if err != nil {
+				t.Fatal(err)
+			}
 			generatePrivateKey = func() ([]byte, error) {
 				return vec.senderPrivateKey, nil
 			}
@@ -96,33 +105,26 @@ func TestX25519HpkeKemEncapsulateSucceeds(t *testing.T) {
 	generatePrivateKey = subtle.GeneratePrivateKeyX25519
 }
 
-func TestX25519HpkeKemEncapsulateFailsWithBadMAC(t *testing.T) {
+func TestX25519HpkeKemEncapsulateWithBadRecipientPublicKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem("BadMac")
-	_, _, err := kem.encapsulate(vec.recipientPublicKey)
-	if err == nil {
-		t.Error("kem.encapsulate: got success, want err")
+	kem, err := newX25519HpkeKem(sha256)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !strings.Contains(err.Error(), "not supported") {
-		t.Errorf("kem.encapsulate: got err %q, want %q", err, "MAC algorithm BadMac is not supported")
-	}
-}
-
-func TestX25519HpkeKemEncapsulateFailsWithBadRecipientPublicKey(t *testing.T) {
-	vecs := x25519HkdfSha256BaseModeTestVectors(t)
-	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem(sha256)
 	badRecipientPublicKey := append(vec.recipientPublicKey, []byte("hello")...)
 	if _, _, err := kem.encapsulate(badRecipientPublicKey); err == nil {
 		t.Error("kem.encapsulate: got success, want err")
 	}
 }
 
-func TestX25519HpkeKemEncapsulateFailsWithBadSenderPrivateKey(t *testing.T) {
+func TestX25519HpkeKemEncapsulateWithBadSenderPrivateKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem(sha256)
+	kem, err := newX25519HpkeKem(sha256)
+	if err != nil {
+		t.Fatal(err)
+	}
 	publicFromPrivateX25519 = func(privKey []byte) ([]byte, error) {
 		return nil, errors.New("failed to compute public key")
 	}
@@ -132,7 +134,7 @@ func TestX25519HpkeKemEncapsulateFailsWithBadSenderPrivateKey(t *testing.T) {
 	publicFromPrivateX25519 = subtle.PublicFromPrivateX25519
 }
 
-func TestX25519HpkeKemDecapsulateSucceeds(t *testing.T) {
+func TestX25519HpkeKemDecapsulateWithBoringSslVectors(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	for _, test := range aeadTests {
 		t.Run(test.name, func(t *testing.T) {
@@ -142,7 +144,10 @@ func TestX25519HpkeKemDecapsulateSucceeds(t *testing.T) {
 				t.Fatalf("failed to find vector %v", key)
 			}
 
-			kem := newX25519HpkeKem(sha256)
+			kem, err := newX25519HpkeKem(sha256)
+			if err != nil {
+				t.Fatal(err)
+			}
 			secret, err := kem.decapsulate(vec.encapsulatedKey, vec.recipientPrivateKey)
 			if err != nil {
 				t.Errorf("kem.decapsulate for vector %v: got err %q, want success", key, err)
@@ -154,55 +159,39 @@ func TestX25519HpkeKemDecapsulateSucceeds(t *testing.T) {
 	}
 }
 
-func TestX25519HpkeKemDecapsulateFailsWithBadMAC(t *testing.T) {
+func TestX25519HpkeKemDecapsulateWithBadEncapsulatedKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem("BadMac")
-	_, err := kem.decapsulate(vec.encapsulatedKey, vec.recipientPrivateKey)
-	if err == nil {
-		t.Error("kem.decapsulate: got success, want err")
+	kem, err := newX25519HpkeKem(sha256)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !strings.Contains(err.Error(), "not supported") {
-		t.Errorf("kem.decapsulate: got err %q, want %q", err, "MAC algorithm BadMac is not supported")
-	}
-}
-
-func TestX25519HpkeKemDecapsulateFailsWithBadEncapsulatedKey(t *testing.T) {
-	vecs := x25519HkdfSha256BaseModeTestVectors(t)
-	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem(sha256)
 	badEncapsulatedKey := append(vec.encapsulatedKey, []byte("hello")...)
 	if _, err := kem.decapsulate(badEncapsulatedKey, vec.recipientPrivateKey); err == nil {
 		t.Error("kem.decapsulate: got success, want err")
 	}
 }
 
-func TestX25519HpkeKemDecapsulateFailsWithBadRecipientPrivateKey(t *testing.T) {
+func TestX25519HpkeKemDecapsulateWithBadRecipientPrivateKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
-	kem := newX25519HpkeKem(sha256)
+	kem, err := newX25519HpkeKem(sha256)
+	if err != nil {
+		t.Fatal(err)
+	}
 	badRecipientPrivateKey := append(vec.recipientPrivateKey, []byte("hello")...)
 	if _, err := kem.decapsulate(vec.encapsulatedKey, badRecipientPrivateKey); err == nil {
 		t.Error("kem.decapsulate: got success, want err")
 	}
 }
 
-func TestX25519HpkeKemGetKEMIDSucceeds(t *testing.T) {
-	kem := newX25519HpkeKem(sha256)
-	kemID, err := kem.kemID()
+func TestX25519HpkeKemKemId(t *testing.T) {
+	kem, err := newX25519HpkeKem(sha256)
 	if err != nil {
-		t.Fatalf("kem.kemID: got %v, want success", err)
+		t.Fatal(err)
 	}
-	if kemID != x25519HkdfSha256 {
-		t.Errorf("kem.kemID: got %d, want %d", kemID, x25519HkdfSha256)
-	}
-}
-
-func TestX25519HpkeKemGetKEMIDFailsWithBadMAC(t *testing.T) {
-	kem := newX25519HpkeKem("BadMac")
-	kemID, err := kem.kemID()
-	if err == nil {
-		t.Errorf("kem.kemID: got %d, want error", kemID)
+	if got, want := kem.kemID(), x25519HkdfSha256; got != want {
+		t.Errorf("kem.kemID: got %d, want %d", got, want)
 	}
 }
 

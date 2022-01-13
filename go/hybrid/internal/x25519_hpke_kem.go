@@ -32,14 +32,20 @@ var (
 )
 
 type x25519HpkeKem struct {
-	macAlgorithm string
+	// HPKE KEM algorithm identifier.
+	id     uint16
+	macAlg string
 }
 
-// newX25519HpkeKem constructs a X25519 HPKE KEM using macAlgorithm.
-func newX25519HpkeKem(macAlgorithm string) *x25519HpkeKem {
-	return &x25519HpkeKem{
-		macAlgorithm: macAlgorithm,
+// newX25519HpkeKem constructs a X25519 HPKE KEM using macAlg.
+func newX25519HpkeKem(macAlg string) (*x25519HpkeKem, error) {
+	if macAlg == sha256 {
+		return &x25519HpkeKem{
+			id:     x25519HkdfSha256,
+			macAlg: macAlg,
+		}, nil
 	}
+	return nil, fmt.Errorf("MAC algorithm %s is not supported", macAlg)
 }
 
 func (x *x25519HpkeKem) encapsulate(recipientPubKey []byte) (sharedSecret, senderPubKey []byte, err error) {
@@ -74,29 +80,26 @@ func (x *x25519HpkeKem) decapsulate(encapsulatedKey, recipientPrivKey []byte) ([
 	return x.deriveKEMSharedSecret(dh, encapsulatedKey, recipientPubKey)
 }
 
-func (x *x25519HpkeKem) kemID() (uint16, error) {
-	if x.macAlgorithm == sha256 {
-		return x25519HkdfSha256, nil
-	}
-	return 0, fmt.Errorf("cannot determine KEM ID from MAC algorithm %s", x.macAlgorithm)
+func (x *x25519HpkeKem) kemID() uint16 {
+	return x.id
 }
 
 // deriveKEMSharedSecret returns a pseudorandom key obtained via HKDF SHA256.
 func (x *x25519HpkeKem) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []byte) ([]byte, error) {
 	ctx := append(senderPubKey, recipientPubKey...)
 	suiteID := kemSuiteID(x25519HkdfSha256)
-	macLength, err := getMACLength(x.macAlgorithm)
+	macLength, err := subtle.GetHashDigestSize(x.macAlg)
 	if err != nil {
 		return nil, err
 	}
-	info, err := labelInfo("shared_secret", ctx, suiteID, macLength)
+	info, err := labelInfo("shared_secret", ctx, suiteID, int(macLength))
 	if err != nil {
 		return nil, err
 	}
 	return subtle.ComputeHKDF(
-		x.macAlgorithm,
+		x.macAlg,
 		labelIKM("eae_prk", dh, suiteID),
 		/*salt=*/ nil,
 		info,
-		uint32(macLength))
+		macLength)
 }
