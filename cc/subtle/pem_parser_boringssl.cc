@@ -30,6 +30,7 @@
 #include "openssl/pem.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/internal/rsa_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/ssl_util.h"
@@ -44,9 +45,6 @@ namespace subtle {
 
 namespace {
 constexpr int kBsslOk = 1;
-
-// TODO(b/194277407): Replace calls to deprecated get0 functions.
-// See: https://www.openssl.org/docs/man3.0/man3/EVP_PKEY_get0_EC_KEY.html
 
 // Verifies that the given RSA pointer `rsa_key` points to a valid RSA key.
 util::Status VerifyRsaKey(const RSA* rsa_key) {
@@ -79,52 +77,37 @@ util::Status VerifyEcdsaKey(const EC_KEY* ecdsa_key) {
 
 // Converts the public portion of a given SubtleUtilBoringSSL::EcKey,
 // `subtle_ec_key`, into an OpenSSL EC key, `openssl_ec_key`.
-util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
+util::Status EcKeyToSslEcPublicKey(
     const SubtleUtilBoringSSL::EcKey& subtle_ec_key, EC_KEY* openssl_ec_key) {
   if (openssl_ec_key == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "`openssl_ec_key` arg cannot be NULL");
   }
 
-  // Set the key's group (EC curve).
   util::StatusOr<internal::SslUniquePtr<EC_GROUP>> group =
       internal::EcGroupFromCurveType(subtle_ec_key.curve);
   if (!group.ok()) {
     return group.status();
   }
+
+  util::StatusOr<internal::SslUniquePtr<EC_POINT>> ec_point =
+      internal::GetEcPoint(subtle_ec_key.curve, subtle_ec_key.pub_x,
+                           subtle_ec_key.pub_y);
+  if (!ec_point.ok()) {
+    return ec_point.status();
+  }
+
+  // Set key's group and EC point.
   if (!EC_KEY_set_group(openssl_ec_key, group->get())) {
     return util::Status(
         absl::StatusCode::kInternal,
-        absl::StrCat("failed to set key group from EC group for curve ",
-                     subtle_ec_key.curve));
+        absl::StrCat("Failed to set key group from EC group for curve ",
+                     EnumToString(subtle_ec_key.curve)));
   }
 
-  // Create an EC point and initialize it from the key proto.
-  internal::SslUniquePtr<EC_POINT> point(EC_POINT_new(group->get()));
-  if (!point.get()) {
+  if (!EC_KEY_set_public_key(openssl_ec_key, ec_point->get())) {
     return util::Status(absl::StatusCode::kInternal,
-                        "failed to allocate EC_POINT");
-  }
-  internal::SslUniquePtr<BIGNUM> x(BN_bin2bn(
-      reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_x.data()),
-      subtle_ec_key.pub_x.length(), nullptr));
-  internal::SslUniquePtr<BIGNUM> y(BN_bin2bn(
-      reinterpret_cast<const unsigned char*>(subtle_ec_key.pub_y.data()),
-      subtle_ec_key.pub_y.length(), nullptr));
-  if (!EC_POINT_set_affine_coordinates_GFp(group->get(), point.get(), x.get(),
-                                           y.get(), nullptr)) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to set affine coordinates");
-  }
-  if (!EC_POINT_is_on_curve(group->get(), point.get(), nullptr)) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to confirm EC point is on curve");
-  }
-
-  // Set the key's point from the EC point, created above.
-  if (!EC_KEY_set_public_key(openssl_ec_key, point.get())) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "failed to set public key");
+                        "Failed to set public key");
   }
 
   return util::OkStatus();
@@ -132,29 +115,30 @@ util::Status ConvertSubtleEcKeyToOpenSslEcPublicKey(
 
 // Converts a given SubtleUtilBoringSSL::EcKey, `subtle_ec_key`, into an OpenSSL
 // EC key, `openssl_ec_key`.
-util::Status ConvertSubtleEcKeyToOpenSslEcPrivateKey(
+util::Status EcKeyToSslEcPrivateKey(
     const SubtleUtilBoringSSL::EcKey& subtle_ec_key, EC_KEY* openssl_ec_key) {
   if (openssl_ec_key == nullptr) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "`openssl_ec_key` arg cannot be NULL");
   }
-  util::Status status =
-      ConvertSubtleEcKeyToOpenSslEcPublicKey(subtle_ec_key, openssl_ec_key);
+  util::Status status = EcKeyToSslEcPublicKey(subtle_ec_key, openssl_ec_key);
   if (!status.ok()) {
     return status;
   }
-  internal::SslUniquePtr<BIGNUM> x(BN_bin2bn(
-      reinterpret_cast<const unsigned char*>(subtle_ec_key.priv.data()),
-      subtle_ec_key.priv.size(), nullptr));
-  if (!EC_KEY_set_private_key(openssl_ec_key, x.get())) {
-    return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to set private key");
+
+  util::StatusOr<internal::SslUniquePtr<BIGNUM>> x =
+      internal::StringToBignum(absl::string_view(
+          reinterpret_cast<const char*>(subtle_ec_key.priv.data()),
+          subtle_ec_key.priv.size()));
+  if (!x.ok()) {
+    return x.status();
   }
-  if (!EC_KEY_check_key(openssl_ec_key)) {
+
+  if (!EC_KEY_set_private_key(openssl_ec_key, x->get())) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed private key check");
+                        "Failed to set private key");
   }
-  return util::OkStatus();
+  return VerifyEcdsaKey(openssl_ec_key);
 }
 
 // Converts an OpenSSL BIO (i.e., basic IO stream), `bio`, into a string.
@@ -167,7 +151,7 @@ util::StatusOr<std::string> ConvertBioToString(BIO* bio) {
   }
   if (pem_material.empty()) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to retrieve key material from BIO");
+                        "Failed to retrieve key material from BIO");
   }
   return pem_material;
 }
@@ -190,7 +174,6 @@ static int FailingPassphraseCallback(char* buf, int buf_size, int rwflag,
 
 }  // namespace
 
-// static.
 util::StatusOr<std::unique_ptr<internal::RsaPublicKey>>
 PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   // Read the RSA key into EVP_PKEY.
@@ -239,7 +222,6 @@ PemParser::ParseRsaPublicKey(absl::string_view pem_serialized_key) {
   return rsa_public_key;
 }
 
-// static.
 util::StatusOr<std::unique_ptr<internal::RsaPrivateKey>>
 PemParser::ParseRsaPrivateKey(absl::string_view pem_serialized_key) {
   // Read the private key into EVP_PKEY.
@@ -329,11 +311,11 @@ util::StatusOr<std::string> PemParser::WriteRsaPublicKey(
     return rsa_statusor.status();
   }
 
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  internal::SslUniquePtr<RSA> rsa = *std::move(rsa_statusor);
   internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_RSA_PUBKEY(bio.get(), rsa.get())) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to write openssl RSA key to write bio");
+                        "Failed to write openssl RSA key to write bio");
   }
   return ConvertBioToString(bio.get());
 }
@@ -345,7 +327,7 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
     return rsa_statusor.status();
   }
 
-  internal::SslUniquePtr<RSA> rsa = std::move(rsa_statusor).ValueOrDie();
+  internal::SslUniquePtr<RSA> rsa = *std::move(rsa_statusor);
   internal::SslUniquePtr<EVP_PKEY> evp(EVP_PKEY_new());
   EVP_PKEY_set1_RSA(evp.get(), rsa.get());
 
@@ -355,7 +337,7 @@ util::StatusOr<std::string> PemParser::WriteRsaPrivateKey(
                                 /*klen=*/0,
                                 /*cb=*/nullptr, /*u=*/nullptr)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to write openssl RSA key to write bio");
+                        "Failed to write openssl RSA key to write bio");
   }
   return ConvertBioToString(bio.get());
 }
@@ -383,29 +365,34 @@ PemParser::ParseEcPublicKey(absl::string_view pem_serialized_key) {
   }
 
   // Get the public key parameters.
-  internal::SslUniquePtr<BIGNUM> x_coordinate(BN_new());
-  internal::SslUniquePtr<BIGNUM> y_coordinate(BN_new());
   const EC_POINT* public_point = EC_KEY_get0_public_key(bssl_ecdsa_key);
   const EC_GROUP* ec_group = EC_KEY_get0_group(bssl_ecdsa_key);
+  internal::SslUniquePtr<BIGNUM> x_coordinate(BN_new());
+  internal::SslUniquePtr<BIGNUM> y_coordinate(BN_new());
   EC_POINT_get_affine_coordinates(ec_group, public_point, x_coordinate.get(),
                                   y_coordinate.get(), nullptr);
 
   // Convert public key parameters and construct Subtle ECKey
-  auto x_string = internal::BignumToString(x_coordinate.get(),
-                                           FieldElementSizeInBytes(ec_group));
-  auto y_string = internal::BignumToString(y_coordinate.get(),
-                                           FieldElementSizeInBytes(ec_group));
+  util::StatusOr<std::string> x_string = internal::BignumToString(
+      x_coordinate.get(), FieldElementSizeInBytes(ec_group));
+  if (!x_string.ok()) {
+    return x_string.status();
+  }
+  util::StatusOr<std::string> y_string = internal::BignumToString(
+      y_coordinate.get(), FieldElementSizeInBytes(ec_group));
+  if (!y_string.ok()) {
+    return y_string.status();
+  }
   util::StatusOr<EllipticCurveType> curve =
       internal::CurveTypeFromEcGroup(ec_group);
-
-  if (!x_string.ok()) return x_string.status();
-  if (!y_string.ok()) return y_string.status();
-  if (!curve.ok()) return curve.status();
+  if (!curve.ok()) {
+    return curve.status();
+  }
 
   auto ecdsa_public_key = absl::make_unique<SubtleUtilBoringSSL::EcKey>();
-  ecdsa_public_key->pub_x = std::move(x_string).ValueOrDie();
-  ecdsa_public_key->pub_y = std::move(y_string).ValueOrDie();
-  ecdsa_public_key->curve = std::move(curve).ValueOrDie();
+  ecdsa_public_key->pub_x = *std::move(x_string);
+  ecdsa_public_key->pub_y = *std::move(y_string);
+  ecdsa_public_key->curve = *std::move(curve);
 
   return ecdsa_public_key;
 }
@@ -434,12 +421,12 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
 
   internal::SslUniquePtr<BIGNUM> x_coordinate(BN_new());
   internal::SslUniquePtr<BIGNUM> y_coordinate(BN_new());
-  const BIGNUM* priv_key = EC_KEY_get0_private_key(bssl_ecdsa_key);
   const EC_POINT* public_point = EC_KEY_get0_public_key(bssl_ecdsa_key);
   const EC_GROUP* ec_group = EC_KEY_get0_group(bssl_ecdsa_key);
   EC_POINT_get_affine_coordinates(ec_group, public_point, x_coordinate.get(),
                                   y_coordinate.get(), nullptr);
 
+  const BIGNUM* priv_key = EC_KEY_get0_private_key(bssl_ecdsa_key);
   util::StatusOr<util::SecretData> priv =
       internal::BignumToSecretData(priv_key, ScalarSizeInBytes(ec_group));
   if (!priv.ok()) {
@@ -473,15 +460,14 @@ PemParser::ParseEcPrivateKey(absl::string_view pem_serialized_key) {
 util::StatusOr<std::string> PemParser::WriteEcPublicKey(
     const SubtleUtilBoringSSL::EcKey& ec_key) {
   internal::SslUniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
-  util::Status status =
-      ConvertSubtleEcKeyToOpenSslEcPublicKey(ec_key, openssl_ec_key.get());
+  util::Status status = EcKeyToSslEcPublicKey(ec_key, openssl_ec_key.get());
   if (!status.ok()) {
     return status;
   }
   internal::SslUniquePtr<BIO> bio(BIO_new(BIO_s_mem()));
   if (!PEM_write_bio_EC_PUBKEY(bio.get(), openssl_ec_key.get())) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to write openssl EC key to write bio");
+                        "Failed to write openssl EC key to write bio");
   }
   return ConvertBioToString(bio.get());
 }
@@ -489,8 +475,7 @@ util::StatusOr<std::string> PemParser::WriteEcPublicKey(
 util::StatusOr<std::string> PemParser::WriteEcPrivateKey(
     const SubtleUtilBoringSSL::EcKey& ec_key) {
   internal::SslUniquePtr<EC_KEY> openssl_ec_key(EC_KEY_new());
-  util::Status status =
-      ConvertSubtleEcKeyToOpenSslEcPrivateKey(ec_key, openssl_ec_key.get());
+  util::Status status = EcKeyToSslEcPrivateKey(ec_key, openssl_ec_key.get());
   if (!status.ok()) {
     return status;
   }
@@ -499,7 +484,7 @@ util::StatusOr<std::string> PemParser::WriteEcPrivateKey(
                                   /*enc=*/nullptr, /*kstr=*/nullptr, /*klen=*/0,
                                   /*cb=*/nullptr, /*u=*/nullptr)) {
     return util::Status(absl::StatusCode::kInvalidArgument,
-                        "failed to write openssl EC key to write bio");
+                        "Failed to write openssl EC key to write bio");
   }
   return ConvertBioToString(bio.get());
 }

@@ -908,6 +908,7 @@ cc_library(
         ":common_enums",
         ":subtle_util_boringssl",
         "//internal:bn_util",
+        "//internal:ec_util",
         "//internal:rsa_util",
         "//internal:ssl_unique_ptr",
         "//internal:ssl_util",

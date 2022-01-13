@@ -860,6 +860,7 @@ tink_cc_library(
     absl::strings
     crypto
     tink::internal::bn_util
+    tink::internal::ec_util
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::ssl_util
