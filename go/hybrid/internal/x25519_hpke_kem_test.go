@@ -29,19 +29,15 @@ import (
 	"github.com/google/tink/go/subtle"
 )
 
-const exportOnlyAEAD uint16 = 0xFFFF
-
-var (
-	tests = []struct {
-		name   string
-		aeadID uint16
-	}{
-		{"AES128GCM", aes128GCM},
-		{"AES256GCM", aes256GCM},
-		{"ChaCha20Poly1305", chaCha20Poly1305},
-		{"ExportOnlyAEAD", exportOnlyAEAD},
-	}
-)
+var aeadTests = []struct {
+	name   string
+	aeadID uint16
+}{
+	{"AES128GCM", aes128GCM},
+	{"AES256GCM", aes256GCM},
+	{"ChaCha20Poly1305", chaCha20Poly1305},
+	{"ExportOnlyAEAD", 0xFFFF},
+}
 
 type id struct {
 	mode   uint8
@@ -50,17 +46,29 @@ type id struct {
 	aeadID uint16
 }
 
+// TODO(b/201070904): Separate into own package.
 type vector struct {
+	mode   uint8
+	kemID  uint16
+	kdfID  uint16
+	aeadID uint16
+	info   []byte
+	// TODO(b/201070904): Rename to Pub/PrivKey.
+	senderPublicKey     []byte
 	senderPrivateKey    []byte
 	recipientPublicKey  []byte
 	recipientPrivateKey []byte
 	encapsulatedKey     []byte
 	sharedSecret        []byte
+	keyScheduleCtx      []byte
+	secret              []byte
+	key                 []byte
+	baseNonce           []byte
 }
 
 func TestX25519HpkeKemEncapsulateSucceeds(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
-	for _, test := range tests {
+	for _, test := range aeadTests {
 		t.Run(test.name, func(t *testing.T) {
 			key := id{baseMode, x25519HkdfSha256, hkdfSha256, test.aeadID}
 			vec, ok := vecs[key]
@@ -126,7 +134,7 @@ func TestX25519HpkeKemEncapsulateFailsWithBadSenderPrivateKey(t *testing.T) {
 
 func TestX25519HpkeKemDecapsulateSucceeds(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
-	for _, test := range tests {
+	for _, test := range aeadTests {
 		t.Run(test.name, func(t *testing.T) {
 			key := id{baseMode, x25519HkdfSha256, hkdfSha256, test.aeadID}
 			vec, ok := vecs[key]
@@ -198,6 +206,7 @@ func TestX25519HpkeKemGetKEMIDFailsWithBadMAC(t *testing.T) {
 	}
 }
 
+// TODO(b/201070904): Separate into own package.
 func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 	t.Helper()
 
@@ -218,11 +227,17 @@ func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 		KEMID               uint16 `json:"kem_id"`
 		KDFID               uint16 `json:"kdf_id"`
 		AEADID              uint16 `json:"aead_id"`
+		Info                string `json:"info"`
+		SenderPublicKey     string `json:"pkEm"`
 		SenderPrivateKey    string `json:"skEm"`
 		RecipientPublicKey  string `json:"pkRm"`
 		RecipientPrivateKey string `json:"skRm"`
 		EncapsulatedKey     string `json:"enc"`
 		SharedSecret        string `json:"shared_secret"`
+		KeyScheduleCtx      string `json:"key_schedule_context"`
+		Secret              string `json:"secret"`
+		Key                 string `json:"key"`
+		BaseNonce           string `json:"base_nonce"`
 	}
 	parser := json.NewDecoder(f)
 	if err := parser.Decode(&vecs); err != nil {
@@ -242,20 +257,38 @@ func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 			aeadID: v.AEADID,
 		}
 		var val vector
+		if val.info, err = hex.DecodeString(v.Info); err != nil {
+			t.Errorf("hex.DecodeString(Info) in vector %v failed", key)
+		}
+		if val.senderPublicKey, err = hex.DecodeString(v.SenderPublicKey); err != nil {
+			t.Errorf("hex.DecodeString(SenderPublicKey) in vector %v failed", key)
+		}
 		if val.senderPrivateKey, err = hex.DecodeString(v.SenderPrivateKey); err != nil {
-			t.Errorf("failed to parse SenderPrivateKey in vector %v", key)
+			t.Errorf("hex.DecodeString(SenderPrivateKey) in vector %v failed", key)
 		}
 		if val.recipientPublicKey, err = hex.DecodeString(v.RecipientPublicKey); err != nil {
-			t.Errorf("failed to parse RecipientPublicKey in vector %v", key)
+			t.Errorf("hex.DecodeString(RecipientPublicKey) in vector %v failed", key)
 		}
 		if val.recipientPrivateKey, err = hex.DecodeString(v.RecipientPrivateKey); err != nil {
-			t.Errorf("failed to parse RecipientPrivateKey in vector %v", key)
+			t.Errorf("hex.DecodeString(RecipientPrivateKey) in vector %v failed", key)
 		}
 		if val.encapsulatedKey, err = hex.DecodeString(v.EncapsulatedKey); err != nil {
-			t.Errorf("failed to parse EncapsulatedKey in vector %v", key)
+			t.Errorf("hex.DecodeString(EncapsulatedKey) in vector %v failed", key)
 		}
 		if val.sharedSecret, err = hex.DecodeString(v.SharedSecret); err != nil {
-			t.Errorf("failed to parse SharedSecret in vector %v", key)
+			t.Errorf("hex.DecodeString(SharedSecret) in vector %v failed", key)
+		}
+		if val.keyScheduleCtx, err = hex.DecodeString(v.KeyScheduleCtx); err != nil {
+			t.Errorf("hex.DecodeString(KeyScheduleCtx) in vector %v failed", key)
+		}
+		if val.secret, err = hex.DecodeString(v.Secret); err != nil {
+			t.Errorf("hex.DecodeString(Secret) in vector %v failed", key)
+		}
+		if val.key, err = hex.DecodeString(v.Key); err != nil {
+			t.Errorf("hex.DecodeString(Key) in vector %v failed", key)
+		}
+		if val.baseNonce, err = hex.DecodeString(v.BaseNonce); err != nil {
+			t.Errorf("hex.DecodeString(BaseNonce) in vector %v failed", key)
 		}
 		m[key] = val
 	}
@@ -263,6 +296,8 @@ func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 	return m
 }
 
+// TODO(b/201070904): Replace with hard-coded vector, see
+// https://critique.corp.google.com/cl/413830047/depot/google3/third_party/tink/go/hybrid/internal/hkdf_hpke_kdf_test.go?version=s10#31.
 func defaultVector(t *testing.T, vecs map[id]vector) vector {
 	t.Helper()
 	key := id{baseMode, x25519HkdfSha256, hkdfSha256, aes128GCM}

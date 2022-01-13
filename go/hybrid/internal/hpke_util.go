@@ -40,9 +40,12 @@ const (
 	chaCha20Poly1305 uint16 = 0x0003
 
 	kem    = "KEM"
+	hpke   = "HPKE"
 	sha256 = "SHA256"
 	hpkeV1 = "HPKE-v1"
 )
+
+var emptySalt = []byte{}
 
 // kemSuiteID generates the KEM suite ID from kemID according to
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5.
@@ -50,7 +53,20 @@ func kemSuiteID(kemID uint16) []byte {
 	return appendBigEndianUint16([]byte(kem), kemID)
 }
 
+// hpkeSuiteID generates the HPKE suite ID according to
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-8.
+func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
+	var res []byte
+	res = append(res, hpke...)
+	res = appendBigEndianUint16(res, kemID)
+	res = appendBigEndianUint16(res, kdfID)
+	res = appendBigEndianUint16(res, aeadID)
+	return res
+}
+
 // getMACLength returns the length of the MAC alg in bytes.
+// TODO(b/201070904): Replace with
+// http://google3/third_party/tink/go/subtle/subtle.go;l=43;rcl=420909179.
 func getMACLength(alg string) (int, error) {
 	if alg == sha256 {
 		return 32, nil

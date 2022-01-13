@@ -22,7 +22,8 @@ import (
 	"github.com/google/tink/go/subtle"
 )
 
-// x25519HpkeKem is a Diffie-Hellman-based X25519 HPKE KEM variant.
+// x25519HpkeKem is a Diffie-Hellman-based X25519 HPKE KEM variant that
+// implements interface hpkeKem.
 var (
 	_ hpkeKem = (*x25519HpkeKem)(nil)
 
