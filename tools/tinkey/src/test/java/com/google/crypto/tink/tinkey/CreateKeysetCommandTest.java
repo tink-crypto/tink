@@ -29,7 +29,6 @@ import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -67,8 +66,6 @@ public class CreateKeysetCommandTest {
     TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
   public void testCreateEncrypted_shouldCreateNewKeyset() throws Exception {
     testCreateEncrypted_shouldCreateNewKeyset("json");
