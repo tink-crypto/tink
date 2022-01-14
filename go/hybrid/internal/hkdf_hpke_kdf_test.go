@@ -60,18 +60,18 @@ func internetDraftTestVector(t *testing.T) (vector, error) {
 		exporterSecret: "45ff1c2e220db587171952c0592d5f5ebe103f1561a2614e38f2ffd47e99e3f8",
 	}
 
-	var info, senderPublicKey, senderPrivateKey, recipientPublicKey, sharedSecret, keyScheduleCtx, secret, key, baseNonce []byte
+	var info, senderPubKey, senderPrivKey, recipientPubKey, sharedSecret, keyScheduleCtx, secret, key, baseNonce []byte
 	var err error
 	if info, err = hex.DecodeString(v.info); err != nil {
 		return vector{}, errors.New("hex.DecodeString(info) failed")
 	}
-	if senderPublicKey, err = hex.DecodeString(v.pkEm); err != nil {
+	if senderPubKey, err = hex.DecodeString(v.pkEm); err != nil {
 		return vector{}, errors.New("hex.DecodeString(pkEm) failed")
 	}
-	if senderPrivateKey, err = hex.DecodeString(v.skEm); err != nil {
+	if senderPrivKey, err = hex.DecodeString(v.skEm); err != nil {
 		return vector{}, errors.New("hex.DecodeString(skEm) failed")
 	}
-	if recipientPublicKey, err = hex.DecodeString(v.pkRm); err != nil {
+	if recipientPubKey, err = hex.DecodeString(v.pkRm); err != nil {
 		return vector{}, errors.New("hex.DecodeString(pkRm) failed")
 	}
 	if sharedSecret, err = hex.DecodeString(v.sharedSecret); err != nil {
@@ -91,19 +91,19 @@ func internetDraftTestVector(t *testing.T) (vector, error) {
 	}
 
 	return vector{
-		mode:               v.mode,
-		kemID:              v.kemID,
-		kdfID:              v.kdfID,
-		aeadID:             v.aeadID,
-		info:               info,
-		senderPublicKey:    senderPublicKey,
-		senderPrivateKey:   senderPrivateKey,
-		recipientPublicKey: recipientPublicKey,
-		sharedSecret:       sharedSecret,
-		keyScheduleCtx:     keyScheduleCtx,
-		secret:             secret,
-		key:                key,
-		baseNonce:          baseNonce,
+		mode:            v.mode,
+		kemID:           v.kemID,
+		kdfID:           v.kdfID,
+		aeadID:          v.aeadID,
+		info:            info,
+		senderPubKey:    senderPubKey,
+		senderPrivKey:   senderPrivKey,
+		recipientPubKey: recipientPubKey,
+		sharedSecret:    sharedSecret,
+		keyScheduleCtx:  keyScheduleCtx,
+		secret:          secret,
+		key:             key,
+		baseNonce:       baseNonce,
 	}, nil
 }
 
@@ -252,13 +252,13 @@ func TestHkdfHpkeKdfExtractAndExpand(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dhSharedSecret, err := subtle.ComputeSharedSecretX25519(v.senderPrivateKey, v.recipientPublicKey)
+	dhSharedSecret, err := subtle.ComputeSharedSecretX25519(v.senderPrivKey, v.recipientPubKey)
 	if err != nil {
 		t.Fatalf("ComputeSharedSecretX25519: got err %q, want success", err)
 	}
 	kemCtx := []byte{}
-	kemCtx = append(kemCtx, v.senderPublicKey...)
-	kemCtx = append(kemCtx, v.recipientPublicKey...)
+	kemCtx = append(kemCtx, v.senderPubKey...)
+	kemCtx = append(kemCtx, v.recipientPubKey...)
 
 	var tests = []struct {
 		length  int

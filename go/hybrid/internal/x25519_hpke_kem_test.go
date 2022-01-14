@@ -47,22 +47,21 @@ type id struct {
 
 // TODO(b/201070904): Separate into own package.
 type vector struct {
-	mode   uint8
-	kemID  uint16
-	kdfID  uint16
-	aeadID uint16
-	info   []byte
-	// TODO(b/201070904): Rename to Pub/PrivKey.
-	senderPublicKey     []byte
-	senderPrivateKey    []byte
-	recipientPublicKey  []byte
-	recipientPrivateKey []byte
-	encapsulatedKey     []byte
-	sharedSecret        []byte
-	keyScheduleCtx      []byte
-	secret              []byte
-	key                 []byte
-	baseNonce           []byte
+	mode             uint8
+	kemID            uint16
+	kdfID            uint16
+	aeadID           uint16
+	info             []byte
+	senderPubKey     []byte
+	senderPrivKey    []byte
+	recipientPubKey  []byte
+	recipientPrivKey []byte
+	encapsulatedKey  []byte
+	sharedSecret     []byte
+	keyScheduleCtx   []byte
+	secret           []byte
+	key              []byte
+	baseNonce        []byte
 }
 
 func TestX25519HpkeKemWithBadMacAlgFails(t *testing.T) {
@@ -87,10 +86,10 @@ func TestX25519HpkeKemEncapsulateWithBoringSslVectors(t *testing.T) {
 				t.Fatal(err)
 			}
 			generatePrivateKey = func() ([]byte, error) {
-				return vec.senderPrivateKey, nil
+				return vec.senderPrivKey, nil
 			}
 
-			secret, enc, err := kem.encapsulate(vec.recipientPublicKey)
+			secret, enc, err := kem.encapsulate(vec.recipientPubKey)
 			if err != nil {
 				t.Errorf("kem.encapsulate for vector %v: got err %q, want success", key, err)
 			}
@@ -105,20 +104,20 @@ func TestX25519HpkeKemEncapsulateWithBoringSslVectors(t *testing.T) {
 	generatePrivateKey = subtle.GeneratePrivateKeyX25519
 }
 
-func TestX25519HpkeKemEncapsulateWithBadRecipientPublicKeyFails(t *testing.T) {
+func TestX25519HpkeKemEncapsulateWithBadRecipientPubKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
 	kem, err := newX25519HpkeKem(sha256)
 	if err != nil {
 		t.Fatal(err)
 	}
-	badRecipientPublicKey := append(vec.recipientPublicKey, []byte("hello")...)
-	if _, _, err := kem.encapsulate(badRecipientPublicKey); err == nil {
+	badRecipientPubKey := append(vec.recipientPubKey, []byte("hello")...)
+	if _, _, err := kem.encapsulate(badRecipientPubKey); err == nil {
 		t.Error("kem.encapsulate: got success, want err")
 	}
 }
 
-func TestX25519HpkeKemEncapsulateWithBadSenderPrivateKeyFails(t *testing.T) {
+func TestX25519HpkeKemEncapsulateWithBadSenderPrivKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
 	kem, err := newX25519HpkeKem(sha256)
@@ -128,7 +127,7 @@ func TestX25519HpkeKemEncapsulateWithBadSenderPrivateKeyFails(t *testing.T) {
 	publicFromPrivateX25519 = func(privKey []byte) ([]byte, error) {
 		return nil, errors.New("failed to compute public key")
 	}
-	if _, _, err := kem.encapsulate(vec.recipientPublicKey); err == nil {
+	if _, _, err := kem.encapsulate(vec.recipientPubKey); err == nil {
 		t.Error("kem.encapsulate: got success, want err")
 	}
 	publicFromPrivateX25519 = subtle.PublicFromPrivateX25519
@@ -148,7 +147,7 @@ func TestX25519HpkeKemDecapsulateWithBoringSslVectors(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			secret, err := kem.decapsulate(vec.encapsulatedKey, vec.recipientPrivateKey)
+			secret, err := kem.decapsulate(vec.encapsulatedKey, vec.recipientPrivKey)
 			if err != nil {
 				t.Errorf("kem.decapsulate for vector %v: got err %q, want success", key, err)
 			}
@@ -167,20 +166,20 @@ func TestX25519HpkeKemDecapsulateWithBadEncapsulatedKeyFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	badEncapsulatedKey := append(vec.encapsulatedKey, []byte("hello")...)
-	if _, err := kem.decapsulate(badEncapsulatedKey, vec.recipientPrivateKey); err == nil {
+	if _, err := kem.decapsulate(badEncapsulatedKey, vec.recipientPrivKey); err == nil {
 		t.Error("kem.decapsulate: got success, want err")
 	}
 }
 
-func TestX25519HpkeKemDecapsulateWithBadRecipientPrivateKeyFails(t *testing.T) {
+func TestX25519HpkeKemDecapsulateWithBadRecipientPrivKeyFails(t *testing.T) {
 	vecs := x25519HkdfSha256BaseModeTestVectors(t)
 	vec := defaultVector(t, vecs)
 	kem, err := newX25519HpkeKem(sha256)
 	if err != nil {
 		t.Fatal(err)
 	}
-	badRecipientPrivateKey := append(vec.recipientPrivateKey, []byte("hello")...)
-	if _, err := kem.decapsulate(vec.encapsulatedKey, badRecipientPrivateKey); err == nil {
+	badRecipientPrivKey := append(vec.recipientPrivKey, []byte("hello")...)
+	if _, err := kem.decapsulate(vec.encapsulatedKey, badRecipientPrivKey); err == nil {
 		t.Error("kem.decapsulate: got success, want err")
 	}
 }
@@ -212,21 +211,21 @@ func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 	}
 
 	var vecs []struct {
-		Mode                uint8  `json:"mode"`
-		KEMID               uint16 `json:"kem_id"`
-		KDFID               uint16 `json:"kdf_id"`
-		AEADID              uint16 `json:"aead_id"`
-		Info                string `json:"info"`
-		SenderPublicKey     string `json:"pkEm"`
-		SenderPrivateKey    string `json:"skEm"`
-		RecipientPublicKey  string `json:"pkRm"`
-		RecipientPrivateKey string `json:"skRm"`
-		EncapsulatedKey     string `json:"enc"`
-		SharedSecret        string `json:"shared_secret"`
-		KeyScheduleCtx      string `json:"key_schedule_context"`
-		Secret              string `json:"secret"`
-		Key                 string `json:"key"`
-		BaseNonce           string `json:"base_nonce"`
+		Mode             uint8  `json:"mode"`
+		KEMID            uint16 `json:"kem_id"`
+		KDFID            uint16 `json:"kdf_id"`
+		AEADID           uint16 `json:"aead_id"`
+		Info             string `json:"info"`
+		SenderPubKey     string `json:"pkEm"`
+		SenderPrivKey    string `json:"skEm"`
+		RecipientPubKey  string `json:"pkRm"`
+		RecipientPrivKey string `json:"skRm"`
+		EncapsulatedKey  string `json:"enc"`
+		SharedSecret     string `json:"shared_secret"`
+		KeyScheduleCtx   string `json:"key_schedule_context"`
+		Secret           string `json:"secret"`
+		Key              string `json:"key"`
+		BaseNonce        string `json:"base_nonce"`
 	}
 	parser := json.NewDecoder(f)
 	if err := parser.Decode(&vecs); err != nil {
@@ -249,17 +248,17 @@ func x25519HkdfSha256BaseModeTestVectors(t *testing.T) map[id]vector {
 		if val.info, err = hex.DecodeString(v.Info); err != nil {
 			t.Errorf("hex.DecodeString(Info) in vector %v failed", key)
 		}
-		if val.senderPublicKey, err = hex.DecodeString(v.SenderPublicKey); err != nil {
-			t.Errorf("hex.DecodeString(SenderPublicKey) in vector %v failed", key)
+		if val.senderPubKey, err = hex.DecodeString(v.SenderPubKey); err != nil {
+			t.Errorf("hex.DecodeString(SenderPubKey) in vector %v failed", key)
 		}
-		if val.senderPrivateKey, err = hex.DecodeString(v.SenderPrivateKey); err != nil {
-			t.Errorf("hex.DecodeString(SenderPrivateKey) in vector %v failed", key)
+		if val.senderPrivKey, err = hex.DecodeString(v.SenderPrivKey); err != nil {
+			t.Errorf("hex.DecodeString(SenderPrivKey) in vector %v failed", key)
 		}
-		if val.recipientPublicKey, err = hex.DecodeString(v.RecipientPublicKey); err != nil {
-			t.Errorf("hex.DecodeString(RecipientPublicKey) in vector %v failed", key)
+		if val.recipientPubKey, err = hex.DecodeString(v.RecipientPubKey); err != nil {
+			t.Errorf("hex.DecodeString(RecipientPubKey) in vector %v failed", key)
 		}
-		if val.recipientPrivateKey, err = hex.DecodeString(v.RecipientPrivateKey); err != nil {
-			t.Errorf("hex.DecodeString(RecipientPrivateKey) in vector %v failed", key)
+		if val.recipientPrivKey, err = hex.DecodeString(v.RecipientPrivKey); err != nil {
+			t.Errorf("hex.DecodeString(RecipientPrivKey) in vector %v failed", key)
 		}
 		if val.encapsulatedKey, err = hex.DecodeString(v.EncapsulatedKey); err != nil {
 			t.Errorf("hex.DecodeString(EncapsulatedKey) in vector %v failed", key)
