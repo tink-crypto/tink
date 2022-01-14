@@ -28,11 +28,11 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//:aead",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
     ],
     alwayslink = 1,
 )
@@ -47,7 +47,6 @@ cc_library(
         ":aws_kms_aead",
         "//:kms_client",
         "//:kms_clients",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
@@ -68,10 +67,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     deps = [
         ":aws_kms_aead",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -84,7 +83,6 @@ cc_test(
     data = ["@tink_base//testdata:credentials"],
     deps = [
         ":aws_kms_client",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",

@@ -569,6 +569,7 @@ cc_library(
     name = "kms_client",
     hdrs = ["kms_client.h"],
     include_prefix = "tink",
+    visibility = ["//visibility:public"],
     deps = [
         ":aead",
         "//util:statusor",
