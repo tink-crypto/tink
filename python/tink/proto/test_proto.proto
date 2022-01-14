@@ -28,3 +28,7 @@ message NestedTestProto {
   uint64 num = 3;
   bytes str = 4;  // placeholder for ctype
 }
+
+message TestProtoWithoutCtype {
+  bytes str = 1;
+}
