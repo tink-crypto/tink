@@ -336,3 +336,196 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		})
 	}
 }
+
+type jsonToJWTTestCase struct {
+	tag      string
+	json     string
+	expected *RawJWT
+}
+
+func stringList(l []string) *spb.Value {
+	vals := []*spb.Value{}
+	for _, v := range l {
+		vals = append(vals, spb.NewStringValue(v))
+	}
+	return spb.NewListValue(&spb.ListValue{Values: vals})
+}
+
+func TestFromJSON(t *testing.T) {
+	testCases := []jsonToJWTTestCase{
+		{
+			tag: "registered claims",
+			json: `{
+				"aud": ["one", "two"],
+				"iss": "tink-test",
+				"exp": 457888
+			}`,
+			expected: &RawJWT{
+				jsonpb: &spb.Struct{
+					Fields: map[string]*spb.Value{
+						"aud": stringList([]string{"one", "two"}),
+						"iss": spb.NewStringValue("tink-test"),
+						"exp": spb.NewNumberValue(457888),
+					},
+				},
+			},
+		},
+		{
+			tag: "all registered and custom claims",
+			json: `{
+				"aud": ["one", "two"],
+				"iss": "tink-test",
+				"sub": "subject",
+				"exp": 457888,
+				"nbf": 450888,
+				"iat": 400888,
+				"jti": "ss",
+				"custom": {"arr": ["1", "2", "3"]}
+			}`,
+			expected: &RawJWT{
+				jsonpb: &spb.Struct{
+					Fields: map[string]*spb.Value{
+						"aud":    stringList([]string{"one", "two"}),
+						"iss":    spb.NewStringValue("tink-test"),
+						"sub":    spb.NewStringValue("subject"),
+						"exp":    spb.NewNumberValue(457888),
+						"nbf":    spb.NewNumberValue(450888),
+						"iat":    spb.NewNumberValue(400888),
+						"jti":    spb.NewStringValue("ss"),
+						"custom": spb.NewStructValue(&spb.Struct{Fields: map[string]*spb.Value{"arr": stringList([]string{"1", "2", "3"})}}),
+					},
+				},
+			},
+		},
+		{
+			tag:  "no claims present",
+			json: "{}",
+			expected: &RawJWT{
+				jsonpb: &spb.Struct{
+					Fields: map[string]*spb.Value{},
+				},
+			},
+		},
+		{
+			tag:  "single string value audience present",
+			json: `{"aud": "tink-aud"}`,
+			expected: &RawJWT{
+				jsonpb: &spb.Struct{
+					Fields: map[string]*spb.Value{
+						"aud": spb.NewStringValue("tink-aud"),
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.tag, func(t *testing.T) {
+			rawJWT, err := NewRawJWTFromJSON("", []byte(tc.json))
+			if err != nil {
+				t.Fatalf("parsing valid RawJWT: %v", err)
+			}
+			if diff := cmp.Diff(tc.expected, rawJWT, protocmp.Transform(), cmp.AllowUnexported(RawJWT{})); diff != "" {
+				t.Fatalf("NewRawJWTFromJSON(%s) returned unexpected diff (-want +got):\n%s", tc.json, diff)
+			}
+		})
+	}
+}
+
+func TestJSONPayload(t *testing.T) {
+	opts := &RawJWTOptions{
+		TypeHeader:        "typeHeader",
+		WithoutExpiration: true,
+		Subject:           refString("tink-subject"),
+	}
+	token, err := NewRawJWT(opts)
+	if err != nil {
+		t.Errorf("generating valid RawJWT: %v", err)
+	}
+	j, err := token.JSONPayload()
+	if err != nil {
+		t.Errorf("calling JSONPayload on rawJWT: %v", err)
+	}
+	expected := `{"sub":"tink-subject"}`
+	if !cmp.Equal(string(j), expected) {
+		t.Fatalf("JSONPayload output got %v, expected %v", string(j), expected)
+	}
+
+}
+
+func TestFromJSONValidationFailures(t *testing.T) {
+	testCases := []jsonToJWTTestCase{
+
+		{
+			tag:  "json with empty audience",
+			json: `{"sub": "tink", "aud": []}`,
+		},
+		{
+			tag:  "json with audience of wrong type",
+			json: `{"aud": 5}`,
+		},
+		{
+			tag:  "json with audiences of wrong type",
+			json: `{"aud": ["one", null]}`,
+		},
+		{
+			tag:  "json with registered claim with wrong type",
+			json: `{"sub": 1}`,
+		},
+		{
+			tag:  "json with non UTF-8 string on subject claim fails",
+			json: `{"sub": "\xF4\x7F\xBF\xBF"}`,
+		},
+		{
+			tag:  "json with non UTF-8 string on issuer claim fails",
+			json: `{"iss": "\xF4\x7F\xBF\xBF"}`,
+		},
+		{
+			tag:  "json with non UTF-8 string on jwt id claim fails",
+			json: `{"jti": "\xF4\x7F\xBF\xBF"}`,
+		},
+		{
+			tag:  "json with `not before` timestamp claim greater than valid JWT max time fails",
+			json: `{"nbf": 253402301799}`,
+		},
+		{
+			tag:  "json with `issued at` timestamp claim greater than valid JWT max time fails",
+			json: `{"iat": 253402301799}`,
+		},
+		{
+			tag:  "json with `expiration` timestamp claim greater than valid JWT max time fails",
+			json: `{"exp": 253402301799}`,
+		},
+		{
+			tag:  "json with `not before` timestamp claim smaller than valid JWT min time fails",
+			json: `{"nbf": -4}`,
+		},
+		{
+			tag:  "json with `issued at` timestamp claim smaller than valid JWT min time fails",
+			json: `{"iat": -4}`,
+		},
+		{
+			tag:  "json with `expiration` timestamp claim smaller than valid JWT min time fails",
+			json: `{"exp": -4}`,
+		},
+		{
+			tag:  "json with `not before` claim of non numeric type fails",
+			json: `{"nbf": "invalid"}`,
+		},
+		{
+			tag:  "json with `issued at` claim of non numeric type fails",
+			json: `{"iat": "invalid"}`,
+		},
+		{
+			tag:  "json with `expiration` claim of non numeric type fails",
+			json: `{"exp": "invalid"}`,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.tag, func(t *testing.T) {
+			if _, err := NewRawJWTFromJSON("", []byte(tc.json)); err == nil {
+				t.Errorf("expected error instead got nil")
+			}
+		})
+	}
+}

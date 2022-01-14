@@ -84,6 +84,27 @@ func NewRawJWT(opts *RawJWTOptions) (*RawJWT, error) {
 	}, nil
 }
 
+// NewRawJWTFromJSON builds a RawJWT from a marshaled JSON.
+// Users shouldn't call this function and instead use NewRawJWT.
+func NewRawJWTFromJSON(typeHeader string, jsonPayload []byte) (*RawJWT, error) {
+	payload := &spb.Struct{}
+	if err := payload.UnmarshalJSON(jsonPayload); err != nil {
+		return nil, err
+	}
+	if err := validatePayload(payload); err != nil {
+		return nil, err
+	}
+	return &RawJWT{
+		jsonpb:     payload,
+		typeHeader: typeHeader,
+	}, nil
+}
+
+// JSONPayload a RawJWT marshals to JSON.
+func (r *RawJWT) JSONPayload() ([]byte, error) {
+	return r.jsonpb.MarshalJSON()
+}
+
 // createPayload creates a JSON payload from JWT options.
 func createPayload(opts *RawJWTOptions) (*spb.Struct, error) {
 	if err := validateCustomClaims(opts.CustomClaims); err != nil {
