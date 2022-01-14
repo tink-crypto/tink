@@ -14,7 +14,6 @@ def tink_pybind_extension(
     Creates Bazel targets for a pybind module:
     - A py_library with the taret name
     - A cc_binary with the target name.so
-    - A cc_library with the target name_cc
 
     Args:
       name: name of the target
@@ -29,7 +28,6 @@ def tink_pybind_extension(
       A py_library target.
     """
     shared_lib_name = name + ".so"
-    cc_library_name = name + "_cc"
     native.cc_binary(
         name = shared_lib_name,
         linkshared = 1,
@@ -42,13 +40,6 @@ def tink_pybind_extension(
         }),
         features = features,
         deps = deps,
-    )
-    native.cc_library(
-        name = cc_library_name,
-        srcs = srcs,
-        hdrs = hdrs,
-        deps = deps,
-        alwayslink = True,
     )
 
     # Extract Python targets from deps
