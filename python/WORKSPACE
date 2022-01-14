@@ -10,6 +10,11 @@ local_repository(
     path = "../cc",
 )
 
+local_repository(
+    name = "tink_cc_awskms",
+    path = "../kms/cc/aws",
+)
+
 # Need to load rules_python earlier as proto uses an older version which is
 # incompatible with our Python implementation will load
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")

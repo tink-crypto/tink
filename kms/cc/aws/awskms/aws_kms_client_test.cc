@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "tink/integration/awskms/aws_kms_client.h"
+#include "awskms/aws_kms_client.h"
 
 #include <cstdlib>
 #include <string>

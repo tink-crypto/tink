@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/integration/awskms/aws_kms_client.h"
+#include "tink/awskms/aws_kms_client.h"
 
 #include "pybind11/pybind11.h"
 #include "tink/util/statusor.h"

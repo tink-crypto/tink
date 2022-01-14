@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INTEGRATION_AWSKMS_AWS_KMS_AEAD_H_
-#define TINK_INTEGRATION_AWSKMS_AWS_KMS_AEAD_H_
+#ifndef AWSKMS_AWS_KMS_AEAD_H_
+#define AWSKMS_AWS_KMS_AEAD_H_
 
 #include "absl/strings/string_view.h"
 #include "aws/kms/KMSClient.h"
@@ -61,4 +61,4 @@ class AwsKmsAead : public Aead {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTEGRATION_AWSKMS_AWS_KMS_AEAD_H_
+#endif  // AWSKMS_AWS_KMS_AEAD_H_

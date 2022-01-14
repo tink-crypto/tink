@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_INTEGRATION_AWSKMS_AWS_CRYPTO_H_
-#define TINK_INTEGRATION_AWSKMS_AWS_CRYPTO_H_
+#ifndef AWSKMS_AWS_CRYPTO_H_
+#define AWSKMS_AWS_CRYPTO_H_
 
 #include "aws/core/Aws.h"
 #include "aws/core/utils/crypto/Factories.h"
@@ -63,4 +63,4 @@ class AwsSha256HmacFactory : public Aws::Utils::Crypto::HMACFactory {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_INTEGRATION_AWSKMS_AWS_CRYPTO_H_
+#endif  // AWSKMS_AWS_CRYPTO_H_

@@ -69,8 +69,26 @@ echo "RBE_BAZELRC: $RBE_BAZELRC"
 # TODO(b/141297103): enable Python
 # TODO(b/143102587): enable Javascript
 
+readonly TINK_BASE_DIR="${PWD}"
+
 # Build and test C++.
-cd cc/
+cd "${TINK_BASE_DIR}/cc/"
+time bazel --bazelrc="$RBE_BAZELRC" \
+  build "${RBE_ARGS[@]}" \
+  --config=remote \
+  --build_tag_filters=-no_rbe \
+  -- ...
+
+time bazel --bazelrc="$RBE_BAZELRC" \
+  test "${RBE_ARGS[@]}" \
+  --config=remote \
+  --test_output=errors \
+  --test_tag_filters=-no_rbe \
+  --jvmopt=-Drbe=1 \
+  -- ...
+
+# Build and test Tink C++ AWS-KMS.
+cd "${TINK_BASE_DIR}/kms/cc/aws/"
 time bazel --bazelrc="$RBE_BAZELRC" \
   build "${RBE_ARGS[@]}" \
   --config=remote \
@@ -86,7 +104,7 @@ time bazel --bazelrc="$RBE_BAZELRC" \
   -- ...
 
 # Build and test Java.
-cd ../java_src
+cd "${TINK_BASE_DIR}/java_src"
 time bazel --bazelrc="$RBE_BAZELRC" \
   build "${RBE_ARGS[@]}" \
   --config=remote \
@@ -102,7 +120,7 @@ time bazel --bazelrc="$RBE_BAZELRC" \
   -- ...
 
 # Build and test Go.
-cd ../go
+cd "${TINK_BASE_DIR}/go"
 time bazel --bazelrc="$RBE_BAZELRC" \
   build "${RBE_ARGS[@]}" \
   --config=remote \
