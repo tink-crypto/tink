@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "awskms/aws_kms_aead.h"
+#include "tink/integration/awskms/aws_kms_aead.h"
 
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"

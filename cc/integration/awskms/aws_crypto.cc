@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "awskms/aws_crypto.h"
+#include "tink/integration/awskms/aws_crypto.h"
 
 #include "aws/core/Aws.h"
 #include "aws/core/utils/Outcome.h"

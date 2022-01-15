@@ -324,7 +324,7 @@ tink_pybind_library(
         "//tink/cc:output_stream_adapter",
         "//tink/cc/pybind:status_casters",
         "@pybind11",
-        "@tink_cc_awskms//awskms:aws_kms_client",
+        "@tink_cc//integration/awskms:aws_kms_client",
     ],
 )
 
@@ -376,7 +376,7 @@ tink_pybind_extension(
         "@tink_cc//:public_key_sign",
         "@tink_cc//:public_key_verify",
         "@tink_cc//:streaming_aead",
-        "@tink_cc_awskms//awskms:aws_kms_client",
+        "@tink_cc//integration/awskms:aws_kms_client",
         "@tink_cc//integration/gcpkms:gcp_kms_client",
         "@tink_cc//prf:prf_set",
         "@tink_cc//util:status",

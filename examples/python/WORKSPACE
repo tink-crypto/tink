@@ -43,11 +43,6 @@ local_repository(
 #     strip_prefix = "tink-master/cc",
 # )
 
-local_repository(
-    name = "tink_cc_awskms",
-    path = "../../kms/cc/aws",
-)
-
 
 # Load Tink dependencies.
 

@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "awskms/aws_kms_aead.h"
+#include "tink/integration/awskms/aws_kms_aead.h"
 
 #include <string>
 #include <vector>
@@ -36,6 +36,7 @@ using crypto::tink::integration::awskms::AwsKmsAead;
 class AwsKmsAeadTest : public ::testing::Test {
   // TODO(przydatek): add a test with a mock KMSClient.
 };
+
 
 }  // namespace
 }  // namespace subtle

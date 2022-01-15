@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "awskms/aws_kms_client.h"
+#include "tink/integration/awskms/aws_kms_client.h"
 
 #include <fstream>
 #include <iostream>
@@ -33,8 +33,8 @@
 #include "aws/core/utils/crypto/Factories.h"
 #include "aws/core/utils/memory/AWSMemory.h"
 #include "aws/kms/KMSClient.h"
-#include "awskms/aws_crypto.h"
-#include "awskms/aws_kms_aead.h"
+#include "tink/integration/awskms/aws_crypto.h"
+#include "tink/integration/awskms/aws_kms_aead.h"
 #include "tink/kms_client.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

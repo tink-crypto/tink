@@ -13,11 +13,6 @@ local_repository(
 )
 
 local_repository(
-    name = "tink_cc_awskms",
-    path = "../kms/cc/aws",
-)
-
-local_repository(
     name = "tink_java",
     path = "../java_src",
 )

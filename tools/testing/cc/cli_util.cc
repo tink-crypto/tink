@@ -27,7 +27,7 @@
 #include "tink/config.h"
 #include "tink/config/tink_config.h"
 #include "tink/input_stream.h"
-#include "tink/awskms/aws_kms_client.h"
+#include "tink/integration/awskms/aws_kms_client.h"
 #include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/json_keyset_writer.h"

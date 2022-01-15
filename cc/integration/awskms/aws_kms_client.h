@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef AWSKMS_AWS_KMS_CLIENT_H_
-#define AWSKMS_AWS_KMS_CLIENT_H_
+#ifndef TINK_INTEGRATION_AWSKMS_AWS_KMS_CLIENT_H_
+#define TINK_INTEGRATION_AWSKMS_AWS_KMS_CLIENT_H_
 
 #include <memory>
 
@@ -78,4 +78,4 @@ class AwsKmsClient : public crypto::tink::KmsClient  {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // AWSKMS_AWS_KMS_CLIENT_H_
+#endif  // TINK_INTEGRATION_AWSKMS_AWS_KMS_CLIENT_H_
