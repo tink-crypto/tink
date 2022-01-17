@@ -27,6 +27,7 @@
 using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::testing::IsEmpty;
+using ::testing::Not;
 using ::testing::UnorderedElementsAreArray;
 
 namespace crypto {
@@ -155,6 +156,28 @@ TEST(RawJwt, NeitherSetExpirationNorWithoutExpirationFail) {
   EXPECT_FALSE(RawJwtBuilder().Build().ok());
 }
 
+TEST(RawJwt, SetAudienceAndGetAudiencesOK) {
+  util::StatusOr<RawJwt> jwt =
+      RawJwtBuilder().SetAudience("audience").WithoutExpiration().Build();
+  ASSERT_THAT(jwt.status(), IsOk());
+
+  std::vector<std::string> expected = {"audience"};
+  EXPECT_TRUE(jwt->HasAudiences());
+  EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
+}
+
+TEST(RawJwt, SetAudiencesAndGetAudiencesOK) {
+  util::StatusOr<RawJwt> jwt = RawJwtBuilder()
+                                   .SetAudiences({"audience1", "audience2"})
+                                   .WithoutExpiration()
+                                   .Build();
+  ASSERT_THAT(jwt.status(), IsOk());
+
+  std::vector<std::string> expected = {"audience1", "audience2"};
+  EXPECT_TRUE(jwt->HasAudiences());
+  EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
+}
+
 TEST(RawJwt, AddGetAudiencesOK) {
   util::StatusOr<RawJwt> jwt = RawJwtBuilder()
                                    .AddAudience("audience1")
@@ -166,6 +189,37 @@ TEST(RawJwt, AddGetAudiencesOK) {
   std::vector<std::string> expected = {"audience1", "audience2"};
   EXPECT_TRUE(jwt->HasAudiences());
   EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
+}
+
+TEST(RawJwt, SetAudienceStringAud) {
+  util::StatusOr<RawJwt> jwt =
+      RawJwtBuilder().SetAudience("audience").WithoutExpiration().Build();
+  ASSERT_THAT(jwt.status(), IsOk());
+
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"aud":"audience"})"));
+}
+
+TEST(RawJwt, AddAudienceListAud) {
+  util::StatusOr<RawJwt> jwt =
+      RawJwtBuilder().AddAudience("audience").WithoutExpiration().Build();
+  ASSERT_THAT(jwt.status(), IsOk());
+
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"aud":["audience"]})"));
+}
+
+TEST(RawJwt, SetAndAddAudienceFail) {
+  EXPECT_THAT(RawJwtBuilder()
+                  .SetAudience("audience1")
+                  .AddAudience("audience2")
+                  .Build()
+                  .status(),
+              Not(IsOk()));
+  EXPECT_THAT(RawJwtBuilder()
+                  .AddAudience("audience2")
+                  .SetAudience("audience1")
+                  .Build()
+                  .status(),
+              Not(IsOk()));
 }
 
 TEST(RawJwt, GetCustomClaimOK) {

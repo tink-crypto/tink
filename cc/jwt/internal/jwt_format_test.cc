@@ -371,7 +371,7 @@ TEST(RawJwt, FromJsonNegativeExpirationAreInvalid) {
   EXPECT_FALSE(jwt.ok());
 }
 
-TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
+TEST(RawJwt, FromJsonPreservesStringAud) {
   util::StatusOr<RawJwt> jwt =
       RawJwtParser::FromJson(absl::nullopt, R"({"aud":"audience"})");
   ASSERT_THAT(jwt.status(), IsOk());
@@ -379,6 +379,20 @@ TEST(RawJwt, FromJsonConvertsStringAudIntoListOfStrings) {
   std::vector<std::string> expected = {"audience"};
   EXPECT_TRUE(jwt->HasAudiences());
   EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
+
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"aud":"audience"})"));
+}
+
+TEST(RawJwt, FromJsonPreservesListAud) {
+  util::StatusOr<RawJwt> jwt =
+      RawJwtParser::FromJson(absl::nullopt, R"({"aud":["audience"]})");
+  ASSERT_THAT(jwt.status(), IsOk());
+
+  std::vector<std::string> expected = {"audience"};
+  EXPECT_TRUE(jwt->HasAudiences());
+  EXPECT_THAT(jwt->GetAudiences(), IsOkAndHolds(expected));
+
+  EXPECT_THAT(jwt->GetJsonPayload(), IsOkAndHolds(R"({"aud":["audience"]})"));
 }
 
 TEST(RawJwt, FromJsonWithBadRegisteredTypes) {

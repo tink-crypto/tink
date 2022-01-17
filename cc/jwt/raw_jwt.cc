@@ -31,6 +31,9 @@ namespace tink {
 
 namespace {
 
+using ::google::protobuf::Struct;
+using ::google::protobuf::Value;
+
 // Registered claim names, as defined in
 // https://tools.ietf.org/html/rfc7519#section-4.1.
 constexpr absl::string_view kJwtClaimIssuer = "iss";
@@ -61,42 +64,53 @@ util::Status ValidatePayloadName(absl::string_view name) {
 }
 
 bool HasClaimOfKind(const google::protobuf::Struct& json_proto,
-                    absl::string_view name,
-                    google::protobuf::Value::KindCase kind) {
+                    absl::string_view name, Value::KindCase kind) {
   if (IsRegisteredClaimName(name)) {
     return false;
   }
-  auto fields = json_proto.fields();
+  const auto& fields = json_proto.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return false;
   }
-  const google::protobuf::Value& value = it->second;
+  const Value& value = it->second;
   return value.kind_case() == kind;
 }
 
 // Returns true if the claim is present but not a string.
 bool ClaimIsNotAString(const google::protobuf::Struct& json_proto,
                        absl::string_view name) {
-  auto fields = json_proto.fields();
+  const auto& fields = json_proto.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return false;
   }
-  const auto& value = it->second;
-  return value.kind_case() != google::protobuf::Value::kStringValue;
+  const Value& value = it->second;
+  return value.kind_case() != Value::kStringValue;
+}
+
+// Returns true if the claim is present but not a list.
+bool ClaimIsNotAList(google::protobuf::Struct& json_proto,
+                     absl::string_view name) {
+  const auto& fields = json_proto.fields();
+  auto it = fields.find(std::string(name));
+  if (it == fields.end()) {
+    return false;
+  }
+  const Value& value = it->second;
+  return value.kind_case() != Value::kListValue;
 }
 
 // Returns true if the claim is present but not a timestamp.
 bool ClaimIsNotATimestamp(const google::protobuf::Struct& json_proto,
                           absl::string_view name) {
-  auto fields = json_proto.fields();
+  const auto& fields = json_proto.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return false;
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kNumberValue) {
     return true;
   }
   double timestamp = value.number_value();
@@ -115,19 +129,17 @@ absl::Time TimestampToTime(double timestamp) {
   return absl::FromUnixSeconds(timestamp);
 }
 
-util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
-  auto fields = json_proto->mutable_fields();
-  auto it = fields->find(std::string(kJwtClaimAudience));
-  if (it == fields->end()) {
+util::Status ValidateAudienceClaim(const google::protobuf::Struct& json_proto) {
+  const auto& fields = json_proto.fields();
+  auto it = fields.find(std::string(kJwtClaimAudience));
+  if (it == fields.end()) {
     return util::OkStatus();
   }
-  google::protobuf::Value& value = it->second;
-  if (value.kind_case() == google::protobuf::Value::kStringValue) {
-    std::string aud = value.string_value();
-    value.mutable_list_value()->add_values()->set_string_value(aud);
+  const Value& value = it->second;
+  if (value.kind_case() == Value::kStringValue) {
     return util::OkStatus();
   }
-  if (value.kind_case() != google::protobuf::Value::kListValue) {
+  if (value.kind_case() != Value::kListValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "aud claim is not a list");
   }
@@ -135,8 +147,8 @@ util::Status ValidateAndFixAudienceClaim(google::protobuf::Struct* json_proto) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "aud claim is present but empty");
   }
-  for (const auto& v : value.list_value().values()) {
-    if (v.kind_case() != google::protobuf::Value::kStringValue) {
+  for (const Value& v : value.list_value().values()) {
+    if (v.kind_case() != Value::kStringValue) {
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "aud claim is not a list of strings");
     }
@@ -161,7 +173,7 @@ util::StatusOr<RawJwt> RawJwt::FromJson(absl::optional<std::string> type_header,
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "contains an invalid registered claim");
   }
-  util::Status aud_status = ValidateAndFixAudienceClaim(&(*proto));
+  util::Status aud_status = ValidateAudienceClaim(*proto);
   if (!aud_status.ok()) {
     return aud_status;
   }
@@ -196,13 +208,13 @@ bool RawJwt::HasIssuer() const {
 }
 
 util::StatusOr<std::string> RawJwt::GetIssuer() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimIssuer));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "No Issuer found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kStringValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Issuer is not a string");
   }
@@ -214,13 +226,13 @@ bool RawJwt::HasSubject() const {
 }
 
 util::StatusOr<std::string> RawJwt::GetSubject() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimSubject));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kInvalidArgument, "No Subject found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kStringValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Subject is not a string");
   }
@@ -232,19 +244,24 @@ bool RawJwt::HasAudiences() const {
 }
 
 util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimAudience));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound, "No Audiences found");
   }
-  google::protobuf::Value list = it->second;
-  if (list.kind_case() != google::protobuf::Value::kListValue) {
+  Value list = it->second;
+  if (list.kind_case() != Value::kListValue) {
+    std::vector<std::string> audiences;
+    audiences.push_back(list.string_value());
+    return audiences;
+  }
+  if (list.kind_case() != Value::kListValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Audiences is not a list");
   }
   std::vector<std::string> audiences;
   for (const auto& value : list.list_value().values()) {
-    if (value.kind_case() != google::protobuf::Value::kStringValue) {
+    if (value.kind_case() != Value::kStringValue) {
       return util::Status(absl::StatusCode::kInvalidArgument,
                           "Audiences is not a list of strings");
     }
@@ -253,19 +270,18 @@ util::StatusOr<std::vector<std::string>> RawJwt::GetAudiences() const {
   return audiences;
 }
 
-
 bool RawJwt::HasJwtId() const {
   return json_proto_.fields().contains(std::string(kJwtClaimJwtId));
 }
 
 util::StatusOr<std::string> RawJwt::GetJwtId() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimJwtId));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound, "No JwtId found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kStringValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "JwtId is not a string");
   }
@@ -277,13 +293,13 @@ bool RawJwt::HasExpiration() const {
 }
 
 util::StatusOr<absl::Time> RawJwt::GetExpiration() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimExpiration));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound, "No Expiration found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kNumberValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "Expiration is not a number");
   }
@@ -295,13 +311,13 @@ bool RawJwt::HasNotBefore() const {
 }
 
 util::StatusOr<absl::Time> RawJwt::GetNotBefore() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimNotBefore));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound, "No NotBefore found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kNumberValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "NotBefore is not a number");
   }
@@ -313,13 +329,13 @@ bool RawJwt::HasIssuedAt() const {
 }
 
 util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(kJwtClaimIssuedAt));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound, "No IssuedAt found");
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kNumberValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         "IssuedAt is not a number");
   }
@@ -327,11 +343,11 @@ util::StatusOr<absl::Time> RawJwt::GetIssuedAt() const {
 }
 
 bool RawJwt::IsNullClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name, google::protobuf::Value::kNullValue);
+  return HasClaimOfKind(json_proto_, name, Value::kNullValue);
 }
 
 bool RawJwt::HasBooleanClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name, google::protobuf::Value::kBoolValue);
+  return HasClaimOfKind(json_proto_, name, Value::kBoolValue);
 }
 
 util::StatusOr<bool> RawJwt::GetBooleanClaim(
@@ -340,14 +356,14 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
   if (!status.ok()) {
     return status;
   }
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kBoolValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kBoolValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::Substitute("claim '$0' is not a bool", name));
   }
@@ -355,8 +371,7 @@ util::StatusOr<bool> RawJwt::GetBooleanClaim(
 }
 
 bool RawJwt::HasStringClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name,
-                        google::protobuf::Value::kStringValue);
+  return HasClaimOfKind(json_proto_, name, Value::kStringValue);
 }
 
 util::StatusOr<std::string> RawJwt::GetStringClaim(
@@ -365,14 +380,14 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
   if (!status.ok()) {
     return status;
   }
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kStringValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::Substitute("claim '$0' is not a string", name));
   }
@@ -380,8 +395,7 @@ util::StatusOr<std::string> RawJwt::GetStringClaim(
 }
 
 bool RawJwt::HasNumberClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name,
-                        google::protobuf::Value::kNumberValue);
+  return HasClaimOfKind(json_proto_, name, Value::kNumberValue);
 }
 
 util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
@@ -389,14 +403,14 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
   if (!status.ok()) {
     return status;
   }
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kNumberValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kNumberValue) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::Substitute("claim '$0' is not a number", name));
   }
@@ -404,8 +418,7 @@ util::StatusOr<double> RawJwt::GetNumberClaim(absl::string_view name) const {
 }
 
 bool RawJwt::HasJsonObjectClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name,
-                        google::protobuf::Value::kStructValue);
+  return HasClaimOfKind(json_proto_, name, Value::kStructValue);
 }
 
 util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
@@ -414,14 +427,14 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
   if (!status.ok()) {
     return status;
   }
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kStructValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kStructValue) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::Substitute("claim '$0' is not a JSON object", name));
@@ -430,8 +443,7 @@ util::StatusOr<std::string> RawJwt::GetJsonObjectClaim(
 }
 
 bool RawJwt::HasJsonArrayClaim(absl::string_view name) const {
-  return HasClaimOfKind(json_proto_, name,
-                        google::protobuf::Value::kListValue);
+  return HasClaimOfKind(json_proto_, name, Value::kListValue);
 }
 
 util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
@@ -440,14 +452,14 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
   if (!status.ok()) {
     return status;
   }
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   auto it = fields.find(std::string(name));
   if (it == fields.end()) {
     return util::Status(absl::StatusCode::kNotFound,
                         absl::Substitute("claim '$0' not found", name));
   }
-  const google::protobuf::Value& value = it->second;
-  if (value.kind_case() != google::protobuf::Value::kListValue) {
+  const Value& value = it->second;
+  if (value.kind_case() != Value::kListValue) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::Substitute("claim '$0' is not a JSON array", name));
@@ -456,7 +468,7 @@ util::StatusOr<std::string> RawJwt::GetJsonArrayClaim(
 }
 
 std::vector<std::string> RawJwt::CustomClaimNames() const {
-  auto fields = json_proto_.fields();
+  const auto& fields = json_proto_.fields();
   std::vector<std::string> values;
   for (auto it = fields.begin(); it != fields.end(); it++) {
     if (!IsRegisteredClaimName(it->first)) {
@@ -475,7 +487,7 @@ RawJwtBuilder& RawJwtBuilder::SetTypeHeader(absl::string_view type_header) {
 
 RawJwtBuilder& RawJwtBuilder::SetIssuer(absl::string_view issuer) {
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_string_value(std::string(issuer));
   (*fields)[std::string(kJwtClaimIssuer)] = value;
   return *this;
@@ -483,16 +495,56 @@ RawJwtBuilder& RawJwtBuilder::SetIssuer(absl::string_view issuer) {
 
 RawJwtBuilder& RawJwtBuilder::SetSubject(absl::string_view subject) {
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_string_value(std::string(subject));
   (*fields)[std::string(kJwtClaimSubject)] = value;
   return *this;
 }
 
-RawJwtBuilder& RawJwtBuilder::AddAudience(absl::string_view audience) {
+RawJwtBuilder& RawJwtBuilder::SetAudience(absl::string_view audience) {
+  // Make sure that "aud" is not already a list by a call to SetAudiences or
+  // AddAudience.
+  if (ClaimIsNotAString(json_proto_, kJwtClaimAudience)) {
+    error_ = util::Status(absl::StatusCode::kInvalidArgument,
+                          "SetAudience() must not be called together with "
+                          "SetAudiences() or AddAudience");
+    return *this;
+  }
   auto fields = json_proto_.mutable_fields();
-  auto insertion_result = fields->insert(
-      {std::string(kJwtClaimAudience), google::protobuf::Value()});
+  Value value;
+  value.set_string_value(std::string(audience));
+  (*fields)[std::string(kJwtClaimAudience)] = value;
+  return *this;
+}
+
+RawJwtBuilder& RawJwtBuilder::SetAudiences(std::vector<std::string> audiences) {
+  // Make sure that "aud" is not already a string by a call to SetAudience.
+  if (ClaimIsNotAList(json_proto_, kJwtClaimAudience)) {
+    error_ = util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "SetAudiences() and SetAudience() must not be called together");
+    return *this;
+  }
+  auto fields = json_proto_.mutable_fields();
+  Value value;
+  for (const auto& audience : audiences) {
+    value.mutable_list_value()->add_values()->set_string_value(audience);
+  }
+  (*fields)[std::string(kJwtClaimAudience)] = value;
+  return *this;
+}
+
+RawJwtBuilder& RawJwtBuilder::AddAudience(absl::string_view audience) {
+  // Make sure that "aud" is not already a string by a call to SetAudience.
+  if (ClaimIsNotAList(json_proto_, kJwtClaimAudience)) {
+    error_ = util::Status(
+        absl::StatusCode::kInvalidArgument,
+        "AddAudience() and SetAudience() must not be called together");
+    return *this;
+  }
+  auto fields = json_proto_.mutable_fields();
+  auto insertion_result =
+      fields->insert({std::string(kJwtClaimAudience), Value()});
   google::protobuf::ListValue* list_value =
       insertion_result.first->second.mutable_list_value();
   list_value->add_values()->set_string_value(std::string(audience));
@@ -501,7 +553,7 @@ RawJwtBuilder& RawJwtBuilder::AddAudience(absl::string_view audience) {
 
 RawJwtBuilder& RawJwtBuilder::SetJwtId(absl::string_view jwid) {
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_string_value(std::string(jwid));
   (*fields)[std::string(kJwtClaimJwtId)] = value;
   return *this;
@@ -522,7 +574,7 @@ RawJwtBuilder& RawJwtBuilder::SetExpiration(absl::Time expiration) {
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_number_value(exp_timestamp);
   (*fields)[std::string(kJwtClaimExpiration)] = value;
   return *this;
@@ -538,7 +590,7 @@ RawJwtBuilder& RawJwtBuilder::SetNotBefore(absl::Time not_before) {
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_number_value(nbf_timestamp);
   (*fields)[std::string(kJwtClaimNotBefore)] = value;
   return *this;
@@ -554,7 +606,7 @@ RawJwtBuilder& RawJwtBuilder::SetIssuedAt(absl::Time issued_at) {
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_number_value(iat_timestamp);
   (*fields)[std::string(kJwtClaimIssuedAt)] = value;
   return *this;
@@ -569,7 +621,7 @@ RawJwtBuilder& RawJwtBuilder::AddNullClaim(absl::string_view name) {
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_null_value(google::protobuf::NULL_VALUE);
   (*fields)[std::string(name)] = value;
   return *this;
@@ -585,7 +637,7 @@ RawJwtBuilder& RawJwtBuilder::AddBooleanClaim(absl::string_view name,
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_bool_value(bool_value);
   (*fields)[std::string(name)] = value;
   return *this;
@@ -601,7 +653,7 @@ RawJwtBuilder& RawJwtBuilder::AddStringClaim(absl::string_view name,
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_string_value(std::string(string_value));
   (*fields)[std::string(name)] = value;
   return *this;
@@ -617,7 +669,7 @@ RawJwtBuilder& RawJwtBuilder::AddNumberClaim(absl::string_view name,
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   value.set_number_value(double_value);
   (*fields)[std::string(name)] = value;
   return *this;
@@ -641,7 +693,7 @@ RawJwtBuilder& RawJwtBuilder::AddJsonObjectClaim(
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   *value.mutable_struct_value() = *std::move(proto);
   (*fields)[std::string(name)] = value;
   return *this;
@@ -665,7 +717,7 @@ RawJwtBuilder& RawJwtBuilder::AddJsonArrayClaim(absl::string_view name,
     return *this;
   }
   auto fields = json_proto_.mutable_fields();
-  google::protobuf::Value value;
+  Value value;
   *value.mutable_list_value() = *list;
   (*fields)[std::string(name)] = value;
   return *this;
