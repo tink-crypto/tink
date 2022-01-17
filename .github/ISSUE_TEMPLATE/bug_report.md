@@ -7,32 +7,32 @@ assignees: 'thaidn, chuckx'
 
 **Help us help you**
 
-Please tell us more about
-[your Tink deployment](https://docs.google.com/forms/d/1mhHvyNJQgTXFDnqOermB7-BD8GQSyvtFPUAhILRbYcA/edit).
+We’d like to know more about
+[your Tink deployment](https://docs.google.com/forms/d/1mhHvyNJQgTXFDnqOermB7-BD8GQSyvtFPUAhILRbYcA/).
 
-**Describe the bug**
+**Describe the bug:**
 
-Provide clear and concise description of the bug.
+Provide a clear and concise description of the bug.
 
-**To Reproduce**
+**What was the expected behavior?**
+
+Describe what you expected to happen.
+
+**How can we reproduce the bug?**
 
 Include buildable code snippets or gists which triggered the bug.
 
-**Expected behavior**
+**Do you have any debugging information?**
 
-Describe of what you expected to happen.
-
-**Error messages, stack traces, etc.**
-
-If applicable, please include error messages, stack traces or any debugging
+If applicable, include error messages, stack traces, or any other debugging
 information.
 
-**Version information**
+**Provide your version information:**
 
- - Language: (e.g., Java, Python, etc.)
- - Version: (e.g., 1.2.0)
- - Environment: (e.g., JDK 8, Python3.7, iPhone 11, Android M, etc.)
+-   Language: (such as Java or Python)
+-   Version: (for example, 1.2.0)
+-   Environment: (such as JDK 8, Python3.7, iPhone 11, or Android M)
 
-**Additional context**
+**Is there anything else you’d like to add?**
 
-Add any other context about the problem.
+Provide any additional context about the problem.
