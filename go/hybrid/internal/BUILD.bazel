@@ -23,11 +23,15 @@ go_test(
     name = "go_default_test",
     srcs = [
         "hkdf_hpke_kdf_test.go",
+        "hpke_test.go",
         "x25519_hpke_kem_test.go",
     ],
     data = [":testdata"],
     embed = [":go_default_library"],
-    deps = ["//subtle:go_default_library"],
+    deps = [
+        "//subtle:go_default_library",
+        "//testutil:go_default_library",
+    ],
 )
 
 filegroup(
