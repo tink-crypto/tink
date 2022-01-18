@@ -29,7 +29,7 @@ import java.security.GeneralSecurityException;
  * it uses the primary key in the keyset, and prepends to the ciphertext a certain prefix associated
  * with the primary key.
  */
-class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, HybridEncrypt> {
+public class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, HybridEncrypt> {
   private static class WrappedHybridEncrypt implements HybridEncrypt {
     final PrimitiveSet<HybridEncrypt> primitives;
 
@@ -45,6 +45,8 @@ class HybridEncryptWrapper implements PrimitiveWrapper<HybridEncrypt, HybridEncr
           primitives.getPrimary().getPrimitive().encrypt(plaintext, contextInfo));
     }
   }
+
+  HybridEncryptWrapper() {}
 
   @Override
   public HybridEncrypt wrap(final PrimitiveSet<HybridEncrypt> primitives) {
