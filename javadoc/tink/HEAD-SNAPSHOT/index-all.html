@@ -6747,6 +6747,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/prf/PrfSetWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.prf.<a href="com/google/crypto/tink/prf/PrfSetWrapper.html" title="class in com.google.crypto.tink.prf">PrfSetWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrimitiveWrapper.html#getInputPrimitiveClass--">getInputPrimitiveClass()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/PrimitiveWrapper.html" title="interface in com.google.crypto.tink">PrimitiveWrapper</a></dt>
@@ -9253,6 +9255,8 @@
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead">DeterministicAeadWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyManager.html#getPrimitiveClass--">getPrimitiveClass()</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink">KeyManager</a></dt>
 <dd>
@@ -12141,6 +12145,10 @@
 <div class="block"><span class="deprecationComment">Use <code>keysetHandle.GetPrimitive(HybridEncrypt.class)</code> after registering the
      <code>HybridEncryptWrapper</code> instead.</span></div>
 </div>
+</dd>
+<dt><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridEncryptWrapper</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
+<dd>
+<div class="block">The implementation of <code>PrimitiveWrapper&lt;HybridEncrypt&gt;</code>.</div>
 </dd>
 <dt><a href="com/google/crypto/tink/hybrid/HybridKeyTemplates.html" title="class in com.google.crypto.tink.hybrid"><span class="typeNameLink">HybridKeyTemplates</span></a> - Class in <a href="com/google/crypto/tink/hybrid/package-summary.html">com.google.crypto.tink.hybrid</a></dt>
 <dd>
@@ -17996,6 +18004,10 @@
 <dd>
 <div class="block">Register the wrapper within the registry.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#register--">register()</a></span> - Static method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
+<dd>
+<div class="block">Register the wrapper within the registry.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/AesCmacKeyManager.html#register-boolean-">register(boolean)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/AesCmacKeyManager.html" title="class in com.google.crypto.tink.mac">AesCmacKeyManager</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/mac/HmacKeyManager.html#register-boolean-">register(boolean)</a></span> - Static method in class com.google.crypto.tink.mac.<a href="com/google/crypto/tink/mac/HmacKeyManager.html" title="class in com.google.crypto.tink.mac">HmacKeyManager</a></dt>
@@ -21408,6 +21420,8 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;DeterministicAead&gt;)</a></span> - Method in class com.google.crypto.tink.daead.<a href="com/google/crypto/tink/daead/DeterministicAeadWrapper.html" title="class in com.google.crypto.tink.daead">DeterministicAeadWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;HybridDecrypt&gt;)</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridDecryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridDecryptWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html#wrap-com.google.crypto.tink.PrimitiveSet-">wrap(PrimitiveSet&lt;HybridEncrypt&gt;)</a></span> - Method in class com.google.crypto.tink.hybrid.<a href="com/google/crypto/tink/hybrid/HybridEncryptWrapper.html" title="class in com.google.crypto.tink.hybrid">HybridEncryptWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/KeyWrap.html#wrap-byte:A-">wrap(byte[])</a></span> - Method in interface com.google.crypto.tink.<a href="com/google/crypto/tink/KeyWrap.html" title="interface in com.google.crypto.tink">KeyWrap</a></dt>
 <dd>
