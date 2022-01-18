@@ -19,6 +19,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from tink.proto import tink_pb2
+from util import key_util
 from util import supported_key_types
 from util import testing_servers
 
@@ -31,25 +32,6 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def _keyset_proto(keyset: bytes) -> tink_pb2.Keyset:
-  keyset_proto = tink_pb2.Keyset()
-  keyset_proto.ParseFromString(keyset)
-  # We sort the keys, since we want keysets to be considered equal even if the
-  # keys are in different order.
-  keyset_proto.key.sort(key=lambda k: k.key_id)
-  return keyset_proto
-
-
-def _is_equal_keyset(keyset1: bytes, keyset2: bytes) -> bool:
-  """Checks if two keyset are equal, and have the exact same keydata.value."""
-  # Keydata.value are serialized protos. This serialization is usually not
-  # deterministic, as it is a unsorted list of key value pairs.
-  # But since JSON serialization does not change keyset.value, we can simply
-  # require these values to be exactly the same in this test. In other tests,
-  # this might be too strict.
-  return _keyset_proto(keyset1) == _keyset_proto(keyset2)
-
-
 def all_key_template_names() -> Iterable[str]:
   """Yields all key template names."""
   for key_type in supported_key_types.ALL_KEY_TYPES:
@@ -58,37 +40,6 @@ def all_key_template_names() -> Iterable[str]:
 
 
 class JsonTest(parameterized.TestCase):
-
-  def test_is_equal_keyset(self):
-    keyset1 = tink_pb2.Keyset()
-    key11 = keyset1.key.add()
-    key11.key_id = 21
-    key12 = keyset1.key.add()
-    key12.key_id = 42
-    keyset2 = tink_pb2.Keyset()
-    key21 = keyset2.key.add()
-    key21.key_id = 42
-    key22 = keyset2.key.add()
-    key22.key_id = 21
-    self.assertTrue(_is_equal_keyset(keyset1.SerializeToString(),
-                                     keyset2.SerializeToString()))
-
-  def test_is_not_equal_keyset(self):
-    keyset1 = tink_pb2.Keyset()
-    key11 = keyset1.key.add()
-    key11.key_id = 21
-    key12 = keyset1.key.add()
-    key12.key_id = 42
-    keyset2 = tink_pb2.Keyset()
-    key3 = keyset2.key.add()
-    key3.key_id = 21
-    self.assertFalse(_is_equal_keyset(keyset1.SerializeToString(),
-                                      keyset2.SerializeToString()))
-
-  def assertEqualKeyset(self, keyset1: bytes, keyset2: bytes):
-    if not _is_equal_keyset(keyset1, keyset2):
-      self.fail('these keysets are not equal: \n%s\n \n%s\n'
-                % (_keyset_proto(keyset1), _keyset_proto(keyset2)))
 
   @parameterized.parameters(all_key_template_names())
   def test_to_from_json(self, key_template_name):
@@ -102,7 +53,12 @@ class JsonTest(parameterized.TestCase):
       json_keyset = testing_servers.keyset_to_json(to_lang, keyset)
       for from_lang in supported_langs:
         keyset2 = testing_servers.keyset_from_json(from_lang, json_keyset)
-        self.assertEqualKeyset(keyset, keyset2)
+        key_util.assert_tink_proto_equal(
+            self,
+            tink_pb2.Keyset.FromString(keyset),
+            tink_pb2.Keyset.FromString(keyset2),
+            msg=('keysets are not equal when converting to JSON in '
+                 '%s and back in %s' % (to_lang, from_lang)))
 
 
 if __name__ == '__main__':

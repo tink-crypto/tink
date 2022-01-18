@@ -61,6 +61,7 @@ py_test(
     name = "json_test",
     srcs = ["json_test.py"],
     deps = [
+        "//util:key_util",
         "//util:supported_key_types",
         "//util:testing_servers",
         requirement("absl-py"),
