@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/strings/escaping.h"
 #include "tink/config/tink_fips.h"
 #include "tink/internal/ec_util.h"
 #include "tink/subtle/common_enums.h"
@@ -28,7 +29,6 @@
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 // TODO(quannguyen): Add extensive tests.
 // It's important to test compatibility with Java.
@@ -89,8 +89,8 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestSenderRecipientBasic) {
     ASSERT_TRUE(status_or_sender_kem.ok());
     auto sender_kem = std::move(status_or_sender_kem.ValueOrDie());
     auto status_or_kem_key = sender_kem->GenerateKey(
-        test.hash, test::HexDecodeOrDie(test.salt_hex),
-        test::HexDecodeOrDie(test.info_hex), test.out_len, test.point_format);
+        test.hash, absl::HexStringToBytes(test.salt_hex),
+        absl::HexStringToBytes(test.info_hex), test.out_len, test.point_format);
     ASSERT_TRUE(status_or_kem_key.ok());
     auto kem_key = std::move(status_or_kem_key.ValueOrDie());
     auto ecies_recipient(
@@ -98,13 +98,13 @@ TEST_F(EciesHkdfSenderKemBoringSslTest, TestSenderRecipientBasic) {
                       .ValueOrDie()));
     auto status_or_shared_secret = ecies_recipient->GenerateKey(
         kem_key->get_kem_bytes(), test.hash,
-        test::HexDecodeOrDie(test.salt_hex),
-        test::HexDecodeOrDie(test.info_hex),
+        absl::HexStringToBytes(test.salt_hex),
+        absl::HexStringToBytes(test.info_hex),
         test.out_len, test.point_format);
-    std::cout << test::HexEncode(kem_key->get_kem_bytes()) << std::endl;
-    EXPECT_EQ(test::HexEncode(
+    std::cout << absl::BytesToHexString(kem_key->get_kem_bytes()) << std::endl;
+    EXPECT_EQ(absl::BytesToHexString(
                   util::SecretDataAsStringView(kem_key->get_symmetric_key())),
-              test::HexEncode(util::SecretDataAsStringView(
+              absl::BytesToHexString(util::SecretDataAsStringView(
                   status_or_shared_secret.ValueOrDie())));
   }
 }

@@ -107,6 +107,8 @@ main() {
     "tink_test_subtle_ed25519_sign_boringssl_test"
     "tink_test_subtle_ed25519_verify_boringssl_test"
     "tink_test_subtle_encrypt_then_authenticate_test"
+    "tink_test_subtle_ecies_hkdf_recipient_kem_boringssl_test"
+    "tink_test_subtle_ecies_hkdf_sender_kem_boringssl_test"
     "tink_test_subtle_hkdf_test"
     "tink_test_subtle_hmac_boringssl_test"
     "tink_test_subtle_hybrid_test_util_test"
