@@ -17,21 +17,9 @@ java_library(
         ":rsa_ssa_pkcs1_sign_key_manager",
         ":rsa_ssa_pkcs1_verify_key_manager",
         ":rsa_ssa_pss_sign_key_manager",
+        ":rsa_ssa_pss_verify_key_manager",
         "//proto:config_java_proto",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
-    ],
-)
-
-java_library(
-    name = "sig_util",
-    srcs = ["SigUtil.java"],
-    deps = [
-        "//proto:common_java_proto",
-        "//proto:ecdsa_java_proto",
-        "//proto:rsa_ssa_pkcs1_java_proto",
-        "//proto:rsa_ssa_pss_java_proto",
-        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
-        "//src/main/java/com/google/crypto/tink/subtle:enums",
     ],
 )
 
@@ -39,11 +27,12 @@ java_library(
     name = "ecdsa_verify_key_manager",
     srcs = ["EcdsaVerifyKeyManager.java"],
     deps = [
-        ":sig_util",
         "//proto:ecdsa_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -65,8 +54,8 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:keyset_reader",
         "//src/main/java/com/google/crypto/tink:pem_key_type",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
@@ -74,11 +63,11 @@ java_library(
     name = "rsa_ssa_pss_verify_key_manager",
     srcs = ["RsaSsaPssVerifyKeyManager.java"],
     deps = [
-        ":sig_util",
         "//proto:rsa_ssa_pss_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
@@ -92,7 +81,6 @@ java_library(
     srcs = ["EcdsaSignKeyManager.java"],
     deps = [
         ":ecdsa_verify_key_manager",
-        ":sig_util",
         "//proto:common_java_proto",
         "//proto:ecdsa_java_proto",
         "//proto:tink_java_proto",
@@ -100,7 +88,9 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -118,7 +108,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -154,7 +144,6 @@ java_library(
     srcs = ["RsaSsaPkcs1SignKeyManager.java"],
     deps = [
         ":rsa_ssa_pkcs1_verify_key_manager",
-        ":sig_util",
         "//proto:common_java_proto",
         "//proto:rsa_ssa_pkcs1_java_proto",
         "//proto:tink_java_proto",
@@ -162,7 +151,9 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -178,6 +169,7 @@ java_library(
     deps = [
         ":public_key_sign_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -200,7 +192,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:primitive_set",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -210,7 +202,6 @@ java_library(
     srcs = ["RsaSsaPssSignKeyManager.java"],
     deps = [
         ":rsa_ssa_pss_verify_key_manager",
-        ":sig_util",
         "//proto:common_java_proto",
         "//proto:rsa_ssa_pss_java_proto",
         "//proto:tink_java_proto",
@@ -218,7 +209,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -239,7 +231,7 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
@@ -250,11 +242,12 @@ java_library(
     name = "rsa_ssa_pkcs1_verify_key_manager",
     srcs = ["RsaSsaPkcs1VerifyKeyManager.java"],
     deps = [
-        ":sig_util",
         "//proto:rsa_ssa_pkcs1_java_proto",
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -268,6 +261,7 @@ java_library(
     deps = [
         ":public_key_verify_wrapper",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
     ],
 )
@@ -301,21 +295,9 @@ android_library(
         ":rsa_ssa_pkcs1_sign_key_manager-android",
         ":rsa_ssa_pkcs1_verify_key_manager-android",
         ":rsa_ssa_pss_sign_key_manager-android",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        ":rsa_ssa_pss_verify_key_manager-android",
         "//proto:config_java_proto_lite",
-    ],
-)
-
-android_library(
-    name = "sig_util-android",
-    srcs = ["SigUtil.java"],
-    deps = [
-        "//proto:common_java_proto_lite",
-        "//proto:ecdsa_java_proto_lite",
-        "//proto:rsa_ssa_pkcs1_java_proto_lite",
-        "//proto:rsa_ssa_pss_java_proto_lite",
-        "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
-        "//src/main/java/com/google/crypto/tink/subtle:enums",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 
@@ -323,11 +305,12 @@ android_library(
     name = "ecdsa_verify_key_manager-android",
     srcs = ["EcdsaVerifyKeyManager.java"],
     deps = [
-        ":sig_util-android",
         "//proto:ecdsa_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -349,8 +332,8 @@ android_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:keyset_reader-android",
         "//src/main/java/com/google/crypto/tink:pem_key_type",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:random",
-        "@com_google_protobuf//:protobuf_javalite",
     ],
 )
 
@@ -358,11 +341,11 @@ android_library(
     name = "rsa_ssa_pss_verify_key_manager-android",
     srcs = ["RsaSsaPssVerifyKeyManager.java"],
     deps = [
-        ":sig_util-android",
         "//proto:rsa_ssa_pss_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -375,7 +358,6 @@ android_library(
     srcs = ["EcdsaSignKeyManager.java"],
     deps = [
         ":ecdsa_verify_key_manager-android",
-        ":sig_util-android",
         "//proto:common_java_proto_lite",
         "//proto:ecdsa_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -383,7 +365,9 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:ecdsa_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -401,7 +385,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -437,7 +421,6 @@ android_library(
     srcs = ["RsaSsaPkcs1SignKeyManager.java"],
     deps = [
         ":rsa_ssa_pkcs1_verify_key_manager-android",
-        ":sig_util-android",
         "//proto:common_java_proto_lite",
         "//proto:rsa_ssa_pkcs1_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -445,7 +428,9 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -461,6 +446,7 @@ android_library(
     deps = [
         ":public_key_sign_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )
@@ -483,7 +469,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
         "//src/main/java/com/google/crypto/tink:primitive_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/subtle:bytes",
     ],
 )
@@ -493,7 +479,6 @@ android_library(
     srcs = ["RsaSsaPssSignKeyManager.java"],
     deps = [
         ":rsa_ssa_pss_verify_key_manager-android",
-        ":sig_util-android",
         "//proto:common_java_proto_lite",
         "//proto:rsa_ssa_pss_java_proto_lite",
         "//proto:tink_java_proto_lite",
@@ -501,7 +486,8 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_sign_jce",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pss_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:selfkeytests_validators",
@@ -522,7 +508,7 @@ android_library(
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:private_key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink:registry_cluster-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink/subtle:ed25519_sign",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
         "@com_google_protobuf//:protobuf_javalite",
@@ -533,11 +519,12 @@ android_library(
     name = "rsa_ssa_pkcs1_verify_key_manager-android",
     srcs = ["RsaSsaPkcs1VerifyKeyManager.java"],
     deps = [
-        ":sig_util-android",
         "//proto:rsa_ssa_pkcs1_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:rsa_ssa_pkcs1_verify_jce",
         "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
@@ -551,6 +538,7 @@ android_library(
     deps = [
         ":public_key_verify_wrapper-android",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
     ],
 )

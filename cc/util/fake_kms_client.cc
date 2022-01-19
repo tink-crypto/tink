@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
@@ -65,8 +66,8 @@ StatusOr<std::unique_ptr<FakeKmsClient>> FakeKmsClient::New(
   if (!key_uri.empty()) {
     client->encoded_keyset_ = GetEncodedKeyset(key_uri);
     if (client->encoded_keyset_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       key_uri);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Key '%s' not supported", key_uri);
     }
   }
   return std::move(client);
@@ -83,18 +84,18 @@ StatusOr<std::unique_ptr<Aead>> FakeKmsClient::GetAead(
     absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!encoded_keyset_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client is bound to a different key, and cannot "
                        "use key '%s'.",
                        key_uri);
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client does not support key '%s'.", key_uri);
     }
   }
   std::string keyset;
   if (!absl::WebSafeBase64Unescape(GetEncodedKeyset(key_uri), &keyset)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "Invalid Keyset");
+    return util::Status(absl::StatusCode::kInvalidArgument, "Invalid Keyset");
   }
   auto reader_result = BinaryKeysetReader::New(keyset);
   if (!reader_result.ok()) {

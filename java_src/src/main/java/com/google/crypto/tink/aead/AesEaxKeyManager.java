@@ -135,7 +135,10 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *       <li>IV size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_EAX")}
    */
+  @Deprecated
   public static final KeyTemplate aes128EaxTemplate() {
     return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -148,7 +151,10 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *       <li>IV size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_EAX_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawAes128EaxTemplate() {
     return createKeyTemplate(16, 16, KeyTemplate.OutputPrefixType.RAW);
   }
@@ -161,7 +167,10 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *       <li>IV size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_EAX")}
    */
+  @Deprecated
   public static final KeyTemplate aes256EaxTemplate() {
     return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -174,7 +183,10 @@ public final class AesEaxKeyManager extends KeyTypeManager<AesEaxKey> {
    *       <li>IV size: 16 bytes
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW} (no prefix)
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_EAX_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawAes256EaxTemplate() {
     return createKeyTemplate(32, 16, KeyTemplate.OutputPrefixType.RAW);
   }

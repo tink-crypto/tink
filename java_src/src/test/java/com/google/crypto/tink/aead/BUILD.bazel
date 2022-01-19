@@ -23,10 +23,26 @@ java_test(
     srcs = ["AeadConfigTest.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)
+
+java_test(
+    name = "KmsEnvelopeAeadTest",
+    size = "small",
+    srcs = ["KmsEnvelopeAeadTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink:key_templates",
+        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink/aead:aead_config",
+        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead",
+        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
         "@maven//:junit_junit",
     ],
 )
@@ -228,36 +244,6 @@ java_test(
         "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key_manager",
         "@com_google_protobuf//:protobuf_javalite",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_test(
-    name = "AeadKeyTemplatesTestdataTest",
-    size = "small",
-    srcs = ["AeadKeyTemplatesTestdataTest.java"],
-    data = [
-        "@tink_base//testdata/templates",
-    ],
-    deps = [
-        "//proto:aes_ctr_hmac_aead_java_proto",
-        "//proto:aes_eax_java_proto",
-        "//proto:aes_gcm_java_proto",
-        "//proto:common_java_proto",
-        "//proto:kms_aead_java_proto",
-        "//proto:kms_envelope_java_proto",
-        "//proto:tink_java_proto",
-        "//src/main/java/com/google/crypto/tink/aead:aead_key_templates",
-        "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:aes_eax_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:aes_gcm_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:cha_cha20_poly1305_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:kms_aead_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:kms_envelope_aead_key_manager",
-        "//src/main/java/com/google/crypto/tink/aead:x_cha_cha20_poly1305_key_manager",
-        "//src/main/java/com/google/crypto/tink/internal:key_template_proto_converter",
-        "//src/main/java/com/google/crypto/tink/testing:testdata",
-        "@com_google_protobuf//:protobuf_java",
         "@maven//:junit_junit",
     ],
 )

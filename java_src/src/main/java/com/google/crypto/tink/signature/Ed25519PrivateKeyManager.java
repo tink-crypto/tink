@@ -177,7 +177,11 @@ public final class Ed25519PrivateKeyManager
         new Ed25519PrivateKeyManager(), new Ed25519PublicKeyManager(), newKeyAllowed);
   }
 
-  /** @return A {@link KeyTemplate} that generates new instances of ED25519 keys. */
+  /**
+   * @return A {@link KeyTemplate} that generates new instances of ED25519 keys.
+   * @deprecated use {@code KeyTemplates.get("ED25519")}
+   */
+  @Deprecated
   public static final KeyTemplate ed25519Template() {
     return KeyTemplate.create(
         new Ed25519PrivateKeyManager().getKeyType(),
@@ -189,7 +193,9 @@ public final class Ed25519PrivateKeyManager
    * @return A {@link KeyTemplate} that generates new instances of Ed25519 keys. Keys generated from
    *     this template creates raw signatures of exactly 64 bytes. It's compatible with most other
    *     libraries.
+   * @deprecated use {@code KeyTemplates.get("ED25519_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawEd25519Template() {
     return KeyTemplate.create(
         new Ed25519PrivateKeyManager().getKeyType(),

@@ -17,11 +17,14 @@
 #define TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/jwt/internal/jwt_mac_impl.h"
+#include "tink/jwt/internal/jwt_mac_internal.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 #include "tink/jwt/jwt_mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -41,43 +44,48 @@ namespace jwt_internal {
 class JwtHmacKeyManager
     : public KeyTypeManager<google::crypto::tink::JwtHmacKey,
                             google::crypto::tink::JwtHmacKeyFormat,
-                            List<JwtMac>> {
+                            List<JwtMacInternal>> {
  public:
-  class JwtMacFactory : public PrimitiveFactory<JwtMac> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtMac>> Create(
+  class JwtMacFactory : public PrimitiveFactory<JwtMacInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtMacInternal>> Create(
         const google::crypto::tink::JwtHmacKey& jwt_hmac_key) const override {
       int tag_size;
       std::string algorithm;
-      switch (jwt_hmac_key.hash_type()) {
-        case google::crypto::tink::HashType::SHA256:
+      google::crypto::tink::HashType hash_type;
+      switch (jwt_hmac_key.algorithm()) {
+        case google::crypto::tink::JwtHmacAlgorithm::HS256:
+          hash_type = google::crypto::tink::HashType::SHA256;
           tag_size = 32;
           algorithm = "HS256";
           break;
-        case google::crypto::tink::HashType::SHA384:
+        case google::crypto::tink::JwtHmacAlgorithm::HS384:
+          hash_type = google::crypto::tink::HashType::SHA384;
           tag_size = 48;
           algorithm = "HS384";
           break;
-        case google::crypto::tink::HashType::SHA512:
+        case google::crypto::tink::JwtHmacAlgorithm::HS512:
+          hash_type = google::crypto::tink::HashType::SHA512;
           tag_size = 64;
           algorithm = "HS512";
           break;
         default:
-          return util::Status(
-              util::error::INVALID_ARGUMENT,
-              absl::StrFormat("HashType '%s' is not supported.",
-                              crypto::tink::util::Enums::HashName(
-                                  jwt_hmac_key.hash_type())));
+          return util::Status(absl::StatusCode::kInvalidArgument,
+                              "Unknown algorithm.");
       }
-      crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac_or =
+      crypto::tink::util::StatusOr<std::unique_ptr<Mac>> mac =
           subtle::HmacBoringSsl::New(
-              util::Enums::ProtoToSubtle(jwt_hmac_key.hash_type()), tag_size,
+              util::Enums::ProtoToSubtle(hash_type), tag_size,
               util::SecretDataFromStringView(jwt_hmac_key.key_value()));
-      if (!mac_or.ok()) {
-        return mac_or.status();
+      if (!mac.ok()) {
+        return mac.status();
       }
-      std::unique_ptr<JwtMac> jwt_mac =
-          absl::make_unique<jwt_internal::JwtMacImpl>(
-              std::move(mac_or.ValueOrDie()), algorithm);
+      absl::optional<std::string> custom_kid = absl::nullopt;
+      if (jwt_hmac_key.has_custom_kid()) {
+        custom_kid = jwt_hmac_key.custom_kid().value();
+      }
+      std::unique_ptr<JwtMacInternal> jwt_mac =
+          absl::make_unique<jwt_internal::JwtMacImpl>(*std::move(mac),
+                                                      algorithm, custom_kid);
       return jwt_mac;
     }
   };

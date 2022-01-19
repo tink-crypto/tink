@@ -257,6 +257,33 @@ public class PaymentMethodTokenRecipientTest {
   }
 
   @Test
+  public void testShouldDecryptECV1WithNonStrictJsonEncoding() throws Exception {
+    PaymentMethodTokenRecipient recipient =
+        new PaymentMethodTokenRecipient.Builder()
+            .senderVerifyingKeys(GOOGLE_VERIFYING_PUBLIC_KEYS_JSON)
+            .recipientId(RECIPIENT_ID)
+            .addRecipientPrivateKey(MERCHANT_PRIVATE_KEY_PKCS8_BASE64)
+            .build();
+
+  String ciphertextEcV1WithNonStrictJsonEncoding =
+      "{"
+          + "# comment \n"   // python-style comment terminated with new line
+          + "protocolVersion:'ECv1',"   // protocolVersion has no quotes, ECv1 has single quotes
+          + "/* a comment */"   // c-style comment
+          + "\"signedMessage\"="  // use = instead of :
+          + "// another comment \n"   // c-style comment terminated with new line
+          + ("\"{"
+              + "\\\"tag\\\":\\\"ZVwlJt7dU8Plk0+r8rPF8DmPTvDiOA1UAoNjDV+SqDE\\\\u003d\\\","
+              + "\\\"ephemeralPublicKey\\\":\\\"BPhVspn70Zj2Kkgu9t8+ApEuUWsI/zos5whGCQBlgOkuYagOis7"
+              + "qsrcbQrcprjvTZO3XOU+Qbcc28FSgsRtcgQE\\\\u003d\\\","
+              + "\\\"encryptedMessage\\\":\\\"12jUObueVTdy\\\"}\";")  // ; instead of ,
+          + "\"signature\":\"MEQCIDxBoUCoFRGReLdZ/cABlSSRIKoOEFoU3e27c14vMZtfAiBtX3pGMEpnw6mSAbnagC"
+          + "CgHlCk3NcFwWYEyxIE6KGZVA\\u003d\\u003d\"}";
+
+    assertEquals(PLAINTEXT, recipient.unseal(ciphertextEcV1WithNonStrictJsonEncoding));
+  }
+
+  @Test
   public void testShouldDecryptECV1WhenUsingCustomKem() throws Exception {
     PaymentMethodTokenRecipient recipient =
         new PaymentMethodTokenRecipient.Builder()

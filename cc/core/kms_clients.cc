@@ -15,8 +15,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/kms_clients.h"
 
+#include <string>
+#include <utility>
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "tink/kms_client.h"
@@ -38,7 +41,7 @@ KmsClients& KmsClients::GlobalInstance() {
 
 Status KmsClients::LocalAdd(std::unique_ptr<KmsClient> kms_client) {
   if (kms_client == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "kms_client must be non-null.");
   }
   absl::MutexLock lock(&clients_mutex_);
@@ -48,14 +51,15 @@ Status KmsClients::LocalAdd(std::unique_ptr<KmsClient> kms_client) {
 
 StatusOr<const KmsClient*> KmsClients::LocalGet(absl::string_view key_uri) {
   if (key_uri.empty()) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "key_uri must be non-empty.");
   }
   absl::MutexLock lock(&clients_mutex_);
   for (const auto& client : clients_) {
     if (client->DoesSupport(key_uri)) return client.get();
   }
-  return ToStatusF(util::error::NOT_FOUND, "no KmsClient found for key '%s'.",
+  return ToStatusF(absl::StatusCode::kNotFound,
+                   "no KmsClient found for key '%s'.",
                    std::string(key_uri).c_str());
 }
 

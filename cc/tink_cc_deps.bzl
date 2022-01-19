@@ -10,21 +10,21 @@ def tink_cc_deps():
     """
 
     if not native.existing_rule("com_google_absl"):
-        # Commit from 2021-01-13
+        # Commit from 2021-12-03
         http_archive(
             name = "com_google_absl",
-            strip_prefix = "abseil-cpp-64461421222f8be8663c50e8e82c91c3f95a0d3c",
-            url = "https://github.com/abseil/abseil-cpp/archive/64461421222f8be8663c50e8e82c91c3f95a0d3c.zip",
-            sha256 = "41d725950d0d3ed4d00020881db84fdc79ac349d9b325ab010686c5a794a822e",
+            strip_prefix = "abseil-cpp-9336be04a242237cd41a525bedfcf3be1bb55377",
+            url = "https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip",
+            sha256 = "368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c",
         )
 
     if not native.existing_rule("boringssl"):
-        # Commit from 2020-06-23
+        # Commit from 2021-07-02
         http_archive(
             name = "boringssl",
-            strip_prefix = "boringssl-597b810379e126ae05d32c1d94b1a9464385acd0",
-            url = "https://github.com/google/boringssl/archive/597b810379e126ae05d32c1d94b1a9464385acd0.zip",
-            sha256 = "c4e8414cb36e62d2fee451296cc864f7ad1a4670396c8a67e1ee77ae84cc4167",
+            strip_prefix = "boringssl-7686eb8ac9bc60198cbc8354fcba7f54c02792ec",
+            url = "https://github.com/google/boringssl/archive/7686eb8ac9bc60198cbc8354fcba7f54c02792ec.zip",
+            sha256 = "73a7bc71f95f3259ddedc6cb5ba45d02f2359c43e75af354928b0471a428bb84",
         )
 
     # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
@@ -87,75 +87,73 @@ def tink_cc_deps():
 
     # gRPC needs rules_apple, which in turn needs rules_swift and apple_support
     if not native.existing_rule("build_bazel_rules_apple"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-10-29
         http_archive(
             name = "build_bazel_rules_apple",
-            strip_prefix = "rules_apple-3043ed832213cb979b6580d19f95ab8473814fb5",
-            url = "https://github.com/bazelbuild/rules_apple/archive/3043ed832213cb979b6580d19f95ab8473814fb5.zip",
-            sha256 = "ff18125271214a4e3633241bf3f9a8a0c6b4f4b208f9fee4b360e9fa15538f8a",
+            sha256 = "77e8bf6fda706f420a55874ae6ee4df0c9d95da6c7838228b26910fc82eea5a2",
+            url = "https://github.com/bazelbuild/rules_apple/releases/download/0.32.0/rules_apple.0.32.0.tar.gz",
         )
     if not native.existing_rule("build_bazel_rules_swift"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-10-04
         http_archive(
             name = "build_bazel_rules_swift",
-            strip_prefix = "rules_swift-8767e70f1a8b500f5f3683cb23258964737a3888",
-            url = "https://github.com/bazelbuild/rules_swift/archive/8767e70f1a8b500f5f3683cb23258964737a3888.zip",
-            sha256 = "cc9d87e67afa75c936eed4725e29ed05ba9a542bc586f943d3333cc6406d6bfc",
+            sha256 = "4f167e5dbb49b082c5b7f49ee688630d69fb96f15c84c448faa2e97a5780dbbc",
+            url = "https://github.com/bazelbuild/rules_swift/releases/download/0.24.0/rules_swift.0.24.0.tar.gz",
         )
     if not native.existing_rule("build_bazel_apple_support"):
-        # Last commit available at 2020-04-28
+        # Release from 2021-06-11
         http_archive(
             name = "build_bazel_apple_support",
-            strip_prefix = "apple_support-501b4afb27745c4813a88ffa28acd901408014e4",
-            url = "https://github.com/bazelbuild/apple_support/archive/501b4afb27745c4813a88ffa28acd901408014e4.zip",
-            sha256 = "8aa07a6388e121763c0164624feac9b20841afa2dd87bac0ba0c3ed1d56feb70",
+            sha256 = "76df040ade90836ff5543888d64616e7ba6c3a7b33b916aa3a4b68f342d1b447",
+            url = "https://github.com/bazelbuild/apple_support/releases/download/0.11.0/apple_support.0.11.0.tar.gz",
         )
 
     # Needed for Cloud KMS API via gRPC.
-    if not native.existing_rule("googleapis"):
-        # Commit from 2020-04-09
+    if not native.existing_rule("com_google_googleapis"):
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
-            name = "googleapis",
-            url = "https://github.com/googleapis/googleapis/archive/ee4ea76504aa60c2bff9b7c11269c155d8c21e0d.zip",
-            sha256 = "687e5b241d365a59d4b95c60d63df07931476c7d14b0c261202ae2aceb44d119",
-            strip_prefix = "googleapis-ee4ea76504aa60c2bff9b7c11269c155d8c21e0d",
+            name = "com_google_googleapis",
+            sha256 = "5bb6b0253ccf64b53d6c7249625a7e3f6c3bc6402abd52d3778bfa48258703a0",
+            strip_prefix = "googleapis-2f9af297c84c55c8b871ba4495e01ade42476c92",
+            url = "https://github.com/googleapis/googleapis/archive/2f9af297c84c55c8b871ba4495e01ade42476c92.tar.gz",
         )
 
     if "upb" not in native.existing_rules():
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
             name = "upb",
-            sha256 = "e9c136e56b98c8eb48ad1c9f8df4a6348e99f9f336ee6199c4259a312c2e3598",
-            strip_prefix = "upb-d8f3d6f9d415b31f3ce56d46791706c38fa311bc",
-            url = "https://github.com/protocolbuffers/upb/archive/d8f3d6f9d415b31f3ce56d46791706c38fa311bc.tar.gz",
+            sha256 = "7c02096dceb6b1249feaf11e4531f6bf31b9abdbd2305038349d1f1749bf88ea",
+            strip_prefix = "upb-0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b",
+            url = "https://github.com/protocolbuffers/upb/archive/0e0de7d9f927aa888d9a0baeaf6576bbbb23bf0b.tar.gz",
         )
 
     if "envoy_api" not in native.existing_rules():
+        # Matches version embedded in com_github_grpc_grpc from 2021-11-17
         http_archive(
             name = "envoy_api",
-            sha256 = "9e8cf42abce32c9b0e9e271b0cb62803084cbe5e5b49f5d5c2aef0766f9d69ca",
-            strip_prefix = "data-plane-api-c83ed7ea9eb5fb3b93d1ad52b59750f1958b8bde",
-            url = "https://github.com/envoyproxy/data-plane-api/archive/c83ed7ea9eb5fb3b93d1ad52b59750f1958b8bde.tar.gz",
+            sha256 = "e89d4dddbadf797dd2700ce45ee8abc82557a934a15fcad82673e7d13213b868",
+            strip_prefix = "data-plane-api-20b1b5fcee88a20a08b71051a961181839ec7268",
+            url = "https://github.com/envoyproxy/data-plane-api/archive/20b1b5fcee88a20a08b71051a961181839ec7268.tar.gz",
         )
 
     # gRPC.
     if not native.existing_rule("com_github_grpc_grpc"):
-        # Release from 2019-12-05
-        # Using the pre-release version due to https://github.com/grpc/grpc/issues/20511
+        # Release from 2021-11-17
         http_archive(
             name = "com_github_grpc_grpc",
-            url = "https://github.com/grpc/grpc/archive/v1.26.0-pre1.tar.gz",
-            sha256 = "d6af0859d3ae4693b1955e972aa2e590d6f4d44baaa82651467c6beea453e30e",
-            strip_prefix = "grpc-1.26.0-pre1",
+            sha256 = "9f387689b7fdf6c003fd90ef55853107f89a2121792146770df5486f0199f400",
+            strip_prefix = "grpc-1.42.0",
+            url = "https://github.com/grpc/grpc/archive/v1.42.0.zip",
         )
 
     # Not used by Java Tink, but apparently needed for C++ gRPC library.
     if not native.existing_rule("io_grpc_grpc_java"):
-        # Commit from 2019-05-02
+        # Release from 2021-11-17
         http_archive(
             name = "io_grpc_grpc_java",
-            strip_prefix = "grpc-java-1.20.0",
-            url = "https://github.com/grpc/grpc-java/archive/v1.20.0.tar.gz",
-            sha256 = "553d1bdbde3ff4035747c184486bae2f084c75c3c4cdf5ef31a6aa48bdccaf9b",
+            sha256 = "1289abd750bee2ebc80679435301e046d587bdf0c0802a76907119725d18eef0",
+            strip_prefix = "grpc-java-1.42.0",
+            url = "https://github.com/grpc/grpc-java/archive/v1.42.0.tar.gz",
         )
 
     if not native.existing_rule("curl"):

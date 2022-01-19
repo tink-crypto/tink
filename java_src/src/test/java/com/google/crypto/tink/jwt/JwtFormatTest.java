@@ -20,10 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertThrows;
 
+import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.subtle.Base64;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.security.InvalidAlgorithmParameterException;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -33,33 +35,85 @@ import org.junit.runners.JUnit4;
 public final class JwtFormatTest {
 
   @Test
-  public void parseJson_success() throws Exception {
-    JsonObject header = JwtFormat.parseJson("{\"bool\":false}");
-    assertThat(header.get("bool").getAsBoolean()).isFalse();
-  }
-
-  @Test
-  public void parseJsonWithoutQuotes_fail() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> JwtFormat.parseJson("{bool:false}"));
-  }
-
-  @Test
-  public void parseJsonWithoutComments_fail() throws Exception {
-    assertThrows(
-        JwtInvalidException.class, () -> JwtFormat.parseJson("{\"bool\":false /* comment */}"));
-  }
-
-  @Test
   public void createDecodeHeader_success() throws Exception {
-    String header = JwtFormat.decodeHeader(JwtFormat.createHeader("RS256"));
+    String header =
+        JwtFormat.decodeHeader(JwtFormat.createHeader("RS256", Optional.empty(), Optional.empty()));
     assertThat(header).isEqualTo("{\"alg\":\"RS256\"}");
+  }
+
+  @Test
+  public void createDecodeHeaderWithTyp_success() throws Exception {
+    String header =
+        JwtFormat.decodeHeader(
+            JwtFormat.createHeader("RS256", Optional.of("JWT"), Optional.empty()));
+    assertThat(header).isEqualTo("{\"alg\":\"RS256\",\"typ\":\"JWT\"}");
+  }
+
+  @Test
+  public void createDecodeHeaderWithKidAndTyp_success() throws Exception {
+    String header =
+        JwtFormat.decodeHeader(
+            JwtFormat.createHeader("RS256", Optional.of("JWT"), Optional.of("GsapRA")));
+    assertThat(header).isEqualTo("{\"kid\":\"GsapRA\",\"alg\":\"RS256\",\"typ\":\"JWT\"}");
+  }
+
+  @Test
+  public void createDecodeHeaderWithInvalidUtf8_fails() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () -> JwtFormat.decodeHeader("eyJhbGciOiJIUzI1NiIsICJhIjoiwiJ9"));
+  }
+
+  @Test
+  public void getKidFromTinkOutputPrefixType_success() throws Exception {
+    int keyId = 0x1ac6a944;
+    Optional<String> kid = JwtFormat.getKid(keyId, OutputPrefixType.TINK);
+    assertThat(kid.get()).isEqualTo("GsapRA");
+    assertThat(JwtFormat.getKeyId(kid.get()).get()).isEqualTo(0x1ac6a944);
+  }
+
+  @Test
+  public void getKidFromRawOutputPrefixType_success() throws Exception {
+    int keyId = 0x1ac6a944;
+    Optional<String> kid = JwtFormat.getKid(keyId, OutputPrefixType.RAW);
+    assertThat(kid.isPresent()).isFalse();
+  }
+
+  @Test
+  public void keyIdKidConversion_outputIsEqual() throws Exception {
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(0x12345678, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(0x12345678);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(-2147483648, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(-2147483648);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(-100, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(-100);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(0, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(0);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(100, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(100);
+    assertThat(JwtFormat.getKeyId(JwtFormat.getKid(2147483647, OutputPrefixType.TINK).get()).get())
+        .isEqualTo(2147483647);
+  }
+
+  @Test
+  public void getKeyId_wrongFormat_isNotPresent() throws Exception {
+    assertThat(JwtFormat.getKeyId("GsapRAA").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("Gsap").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("").isPresent()).isFalse();
+    assertThat(JwtFormat.getKeyId("dBjftJeZ4CVP-mB92K27uhbUJU1p1r").isPresent()).isFalse();
+  }
+
+  @Test
+  public void getKidFromUnsupportedOutputPrefixType_fails() throws Exception {
+    int keyId = 0x1ac6a944;
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.getKid(keyId, OutputPrefixType.LEGACY));
   }
 
   @Test
   public void createHeaderWithUnknownAlgorithm_fails() throws Exception {
     assertThrows(
         InvalidAlgorithmParameterException.class,
-        () -> JwtFormat.createHeader("UnknownAlgorithm"));
+        () -> JwtFormat.createHeader("UnknownAlgorithm", Optional.empty(), Optional.empty()));
   }
 
   @Test
@@ -84,7 +138,6 @@ public final class JwtFormatTest {
         JwtInvalidException.class, () -> JwtFormat.decodeHeader("eyJhbGci\r\nOiJSUzI1NiJ9"));
   }
 
-
   @Test
   public void decodeHeader_success() throws Exception {
     String headerStr = Base64.urlSafeEncode("{\"alg\":\"RS256\"}".getBytes(UTF_8));
@@ -98,57 +151,155 @@ public final class JwtFormatTest {
   }
 
   @Test
-  public void validateHeaderWithoutQuotes_fails() throws Exception {
-    assertThrows(JwtInvalidException.class, () -> JwtFormat.validateHeader("RS256", "{alg:RS256}"));
-  }
-
-  @Test
   public void createDecodeValidateHeader_success() throws Exception {
-    JwtFormat.validateHeader("HS256", JwtFormat.decodeHeader(JwtFormat.createHeader("HS256")));
-    JwtFormat.validateHeader("HS384", JwtFormat.decodeHeader(JwtFormat.createHeader("HS384")));
-    JwtFormat.validateHeader("HS512", JwtFormat.decodeHeader(JwtFormat.createHeader("HS512")));
-    JwtFormat.validateHeader("ES256", JwtFormat.decodeHeader(JwtFormat.createHeader("ES256")));
-    JwtFormat.validateHeader("RS256", JwtFormat.decodeHeader(JwtFormat.createHeader("RS256")));
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson(
+            JwtFormat.decodeHeader(
+                JwtFormat.createHeader("HS256", Optional.empty(), Optional.empty()))));
+    JwtFormat.validateHeader(
+        "HS384",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson(
+            JwtFormat.decodeHeader(
+                JwtFormat.createHeader("HS384", Optional.empty(), Optional.empty()))));
+    JwtFormat.validateHeader(
+        "HS512",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson(
+            JwtFormat.decodeHeader(
+                JwtFormat.createHeader("HS512", Optional.empty(), Optional.empty()))));
+    JwtFormat.validateHeader(
+        "ES256",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson(
+            JwtFormat.decodeHeader(
+                JwtFormat.createHeader("ES256", Optional.empty(), Optional.empty()))));
+    JwtFormat.validateHeader(
+        "RS256",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson(
+            JwtFormat.decodeHeader(
+                JwtFormat.createHeader("RS256", Optional.empty(), Optional.empty()))));
   }
-
 
   @Test
   public void validateHeaderWithWrongAlgorithm_fails() throws Exception {
-    String header = JwtFormat.decodeHeader(JwtFormat.createHeader("HS256"));
+    String header =
+        JwtFormat.decodeHeader(JwtFormat.createHeader("HS256", Optional.empty(), Optional.empty()));
     assertThrows(
         InvalidAlgorithmParameterException.class,
-        () -> JwtFormat.validateHeader("HS384", header));
+        () ->
+            JwtFormat.validateHeader(
+                "HS384", Optional.empty(), Optional.empty(), JsonUtil.parseJson(header)));
   }
 
   @Test
   public void validateHeaderWithUnknownAlgorithm_fails() throws Exception {
     assertThrows(
         InvalidAlgorithmParameterException.class,
-        () -> JwtFormat.validateHeader("UnknownAlgorithm", "{\"alg\": \"UnknownAlgorithm\"}"));
+        () ->
+            JwtFormat.validateHeader(
+                "UnknownAlgorithm",
+                Optional.empty(), Optional.empty(),
+                JsonUtil.parseJson("{\"alg\": \"UnknownAlgorithm\"}")));
   }
 
   @Test
-  public void validateHeaderWithValidLowercaseTyp_success() throws Exception {
-    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"jwt\"}");
+  public void validateHeaderIgnoresTyp() throws Exception {
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson("{\"alg\": \"HS256\", \"typ\": \"unknown\"}"));
   }
 
   @Test
-  public void validateHeaderWithBadTyp_fails() throws Exception {
+  public void validateHeaderRejectsCrit() throws Exception {
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"typ\": \"IWT\"}"));
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                Optional.empty(), Optional.empty(),
+                JsonUtil.parseJson(
+                    "{\"alg\": \"HS256\", \"crit\":[\"http://example.invalid/UNDEFINED\"], "
+                        + "\"http://example.invalid/UNDEFINED\":true}")));
   }
 
   @Test
   public void validateHeaderWithUnknownEntry_success() throws Exception {
-    JwtFormat.validateHeader("HS256", "{\"alg\": \"HS256\", \"unknown\": \"header\"}");
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.empty(), Optional.empty(),
+        JsonUtil.parseJson("{\"alg\": \"HS256\", \"unknown\": \"header\"}"));
   }
 
   @Test
   public void validateEmptyHeader_fails() throws Exception {
     assertThrows(
         JwtInvalidException.class,
-        () -> JwtFormat.validateHeader("HS256", "{}"));
+        () ->
+            JwtFormat.validateHeader(
+                "HS256", Optional.empty(), Optional.empty(), JsonUtil.parseJson("{}")));
+  }
+
+  @Test
+  public void validateHeaderWithTinkKid() throws Exception {
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.of("kid123"), Optional.empty(),
+        JsonUtil.parseJson("{\"alg\": \"HS256\", \"kid\": \"kid123\"}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                Optional.of("kid123"),
+                Optional.empty(),
+                JsonUtil.parseJson("{\"alg\": \"HS256\", \"kid\": \"wrongKid\"}")));
+    // If tinkKid is set, then the kid is required in the header.
+    assertThrows(
+        JwtInvalidException.class,
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                Optional.of("kid123"),
+                Optional.empty(),
+                JsonUtil.parseJson("{\"alg\": \"HS256\"}")));
+  }
+
+  @Test
+  public void validateHeaderWithCustomKid() throws Exception {
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.empty(), Optional.of("kid123"),
+        JsonUtil.parseJson("{\"alg\": \"HS256\", \"kid\": \"kid123\"}"));
+    assertThrows(
+        JwtInvalidException.class,
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                Optional.empty(),
+                Optional.of("kid123"),
+                JsonUtil.parseJson("{\"alg\": \"HS256\", \"kid\": \"wrongKid\"}")));
+    // If customKid is set, then the kid is not required in the header.
+    JwtFormat.validateHeader(
+        "HS256",
+        Optional.empty(), Optional.of("kid123"),
+        JsonUtil.parseJson("{\"alg\": \"HS256\"}"));
+  }
+
+  @Test
+  public void validateHeaderWithBothTinkAndCustomKid_fails() throws Exception {
+    assertThrows(
+        JwtInvalidException.class,
+        () ->
+            JwtFormat.validateHeader(
+                "HS256",
+                Optional.of("kid123"),
+                Optional.of("kid123"),
+                JsonUtil.parseJson("{\"alg\": \"HS256\", \"kid\": \"kid123\"}")));
   }
 
   @Test
@@ -183,14 +334,21 @@ public final class JwtFormatTest {
   }
 
   @Test
+  public void createDecodePayloadWithInvalidUtf8_fails() throws Exception {
+    assertThrows(JwtInvalidException.class, () -> JwtFormat.decodePayload("eyJpc3MiOiJqb2XCIn0"));
+  }
+
+  @Test
   public void signedCompactCreateSplit_success() throws Exception {
-    String payload = "{\"iss\":\"joe\"}";
+    RawJwt rawJwt = RawJwt.newBuilder().setIssuer("joe").withoutExpiration().build();
     String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
     byte[] signature = JwtFormat.decodeSignature(encodedSignature);
-    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", payload);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
     String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
     JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
-    JwtFormat.validateHeader("RS256", parts.header);
+
+    JwtFormat.validateHeader(
+        "RS256", Optional.empty(), Optional.empty(), JsonUtil.parseJson(parts.header));
 
     assertThat(unsignedCompact).isEqualTo("eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UifQ");
     assertThat(signedCompact).isEqualTo(
@@ -198,7 +356,53 @@ public final class JwtFormatTest {
     assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
     assertThat(parts.signatureOrMac).isEqualTo(signature);
     assertThat(parts.header).isEqualTo("{\"alg\":\"RS256\"}");
-    assertThat(parts.payload).isEqualTo(payload);
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
+  }
+
+
+  @Test
+  public void signedCompactCreateSplitWithTypeHeader_success() throws Exception {
+    RawJwt rawJwt =
+        RawJwt.newBuilder().setTypeHeader("JWT").setIssuer("joe").withoutExpiration().build();
+    String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    byte[] signature = JwtFormat.decodeSignature(encodedSignature);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.empty(), rawJwt);
+    String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
+    JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
+    JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
+    JwtFormat.validateHeader("RS256", Optional.empty(), Optional.empty(), parsedHeader);
+    assertThat(parsedHeader.getAsJsonPrimitive("typ").getAsString()).isEqualTo("JWT");
+
+    assertThat(unsignedCompact)
+        .isEqualTo("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJqb2UifQ");
+    assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
+    assertThat(parts.signatureOrMac).isEqualTo(signature);
+    assertThat(parts.header).isEqualTo("{\"alg\":\"RS256\",\"typ\":\"JWT\"}");
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
+  }
+
+  @Test
+  public void signedCompactCreateSplitWithKeyIdentifier_success() throws Exception {
+    String kid = "AZxkm2U";
+    RawJwt rawJwt = RawJwt.newBuilder().setIssuer("joe").withoutExpiration().build();
+    String encodedSignature = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    byte[] signature = JwtFormat.decodeSignature(encodedSignature);
+    String unsignedCompact = JwtFormat.createUnsignedCompact("RS256", Optional.of(kid), rawJwt);
+    String signedCompact = JwtFormat.createSignedCompact(unsignedCompact, signature);
+    JwtFormat.Parts parts = JwtFormat.splitSignedCompact(signedCompact);
+    JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
+    JwtFormat.validateHeader("RS256", Optional.empty(), Optional.empty(), parsedHeader);
+
+    assertThat(unsignedCompact)
+        .isEqualTo("eyJraWQiOiJBWnhrbTJVIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJqb2UifQ");
+    assertThat(signedCompact)
+        .isEqualTo(
+            "eyJraWQiOiJBWnhrbTJVIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJqb2UifQ"
+                + ".dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk");
+    assertThat(parts.unsignedCompact).isEqualTo(unsignedCompact);
+    assertThat(parts.signatureOrMac).isEqualTo(signature);
+    assertThat(parts.header).isEqualTo("{\"kid\":\"AZxkm2U\",\"alg\":\"RS256\"}");
+    assertThat(parts.payload).isEqualTo("{\"iss\":\"joe\"}");
   }
 
   @Test

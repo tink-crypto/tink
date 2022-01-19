@@ -11,16 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for tink.python.tink.util.bytes_io."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
+"""Tests for tink.python.tink.testing.bytes_io."""
 
 import io
 
 from absl.testing import absltest
+
 from tink.testing import bytes_io
 
 

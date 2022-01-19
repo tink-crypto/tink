@@ -27,11 +27,11 @@ import (
 )
 
 func init() {
-	if err := registry.RegisterKeyManager(&aesGCMHKDFKeyManager{}); err != nil {
+	if err := registry.RegisterKeyManager(new(aesGCMHKDFKeyManager)); err != nil {
 		panic(fmt.Sprintf("streamingaead.init() failed: %v", err))
 	}
 
-	if err := registry.RegisterKeyManager(&aesCTRHMACKeyManager{}); err != nil {
+	if err := registry.RegisterKeyManager(new(aesCTRHMACKeyManager)); err != nil {
 		panic(fmt.Sprintf("streamingaead.init() failed: %v", err))
 	}
 }

@@ -17,12 +17,19 @@
 #include "tink/subtle/aes_siv_boringssl.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "openssl/aes.h"
-#include "openssl/mem.h"
+#include "openssl/crypto.h"
+#include "tink/aead/internal/aead_util.h"
 #include "tink/deterministic_aead.h"
+#include "tink/internal/aes_util.h"
+#include "tink/subtle/subtle_util.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -37,7 +44,8 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
   util::SecretUniquePtr<AES_KEY> aes_key = util::MakeSecretUniquePtr<AES_KEY>();
   if (AES_set_encrypt_key(reinterpret_cast<const uint8_t*>(key.data()),
                           8 * key.size(), aes_key.get()) != 0) {
-    return util::Status(util::error::INTERNAL, "could not initialize aes key");
+    return util::Status(absl::StatusCode::kInternal,
+                        "could not initialize aes key");
   }
   return aes_key;
 }
@@ -47,11 +55,11 @@ crypto::tink::util::StatusOr<util::SecretUniquePtr<AES_KEY>> InitializeAesKey(
 // static
 crypto::tink::util::StatusOr<std::unique_ptr<DeterministicAead>>
 AesSivBoringSsl::New(const util::SecretData& key) {
-  auto status = CheckFipsCompatibility<AesSivBoringSsl>();
+  auto status = internal::CheckFipsCompatibility<AesSivBoringSsl>();
   if (!status.ok()) return status;
 
   if (!IsValidKeySizeInBytes(key.size())) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid key size");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid key size");
   }
   auto k1_or = InitializeAesKey(absl::MakeSpan(key).subspan(0, key.size() / 2));
   if (!k1_or.ok()) {
@@ -62,6 +70,7 @@ AesSivBoringSsl::New(const util::SecretData& key) {
   if (!k2_or.ok()) {
     return k2_or.status();
   }
+
   util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).ValueOrDie();
   return {absl::WrapUnique(new AesSivBoringSsl(std::move(k1), std::move(k2)))};
 }
@@ -77,20 +86,6 @@ util::SecretData AesSivBoringSsl::ComputeCmacK2() const {
   util::SecretData cmac_k2(cmac_k1_);
   MultiplyByX(cmac_k2.data());
   return cmac_k2;
-}
-
-void AesSivBoringSsl::CtrCrypt(const uint8_t siv[kBlockSize],
-                               absl::Span<const uint8_t> in,
-                               uint8_t* out) const {
-  uint8_t iv[kBlockSize];
-  std::copy_n(siv, kBlockSize, iv);
-  iv[8] &= 0x7f;
-  iv[12] &= 0x7f;
-  unsigned int num = 0;
-  uint8_t ecount_buf[kBlockSize];
-  std::fill(std::begin(ecount_buf), std::end(ecount_buf), 0);
-  AES_ctr128_encrypt(in.data(), out, in.size(), k2_.get(), iv, ecount_buf,
-                     &num);
 }
 
 void AesSivBoringSsl::EncryptBlock(const uint8_t in[kBlockSize],
@@ -197,6 +192,17 @@ void AesSivBoringSsl::S2v(absl::Span<const uint8_t> aad,
   }
 }
 
+util::Status AesSivBoringSsl::AesCtrCrypt(absl::string_view in,
+                                          const uint8_t siv[kBlockSize],
+                                          const AES_KEY* key,
+                                          absl::Span<char> out) const {
+  uint8_t iv[kBlockSize];
+  std::copy_n(siv, kBlockSize, iv);
+  iv[8] &= 0x7f;
+  iv[12] &= 0x7f;
+  return internal::AesCtr128Crypt(in, iv, key, out);
+}
+
 util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view additional_data) const {
   uint8_t siv[kBlockSize];
@@ -206,35 +212,46 @@ util::StatusOr<std::string> AesSivBoringSsl::EncryptDeterministically(
                      plaintext.size()),
       siv);
   size_t ciphertext_size = plaintext.size() + kBlockSize;
-  std::vector<uint8_t> ct(ciphertext_size);
-  std::copy(std::begin(siv), std::end(siv), ct.begin());
-  CtrCrypt(siv,
-           absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
-                          plaintext.size()),
-           ct.data() + kBlockSize);
-  return std::string(reinterpret_cast<const char*>(ct.data()), ciphertext_size);
+
+  std::string ciphertext;
+  ResizeStringUninitialized(&ciphertext, ciphertext_size);
+  std::copy(std::begin(siv), std::end(siv), ciphertext.begin());
+  util::Status res =
+      AesCtrCrypt(plaintext, siv, k2_.get(),
+                  absl::MakeSpan(ciphertext).subspan(kBlockSize));
+  if (!res.ok()) {
+    return res;
+  }
+  return ciphertext;
 }
 
 util::StatusOr<std::string> AesSivBoringSsl::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view additional_data) const {
   if (ciphertext.size() < kBlockSize) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
   size_t plaintext_size = ciphertext.size() - kBlockSize;
-  std::vector<uint8_t> pt(plaintext_size);
-  const uint8_t *siv = reinterpret_cast<const uint8_t*>(&ciphertext[0]);
-  const uint8_t* ct =
-      reinterpret_cast<const uint8_t*>(&ciphertext[0]) + kBlockSize;
-  CtrCrypt(siv, absl::MakeSpan(ct, plaintext_size), pt.data());
+  std::string plaintext;
+  ResizeStringUninitialized(&plaintext, plaintext_size);
+  const uint8_t* siv = reinterpret_cast<const uint8_t*>(&ciphertext[0]);
+  util::Status res = AesCtrCrypt(ciphertext.substr(kBlockSize), siv, k2_.get(),
+                                 absl::MakeSpan(plaintext));
+  if (!res.ok()) {
+    return res;
+  }
 
   uint8_t s2v[kBlockSize];
   S2v(absl::MakeSpan(reinterpret_cast<const uint8_t*>(additional_data.data()),
                      additional_data.size()),
-      absl::MakeSpan(pt), s2v);
+      absl::MakeSpan(reinterpret_cast<const uint8_t*>(plaintext.data()),
+                     plaintext_size),
+      s2v);
   if (CRYPTO_memcmp(siv, s2v, kBlockSize) != 0) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid ciphertext");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid ciphertext");
   }
-  return std::string(reinterpret_cast<const char*>(pt.data()), plaintext_size);
+  return plaintext;
 }
 
 }  // namespace subtle

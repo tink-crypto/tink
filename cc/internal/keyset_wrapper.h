@@ -21,6 +21,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 // A Keyset wrapper wraps a Tink Keyset into a set of primitives. This is a
 // Tink internal object, which is created from a PrimitiveWrapper.
@@ -43,7 +44,8 @@ class KeysetWrapper {
       const google::crypto::tink::Keyset& keyset) const = 0;
 };
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_CORE_KEYSET_WRAPPER_H_
+#endif  // TINK_INTERNAL_KEYSET_WRAPPER_H_

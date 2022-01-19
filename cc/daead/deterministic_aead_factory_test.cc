@@ -15,6 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/daead/deterministic_aead_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/crypto_format.h"
@@ -23,8 +26,8 @@
 #include "tink/deterministic_aead.h"
 #include "tink/internal/key_info.h"
 #include "tink/keyset_handle.h"
-#include "tink/util/test_keyset_handle.h"
 #include "tink/util/status.h"
+#include "tink/util/test_keyset_handle.h"
 #include "tink/util/test_util.h"
 #include "proto/aes_siv.pb.h"
 
@@ -48,9 +51,9 @@ TEST_F(DeterministicAeadFactoryTest, testBasic) {
   auto daead_result = DeterministicAeadFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(daead_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, daead_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, daead_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-                      daead_result.status().error_message());
+                      std::string(daead_result.status().message()));
 }
 
 TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
@@ -109,10 +112,10 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
 
   decrypt_result = daead->DecryptDeterministically("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+            decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 
   // Create raw ciphertext with 2nd key, and decrypt
   // with DeterministicAead-instance.

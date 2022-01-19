@@ -13,11 +13,6 @@
 # limitations under the License.
 """Streaming AEAD wrapper."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import io
 from typing import cast, BinaryIO, Optional, Type
 
@@ -45,7 +40,7 @@ class _DecryptingStreamWrapper(io.RawIOBase):
         will be read.
       associated_data: The associated data to use for decryption.
     """
-    super(_DecryptingStreamWrapper, self).__init__()
+    super().__init__()
     if not ciphertext_source.readable():
       raise ValueError('ciphertext_source must be readable')
     self._ciphertext_source = _rewindable_input_stream.RewindableInputStream(
@@ -130,7 +125,7 @@ class _DecryptingStreamWrapper(io.RawIOBase):
     if self._attempting_stream:
       self._attempting_stream.close()
     self._ciphertext_source.close()
-    super(_DecryptingStreamWrapper, self).close()
+    super().close()
 
   def readable(self) -> bool:
     return True

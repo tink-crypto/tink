@@ -16,16 +16,21 @@
 
 #include "tink/signature/rsa_ssa_pkcs1_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/subtle/rsa_ssa_pkcs1_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -72,11 +77,10 @@ RsaSsaPkcs1KeyFormat CreateKeyFormat(HashType hash_type,
   auto params = key_format.mutable_params();
   params->set_hash_type(hash_type);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
   return key_format;
 }
 
@@ -117,7 +121,7 @@ TEST(RsaSsaPkcs1VerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
   key.set_n("\x23");
   key.set_e("\x3");
   EXPECT_THAT(RsaSsaPkcs1VerifyKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("only modulus size >= 2048")));
 }
 
@@ -131,7 +135,7 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, Create) {
   RsaSsaPkcs1PublicKey public_key =
       RsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).ValueOrDie();
 
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
+  internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
   private_key_subtle.e = private_key.public_key().e();
   private_key_subtle.d = util::SecretDataFromStringView(private_key.d());

@@ -17,9 +17,12 @@
 #include "tink/hybrid/hybrid_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
@@ -48,18 +51,18 @@ class HybridConfigTest : public ::testing::Test {
 };
 
 TEST_F(HybridConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<HybridEncrypt>(
                   EciesAeadHkdfPublicKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(HybridConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<HybridDecrypt>(
                   EciesAeadHkdfPrivateKeyManager().get_key_type())
@@ -74,7 +77,7 @@ TEST_F(HybridConfigTest, Basic) {
 // Tests that the HybridEncryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -110,7 +113,7 @@ TEST_F(HybridConfigTest, EncryptWrapperRegistered) {
 // Tests that the HybridDecryptWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -145,7 +148,7 @@ TEST_F(HybridConfigTest, DecryptWrapperRegistered) {
 
 // FIPS-only mode tests
 TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -174,7 +177,7 @@ TEST_F(HybridConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

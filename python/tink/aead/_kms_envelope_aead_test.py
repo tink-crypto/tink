@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC.
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for tink.python.tink.aead.aead."""
-
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 import struct
 from absl.testing import absltest

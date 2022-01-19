@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include "absl/status/status.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -32,7 +33,7 @@ StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
   absl::MutexLock lock(&maps_mutex_);
   auto it = type_url_to_info_.find(type_url);
   if (it == type_url_to_info_.end()) {
-    return ToStatusF(util::error::NOT_FOUND,
+    return ToStatusF(absl::StatusCode::kNotFound,
                      "No manager for type '%s' has been registered.", type_url);
   }
   return &it->second;
@@ -44,7 +45,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::NewKeyData(
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   if (!key_type_info_or.ValueOrDie()->new_key_allowed()) {
     return crypto::tink::util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("KeyManager for type ", key_template.type_url(),
                      " does not allow for creation of new keys."));
   }
@@ -60,7 +61,7 @@ StatusOr<std::unique_ptr<KeyData>> RegistryImpl::GetPublicKeyData(
   auto factory = dynamic_cast<const PrivateKeyFactory*>(
       &key_type_info_or.ValueOrDie()->key_factory());
   if (factory == nullptr) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "KeyManager for type '%s' does not have "
                      "a PrivateKeyFactory.",
                      type_url);
@@ -75,20 +76,20 @@ crypto::tink::util::Status RegistryImpl::CheckInsertable(
   auto it = type_url_to_info_.find(type_url);
 
   if (it == type_url_to_info_.end()) {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   if (it->second.key_manager_type_index() != key_manager_type_index) {
-    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+    return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered.",
                      type_url);
   }
   if (!it->second.new_key_allowed() && new_key_allowed) {
-    return ToStatusF(crypto::tink::util::error::ALREADY_EXISTS,
+    return ToStatusF(absl::StatusCode::kAlreadyExists,
                      "A manager for type '%s' has been already registered "
                      "with forbidden new key operation.",
                      type_url);
   }
-  return crypto::tink::util::Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<google::crypto::tink::KeyData>
@@ -98,7 +99,7 @@ RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
   if (!key_type_info_or.ok()) return key_type_info_or.status();
   if (!key_type_info_or.ValueOrDie()->key_deriver()) {
     return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         absl::StrCat("Manager for type '", key_template.type_url(),
                      "' cannot derive keys."));
   }

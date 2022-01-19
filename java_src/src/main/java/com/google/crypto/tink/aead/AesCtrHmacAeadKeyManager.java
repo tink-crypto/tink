@@ -21,6 +21,7 @@ import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.mac.HmacKeyManager;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKey;
 import com.google.crypto.tink.proto.AesCtrHmacAeadKeyFormat;
@@ -161,7 +162,10 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *       <li>HMAC tag size: 16 bytes
    *       <li>HMAC hash function: SHA256
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_CTR_HMAC_SHA256")}
    */
+  @Deprecated
   public static final KeyTemplate aes128CtrHmacSha256Template() {
     return createKeyTemplate(16, 16, 32, 16, HashType.SHA256);
   }
@@ -176,7 +180,10 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
    *       <li>HMAC tag size: 32 bytes
    *       <li>HMAC hash function: SHA256
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_CTR_HMAC_SHA256")}
    */
+  @Deprecated
   public static final KeyTemplate aes256CtrHmacSha256Template() {
     return createKeyTemplate(32, 16, 32, 32, HashType.SHA256);
   }
@@ -223,4 +230,9 @@ public final class AesCtrHmacAeadKeyManager extends KeyTypeManager<AesCtrHmacAea
         .setHmacKeyFormat(hmacKeyFormat)
         .build();
   }
+
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
 }

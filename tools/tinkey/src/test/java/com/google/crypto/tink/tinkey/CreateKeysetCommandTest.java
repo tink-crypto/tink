@@ -19,18 +19,16 @@ package com.google.crypto.tink.tinkey;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeFalse;
 
-import com.google.crypto.tink.Config;
-import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.testing.TestUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,11 +38,12 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class CreateKeysetCommandTest {
-  private static final KeyTemplate KEY_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
+  private static KeyTemplate template;
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(TinkConfig.TINK_1_0_0);
+    MacConfig.register();
+    template = KeyTemplates.get("HMAC_SHA256_128BITTAG");
   }
 
   @Test
@@ -59,18 +58,14 @@ public class CreateKeysetCommandTest {
     String masterKeyUri = null; // This ensures that the keyset won't be encrypted.
     String credentialPath = null;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(
-        outputStream, outFormat,
-        masterKeyUri, credentialPath, KEY_TEMPLATE);
+    CreateKeysetCommand.create(outputStream, outFormat, masterKeyUri, credentialPath, template);
     Keyset keyset = TinkeyUtil.createKeysetReader(
         new ByteArrayInputStream(outputStream.toByteArray()), outFormat).read();
 
     assertThat(keyset.getKeyCount()).isEqualTo(1);
-    TestUtil.assertHmacKey(KEY_TEMPLATE, keyset.getKey(0));
+    TestUtil.assertHmacKey(template, keyset.getKey(0));
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
   public void testCreateEncrypted_shouldCreateNewKeyset() throws Exception {
     testCreateEncrypted_shouldCreateNewKeyset("json");
@@ -85,15 +80,13 @@ public class CreateKeysetCommandTest {
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    CreateKeysetCommand.create(
-        outputStream, outFormat,
-        masterKeyUri, credentialPath, KEY_TEMPLATE);
+    CreateKeysetCommand.create(outputStream, outFormat, masterKeyUri, credentialPath, template);
     EncryptedKeyset encryptedKeyset = TinkeyUtil
         .createKeysetReader(new ByteArrayInputStream(outputStream.toByteArray()), outFormat)
         .readEncrypted();
     KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
 
     assertThat(keysetInfo.getKeyInfoCount()).isEqualTo(1);
-    TestUtil.assertKeyInfo(KEY_TEMPLATE, keysetInfo.getKeyInfo(0));
+    TestUtil.assertKeyInfo(template, keysetInfo.getKeyInfo(0));
   }
 }

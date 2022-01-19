@@ -10,7 +10,7 @@ java_library(
         ":bytes",
         ":subtle_util_cluster",
         ":validators",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -28,6 +28,7 @@ java_library(
         ":stream_segment_encrypter",
         ":subtle_util_cluster",
         ":validators",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -36,8 +37,10 @@ java_library(
     srcs = ["ChaCha20Poly1305.java"],
     deps = [
         ":cha_cha20",
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 
@@ -54,7 +57,7 @@ java_library(
         ":random",
         ":subtle_util_cluster",
         ":validators",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -157,7 +160,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -182,7 +185,7 @@ java_library(
         ":enums",
         ":subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -192,7 +195,7 @@ java_library(
     srcs = ["Validators.java"],
     deps = [
         ":enums",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -226,7 +229,7 @@ java_library(
         ":prf_aes_cmac",
         ":subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink:deterministic_aead",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -260,6 +263,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -293,7 +297,8 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_aes_gcm_jce",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -310,7 +315,7 @@ java_library(
         ":field25519",
         ":random",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -336,7 +341,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -348,7 +353,7 @@ java_library(
         ":field25519",
         ":immutable_byte_array",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
@@ -359,14 +364,18 @@ java_library(
         ":cha_cha20_base",
         ":poly1305",
         "//src/main/java/com/google/crypto/tink:aead",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 
 java_library(
     name = "x_cha_cha20",
     srcs = ["XChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20",
+    ],
 )
 
 java_library(
@@ -377,7 +386,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -391,7 +400,11 @@ java_library(
 java_library(
     name = "cha_cha20",
     srcs = ["ChaCha20.java"],
-    deps = [":cha_cha20_base"],
+    deps = [
+        ":ind_cpa_cipher",
+        ":random",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_cha_cha20",
+    ],
 )
 
 java_library(
@@ -402,7 +415,7 @@ java_library(
         ":enums",
         ":subtle_util_cluster",
         "//src/main/java/com/google/crypto/tink:public_key_verify",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -433,6 +446,7 @@ java_library(
         ":subtle_util_cluster",
         ":validators",
         "//src/main/java/com/google/crypto/tink:public_key_sign",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
 )
@@ -447,7 +461,7 @@ java_library(
     srcs = ["PrfHmacJce.java"],
     deps = [
         ":subtle_util_cluster",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
         "//src/main/java/com/google/crypto/tink/prf:prf_set",
         "@maven//:com_google_errorprone_error_prone_annotations",
     ],
@@ -466,9 +480,11 @@ java_library(
     name = "x_cha_cha20_poly1305",
     srcs = ["XChaCha20Poly1305.java"],
     deps = [
-        ":cha_cha20_base",
-        ":cha_cha20_poly1305_base",
+        ":random",
         ":x_cha_cha20",
+        "//src/main/java/com/google/crypto/tink:aead",
+        "//src/main/java/com/google/crypto/tink/aead/internal:insecure_nonce_x_cha_cha20_poly1305",
+        "//src/main/java/com/google/crypto/tink/aead/internal:poly1305",
     ],
 )
 
@@ -522,7 +538,7 @@ java_library(
         ":engine_wrapper",
         ":enums",
         ":validators",
-        "//src/main/java/com/google/crypto/tink/config:tink_fips",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
     ],
 )
 

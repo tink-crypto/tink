@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
@@ -88,15 +89,11 @@ class AesEaxKeyManager
     return aes_eax_key;
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
-
  private:
   crypto::tink::util::Status ValidateKeySize(uint32_t key_size) const {
     if (key_size != 16 && key_size != 32) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid key size: ", key_size,
                        " bytes, expected 16 or 32 bytes."));
     }
@@ -106,7 +103,7 @@ class AesEaxKeyManager
   crypto::tink::util::Status ValidateIvSize(uint32_t iv_size) const {
     if (iv_size != 12 && iv_size != 16) {
       return crypto::tink::util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid IV size: ", iv_size,
                        " bytes, expected 12 or 16 bytes."));
     }

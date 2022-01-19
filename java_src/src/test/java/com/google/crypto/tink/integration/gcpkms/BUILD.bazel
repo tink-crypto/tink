@@ -13,6 +13,7 @@ java_test(
     deps = [
         "//src/main/java/com/google/crypto/tink:kms_client",
         "//src/main/java/com/google/crypto/tink:kms_clients",
+        "//src/main/java/com/google/crypto/tink:kms_clients_test_util",
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",

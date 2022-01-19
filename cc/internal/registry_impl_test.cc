@@ -15,12 +15,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <memory>
+#include <string>
 #include <thread>  // NOLINT(build/c++11)
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "openssl/crypto.h"
 #include "tink/aead.h"
@@ -104,12 +107,14 @@ class TestKeyFactory : public KeyFactory {
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       const MessageLite& key_format) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot produce a key");
   }
 
   util::StatusOr<std::unique_ptr<portable_proto::MessageLite>> NewKey(
       absl::string_view serialized_key_format) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot produce a key");
   }
 
   util::StatusOr<std::unique_ptr<KeyData>> NewKeyData(
@@ -137,7 +142,8 @@ class TestAeadKeyManager : public KeyManager<Aead> {
 
   util::StatusOr<std::unique_ptr<Aead>>
   GetPrimitive(const MessageLite& key) const override {
-    return util::Status::UNKNOWN;
+    return util::Status(absl::StatusCode::kUnknown,
+                        "TestKeyFactory cannot construct an aead");
   }
 
 
@@ -248,7 +254,8 @@ class TestWrapper : public PrimitiveWrapper<P, Q> {
   TestWrapper() {}
   crypto::tink::util::StatusOr<std::unique_ptr<Q>> Wrap(
       std::unique_ptr<PrimitiveSet<P>> primitive_set) const override {
-    return util::Status(util::error::UNIMPLEMENTED, "This is a test wrapper.");
+    return util::Status(absl::StatusCode::kUnimplemented,
+                        "This is a test wrapper.");
   }
 };
 
@@ -316,11 +323,11 @@ TEST_F(RegistryTest, testRegisterKeyManagerMoreRestrictiveNewKeyAllowed) {
 
   auto result_after = Registry::NewKeyData(key_template);
   EXPECT_FALSE(result_after.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result_after.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result_after.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
 }
 
 TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
@@ -341,19 +348,21 @@ TEST_F(RegistryTest, testRegisterKeyManagerLessRestrictiveNewKeyAllowed) {
       absl::make_unique<TestAeadKeyManager>(key_type),
       /* new_key_allowed= */ true);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+  EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      status.error_message()) << status;
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "forbidden new key operation" ,
-                      status.error_message()) << status;
+                      std::string(status.message()))
+      << status;
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, "forbidden new key operation",
+                      std::string(status.message()))
+      << status;
 
   auto result_after = Registry::NewKeyData(key_template);
   EXPECT_FALSE(result_after.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result_after.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result_after.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type,
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                      result_after.status().error_message());
+                      std::string(result_after.status().message()));
 }
 
 TEST_F(RegistryTest, testConcurrentRegistration) {
@@ -392,7 +401,7 @@ TEST_F(RegistryTest, testConcurrentRegistration) {
   key_type = key_type_prefix_a + std::to_string(count_a);
   manager_result = Registry::get_key_manager<Aead>(key_type);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, manager_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, manager_result.status().code());
 }
 
 TEST_F(RegistryTest, testBasic) {
@@ -400,8 +409,7 @@ TEST_F(RegistryTest, testBasic) {
   std::string key_type_2 = "google.crypto.tink.AesGcmKey";
   auto manager_result = Registry::get_key_manager<Aead>(key_type_1);
   EXPECT_FALSE(manager_result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND,
-            manager_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, manager_result.status().code());
 
   auto status = Registry::RegisterKeyManager(
       absl::make_unique<TestAeadKeyManager>(key_type_1), true);
@@ -432,7 +440,7 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   std::unique_ptr<TestAeadKeyManager> null_key_manager = nullptr;
   auto status = Registry::RegisterKeyManager(std::move(null_key_manager), true);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code()) << status;
 
   // Register a key manager.
   status = Registry::RegisterKeyManager(
@@ -449,7 +457,7 @@ TEST_F(RegistryTest, testRegisterKeyManager) {
   status = Registry::RegisterKeyManager(
       crypto::tink::internal::MakeKeyManager<Aead>(&key_type_manager), true);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+  EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
 
   // Check the key manager is still registered.
   auto manager_result = Registry::get_key_manager<Aead>(key_type_1);
@@ -482,7 +490,7 @@ class TestAeadCatalogue : public Catalogue<Aead> {
   util::StatusOr<std::unique_ptr<KeyManager<Aead>>> GetKeyManager(
       const std::string& type_url, const std::string& primitive_name,
       uint32_t min_version) const override {
-    return util::Status(util::error::UNIMPLEMENTED,
+    return util::Status(absl::StatusCode::kUnimplemented,
                         "This is a test catalogue.");
   }
 };
@@ -496,7 +504,7 @@ TEST_F(RegistryTest, testAddCatalogue) {
   auto status =
       Registry::AddCatalogue(catalogue_name, std::move(null_catalogue));
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code()) << status;
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code()) << status;
 
   // Add a catalogue.
   status = Registry::AddCatalogue(catalogue_name,
@@ -512,7 +520,7 @@ TEST_F(RegistryTest, testAddCatalogue) {
   status = Registry::AddCatalogue(catalogue_name,
                                   absl::make_unique<TestAeadCatalogue2>());
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, status.error_code()) << status;
+  EXPECT_EQ(absl::StatusCode::kAlreadyExists, status.code()) << status;
 
   // Check the catalogue is still present.
   EXPECT_THAT(Registry::get_catalogue<Aead>(catalogue_name).status(), IsOk());
@@ -627,12 +635,12 @@ TEST_F(RegistryTest, testNewKeyData) {
     key_template.set_value("some other value 72");
     auto new_key_data_result = Registry::NewKeyData(key_template);
     EXPECT_FALSE(new_key_data_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              new_key_data_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              new_key_data_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, key_type_3,
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "does not allow",
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
   }
 
   {  // A key type that is not supported.
@@ -642,10 +650,10 @@ TEST_F(RegistryTest, testNewKeyData) {
     key_template.set_value("some totally other value 42");
     auto new_key_data_result = Registry::NewKeyData(key_template);
     EXPECT_FALSE(new_key_data_result.ok());
-    EXPECT_EQ(util::error::NOT_FOUND,
-              new_key_data_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kNotFound,
+              new_key_data_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, bad_type_url,
-                        new_key_data_result.status().error_message());
+                        std::string(new_key_data_result.status().message()));
   }
 }
 
@@ -688,20 +696,19 @@ TEST_F(RegistryTest, testGetPublicKeyData) {
   auto wrong_key_type_result = Registry::GetPublicKeyData(
       AesGcmKeyManager().get_key_type(), ecies_key.SerializeAsString());
   EXPECT_FALSE(wrong_key_type_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            wrong_key_type_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+            wrong_key_type_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "PrivateKeyFactory",
-                      wrong_key_type_result.status().error_message());
+                      std::string(wrong_key_type_result.status().message()));
 
   // Try with a bad serialized key.
   auto bad_key_result = Registry::GetPublicKeyData(
       EciesAeadHkdfPrivateKeyManager().get_key_type(),
       "some bad serialized key");
   EXPECT_FALSE(bad_key_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            bad_key_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, bad_key_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Could not parse",
-                      bad_key_result.status().error_message());
+                      std::string(bad_key_result.status().message()));
 }
 
 // Tests that if we register the same type of wrapper twice, the second call
@@ -763,7 +770,7 @@ TEST_F(RegistryTest, RegisterDifferentWrappers) {
   util::Status result = Registry::RegisterPrimitiveWrapper(
       absl::make_unique<TestWrapper<Aead>>());
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::ALREADY_EXISTS, result.error_code());
+  EXPECT_EQ(absl::StatusCode::kAlreadyExists, result.code());
 }
 
 // Tests that if we register different wrappers for different primitives, this
@@ -788,9 +795,9 @@ TEST_F(RegistryTest, NoWrapperRegistered) {
   crypto::tink::util::StatusOr<std::unique_ptr<Aead>> result =
       Registry::Wrap<Aead>(absl::make_unique<PrimitiveSet<Aead>>());
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No wrapper registered",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 // Tests that if the wrapper fails, the error of the wrapped is forwarded
@@ -804,7 +811,7 @@ TEST_F(RegistryTest, WrapperFails) {
       Registry::Wrap<Aead>(absl::make_unique<PrimitiveSet<Aead>>());
   EXPECT_FALSE(result.ok());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "This is a test wrapper",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 // Tests that wrapping works as expected in the usual case.
@@ -861,10 +868,9 @@ TEST_F(RegistryTest, UsualWrappingTest) {
 
   decrypt_result = aead->Decrypt("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-            decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                      decrypt_result.status().error_message());
+                      std::string(decrypt_result.status().message()));
 }
 
 std::string AddAesGcmKey(uint32_t key_id, OutputPrefixType output_prefix_type,
@@ -965,7 +971,7 @@ TEST_F(RegistryTest, TransformingPrimitiveWrapperCustomKeyManager) {
                   .ok());
 
   EXPECT_THAT(Registry::Wrap<Aead>(std::move(primitive_set)).status(),
-              StatusIs(util::error::FAILED_PRECONDITION,
+              StatusIs(absl::StatusCode::kFailedPrecondition,
                        HasSubstr("custom key manager")));
 }
 
@@ -980,11 +986,12 @@ TEST_F(RegistryTest, GetKeyManagerErrorMessage) {
   auto result =
       Registry::get_key_manager<int>(AesGcmKeyManager().get_key_type());
   EXPECT_FALSE(result.ok());
-  EXPECT_THAT(result.status().error_message(),
+  EXPECT_THAT(std::string(result.status().message()),
               HasSubstr(AesGcmKeyManager().get_key_type()));
   // Note: The C++ standard does not guarantee the next line.  If some toolchain
   // update fails it, one can delete it.
-  EXPECT_THAT(result.status().error_message(), HasSubstr(typeid(Aead).name()));
+  EXPECT_THAT(std::string(result.status().message()),
+              HasSubstr(typeid(Aead).name()));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManager) {
@@ -1025,7 +1032,7 @@ TEST_F(RegistryTest, RegisterFipsKeyTypeManagerNoBoringCrypto) {
 
   EXPECT_THAT(
       Registry::RegisterKeyTypeManager(std::move(fips_key_manager), true),
-      StatusIs(util::error::INTERNAL));
+      StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RegistryTest, KeyTypeManagerGetFirstKeyManager) {
@@ -1079,7 +1086,7 @@ TEST_F(RegistryTest, KeyTypeManagerNotSupportedPrimitive) {
   EXPECT_THAT(Registry::get_key_manager<Mac>(
                   "type.googleapis.com/google.crypto.tink.AesGcmKey")
                   .status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not among supported primitives")));
 }
 
@@ -1224,7 +1231,7 @@ TEST_F(RegistryTest, KeyManagerDeriveKeyFail) {
 
   EXPECT_THAT(
       RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("cannot derive")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("cannot derive")));
 }
 
 TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
@@ -1233,7 +1240,7 @@ TEST_F(RegistryTest, KeyManagerDeriveNotRegistered) {
 
   EXPECT_THAT(
       RegistryImpl::GlobalInstance().DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::NOT_FOUND, HasSubstr("No manager")));
+      StatusIs(absl::StatusCode::kNotFound, HasSubstr("No manager")));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerTwiceMoreRestrictive) {
@@ -1278,7 +1285,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerLessRestrictive) {
               IsOk());
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
@@ -1293,7 +1300,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerBeforeKeyManager) {
                   absl::make_unique<TestAeadKeyManager>(
                       "type.googleapis.com/google.crypto.tink.AesGcmKey"),
                   true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
@@ -1308,7 +1315,7 @@ TEST_F(RegistryTest, RegisterKeyTypeManagerAfterKeyManager) {
               IsOk());
   EXPECT_THAT(Registry::RegisterKeyTypeManager(
                   absl::make_unique<ExampleKeyTypeManager>(), true),
-              StatusIs(util::error::ALREADY_EXISTS));
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 class PrivatePrimitiveA {};
@@ -1323,14 +1330,14 @@ class TestPrivateKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PrivatePrimitiveA>> Create(
         const EcdsaPrivateKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
   class PrivatePrimitiveBFactory : public PrimitiveFactory<PrivatePrimitiveB> {
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PrivatePrimitiveB>> Create(
         const EcdsaPrivateKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 
@@ -1346,11 +1353,11 @@ class TestPrivateKeyTypeManager
   uint32_t get_version() const override { return 0; }
   crypto::tink::util::Status ValidateKey(
       const EcdsaPrivateKey& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
   crypto::tink::util::Status ValidateKeyFormat(
       const EcdsaKeyFormat& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   const std::string& get_key_type() const override { return kKeyType; }
@@ -1387,14 +1394,14 @@ class TestPublicKeyTypeManager
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PublicPrimitiveA>> Create(
         const EcdsaPublicKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
   class PublicPrimitiveBFactory : public PrimitiveFactory<PublicPrimitiveB> {
    public:
     crypto::tink::util::StatusOr<std::unique_ptr<PublicPrimitiveB>> Create(
         const EcdsaPublicKey& key) const override {
-      return util::Status(util::error::UNIMPLEMENTED, "Not implemented");
+      return util::Status(absl::StatusCode::kUnimplemented, "Not implemented");
     }
   };
 
@@ -1410,7 +1417,7 @@ class TestPublicKeyTypeManager
   uint32_t get_version() const override { return 0; }
   crypto::tink::util::Status ValidateKey(
       const EcdsaPublicKey& key) const override {
-    return crypto::tink::util::Status::OK;
+    return crypto::tink::util::OkStatus();
   }
 
   const std::string& get_key_type() const override { return kKeyType; }
@@ -1505,7 +1512,7 @@ TEST_F(RegistryTest, AsymmetricLessRestrictiveGivesError) {
   EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
                   CreateTestPrivateKeyManagerFipsCompatible(),
                   CreateTestPublicKeyManagerFipsCompatible(), true),
-              StatusIs(util::error::ALREADY_EXISTS,
+              StatusIs(absl::StatusCode::kAlreadyExists,
                        HasSubstr("forbidden new key operation")));
 }
 
@@ -1656,7 +1663,7 @@ TEST_F(RegistryTest, AsymmetricGetWrongPrimitiveError) {
       Registry::get_key_manager<PublicPrimitiveA>(
           TestPrivateKeyTypeManager().get_key_type());
   EXPECT_THAT(km.status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("not among supported primitives")));
 }
 
@@ -1715,8 +1722,9 @@ TEST_F(PrivateKeyManagerImplTest, AsymmetricNewKeyDisallowed) {
 
   KeyTemplate key_template;
   key_template.set_type_url(TestPrivateKeyTypeManager().get_key_type());
-  EXPECT_THAT(Registry::NewKeyData(key_template).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("not allow")));
+  EXPECT_THAT(
+      Registry::NewKeyData(key_template).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("not allow")));
 }
 
 TEST_F(RegistryTest, AsymmetricGetPublicKeyData) {
@@ -1755,29 +1763,29 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithWrongClasses) {
                   absl::make_unique<TestPrivateKeyTypeManager>(),
                   absl::make_unique<TestPublicKeyTypeManager>(), true)
                   .ok());
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager2>(),
-          absl::make_unique<TestPublicKeyTypeManager>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager>(),
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterAsymmetricKeyManagers(
-          absl::make_unique<TestPrivateKeyTypeManager2>(),
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<TestPrivateKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
-  EXPECT_THAT(
-      Registry::RegisterKeyTypeManager(
-          absl::make_unique<TestPublicKeyTypeManager2>(), true),
-      StatusIs(util::error::ALREADY_EXISTS, HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(),
+                  absl::make_unique<TestPublicKeyTypeManager>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager>(),
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterAsymmetricKeyManagers(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(),
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPrivateKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
+  EXPECT_THAT(Registry::RegisterKeyTypeManager(
+                  absl::make_unique<TestPublicKeyTypeManager2>(), true),
+              StatusIs(absl::StatusCode::kAlreadyExists,
+                       HasSubstr("already registered")));
 }
 
 class TestPublicKeyTypeManagerWithDifferentKeyType
@@ -1802,7 +1810,7 @@ TEST_F(RegistryTest, RegisterAssymmetricReregistrationWithNewKeyType) {
           absl::make_unique<TestPrivateKeyTypeManager>(),
           absl::make_unique<TestPublicKeyTypeManagerWithDifferentKeyType>(),
           true),
-      StatusIs(util::error::INVALID_ARGUMENT,
+      StatusIs(absl::StatusCode::kInvalidArgument,
                HasSubstr("impossible to register")));
 }
 
@@ -1844,7 +1852,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->NewKeyData(key_template);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "CreateKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "CreateKey worked");
   }
 
   crypto::tink::util::StatusOr<EcdsaPrivateKey> DeriveKey(
@@ -1859,7 +1868,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->DeriveKey(key_template, input_stream);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "DeriveKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "DeriveKey worked");
   }
 
   crypto::tink::util::StatusOr<EcdsaPublicKey> GetPublicKey(
@@ -1872,7 +1882,8 @@ class DelegatingKeyTypeManager
     auto result = registry_->NewKeyData(key_template);
     if (!result.ok()) return result.status();
     // Return a string we can check for.
-    return util::Status(util::error::DEADLINE_EXCEEDED, "GetPublicKey worked");
+    return util::Status(absl::StatusCode::kDeadlineExceeded,
+                        "GetPublicKey worked");
   }
 
  private:
@@ -1883,8 +1894,17 @@ class DelegatingKeyTypeManager
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey";
 };
 
+class RegistryImplTest : public ::testing::Test {
+ protected:
+  void TearDown() override {
+    // Calling RestrictToFipsIfEmpty() may call SetFipsRestricted(), which
+    // set a global variable to true. We have to reset that after the test.
+    UnSetFipsRestricted();
+  }
+};
+
 // Check that we can call the registry again from within NewKeyData
-TEST(RegistryImplTest, CanDelegateCreateKey) {
+TEST_F(RegistryImplTest, CanDelegateCreateKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1908,12 +1928,12 @@ TEST(RegistryImplTest, CanDelegateCreateKey) {
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
   key_template.set_value(format.SerializeAsString());
   EXPECT_THAT(registry_impl.NewKeyData(key_template).status(),
-              StatusIs(util::error::DEADLINE_EXCEEDED,
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
                        HasSubstr("CreateKey worked")));
 }
 
 // Check that we can call the registry again from within NewKeyData
-TEST(RegistryImplTest, CanDelegateDeriveKey) {
+TEST_F(RegistryImplTest, CanDelegateDeriveKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1936,12 +1956,12 @@ TEST(RegistryImplTest, CanDelegateDeriveKey) {
   key_template.set_type_url(
       "type.googleapis.com/google.crypto.tink.EcdsaPrivateKey");
   key_template.set_value(format.SerializeAsString());
-  EXPECT_THAT(
-      registry_impl.DeriveKey(key_template, nullptr).status(),
-      StatusIs(util::error::DEADLINE_EXCEEDED, HasSubstr("DeriveKey worked")));
+  EXPECT_THAT(registry_impl.DeriveKey(key_template, nullptr).status(),
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
+                       HasSubstr("DeriveKey worked")));
 }
 
-TEST(RegistryImplTest, CanDelegateGetPublicKey) {
+TEST_F(RegistryImplTest, CanDelegateGetPublicKey) {
   if (kUseOnlyFips) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
@@ -1966,8 +1986,31 @@ TEST(RegistryImplTest, CanDelegateGetPublicKey) {
                   .GetPublicKeyData(DelegatingKeyTypeManager().get_key_type(),
                                     private_key.SerializeAsString())
                   .status(),
-              StatusIs(util::error::DEADLINE_EXCEEDED,
+              StatusIs(absl::StatusCode::kDeadlineExceeded,
                        HasSubstr("GetPublicKey worked")));
+}
+
+TEST_F(RegistryImplTest, FipsSucceedsOnEmptyRegistry) {
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(), IsOk());
+}
+
+TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
+  if (!FIPS_mode()) {
+    GTEST_SKIP() << "Not supported when BoringSSL is not built in FIPS-mode.";
+  }
+
+  auto fips_key_manager = absl::make_unique<ExampleKeyTypeManager>();
+  ON_CALL(*fips_key_manager, FipsStatus())
+      .WillByDefault(testing::Return(FipsCompatibility::kRequiresBoringCrypto));
+
+  RegistryImpl registry_impl;
+  auto status = registry_impl.RegisterKeyTypeManager<AesGcmKey, AesGcmKeyFormat,
+                                                   List<Aead, AeadVariant>>(
+                  std::move(fips_key_manager), true);
+  EXPECT_THAT(status, IsOk());
+  EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

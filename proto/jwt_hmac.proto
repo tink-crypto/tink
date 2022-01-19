@@ -18,21 +18,33 @@ syntax = "proto3";
 
 package google.crypto.tink;
 
-import "proto/common.proto";
-
 option java_package = "com.google.crypto.tink.proto";
 option java_multiple_files = true;
 option go_package = "github.com/google/tink/proto/jwt_hmac_go_proto";
 
+enum JwtHmacAlgorithm {
+  HS_UNKNOWN = 0;
+  HS256 = 1;
+  HS384 = 2;
+  HS512 = 3;
+}
+
 // key_type: type.googleapis.com/google.crypto.tink.JwtHmacKey
 message JwtHmacKey {
   uint32 version = 1;
-  HashType hash_type = 2;
+  JwtHmacAlgorithm algorithm = 2;
   bytes key_value = 3;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 4;
 }
 
 message JwtHmacKeyFormat {
   uint32 version = 1;
-  HashType hash_type = 2;
+  JwtHmacAlgorithm algorithm = 2;
   uint32 key_size = 3;
 }

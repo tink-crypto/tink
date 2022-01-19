@@ -1,6 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey"
-# value: [type.googleapis.com/google.crypto.tink.JwtEcdsaKeyFormat] {
-#   algorithm: ES512
-# }
-value: "\010\003"
-output_prefix_type: RAW

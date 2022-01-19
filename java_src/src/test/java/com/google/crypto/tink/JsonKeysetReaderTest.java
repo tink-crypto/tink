@@ -234,7 +234,7 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
-  public void testRead_JsonKeysetWriter_shouldWork() throws Exception {
+  public void testRead_jsonKeysetWriter_shouldWork() throws Exception {
     KeyTemplate template = MacKeyTemplates.HMAC_SHA256_128BITTAG;
     KeysetHandle handle1 = KeysetHandle.generateNew(template);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -317,7 +317,7 @@ public class JsonKeysetReaderTest {
   }
 
   @Test
-  public void testReadEncrypted_JsonKeysetWriter_shouldWork() throws Exception {
+  public void testReadEncrypted_jsonKeysetWriter_shouldWork() throws Exception {
     KeyTemplate masterKeyTemplate = AeadKeyTemplates.AES128_EAX;
     Aead masterKey = Registry.getPrimitive(Registry.newKeyData(masterKeyTemplate));
     KeysetHandle handle1 = KeysetHandle.generateNew(MacKeyTemplates.HMAC_SHA256_128BITTAG);

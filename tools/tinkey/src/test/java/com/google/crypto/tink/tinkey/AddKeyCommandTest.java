@@ -20,12 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 
-import com.google.crypto.tink.Config;
+import com.google.crypto.tink.KeyTemplate;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetReader;
-import com.google.crypto.tink.config.TinkConfig;
-import com.google.crypto.tink.mac.MacKeyTemplates;
+import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.proto.EncryptedKeyset;
-import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.KeysetInfo;
 import com.google.crypto.tink.testing.TestUtil;
@@ -34,7 +33,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,14 +42,16 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AddKeyCommandTest {
-  private static final KeyTemplate EXISTING_TEMPLATE = MacKeyTemplates.HMAC_SHA256_128BITTAG;
-  private static final KeyTemplate NEW_TEMPLATE = MacKeyTemplates.HMAC_SHA256_256BITTAG;
+  private static KeyTemplate existingTemplate;
+  private static KeyTemplate newTemplate;
   private static final String OUTPUT_FORMAT = "json";
   private static final String INPUT_FORMAT = "json";
 
   @BeforeClass
   public static void setUp() throws Exception {
-    Config.register(TinkConfig.TINK_1_0_0);
+    MacConfig.register();
+    existingTemplate = KeyTemplates.get("HMAC_SHA256_128BITTAG");
+    newTemplate = KeyTemplates.get("HMAC_SHA256_256BITTAG");
   }
 
   private KeysetReader addNewKeyToKeyset(String outFormat, InputStream inputStream,
@@ -72,16 +72,18 @@ public class AddKeyCommandTest {
     // Create an input stream containing a cleartext keyset.
     String masterKeyUri = null;
     String credentialPath = null;
-    InputStream inputStream = TinkeyUtil.createKeyset(
-        EXISTING_TEMPLATE, INPUT_FORMAT, masterKeyUri, credentialPath);
+    InputStream inputStream =
+        TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);
     // Add a new key to the existing keyset.
-    Keyset keyset = addNewKeyToKeyset(OUTPUT_FORMAT, inputStream, INPUT_FORMAT,
-        masterKeyUri, credentialPath, NEW_TEMPLATE).read();
+    Keyset keyset =
+        addNewKeyToKeyset(
+                OUTPUT_FORMAT, inputStream, INPUT_FORMAT, masterKeyUri, credentialPath, newTemplate)
+            .read();
 
     assertThat(keyset.getKeyCount()).isEqualTo(2);
     assertThat(keyset.getPrimaryKeyId()).isEqualTo(keyset.getKey(0).getKeyId());
-    TestUtil.assertHmacKey(EXISTING_TEMPLATE, keyset.getKey(0));
-    TestUtil.assertHmacKey(NEW_TEMPLATE, keyset.getKey(1));
+    TestUtil.assertHmacKey(existingTemplate, keyset.getKey(0));
+    TestUtil.assertHmacKey(newTemplate, keyset.getKey(1));
   }
 
   @Test
@@ -93,17 +95,19 @@ public class AddKeyCommandTest {
 
     try {
       AddKeyCommand.add(
-          outputStream, OUTPUT_FORMAT,
-          emptyStream, INPUT_FORMAT,
-          masterKeyUri, credentialPath, NEW_TEMPLATE);
+          outputStream,
+          OUTPUT_FORMAT,
+          emptyStream,
+          INPUT_FORMAT,
+          masterKeyUri,
+          credentialPath,
+          newTemplate);
       fail("Expected IOException");
     } catch (IOException e) {
       // expected
     }
   }
 
-  // TODO(b/154273145): re-enable this.
-  @Ignore
   @Test
   public void testAddEncrypted_shouldAddNewKey() throws Exception {
     // This test requires KMS/internet access and thus cannot run on RBE.
@@ -111,16 +115,18 @@ public class AddKeyCommandTest {
     // Create an input stream containing an encrypted keyset.
     String masterKeyUri = TestUtil.RESTRICTED_CRYPTO_KEY_URI;
     String credentialPath = TestUtil.SERVICE_ACCOUNT_FILE;
-    InputStream inputStream = TinkeyUtil.createKeyset(
-        EXISTING_TEMPLATE, INPUT_FORMAT, masterKeyUri, credentialPath);
-    EncryptedKeyset encryptedKeyset = addNewKeyToKeyset(OUTPUT_FORMAT, inputStream,
-        INPUT_FORMAT, masterKeyUri, credentialPath, NEW_TEMPLATE).readEncrypted();
+    InputStream inputStream =
+        TinkeyUtil.createKeyset(existingTemplate, INPUT_FORMAT, masterKeyUri, credentialPath);
+    EncryptedKeyset encryptedKeyset =
+        addNewKeyToKeyset(
+                OUTPUT_FORMAT, inputStream, INPUT_FORMAT, masterKeyUri, credentialPath, newTemplate)
+            .readEncrypted();
     KeysetInfo keysetInfo = encryptedKeyset.getKeysetInfo();
 
     assertThat(keysetInfo.getKeyInfoCount()).isEqualTo(2);
     assertThat(keysetInfo.getPrimaryKeyId()).isEqualTo(keysetInfo.getKeyInfo(0).getKeyId());
-    TestUtil.assertKeyInfo(EXISTING_TEMPLATE, keysetInfo.getKeyInfo(0));
-    TestUtil.assertKeyInfo(NEW_TEMPLATE, keysetInfo.getKeyInfo(0));
+    TestUtil.assertKeyInfo(existingTemplate, keysetInfo.getKeyInfo(0));
+    TestUtil.assertKeyInfo(newTemplate, keysetInfo.getKeyInfo(0));
   }
 
 }

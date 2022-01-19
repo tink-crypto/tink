@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/mac.h"
 #include "tink/util/istream_input_stream.h"
@@ -275,7 +276,7 @@ TEST(HmacKeyManagerTest, DeriveKeyNotEnoughRandomness) {
       absl::make_unique<std::stringstream>("0123456789abcdef")};
 
   ASSERT_THAT(HmacKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(HmacKeyManagerTest, DeriveKeyWrongVersion) {
@@ -288,8 +289,9 @@ TEST(HmacKeyManagerTest, DeriveKeyWrongVersion) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef")};
 
-  ASSERT_THAT(HmacKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      HmacKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 TEST(HmacKeyManagerTest, GetPrimitive) {

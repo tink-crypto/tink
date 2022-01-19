@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
 	kmsepb "github.com/google/tink/go/proto/kms_envelope_go_proto"
@@ -35,11 +35,6 @@ const (
 // kmsEnvelopeAEADKeyManager is an implementation of KeyManager interface.
 // It generates new KMSEnvelopeAEADKey keys and produces new instances of KMSEnvelopeAEAD subtle.
 type kmsEnvelopeAEADKeyManager struct{}
-
-// newKMSEnvelopeAEADKeyManager creates a new aesGcmKeyManager.
-func newKMSEnvelopeAEADKeyManager() *kmsEnvelopeAEADKeyManager {
-	return new(kmsEnvelopeAEADKeyManager)
-}
 
 // Primitive creates an KMSEnvelopeAEAD subtle for the given serialized KMSEnvelopeAEADKey proto.
 func (km *kmsEnvelopeAEADKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

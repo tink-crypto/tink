@@ -16,15 +16,17 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.internal.KeyStatusTypeProtoConverter;
+import com.google.crypto.tink.internal.Util;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.crypto.tink.proto.KeyStatusType;
 import com.google.crypto.tink.proto.Keyset;
 import com.google.crypto.tink.proto.OutputPrefixType;
 import com.google.crypto.tink.tinkkey.KeyAccess;
 import com.google.crypto.tink.tinkkey.KeyHandle;
-import com.google.crypto.tink.tinkkey.ProtoKey;
+import com.google.crypto.tink.tinkkey.SecretKeyAccess;
+import com.google.crypto.tink.tinkkey.internal.ProtoKey;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import javax.annotation.concurrent.GuardedBy;
 
 /**
@@ -100,13 +102,48 @@ public final class KeysetManager {
   }
 
   /**
+   * Adds the input {@link KeyHandle} to the existing keyset. The KeyStatusType and key ID of the
+   * {@link KeyHandle} are used as-is in the keyset.
+   *
+   * @throws UnsupportedOperationException if the {@link KeyHandle} contains a {@link TinkKey} which
+   *     is not a {@link ProtoKey}.
+   * @throws GeneralSecurityException if the {@link KeyHandle}'s key ID collides with another key ID
+   *     in the keyset.
+   */
+  public synchronized KeysetManager add(KeyHandle keyHandle) throws GeneralSecurityException {
+    ProtoKey pkey;
+    try {
+      pkey = (ProtoKey) keyHandle.getKey(SecretKeyAccess.insecureSecretAccess());
+    } catch (ClassCastException e) {
+      throw new UnsupportedOperationException(
+          "KeyHandles which contain TinkKeys that are not ProtoKeys are not yet supported.", e);
+    }
+
+    if (keyIdExists(keyHandle.getId())) {
+      throw new GeneralSecurityException(
+          "Trying to add a key with an ID already contained in the keyset.");
+    }
+
+    keysetBuilder.addKey(
+        Keyset.Key.newBuilder()
+            .setKeyData(pkey.getProtoKey())
+            .setKeyId(keyHandle.getId())
+            .setStatus(KeyStatusTypeProtoConverter.toProto(keyHandle.getStatus()))
+            .setOutputPrefixType(KeyTemplate.toProto(pkey.getOutputPrefixType()))
+            .build());
+    return this;
+  }
+
+  /**
    * Adds the input {@code KeyHandle} to the existing keyset with {@code OutputPrefixType.TINK}.
    *
    * @throws GeneralSecurityException if the given {@code KeyAccess} does not grant access to the
    *     key contained in the {@code KeyHandle}.
    * @throws UnsupportedOperationException if the {@code KeyHandle} contains a {@code TinkKey} which
    *     is not a {@code ProtoKey}.
+   * @deprecated Use KeysetManager.add(KeyHandle) instead.
    */
+  @Deprecated
   public synchronized KeysetManager add(KeyHandle keyHandle, KeyAccess access)
       throws GeneralSecurityException {
     ProtoKey pkey;
@@ -181,8 +218,7 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
-        if (key.getStatus() != KeyStatusType.ENABLED
-            && key.getStatus() != KeyStatusType.DISABLED) {
+        if (key.getStatus() != KeyStatusType.ENABLED && key.getStatus() != KeyStatusType.DISABLED) {
           throw new GeneralSecurityException("cannot enable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.ENABLED).build());
@@ -205,8 +241,7 @@ public final class KeysetManager {
     for (int i = 0; i < keysetBuilder.getKeyCount(); i++) {
       Keyset.Key key = keysetBuilder.getKey(i);
       if (key.getKeyId() == keyId) {
-        if (key.getStatus() != KeyStatusType.ENABLED
-            && key.getStatus() != KeyStatusType.DISABLED) {
+        if (key.getStatus() != KeyStatusType.ENABLED && key.getStatus() != KeyStatusType.DISABLED) {
           throw new GeneralSecurityException("cannot disable key with id " + keyId);
         }
         keysetBuilder.setKey(i, key.toBuilder().setStatus(KeyStatusType.DISABLED).build());
@@ -291,27 +326,10 @@ public final class KeysetManager {
   }
 
   private synchronized int newKeyId() {
-    int keyId = randPositiveInt();
+    int keyId = Util.randKeyId();
     while (keyIdExists(keyId)) {
-      keyId = randPositiveInt();
+      keyId = Util.randKeyId();
     }
     return keyId;
-  }
-
-  /** @return positive random int */
-  private static int randPositiveInt() {
-    SecureRandom secureRandom = new SecureRandom();
-    byte[] rand = new byte[4];
-    int result = 0;
-    while (result == 0) {
-      secureRandom.nextBytes(rand);
-      // TODO(b/148124847): Other languages create key_ids with the MSB set, so we should here too.
-      result =
-          ((rand[0] & 0x7f) << 24)
-              | ((rand[1] & 0xff) << 16)
-              | ((rand[2] & 0xff) << 8)
-              | (rand[3] & 0xff);
-    }
-    return result;
   }
 }

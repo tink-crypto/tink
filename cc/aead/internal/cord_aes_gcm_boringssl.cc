@@ -20,17 +20,18 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "absl/status/status.h"
 #include "absl/strings/cord.h"
-#include "openssl/aead.h"
-#include "openssl/base.h"
-#include "openssl/cipher.h"
+#include "openssl/evp.h"
 #include "openssl/err.h"
 #include "tink/aead/cord_aead.h"
+#include "tink/aead/internal/aead_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/errors.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -38,57 +39,78 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
+namespace {
 
-util::Status CordAesGcmBoringSsl::Init(util::SecretData key_value) {
-  cipher_ =
-      subtle::SubtleUtilBoringSSL::GetAesGcmCipherForKeySize(key_value.size());
+constexpr int kIvSizeInBytes = 12;
+constexpr int kTagSizeInBytes = 16;
 
-  if (cipher_ == nullptr) {
-    return util::Status(util::error::INTERNAL, "invalid key size");
+// Set the IV `iv` for the given `context`. if `encryption` is true, set the
+// context for encryption, and for decryption otherwise.
+util::Status SetIv(EVP_CIPHER_CTX* context, absl::string_view iv,
+                   bool encryption) {
+  const int encryption_flag = encryption ? 1 : 0;
+  // Set the IV size.
+  if (EVP_CIPHER_CTX_ctrl(context, EVP_CTRL_GCM_SET_IVLEN, iv.size(),
+                          /*ptr=*/nullptr) <= 0) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Failed to set the IV size");
+  }
+  // Finally set the IV bytes.
+  if (EVP_CipherInit_ex(context, /*cipher=*/nullptr, /*engine=*/nullptr,
+                        /*key=*/nullptr,
+                        reinterpret_cast<const uint8_t*>(&iv[0]),
+                        /*enc=*/encryption_flag) <= 0) {
+    return util::Status(absl::StatusCode::kInternal, "Failed to set the IV");
   }
 
-  key_ = key_value;
   return util::OkStatus();
 }
 
-util::StatusOr<std::unique_ptr<CordAead>> CordAesGcmBoringSsl::New(
+}  // namespace
+
+util::StatusOr<std::unique_ptr<CordAead> > CordAesGcmBoringSsl::New(
     util::SecretData key_value) {
-  std::unique_ptr<CordAesGcmBoringSsl> aead(new CordAesGcmBoringSsl);
-  auto status = aead->Init(key_value);
-  if (!status.ok()) {
-    return status;
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      internal::GetAesGcmCipherForKeySize(key_value.size());
+  if (!cipher.ok()) {
+    return cipher.status();
   }
-  return util::StatusOr<std::unique_ptr<CordAead>>(std::move(aead));
+
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  // Initialize the cipher now to have some precomputations on the key. The
+  // direction (enc/dec) is not important since it will be overwritten later.
+  if (EVP_CipherInit_ex(context.get(), *cipher, /*engine=*/nullptr,
+                        reinterpret_cast<const uint8_t*>(&key_value[0]),
+                        /*iv=*/nullptr, /*enc=*/1) <= 0) {
+    return util::Status(absl::StatusCode::kInternal,
+                        "Context initialization failed");
+  }
+
+  std::unique_ptr<CordAead> aead =
+      absl::WrapUnique(new CordAesGcmBoringSsl(std::move(context)));
+  return aead;
 }
 
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
     absl::Cord plaintext, absl::Cord additional_data) const {
   std::string iv = subtle::Random::GetRandomBytes(kIvSizeInBytes);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  EVP_CIPHER_CTX_copy(context.get(), context_.get());
 
-  if (!EVP_EncryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Encryption init failed");
-  }
-
-  if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, kIvSizeInBytes,
-                           nullptr)) {
-    return util::Status(util::error::INTERNAL, "Setting IV size failed");
-  }
-
-  if (!EVP_EncryptInit_ex(ctx.get(), nullptr, nullptr,
-                          reinterpret_cast<const uint8_t*>(key_.data()),
-                          reinterpret_cast<const uint8_t*>(iv.data()))) {
-    return util::Status(util::error::INTERNAL, "Encryption init failed");
+  util::Status res = SetIv(context.get(), iv, /*encryption=*/true);
+  if (!res.ok()) {
+    return res;
   }
 
   int len = 0;
-  // Process AD
+  // Process AAD.
   for (auto ad_chunk : additional_data.Chunks()) {
-    if (!EVP_EncryptUpdate(ctx.get(), nullptr, &len,
+    if (!EVP_EncryptUpdate(context.get(), /*out=*/nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Encryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Encryption failed");
     }
   }
 
@@ -102,23 +124,23 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
 
   for (auto plaintext_chunk : plaintext.Chunks()) {
     if (!EVP_EncryptUpdate(
-            ctx.get(),
+            context.get(),
             reinterpret_cast<uint8_t*>(&(buffer[ciphertext_buffer_offset])),
             &len, reinterpret_cast<const uint8_t*>(plaintext_chunk.data()),
             plaintext_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Encryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Encryption failed");
     }
     ciphertext_buffer_offset += plaintext_chunk.size();
   }
-  if (!EVP_EncryptFinal_ex(ctx.get(), nullptr, &len)) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+  if (!EVP_EncryptFinal_ex(context.get(), nullptr, &len)) {
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
 
   std::string tag;
   subtle::ResizeStringUninitialized(&tag, kTagSizeInBytes);
-  if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_GET_TAG, kTagSizeInBytes,
+  if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_GET_TAG, kTagSizeInBytes,
                            reinterpret_cast<uint8_t*>(&tag[0]))) {
-    return util::Status(util::error::INTERNAL, "Encryption failed");
+    return util::Status(absl::StatusCode::kInternal, "Encryption failed");
   }
 
   // Create result cord
@@ -132,37 +154,29 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Encrypt(
 util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
     absl::Cord ciphertext, absl::Cord additional_data) const {
   if (ciphertext.size() < kIvSizeInBytes + kTagSizeInBytes) {
-    return util::Status(util::error::INTERNAL, "Ciphertext too short");
+    return util::Status(absl::StatusCode::kInternal, "Ciphertext too short");
   }
 
-  // First bytes contain IV
+  // First bytes contain IV.
   std::string iv = std::string(ciphertext.Subcord(0, kIvSizeInBytes));
   absl::Cord raw_ciphertext = ciphertext.Subcord(
       kIvSizeInBytes, ciphertext.size() - kIvSizeInBytes - kTagSizeInBytes);
 
-  bssl::UniquePtr<EVP_CIPHER_CTX> ctx(EVP_CIPHER_CTX_new());
-  if (!EVP_DecryptInit_ex(ctx.get(), cipher_, nullptr, nullptr, nullptr)) {
-    return util::Status(util::error::INTERNAL, "Decryption init failed");
-  }
+  internal::SslUniquePtr<EVP_CIPHER_CTX> context(EVP_CIPHER_CTX_new());
+  EVP_CIPHER_CTX_copy(context.get(), context_.get());
 
-  if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, kIvSizeInBytes,
-                           nullptr)) {
-    return util::Status(util::error::INTERNAL, "Setting IV size failed");
-  }
-
-  if (!EVP_DecryptInit_ex(ctx.get(), nullptr, nullptr,
-                          reinterpret_cast<const uint8_t*>(key_.data()),
-                          reinterpret_cast<const uint8_t*>(iv.data()))) {
-    return util::Status(util::error::INTERNAL, "Decryption init failed");
+  util::Status res = SetIv(context.get(), iv, /*encryption=*/false);
+  if (!res.ok()) {
+    return res;
   }
 
   int len = 0;
-  // Process AD
+  // Process AAD.
   for (auto ad_chunk : additional_data.Chunks()) {
-    if (!EVP_DecryptUpdate(ctx.get(), nullptr, &len,
+    if (!EVP_DecryptUpdate(context.get(), nullptr, &len,
                            reinterpret_cast<const uint8_t*>(ad_chunk.data()),
                            ad_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Decryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Decryption failed");
     }
   }
 
@@ -178,32 +192,33 @@ util::StatusOr<absl::Cord> CordAesGcmBoringSsl::Decrypt(
       });
 
   for (auto ct_chunk : raw_ciphertext.Chunks()) {
-    if (!EVP_DecryptUpdate(ctx.get(),
+    if (!EVP_DecryptUpdate(context.get(),
                            reinterpret_cast<uint8_t*>(
                                &plaintext_buffer[plaintext_buffer_offset]),
                            &len,
                            reinterpret_cast<const uint8_t*>(ct_chunk.data()),
                            ct_chunk.size())) {
-      return util::Status(util::error::INTERNAL, "Decryption failed");
+      return util::Status(absl::StatusCode::kInternal, "Decryption failed");
     }
     plaintext_buffer_offset += ct_chunk.size();
   }
 
-  // Set expected tag value to last chunk in ciphertext Cord
+  // Set expected tag value to last chunk in ciphertext Cord.
   std::string tag = std::string(
       ciphertext.Subcord(ciphertext.size() - kTagSizeInBytes, kTagSizeInBytes));
 
-  if (!EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_TAG, kTagSizeInBytes,
+  if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG, kTagSizeInBytes,
                            &tag[0])) {
-    return util::Status(util::error::INTERNAL,
+    return util::Status(absl::StatusCode::kInternal,
                         "Could not set authentication tag");
   }
-  // Verify authentication tag
-  if (!EVP_DecryptFinal_ex(ctx.get(), nullptr, &len)) {
-    return util::Status(util::error::INTERNAL, "Authentication failed");
+  // Verify authentication tag.
+  if (!EVP_DecryptFinal_ex(context.get(), nullptr, &len)) {
+    return util::Status(absl::StatusCode::kInternal, "Authentication failed");
   }
   return result;
 }
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

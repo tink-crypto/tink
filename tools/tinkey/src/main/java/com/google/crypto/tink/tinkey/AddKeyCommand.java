@@ -16,7 +16,7 @@
 
 package com.google.crypto.tink.tinkey;
 
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

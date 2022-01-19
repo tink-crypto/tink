@@ -16,6 +16,10 @@
 
 #include "tink/hybrid/hybrid_decrypt_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/hybrid_decrypt.h"
 #include "tink/primitive_set.h"
@@ -48,10 +52,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     auto hybrid_decrypt_result =
         HybridDecryptWrapper().Wrap(nullptr);
     EXPECT_FALSE(hybrid_decrypt_result.ok());
-    EXPECT_EQ(util::error::INTERNAL,
-        hybrid_decrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal,
+              hybrid_decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        hybrid_decrypt_result.status().error_message());
+                        std::string(hybrid_decrypt_result.status().message()));
   }
 
   { // hybrid_decrypt_set has no primary primitive.
@@ -60,10 +64,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
     auto hybrid_decrypt_result = HybridDecryptWrapper().Wrap(
         std::move(hybrid_decrypt_set));
     EXPECT_FALSE(hybrid_decrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-        hybrid_decrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+        hybrid_decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        hybrid_decrypt_result.status().error_message());
+                        std::string(hybrid_decrypt_result.status().message()));
   }
 
   { // Correct hybrid_decrypt_set;
@@ -132,10 +136,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
       std::string ciphertext = plaintext + hybrid_name_1;
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_FALSE(decrypt_result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT,
-          decrypt_result.status().error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+                decrypt_result.status().code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-          decrypt_result.status().error_message());
+                          std::string(decrypt_result.status().message()));
     }
 
     {  // Correct ciphertext prefix.
@@ -152,10 +156,10 @@ TEST_F(HybridDecryptSetWrapperTest, Basic) {
       std::string ciphertext = "some bad ciphertext";
       auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext, context_info);
       EXPECT_FALSE(decrypt_result.ok());
-      EXPECT_EQ(util::error::INVALID_ARGUMENT,
-          decrypt_result.status().error_code());
+      EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+          decrypt_result.status().code());
       EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-          decrypt_result.status().error_message());
+                          std::string(decrypt_result.status().message()));
     }
   }
 }

@@ -128,7 +128,7 @@ java_test(
     size = "small",
     srcs = ["StreamingAeadConfigTest.java"],
     deps = [
-        "//src/main/java/com/google/crypto/tink:registry_cluster",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:streaming_aead",
         "//src/main/java/com/google/crypto/tink/config:tink_fips",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",

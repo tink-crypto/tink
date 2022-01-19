@@ -19,7 +19,7 @@ package aead
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/keyset"
@@ -43,11 +43,6 @@ type aesGCMKeyManager struct{}
 
 // Assert that aesGCMKeyManager implements the KeyManager interface.
 var _ registry.KeyManager = (*aesGCMKeyManager)(nil)
-
-// newAESGCMKeyManager creates a new aesGcmKeyManager.
-func newAESGCMKeyManager() *aesGCMKeyManager {
-	return new(aesGCMKeyManager)
-}
 
 // Primitive creates an AESGCM subtle for the given serialized AESGCMKey proto.
 func (km *aesGCMKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "//:config",
         "//:key_manager",
+        "//:registry",
         "//daead:deterministic_aead_config",
         "//hybrid:hybrid_config",
         "//prf:prf_config",
@@ -29,9 +30,7 @@ cc_library(
     srcs = ["config_util.cc"],
     hdrs = ["config_util.h"],
     include_prefix = "tink/config",
-    deps = [
-        "//proto:config_cc_proto",
-    ],
+    deps = ["//proto:config_cc_proto"],
 )
 
 bool_flag(
@@ -39,9 +38,14 @@ bool_flag(
     build_setting_default = False,
 )
 
+bool_flag(
+    name = "tink_use_absl_status",
+    build_setting_default = False,
+)
+
 config_setting(
-    name = "fips_enabled",
-    flag_values = {":use_only_fips": "True"},
+    name = "absl_status_enabled",
+    flag_values = {"//config:tink_use_absl_status": "True"},
     visibility = ["//visibility:public"],
 )
 
@@ -50,15 +54,13 @@ cc_library(
     srcs = ["tink_fips.cc"],
     hdrs = ["tink_fips.h"],
     include_prefix = "tink/config",
-    defines = select({
-        "fips_enabled": ["TINK_USE_ONLY_FIPS"],
-        "//conditions:default": [],
-    }),
     visibility = ["//visibility:public"],
     deps = [
-        "@com_google_absl//absl/base:core_headers",
-        "@boringssl//:crypto",
+        "//internal:fips_utils",
+        "//internal:registry_impl",
         "//util:status",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base:core_headers",
     ],
 )
 
@@ -68,7 +70,6 @@ cc_test(
     name = "tink_config_test",
     size = "small",
     srcs = ["tink_config_test.cc"],
-    copts = ["-Iexternal/gtest/include"],
     deps = [
         ":tink_config",
         "//:aead",
@@ -79,9 +80,11 @@ cc_test(
         "//:mac",
         "//:registry",
         "//:streaming_aead",
+        "//:tink_cc",
         "//aead:aes_gcm_key_manager",
         "//util:status",
         "//util:test_matchers",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -99,21 +102,17 @@ cc_test(
 cc_test(
     name = "tink_fips_test",
     size = "small",
-    srcs = select({
-        "fips_enabled": ["tink_fips_enabled_test.cc"],
-        "//conditions:default": ["tink_fips_disabled_test.cc"],
-    }),
-    tags = [
-        "fips",
-    ],
+    srcs = ["tink_fips_test.cc"],
+    tags = ["fips"],
     deps = [
         ":tink_fips",
+        "//:registry",
         "//aead:aead_config",
-        "//aead:aead_key_templates",
+        "//internal:fips_utils",
         "//util:status",
         "//util:test_matchers",
-        "//util:test_util",
         "@boringssl//:crypto",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

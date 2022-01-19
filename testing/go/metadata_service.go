@@ -24,6 +24,7 @@ import (
 
 // MetadataService implements the Keyset testing service.
 type MetadataService struct {
+	pb.MetadataServer
 }
 
 func (s *MetadataService) GetServerInfo(ctx context.Context, req *pb.ServerInfoRequest) (*pb.ServerInfoResponse, error) {

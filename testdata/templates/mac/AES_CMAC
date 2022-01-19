@@ -1,9 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.AesCmacKey"
-# value: [type.googleapis.com/google.crypto.tink.AesCmacKeyFormat] {
-#   key_size: 32
-#   params {
-#     tag_size: 16
-#   }
-# }
-value: "\010 \022\002\010\020"
-output_prefix_type: TINK

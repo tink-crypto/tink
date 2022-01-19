@@ -18,6 +18,7 @@
 #define TINK_SIGNATURE_RSA_SSA_PKCS1_VERIFY_KEY_MANAGER_H_
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -62,8 +63,8 @@ class RsaSsaPkcs1VerifyKeyManager
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::RsaSsaPkcs1Params& params) const;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

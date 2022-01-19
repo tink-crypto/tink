@@ -16,6 +16,9 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/deterministic_aead.h"
@@ -47,9 +50,9 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     auto daead_result =
         DeterministicAeadWrapper().Wrap(nullptr);
     EXPECT_FALSE(daead_result.ok());
-    EXPECT_EQ(util::error::INTERNAL, daead_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal, daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-                        daead_result.status().error_message());
+                        std::string(daead_result.status().message()));
   }
 
   {  // daead_set has no primary primitive.
@@ -58,10 +61,10 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     auto daead_result =
         DeterministicAeadWrapper().Wrap(std::move(daead_set));
     EXPECT_FALSE(daead_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              daead_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              daead_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-                        daead_result.status().error_message());
+                        std::string(daead_result.status().message()));
   }
 
   {  // Correct daead_set;
@@ -127,10 +130,10 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
     decrypt_result =
         daead->DecryptDeterministically("some bad ciphertext", aad);
     EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              decrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                        decrypt_result.status().error_message());
+                        std::string(decrypt_result.status().message()));
   }
 }
 

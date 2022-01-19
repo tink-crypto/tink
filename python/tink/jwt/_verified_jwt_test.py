@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 """Tests for tink.python.tink.jwt._verified_jwt."""
 
-
 import datetime
 
 from absl.testing import absltest
@@ -26,7 +25,9 @@ EXPIRATION = datetime.datetime.fromtimestamp(2218027244, datetime.timezone.utc)
 class VerifiedJwtTest(absltest.TestCase):
 
   def test_empty(self):
-    token = jwt.VerifiedJwt._create(jwt.new_raw_jwt())
+    token = jwt.VerifiedJwt._create(jwt.new_raw_jwt(without_expiration=True))
+    with self.assertRaises(KeyError):
+      token.type_header()
     with self.assertRaises(KeyError):
       token.issuer()
     with self.assertRaises(KeyError):
@@ -54,6 +55,7 @@ class VerifiedJwtTest(absltest.TestCase):
   def test_full(self):
     token = jwt.VerifiedJwt._create(
         jwt.new_raw_jwt(
+            type_header='TypeHeader',
             issuer='Issuer',
             subject='Subject',
             jwt_id='JWT ID',
@@ -61,6 +63,8 @@ class VerifiedJwtTest(absltest.TestCase):
             expiration=EXPIRATION,
             issued_at=ISSUED_AT,
             not_before=NOT_BEFORE))
+    self.assertTrue(token.has_type_header())
+    self.assertEqual(token.type_header(), 'TypeHeader')
     self.assertTrue(token.has_issuer())
     self.assertEqual(token.issuer(), 'Issuer')
     self.assertTrue(token.has_subject())
@@ -85,7 +89,7 @@ class VerifiedJwtTest(absltest.TestCase):
                      'array': [1, None, 'Bob', 2.2, {'foo': 'bar'}],
                      'object': {'one': {'two': 3}}}
     token = token = jwt.VerifiedJwt._create(
-        jwt.new_raw_jwt(custom_claims=custom_claims))
+        jwt.new_raw_jwt(custom_claims=custom_claims, without_expiration=True))
     self.assertCountEqual(
         token.custom_claim_names(),
         {'string', 'boolean', 'number', 'integer', 'null', 'array', 'object'})

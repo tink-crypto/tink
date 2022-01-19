@@ -16,11 +16,19 @@
 
 package com.google.crypto.tink.tinkey;
 
+import com.google.crypto.tink.Registry;
+
 /** Creates a new {@link com.google.crypto.tink.proto.KeyTemplate}. */
 public class ListKeyTemplatesCommand implements Command {
 
   @Override
   public void run() throws Exception {
-    TinkeyUtil.printAllKeyTemplates();
+    System.out.println("The following key templates are supported:");
+    for (String name : Registry.keyTemplates()) {
+      System.out.println(name);
+    }
+    for (String name : TinkeyKeyTemplates.get().keySet()) {
+      System.out.println(name);
+    }
   }
 }

@@ -32,8 +32,8 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.Random;
-import com.google.protobuf.ByteString;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -50,7 +50,7 @@ import java.util.List;
  * <h3>Usage</h3>
  *
  * <pre>{@code
- * import com.google.crypto.tink.subtle.PemKeyType;
+ * import com.google.crypto.tink.PemKeyType;
  *
  * String pem = ...;
  * PemKeyType type = ...;
@@ -160,8 +160,8 @@ public final class SignaturePemKeysetReader implements KeysetReader {
           RsaSsaPkcs1PublicKey.newBuilder()
               .setVersion(new RsaSsaPkcs1VerifyKeyManager().getVersion())
               .setParams(params)
-              .setE(ByteString.copyFrom(key.getPublicExponent().toByteArray()))
-              .setN(ByteString.copyFrom(key.getModulus().toByteArray()))
+              .setE(SigUtil.toUnsignedIntByteString(key.getPublicExponent()))
+              .setN(SigUtil.toUnsignedIntByteString(key.getModulus()))
               .build();
       return KeyData.newBuilder()
           .setTypeUrl(new RsaSsaPkcs1VerifyKeyManager().getKeyType())
@@ -179,8 +179,8 @@ public final class SignaturePemKeysetReader implements KeysetReader {
           RsaSsaPssPublicKey.newBuilder()
               .setVersion(new RsaSsaPssVerifyKeyManager().getVersion())
               .setParams(params)
-              .setE(ByteString.copyFrom(key.getPublicExponent().toByteArray()))
-              .setN(ByteString.copyFrom(key.getModulus().toByteArray()))
+              .setE(SigUtil.toUnsignedIntByteString(key.getPublicExponent()))
+              .setN(SigUtil.toUnsignedIntByteString(key.getModulus()))
               .build();
       return KeyData.newBuilder()
           .setTypeUrl(new RsaSsaPssVerifyKeyManager().getKeyType())
@@ -204,8 +204,8 @@ public final class SignaturePemKeysetReader implements KeysetReader {
           EcdsaPublicKey.newBuilder()
               .setVersion(new EcdsaVerifyKeyManager().getVersion())
               .setParams(params)
-              .setX(ByteString.copyFrom(key.getW().getAffineX().toByteArray()))
-              .setY(ByteString.copyFrom(key.getW().getAffineY().toByteArray()))
+              .setX(SigUtil.toUnsignedIntByteString(key.getW().getAffineX()))
+              .setY(SigUtil.toUnsignedIntByteString(key.getW().getAffineY()))
               .build();
 
       return KeyData.newBuilder()

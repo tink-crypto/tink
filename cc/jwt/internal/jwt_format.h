@@ -17,8 +17,13 @@
 #ifndef TINK_JWT_INTERNAL_JWT_FORMAT_H_
 #define TINK_JWT_INTERNAL_JWT_FORMAT_H_
 
+#include <string>
+
+#include "google/protobuf/struct.pb.h"
+#include "tink/jwt/raw_jwt.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
@@ -27,9 +32,20 @@ namespace jwt_internal {
 std::string EncodeHeader(absl::string_view json_header);
 bool DecodeHeader(absl::string_view header, std::string* json_header);
 
-std::string CreateHeader(absl::string_view algorithm);
-util::Status ValidateHeader(absl::string_view encoded_header,
-                            absl::string_view algorithm);
+absl::optional<std::string> GetKid(
+    uint32_t key_id,
+    ::google::crypto::tink::OutputPrefixType output_prefix_type);
+absl::optional<uint32_t> GetKeyId(absl::string_view kid);
+
+util::StatusOr<std::string> CreateHeader(absl::string_view algorithm,
+                         absl::optional<absl::string_view> type_header,
+                         absl::optional<absl::string_view> kid);
+util::Status ValidateHeader(const google::protobuf::Struct& header,
+                            absl::string_view algorithm,
+                            absl::optional<absl::string_view> tink_kid,
+                            absl::optional<absl::string_view> custom_kid);
+absl::optional<std::string> GetTypeHeader(
+    const google::protobuf::Struct& header);
 
 std::string EncodePayload(absl::string_view json_payload);
 bool DecodePayload(absl::string_view payload, std::string* json_payload);
@@ -37,6 +53,12 @@ bool DecodePayload(absl::string_view payload, std::string* json_payload);
 std::string EncodeSignature(absl::string_view signature);
 bool DecodeSignature(absl::string_view encoded_signature,
                      std::string* signature);
+
+class RawJwtParser {
+ public:
+  static util::StatusOr<RawJwt> FromJson(
+      absl::optional<std::string> type_header, absl::string_view json_payload);
+};
 
 }  // namespace jwt_internal
 }  // namespace tink

@@ -68,7 +68,10 @@ describe('encrypt then authenticate test', function() {
         try {
           await aead.decrypt(c1, aad);
           fail('Should throw an exception.');
-        } catch (e) {
+          // Preserving old behavior when moving to
+          // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+          // tslint:disable-next-line:no-any
+        } catch (e: any) {
           expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
@@ -89,7 +92,10 @@ describe('encrypt then authenticate test', function() {
         try {
           await aead.decrypt(ciphertext, aad1);
           fail('Should throw an exception.');
-        } catch (e) {
+          // Preserving old behavior when moving to
+          // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+          // tslint:disable-next-line:no-any
+        } catch (e: any) {
           expect(e.toString()).toBe('SecurityException: invalid MAC');
         }
       }
@@ -108,7 +114,10 @@ describe('encrypt then authenticate test', function() {
       try {
         await aead.decrypt(c1, aad);
         fail('Should throw an exception.');
-      } catch (e) {
+        // Preserving old behavior when moving to
+        // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+        // tslint:disable-next-line:no-any
+      } catch (e: any) {
         if (c1.length < 32) {
           expect(e.toString()).toBe('SecurityException: ciphertext too short');
         } else {

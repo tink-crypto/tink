@@ -17,6 +17,7 @@
 #include "tink/aead/aead_config.h"
 
 #include "absl/memory/memory.h"
+#include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 #include "tink/aead/aes_eax_key_manager.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -24,18 +25,17 @@
 #include "tink/aead/kms_aead_key_manager.h"
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
-#include "tink/aead/aead_wrapper.h"
 #include "tink/config/config_util.h"
+#include "tink/config/tink_fips.h"
 #include "tink/mac/mac_config.h"
 #include "tink/registry.h"
 #include "tink/util/status.h"
 #include "proto/config.pb.h"
-#include "tink/config/tink_fips.h"
-
-using google::crypto::tink::RegistryConfig;
 
 namespace crypto {
 namespace tink {
+
+using ::google::crypto::tink::RegistryConfig;
 
 // static
 const RegistryConfig& AeadConfig::Latest() {
@@ -61,7 +61,7 @@ util::Status AeadConfig::Register() {
       absl::make_unique<AesGcmKeyManager>(), true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 
@@ -84,9 +84,6 @@ util::Status AeadConfig::Register() {
 
   return util::OkStatus();
 }
-
-
-
 
 }  // namespace tink
 }  // namespace crypto

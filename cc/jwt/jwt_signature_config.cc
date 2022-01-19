@@ -62,7 +62,7 @@ util::Status JwtSignatureRegister() {
       absl::make_unique<jwt_internal::JwtRsaSsaPssVerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

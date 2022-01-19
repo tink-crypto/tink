@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/core/key_type_manager.h"
 #include "tink/mac.h"
@@ -49,23 +50,26 @@ class RawJwtHmacKeyManager
     crypto::tink::util::StatusOr<std::unique_ptr<Mac>> Create(
         const google::crypto::tink::JwtHmacKey& jwt_hmac_key) const override {
       int tag_size;
-      switch (jwt_hmac_key.hash_type()) {
-        case google::crypto::tink::HashType::SHA256:
+      google::crypto::tink::HashType hash_type;
+      switch (jwt_hmac_key.algorithm()) {
+        case google::crypto::tink::JwtHmacAlgorithm::HS256:
+          hash_type = google::crypto::tink::HashType::SHA256;
           tag_size = 32;
           break;
-        case google::crypto::tink::HashType::SHA384:
+        case google::crypto::tink::JwtHmacAlgorithm::HS384:
+          hash_type = google::crypto::tink::HashType::SHA384;
           tag_size = 48;
           break;
-        case google::crypto::tink::HashType::SHA512:
+        case google::crypto::tink::JwtHmacAlgorithm::HS512:
+          hash_type = google::crypto::tink::HashType::SHA512;
           tag_size = 64;
           break;
         default:
-          return ToStatusF(
-              util::error::INVALID_ARGUMENT, "HashType '%s' is not supported.",
-              crypto::tink::util::Enums::HashName(jwt_hmac_key.hash_type()));
+          return util::Status(absl::StatusCode::kInvalidArgument,
+                              "Unknown algorithm.");
       }
       return subtle::HmacBoringSsl::New(
-          util::Enums::ProtoToSubtle(jwt_hmac_key.hash_type()), tag_size,
+          util::Enums::ProtoToSubtle(hash_type), tag_size,
           util::SecretDataFromStringView(jwt_hmac_key.key_value()));
     }
   };
@@ -100,11 +104,6 @@ class RawJwtHmacKeyManager
 };
 
 }  // namespace jwt_internal
-
-// TODO(juerg): remove this once all users are migrated.
-namespace internal {
-  typedef jwt_internal::RawJwtHmacKeyManager RawJwtHmacKeyManager;
-}  // namespace internal
 
 }  // namespace tink
 }  // namespace crypto

@@ -16,3 +16,14 @@ java_test(
         "@maven//:junit_junit",
     ],
 )
+
+java_test(
+    name = "UtilTest",
+    size = "small",
+    srcs = ["UtilTest.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/internal:util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

@@ -1,0 +1,16 @@
+licenses(["notice"])
+
+java_test(
+    name = "TinkFipsUtilTest",
+    size = "small",
+    srcs = ["TinkFipsUtilTest.java"],
+    tags = [
+        "fips",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_status",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "@maven//:com_google_truth_truth",
+        "@maven//:junit_junit",
+    ],
+)

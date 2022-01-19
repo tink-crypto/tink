@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/random.h"
 #include "tink/util/ostream_output_stream.h"
@@ -71,8 +72,9 @@ TEST(OutputStreamAdapterTest, WriteAfterClose) {
   auto adapter = GetOutputStreamAdapter(-1, &buffer_ref);
   ASSERT_TRUE(adapter->Close().ok());
   auto status = adapter->Write("something").status();
-  EXPECT_EQ(status.error_code(), util::error::FAILED_PRECONDITION);
-  EXPECT_THAT(status.error_message(), testing::HasSubstr("Stream closed"));
+  EXPECT_EQ(status.code(), absl::StatusCode::kFailedPrecondition);
+  EXPECT_THAT(std::string(status.message()),
+              testing::HasSubstr("Stream closed"));
 }
 
 // In this test size of the OstreamOutputStream buffer is smaller than the

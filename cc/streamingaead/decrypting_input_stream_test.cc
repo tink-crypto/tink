@@ -17,10 +17,13 @@
 #include "tink/streamingaead/decrypting_input_stream.h"
 
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
@@ -193,7 +196,7 @@ TEST(DecryptingInputStreamTest, WrongAssociatedData) {
       std::string decrypted;
       auto status = ReadFromStream(dec_stream_result.ValueOrDie().get(),
                                    &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }
@@ -223,7 +226,7 @@ TEST(DecryptingInputStreamTest, WrongCiphertext) {
       std::string decrypted;
       auto status = ReadFromStream(dec_stream_result.ValueOrDie().get(),
                                    &decrypted);
-      EXPECT_THAT(status, StatusIs(util::error::INVALID_ARGUMENT));
+      EXPECT_THAT(status, StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 #include "tink/jwt/internal/raw_jwt_ecdsa_sign_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "tink/internal/ec_util.h"
+#include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "tink/jwt/internal/raw_jwt_ecdsa_verify_key_manager.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -86,29 +89,28 @@ TEST(RawJwtEcdsaSignKeyManagerTest, ValidateKeyFormatUnknownAlgorithm) {
 
 TEST(RawJwtEcdsaSignKeyManagerTest, CreateKey) {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
-  StatusOr<JwtEcdsaPrivateKey> key_or =
+  StatusOr<JwtEcdsaPrivateKey> key =
       RawJwtEcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  JwtEcdsaPrivateKey key = key_or.ValueOrDie();
+  ASSERT_THAT(key.status(), IsOk());
 
-  EXPECT_THAT(key.version(), Eq(0));
+  EXPECT_THAT(key->version(), Eq(0));
 
-  EXPECT_THAT(key.public_key().version(), Eq(key.version()));
-  EXPECT_THAT(key.public_key().algorithm(),
+  EXPECT_THAT(key->public_key().version(), Eq(key->version()));
+  EXPECT_THAT(key->public_key().algorithm(),
               Eq(format.algorithm()));
 
-  EXPECT_THAT(key.public_key().x(), SizeIs(Gt(0)));
-  EXPECT_THAT(key.public_key().y(), SizeIs(Gt(0)));
+  EXPECT_THAT(key->public_key().x(), SizeIs(Gt(0)));
+  EXPECT_THAT(key->public_key().y(), SizeIs(Gt(0)));
 
-  EXPECT_THAT(key.key_value(), SizeIs(Gt(0)));
+  EXPECT_THAT(key->key_value(), SizeIs(Gt(0)));
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, CreateKeyValid) {
   JwtEcdsaKeyFormat format = CreateValidEs256KeyFormat();
-  StatusOr<JwtEcdsaPrivateKey> key_or =
+  StatusOr<JwtEcdsaPrivateKey> key =
       RawJwtEcdsaSignKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(key_or.ValueOrDie()),
+  ASSERT_THAT(key.status(), IsOk());
+  EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(*key),
               IsOk());
 }
 
@@ -126,75 +128,75 @@ TEST(RawJwtEcdsaSignKeyManagerTest, ValidateKeyUnknownAlgorithm) {
   JwtEcdsaPrivateKey key = CreateValidEs256Key();
   key.mutable_public_key()->set_algorithm(JwtEcdsaAlgorithm::ES_UNKNOWN);
   EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(key), Not(IsOk()));
-  EXPECT_THAT(
-      RawJwtEcdsaSignKeyManager().ValidateKey(key),
-      StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(RawJwtEcdsaSignKeyManager().ValidateKey(key),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, GetPublicKey) {
   JwtEcdsaPrivateKey key = CreateValidEs256Key();
-  StatusOr<JwtEcdsaPublicKey> public_key_or =
+  StatusOr<JwtEcdsaPublicKey> public_key =
       RawJwtEcdsaSignKeyManager().GetPublicKey(key);
 
-  ASSERT_THAT(public_key_or.status(), IsOk());
-  JwtEcdsaPublicKey public_key = public_key_or.ValueOrDie();
+  ASSERT_THAT(public_key.status(), IsOk());
 
-  EXPECT_THAT(public_key.version(), Eq(key.public_key().version()));
-  EXPECT_THAT(public_key.algorithm(),
+  EXPECT_THAT(public_key->version(), Eq(key.public_key().version()));
+  EXPECT_THAT(public_key->algorithm(),
               Eq(key.public_key().algorithm()));
 
-  EXPECT_THAT(public_key.x(), Eq(key.public_key().x()));
-  EXPECT_THAT(public_key.y(), Eq(key.public_key().y()));
+  EXPECT_THAT(public_key->x(), Eq(key.public_key().x()));
+  EXPECT_THAT(public_key->y(), Eq(key.public_key().y()));
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, Create) {
   JwtEcdsaPrivateKey private_key = CreateValidEs256Key();
-  JwtEcdsaPublicKey public_key =
-      RawJwtEcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+  util::StatusOr<JwtEcdsaPublicKey> public_key =
+      RawJwtEcdsaSignKeyManager().GetPublicKey(private_key);
+  ASSERT_THAT(public_key.status(), IsOk());
 
-  auto signer_or =
+  util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
-  ec_key.pub_x = public_key.x();
-  ec_key.pub_y = public_key.y();
-  auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(HashType::SHA256),
-      subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ec_key.pub_x = public_key->x();
+  ec_key.pub_y = public_key->y();
+  util::StatusOr<std::unique_ptr<subtle::EcdsaVerifyBoringSsl>>
+      direct_verifier = subtle::EcdsaVerifyBoringSsl::New(
+          ec_key, Enums::ProtoToSubtle(HashType::SHA256),
+          subtle::EcdsaSignatureEncoding::IEEE_P1363);
+  ASSERT_THAT(direct_verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-              IsOk());
+  util::StatusOr<std::string> sig = (*signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*direct_verifier)->Verify(*sig, message), IsOk());
 }
 
 TEST(RawJwtEcdsaSignKeyManagerTest, CreateDifferentKey) {
   JwtEcdsaPrivateKey private_key = CreateValidEs256Key();
   // Note: we create a new key in the next line.
-  JwtEcdsaPublicKey public_key = RawJwtEcdsaSignKeyManager()
-                                     .GetPublicKey(CreateValidEs256Key())
-                                     .ValueOrDie();
+  util::StatusOr<JwtEcdsaPublicKey> public_key = RawJwtEcdsaSignKeyManager()
+                                     .GetPublicKey(CreateValidEs256Key());
 
-  auto signer_or =
+  util::StatusOr<std::unique_ptr<PublicKeySign>> signer =
       RawJwtEcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
-  ASSERT_THAT(signer_or.status(), IsOk());
+  ASSERT_THAT(signer.status(), IsOk());
 
-  subtle::SubtleUtilBoringSSL::EcKey ec_key;
+  internal::EcKey ec_key;
   ec_key.curve = Enums::ProtoToSubtle(EllipticCurveType::NIST_P256);
-  ec_key.pub_x = public_key.x();
-  ec_key.pub_y = public_key.y();
-  auto direct_verifier_or = subtle::EcdsaVerifyBoringSsl::New(
-      ec_key, Enums::ProtoToSubtle(HashType::SHA256),
-      subtle::EcdsaSignatureEncoding::IEEE_P1363);
-  ASSERT_THAT(direct_verifier_or.status(), IsOk());
+  ec_key.pub_x = public_key->x();
+  ec_key.pub_y = public_key->y();
+  util::StatusOr<std::unique_ptr<subtle::EcdsaVerifyBoringSsl>>
+      direct_verifier = subtle::EcdsaVerifyBoringSsl::New(
+          ec_key, Enums::ProtoToSubtle(HashType::SHA256),
+          subtle::EcdsaSignatureEncoding::IEEE_P1363);
+  ASSERT_THAT(direct_verifier.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
-              Not(IsOk()));
+  util::StatusOr<std::string> sig = (*signer)->Sign(message);
+  ASSERT_THAT(sig.status(), IsOk());
+  EXPECT_THAT((*direct_verifier)->Verify(*sig, message), Not(IsOk()));
 }
 
 }  // namespace

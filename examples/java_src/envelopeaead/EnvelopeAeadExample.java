@@ -17,9 +17,9 @@ package envelopeaead;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 import java.io.File;
@@ -30,9 +30,7 @@ import java.security.GeneralSecurityException;
 import java.util.Optional;
 
 /**
- * A command-line utility for encrypting small files with AEAD.
- *
- * <p>It loads cleartext keys from disk - this is not recommended!
+ * A command-line utility for encrypting small files with envelope encryption.
  *
  * <p>It requires the following arguments:
  *
@@ -82,8 +80,7 @@ public final class EnvelopeAeadExample {
     try {
       KeysetHandle handle =
           KeysetHandle.generateNew(
-              KmsEnvelopeAeadKeyManager.createKeyTemplate(
-                  kekUri, AesGcmKeyManager.aes128GcmTemplate()));
+              KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get("AES256_GCM")));
       aead = handle.getPrimitive(Aead.class);
     } catch (GeneralSecurityException ex) {
       System.err.println("Error creating primitive: %s " + ex);

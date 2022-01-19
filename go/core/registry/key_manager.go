@@ -17,7 +17,7 @@
 package registry
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 

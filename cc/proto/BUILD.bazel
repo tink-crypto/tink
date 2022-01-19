@@ -169,6 +169,12 @@ cc_proto_library(
     deps = ["@tink_base//proto:test_proto_proto"],
 )
 
+cc_proto_library(
+    name = "hpke_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = ["@tink_base//proto:hpke_proto"],
+)
+
 filegroup(
     name = "public_cc_protos",
     srcs = [

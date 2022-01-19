@@ -39,6 +39,6 @@ public class ListKeysetCommand extends InOptions implements Command {
     KeysetHandle handle = TinkeyUtil.getKeysetHandle(inputStream, inFormat, masterKeyUri,
         credentialPath);
     KeysetInfo keysetInfo = handle.getKeysetInfo();
-    System.out.println(keysetInfo.toString());
+    System.out.println(keysetInfo);
   }
 }

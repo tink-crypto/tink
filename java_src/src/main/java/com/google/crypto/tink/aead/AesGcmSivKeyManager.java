@@ -162,7 +162,10 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    *   <li>Key size: 16 bytes
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
    * </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_GCM_SIV")}
    */
+  @Deprecated
   public static final KeyTemplate aes128GcmSivTemplate() {
     return createKeyTemplate(16, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -177,7 +180,10 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * </ul>
    *
    * <p>Keys generated from this template should create ciphertexts compatible with other libraries.
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_GCM_SIV_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawAes128GcmSivTemplate() {
     return createKeyTemplate(16, KeyTemplate.OutputPrefixType.RAW);
   }
@@ -190,7 +196,10 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    *   <li>Key size: 32 bytes
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}
    * </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_GCM_SIV")}
    */
+  @Deprecated
   public static final KeyTemplate aes256GcmSivTemplate() {
     return createKeyTemplate(32, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -205,7 +214,10 @@ public final class AesGcmSivKeyManager extends KeyTypeManager<AesGcmSivKey> {
    * </ul>
    *
    * <p>Keys generated from this template should create ciphertexts compatible with other libraries.
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_GCM_SIV_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawAes256GcmSivTemplate() {
     return createKeyTemplate(32, KeyTemplate.OutputPrefixType.RAW);
   }

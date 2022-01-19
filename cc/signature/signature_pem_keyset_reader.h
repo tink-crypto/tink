@@ -17,6 +17,7 @@
 #ifndef TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 #define TINK_SIGNATURE_SIGNATURE_PEM_KEYSET_READER_H_
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -33,7 +34,11 @@ namespace tink {
 enum PemKeyType { PEM_RSA, PEM_EC };
 
 // Algorithm to use with this key.
-enum PemAlgorithm { RSASSA_PSS, RSASSA_PKCS1, ECDSA };
+enum PemAlgorithm {
+  RSASSA_PSS,
+  RSASSA_PKCS1,
+  ECDSA_IEEE  // Represents the NIST_P256 curve with IEEE_P1363 encoding
+};
 
 // Common set of parameters for the PEM key.
 struct PemKeyParams {

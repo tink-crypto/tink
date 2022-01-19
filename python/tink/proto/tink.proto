@@ -76,7 +76,10 @@ enum KeyStatusType {
 // entirely by the primitive, but the prefix has to be one of the following
 // 4 types:
 //   - Legacy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
-//             key id that is computed from the key material.
+//             key id that is computed from the key material. In addition to
+//             that, signature schemes and MACs will add a \x00 byte to the
+//             end of the data being signed / MACed when operating on keys
+//             with this OutputPrefixType.
 //   - Crunchy: prefix is 5 bytes, starts with \x00 and followed by a 4-byte
 //             key id that is generated randomly.
 //   - Tink  : prefix is 5 bytes, starts with \x01 and followed by 4-byte
@@ -87,9 +90,6 @@ enum OutputPrefixType {
   TINK = 1;
   LEGACY = 2;
   RAW = 3;
-  // CRUNCHY is like LEGACY, but with two differences:
-  //   - Its key id is generated randomly (like TINK)
-  //   - Its signature schemes don't append zero to sign messages
   CRUNCHY = 4;
 }
 

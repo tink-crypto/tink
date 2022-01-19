@@ -25,6 +25,7 @@ import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Enums;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
 import com.google.crypto.tink.subtle.Validators;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -32,6 +33,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Optional;
 
 /**
  * This key manager produces new instances of {@code JwtRsaSsaPkcs11Verify}. It doesn't support key
@@ -67,24 +69,32 @@ class JwtRsaSsaPkcs1VerifyKeyManager extends KeyTypeManager<JwtRsaSsaPkcs1Public
   public JwtRsaSsaPkcs1VerifyKeyManager() {
     super(
         JwtRsaSsaPkcs1PublicKey.class,
-        new KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerify, JwtRsaSsaPkcs1PublicKey>(
-            JwtPublicKeyVerify.class) {
+        new KeyTypeManager.PrimitiveFactory<JwtPublicKeyVerifyInternal, JwtRsaSsaPkcs1PublicKey>(
+            JwtPublicKeyVerifyInternal.class) {
           @Override
-          public JwtPublicKeyVerify getPrimitive(JwtRsaSsaPkcs1PublicKey keyProto)
+          public JwtPublicKeyVerifyInternal getPrimitive(JwtRsaSsaPkcs1PublicKey keyProto)
               throws GeneralSecurityException {
             RSAPublicKey publickey = createPublicKey(keyProto);
             Enums.HashType hash = hashForPkcs1Algorithm(keyProto.getAlgorithm());
             final RsaSsaPkcs1VerifyJce verifier = new RsaSsaPkcs1VerifyJce(publickey, hash);
             final String algorithmName = keyProto.getAlgorithm().name();
+            final Optional<String> customKidFromRsaSsaPkcs1PublicKey =
+                keyProto.hasCustomKid()
+                    ? Optional.of(keyProto.getCustomKid().getValue())
+                    : Optional.empty();
 
-            return new JwtPublicKeyVerify() {
+            return new JwtPublicKeyVerifyInternal() {
               @Override
-              public VerifiedJwt verifyAndDecode(String compact, JwtValidator validator)
+              public VerifiedJwt verifyAndDecodeWithKid(
+                  String compact, JwtValidator validator, Optional<String> kid)
                   throws GeneralSecurityException {
                 JwtFormat.Parts parts = JwtFormat.splitSignedCompact(compact);
                 verifier.verify(parts.signatureOrMac, parts.unsignedCompact.getBytes(US_ASCII));
-                JwtFormat.validateHeader(algorithmName, parts.header);
-                RawJwt token = RawJwt.fromJsonPayload(parts.payload);
+                JsonObject parsedHeader = JsonUtil.parseJson(parts.header);
+                JwtFormat.validateHeader(
+                    algorithmName, kid, customKidFromRsaSsaPkcs1PublicKey, parsedHeader);
+                RawJwt token =
+                    RawJwt.fromJsonPayload(JwtFormat.getTypeHeader(parsedHeader), parts.payload);
                 return validator.validate(token);
               }
             };

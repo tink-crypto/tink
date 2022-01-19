@@ -1,15 +1,19 @@
-package(default_visibility = ["//:__subpackages__"])  # keep
-
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
     srcs = [
         "hkdf.go",
         "subtle.go",
+        "x25519.go",
     ],
     importpath = "github.com/google/tink/go/subtle",
-    deps = ["@org_golang_x_crypto//hkdf:go_default_library"],
+    deps = [
+        "@org_golang_x_crypto//curve25519:go_default_library",
+        "@org_golang_x_crypto//hkdf:go_default_library",
+    ],
 )
 
 go_test(
@@ -17,7 +21,13 @@ go_test(
     srcs = [
         "hkdf_test.go",
         "subtle_test.go",
+        "x25519_test.go",
     ],
+    data = ["@wycheproof//testvectors:xdh"],
     embed = [":go_default_library"],
-    deps = ["//subtle/random:go_default_library"],
+    deps = [
+        "//subtle/random:go_default_library",
+        "//testutil:go_default_library",
+        "@org_golang_x_crypto//curve25519:go_default_library",
+    ],
 )

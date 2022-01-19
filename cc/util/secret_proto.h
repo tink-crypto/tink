@@ -45,6 +45,9 @@ inline google::protobuf::ArenaOptions SecretArenaOptions() {
 
 // Stores secret (sensitive) protobuf and makes sure it's marked as such and
 // destroyed in a safe way.
+//
+// Note: Currently does not protect fields of type "string" and "bytes"
+// (depends on https://github.com/protocolbuffers/protobuf/issues/1896)
 template <typename T>
 class SecretProto {
  public:

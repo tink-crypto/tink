@@ -1,0 +1,83 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files([
+    "jwt_test_private_keyset.json",
+])
+
+py_binary(
+    name = "jwt_sign",
+    srcs = ["jwt_sign.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
+py_binary(
+    name = "jwt_generate_public_jwk_set",
+    srcs = ["jwt_generate_public_jwk_set.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
+py_binary(
+    name = "jwt_verify",
+    srcs = ["jwt_verify.py"],
+    python_version = "PY3",
+    deps = [
+        requirement("absl-py"),
+        "@tink_py//tink:tink_python",
+        "@tink_py//tink/jwt",
+    ],
+)
+
+sh_test(
+    name = "jwt_signature_test",
+    size = "small",
+    srcs = ["jwt_signature_test.sh"],
+    args = [
+        "$(rootpath :jwt_sign)",
+        "$(rootpath :jwt_generate_public_jwk_set)",
+        "$(rootpath :jwt_verify)",
+        "$(rootpath :jwt_test_private_keyset.json)",
+    ],
+    data = [
+        ":jwt_generate_public_jwk_set",
+        ":jwt_sign",
+        ":jwt_test_private_keyset.json",
+        ":jwt_verify",
+    ],
+)
+
+# This runs the previous test assuming the Tink python package has been
+# installed previously with pip3 install.
+sh_test(
+    name = "jwt_signature_test_package",
+    size = "small",
+    srcs = ["jwt_signature_test.sh"],
+    args = [
+        "'python3 $(rootpath :jwt_sign.py)'",
+        "'python3 $(rootpath :jwt_generate_public_jwk_set.py)'",
+        "'python3 $(rootpath :jwt_verify.py)'",
+        "$(rootpath :jwt_test_private_keyset.json)",
+    ],
+    data = [
+        ":jwt_generate_public_jwk_set.py",
+        ":jwt_sign.py",
+        ":jwt_test_private_keyset.json",
+        ":jwt_verify.py",
+    ],
+)

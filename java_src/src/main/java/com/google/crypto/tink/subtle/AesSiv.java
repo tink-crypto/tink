@@ -17,7 +17,7 @@
 package com.google.crypto.tink.subtle;
 
 import com.google.crypto.tink.DeterministicAead;
-import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -37,8 +37,8 @@ import javax.crypto.spec.SecretKeySpec;
  * @since 1.1.0
  */
 public final class AesSiv implements DeterministicAead {
-  public static final TinkFips.AlgorithmFipsCompatibility FIPS =
-      TinkFips.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
 
   // Do not support 128-bit keys because it might not provide 128-bit security level in
   // multi-user setting.

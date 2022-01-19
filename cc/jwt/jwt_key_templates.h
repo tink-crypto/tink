@@ -24,7 +24,9 @@ namespace tink {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Pre-generated KeyTemplate for Jwt key types. One can use these templates
-// to generate new KeysetHandle object with fresh keys.
+// to generate new KeysetHandle object with fresh keys. The templates with
+// the "Raw" prefix generate tokens without a "kid" header.
+//
 // To generate a new keyset that contains a single JwtHmacKey, one can do:
 //
 //   auto status = JwtMacRegister();
@@ -34,22 +36,36 @@ namespace tink {
 //   if (!handle_result.ok()) { /* fail with error */ }
 //   auto keyset_handle = std::move(handle_result.ValueOrDie());
 const google::crypto::tink::KeyTemplate& JwtHs256Template();
+const google::crypto::tink::KeyTemplate& RawJwtHs256Template();
 const google::crypto::tink::KeyTemplate& JwtHs384Template();
+const google::crypto::tink::KeyTemplate& RawJwtHs384Template();
 const google::crypto::tink::KeyTemplate& JwtHs512Template();
+const google::crypto::tink::KeyTemplate& RawJwtHs512Template();
 
 const google::crypto::tink::KeyTemplate& JwtEs256Template();
+const google::crypto::tink::KeyTemplate& RawJwtEs256Template();
 const google::crypto::tink::KeyTemplate& JwtEs384Template();
+const google::crypto::tink::KeyTemplate& RawJwtEs384Template();
 const google::crypto::tink::KeyTemplate& JwtEs512Template();
+const google::crypto::tink::KeyTemplate& RawJwtEs512Template();
 
 const google::crypto::tink::KeyTemplate& JwtRs256_2048_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtRs256_2048_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtRs256_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtRs256_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtRs384_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtRs384_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtRs512_4096_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtRs512_4096_F4_Template();
 
 const google::crypto::tink::KeyTemplate& JwtPs256_2048_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtPs256_2048_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtPs256_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtPs256_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtPs384_3072_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtPs384_3072_F4_Template();
 const google::crypto::tink::KeyTemplate& JwtPs512_4096_F4_Template();
+const google::crypto::tink::KeyTemplate& RawJwtPs512_4096_F4_Template();
 
 }  // namespace tink
 }  // namespace crypto

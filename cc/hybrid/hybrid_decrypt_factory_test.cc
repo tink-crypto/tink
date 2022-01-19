@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_decrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "tink/config.h"
@@ -60,10 +63,10 @@ TEST_F(HybridDecryptFactoryTest, testBasic) {
   auto hybrid_decrypt_result = HybridDecryptFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(hybrid_decrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-      hybrid_decrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+      hybrid_decrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      hybrid_decrypt_result.status().error_message());
+                      std::string(hybrid_decrypt_result.status().message()));
 }
 
 TEST_F(HybridDecryptFactoryTest, testPrimitive) {
@@ -134,10 +137,10 @@ TEST_F(HybridDecryptFactoryTest, testPrimitive) {
   {  // Wrong context_info.
     auto decrypt_result = hybrid_decrypt->Decrypt(ciphertext_1, "bad context");
     EXPECT_FALSE(decrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              decrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              decrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "decryption failed",
-                        decrypt_result.status().error_message());
+                        std::string(decrypt_result.status().message()));
   }
 }
 

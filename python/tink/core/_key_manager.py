@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,9 @@
 # limitations under the License.
 
 """This module defines the basic types and abstract classes in Tink."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 import abc
-from typing import Any, Generic, Text, Type, TypeVar
-import six
+from typing import Any, Generic, Type, TypeVar
 
 from tink.proto import tink_pb2
 from tink.core import _tink_error
@@ -29,8 +24,7 @@ from tink.core import _tink_error
 P = TypeVar('P')
 
 
-@six.add_metaclass(abc.ABCMeta)
-class KeyManager(Generic[P]):
+class KeyManager(Generic[P], metaclass=abc.ABCMeta):
   """Generates keys and provides primitives for the keys.
 
   A KeyManager "understands" keys of a specific key types: it can generate keys
@@ -59,7 +53,7 @@ class KeyManager(Generic[P]):
     raise NotImplementedError()
 
   @abc.abstractmethod
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     """Returns the type_url identifying the key type handled by this manager."""
     raise NotImplementedError()
 
@@ -77,7 +71,7 @@ class KeyManager(Generic[P]):
     """
     raise NotImplementedError()
 
-  def does_support(self, type_url: Text) -> bool:
+  def does_support(self, type_url: str) -> bool:
     return self.key_type() == type_url
 
 
@@ -118,7 +112,7 @@ class KeyManagerCcToPyWrapper(KeyManager[P]):
     return self._primitive_py_wrapper(
         self._cc_key_manager.primitive(key_data.SerializeToString()))
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @_tink_error.use_tink_errors
@@ -147,7 +141,7 @@ class PrivateKeyManagerCcToPyWrapper(PrivateKeyManager[P]):
     return self._primitive_py_wrapper(
         self._cc_key_manager.primitive(key_data.SerializeToString()))
 
-  def key_type(self) -> Text:
+  def key_type(self) -> str:
     return self._cc_key_manager.key_type()
 
   @_tink_error.use_tink_errors

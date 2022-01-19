@@ -59,6 +59,29 @@ proto_library(
 )
 
 # -----------------------------------------------
+# cached_dek_aead
+# -----------------------------------------------
+proto_library(
+    name = "cached_dek_aead_proto",
+    srcs = [
+        "cached_dek_aead.proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# -----------------------------------------------
+# cached_dek_envelope
+# -----------------------------------------------
+proto_library(
+    name = "cached_dek_envelope_proto",
+    srcs = [
+        "cached_dek_envelope.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [":tink_proto"],
+)
+
+# -----------------------------------------------
 # rsa_ssa_pss
 # -----------------------------------------------
 proto_library(
@@ -162,7 +185,6 @@ proto_library(
         "jwt_hmac.proto",
     ],
     visibility = ["//visibility:public"],
-    deps = [":common_proto"],
 )
 
 # -----------------------------------------------
@@ -341,6 +363,17 @@ proto_library(
     ],
     visibility = ["//visibility:public"],
     deps = [":common_proto"],
+)
+
+# -----------------------------------------------
+# hpke
+# -----------------------------------------------
+proto_library(
+    name = "hpke_proto",
+    srcs = [
+        "hpke.proto",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 # ----------------------------------------------------------------------------

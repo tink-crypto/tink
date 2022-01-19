@@ -18,9 +18,10 @@
 #define TINK_SUBTLE_ECIES_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
 #include "openssl/ec.h"
-#include "tink/config/tink_fips.h"
+#include "openssl/evp.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -68,17 +69,17 @@ class EciesHkdfNistPCurveRecipientKemBoringSsl
       absl::string_view hkdf_info, uint32_t key_size_in_bytes,
       EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  EciesHkdfNistPCurveRecipientKemBoringSsl(EllipticCurveType curve,
-                                           util::SecretData priv_key_value,
-                                           EC_GROUP* ec_group);
+  EciesHkdfNistPCurveRecipientKemBoringSsl(
+      EllipticCurveType curve, util::SecretData priv_key_value,
+      internal::SslUniquePtr<EC_GROUP> ec_group);
 
   EllipticCurveType curve_;
   util::SecretData priv_key_value_;
-  bssl::UniquePtr<EC_GROUP> ec_group_;
+  internal::SslUniquePtr<EC_GROUP> ec_group_;
 };
 
 // Implementation of EciesHkdfRecipientKemBoringSsl for curve25519.
@@ -99,13 +100,14 @@ class EciesHkdfX25519RecipientKemBoringSsl
       absl::string_view hkdf_info, uint32_t key_size_in_bytes,
       EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  explicit EciesHkdfX25519RecipientKemBoringSsl(util::SecretData private_key);
+  explicit EciesHkdfX25519RecipientKemBoringSsl(
+      internal::SslUniquePtr<EVP_PKEY> private_key);
 
-  util::SecretData private_key_;
+  const internal::SslUniquePtr<EVP_PKEY> private_key_;
 };
 
 }  // namespace subtle

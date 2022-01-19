@@ -32,7 +32,6 @@ class WrappedHybridDecrypt extends HybridDecrypt {
     return new WrappedHybridDecrypt(hybridDecryptPrimitiveSet);
   }
 
-  /** @override */
   async decrypt(ciphertext: Uint8Array, opt_contextInfo?: Uint8Array) {
     if (!ciphertext) {
       throw new SecurityException('Ciphertext has to be non-null.');
@@ -88,14 +87,12 @@ class WrappedHybridDecrypt extends HybridDecrypt {
 
 export class HybridDecryptWrapper implements PrimitiveWrapper<HybridDecrypt> {
   /**
-   * @override
    */
   wrap(primitiveSet: PrimitiveSet.PrimitiveSet<HybridDecrypt>) {
     return WrappedHybridDecrypt.newHybridDecrypt(primitiveSet);
   }
 
   /**
-   * @override
    */
   getPrimitiveType() {
     return HybridDecrypt;

@@ -16,7 +16,11 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_encrypt.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/util/enums.h"
@@ -34,7 +38,7 @@ namespace {
 util::Status Validate(const EciesAeadHkdfPublicKey& key) {
   if (key.x().empty() || !key.has_params()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
@@ -42,16 +46,16 @@ util::Status Validate(const EciesAeadHkdfPublicKey& key) {
       key.params().kem_params().curve_type() == EllipticCurveType::CURVE25519) {
     if (!key.y().empty()) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
     }
   } else if (key.y().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace

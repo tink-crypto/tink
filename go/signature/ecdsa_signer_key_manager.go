@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/keyset"
 	subtleSignature "github.com/google/tink/go/signature/subtle"
 	"github.com/google/tink/go/subtle"
@@ -43,11 +43,6 @@ var errInvalidECDSASignKeyFormat = errors.New("ecdsa_signer_key_manager: invalid
 // ecdsaSignerKeyManager is an implementation of KeyManager interface.
 // It generates new ECDSAPrivateKeys and produces new instances of ECDSASign subtle.
 type ecdsaSignerKeyManager struct{}
-
-// newECDSASignerKeyManager creates a new ecdsaSignerKeyManager.
-func newECDSASignerKeyManager() *ecdsaSignerKeyManager {
-	return new(ecdsaSignerKeyManager)
-}
 
 // Primitive creates an ECDSASign subtle for the given serialized ECDSAPrivateKey proto.
 func (km *ecdsaSignerKeyManager) Primitive(serializedKey []byte) (interface{}, error) {

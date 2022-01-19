@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """Core package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.proto import tink_pb2
 from tink.core import _crypto_format
@@ -43,3 +39,8 @@ PrimitiveSet = _primitive_set.PrimitiveSet
 PrimitiveWrapper = _primitive_wrapper.PrimitiveWrapper
 
 crypto_format = _crypto_format
+
+
+class KeyAccess:
+  """Base class for access tokens for Tink Keys."""
+  pass

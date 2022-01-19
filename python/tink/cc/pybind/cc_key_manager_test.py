@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,6 @@
 # limitations under the License.
 
 """Tests for tink.python.tink.cc.pybind.py_key_manager."""
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from typing import cast
 from absl.testing import absltest
@@ -43,7 +39,7 @@ def setUpModule():
 class AeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(AeadKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.AeadKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesEaxKey')
 
@@ -90,7 +86,7 @@ class AeadKeyManagerTest(absltest.TestCase):
 class DeterministicAeadKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(DeterministicAeadKeyManagerTest, self).setUp()
+    super().setUp()
     daead_key_manager = tink_bindings.DeterministicAeadKeyManager
     self.key_manager = daead_key_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.AesSivKey')
@@ -197,7 +193,7 @@ class HybridKeyManagerTest(absltest.TestCase):
 class MacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(MacKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacKey')
 
@@ -253,13 +249,13 @@ class MacKeyManagerTest(absltest.TestCase):
 class JwtMacKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(JwtMacKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.MacKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
-  def new_jwt_hmac_key_template(self, hash_type, key_size):
+  def new_jwt_hmac_key_template(self, algorithm, key_size):
     key_format = jwt_hmac_pb2.JwtHmacKeyFormat()
-    key_format.hash_type = hash_type
+    key_format.algorithm = algorithm
     key_format.key_size = key_size
     key_template = tink_pb2.KeyTemplate()
     key_template.type_url = 'type.googleapis.com/google.crypto.tink.JwtHmacKey'
@@ -271,24 +267,24 @@ class JwtMacKeyManagerTest(absltest.TestCase):
                      'type.googleapis.com/google.crypto.tink.JwtHmacKey')
 
   def test_new_key_data(self):
-    key_template = self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)
+    key_template = self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 32)
     key_data = tink_pb2.KeyData.FromString(
         self.key_manager.new_key_data(key_template))
     self.assertEqual(key_data.type_url, self.key_manager.key_type())
     key = jwt_hmac_pb2.JwtHmacKey.FromString(key_data.value)
     self.assertEqual(key.version, 0)
-    self.assertEqual(key.hash_type, common_pb2.SHA256)
+    self.assertEqual(key.algorithm, jwt_hmac_pb2.HS256)
     self.assertLen(key.key_value, 32)
 
   def test_too_short_key_size_raises_exception(self):
-    key_template = self.new_jwt_hmac_key_template(common_pb2.SHA256, 31)
+    key_template = self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 31)
     with self.assertRaises(tink_bindings.StatusNotOk):
       self.key_manager.new_key_data(key_template)
 
   def test_mac_success(self):
     mac = self.key_manager.primitive(
         self.key_manager.new_key_data(
-            self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)))
+            self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 32)))
     data = b'data'
     tag = mac.compute_mac(data)
     self.assertLen(tag, 32)
@@ -298,7 +294,7 @@ class JwtMacKeyManagerTest(absltest.TestCase):
   def test_mac_wrong(self):
     mac = self.key_manager.primitive(
         self.key_manager.new_key_data(
-            self.new_jwt_hmac_key_template(common_pb2.SHA256, 32)))
+            self.new_jwt_hmac_key_template(jwt_hmac_pb2.HS256, 32)))
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'verification failed'):
       mac.verify_mac(b'0123456789ABCDEF0123456789ABCDEF', b'data')
@@ -307,7 +303,7 @@ class JwtMacKeyManagerTest(absltest.TestCase):
 class PrfKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(PrfKeyManagerTest, self).setUp()
+    super().setUp()
     self.key_manager = tink_bindings.PrfKeyManager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.HmacPrfKey')
 
@@ -363,7 +359,7 @@ class PrfKeyManagerTest(absltest.TestCase):
 class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(PublicKeySignVerifyKeyManagerTest, self).setUp()
+    super().setUp()
     public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
     self.key_manager_verify = public_key_verify_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.EcdsaPublicKey')
@@ -456,7 +452,7 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 class JwtPublicKeySignVerifyKeyManagerTest(absltest.TestCase):
 
   def setUp(self):
-    super(JwtPublicKeySignVerifyKeyManagerTest, self).setUp()
+    super().setUp()
     public_key_verify_manager = tink_bindings.PublicKeyVerifyKeyManager
     self.key_manager_verify = public_key_verify_manager.from_cc_registry(
         'type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey')

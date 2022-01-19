@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Jwt package."""
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 import datetime
-from typing import Dict, List, Mapping, Optional, Text, Union, cast
+from typing import Dict, List, Mapping, Optional, Union, cast
 
+from tink.jwt import _jwk_set_converter
 from tink.jwt import _jwt_error
 from tink.jwt import _jwt_hmac_key_manager
 from tink.jwt import _jwt_key_templates
@@ -27,6 +24,8 @@ from tink.jwt import _jwt_mac
 from tink.jwt import _jwt_mac_wrapper
 from tink.jwt import _jwt_public_key_sign
 from tink.jwt import _jwt_public_key_verify
+from tink.jwt import _jwt_signature_key_manager
+from tink.jwt import _jwt_signature_wrappers
 from tink.jwt import _jwt_validator
 from tink.jwt import _raw_jwt
 from tink.jwt import _verified_jwt
@@ -40,48 +39,53 @@ JwtMac = _jwt_mac.JwtMac
 JwtPublicKeySign = _jwt_public_key_sign.JwtPublicKeySign
 JwtPublicKeyVerify = _jwt_public_key_verify.JwtPublicKeyVerify
 
+new_raw_jwt = _raw_jwt.new_raw_jwt
+new_validator = _jwt_validator.new_validator
 
-def raw_jwt_from_json_payload(payload: Text) -> RawJwt:
-  return _raw_jwt.RawJwt.from_json_payload(payload)
-
-
-def new_raw_jwt(issuer: Optional[Text] = None,
-                subject: Optional[Text] = None,
-                audiences: Optional[List[Text]] = None,
-                jwt_id: Optional[Text] = None,
-                expiration: Optional[datetime.datetime] = None,
-                not_before: Optional[datetime.datetime] = None,
-                issued_at: Optional[datetime.datetime] = None,
-                custom_claims: Mapping[Text, Claim] = None) -> RawJwt:
-  return _raw_jwt.RawJwt.create(issuer, subject, audiences, jwt_id, expiration,
-                                not_before, issued_at, custom_claims)
-
-
-def new_validator(issuer: Optional[Text] = None,
-                  subject: Optional[Text] = None,
-                  audience: Optional[Text] = None,
-                  clock_skew: Optional[datetime.timedelta] = None,
-                  fixed_now: Optional[datetime.datetime] = None
-                  ) -> JwtValidator:
-  return JwtValidator(issuer, subject, audience, clock_skew, fixed_now)
-
+jwk_set_from_public_keyset_handle = _jwk_set_converter.from_public_keyset_handle
+jwk_set_to_public_keyset_handle = _jwk_set_converter.to_public_keyset_handle
 
 jwt_hs256_template = _jwt_key_templates.jwt_hs256_template
+raw_jwt_hs256_template = _jwt_key_templates.raw_jwt_hs256_template
 jwt_hs384_template = _jwt_key_templates.jwt_hs384_template
+raw_jwt_hs384_template = _jwt_key_templates.raw_jwt_hs384_template
 jwt_hs512_template = _jwt_key_templates.jwt_hs512_template
+raw_jwt_hs512_template = _jwt_key_templates.raw_jwt_hs512_template
 jwt_es256_template = _jwt_key_templates.jwt_es256_template
+raw_jwt_es256_template = _jwt_key_templates.raw_jwt_es256_template
 jwt_es384_template = _jwt_key_templates.jwt_es384_template
+raw_jwt_es384_template = _jwt_key_templates.raw_jwt_es384_template
 jwt_es512_template = _jwt_key_templates.jwt_es512_template
+raw_jwt_es512_template = _jwt_key_templates.raw_jwt_es512_template
 jwt_rs256_2048_f4_template = _jwt_key_templates.jwt_rs256_2048_f4_template
+raw_jwt_rs256_2048_f4_template = _jwt_key_templates.raw_jwt_rs256_2048_f4_template
 jwt_rs256_3072_f4_template = _jwt_key_templates.jwt_rs256_3072_f4_template
+raw_jwt_rs256_3072_f4_template = _jwt_key_templates.raw_jwt_rs256_3072_f4_template
 jwt_rs384_3072_f4_template = _jwt_key_templates.jwt_rs384_3072_f4_template
+raw_jwt_rs384_3072_f4_template = _jwt_key_templates.raw_jwt_rs384_3072_f4_template
 jwt_rs512_4096_f4_template = _jwt_key_templates.jwt_rs512_4096_f4_template
+raw_jwt_rs512_4096_f4_template = _jwt_key_templates.raw_jwt_rs512_4096_f4_template
 jwt_ps256_2048_f4_template = _jwt_key_templates.jwt_ps256_2048_f4_template
+raw_jwt_ps256_2048_f4_template = _jwt_key_templates.raw_jwt_ps256_2048_f4_template
 jwt_ps256_3072_f4_template = _jwt_key_templates.jwt_ps256_3072_f4_template
+raw_jwt_ps256_3072_f4_template = _jwt_key_templates.raw_jwt_ps256_3072_f4_template
 jwt_ps384_3072_f4_template = _jwt_key_templates.jwt_ps384_3072_f4_template
+raw_jwt_ps384_3072_f4_template = _jwt_key_templates.raw_jwt_ps384_3072_f4_template
 jwt_ps512_4096_f4_template = _jwt_key_templates.jwt_ps512_4096_f4_template
+raw_jwt_ps512_4096_f4_template = _jwt_key_templates.raw_jwt_ps512_4096_f4_template
 
 
 def register_jwt_mac() -> None:
   _jwt_hmac_key_manager.register()
   _jwt_mac_wrapper.register()
+
+
+def register_jwt_signature() -> None:
+  _jwt_signature_key_manager.register()
+  _jwt_signature_wrappers.register()
+
+
+# Deprecated. Use jwk_set_from_public_keyset_handle instead.
+jwk_set_from_keyset_handle = _jwk_set_converter.from_keyset_handle
+# Deprecated. Use jwk_set_to_public_keyset_handle instead.
+jwk_set_to_keyset_handle = _jwk_set_converter.to_keyset_handle

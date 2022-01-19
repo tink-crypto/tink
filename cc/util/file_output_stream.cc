@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/output_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -64,7 +65,7 @@ FileOutputStream::FileOutputStream(int file_descriptor, int buffer_size) :
   buffer_ = nullptr;
   position_ = 0;
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> FileOutputStream::Next(void** data) {
@@ -99,8 +100,8 @@ crypto::tink::util::StatusOr<int> FileOutputStream::Next(void** data) {
     if (write_result == 0) {
       return 0;
     }
-    status_ = ToStatusF(
-        util::error::INTERNAL, "I/O error upon write: %d", errno);
+    status_ = ToStatusF(absl::StatusCode::kInternal, "I/O error upon write: %d",
+                        errno);
     return status_;
   }
   // Some data was written, so we can return some portion of buffer_.
@@ -139,13 +140,14 @@ Status FileOutputStream::Close() {
       int write_result = write_ignoring_eintr(
           fd_, buffer_.get() + total_written, count_in_buffer_ - total_written);
       if (write_result < 0) {  // An I/O error occurred.
-        status_ = ToStatusF(
-            util::error::INTERNAL, "I/O error upon write: %d", errno);
+        status_ = ToStatusF(absl::StatusCode::kInternal,
+                            "I/O error upon write: %d", errno);
         return status_;
       } else if (write_result == 0) {  // No progress, hence abort.
-        status_ = ToStatusF(util::error::INTERNAL,
-            "I/O error: failed to write %d bytes before closing.",
-            count_in_buffer_ - total_written);
+        status_ =
+            ToStatusF(absl::StatusCode::kInternal,
+                      "I/O error: failed to write %d bytes before closing.",
+                      count_in_buffer_ - total_written);
         return status_;
       }
       // Managed to write some bytes, hence continue.
@@ -153,12 +155,12 @@ Status FileOutputStream::Close() {
     }
   }
   if (close_ignoring_eintr(fd_) == -1) {
-    status_ = ToStatusF(
-        util::error::INTERNAL, "I/O error upon close: %d", errno);
+    status_ = ToStatusF(absl::StatusCode::kInternal, "I/O error upon close: %d",
+                        errno);
     return status_;
   }
-  status_ = Status(util::error::FAILED_PRECONDITION, "Stream closed");
-  return Status::OK;
+  status_ = Status(absl::StatusCode::kFailedPrecondition, "Stream closed");
+  return OkStatus();
 }
 
 int64_t FileOutputStream::Position() const {

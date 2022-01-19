@@ -18,6 +18,7 @@
 
 #import "objc/TINKDeterministicAeadKeyTemplate.h"
 
+#include "absl/status/status.h"
 #include "tink/daead/deterministic_aead_key_templates.h"
 #include "tink/util/status.h"
 #include "proto/tink.pb.h"
@@ -39,7 +40,7 @@
     default:
       if (error) {
         *error = TINKStatusToError(
-            crypto::tink::util::Status(crypto::tink::util::error::INVALID_ARGUMENT,
+            crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
                                        "Invalid TINKDeterministicAeadKeyTemplate"));
       }
       return nil;

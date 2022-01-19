@@ -108,7 +108,8 @@ util::Status PythonOutputStream::Close() {
   }
   status_ = adapter_->Close();
   if (!status_.ok()) return status_;
-  status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream closed");
+  status_ =
+      util::Status(absl::StatusCode::kFailedPrecondition, "Stream closed");
   return util::OkStatus();
 }
 

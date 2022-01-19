@@ -1,2 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.ChaCha20Poly1305Key"
-output_prefix_type: TINK

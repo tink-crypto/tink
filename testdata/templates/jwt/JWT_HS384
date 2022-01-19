@@ -1,8 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.JwtHmacKey"
-# value: [type.googleapis.com/google.crypto.tink.JwtHmacKeyFormat] {
-#   version: 0
-#   hash_type: SHA384
-#   key_size: 32
-# }
-value: "\020\002\030 "
-output_prefix_type: RAW

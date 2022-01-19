@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_VERIFIED_JWT_H_
 #define TINK_JWT_VERIFIED_JWT_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/clock.h"
@@ -37,17 +39,24 @@ class JwtPublicKeyVerifyImpl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// A read-only JSON Web Token</a> (JWT), https://tools.ietf.org/html/rfc7519.
+// A decoded and verified JSON Web Token (JWT).
 //
 // A new instance of this class is returned as the result of a sucessfully
-// verification of a JWT. It contains the payload of the token, but no header
-// information (typ, cty, alg and kid).
+// verification of a MACed or signed compact JWT.
+//
+// It gives read-only access all payload claims and a subset of the headers. It
+// does not contain any headers that depend on the key, such as "alg" or "kid".
+// These headers are checked when the signature is verified and should not be
+// read by the user. This ensures that the key can be changed without any
+// changes to the user code.
 class VerifiedJwt {
  public:
   // VerifiedJwt objects are copiable and implicitly movable.
   VerifiedJwt(const VerifiedJwt&) = default;
   VerifiedJwt& operator=(const VerifiedJwt&) = default;
 
+  bool HasTypeHeader() const;
+  util::StatusOr<std::string> GetTypeHeader() const;
   bool HasIssuer() const;
   util::StatusOr<std::string> GetIssuer() const;
   bool HasSubject() const;
@@ -76,7 +85,7 @@ class VerifiedJwt {
   util::StatusOr<std::string> GetJsonArrayClaim(absl::string_view name) const;
   std::vector<std::string> CustomClaimNames() const;
 
-  util::StatusOr<std::string> ToString();
+  util::StatusOr<std::string> GetJsonPayload();
 
  private:
   VerifiedJwt();

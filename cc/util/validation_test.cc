@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/test_matchers.h"
 
 namespace crypto {
@@ -45,7 +46,7 @@ TEST(ValidateKey, MissingOutputPrefixType) {
   key.mutable_key_data()->set_value("some value");
   key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
   EXPECT_THAT(crypto::tink::ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(ValidateKey, MissingKeyData) {
@@ -54,7 +55,7 @@ TEST(ValidateKey, MissingKeyData) {
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   key.set_status(google::crypto::tink::KeyStatusType::ENABLED);
   EXPECT_THAT(crypto::tink::ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(ValidateKey, MissingStatus) {
@@ -63,7 +64,7 @@ TEST(ValidateKey, MissingStatus) {
   key.mutable_key_data()->set_value("some value");
   key.set_output_prefix_type(google::crypto::tink::OutputPrefixType::TINK);
   EXPECT_THAT(crypto::tink::ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(ValidateKeyset, Valid) {
@@ -148,7 +149,7 @@ TEST(ValidateKeyset, PrimaryIdNonExistent) {
   key->set_status(google::crypto::tink::KeyStatusType::ENABLED);
   keyset.set_primary_key_id(99);
   EXPECT_THAT(crypto::tink::ValidateKeyset(keyset),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(ValidateKeyset, ValidHighId) {

@@ -116,7 +116,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, WritingStreams) {
           // Try closing the stream again.
           status = enc_stream->Close();
           EXPECT_FALSE(status.ok());
-          EXPECT_EQ(util::error::FAILED_PRECONDITION, status.error_code());
+          EXPECT_EQ(absl::StatusCode::kFailedPrecondition, status.code());
         }
       }
     }
@@ -147,7 +147,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintext) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintextWithBackup) {
@@ -184,7 +184,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, EmptyPlaintextWithBackup) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintext) {
@@ -217,7 +217,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintext) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, NextAfterBackup) {
@@ -303,7 +303,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, OneSegmentPlaintextWithBackup) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintext) {
@@ -354,7 +354,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintext) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithBackup) {
@@ -409,7 +409,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithBackup) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithFullBackup) {
@@ -462,7 +462,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, ManySegmentsPlaintextWithFullBackup) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
@@ -559,7 +559,7 @@ TEST_F(StreamingAeadEncryptingStreamTest, BackupAndPosition) {
   // Try closing the stream again.
   close_status = enc_stream->Close();
   EXPECT_FALSE(close_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, close_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, close_status.code());
 }
 
 }  // namespace

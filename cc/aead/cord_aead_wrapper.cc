@@ -16,10 +16,13 @@
 
 #include "tink/aead/cord_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
 #include "tink/aead/cord_aead.h"
 #include "tink/crypto_format.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -30,13 +33,14 @@ namespace {
 
 util::Status Validate(PrimitiveSet<CordAead>* aead_set) {
   if (aead_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "aead_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "aead_set must be non-NULL");
   }
   if (aead_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "aead_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class CordAeadSetWrapper : public CordAead {
@@ -99,7 +103,7 @@ util::StatusOr<absl::Cord> CordAeadSetWrapper::Decrypt(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 }  // anonymous namespace
 

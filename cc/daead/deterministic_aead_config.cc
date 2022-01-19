@@ -40,7 +40,7 @@ const RegistryConfig& DeterministicAeadConfig::Latest() {
 util::Status DeterministicAeadConfig::Register() {
   // Currently there are no FIPS-validated deterministic AEAD key managers
   // available, therefore none will be registered in FIPS only mode.
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

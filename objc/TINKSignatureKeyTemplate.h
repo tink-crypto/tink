@@ -22,7 +22,7 @@
 
 typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-256
    *   - hash function: SHA256
    *   - signature: DER
@@ -31,16 +31,18 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKEcdsaP256 = 1,
 
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-384
    *   - hash function: SHA512
    *   - signature: DER
    *   - OutputPrefixType: TINK
+   *
+   * Deprecated. Use TINKEcdsaP384Sha512 instead.
    */
   TINKEcdsaP384 = 2,
 
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-521
    *   - hash function: SHA512
    *   - signature: DER
@@ -49,7 +51,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKEcdsaP521 = 3,
 
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-256
    *   - hash function: SHA256
    *   - signature: IEEE P1363
@@ -58,7 +60,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKEcdsaP256Ieee = 4,
 
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-384
    *   - hash function: SHA512
    *   - signature: IEEE P1363
@@ -67,7 +69,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKEcdsaP384Ieee = 5,
 
   /**
-   * EcdsaPrivateKey with the following parameters:
+   * `EcdsaPrivateKey` with the following parameters:
    *   - EC curve: NIST P-521
    *   - hash function: SHA512
    *   - signature: IEEE P1363
@@ -76,7 +78,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKEcdsaP521Ieee = 6,
 
   /**
-   * RsaSsaPkcs1PrivateKey with the following parameters:
+   * `RsaSsaPkcs1PrivateKey` with the following parameters:
    *   - Modulus size in bits: 3072.
    *   - Hash function: SHA256.
    *   - Public Exponent: 65537 (aka F4).
@@ -85,7 +87,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKRsaSsaPkcs13072Sha256F4 = 7,
 
   /**
-   * RsaSsaPkcs1PrivateKey with the following parameters:
+   * `RsaSsaPkcs1PrivateKey` with the following parameters:
    *   - Modulus size in bits: 4096.
    *   - Hash function: SHA512.
    *   - Public Exponent: 65537 (aka F4).
@@ -94,7 +96,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKRsaSsaPkcs14096Sha512F4 = 8,
 
   /**
-   * RsaSsaPssPrivateKey with the following parameters:
+   * `RsaSsaPssPrivateKey` with the following parameters:
    *   - Modulus size in bits: 3072.
    *   - Signature hash: SHA256.
    *   - MGF1 hash: SHA256.
@@ -105,7 +107,7 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKRsaSsaPss3072Sha256Sha256F4 = 9,
 
   /**
-   * RsaSsaPssPrivateKey with the following parameters:
+   * `RsaSsaPssPrivateKey` with the following parameters:
    *   - Modulus size in bits: 4096.
    *   - Signature hash: SHA512.
    *   - MGF1 hash: SHA512.
@@ -116,9 +118,27 @@ typedef NS_ENUM(NSInteger, TINKSignatureKeyTemplates) {
   TINKRsaSsaPss4096Sha512Sha512F4 = 10,
 
   /**
-   * Ed25519PrivateKey.
+   * `Ed25519PrivateKey`.
    */
   TINKEd25519 = 11,
+
+  /**
+   * `EcdsaPrivateKey` with the following parameters:
+   *   - EC curve: NIST P-384
+   *   - hash function: SHA384
+   *   - signature: DER
+   *   - OutputPrefixType: TINK
+   */
+  TINKEcdsaP384Sha384 = 12,
+
+  /**
+   * `EcdsaPrivateKey` with the following parameters:
+   *   - EC curve: NIST P-384
+   *   - hash function: SHA512
+   *   - signature: DER
+   *   - OutputPrefixType: TINK
+   */
+  TINKEcdsaP384Sha512 = 13,
 };
 
 NS_ASSUME_NONNULL_BEGIN

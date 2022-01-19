@@ -16,10 +16,14 @@
 
 #include "tink/daead/deterministic_aead_wrapper.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
 #include "tink/crypto_format.h"
 #include "tink/deterministic_aead.h"
+#include "tink/internal/util.h"
 #include "tink/primitive_set.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -30,13 +34,14 @@ namespace {
 
 util::Status Validate(PrimitiveSet<DeterministicAead>* daead_set) {
   if (daead_set == nullptr) {
-    return util::Status(util::error::INTERNAL, "daead_set must be non-NULL");
+    return util::Status(absl::StatusCode::kInternal,
+                        "daead_set must be non-NULL");
   }
   if (daead_set->get_primary() == nullptr) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "daead_set has no primary");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 
 class  DeterministicAeadSetWrapper : public DeterministicAead {
@@ -64,8 +69,8 @@ DeterministicAeadSetWrapper::EncryptDeterministically(
     absl::string_view plaintext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  plaintext = subtle::SubtleUtilBoringSSL::EnsureNonNull(plaintext);
-  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+  plaintext = internal::EnsureStringNonNull(plaintext);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   auto encrypt_result =
       daead_set_->get_primary()->get_primitive().EncryptDeterministically(
@@ -80,7 +85,7 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
     absl::string_view ciphertext, absl::string_view associated_data) const {
   // BoringSSL expects a non-null pointer for plaintext and additional_data,
   // regardless of whether the size is 0.
-  associated_data = subtle::SubtleUtilBoringSSL::EnsureNonNull(associated_data);
+  associated_data = internal::EnsureStringNonNull(associated_data);
 
   if (ciphertext.length() > CryptoFormat::kNonRawPrefixSize) {
     absl::string_view key_id =
@@ -114,7 +119,7 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
       }
     }
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "decryption failed");
+  return util::Status(absl::StatusCode::kInvalidArgument, "decryption failed");
 }
 
 }  // anonymous namespace

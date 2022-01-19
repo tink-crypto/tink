@@ -18,9 +18,9 @@ import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public final class CleartextKeysetExample {
 
     if (MODE_GENERATE.equals(mode)) {
       // [START generate-a-new-keyset]
-      KeysetHandle handle = KeysetHandle.generateNew(AesGcmKeyManager.aes128GcmTemplate());
+      KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get("AES128_GCM"));
       // [END generate-a-new-keyset]
 
       // [START store-a-cleartext-keyset]

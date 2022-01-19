@@ -17,9 +17,11 @@
 #include "tink/daead/deterministic_aead_config.h"
 
 #include <list>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/daead/aes_siv_key_manager.h"
@@ -46,14 +48,14 @@ class DeterministicAeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(DeterministicAeadConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(DeterministicAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<DeterministicAead>(
                   AesSivKeyManager().get_key_type())
@@ -64,7 +66,7 @@ TEST_F(DeterministicAeadConfigTest, Basic) {
 // Tests that the DeterministicAeadWrapper has been properly registered and we
 // can wrap primitives.
 TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -102,7 +104,7 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
 }
 
 TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -115,7 +117,7 @@ TEST_F(DeterministicAeadConfigTest, RegisterFipsValidTemplates) {
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(),
-               StatusIs(util::error::NOT_FOUND));
+               StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

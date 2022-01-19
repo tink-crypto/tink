@@ -6,9 +6,10 @@ tink_cc_library(
     buffer.cc
     buffer.h
   DEPS
-    absl::memory
     tink::util::status
     tink::util::statusor
+    absl::memory
+    absl::status
 )
 
 tink_cc_library(
@@ -17,7 +18,7 @@ tink_cc_library(
     constants.cc
     constants.h
   DEPS
-    absl::base
+    absl::core_headers
 )
 
 tink_cc_library(
@@ -35,12 +36,13 @@ tink_cc_library(
     enums.cc
     enums.h
   DEPS
+    tink::util::statusor
+    absl::status
+    absl::strings
     tink::subtle::common_enums
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
     tink::proto::tink_cc_proto
-    tink::util::statusor
-    absl::strings
 )
 
 tink_cc_library(
@@ -49,7 +51,7 @@ tink_cc_library(
     status.cc
     status.h
   DEPS
-    absl::base
+    absl::core_headers
     absl::status
     absl::strings
   PUBLIC
@@ -59,9 +61,10 @@ tink_cc_library(
   NAME statusor
   SRCS
     statusor.h
+    statusor.h
   DEPS
-    absl::status
     tink::util::status
+    absl::statusor
   PUBLIC
 )
 
@@ -73,6 +76,7 @@ tink_cc_library(
   DEPS
     tink::util::errors
     tink::util::status
+    absl::status
     tink::proto::tink_cc_proto
 )
 
@@ -85,8 +89,9 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::core::input_stream
     absl::memory
+    absl::status
+    tink::core::input_stream
 )
 
 tink_cc_library(
@@ -98,8 +103,9 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::core::output_stream
     absl::memory
+    absl::status
+    tink::core::output_stream
 )
 
 tink_cc_library(
@@ -112,8 +118,9 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::core::random_access_stream
     absl::memory
+    absl::status
+    tink::core::random_access_stream
 )
 
 tink_cc_library(
@@ -125,8 +132,9 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::core::input_stream
     absl::memory
+    absl::status
+    tink::core::input_stream
 )
 
 tink_cc_library(
@@ -138,8 +146,9 @@ tink_cc_library(
     tink::util::errors
     tink::util::status
     tink::util::statusor
-    tink::core::output_stream
     absl::memory
+    absl::status
+    tink::core::output_stream
 )
 
 tink_cc_library(
@@ -148,11 +157,19 @@ tink_cc_library(
     test_util.cc
     test_util.h
   DEPS
+    tink::util::buffer
     tink::util::constants
     tink::util::enums
     tink::util::protobuf_helper
+    tink::util::secret_data
     tink::util::status
     tink::util::statusor
+    absl::core_headers
+    absl::memory
+    absl::status
+    absl::strings
+    absl::cord
+    absl::synchronization
     tink::core::aead
     tink::core::cleartext_keyset_handle
     tink::core::deterministic_aead
@@ -169,13 +186,14 @@ tink_cc_library(
     tink::core::streaming_aead
     tink::aead::aes_ctr_hmac_aead_key_manager
     tink::aead::aes_gcm_key_manager
-    tink::daead::aes_siv_key_manager
+    tink::aead::cord_aead
     tink::aead::xchacha20_poly1305_key_manager
+    tink::daead::aes_siv_key_manager
+    tink::internal::ec_util
+    tink::subtle::common_enums
     tink::subtle::random
     tink::subtle::mac::stateful_mac
-    tink::subtle::subtle_util_boringssl
     tink::proto::aes_ctr_hmac_aead_cc_proto
-    tink::proto::aes_gcm_cc_proto
     tink::proto::aes_siv_cc_proto
     tink::proto::common_cc_proto
     tink::proto::ecdsa_cc_proto
@@ -183,13 +201,6 @@ tink_cc_library(
     tink::proto::ed25519_cc_proto
     tink::proto::tink_cc_proto
     tink::proto::xchacha20_poly1305_cc_proto
-    tink::util::buffer
-    tink::util::secret_data
-    absl::core_headers
-    absl::memory
-    absl::strings
-    absl::cord
-    absl::synchronization
 )
 
 tink_cc_library(
@@ -200,12 +211,15 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     gmock
+    absl::status
 )
 
 tink_cc_library(
   NAME protobuf_helper
-  SRCS protobuf_helper.h
-  DEPS protobuf::libprotobuf-lite
+  SRCS
+    protobuf_helper.h
+  DEPS
+    protobuf::libprotobuf-lite
 )
 
 tink_cc_library(
@@ -214,9 +228,9 @@ tink_cc_library(
     test_keyset_handle.cc
     test_keyset_handle.h
   DEPS
+    absl::memory
     tink::core::keyset_handle
     tink::proto::tink_cc_proto
-    absl::memory
 )
 
 tink_cc_library(
@@ -225,12 +239,12 @@ tink_cc_library(
     input_stream_util.cc
     input_stream_util.h
   DEPS
-    tink::core::input_stream
     tink::util::secret_data
     tink::util::statusor
     absl::algorithm_container
-    absl::span
     absl::strings
+    absl::span
+    tink::core::input_stream
 )
 
 tink_cc_library(
@@ -249,12 +263,14 @@ tink_cc_test(
   SRCS
     buffer_test.cc
   DEPS
-    absl::memory
-    absl::strings
-    tink::subtle::random
     tink::util::buffer
     tink::util::status
     tink::util::test_matchers
+    gmock
+    absl::memory
+    absl::status
+    absl::strings
+    tink::subtle::random
 )
 
 tink_cc_test(
@@ -264,6 +280,8 @@ tink_cc_test(
   DEPS
     tink::util::errors
     tink::util::status
+    gmock
+    absl::status
 )
 
 tink_cc_test(
@@ -272,6 +290,7 @@ tink_cc_test(
     enums_test.cc
   DEPS
     tink::util::enums
+    gmock
     tink::subtle::common_enums
     tink::proto::common_cc_proto
 )
@@ -283,6 +302,7 @@ tink_cc_test(
   DEPS
     tink::util::file_input_stream
     tink::util::test_util
+    gmock
     absl::memory
     absl::strings
 )
@@ -294,9 +314,10 @@ tink_cc_test(
   DEPS
     tink::util::file_output_stream
     tink::util::test_util
-    tink::subtle::random
+    gmock
     absl::memory
     absl::strings
+    tink::subtle::random
 )
 
 tink_cc_test(
@@ -307,6 +328,7 @@ tink_cc_test(
     tink::util::buffer
     tink::util::file_random_access_stream
     tink::util::test_util
+    gmock
     absl::memory
     absl::strings
 )
@@ -318,9 +340,10 @@ tink_cc_test(
   DEPS
     tink::util::istream_input_stream
     tink::util::test_util
-    tink::subtle::random
+    gmock
     absl::memory
     absl::strings
+    tink::subtle::random
 )
 
 tink_cc_test(
@@ -330,9 +353,10 @@ tink_cc_test(
   DEPS
     tink::util::ostream_output_stream
     tink::util::test_util
-    tink::subtle::random
+    gmock
     absl::memory
     absl::strings
+    tink::subtle::random
 )
 
 tink_cc_test(
@@ -340,14 +364,12 @@ tink_cc_test(
   SRCS
     test_util_test.cc
   DEPS
-    tink::proto::aes_gcm_cc_proto
-    tink::proto::tink_cc_proto
     tink::util::test_matchers
     tink::util::test_util
-    tink::subtle::random
-    absl::strings
-    absl::cord
     gmock
+    tink::subtle::subtle
+    tink::proto::aes_gcm_cc_proto
+    tink::proto::tink_cc_proto
 )
 
 tink_cc_test(
@@ -358,19 +380,21 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::validation
     gmock
+    absl::status
 )
 
 tink_cc_test(
   NAME input_stream_util_test
-  SRCS input_stream_util_test.cc
+  SRCS
+    input_stream_util_test.cc
   DEPS
     tink::util::input_stream_util
     tink::util::istream_input_stream
     tink::util::secret_data
     tink::util::status
     tink::util::test_matchers
-    absl::memory
     gmock
+    absl::memory
 )
 
 tink_cc_library(
@@ -378,7 +402,9 @@ tink_cc_library(
   SRCS
     secret_data_internal.h
   DEPS
+    absl::strings
     absl::base
+    crypto
 )
 
 tink_cc_library(
@@ -392,11 +418,12 @@ tink_cc_library(
 
 tink_cc_test(
   NAME secret_data_test
-  SRCS secret_data_test.cc
+  SRCS
+    secret_data_test.cc
   DEPS
-    absl::strings
     tink::util::secret_data
     gmock
+    absl::strings
 )
 
 tink_cc_library(
@@ -404,33 +431,34 @@ tink_cc_library(
   SRCS
     secret_proto.h
   DEPS
-    absl::memory
     tink::util::secret_data
-    protobuf::libprotobuf-lite
+    protobuf::libprotobuf
+    absl::memory
 )
 
 tink_cc_test(
   NAME secret_proto_test
-  SRCS secret_proto_test.cc
+  SRCS
+    secret_proto_test.cc
   DEPS
-    tink::util::secret_data
-    tink::proto::test_proto_cc_proto
-    absl::memory
-    gmock
+    tink::util::secret_proto
     protobuf::libprotobuf
+    gmock
+    absl::memory
+    tink::proto::test_proto_cc_proto
 )
 
 tink_cc_library(
   NAME fake_kms_client
   SRCS
-    fake_kms_client.h
     fake_kms_client.cc
+    fake_kms_client.h
   DEPS
     tink::util::errors
     tink::util::status
     tink::util::statusor
+    absl::status
     absl::strings
-    tink::aead::aead_key_templates
     tink::core::aead
     tink::core::binary_keyset_reader
     tink::core::binary_keyset_writer
@@ -438,22 +466,34 @@ tink_cc_library(
     tink::core::keyset_handle
     tink::core::kms_client
     tink::core::kms_clients
+    tink::aead::aead_key_templates
 )
 
 tink_cc_test(
   NAME fake_kms_client_test
-  SRCS fake_kms_client_test.cc
+  SRCS
+    fake_kms_client_test.cc
   DEPS
-    tink::util::errors
     tink::util::fake_kms_client
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
     tink::util::test_util
+    gmock
     tink::aead::aead_config
     tink::aead::aead_key_templates
     tink::proto::kms_aead_cc_proto
     tink::proto::kms_envelope_cc_proto
+)
+
+tink_cc_test(
+  NAME status_test
+  SRCS
+    status_test.cc
+  DEPS
+    tink::util::status
+    gmock
+    absl::status
 )
 
 tink_cc_test(

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/core/private_key_type_manager.h"
-#include "tink/jwt/internal/jwt_public_key_sign_impl.h"
+#include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/internal/raw_jwt_ecdsa_sign_key_manager.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/util/status.h"
@@ -35,12 +35,14 @@ class JwtEcdsaSignKeyManager
     : public PrivateKeyTypeManager<google::crypto::tink::JwtEcdsaPrivateKey,
                                    google::crypto::tink::JwtEcdsaKeyFormat,
                                    google::crypto::tink::JwtEcdsaPublicKey,
-                                   List<JwtPublicKeySign>> {
+                                   List<JwtPublicKeySignInternal>> {
  public:
-  class PublicKeySignFactory : public PrimitiveFactory<JwtPublicKeySign> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySign>> Create(
-        const google::crypto::tink::JwtEcdsaPrivateKey& private_key)
+  class PublicKeySignFactory
+      : public PrimitiveFactory<JwtPublicKeySignInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
+    Create(const google::crypto::tink::JwtEcdsaPrivateKey& private_key)
         const override;
+
    private:
     const RawJwtEcdsaSignKeyManager raw_key_manager_;
   };

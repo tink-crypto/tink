@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKRegistryConfig.h"
 
 #include "proto/config.pb.h"
@@ -28,3 +30,5 @@
 - (google::crypto::tink::RegistryConfig)ccConfig;
 
 @end
+
+#endif  // __cplusplus

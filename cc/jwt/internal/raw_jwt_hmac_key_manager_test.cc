@@ -16,6 +16,8 @@
 
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"
 
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/core/key_manager_impl.h"
@@ -38,7 +40,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::crypto::tink::util::IstreamInputStream;
 using ::crypto::tink::util::StatusOr;
-using ::google::crypto::tink::HashType;
+using ::google::crypto::tink::JwtHmacAlgorithm;
 using ::google::crypto::tink::JwtHmacKey;
 using ::google::crypto::tink::JwtHmacKeyFormat;
 using ::google::crypto::tink::KeyData;
@@ -69,14 +71,14 @@ TEST(RawJwtHmacKeyManagerTest, ValidateEmptyKeyFormat) {
 
 TEST(RawJwtHmacKeyManagerTest, ValidKeyFormat) {
   JwtHmacKeyFormat key_format;
-  key_format.set_hash_type(HashType::SHA256);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.set_key_size(32);
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format), IsOk());
 }
 
 TEST(RawJwtHmacKeyManagerTest, SmallKeySizeIsInvalidKeyFormat) {
   JwtHmacKeyFormat key_format;
-  key_format.set_hash_type(HashType::SHA512);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS512);
   key_format.set_key_size(31);
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format),
               Not(IsOk()));
@@ -84,7 +86,7 @@ TEST(RawJwtHmacKeyManagerTest, SmallKeySizeIsInvalidKeyFormat) {
 
 TEST(RawJwtHmacKeyManagerTest, Sha1IsInvalidKeyFormat) {
   JwtHmacKeyFormat key_format;
-  key_format.set_hash_type(HashType::SHA1);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS_UNKNOWN);
   key_format.set_key_size(32);
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKeyFormat(key_format),
               Not(IsOk()));
@@ -93,11 +95,11 @@ TEST(RawJwtHmacKeyManagerTest, Sha1IsInvalidKeyFormat) {
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha256) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_hash_type(HashType::SHA256);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
   EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().hash_type(), Eq(key_format.hash_type()));
+  EXPECT_THAT(hmac_key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
               SizeIs(key_format.key_size()));
 
@@ -108,11 +110,11 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha256) {
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_hash_type(HashType::SHA384);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS384);
   auto hmac_key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
   EXPECT_THAT(hmac_key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(hmac_key_or.ValueOrDie().hash_type(), Eq(key_format.hash_type()));
+  EXPECT_THAT(hmac_key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
               SizeIs(key_format.key_size()));
 
@@ -123,11 +125,11 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha384) {
 TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
   JwtHmacKeyFormat key_format;
   key_format.set_key_size(32);
-  key_format.set_hash_type(HashType::SHA512);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS512);
   auto key_or = RawJwtHmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(key_or.status(), IsOk());
   EXPECT_THAT(key_or.ValueOrDie().version(), Eq(0));
-  EXPECT_THAT(key_or.ValueOrDie().hash_type(), Eq(key_format.hash_type()));
+  EXPECT_THAT(key_or.ValueOrDie().algorithm(), Eq(key_format.algorithm()));
   EXPECT_THAT(key_or.ValueOrDie().key_value(),
               SizeIs(key_format.key_size()));
 
@@ -138,7 +140,7 @@ TEST(RawJwtHmacKeyManagerTest, CreateKeyWithSha512) {
 TEST(RawJwtHmacKeyManagerTest, ShortKeyIsInvalid) {
   JwtHmacKey key;
   key.set_version(0);
-  key.set_hash_type(HashType::SHA256);
+  key.set_algorithm(JwtHmacAlgorithm::HS256);
   key.set_key_value("0123456789abcdef0123456789abcde");  // 31 bytes
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
@@ -146,7 +148,7 @@ TEST(RawJwtHmacKeyManagerTest, ShortKeyIsInvalid) {
 TEST(RawJwtHmacKeyManagerTest, Sha1KeyIsInvalid) {
   JwtHmacKey key;
   key.set_version(0);
-  key.set_hash_type(HashType::SHA1);
+  key.set_algorithm(JwtHmacAlgorithm::HS_UNKNOWN);
   key.set_key_value("0123456789abcdef0123456789abcdef");
   EXPECT_THAT(RawJwtHmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
@@ -155,14 +157,13 @@ TEST(RawJwtHmacKeyManagerTest, DeriveKeyIsNotImplemented) {
   JwtHmacKeyFormat format;
   format.set_key_size(32);
   format.set_version(0);
-  format.set_hash_type(HashType::SHA256);
+  format.set_algorithm(JwtHmacAlgorithm::HS256);
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef0123456789abcdef")};
 
   StatusOr<JwtHmacKey> key_or =
       RawJwtHmacKeyManager().DeriveKey(format, &input_stream);
-  EXPECT_THAT(key_or.status(),
-              StatusIs(::crypto::tink::util::error::Code::UNIMPLEMENTED));
+  EXPECT_THAT(key_or.status(), StatusIs(absl::StatusCode::kUnimplemented));
 }
 
 TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
@@ -173,7 +174,7 @@ TEST(RawJwtHmacKeyManagerTest, GetPrimitiveFromNewKeysetHandle) {
               IsOk());
 
   JwtHmacKeyFormat key_format;
-  key_format.set_hash_type(HashType::SHA256);
+  key_format.set_algorithm(JwtHmacAlgorithm::HS256);
   key_format.set_key_size(32);
   KeyTemplate key_template;
   key_template.set_type_url(

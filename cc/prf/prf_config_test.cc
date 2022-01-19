@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
@@ -43,13 +44,13 @@ class PrfConfigTest : public ::testing::Test {
 };
 
 TEST_F(PrfConfigTest, RegisterWorks) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
   EXPECT_THAT(Registry::get_key_manager<Prf>(HmacPrfKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(PrfConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<Prf>(HmacPrfKeyManager().get_key_type())
                   .status(),
@@ -58,7 +59,7 @@ TEST_F(PrfConfigTest, RegisterWorks) {
 
 // FIPS-only mode tests
 TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -71,12 +72,12 @@ TEST_F(PrfConfigTest, RegisterNonFipsTemplates) {
   for (auto key_template : non_fips_key_templates) {
     auto new_keyset_handle_result = KeysetHandle::GenerateNew(key_template);
     EXPECT_THAT(new_keyset_handle_result.status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 
 TEST_F(PrfConfigTest, RegisterFipsValidTemplates) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 

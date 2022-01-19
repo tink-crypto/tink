@@ -16,6 +16,7 @@
 
 package com.google.crypto.tink.subtle;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
@@ -58,6 +59,9 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
   //     If an attacker can change these parameters then this would allow to move
   //     the position of plaintext in the file.
   //
+  public static final TinkFipsUtil.AlgorithmFipsCompatibility FIPS =
+      TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_NOT_FIPS;
+
   // The size of the nonce for AES-CTR
   private static final int NONCE_SIZE_IN_BYTES = 16;
 
@@ -89,6 +93,7 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
    * @param ciphertextSegmentSize the size of ciphertext segments.
    * @param firstSegmentOffset the offset of the first ciphertext segment. That means the first
    *     segment has size ciphertextSegmentSize - getHeaderLength() - firstSegmentOffset
+   * @throws GeneralSecurityException if called in FIPS mode.*
    * @throws InvalidAlgorithmParameterException if ikm is too short, the key size not supported or
    *     ciphertextSegmentSize is to short.
    */
@@ -100,7 +105,10 @@ public final class AesCtrHmacStreaming extends NonceBasedStreamingAead {
       int tagSizeInBytes,
       int ciphertextSegmentSize,
       int firstSegmentOffset)
-      throws InvalidAlgorithmParameterException {
+      throws GeneralSecurityException {
+    if (!FIPS.isCompatible()) {
+      throw new GeneralSecurityException("Can not use AES-CTR-HMAC streaming in FIPS-mode.");
+    }
     validateParameters(
         ikm.length,
         keySizeInBytes,

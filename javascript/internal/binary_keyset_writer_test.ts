@@ -15,7 +15,7 @@ describe('binary keyset writer test', function() {
 
     // Write the keyset.
     const writer = new BinaryKeysetWriter();
-    const serializedKeyset = writer.write(dummyKeyset);
+    const serializedKeyset = writer.encodeBinary(dummyKeyset);
 
     // Read the keyset proto serialization.
     const reader = BinaryKeysetReader.withUint8Array(serializedKeyset);

@@ -17,6 +17,12 @@ from absl.testing import absltest
 from util import supported_key_types
 
 
+def all_key_template_names():
+  for _, names in supported_key_types.KEY_TEMPLATE_NAMES.items():
+    for name in names:
+      yield name
+
+
 class SupportedKeyTypesTest(absltest.TestCase):
 
   def test_all_key_types_present(self):
@@ -28,22 +34,20 @@ class SupportedKeyTypesTest(absltest.TestCase):
         supported_key_types.ALL_KEY_TYPES)
 
   def test_all_key_templates_present(self):
-    def all_key_template_names():
-      for _, names in supported_key_types.KEY_TEMPLATE_NAMES.items():
-        for name in names:
-          yield name
     self.assertEqual(
         list(all_key_template_names()),
         list(supported_key_types.KEY_TEMPLATE.keys()))
+
+  def test_supported_lang_by_template_name_all_present(self):
+    self.assertEqual(
+        list(all_key_template_names()),
+        list(supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME.keys()))
 
   def test_supported_langauges_by_template_name(self):
     self.assertEqual(
         supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
             'ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM'],
         ['cc', 'java', 'go', 'python'])
-    self.assertEqual(
-        supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
-            'ECIES_P256_HKDF_HMAC_SHA256_XCHACHA20_POLY1305'], ['cc', 'python'])
 
 
 if __name__ == '__main__':

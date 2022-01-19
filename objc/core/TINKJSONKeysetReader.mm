@@ -23,6 +23,7 @@
 #import "objc/util/TINKErrors.h"
 #import "objc/util/TINKStrings.h"
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/json_keyset_reader.h"
 #include "proto/tink.pb.h"
@@ -33,7 +34,7 @@
   if (keyset == nil) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "keyset must be non-nil."));
+          absl::StatusCode::kInvalidArgument, "keyset must be non-nil."));
     }
     return nil;
   }

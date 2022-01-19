@@ -16,12 +16,14 @@
 
 #include "tink/hybrid/ecies_aead_hkdf_hybrid_decrypt.h"
 
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/hybrid/ecies_aead_hkdf_dem_helper.h"
 #include "tink/hybrid_decrypt.h"
-#include "tink/subtle/ec_util.h"
+#include "tink/internal/ec_util.h"
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 #include "tink/util/enums.h"
 #include "tink/util/secret_data.h"
@@ -39,7 +41,7 @@ util::Status Validate(const EciesAeadHkdfPrivateKey& key) {
   if (!key.has_public_key() || !key.public_key().has_params() ||
       key.public_key().x().empty() || key.key_value().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
 
@@ -48,15 +50,15 @@ util::Status Validate(const EciesAeadHkdfPrivateKey& key) {
           EllipticCurveType::CURVE25519) {
     if (!key.public_key().y().empty()) {
       return util::Status(
-          util::error::INVALID_ARGUMENT,
+          absl::StatusCode::kInvalidArgument,
           "Invalid EciesAeadHkdfPublicKey: has unexpected field.");
     }
   } else if (key.public_key().y().empty()) {
     return util::Status(
-        util::error::INVALID_ARGUMENT,
+        absl::StatusCode::kInvalidArgument,
         "Invalid EciesAeadHkdfPublicKey: missing required fields.");
   }
-  return util::Status::OK;
+  return util::OkStatus();
 }
 }  // namespace
 
@@ -84,14 +86,15 @@ util::StatusOr<std::unique_ptr<HybridDecrypt>> EciesAeadHkdfHybridDecrypt::New(
 util::StatusOr<std::string> EciesAeadHkdfHybridDecrypt::Decrypt(
     absl::string_view ciphertext, absl::string_view context_info) const {
   // Extract KEM-bytes from the ciphertext.
-  auto header_size_result = subtle::EcUtil::EncodingSizeInBytes(
+  auto header_size_result = internal::EcPointEncodingSizeInBytes(
       util::Enums::ProtoToSubtle(
           recipient_key_params_.kem_params().curve_type()),
       util::Enums::ProtoToSubtle(recipient_key_params_.ec_point_format()));
   if (!header_size_result.ok()) return header_size_result.status();
   auto header_size = header_size_result.ValueOrDie();
   if (ciphertext.size() < header_size) {
-    return util::Status(util::error::INVALID_ARGUMENT, "ciphertext too short");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ciphertext too short");
   }
 
   // Use KEM to get a symmetric key.

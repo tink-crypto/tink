@@ -26,6 +26,7 @@ import com.google.crypto.tink.proto.JwtEcdsaPublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Test;
@@ -81,11 +82,14 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     JwtEcdsaKeyFormat keyFormat = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
     JwtEcdsaPrivateKey privateKey = factory.createKey(keyFormat);
     JwtEcdsaPublicKey publicKey = signManager.getPublicKey(privateKey);
-    JwtPublicKeySign signer = signManager.getPrimitive(privateKey, JwtPublicKeySign.class);
-    JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
-    verifier.verifyAndDecode(signer.signAndEncode(token), validator);
+    JwtPublicKeySignInternal signer =
+        signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
+    JwtPublicKeyVerifyInternal verifier =
+        verifyManager.getPrimitive(publicKey, JwtPublicKeyVerifyInternal.class);
+    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
+    verifier.verifyAndDecodeWithKid(
+        signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
   }
 
   @Test
@@ -100,12 +104,16 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     JwtEcdsaPrivateKey privateKey = factory.createKey(keyFormat);
     // Create a different key.
     JwtEcdsaPublicKey publicKey = signManager.getPublicKey(factory.createKey(keyFormat));
-    JwtPublicKeySign signer = signManager.getPrimitive(privateKey, JwtPublicKeySign.class);
-    JwtPublicKeyVerify verifier = verifyManager.getPrimitive(publicKey, JwtPublicKeyVerify.class);
-    RawJwt token = new RawJwt.Builder().build();
-    JwtValidator validator = new JwtValidator.Builder().build();
+    JwtPublicKeySignInternal signer =
+        signManager.getPrimitive(privateKey, JwtPublicKeySignInternal.class);
+    JwtPublicKeyVerifyInternal verifier =
+        verifyManager.getPrimitive(publicKey, JwtPublicKeyVerifyInternal.class);
+    RawJwt token = RawJwt.newBuilder().withoutExpiration().build();
+    JwtValidator validator = JwtValidator.newBuilder().allowMissingExpiration().build();
     assertThrows(
         GeneralSecurityException.class,
-        () -> verifier.verifyAndDecode(signer.signAndEncode(token), validator));
+        () ->
+            verifier.verifyAndDecodeWithKid(
+                signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty()));
   }
 }

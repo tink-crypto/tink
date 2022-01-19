@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/kms_clients.h"
 #include "tink/util/status.h"
@@ -87,8 +88,7 @@ TEST(GcpKmsClientTest, ClientCreationInvalidRegistry) {
       std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
 
   auto client_result = GcpKmsClient::RegisterNewClient(non_gcp_key, creds_file);
-  EXPECT_THAT(client_result,
-              StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(client_result, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

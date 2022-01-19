@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
@@ -134,7 +135,8 @@ class NotRegistered {};
 TEST(KeyManagerTest, CreateFails) {
   auto failing =
       ExampleKeyTypeManager().GetPrimitive<NotRegistered>(AesGcmKey());
-  EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(failing.status(),
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 class ExampleKeyTypeManagerWithoutFactory
@@ -208,7 +210,8 @@ TEST(KeyManagerWithoutFactoryTest, CreateFails) {
   auto failing =
       ExampleKeyTypeManagerWithoutFactory().GetPrimitive<NotRegistered>(
           AesGcmKey());
-  EXPECT_THAT(failing.status(), test::StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(failing.status(),
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

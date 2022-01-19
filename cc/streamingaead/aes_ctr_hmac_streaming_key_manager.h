@@ -17,6 +17,7 @@
 #define TINK_STREAMINGAEAD_AES_CTR_HMAC_STREAMING_KEY_MANAGER_H_
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
@@ -96,10 +97,6 @@ class AesCtrHmacStreamingKeyManager
       InputStream* input_stream) const override;
 
   ~AesCtrHmacStreamingKeyManager() override {}
-
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
-  }
 
  private:
   const std::string key_type_ = absl::StrCat(

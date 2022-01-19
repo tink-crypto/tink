@@ -20,11 +20,6 @@ An example is the implementation of normal AEAD encryption interface using
 the streaming AEAD encryption interface.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
 import errno
 import io
 from typing import Optional
@@ -36,14 +31,14 @@ class BytesIOWithValueAfterClose(io.BytesIO):
   def __init__(self, initial_bytes=None):
     self._finalvalue = None
     if initial_bytes:
-      super(BytesIOWithValueAfterClose, self).__init__(initial_bytes)
+      super().__init__(initial_bytes)
     else:
-      super(BytesIOWithValueAfterClose, self).__init__()
+      super().__init__()
 
   def close(self) -> None:
     if not self.closed:
       self._value_after_close = self.getvalue()
-    super(BytesIOWithValueAfterClose, self).close()
+    super().close()
 
   def value_after_close(self) -> bytes:
     if not self.closed:
@@ -55,7 +50,7 @@ class SlowBytesIO(io.BytesIO):
   """A readable BytesIO that raised BlockingIOError on some calls to read."""
 
   def __init__(self, data: bytes, seekable: bool = False):
-    super(SlowBytesIO, self).__init__(data)
+    super().__init__(data)
     self._seekable = seekable
     self._state = -1
 
@@ -69,12 +64,12 @@ class SlowBytesIO(io.BytesIO):
             errno.EAGAIN,
             'write could not complete without blocking', 0)
       # read at most 5 bytes.
-      return super(SlowBytesIO, self).read(min(size, 5))
-    return super(SlowBytesIO, self).read(size)
+      return super().read(min(size, 5))
+    return super().read(size)
 
   def seek(self, pos: int, whence: int = 0) -> int:
     if self._seekable:
-      return super(SlowBytesIO, self).seek(pos, whence)
+      return super().seek(pos, whence)
     raise io.UnsupportedOperation('seek')
 
   def seekable(self)-> bool:
@@ -85,7 +80,7 @@ class SlowReadableRawBytes(io.RawIOBase):
   """A readable io.RawIOBase stream that only sometimes returns data."""
 
   def __init__(self, data: bytes, seekable: bool = False):
-    super(SlowReadableRawBytes, self).__init__()
+    super().__init__()
     self._bytes_io = io.BytesIO(data)
     self._seekable = seekable
     self._state = -1

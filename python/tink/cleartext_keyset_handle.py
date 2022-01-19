@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,6 @@ Reading or writing cleartext keysets is a bad practice, usage of this API
 should be restricted. Users can read encrypted keysets using
 tink.read_keyset_handle.
 """
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
 
 from tink.proto import tink_pb2
 import tink

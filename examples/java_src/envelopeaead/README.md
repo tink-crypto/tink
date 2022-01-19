@@ -8,7 +8,7 @@ encryption key* (DEK) which is wrapped with a KMS key. The data will be
 encrypted with AES256 GCM using the DEK and the DEK will be encrypted with the
 KMS key and stored alongside the ciphertext.
 
-The CLI takes 5 arguments:
+The CLI takes the following arguments:
 
 *   mode: "encrypt" or "decrypt" to indicate if you want to encrypt or decrypt.
 *   kek-uri: The URI for the key to be used for envelope encryption.
@@ -16,6 +16,8 @@ The CLI takes 5 arguments:
     format.
 *   input-file: Read the input from this file.
 *   output-file: Write the result to this file.
+*   [optional] associated-data: Associated data used for the encryption or
+    decryption.
 
 ## Build and Run
 

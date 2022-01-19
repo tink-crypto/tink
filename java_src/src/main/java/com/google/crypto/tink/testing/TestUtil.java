@@ -91,7 +91,7 @@ import java.util.List;
 import javax.crypto.Cipher;
 
 /** Test helpers. */
-public class TestUtil {
+public final class TestUtil {
   /** A place holder to keep mutated bytes and its description. */
   public static class BytesMutation {
     public byte[] value;
@@ -569,13 +569,8 @@ public class TestUtil {
    * @return true if running on Android.
    */
   public static boolean isAndroid() {
-    try {
-      Class.forName("android.app.Application", /*initialize=*/ false, null);
-      return true;
-    } catch (Exception e) {
-      // If Application isn't loaded, it might as well not be Android.
-      return false;
-    }
+    // https://developer.android.com/reference/java/lang/System#getProperties%28%29
+    return "The Android Project".equals(System.getProperty("java.vendor"));
   }
 
   /**
@@ -632,7 +627,8 @@ public class TestUtil {
   }
 
   /** Asserts that {@code key} is generated from {@code keyTemplate}. */
-  public static void assertHmacKey(KeyTemplate keyTemplate, Keyset.Key key) throws Exception {
+  public static void assertHmacKey(com.google.crypto.tink.KeyTemplate keyTemplate, Keyset.Key key)
+      throws Exception {
     assertThat(key.getKeyId()).isGreaterThan(0);
     assertThat(key.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(key.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
@@ -648,8 +644,8 @@ public class TestUtil {
   }
 
   /** Asserts that {@code KeyInfo} is corresponding to a key from {@code keyTemplate}. */
-  public static void assertKeyInfo(KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo)
-      throws Exception {
+  public static void assertKeyInfo(
+      com.google.crypto.tink.KeyTemplate keyTemplate, KeysetInfo.KeyInfo keyInfo) throws Exception {
     assertThat(keyInfo.getKeyId()).isGreaterThan(0);
     assertThat(keyInfo.getStatus()).isEqualTo(KeyStatusType.ENABLED);
     assertThat(keyInfo.getOutputPrefixType()).isEqualTo(OutputPrefixType.TINK);
@@ -862,4 +858,6 @@ public class TestUtil {
                   | ((1 & toUnsignedInt(ref[(i == 0 ? string.length : i) - 1])) << 7));
     }
   }
+
+  private TestUtil() {}
 }

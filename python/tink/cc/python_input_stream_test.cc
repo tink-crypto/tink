@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/subtle/random.h"
 #include "tink/cc/test_util.h"
 
@@ -49,8 +50,8 @@ TEST(PythonInputStreamTest, testReadingStreams) {
     auto input_stream = absl::make_unique<PythonInputStream>(std::move(input));
     std::string stream_contents;
     auto status = ReadTillEnd(input_stream.get(), &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(contents, stream_contents);
   }
 }

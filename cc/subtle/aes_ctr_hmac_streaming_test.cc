@@ -22,7 +22,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/stream_segment_decrypter.h"
@@ -55,7 +57,7 @@ AesCtrHmacStreaming::Params ValidParams() {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -126,7 +128,7 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -139,13 +141,13 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptLongPlaintext) {
 
   std::vector<uint8_t> pt(enc->get_plaintext_segment_size() + 1, 'p');
   std::vector<uint8_t> ct;
-  ASSERT_THAT(
-      enc->EncryptSegment(pt, true, &ct),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("plaintext too long")));
+  ASSERT_THAT(enc->EncryptSegment(pt, true, &ct),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("plaintext too long")));
 }
 
 TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -157,13 +159,13 @@ TEST(AesCtrHmacStreamSegmentEncrypterTest, EncryptNullCtBuffer) {
   auto enc = std::move(enc_result.ValueOrDie());
 
   std::vector<uint8_t> pt(enc->get_plaintext_segment_size(), 'p');
-  ASSERT_THAT(
-      enc->EncryptSegment(pt, true, nullptr),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("must be non-null")));
+  ASSERT_THAT(enc->EncryptSegment(pt, true, nullptr),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("must be non-null")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -246,7 +248,7 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, Basic) {
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -262,12 +264,12 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, AlreadyInit) {
   auto dec = std::move(dec_result.ValueOrDie());
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
   ASSERT_THAT(dec->Init(enc->get_header()),
-              StatusIs(util::error::FAILED_PRECONDITION,
+              StatusIs(absl::StatusCode::kFailedPrecondition,
                        HasSubstr("alreday initialized")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -283,12 +285,12 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitWrongHeaderSize) {
   auto dec = std::move(dec_result.ValueOrDie());
   auto header = enc->get_header();
   header.resize(dec->get_header_size() - 1);
-  ASSERT_THAT(dec->Init(header), StatusIs(util::error::INVALID_ARGUMENT,
+  ASSERT_THAT(dec->Init(header), StatusIs(absl::StatusCode::kInvalidArgument,
                                           HasSubstr("wrong header size")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -304,12 +306,12 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, InitCorruptedHeader) {
   auto dec = std::move(dec_result.ValueOrDie());
   auto header = enc->get_header();
   header[0] = 0;
-  ASSERT_THAT(dec->Init(header), StatusIs(util::error::INVALID_ARGUMENT,
+  ASSERT_THAT(dec->Init(header), StatusIs(absl::StatusCode::kInvalidArgument,
                                           HasSubstr("corrupted header")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -326,13 +328,13 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNotInit) {
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size(), 'c');
   std::vector<uint8_t> pt;
-  ASSERT_THAT(
-      dec->DecryptSegment(ct, 0, true, &pt),
-      StatusIs(util::error::FAILED_PRECONDITION, HasSubstr("not initialized")));
+  ASSERT_THAT(dec->DecryptSegment(ct, 0, true, &pt),
+              StatusIs(absl::StatusCode::kFailedPrecondition,
+                       HasSubstr("not initialized")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -351,12 +353,12 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptLongCiphertext) {
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size() + 1, 'c');
   std::vector<uint8_t> pt;
   ASSERT_THAT(dec->DecryptSegment(ct, 0, true, &pt),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext too long")));
 }
 
 TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -373,13 +375,13 @@ TEST(AesCtrHmacStreamSegmentDecrypterTest, DecryptNullPtBuffer) {
   ASSERT_THAT(dec->Init(enc->get_header()), IsOk());
 
   std::vector<uint8_t> ct(dec->get_ciphertext_segment_size(), 'c');
-  ASSERT_THAT(
-      dec->DecryptSegment(ct, 0, true, nullptr),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("must be non-null")));
+  ASSERT_THAT(dec->DecryptSegment(ct, 0, true, nullptr),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("must be non-null")));
 }
 
 TEST(AesCtrHmacStreamingTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {16, 32}) {
@@ -431,7 +433,7 @@ TEST(AesCtrHmacStreamingTest, Basic) {
 }
 
 TEST(ValidateTest, ValidParams) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
@@ -439,115 +441,115 @@ TEST(ValidateTest, ValidParams) {
 }
 
 TEST(ValidateTest, WrongIkm) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ikm = Random::GetRandomKeyBytes(16);
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("key material too small")));
 }
 
 TEST(ValidateTest, WrongHkdfAlgo) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.hkdf_algo = SHA384;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("unsupported hkdf_algo")));
 }
 
 TEST(ValidateTest, WrongKeySize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ikm = Random::GetRandomKeyBytes(64);
   params.key_size = 64;
-  ASSERT_THAT(
-      AesCtrHmacStreaming::New(params).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("key_size must be")));
+  ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("key_size must be")));
 }
 
 TEST(ValidateTest, WrongCtSegmentSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ciphertext_segment_size = 10;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_segment_size too small")));
 
   params.ciphertext_segment_size = 1 + 32 + 7 + 16;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_segment_size too small")));
 }
 
 TEST(ValidateTest, WrongCtOffset) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.ciphertext_offset = -10;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_offset must be")));
 }
 
 TEST(ValidateTest, WrongTagSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.tag_size = 5;
-  ASSERT_THAT(
-      AesCtrHmacStreaming::New(params).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("tag_size too small")));
+  ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("tag_size too small")));
 
   params.tag_algo = SHA1;
   params.tag_size = 21;
-  ASSERT_THAT(
-      AesCtrHmacStreaming::New(params).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("tag_size too big")));
+  ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("tag_size too big")));
 
   params.tag_algo = SHA256;
   params.tag_size = 33;
-  ASSERT_THAT(
-      AesCtrHmacStreaming::New(params).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("tag_size too big")));
+  ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("tag_size too big")));
 
   params.tag_algo = SHA512;
   params.tag_size = 65;
-  ASSERT_THAT(
-      AesCtrHmacStreaming::New(params).status(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("tag_size too big")));
+  ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("tag_size too big")));
 }
 
 TEST(ValidateTest, WrongTagAlgo) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
   params.tag_algo = SHA384;
   ASSERT_THAT(AesCtrHmacStreaming::New(params).status(),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("unsupported tag_algo")));
 }
 
 // FIPS only mode tests
 TEST(AesCtrHmacStreamingTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   AesCtrHmacStreaming::Params params = ValidParams();
 
   EXPECT_THAT(AesCtrHmacStreaming::New(std::move(params)).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

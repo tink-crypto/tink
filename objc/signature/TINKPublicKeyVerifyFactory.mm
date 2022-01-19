@@ -47,7 +47,7 @@
   if (!publicKeyVerify) {
     if (error) {
       *error = TINKStatusToError(crypto::tink::util::Status(
-          crypto::tink::util::error::RESOURCE_EXHAUSTED, "Cannot initialize TINKPublicKeyVerify"));
+          absl::StatusCode::kResourceExhausted, "Cannot initialize TINKPublicKeyVerify"));
     }
     return nil;
   }

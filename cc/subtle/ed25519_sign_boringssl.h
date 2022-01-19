@@ -21,6 +21,8 @@
 #include <utility>
 
 #include "tink/config/tink_fips.h"
+#include "openssl/evp.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -38,14 +40,14 @@ class Ed25519SignBoringSsl : public PublicKeySign {
   crypto::tink::util::StatusOr<std::string> Sign(
       absl::string_view data) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  explicit Ed25519SignBoringSsl(util::SecretData private_key)
-      : private_key_(std::move(private_key)) {}
+  explicit Ed25519SignBoringSsl(internal::SslUniquePtr<EVP_PKEY> priv_key)
+      : priv_key_(std::move(priv_key)) {}
 
-  const util::SecretData private_key_;
+  const internal::SslUniquePtr<EVP_PKEY> priv_key_;
 };
 
 }  // namespace subtle

@@ -74,7 +74,7 @@ util::Status SignatureConfig::Register() {
       absl::make_unique<RsaSsaPkcs1VerifyKeyManager>(), true);
   if (!status.ok()) return status;
 
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     return util::OkStatus();
   }
 

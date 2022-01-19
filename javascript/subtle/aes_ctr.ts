@@ -36,7 +36,6 @@ export class AesCtr implements IndCpaCipher {
       private readonly key: CryptoKey, private readonly ivSize: number) {}
 
   /**
-   * @override
    */
   async encrypt(plaintext: Uint8Array): Promise<Uint8Array> {
     Validators.requireUint8Array(plaintext);
@@ -50,7 +49,6 @@ export class AesCtr implements IndCpaCipher {
   }
 
   /**
-   * @override
    */
   async decrypt(ciphertext: Uint8Array): Promise<Uint8Array> {
     Validators.requireUint8Array(ciphertext);

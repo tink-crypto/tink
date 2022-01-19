@@ -27,6 +27,10 @@ import (
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
 
+const (
+	maxInt = int(^uint(0) >> 1)
+)
+
 // New creates a MAC primitive from the given keyset handle.
 func New(h *keyset.Handle) (tink.MAC, error) {
 	return NewWithKeyManager(h, nil /*keyManager*/)
@@ -78,6 +82,9 @@ func (m *wrappedMAC) ComputeMAC(data []byte) ([]byte, error) {
 	}
 	if m.ps.Primary.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 		d := data
+		if len(d) == maxInt {
+			return nil, fmt.Errorf("mac_factory: data too long")
+		}
 		data = make([]byte, 0, len(d)+1)
 		data = append(data, d...)
 		data = append(data, byte(0))
@@ -114,6 +121,9 @@ func (m *wrappedMAC) VerifyMAC(mac, data []byte) error {
 			}
 			if entry.PrefixType == tinkpb.OutputPrefixType_LEGACY {
 				d := data
+				if len(d) == maxInt {
+					return fmt.Errorf("mac_factory: data too long")
+				}
 				data = make([]byte, 0, len(d)+1)
 				data = append(data, d...)
 				data = append(data, byte(0))

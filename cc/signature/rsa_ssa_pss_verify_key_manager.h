@@ -62,8 +62,8 @@ class RsaSsaPssVerifyKeyManager
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::RsaSsaPssParams& params) const;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

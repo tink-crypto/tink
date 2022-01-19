@@ -15,9 +15,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/keyset_wrapper_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/test_matchers.h"
@@ -26,6 +29,7 @@
 
 namespace crypto {
 namespace tink {
+namespace internal {
 
 namespace {
 
@@ -62,8 +66,8 @@ class Wrapper : public PrimitiveWrapper<InputPrimitive, OutputPrimitive> {
 crypto::tink::util::StatusOr<std::unique_ptr<InputPrimitive>> CreateIn(
     const google::crypto::tink::KeyData& key_data) {
   if (absl::StartsWith(key_data.type_url(), "error:")) {
-    return crypto::tink::util::Status(
-        crypto::tink::util::error::INVALID_ARGUMENT, key_data.type_url());
+    return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                      key_data.type_url());
   } else {
     return absl::make_unique<InputPrimitive>(key_data.type_url());
   }
@@ -119,7 +123,7 @@ TEST(KeysetWrapperImplTest, FailingGetPrimitive) {
       wrapper_or->Wrap(keyset);
 
   ASSERT_THAT(wrapped.status(), Not(IsOk()));
-  ASSERT_THAT(wrapped.status().error_message(), HasSubstr("error:two"));
+  ASSERT_THAT(std::string(wrapped.status().message()), HasSubstr("error:two"));
 }
 
 // This test checks that validate keyset is called. We simply pass an empty
@@ -158,5 +162,6 @@ TEST(KeysetWrapperImplTest, OnlyEnabled) {
 
 }  // namespace
 
+}  // namespace internal
 }  // namespace tink
 }  // namespace crypto

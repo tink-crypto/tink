@@ -21,9 +21,9 @@
 #include <utility>
 
 #include "absl/strings/string_view.h"
-#include "openssl/base.h"
 #include "tink/aead.h"
-#include "tink/config/tink_fips.h"
+#include "tink/aead/internal/ssl_aead.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -49,19 +49,15 @@ class XChacha20Poly1305BoringSsl : public Aead {
       absl::string_view ciphertext,
       absl::string_view additional_data) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  // The following constants are in bytes.
-  static constexpr int kNonceSize = 24;
-  static constexpr int kTagSize = 16;
+  explicit XChacha20Poly1305BoringSsl(
+      std::unique_ptr<internal::SslOneShotAead> aead)
+      : aead_(std::move(aead)) {}
 
-  XChacha20Poly1305BoringSsl(util::SecretData key, const EVP_AEAD* aead)
-      : key_(std::move(key)), aead_(aead) {}
-
-  const util::SecretData key_;
-  const EVP_AEAD* const aead_;
+  const std::unique_ptr<internal::SslOneShotAead> aead_;
 };
 
 }  // namespace subtle

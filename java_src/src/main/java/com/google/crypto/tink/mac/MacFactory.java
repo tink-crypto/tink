@@ -51,4 +51,6 @@ public final class MacFactory {
     Registry.registerPrimitiveWrapper(new MacWrapper());
     return keysetHandle.getPrimitive(Mac.class);
   }
+
+  private MacFactory() {}
 }

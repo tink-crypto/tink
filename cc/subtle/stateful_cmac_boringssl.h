@@ -20,9 +20,9 @@
 #include <memory>
 #include <utility>
 
-#include "openssl/base.h"
 #include "openssl/cmac.h"
 #include "openssl/evp.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/mac/stateful_mac.h"
 #include "tink/util/secret_data.h"
@@ -47,10 +47,10 @@ class StatefulCmacBoringSsl : public subtle::StatefulMac {
   static constexpr size_t kBigKeySize = 32;
   static constexpr size_t kMaxTagSize = 16;
 
-  StatefulCmacBoringSsl(uint32_t tag_size, bssl::UniquePtr<CMAC_CTX> ctx)
+  StatefulCmacBoringSsl(uint32_t tag_size, internal::SslUniquePtr<CMAC_CTX> ctx)
       : cmac_context_(std::move(ctx)), tag_size_(tag_size) {}
 
-  const bssl::UniquePtr<CMAC_CTX> cmac_context_;
+  const internal::SslUniquePtr<CMAC_CTX> cmac_context_;
   const uint32_t tag_size_;
 };
 

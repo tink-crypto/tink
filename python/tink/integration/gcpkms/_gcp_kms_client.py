@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,6 @@
 # limitations under the License.
 """A client for Google Cloud KMS."""
 
-from __future__ import absolute_import
-from __future__ import division
-# Placeholder for import for type annotations
-from __future__ import print_function
-
-from typing import Text
-
 from tink import aead
 from tink import core
 from tink.cc.pybind import tink_bindings
@@ -27,10 +20,10 @@ from tink.cc.pybind import tink_bindings
 GCP_KEYURI_PREFIX = 'gcp-kms://'
 
 
-class GcpKmsClient(object):
+class GcpKmsClient:
   """Basic GCP client for AEAD."""
 
-  def __init__(self, key_uri: Text, credentials_path: Text):
+  def __init__(self, key_uri: str, credentials_path: str):
     """Creates a new GcpKmsClient that is bound to the key specified in 'key_uri'.
 
     Uses the specifed credentials when communicating with the KMS. Either of
@@ -58,7 +51,7 @@ class GcpKmsClient(object):
     # Use the C++ GCP KMS client
     self.cc_client = tink_bindings.GcpKmsClient(key_uri, credentials_path)
 
-  def does_support(self, key_uri: Text) -> bool:
+  def does_support(self, key_uri: str) -> bool:
     """Returns true iff this client supports KMS key specified in 'key_uri'.
 
     Args:
@@ -70,7 +63,7 @@ class GcpKmsClient(object):
     return self.cc_client.does_support(key_uri)
 
   @core.use_tink_errors
-  def get_aead(self, key_uri: Text) -> aead.Aead:
+  def get_aead(self, key_uri: str) -> aead.Aead:
     """Returns an Aead-primitive backed by KMS key specified by 'key_uri'.
 
     Args:

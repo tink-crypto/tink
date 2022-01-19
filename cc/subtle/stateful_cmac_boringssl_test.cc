@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/secret_data.h"
@@ -148,7 +149,7 @@ TEST(StatefulCmacBoringSslTest, testInvalidKeySizes) {
       EXPECT_THAT(cmac_result.status(), IsOk());
     } else {
       EXPECT_THAT(cmac_result.status(),
-                  StatusIs(util::error::INVALID_ARGUMENT,
+                  StatusIs(absl::StatusCode::kInvalidArgument,
                            HasSubstr("invalid key size")));
     }
   }

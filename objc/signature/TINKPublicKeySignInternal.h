@@ -16,6 +16,8 @@
  **************************************************************************
  */
 
+#ifdef __cplusplus
+
 #import "objc/TINKPublicKeySign.h"
 
 #import <Foundation/Foundation.h>
@@ -40,3 +42,5 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif  // __cplusplus

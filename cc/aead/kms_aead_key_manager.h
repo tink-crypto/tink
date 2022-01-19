@@ -19,6 +19,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
 #include "tink/core/key_type_manager.h"
@@ -69,8 +70,8 @@ class KmsAeadKeyManager
   crypto::tink::util::Status ValidateKeyFormat(
       const google::crypto::tink::KmsAeadKeyFormat& key_format) const override {
     if (key_format.key_uri().empty()) {
-      return crypto::tink::util::Status(
-          crypto::tink::util::error::INVALID_ARGUMENT, "Missing key_uri.");
+      return crypto::tink::util::Status(absl::StatusCode::kInvalidArgument,
+                                        "Missing key_uri.");
     }
     return util::OkStatus();
   }
@@ -81,10 +82,6 @@ class KmsAeadKeyManager
     kms_aead_key.set_version(get_version());
     *(kms_aead_key.mutable_params()) = key_format;
     return kms_aead_key;
-  }
-
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kNotFips;
   }
 
  private:

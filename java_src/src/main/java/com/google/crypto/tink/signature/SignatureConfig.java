@@ -48,16 +48,18 @@ public final class SignatureConfig {
       new RsaSsaPkcs1SignKeyManager().getKeyType();
   public static final String RSA_PKCS1_PUBLIC_KEY_TYPE_URL =
       new RsaSsaPkcs1VerifyKeyManager().getKeyType();
+  public static final String RSA_PSS_PRIVATE_KEY_TYPE_URL =
+      new RsaSsaPssSignKeyManager().getKeyType();
+  public static final String RSA_PSS_PUBLIC_KEY_TYPE_URL =
+      new RsaSsaPssVerifyKeyManager().getKeyType();
 
   /** @deprecated */
-  @Deprecated
-  public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
+  @Deprecated public static final RegistryConfig TINK_1_0_0 = RegistryConfig.getDefaultInstance();
   /**
    * @deprecated
    * @since 1.1.0
    */
-  @Deprecated
-  public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
+  @Deprecated public static final RegistryConfig TINK_1_1_0 = RegistryConfig.getDefaultInstance();
 
   /** @since 1.2.0 */
   public static final RegistryConfig LATEST = RegistryConfig.getDefaultInstance();
@@ -103,6 +105,7 @@ public final class SignatureConfig {
 
     RsaSsaPssSignKeyManager.registerPair(/*newKeyAllowed=*/ true);
     Ed25519PrivateKeyManager.registerPair(/*newKeyAllowed=*/ true);
-
   }
+
+  private SignatureConfig() {}
 }

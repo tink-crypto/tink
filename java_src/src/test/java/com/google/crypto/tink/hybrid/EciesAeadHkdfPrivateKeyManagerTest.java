@@ -340,4 +340,37 @@ public class EciesAeadHkdfPrivateKeyManagerTest {
         EciesAeadHkdfPrivateKeyManager
             .rawEciesP256HkdfHmacSha256Aes128CtrHmacSha256CompressedTemplate());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM").keyFormat);
+    factory.validateKeyFormat(
+        factory
+            .keyFormats()
+            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM_RAW")
+            .keyFormat);
+
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256").keyFormat);
+    factory.validateKeyFormat(
+        factory
+            .keyFormats()
+            .get("ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW")
+            .keyFormat);
+    factory.validateKeyFormat(
+        factory
+            .keyFormats()
+            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256")
+            .keyFormat);
+    factory.validateKeyFormat(
+        factory
+            .keyFormats()
+            .get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256_RAW")
+            .keyFormat);
+  }
 }

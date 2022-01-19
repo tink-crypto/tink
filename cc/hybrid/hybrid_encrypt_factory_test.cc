@@ -16,6 +16,9 @@
 
 #include "tink/hybrid/hybrid_encrypt_factory.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/config.h"
 #include "tink/crypto_format.h"
@@ -58,10 +61,10 @@ TEST_F(HybridEncryptFactoryTest, testBasic) {
   auto hybrid_encrypt_result = HybridEncryptFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_FALSE(hybrid_encrypt_result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT,
-      hybrid_encrypt_result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+      hybrid_encrypt_result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "at least one key",
-      hybrid_encrypt_result.status().error_message());
+                      std::string(hybrid_encrypt_result.status().message()));
 }
 
 TEST_F(HybridEncryptFactoryTest, testPrimitive) {

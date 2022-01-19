@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/core/key_manager_impl.h"
 #include "tink/prf/prf_set.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -152,8 +153,9 @@ TEST(HmacPrfKeyManagerTest, DeriveKeyWrongVersion) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef")};
 
-  ASSERT_THAT(HmacPrfKeyManager().DeriveKey(format, &input_stream).status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      HmacPrfKeyManager().DeriveKey(format, &input_stream).status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 TEST(HmacPrfKeyManagerTest, GetPrimitive) {

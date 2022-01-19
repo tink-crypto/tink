@@ -18,10 +18,10 @@ package keyset
 
 import (
 	"io"
+	"io/ioutil"
 
-	"github.com/golang/protobuf/jsonpb"
-
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"
 )
@@ -29,14 +29,14 @@ import (
 // JSONReader deserializes a keyset from json format.
 type JSONReader struct {
 	r io.Reader
-	j *jsonpb.Unmarshaler
+	j *protojson.UnmarshalOptions
 }
 
 // NewJSONReader returns new JSONReader that will read from r.
 func NewJSONReader(r io.Reader) *JSONReader {
 	return &JSONReader{
 		r: r,
-		j: &jsonpb.Unmarshaler{},
+		j: &protojson.UnmarshalOptions{},
 	}
 }
 
@@ -61,21 +61,26 @@ func (bkr *JSONReader) ReadEncrypted() (*tinkpb.EncryptedKeyset, error) {
 }
 
 func (bkr *JSONReader) readJSON(r io.Reader, msg proto.Message) error {
-	return bkr.j.Unmarshal(r, msg)
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	return bkr.j.Unmarshal(b, msg)
 }
 
 // JSONWriter serializes a keyset into binary proto format.
 type JSONWriter struct {
 	w io.Writer
-	j *jsonpb.Marshaler
+	j *protojson.MarshalOptions
 }
 
 // NewJSONWriter returns a new JSONWriter that will write to w.
 func NewJSONWriter(w io.Writer) *JSONWriter {
 	return &JSONWriter{
 		w: w,
-		j: &jsonpb.Marshaler{
-			EmitDefaults: true,
+		j: &protojson.MarshalOptions{
+			EmitUnpopulated: true,
+			Indent:          "",
 		},
 	}
 }
@@ -91,5 +96,10 @@ func (bkw *JSONWriter) WriteEncrypted(keyset *tinkpb.EncryptedKeyset) error {
 }
 
 func (bkw *JSONWriter) writeJSON(w io.Writer, msg proto.Message) error {
-	return bkw.j.Marshal(w, msg)
+	b, err := bkw.j.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(b)
+	return err
 }

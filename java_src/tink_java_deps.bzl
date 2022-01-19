@@ -9,12 +9,12 @@ def tink_java_deps():
 
     """
     if not native.existing_rule("rules_jvm_external"):
-        # Release from 2019-08-14
+        # Release from 2021-05-18
         http_archive(
             name = "rules_jvm_external",
-            strip_prefix = "rules_jvm_external-2.7",
-            sha256 = "f04b1466a00a2845106801e0c5cec96841f49ea4e7d1df88dc8e4bf31523df74",
-            url = "https://github.com/bazelbuild/rules_jvm_external/archive/2.7.zip",
+            strip_prefix = "rules_jvm_external-4.1",
+            sha256 = "f36441aa876c4f6427bfb2d1f2d723b48e9d930b62662bf723ddfb8fc80f0140",
+            url = "https://github.com/bazelbuild/rules_jvm_external/archive/4.1.zip",
         )
 
     if not native.existing_rule("build_bazel_rules_android"):

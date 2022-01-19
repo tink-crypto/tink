@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/tink"
 	tinkpb "github.com/google/tink/go/proto/tink_go_proto"

@@ -19,6 +19,8 @@
 #include <iostream>
 #include <istream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
@@ -51,7 +53,7 @@ namespace {
 
 class JsonKeysetReaderTest : public ::testing::Test {
  protected:
-  void SetUp() {
+  void SetUp() override {
     gcm_key_.set_key_value("some gcm key value");
     gcm_key_.set_version(0);
 
@@ -142,8 +144,8 @@ TEST_F(JsonKeysetReaderTest, testReaderCreation) {
     std::unique_ptr<std::istream> null_stream(nullptr);
     auto reader_result = JsonKeysetReader::New(std::move(null_stream));
     EXPECT_FALSE(reader_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              reader_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              reader_result.status().code());
   }
 
   {  // Good serialized keyset.
@@ -188,7 +190,7 @@ TEST_F(JsonKeysetReaderTest, testReadFromString) {
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, read_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
   }
 }
 
@@ -213,7 +215,7 @@ TEST_F(JsonKeysetReaderTest, testReadFromStream) {
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_result = reader->Read();
     EXPECT_FALSE(read_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, read_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, read_result.status().code());
   }
 }
 
@@ -235,8 +237,8 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromString) {
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_FALSE(read_encrypted_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              read_encrypted_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              read_encrypted_result.status().code());
   }
 }
 
@@ -264,8 +266,8 @@ TEST_F(JsonKeysetReaderTest, testReadEncryptedFromStream) {
     auto reader = std::move(reader_result.ValueOrDie());
     auto read_encrypted_result = reader->ReadEncrypted();
     EXPECT_FALSE(read_encrypted_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-              read_encrypted_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+              read_encrypted_result.status().code());
   }
 }
 

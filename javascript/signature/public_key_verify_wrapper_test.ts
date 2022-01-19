@@ -185,7 +185,6 @@ class DummyPublicKeySign extends PublicKeySign {
     super();
   }
 
-  /** @override */
   async sign(data: Uint8Array) {
     return Bytes.concat(data, this.signatureSuffix);
   }
@@ -197,7 +196,6 @@ class DummyPublicKeyVerify extends PublicKeyVerify {
     super();
   }
 
-  /** @override */
   async verify(signature: Uint8Array, data: Uint8Array) {
     return Bytes.isEqual(Bytes.concat(data, this.signatureSuffix), signature);
   }

@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "tink/mac.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
 
@@ -43,19 +43,10 @@ class AesCmacBoringSsl : public Mac {
   crypto::tink::util::Status VerifyMac(absl::string_view mac,
                                        absl::string_view data) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  // CMAC key sizes in bytes.
-  // The small key size is used only to check RFC 4493's test vectors due to
-  // the attack described in
-  // https://www.math.uwaterloo.ca/~ajmeneze/publications/tightness.pdf. We
-  // check this restriction in AesCmacManager.
-  static constexpr size_t kSmallKeySize = 16;
-  static constexpr size_t kBigKeySize = 32;
-  static constexpr size_t kMaxTagSize = 16;
-
   AesCmacBoringSsl(util::SecretData key, uint32_t tag_size)
       : key_(std::move(key)), tag_size_(tag_size) {}
 

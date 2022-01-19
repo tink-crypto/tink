@@ -26,4 +26,6 @@ public final class Enums {
     SHA384,
     SHA512,
   };
+
+  private Enums() {}
 }

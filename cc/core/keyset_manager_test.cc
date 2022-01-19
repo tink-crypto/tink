@@ -15,6 +15,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/keyset_manager.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aes_gcm_key_manager.h"
@@ -131,9 +133,9 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
 
   status = keyset_manager->SetPrimary(key_id_2);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be ENABLED",
-                      status.error_message());
+                      std::string(status.message()));
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
 
@@ -167,9 +169,9 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
 
   status = keyset_manager->Enable(key_id_2);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Cannot enable",
-                      status.error_message());
+                      std::string(status.message()));
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
   EXPECT_EQ(KeyStatusType::DESTROYED, keyset.key(2).status());
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
@@ -183,14 +185,14 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(2, keyset.key().size());
 
   status = keyset_manager->Destroy(key_id_2);
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No key with key_id",
-                      status.error_message());
+                      std::string(status.message()));
 
   status = keyset_manager->Delete(key_id_2);
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No key with key_id",
-                      status.error_message());
+                      std::string(status.message()));
 
   // Try disabling/destroying/deleting the primary key.
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
@@ -198,19 +200,19 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
 
   status = keyset_manager->Disable(key_id_1);
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Cannot disable primary",
-                      status.error_message());
+                      std::string(status.message()));
 
   status = keyset_manager->Destroy(key_id_1);
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Cannot destroy primary",
-                      status.error_message());
+                      std::string(status.message()));
 
   status = keyset_manager->Delete(key_id_1);
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "Cannot delete primary",
-                      status.error_message());
+                      std::string(status.message()));
 
   keyset = TestKeysetHandle::GetKeyset(*(keyset_manager->GetKeysetHandle()));
   EXPECT_EQ(key_id_1, keyset.primary_key_id());
@@ -224,9 +226,9 @@ TEST_F(KeysetManagerTest, testBasicOperations) {
 
   status = keyset_manager->SetPrimary(key_id_0);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(util::error::NOT_FOUND, status.error_code());
+  EXPECT_EQ(absl::StatusCode::kNotFound, status.code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "No key with key_id",
-                      status.error_message());
+                      std::string(status.message()));
   EXPECT_EQ(1, keyset_manager->KeyCount());
 }
 

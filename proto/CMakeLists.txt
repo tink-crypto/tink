@@ -34,6 +34,17 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME cached_dek_aead_cc_proto
+  SRCS cached_dek_aead.proto
+)
+
+tink_cc_proto(
+  NAME cached_dek_envelope_cc_proto
+  SRCS cached_dek_envelope.proto
+  DEPS tink::proto::tink_cc_proto
+)
+
+tink_cc_proto(
   NAME ecdsa_cc_proto
   SRCS ecdsa.proto
   DEPS tink::proto::common_cc_proto
@@ -160,6 +171,11 @@ tink_cc_proto(
 )
 
 tink_cc_proto(
+  NAME hpke_cc_proto
+  SRCS hpke.proto
+)
+
+tink_cc_proto(
   NAME prf_based_deriver_cc_proto
   SRCS prf_based_deriver.proto
   DEPS
@@ -169,8 +185,6 @@ tink_cc_proto(
 tink_cc_proto(
   NAME jwt_hmac_cc_proto
   SRCS jwt_hmac.proto
-  DEPS
-    tink::proto::hmac_cc_proto
 )
 
 tink_cc_proto(

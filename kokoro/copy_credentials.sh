@@ -17,4 +17,13 @@
 if [[ -n "${KOKORO_ROOT}" ]]; then
   # The env variable is set up in common.cfg.
   cp "${TINK_TEST_SERVICE_ACCOUNT}" "testdata/credential.json"
+
+  # Create the different format for the AWS credentials
+  AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
+  AWS_KEY=$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})
+
+  printf "[default]\naws_access_key_id = ${AWS_KEY_ID}\naws_secret_access_key = ${AWS_KEY}\n" > testdata/aws_credentials_cc.txt
+  printf "[default]\naccessKey = ${AWS_KEY_ID}\nsecretKey = ${AWS_KEY}\n" > testdata/credentials_aws.cred
+  printf "[default]\naws_access_key_id = ${AWS_KEY_ID}\naws_secret_access_key = ${AWS_KEY}\n" > testdata/credentials_aws.ini
+  printf "User name,Password,Access key ID,Secret access key,Console login link\ntink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console\n" > testdata/credentials_aws.csv
 fi

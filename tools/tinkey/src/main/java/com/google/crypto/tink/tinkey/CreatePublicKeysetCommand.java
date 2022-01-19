@@ -28,6 +28,7 @@ import java.io.OutputStream;
 public class CreatePublicKeysetCommand extends OutOptions implements Command {
   @Override
   public void run() throws Exception {
+    validate();
     create(outputStream, outFormat, inputStream, inFormat, masterKeyUri, credentialPath);
     outputStream.close();
     inputStream.close();

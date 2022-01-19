@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/aead.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/secret_data.h"
@@ -48,7 +49,7 @@ TEST(AesGcmSivKeyManagerTest, Basics) {
 
 TEST(AesGcmSivKeyManagerTest, ValidateEmptyKey) {
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(AesGcmSivKey()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, ValidateValid16ByteKey) {
@@ -70,7 +71,7 @@ TEST(AesGcmSivKeyManagerTest, InvalidKeySizes17Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789abcdefg");
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, InvalidKeySizes24Bytes) {
@@ -78,7 +79,7 @@ TEST(AesGcmSivKeyManagerTest, InvalidKeySizes24Bytes) {
   key.set_version(0);
   key.set_key_value("01234567890123");
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, InvalidKeySizes31Bytes) {
@@ -86,7 +87,7 @@ TEST(AesGcmSivKeyManagerTest, InvalidKeySizes31Bytes) {
   key.set_version(0);
   key.set_key_value("0123456789012345678901234567890");
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, InvalidKeySizes33Bytes) {
@@ -94,7 +95,7 @@ TEST(AesGcmSivKeyManagerTest, InvalidKeySizes33Bytes) {
   key.set_version(0);
   key.set_key_value("012345678901234567890123456789012");
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, ValidateKeyFormat) {
@@ -102,33 +103,33 @@ TEST(AesGcmSivKeyManagerTest, ValidateKeyFormat) {
 
   format.set_key_size(0);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(1);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(15);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(16);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format), IsOk());
 
   format.set_key_size(17);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(31);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 
   format.set_key_size(32);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format), IsOk());
 
   format.set_key_size(33);
   EXPECT_THAT(AesGcmSivKeyManager().ValidateKeyFormat(format),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesGcmSivKeyManagerTest, Create16ByteKey) {

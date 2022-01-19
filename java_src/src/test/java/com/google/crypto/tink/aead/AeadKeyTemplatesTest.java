@@ -36,7 +36,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class AeadKeyTemplatesTest {
   @Test
-  public void testAES128_GCM() throws Exception {
+  public void aes128Gcm() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_GCM;
     assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -46,7 +46,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testAES256_GCM() throws Exception {
+  public void aes256Gcm() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_GCM;
     assertEquals(new AesGcmKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -70,7 +70,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testAES128_EAX() throws Exception {
+  public void aes128Eax() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_EAX;
     assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -82,7 +82,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testAES256_EAX() throws Exception {
+  public void aes256Eax() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_EAX;
     assertEquals(new AesEaxKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -111,7 +111,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testAES128_CTR_HMAC_SHA256() throws Exception {
+  public void aes128CtrHmacSha256() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES128_CTR_HMAC_SHA256;
     assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -132,7 +132,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testAES256_CTR_HMAC_SHA256() throws Exception {
+  public void aes256CtrHmacSha256() throws Exception {
     KeyTemplate template = AeadKeyTemplates.AES256_CTR_HMAC_SHA256;
     assertEquals(new AesCtrHmacAeadKeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -182,7 +182,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testCHACHA20_POLY1305() throws Exception {
+  public void chacha20Poly1305() throws Exception {
     KeyTemplate template = AeadKeyTemplates.CHACHA20_POLY1305;
     assertEquals(new ChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());
@@ -190,7 +190,7 @@ public class AeadKeyTemplatesTest {
   }
 
   @Test
-  public void testXCHACHA20_POLY1305() throws Exception {
+  public void xchacha20Poly1305() throws Exception {
     KeyTemplate template = AeadKeyTemplates.XCHACHA20_POLY1305;
     assertEquals(new XChaCha20Poly1305KeyManager().getKeyType(), template.getTypeUrl());
     assertEquals(OutputPrefixType.TINK, template.getOutputPrefixType());

@@ -20,20 +20,22 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"
 #include "include/rapidjson/document.h"
+#include "tink/config/tink_fips.h"
+#include "tink/internal/err_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
-#include "tink/config/tink_fips.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/subtle/wycheproof_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
@@ -83,62 +85,58 @@ static const NistTestVector nist_test_vector{
     HashType::SHA256};
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, BasicVerify) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
-                                            nist_test_vector.e};
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
+  internal::RsaPublicKey pub_key{nist_test_vector.n, nist_test_vector.e};
+  internal::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
 
   auto verifier_result = RsaSsaPkcs1VerifyBoringSsl::New(pub_key, params);
   ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
   auto verifier = std::move(verifier_result.ValueOrDie());
   auto status =
       verifier->Verify(nist_test_vector.signature, nist_test_vector.message);
-  EXPECT_TRUE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+  EXPECT_TRUE(status.ok()) << status << internal::GetSslErrors();
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, NewErrors) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaPublicKey nist_pub_key{nist_test_vector.n,
-                                                 nist_test_vector.e};
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params nist_params{nist_test_vector.sig_hash};
-  SubtleUtilBoringSSL::RsaPublicKey small_pub_key{std::string("\x23"),
-                                                  std::string("\x3")};
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params sha1_hash_params{HashType::SHA1};
+  internal::RsaPublicKey nist_pub_key{nist_test_vector.n, nist_test_vector.e};
+  internal::RsaSsaPkcs1Params nist_params{nist_test_vector.sig_hash};
+  internal::RsaPublicKey small_pub_key{std::string("\x23"), std::string("\x3")};
+  internal::RsaSsaPkcs1Params sha1_hash_params{HashType::SHA1};
 
   {  // Small modulus.
     auto result = RsaSsaPkcs1VerifyBoringSsl::New(small_pub_key, nist_params);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "only modulus size >= 2048-bit is supported",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 
   {  // Use SHA1 for digital signature.
     auto result =
         RsaSsaPkcs1VerifyBoringSsl::New(nist_pub_key, sha1_hash_params);
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
                         "SHA1 is not safe for digital signature",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
 
-  SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
-                                            nist_test_vector.e};
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
+  internal::RsaPublicKey pub_key{nist_test_vector.n, nist_test_vector.e};
+  internal::RsaSsaPkcs1Params params{nist_test_vector.sig_hash};
 
   auto verifier_result = RsaSsaPkcs1VerifyBoringSsl::New(pub_key, params);
   ASSERT_TRUE(verifier_result.ok()) << verifier_result.status();
@@ -149,7 +147,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
     modified_message[i / 8] ^= 1 << (i % 8);
     auto status =
         verifier->Verify(nist_test_vector.signature, modified_message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
   // Modify the signature.
   for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
@@ -157,25 +155,25 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, Modification) {
     modified_signature[i / 8] ^= 1 << (i % 8);
     auto status =
         verifier->Verify(modified_signature, nist_test_vector.message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
   // Truncate the signature.
   for (std::size_t i = 0; i < nist_test_vector.signature.length(); i++) {
     std::string truncated_signature(nist_test_vector.signature, 0, i);
     auto status =
         verifier->Verify(truncated_signature, nist_test_vector.message);
-    EXPECT_FALSE(status.ok()) << status << SubtleUtilBoringSSL::GetErrors();
+    EXPECT_FALSE(status.ok()) << status << internal::GetSslErrors();
   }
 }
 
 static util::StatusOr<std::unique_ptr<RsaSsaPkcs1VerifyBoringSsl>> GetVerifier(
     const rapidjson::Value& test_group) {
-  SubtleUtilBoringSSL::RsaPublicKey key;
+  internal::RsaPublicKey key;
   key.n = WycheproofUtil::GetInteger(test_group["n"]);
   key.e = WycheproofUtil::GetInteger(test_group["e"]);
 
   HashType md = WycheproofUtil::GetHashType(test_group["sha"]);
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params;
+  internal::RsaSsaPkcs1Params params;
   params.hash_type = md;
 
   auto result = RsaSsaPkcs1VerifyBoringSsl::New(key, params);
@@ -258,7 +256,7 @@ bool TestSignatures(const std::string& filename, bool allow_skipping) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_2048_sha256_test.json",
@@ -266,7 +264,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs12048SHA256) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -275,7 +273,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA256) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -284,7 +282,7 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs13072SHA512) {
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Test not run in FIPS-only mode";
   }
   ASSERT_TRUE(TestSignatures("rsa_signature_4096_sha512_test.json",
@@ -293,62 +291,60 @@ TEST_F(RsaSsaPkcs1VerifyBoringSslTest, WycheproofRsaPkcs14096SHA512) {
 
 // FIPS-only mode test
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
 
-  SubtleUtilBoringSSL::RsaPublicKey pub_key{nist_test_vector.n,
-                                            nist_test_vector.e};
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
+  internal::RsaPublicKey pub_key{nist_test_vector.n, nist_test_vector.e};
+  internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(pub_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestAllowedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
-  bssl::UniquePtr<BIGNUM> rsa_f4(BN_new());
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  internal::SslUniquePtr<BIGNUM> rsa_f4(BN_new());
+  internal::RsaPrivateKey private_key;
+  internal::RsaPublicKey public_key;
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  3072, rsa_f4.get(), &private_key, &public_key),
-              IsOk());
+  EXPECT_THAT(
+      internal::NewRsaKeyPair(3072, rsa_f4.get(), &private_key, &public_key),
+      IsOk());
 
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
+  internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),
               IsOk());
 }
 
 TEST_F(RsaSsaPkcs1VerifyBoringSslTest, TestRestrictedFipsModuli) {
-  if (!kUseOnlyFips || !FIPS_mode()) {
+  if (!IsFipsModeEnabled() || !FIPS_mode()) {
     GTEST_SKIP() << "Test assumes kOnlyUseFips and BoringCrypto.";
   }
 
-  bssl::UniquePtr<BIGNUM> rsa_f4(BN_new());
-  SubtleUtilBoringSSL::RsaPrivateKey private_key;
-  SubtleUtilBoringSSL::RsaPublicKey public_key;
-  SubtleUtilBoringSSL::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
-  BN_set_u64(rsa_f4.get(), RSA_F4);
+  internal::SslUniquePtr<BIGNUM> rsa_f4(BN_new());
+  internal::RsaPrivateKey private_key;
+  internal::RsaPublicKey public_key;
+  internal::RsaSsaPkcs1Params params{/*sig_hash=*/HashType::SHA256};
+  BN_set_word(rsa_f4.get(), RSA_F4);
 
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  2048, rsa_f4.get(), &private_key, &public_key),
-              IsOk());
-
-  EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),
-              StatusIs(util::error::INTERNAL));
-
-  EXPECT_THAT(SubtleUtilBoringSSL::GetNewRsaKeyPair(
-                  4096, rsa_f4.get(), &private_key, &public_key),
-              IsOk());
+  EXPECT_THAT(
+      internal::NewRsaKeyPair(2560, rsa_f4.get(), &private_key, &public_key),
+      IsOk());
 
   EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
+
+  EXPECT_THAT(
+      internal::NewRsaKeyPair(4096, rsa_f4.get(), &private_key, &public_key),
+      IsOk());
+
+  EXPECT_THAT(RsaSsaPkcs1VerifyBoringSsl::New(public_key, params).status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

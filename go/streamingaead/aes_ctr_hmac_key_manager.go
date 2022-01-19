@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	subtleaead "github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/keyset"
 	subtlemac "github.com/google/tink/go/mac/subtle"

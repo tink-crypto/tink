@@ -19,6 +19,7 @@ package com.google.crypto.tink.prf;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacPrfKey;
 import com.google.crypto.tink.proto.HmacPrfKeyFormat;
@@ -187,6 +188,11 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
     Registry.registerKeyManager(new HmacPrfKeyManager(), newKeyAllowed);
   }
 
+  @Override
+  public TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus() {
+    return TinkFipsUtil.AlgorithmFipsCompatibility.ALGORITHM_REQUIRES_BORINGCRYPTO;
+  };
+
   /**
    * Returns a {@link KeyTemplate} that generates new instances of HMAC keys with the following
    * parameters:
@@ -197,7 +203,9 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    * </ul>
    *
+   * @deprecated use {@code KeyTemplates.get("HMAC_SHA256_PRF")}
    */
+  @Deprecated
   public static final KeyTemplate hmacSha256Template() {
     return createTemplate(32, HashType.SHA256);
   }
@@ -212,7 +220,9 @@ public final class HmacPrfKeyManager extends KeyTypeManager<HmacPrfKey> {
    *   <li>Prefix type: {@link KeyTemplate.OutputPrefixType#RAW}
    * </ul>
    *
+   * @deprecated use {@code KeyTemplates.get("HMAC_SHA512_PRF")}
    */
+  @Deprecated
   public static final KeyTemplate hmacSha512Template() {
     return createTemplate(64, HashType.SHA512);
   }

@@ -48,7 +48,7 @@ def tink_base_deps():
             name = "google_root_pem",
             executable = 0,
             urls = ["https://pki.goog/roots.pem"],
-            sha256 = "6b1ad80fb0b67022b23a965429740c7643c50583d0f16e0a9f1357cd16d2255a",
+            sha256 = "a9bebf3c3d65d4d421b7e2adbd8600ede614e9e2cc0a05fb2a652f147d7802f3",
         )
 
     # proto
@@ -67,14 +67,14 @@ def tink_base_deps():
 
     # Remote Build Execution
     if not native.existing_rule("bazel_toolchains"):
-        # Latest bazel_toolchains package on 2020-06-02
+        # Latest bazel_toolchains package on 2021-10-13
         http_archive(
             name = "bazel_toolchains",
-            sha256 = "db48eed61552e25d36fe051a65d2a329cc0fb08442627e8f13960c5ab087a44e",
-            strip_prefix = "bazel-toolchains-3.2.0",
+            sha256 = "179ec02f809e86abf56356d8898c8bd74069f1bd7c56044050c2cd3d79d0e024",
+            strip_prefix = "bazel-toolchains-4.1.0",
             urls = [
-                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/releases/download/3.2.0/bazel-toolchains-3.2.0.tar.gz",
-                "https://github.com/bazelbuild/bazel-toolchains/archive/3.2.0.tar.gz",
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/releases/download/4.1.0/bazel-toolchains-4.1.0.tar.gz",
+                "https://github.com/bazelbuild/bazel-toolchains/releases/download/4.1.0/bazel-toolchains-4.1.0.tar.gz",
             ],
         )
     if not native.existing_rule("wycheproof"):

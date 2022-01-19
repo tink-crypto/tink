@@ -28,7 +28,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ConfigTest {
   @Test
-  public void testRegisterKeyType_NoCatalogue_shouldThrowException() throws Exception {
+  public void testRegisterKeyType_noCatalogue_shouldThrowException() throws Exception {
     KeyTypeEntry entry = KeyTypeEntry.newBuilder().setCatalogueName("DoesNotExist").build();
     assertThrows(GeneralSecurityException.class, () -> Config.registerKeyType(entry));
   }

@@ -16,13 +16,16 @@
 
 package com.google.crypto.tink;
 
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -511,6 +514,7 @@ public final class Registry {
     if (manager == null) {
       throw new IllegalArgumentException("key manager must be non-null.");
     }
+    // TODO(kste): Do not allow registering for key types when in FIPS-mode.
     String typeUrl = manager.getKeyType();
     // Use an empty key format because old-style key managers don't export their key formats
     ensureKeyManagerInsertable(typeUrl, manager.getClass(), Collections.emptyMap(), newKeyAllowed);
@@ -533,6 +537,8 @@ public final class Registry {
    *     class of {@code manager}, or the registration tries to re-enable the generation of new
    *     keys.
    * @throws GeneralSecurityException if there's an existing key template.
+   * @throws GeneralSecurityException if the key manager is not compatible with the restrictions in
+   *     FIPS-mode.
    */
   public static synchronized <KeyProtoT extends MessageLite> void registerKeyManager(
       final KeyTypeManager<KeyProtoT> manager, boolean newKeyAllowed)
@@ -546,6 +552,15 @@ public final class Registry {
         manager.getClass(),
         newKeyAllowed ? manager.keyFactory().keyFormats() : Collections.emptyMap(),
         newKeyAllowed);
+
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatus = manager.fipsStatus();
+
+    if (!fipsStatus.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + manager.getClass()
+              + " as it is not FIPS compatible.");
+    }
 
     if (!keyManagerMap.containsKey(typeUrl)) {
       keyManagerMap.put(typeUrl, createContainerFor(manager));
@@ -594,6 +609,24 @@ public final class Registry {
         publicTypeUrl, publicKeyTypeManager.getClass(), Collections.emptyMap(), false);
     if (privateTypeUrl.equals(publicTypeUrl)) {
       throw new GeneralSecurityException("Private and public key type must be different.");
+    }
+
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPrivateKey =
+        privateKeyTypeManager.fipsStatus();
+    TinkFipsUtil.AlgorithmFipsCompatibility fipsStatusPublicKey = publicKeyTypeManager.fipsStatus();
+
+    if (!fipsStatusPrivateKey.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + privateKeyTypeManager.getClass()
+              + " as it is not FIPS compatible.");
+    }
+
+    if (!fipsStatusPublicKey.isCompatible()) {
+      throw new GeneralSecurityException(
+          "failed to register key manager "
+              + publicKeyTypeManager.getClass()
+              + " as it is not FIPS compatible.");
     }
 
     if (keyManagerMap.containsKey(privateTypeUrl)) {
@@ -1062,13 +1095,24 @@ public final class Registry {
   }
 
   /**
-   * Returns an immutable map of key templates and their names supported by registered key managers
-   * that are allowed to generate new keys.
+   * Returns an immutable list of key template names supported by registered key managers that are
+   * allowed to generate new keys.
+   *
+   * @since 1.6.0
    */
-  public static synchronized Map<String, KeyTemplate> keyTemplates() {
-    return Collections.unmodifiableMap(keyTemplateMap);
+  public static synchronized List<String> keyTemplates() {
+    List<String> results = new ArrayList<>();
+    for (String name : keyTemplateMap.keySet()) {
+      results.add(name);
+    }
+
+    return Collections.unmodifiableList(results);
   }
 
+  /** Internal API that returns an unmodifiable map of registered key templates and their names. */
+  static synchronized Map<String, KeyTemplate> keyTemplateMap() {
+    return Collections.unmodifiableMap(keyTemplateMap);
+  }
   /**
    * Returns the input primitive required when creating a {@code wrappedPrimitive}.
    *
@@ -1093,6 +1137,19 @@ public final class Registry {
       throws GeneralSecurityException, InvalidProtocolBufferException {
     KeyManagerContainer container = getKeyManagerContainerOrThrow(keyData.getTypeUrl());
     return container.parseKey(keyData.getValue());
+  }
+
+  /**
+   * Tries to enable the FIPS restrictions if the Registry is empty.
+   *
+   * @throws GeneralSecurityException if any key manager has already been registered.
+   */
+  public static synchronized void restrictToFipsIfEmpty() throws GeneralSecurityException {
+    if (keyManagerMap.isEmpty()) {
+      TinkFipsUtil.setFipsRestricted();
+      return;
+    }
+    throw new GeneralSecurityException("Could not enable FIPS mode as Registry is not empty.");
   }
 
   private Registry() {}

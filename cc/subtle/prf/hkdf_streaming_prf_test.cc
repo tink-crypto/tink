@@ -18,6 +18,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "tink/config/tink_fips.h"
 #include "tink/subtle/hkdf.h"
 #include "tink/subtle/random.h"
 #include "tink/util/input_stream_util.h"
@@ -45,7 +47,7 @@ using ::testing::SizeIs;
 // These should be satisfied for any streaming prf which generates enough
 // output.
 TEST(HkdfStreamingPrf, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -61,7 +63,7 @@ TEST(HkdfStreamingPrf, Basic) {
 }
 
 TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -82,7 +84,7 @@ TEST(HkdfStreamingPrf, DifferentInputsGiveDifferentvalues) {
 }
 
 TEST(HkdfStreamingPrf, SameInputTwice) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -109,7 +111,7 @@ TEST(HkdfStreamingPrf, SameInputTwice) {
 
 // Tests that after Backing up the full stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupFullStream) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -142,7 +144,7 @@ TEST(HkdfStreamingPrf, BackupFullStream) {
 
 // Tests that after Backing up half the stream, we get back the same data.
 TEST(HkdfStreamingPrf, BackupHalf) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -177,7 +179,7 @@ TEST(HkdfStreamingPrf, BackupHalf) {
 
 // Tests that after Position is correct initially (i.e., 0).
 TEST(HkdfStreamingPrf, PositionOneRead) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -192,7 +194,7 @@ TEST(HkdfStreamingPrf, PositionOneRead) {
 
 // Tests that after Position is correct after a single read.
 TEST(HkdfStreamingPrf, PositionSingleRead) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -210,7 +212,7 @@ TEST(HkdfStreamingPrf, PositionSingleRead) {
 
 // Tests that after Position is correct after a two reads.
 TEST(HkdfStreamingPrf, PositionTwoReads) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -233,7 +235,7 @@ TEST(HkdfStreamingPrf, PositionTwoReads) {
 
 // Tests that we can backup the first read completely.
 TEST(HkdfStreamingPrf, BackupSingleRead) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -252,7 +254,7 @@ TEST(HkdfStreamingPrf, BackupSingleRead) {
 
 // Tests that we can backup the second read completely.
 TEST(HkdfStreamingPrf, BackupSecondRead) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -276,7 +278,7 @@ TEST(HkdfStreamingPrf, BackupSecondRead) {
 
 // Tests that we can partially backup and position is correct.
 TEST(HkdfStreamingPrf, PartialBackup) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -299,7 +301,7 @@ TEST(HkdfStreamingPrf, PartialBackup) {
 // HKDF Specific tests =========================================================
 // Tests which only apply for Hkdf.
 TEST(HkdfStreamingPrf, ExhaustInput) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   auto streaming_prf_or = HkdfStreamingPrf::New(
@@ -320,7 +322,7 @@ TEST(HkdfStreamingPrf, ExhaustInput) {
 // These test are Hkdf specific. We test with the test vectors from RFC 5869 and
 // compare with our implementation.
 TEST(HkdfStreamingPrf, TestVector1) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.1
@@ -356,7 +358,7 @@ crypto::tink::util::StatusOr<std::string> ComputeWithHkdfStreamingPrf(
 }
 
 TEST(HkdfStreamingPrf, TestVector2) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.2
@@ -394,7 +396,7 @@ TEST(HkdfStreamingPrf, TestVector2) {
 }
 
 TEST(HkdfStreamingPrf, TestVector3) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.3
@@ -415,7 +417,7 @@ TEST(HkdfStreamingPrf, TestVector3) {
 }
 
 TEST(HkdfStreamingPrf, TestVector4) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.4
@@ -436,7 +438,7 @@ TEST(HkdfStreamingPrf, TestVector4) {
 }
 
 TEST(HkdfStreamingPrf, TestVector5) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.5
@@ -474,7 +476,7 @@ TEST(HkdfStreamingPrf, TestVector5) {
 }
 
 TEST(HkdfStreamingPrf, TestVector6) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.6
@@ -495,7 +497,7 @@ TEST(HkdfStreamingPrf, TestVector6) {
 }
 
 TEST(HkdfStreamingPrf, TestVector7) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   // https://tools.ietf.org/html/rfc5869#appendix-A.7
@@ -517,7 +519,7 @@ TEST(HkdfStreamingPrf, TestVector7) {
 }
 
 TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   HashType hash = SHA1;
@@ -539,7 +541,7 @@ TEST(HkdfStreamingPrf, TestAgainstHkdfUtil) {
 }
 
 TEST(HkdfStreamingPrf, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -549,7 +551,7 @@ TEST(HkdfStreamingPrf, TestFipsOnly) {
   std::string info = Random::GetRandomBytes(345);
 
   EXPECT_THAT(HkdfStreamingPrf::New(hash, std::move(ikm), salt).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 }  // namespace
 }  // namespace subtle

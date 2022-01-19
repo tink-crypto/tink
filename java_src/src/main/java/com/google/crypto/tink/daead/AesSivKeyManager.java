@@ -161,7 +161,11 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
     Registry.registerKeyManager(new AesSivKeyManager(), newKeyAllowed);
   }
 
-  /** @return a {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys. */
+  /**
+   * @return a {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys.
+   * @deprecated use {@code KeyTemplates.get("AES256_SIV")}
+   */
+  @Deprecated
   public static final KeyTemplate aes256SivTemplate() {
     return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.TINK);
   }
@@ -169,7 +173,9 @@ public final class AesSivKeyManager extends KeyTypeManager<AesSivKey> {
   /**
    * @return A {@code KeyTemplate} that generates new instances of AES-SIV-CMAC keys. Keys generated
    *     from this template create ciphertexts compatible with other libraries.
+   * @deprecated use {@code KeyTemplates.get("AES256_SIV_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawAes256SivTemplate() {
     return createKeyTemplate(KEY_SIZE_IN_BYTES, KeyTemplate.OutputPrefixType.RAW);
   }

@@ -18,9 +18,12 @@
 
 #include <algorithm>
 #include <cstring>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/primitive_set.h"
 #include "tink/streaming_aead.h"
@@ -60,14 +63,14 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
     return matching_stream_->Next(data);
   }
   if (attempted_matching_) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "Could not find a decrypter matching the ciphertext stream.");
   }
   // Matching has not been attempted yet, so try it now.
   attempted_matching_ = true;
   auto raw_primitives_result = primitives_->get_raw_primitives();
   if (!raw_primitives_result.ok()) {
-    return Status(util::error::INTERNAL, "No RAW primitives found");
+    return Status(absl::StatusCode::kInternal, "No RAW primitives found");
   }
   for (auto& primitive : *(raw_primitives_result.ValueOrDie())) {
     StreamingAead& streaming_aead = primitive->get_primitive();
@@ -77,7 +80,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
         std::move(shared_ct), associated_data_);
     if (decrypting_stream_result.ok()) {
       auto next_result = decrypting_stream_result.ValueOrDie()->Next(data);
-      if (next_result.status().error_code() == util::error::OUT_OF_RANGE ||
+      if (next_result.status().code() == absl::StatusCode::kOutOfRange ||
           next_result.ok()) {  // Found a match.
         buffered_ct_source_->DisableRewinding();
         matching_stream_ = std::move(decrypting_stream_result.ValueOrDie());
@@ -90,7 +93,7 @@ util::StatusOr<int> DecryptingInputStream::Next(const void** data) {
       return s;
     }
   }
-  return Status(util::error::INVALID_ARGUMENT,
+  return Status(absl::StatusCode::kInvalidArgument,
                 "Could not find a decrypter matching the ciphertext stream.");
 }
 

@@ -21,7 +21,7 @@ export class CleartextKeysetHandle {
    *
    */
   static serializeToBinary(keysetHandle: KeysetHandle): Uint8Array {
-    return binaryKeysetWriter.write(keysetHandle.getKeyset());
+    return binaryKeysetWriter.encodeBinary(keysetHandle.getKeyset());
   }
 
   /**

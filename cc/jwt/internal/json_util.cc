@@ -16,7 +16,10 @@
 
 #include "tink/jwt/internal/json_util.h"
 
+#include <string>
+
 #include <google/protobuf/util/json_util.h>
+#include "absl/status/status.h"
 #include "absl/strings/substitute.h"
 
 namespace crypto {
@@ -26,7 +29,7 @@ namespace jwt_internal {
 namespace {
 
 util::Status ConvertProtoStatus(const google::protobuf::util::Status& status) {
-  return util::Status(static_cast<util::error::Code>(status.error_code()),
+  return util::Status(static_cast<absl::StatusCode>(status.error_code()),
                                     std::string(status.message().data(), status.message().length()));
 }
 
@@ -39,7 +42,7 @@ util::StatusOr<google::protobuf::Struct> JsonStringToProtoStruct(
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid JSON");
   }
   return proto;
 }
@@ -51,7 +54,7 @@ util::StatusOr<google::protobuf::ListValue> JsonStringToProtoList(
   auto status = google::protobuf::util::JsonStringToMessage(google::protobuf::StringPiece(json_string.data(), json_string.length()), &proto,
                                                   json_parse_options);
   if (!status.ok()) {
-    return ConvertProtoStatus(status);
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid JSON");
   }
   return proto;
 }

@@ -1,4 +1,5 @@
 load("//tools:gen_maven_jar_rules.bzl", "gen_maven_jar_rules")
+load("@tink_base//tools:common.bzl", "check_deps")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,6 +13,9 @@ exports_files(["BUILD"])
 gen_maven_jar_rules(
     name = "tink",
     doctitle = "Tink Cryptography API",
+    manifest_lines = [
+        "Automatic-Module-Name: com.google.crypto.tink",
+    ],
     root_packages = [
         "com.google.crypto.tink",
     ],
@@ -31,6 +35,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink:key_manager",
         "//src/main/java/com/google/crypto/tink:key_manager_impl",
         "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink:key_templates",
         "//src/main/java/com/google/crypto/tink:key_type_manager",
         "//src/main/java/com/google/crypto/tink:key_wrap",
         "//src/main/java/com/google/crypto/tink:keyset_reader",
@@ -108,10 +113,10 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_verify_key_manager",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_verify_key_manager",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util",
         "//src/main/java/com/google/crypto/tink/signature:signature_config",
         "//src/main/java/com/google/crypto/tink/signature:signature_key_templates",
         "//src/main/java/com/google/crypto/tink/signature:signature_pem_keyset_reader",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config",
@@ -200,6 +205,7 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink:key_manager-android",
         "//src/main/java/com/google/crypto/tink:key_manager_impl-android",
         "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink:key_templates-android",
         "//src/main/java/com/google/crypto/tink:key_type_manager-android",
         "//src/main/java/com/google/crypto/tink:key_wrap",
         "//src/main/java/com/google/crypto/tink:keyset_reader-android",
@@ -282,10 +288,10 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pkcs1_verify_key_manager-android",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_sign_key_manager-android",
         "//src/main/java/com/google/crypto/tink/signature:rsa_ssa_pss_verify_key_manager-android",
-        "//src/main/java/com/google/crypto/tink/signature:sig_util-android",
         "//src/main/java/com/google/crypto/tink/signature:signature_config-android",
         "//src/main/java/com/google/crypto/tink/signature:signature_key_templates-android",
         "//src/main/java/com/google/crypto/tink/signature:signature_pem_keyset_reader-android",
+        "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_ctr_hmac_streaming_key_manager-android",
         "//src/main/java/com/google/crypto/tink/streamingaead:aes_gcm_hkdf_streaming_key_manager-android",
         "//src/main/java/com/google/crypto/tink/streamingaead:streaming_aead_config-android",
@@ -345,6 +351,9 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-awskms",
     doctitle = "Tink Cryptography API with AWS KMS",
+    manifest_lines = [
+        "Automatic-Module-Name: com.google.crypto.tink.integration.awskms",
+    ],
     root_packages = [
         "com.google.crypto.tink",
     ],
@@ -357,6 +366,9 @@ gen_maven_jar_rules(
 gen_maven_jar_rules(
     name = "tink-gcpkms",
     doctitle = "Tink Cryptography API with Google Cloud KMS",
+    manifest_lines = [
+        "Automatic-Module-Name: com.google.crypto.tink.integration.gcpkms",
+    ],
     root_packages = [
         "com.google.crypto.tink",
     ],
@@ -364,4 +376,12 @@ gen_maven_jar_rules(
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_aead",
         "//src/main/java/com/google/crypto/tink/integration/gcpkms:gcp_kms_client",
     ],
+)
+
+# Check that tink-android depends on protobuf-lite, not the full version.
+check_deps(
+    name = "tink-android-dep-checks",
+    disallowed_deps = ["@com_google_protobuf//java/core:core"],
+    required_deps = ["@com_google_protobuf//java/lite:lite"],
+    deps = [":tink-android-unshaded"],
 )

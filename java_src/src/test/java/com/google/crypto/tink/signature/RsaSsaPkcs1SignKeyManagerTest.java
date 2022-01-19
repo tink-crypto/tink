@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.RsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPkcs1Params;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPkcs1PublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPkcs1VerifyJce;
@@ -90,26 +91,26 @@ public class RsaSsaPkcs1SignKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_Sha512Allowed() throws Exception {
+  public void validateKeyFormat_sha512Allowed() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA512, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha384Allowed() throws Exception {
+  public void validateKeyFormat_sha384Allowed() throws Exception {
     // TODO(b/140410067): Check if SHA384 should be allowed.
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA384, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha1Disallowed() throws Exception {
+  public void validateKeyFormat_sha1Disallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format = createKeyFormat(HashType.SHA1, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
   @Test
-  public void validateKeyFormat_UnknownHashDisallowed() throws Exception {
+  public void validateKeyFormat_unknownHashDisallowed() throws Exception {
     RsaSsaPkcs1KeyFormat format =
         createKeyFormat(HashType.UNKNOWN_HASH, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
@@ -222,8 +223,9 @@ public class RsaSsaPkcs1SignKeyManagerTest {
     BigInteger exponent = new BigInteger(1, key.getPublicKey().getE().toByteArray());
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
-    PublicKeyVerify verifier = new RsaSsaPkcs1VerifyJce(
-        publicKey, SigUtil.toHashType(key.getPublicKey().getParams().getHashType()));
+    PublicKeyVerify verifier =
+        new RsaSsaPkcs1VerifyJce(
+            publicKey, SigUtil.toHashType(key.getPublicKey().getParams().getHashType()));
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
@@ -358,5 +360,18 @@ public class RsaSsaPkcs1SignKeyManagerTest {
     assertThrows(
         GeneralSecurityException.class,
         () -> manager.getPrimitive(corruptedKey, PublicKeySign.class));
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_RAW").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_4096_SHA512_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PKCS1_3072_SHA256_F4_WITHOUT_PREFIX").keyFormat);
   }
 }

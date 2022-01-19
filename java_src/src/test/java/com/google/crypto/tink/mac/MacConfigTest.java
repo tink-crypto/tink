@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.Registry;
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import java.security.GeneralSecurityException;
 import org.junit.Assume;
 import org.junit.FixMethodOrder;
@@ -41,6 +42,8 @@ public class MacConfigTest {
   // This test must run first.
   @Test
   public void aaaTestInitialization() throws Exception {
+    Assume.assumeFalse(TinkFips.useOnlyFips());
+
     GeneralSecurityException e =
         assertThrows(GeneralSecurityException.class, () -> Registry.getCatalogue("tinkmac"));
     assertThat(e.toString()).contains("no catalogue found");
@@ -80,6 +83,7 @@ public class MacConfigTest {
   @Test
   public void testFipsRegisterFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register MAC key manager.
     MacConfig.register();
@@ -96,6 +100,7 @@ public class MacConfigTest {
   @Test
   public void testFipsRegisterNonFipsKeys() throws Exception {
     Assume.assumeTrue(TinkFips.useOnlyFips());
+    Assume.assumeTrue(TinkFipsUtil.fipsModuleAvailable());
 
     // Register MAC key manager.
     MacConfig.register();

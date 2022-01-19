@@ -69,6 +69,8 @@ def _java_single_jar(ctx):
     if ctx.attr.exclude_build_data:
         args.add("--exclude_build_data")
 
+    args.add_all("--deploy_manifest_lines", ctx.attr.manifest_lines, format_each = "\"%s\"")
+
     ctx.actions.run(
         inputs = inputs.to_list() + resource_files,
         outputs = [ctx.outputs.jar],
@@ -95,6 +97,7 @@ java_single_jar = rule(
         "compress": attr.string(default = "preserve"),
         "root_packages": attr.string_list(),
         "exclude_build_data": attr.bool(default = True),
+        "manifest_lines": attr.string_list(),
     },
     outputs = {
         "jar": "%{name}.jar",
@@ -120,6 +123,8 @@ Args:
   root_packages: Java packages to include in generated jar.
   exclude_build_data: Whether to omit the build-data.properties file generated
       by default.
+  manifest_lines: lines to put in the output manifest file (manifest
+      files in the input jars are ignored)
 
 Outputs:
   {name}.jar: A single jar containing all of the input.

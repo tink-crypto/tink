@@ -13,8 +13,7 @@
 # limitations under the License.
 """Cross-language tests for the MAC primitive."""
 
-# Placeholder for import for type annotations
-from typing import Iterable, Text, Tuple
+from typing import Iterable, Tuple
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -39,22 +38,41 @@ def tearDownModule():
   testing_servers.stop()
 
 
-def mac_key_templates() -> Iterable[Tuple[Text, tink_pb2.KeyTemplate]]:
-  """Yields (mac_key_template_name, mac_key_template) tuples."""
+# maps from key_template_name to (key_template, key_type)
+_ADDITIONAL_KEY_TEMPLATES = {
+    # We additionally test a RAW and a LEGACY template, because LEGACY keys
+    # require tags with a special format, and RAW don't.
+    # We test one key template for each, because this is handled by the
+    # primitive wrapper which is independent of the particular key template
+    # used.
+    'HMAC_SHA256_128BITTAG_RAW': (keyset_builder.raw_template(
+        mac.mac_key_templates.HMAC_SHA256_128BITTAG), 'HmacKey'),
+    'HMAC_SHA256_128BITTAG_LEGACY': (keyset_builder.legacy_template(
+        mac.mac_key_templates.HMAC_SHA256_128BITTAG), 'HmacKey')
+}
+
+
+def mac_key_template_names() -> Iterable[str]:
   for key_type in supported_key_types.MAC_KEY_TYPES:
-    for name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      template = supported_key_types.KEY_TEMPLATE[name]
-      yield (name, template)
-      yield (name + '-raw', keyset_builder.raw_template(template))
-      yield (name + '-legacy', keyset_builder.legacy_template(template))
+    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
+      yield key_template_name
+  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+    yield key_template_name
 
 
 class MacTest(parameterized.TestCase):
 
-  @parameterized.parameters(mac_key_templates())
-  def test_compute_verify_mac(self, key_template_name, key_template):
-    key_type = supported_key_types.KEY_TYPE_FROM_URL[key_template.type_url]
-    supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
+  @parameterized.parameters(mac_key_template_names())
+  def test_compute_verify_mac(self, key_template_name):
+    if key_template_name in _ADDITIONAL_KEY_TEMPLATES:
+      key_template, key_type = _ADDITIONAL_KEY_TEMPLATES[
+          key_template_name]
+      supported_langs = supported_key_types.SUPPORTED_LANGUAGES[key_type]
+    else:
+      key_template = supported_key_types.KEY_TEMPLATE[key_template_name]
+      supported_langs = (
+          supported_key_types
+          .SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[key_template_name])
     self.assertNotEmpty(supported_langs)
     # Take the first supported language to generate the keyset.
     keyset = testing_servers.new_keyset(supported_langs[0], key_template)
@@ -102,7 +120,7 @@ KEY_ROTATION_TEMPLATES = [
 
 
 def key_rotation_test_cases(
-) -> Iterable[Tuple[Text, Text, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
+) -> Iterable[Tuple[str, str, tink_pb2.KeyTemplate, tink_pb2.KeyTemplate]]:
   for compute_lang in SUPPORTED_LANGUAGES:
     for verify_lang in SUPPORTED_LANGUAGES:
       for old_key_tmpl in KEY_ROTATION_TEMPLATES:

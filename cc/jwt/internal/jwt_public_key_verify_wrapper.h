@@ -16,6 +16,7 @@
 #ifndef TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_WRAPPER_H_
 #define TINK_JWT_INTERNAL_JWT_PUBLIC_KEY_VERIFY_WRAPPER_H_
 
+#include "tink/jwt/internal/jwt_public_key_verify_internal.h"
 #include "tink/jwt/jwt_public_key_verify.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
@@ -30,10 +31,10 @@ namespace jwt_internal {
 // uses all instances from the set in VerifyAndDecode. Only keys with RAW
 // output prefix are supported.
 class JwtPublicKeyVerifyWrapper
-    : public PrimitiveWrapper<JwtPublicKeyVerify, JwtPublicKeyVerify> {
+    : public PrimitiveWrapper<JwtPublicKeyVerifyInternal, JwtPublicKeyVerify> {
  public:
   util::StatusOr<std::unique_ptr<JwtPublicKeyVerify>> Wrap(
-      std::unique_ptr<PrimitiveSet<JwtPublicKeyVerify>> jwt_verify_set)
+      std::unique_ptr<PrimitiveSet<JwtPublicKeyVerifyInternal>> jwt_verify_set)
       const override;
 };
 

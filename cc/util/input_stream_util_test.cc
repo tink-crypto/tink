@@ -48,7 +48,7 @@ TEST(ReadBytesTest, ShortRead) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("Some content")};
   auto text_or = ReadBytesFromStream(100, &input_stream);
-  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+  EXPECT_THAT(text_or.status(), StatusIs(absl::StatusCode::kOutOfRange));
 }
 
 TEST(ReadBytesTest, ReadLess) {
@@ -116,7 +116,7 @@ TEST(ReadBytesTest, EmptyInput) {
   ASSERT_THAT(text_or.status(), IsOk());
   EXPECT_THAT(text_or.ValueOrDie(), Eq(""));
   text_or = ReadBytesFromStream(1, &input_stream);
-  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+  EXPECT_THAT(text_or.status(), StatusIs(absl::StatusCode::kOutOfRange));
 }
 
 TEST(ReadSecretBytesTest, ReadExact) {
@@ -134,7 +134,7 @@ TEST(ReadSecretBytesTest, ShortRead) {
   IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("Some content")};
   auto text_or = ReadSecretBytesFromStream(100, &input_stream);
-  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+  EXPECT_THAT(text_or.status(), StatusIs(absl::StatusCode::kOutOfRange));
 }
 
 TEST(ReadSecretBytesTest, ReadLess) {
@@ -224,7 +224,7 @@ TEST(ReadSecretBytesTest, EmptyInput) {
       util::SecretDataAsStringView(std::move(text_or).ValueOrDie()));
   EXPECT_THAT(text, Eq(""));
   text_or = ReadSecretBytesFromStream(1, &input_stream);
-  EXPECT_THAT(text_or.status(), StatusIs(util::error::OUT_OF_RANGE));
+  EXPECT_THAT(text_or.status(), StatusIs(absl::StatusCode::kOutOfRange));
 }
 
 }  // namespace

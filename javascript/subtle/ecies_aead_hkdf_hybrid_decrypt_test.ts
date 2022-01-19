@@ -29,7 +29,8 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
 
   it('new instance, should work', async function() {
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+    const privateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
     const hkdfSalt = new Uint8Array(0);
     const hkdfHash = 'SHA-256';
     const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
@@ -50,8 +51,9 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
         EllipticCurves.encodingSizeInBytes(curve, pointFormat);
 
     const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
-    const privateKey = await EllipticCurves.exportCryptoKey(keyPair.privateKey);
-    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+    const privateKey =
+        await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
+    const publicKey = await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
 
     const hybridEncrypt = await encrypterFromJsonWebKey(
         publicKey, hkdfHash, pointFormat, demHelper);
@@ -63,7 +65,10 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
     try {
       await hybridDecrypt.decrypt(ciphertext.slice(0, curveEncodingSize - 1));
       fail('Should throw an exception');
-    } catch (e) {
+      // Preserving old behavior when moving to
+      // https://www.typescriptlang.org/tsconfig#useUnknownInCatchVariables
+      // tslint:disable-next-line:no-any
+    } catch (e: any) {
       expect(e.toString()).toBe('SecurityException: Ciphertext is too short.');
     }
   });
@@ -72,9 +77,9 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
      async function() {
        const keyPair = await EllipticCurves.generateKeyPair('ECDH', 'P-256');
        const privateKey =
-           await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+           await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
        const publicKey =
-           await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+           await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
        const pointFormat = EllipticCurves.PointFormatType.UNCOMPRESSED;
        const hkdfHash = 'SHA-256';
        const keyTemplate = AeadKeyTemplates.aes256CtrHmacSha256();
@@ -113,9 +118,9 @@ describe('ecies aead hkdf hybrid decrypt test', function() {
         const curveName = EllipticCurves.curveToString(curve);
         const keyPair = await EllipticCurves.generateKeyPair('ECDH', curveName);
         const privateKey =
-            await EllipticCurves.exportCryptoKey(keyPair.privateKey);
+            await EllipticCurves.exportCryptoKey(keyPair.privateKey!);
         const publicKey =
-            await EllipticCurves.exportCryptoKey(keyPair.publicKey);
+            await EllipticCurves.exportCryptoKey(keyPair.publicKey!);
 
         const hybridEncrypt = await encrypterFromJsonWebKey(
             publicKey, hkdfHash, pointFormat, demHelper, hkdfSalt);

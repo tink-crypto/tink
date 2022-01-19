@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/util/test_matchers.h"
 #include "tink/util/test_util.h"
 
@@ -43,7 +44,7 @@ TEST(EncryptThenDecrypt, DifferentAeads) {
   int ciphertext_offset = 0;
   EXPECT_THAT(EncryptThenDecrypt(&streaming_aead_1, &streaming_aead_2,
                                  "plaintext", "aad", ciphertext_offset),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

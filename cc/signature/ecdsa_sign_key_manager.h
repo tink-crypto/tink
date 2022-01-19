@@ -65,14 +65,18 @@ class EcdsaSignKeyManager
   crypto::tink::util::StatusOr<google::crypto::tink::EcdsaPrivateKey> CreateKey(
       const google::crypto::tink::EcdsaKeyFormat& key_format) const override;
 
+  crypto::tink::util::StatusOr<google::crypto::tink::EcdsaPrivateKey> DeriveKey(
+      const google::crypto::tink::EcdsaKeyFormat& key_format,
+      InputStream* input_stream) const override;
+
   crypto::tink::util::StatusOr<google::crypto::tink::EcdsaPublicKey>
   GetPublicKey(
       const google::crypto::tink::EcdsaPrivateKey& private_key) const override {
     return private_key.public_key();
   }
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

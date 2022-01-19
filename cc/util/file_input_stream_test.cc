@@ -56,8 +56,8 @@ TEST_F(FileInputStreamTest, testReadingStreams) {
     auto input_stream = absl::make_unique<util::FileInputStream>(input_fd);
     std::string stream_contents;
     auto status = ReadTillEnd(input_stream.get(), &stream_contents);
-    EXPECT_EQ(util::error::OUT_OF_RANGE, status.error_code());
-    EXPECT_EQ("EOF", status.error_message());
+    EXPECT_EQ(absl::StatusCode::kOutOfRange, status.code());
+    EXPECT_EQ("EOF", status.message());
     EXPECT_EQ(file_contents, stream_contents);
   }
 }

@@ -20,6 +20,7 @@
 #include <cstring>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/util/status.h"
@@ -47,7 +48,7 @@ namespace {
 util::Status ReadFromStream(InputStream* input_stream, int count,
                             std::vector<uint8_t>* output) {
   if (count <= 0 || input_stream == nullptr || output == nullptr) {
-    return Status(util::error::INTERNAL, "Illegal read from a stream");
+    return Status(absl::StatusCode::kInternal, "Illegal read from a stream");
   }
   const void* buffer;
   int bytes_to_be_read = count;
@@ -56,7 +57,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
   output->resize(count);
   while (bytes_to_be_read > 0) {
     auto next_result = input_stream->Next(&buffer);
-    if (next_result.status().error_code() == util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       output->resize(count - bytes_to_be_read);
       return next_result.status();
@@ -70,7 +71,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
   if (read_bytes > needed_bytes) {
     input_stream->BackUp(read_bytes - needed_bytes);
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // anonymous namespace
@@ -80,11 +81,11 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
     std::unique_ptr<StreamSegmentDecrypter> segment_decrypter,
     std::unique_ptr<InputStream> ciphertext_source) {
   if (segment_decrypter == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "segment_decrypter must be non-null");
   }
   if (ciphertext_source == nullptr) {
-    return Status(util::error::INVALID_ARGUMENT,
+    return Status(absl::StatusCode::kInvalidArgument,
                   "cipertext_source must be non-null");
   }
   std::unique_ptr<StreamingAeadDecryptingStream> dec_stream(
@@ -96,7 +97,7 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
       dec_stream->segment_decrypter_->get_ciphertext_offset() -
       dec_stream->segment_decrypter_->get_header_size();
   if (first_segment_size <= 0) {
-    return Status(util::error::INTERNAL,
+    return Status(absl::StatusCode::kInternal,
                   "Size of the first segment must be greater than 0.");
   }
   dec_stream->ct_buffer_.resize(first_segment_size);
@@ -106,7 +107,7 @@ StatusOr<std::unique_ptr<InputStream>> StreamingAeadDecryptingStream::New(
   dec_stream->read_last_segment_ = false;
   dec_stream->count_backedup_ = first_segment_size;
   dec_stream->pt_buffer_offset_ = 0;
-  dec_stream->status_ = Status::OK;
+  dec_stream->status_ = util::OkStatus();
   return {std::move(dec_stream)};
 }
 
@@ -118,8 +119,8 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
     std::vector<uint8_t> header;
     status_ = ReadFromStream(ct_source_.get(),
                              segment_decrypter_->get_header_size(), &header);
-    if (status_.error_code() == util::error::OUT_OF_RANGE) {
-      status_ = Status(util::error::INVALID_ARGUMENT,
+    if (status_.code() == absl::StatusCode::kOutOfRange) {
+      status_ = Status(absl::StatusCode::kInvalidArgument,
                        "Could not read stream header.");
     }
     if (!status_.ok()) return status_;
@@ -128,10 +129,10 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
     is_initialized_ = true;
     count_backedup_ = 0;
     status_ = ReadFromStream(ct_source_.get(), ct_buffer_.size(), &ct_buffer_);
-    if (!status_.ok() && (status_.error_code() != util::error::OUT_OF_RANGE)) {
+    if (!status_.ok() && (status_.code() != absl::StatusCode::kOutOfRange)) {
       return status_;
     }
-    read_last_segment_ = (status_.error_code() == util::error::OUT_OF_RANGE);
+    read_last_segment_ = (status_.code() == absl::StatusCode::kOutOfRange);
     status_ = segment_decrypter_->DecryptSegment(
         ct_buffer_,
         /* segment_number = */ segment_number_,
@@ -165,16 +166,16 @@ StatusOr<int> StreamingAeadDecryptingStream::Next(const void** data) {
   // We're past the first segment, and no space was backed up, so we
   // try to get and decrypt the next ciphertext segment, if any.
   if (read_last_segment_) {
-    status_ = Status(util::error::OUT_OF_RANGE, "Reached end of stream.");
+    status_ = Status(absl::StatusCode::kOutOfRange, "Reached end of stream.");
     return status_;
   }
   segment_number_++;
   ct_buffer_.resize(segment_decrypter_->get_ciphertext_segment_size());
   status_ = ReadFromStream(ct_source_.get(), ct_buffer_.size(), &ct_buffer_);
-  if (!status_.ok() && (status_.error_code() != util::error::OUT_OF_RANGE)) {
+  if (!status_.ok() && (status_.code() != absl::StatusCode::kOutOfRange)) {
     return status_;
   }
-  read_last_segment_ = (status_.error_code() == util::error::OUT_OF_RANGE);
+  read_last_segment_ = (status_.code() == absl::StatusCode::kOutOfRange);
   status_ = segment_decrypter_->DecryptSegment(
       ct_buffer_,
       /* segment_number = */ segment_number_,

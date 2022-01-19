@@ -18,19 +18,20 @@ def tink_py_deps():
         )
 
     if not native.existing_rule("pybind11"):
+        # Commit from 2021-01-05
         http_archive(
             name = "pybind11",
             build_file = "@pybind11_bazel//:pybind11.BUILD",
-            strip_prefix = "pybind11-2.4.3",
-            urls = ["https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz"],
-            sha256 = "1eed57bc6863190e35637290f97a20c81cfe4d9090ac0a24f3bbf08f265eb71d",
+            strip_prefix = "pybind11-2.9.0",
+            urls = ["https://github.com/pybind/pybind11/archive/v2.9.0.tar.gz"],
+            sha256 = "057fb68dafd972bc13afb855f3b0d8cf0fa1a78ef053e815d9af79be7ff567cb",
         )
 
     if not native.existing_rule("pybind11_bazel"):
-        # Commit from 2020-04-09
+        # Commit from 2021-01-05
         http_archive(
             name = "pybind11_bazel",
-            strip_prefix = "pybind11_bazel-34206c29f891dbd5f6f5face7b91664c2ff7185c",
-            url = "https://github.com/pybind/pybind11_bazel/archive/34206c29f891dbd5f6f5face7b91664c2ff7185c.zip",
-            sha256 = "8d0b776ea5b67891f8585989d54aa34869fc12f14bf33f1dc7459458dd222e95",
+            strip_prefix = "pybind11_bazel-72cbbf1fbc830e487e3012862b7b720001b70672",
+            url = "https://github.com/pybind/pybind11_bazel/archive/72cbbf1fbc830e487e3012862b7b720001b70672.zip",
+            sha256 = "fec6281e4109115c5157ca720b8fe20c8f655f773172290b03f57353c11869c2",
         )

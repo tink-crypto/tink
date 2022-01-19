@@ -1,8 +1,0 @@
-type_url: "type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1PrivateKey"
-# value: [type.googleapis.com/google.crypto.tink.JwtRsaSsaPkcs1KeyFormat] {
-#   algorithm: RS384
-#   modulus_size_in_bits: 3072
-#   public_exponent: "\001\000\001"
-# }
-value: "\010\002\020\200\030\032\003\001\000\001"
-output_prefix_type: RAW

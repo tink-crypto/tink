@@ -277,4 +277,9 @@ public class HkdfPrfKeyManagerTest {
 
     testKeyTemplateCompatible(manager, HkdfPrfKeyManager.hkdfSha256Template());
   }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("HKDF_SHA256").keyFormat);
+  }
 }

@@ -27,6 +27,7 @@ import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.RsaSsaPssSignJce;
 import com.google.crypto.tink.subtle.SelfKeyTestValidators;
@@ -43,6 +44,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code RsaSsaPssPrivateKey} keys and produces new instances of
@@ -50,7 +54,6 @@ import java.security.spec.RSAPublicKeySpec;
  */
 public final class RsaSsaPssSignKeyManager
     extends PrivateKeyTypeManager<RsaSsaPssPrivateKey, RsaSsaPssPublicKey> {
-  
   RsaSsaPssSignKeyManager() {
     super(
         RsaSsaPssPrivateKey.class,
@@ -186,12 +189,86 @@ public final class RsaSsaPssSignKeyManager
             .setCrt(ByteString.copyFrom(privKey.getCrtCoefficient().toByteArray()))
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<RsaSsaPssKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<RsaSsaPssKeyFormat>> result = new HashMap<>();
+        result.put(
+            "RSA_SSA_PSS_3072_SHA256_F4",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA256,
+                    HashType.SHA256,
+                    /*saltLength=*/ 32,
+                    /*modulusSize=*/ 3072,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "RSA_SSA_PSS_3072_SHA256_F4_RAW",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA256,
+                    HashType.SHA256,
+                    /*saltLength=*/ 32,
+                    /*modulusSize=*/ 3072,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.RAW));
+        // This is identical to RSA_SSA_PSS_3072_SHA256_F4. It is needed to maintain backward
+        // compatibility with SignatureKeyTemplates.
+        // TODO(b/185475349): remove this in Tink 2.0.0.
+        result.put(
+            "RSA_SSA_PSS_3072_SHA256_SHA256_32_F4",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA256,
+                    HashType.SHA256,
+                    /*saltLength=*/ 32,
+                    /*modulusSize=*/ 3072,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+
+        result.put(
+            "RSA_SSA_PSS_4096_SHA512_F4",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA512,
+                    HashType.SHA512,
+                    /*saltLength=*/ 64,
+                    /*modulusSize=*/ 4096,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "RSA_SSA_PSS_4096_SHA512_F4_RAW",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA512,
+                    HashType.SHA512,
+                    /*saltLength=*/ 64,
+                    /*modulusSize=*/ 4096,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.RAW));
+        // This is identical to RSA_SSA_PSS_4096_SHA512_F4. It is needed to maintain backward
+        // compatibility with SignatureKeyTemplates.
+        // TODO(b/185475349): remove this in Tink 2.0.0.
+        result.put(
+            "RSA_SSA_PSS_4096_SHA512_SHA512_64_F4",
+            new KeyFormat<>(
+                createKeyFormat(
+                    HashType.SHA512,
+                    HashType.SHA512,
+                    /*saltLength=*/ 64,
+                    /*modulusSize=*/ 4096,
+                    RSAKeyGenParameterSpec.F4),
+                KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
   /**
-   * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager}
-   * with the registry, so that the the RsaSsaPss-Keys can be used with Tink.
+   * Registers the {@link RsaSsaPssSignKeyManager} and the {@link RsaSsaPssVerifyKeyManager} with
+   * the registry, so that the the RsaSsaPss-Keys can be used with Tink.
    */
   public static void registerPair(boolean newKeyAllowed) throws GeneralSecurityException {
     Registry.registerAsymmetricKeyManagers(
@@ -209,7 +286,9 @@ public final class RsaSsaPssSignKeyManager
    *       <li>Public exponent: 65537 (aka F4).
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
    *     </ul>
+   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_3072_SHA256_F4")}
    */
+  @Deprecated
   public static final KeyTemplate rsa3072PssSha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -232,7 +311,9 @@ public final class RsaSsaPssSignKeyManager
    *     </ul>
    *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
    *     libraries.
+   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_3072_SHA256_F4_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawRsa3072PssSha256F4Template() {
     return createKeyTemplate(
         HashType.SHA256,
@@ -254,7 +335,9 @@ public final class RsaSsaPssSignKeyManager
    *       <li>Public exponent: 65537 (aka F4).
    *       <li>Prefix type: {@link KeyTemplate.OutputPrefixType#TINK}.
    *     </ul>
+   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_4096_SHA512_F4")}
    */
+  @Deprecated
   public static final KeyTemplate rsa4096PssSha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,
@@ -278,7 +361,9 @@ public final class RsaSsaPssSignKeyManager
    *     </ul>
    *     <p>Keys generated from this template create signatures compatible with OpenSSL and other
    *     libraries.
+   * @deprecated use {@code KeyTemplates.get("RSA_SSA_PSS_4096_SHA512_F4_RAW")}
    */
+  @Deprecated
   public static final KeyTemplate rawRsa4096PssSha512F4Template() {
     return createKeyTemplate(
         HashType.SHA512,
@@ -300,19 +385,28 @@ public final class RsaSsaPssSignKeyManager
       int modulusSize,
       BigInteger publicExponent,
       KeyTemplate.OutputPrefixType prefixType) {
+    RsaSsaPssKeyFormat format =
+        createKeyFormat(sigHash, mgf1Hash, saltLength, modulusSize, publicExponent);
+    return KeyTemplate.create(
+        new RsaSsaPssSignKeyManager().getKeyType(), format.toByteArray(), prefixType);
+  }
+
+  private static RsaSsaPssKeyFormat createKeyFormat(
+      HashType sigHash,
+      HashType mgf1Hash,
+      int saltLength,
+      int modulusSize,
+      BigInteger publicExponent) {
     RsaSsaPssParams params =
         RsaSsaPssParams.newBuilder()
             .setSigHash(sigHash)
             .setMgf1Hash(mgf1Hash)
             .setSaltLength(saltLength)
             .build();
-    RsaSsaPssKeyFormat format =
-        RsaSsaPssKeyFormat.newBuilder()
-            .setParams(params)
-            .setModulusSizeInBits(modulusSize)
-            .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
-            .build();
-    return KeyTemplate.create(
-        new RsaSsaPssSignKeyManager().getKeyType(), format.toByteArray(), prefixType);
+    return RsaSsaPssKeyFormat.newBuilder()
+        .setParams(params)
+        .setModulusSizeInBits(modulusSize)
+        .setPublicExponent(ByteString.copyFrom(publicExponent.toByteArray()))
+        .build();
   }
 }

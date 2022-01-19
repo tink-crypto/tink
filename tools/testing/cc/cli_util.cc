@@ -20,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
@@ -40,7 +41,6 @@
 using crypto::tink::BinaryKeysetReader;
 using crypto::tink::BinaryKeysetWriter;
 using crypto::tink::CleartextKeysetHandle;
-using crypto::tink::Config;
 using crypto::tink::InputStream;
 using crypto::tink::JsonKeysetReader;
 using crypto::tink::JsonKeysetWriter;
@@ -99,7 +99,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetBinaryKeysetReader(
   auto keyset_reader_result = BinaryKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the reader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_reader_result.ValueOrDie());
@@ -114,7 +114,7 @@ std::unique_ptr<KeysetReader> CliUtil::GetJsonKeysetReader(
   auto keyset_reader_result = JsonKeysetReader::New(std::move(keyset_stream));
   if (!keyset_reader_result.ok()) {
     std::clog << "Creation of the reader failed: "
-              << keyset_reader_result.status().error_message() << std::endl;
+              << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_reader_result.ValueOrDie());
@@ -129,7 +129,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetBinaryKeysetWriter(
   auto keyset_writer_result = BinaryKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer_result.ok()) {
     std::clog << "Creation of the writer failed: "
-              << keyset_writer_result.status().error_message() << std::endl;
+              << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_writer_result.ValueOrDie());
@@ -144,7 +144,7 @@ std::unique_ptr<KeysetWriter> CliUtil::GetJsonKeysetWriter(
   auto keyset_writer_result = JsonKeysetWriter::New(std::move(keyset_stream));
   if (!keyset_writer_result.ok()) {
     std::clog << "Creation of the writer failed: "
-              << keyset_writer_result.status().error_message() << std::endl;
+              << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_writer_result.ValueOrDie());
@@ -157,7 +157,7 @@ std::unique_ptr<KeysetHandle> CliUtil::ReadKeyset(const std::string& filename) {
       CleartextKeysetHandle::Read(std::move(keyset_reader));
   if (!keyset_handle_result.ok()) {
     std::clog << "Reading the keyset failed: "
-              << keyset_handle_result.status().error_message() << std::endl;
+              << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
   return std::move(keyset_handle_result.ValueOrDie());
@@ -169,8 +169,7 @@ void CliUtil::WriteKeyset(const KeysetHandle& keyset_handle,
   auto writer = GetBinaryKeysetWriter(filename);
   auto status = writer->Write(CleartextKeysetHandle::GetKeyset(keyset_handle));
   if (!status.ok()) {
-    std::clog << "Writing the keyset failed: " << status.error_message()
-              << std::endl;
+    std::clog << "Writing the keyset failed: " << status.message() << std::endl;
     exit(1);
   }
 }
@@ -180,14 +179,14 @@ void CliUtil::InitTink() {
   std::clog << "Initializing Tink...\n";
   auto status = TinkConfig::Register();
   if (!status.ok()) {
-    std::clog << "Initialization of Tink failed: " << status.error_message()
+    std::clog << "Initialization of Tink failed: " << status.message()
               << std::endl;
     exit(1);
   }
 
   Status gcp_result = InitGcp();
   if (!gcp_result.ok()) {
-    std::clog << gcp_result.error_message() << std::endl;
+    std::clog << gcp_result.message() << std::endl;
   }
 
   Status aws_result = InitAws();
@@ -202,16 +201,15 @@ Status CliUtil::InitGcp() {
                            "/tink_base/testdata/credential.json";
   auto client_result = GcpKmsClient::New("", creds_file);
   if (!client_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                        "Failed to connect to GCP client.");
+    return Status(absl::StatusCode::kInternal,
+                  "Failed to connect to GCP client.");
   }
   auto client_add_result =
       KmsClients::Add(std::move(client_result.ValueOrDie()));
   if (!client_add_result.ok()) {
-    return Status(crypto::tink::util::error::INTERNAL,
-                  "Failed to add KMS client.");
+    return Status(absl::StatusCode::kInternal, "Failed to add KMS client.");
   }
-  return Status::OK;
+  return crypto::tink::util::OkStatus();
 }
 
 // static
@@ -271,8 +269,7 @@ void CliUtil::CopyStream(InputStream* input_stream,
   const void* in_buffer;
   while (true) {
     auto next_result = input_stream->Next(&in_buffer);
-    if (next_result.status().error_code() ==
-        crypto::tink::util::error::OUT_OF_RANGE) {
+    if (next_result.status().code() == absl::StatusCode::kOutOfRange) {
       // End of stream.
       auto status = output_stream->Close();
       if (!status.ok()) {

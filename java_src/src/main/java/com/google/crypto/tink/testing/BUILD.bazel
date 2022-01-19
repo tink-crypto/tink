@@ -28,7 +28,9 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle",
+        "//src/main/java/com/google/crypto/tink:key_template",
         "//src/main/java/com/google/crypto/tink:primitive_set",
+        "//src/main/java/com/google/crypto/tink:registry",
         "//src/main/java/com/google/crypto/tink:registry_cluster",
         "//src/main/java/com/google/crypto/tink/aead:aead_config",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config",
@@ -67,7 +69,9 @@ java_library(
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:aead",
         "//src/main/java/com/google/crypto/tink:cleartext_keyset_handle-android",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
         "//src/main/java/com/google/crypto/tink:primitive_set-android",
+        "//src/main/java/com/google/crypto/tink:registry-android",
         "//src/main/java/com/google/crypto/tink:registry_cluster-android",
         "//src/main/java/com/google/crypto/tink/aead:aead_config-android",
         "//src/main/java/com/google/crypto/tink/daead:deterministic_aead_config-android",
@@ -151,17 +155,6 @@ java_library(
 )
 
 java_library(
-    name = "testdata",
-    srcs = ["Testdata.java"],
-    deps = [
-        "//proto:tink_java_proto",
-        "@com_google_protobuf//:protobuf_java",
-        "@maven//:com_google_truth_truth",
-        "@maven//:junit_junit",
-    ],
-)
-
-java_library(
     name = "fake_kms_client",
     srcs = ["FakeKmsClient.java"],
     deps = [
@@ -176,5 +169,23 @@ java_library(
         "//src/main/java/com/google/crypto/tink/aead:aes_ctr_hmac_aead_key_manager",
         "//src/main/java/com/google/crypto/tink/subtle:base64",
         "//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "hpke_test_util",
+    srcs = [
+        "HpkeTestEncryption.java",
+        "HpkeTestId.java",
+        "HpkeTestSetup.java",
+        "HpkeTestUtil.java",
+        "HpkeTestVector.java",
+    ],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/hybrid/internal:hpke_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+        "//src/main/java/com/google/crypto/tink/subtle:hex",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "@maven//:com_google_code_gson_gson",
     ],
 )

@@ -18,9 +18,9 @@
 #define TINK_SUBTLE_ECIES_HKDF_SENDER_KEM_BORINGSSL_H_
 
 #include "absl/strings/string_view.h"
-#include "openssl/curve25519.h"
-#include "openssl/ec.h"
-#include "tink/config/tink_fips.h"
+#include "openssl/evp.h"
+#include "tink/internal/fips_utils.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/statusor.h"
@@ -61,10 +61,10 @@ class EciesHkdfSenderKemBoringSsl {
   // generated ephemeral key and recipient's public key, then uses HKDF
   // to derive the symmetric key from the shared secret, 'hkdf_info' and
   // hkdf_salt.
-  virtual
-      crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>> GenerateKey(
-      HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
-      uint32_t key_size_in_bytes, EcPointFormat point_format) const = 0;
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<const KemKey>>
+  GenerateKey(HashType hash, absl::string_view hkdf_salt,
+              absl::string_view hkdf_info, uint32_t key_size_in_bytes,
+              EcPointFormat point_format) const = 0;
 
   virtual ~EciesHkdfSenderKemBoringSsl() = default;
 };
@@ -87,19 +87,18 @@ class EciesHkdfNistPCurveSendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
-  EciesHkdfNistPCurveSendKemBoringSsl(EllipticCurveType curve,
-                                      const std::string& pubx,
-                                      const std::string& puby,
-                                      EC_POINT* peer_pub_key);
+  EciesHkdfNistPCurveSendKemBoringSsl(
+      EllipticCurveType curve, const std::string& pubx, const std::string& puby,
+      internal::SslUniquePtr<EC_POINT> peer_pub_key);
 
   EllipticCurveType curve_;
   std::string pubx_;
   std::string puby_;
-  bssl::UniquePtr<EC_POINT> peer_pub_key_;
+  internal::SslUniquePtr<EC_POINT> peer_pub_key_;
 };
 
 // Implementation of EciesHkdfSenderKemBoringSsl for curve25519.
@@ -120,14 +119,14 @@ class EciesHkdfX25519SendKemBoringSsl : public EciesHkdfSenderKemBoringSsl {
       HashType hash, absl::string_view hkdf_salt, absl::string_view hkdf_info,
       uint32_t key_size_in_bytes, EcPointFormat point_format) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kNotFips;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kNotFips;
 
  private:
   explicit EciesHkdfX25519SendKemBoringSsl(
-      const std::string& peer_public_value);
+      internal::SslUniquePtr<EVP_PKEY> peer_public_key);
 
-  uint8_t peer_public_value_[X25519_PUBLIC_VALUE_LEN];
+  const internal::SslUniquePtr<EVP_PKEY> peer_public_key_;
 };
 
 }  // namespace subtle

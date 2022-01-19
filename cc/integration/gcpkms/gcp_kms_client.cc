@@ -23,6 +23,7 @@
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
@@ -57,8 +58,8 @@ StatusOr<std::string> ReadFile(absl::string_view filename) {
   std::ifstream input_stream;
   input_stream.open(std::string(filename), std::ifstream::in);
   if (!input_stream.is_open()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT, "Error reading file %s",
-                     filename);
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
+                     "Error reading file %s", filename);
   }
   std::stringstream input;
   input << input_stream.rdbuf();
@@ -71,7 +72,7 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
   if (credentials_path.empty()) {
     auto creds = grpc::GoogleDefaultCredentials();
     if (creds == nullptr) {
-      return Status(util::error::INTERNAL,
+      return Status(absl::StatusCode::kInternal,
                     "Could not read default credentials");
     }
     return creds;
@@ -88,7 +89,7 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
     auto channel_creds = grpc::SslCredentials(grpc::SslCredentialsOptions());
     return grpc::CompositeChannelCredentials(channel_creds, creds);
   }
-  return ToStatusF(util::error::INVALID_ARGUMENT,
+  return ToStatusF(absl::StatusCode::kInvalidArgument,
                    "Could not load credentials from file %s", credentials_path);
 }
 
@@ -111,8 +112,8 @@ GcpKmsClient::New(absl::string_view key_uri,
   if (!key_uri.empty()) {
     client->key_name_ = GetKeyName(key_uri);
     if (client->key_name_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT, "Key '%s' not supported",
-                       key_uri);
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
+                       "Key '%s' not supported", key_uri);
     }
   }
   // Read credentials.
@@ -141,11 +142,11 @@ StatusOr<std::unique_ptr<Aead>>
 GcpKmsClient::GetAead(absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!key_name_.empty()) {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client is bound to '%s', and cannot use key '%s'.",
                        key_name_, key_uri);
     } else {
-      return ToStatusF(util::error::INVALID_ARGUMENT,
+      return ToStatusF(absl::StatusCode::kInvalidArgument,
                        "This client does not support key '%s'.", key_uri);
     }
   }

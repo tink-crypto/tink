@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 #include "absl/memory/memory.h"
 #include "tink/core/private_key_type_manager.h"
-#include "tink/jwt/internal/jwt_public_key_sign_impl.h"
+#include "tink/jwt/internal/jwt_public_key_sign_internal.h"
 #include "tink/jwt/internal/raw_jwt_rsa_ssa_pkcs1_sign_key_manager.h"
 #include "tink/jwt/jwt_public_key_sign.h"
 #include "tink/util/status.h"
@@ -36,11 +36,12 @@ class JwtRsaSsaPkcs1SignKeyManager
           google::crypto::tink::JwtRsaSsaPkcs1PrivateKey,
           google::crypto::tink::JwtRsaSsaPkcs1KeyFormat,
           google::crypto::tink::JwtRsaSsaPkcs1PublicKey,
-          List<JwtPublicKeySign>> {
+          List<JwtPublicKeySignInternal>> {
  public:
-  class PublicKeySignFactory : public PrimitiveFactory<JwtPublicKeySign> {
-    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySign>> Create(
-        const google::crypto::tink::JwtRsaSsaPkcs1PrivateKey& private_key)
+  class PublicKeySignFactory
+      : public PrimitiveFactory<JwtPublicKeySignInternal> {
+    crypto::tink::util::StatusOr<std::unique_ptr<JwtPublicKeySignInternal>>
+    Create(const google::crypto::tink::JwtRsaSsaPkcs1PrivateKey& private_key)
         const override;
 
    private:

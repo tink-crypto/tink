@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC.
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "pybind11/pybind11.h"
 #include "tink/key_manager.h"
@@ -44,7 +45,7 @@ class CcKeyManager {
       const std::string& type_url) {
     auto key_manager_result = Registry::get_key_manager<P>(type_url);
     if (!key_manager_result.ok()) {
-      return util::Status(util::error::FAILED_PRECONDITION,
+      return util::Status(absl::StatusCode::kFailedPrecondition,
                           absl::StrCat("No manager for key type '", type_url,
                                        "' found in the registry."));
     }
@@ -57,7 +58,7 @@ class CcKeyManager {
 
   // Constructs an instance of P for the given 'key_data'.
   crypto::tink::util::StatusOr<std::unique_ptr<P>> GetPrimitive(
-      const std::string& serialized_key_data) {
+      const std::string& serialized_key_data) const {
     google::crypto::tink::KeyData key_data;
     key_data.ParseFromString(serialized_key_data);
     return key_manager_->GetPrimitive(key_data);
@@ -65,11 +66,11 @@ class CcKeyManager {
 
   // Creates a new random key, based on the specified 'key_format'.
   crypto::tink::util::StatusOr<pybind11::bytes> NewKeyData(
-      const std::string& serialized_key_template) {
+      const std::string& serialized_key_template) const {
     google::crypto::tink::KeyTemplate key_template;
     key_template.ParseFromString(serialized_key_template);
     if (key_manager_->get_key_type() != key_template.type_url()) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Key type '", key_template.type_url(),
                                        "' is not supported by this manager."));
     }
@@ -88,7 +89,7 @@ class CcKeyManager {
     const PrivateKeyFactory* factory = dynamic_cast<const PrivateKeyFactory*>(
         &key_manager_->get_key_factory());
     if (factory == nullptr) {
-      return util::Status(util::error::INVALID_ARGUMENT,
+      return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("KeyManager for type '",
                                        key_manager_->get_key_type().c_str(),
                                        "' does not have "
@@ -105,7 +106,7 @@ class CcKeyManager {
   }
 
   // Returns the type_url identifying the key type handled by this manager.
-  std::string KeyType() { return key_manager_->get_key_type(); }
+  std::string KeyType() const { return key_manager_->get_key_type(); }
 
  private:
   const KeyManager<P>* key_manager_;

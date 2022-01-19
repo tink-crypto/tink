@@ -18,38 +18,20 @@
 
 #include "absl/base/attributes.h"
 #include "openssl/crypto.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
 
-// This flag indicates whether Tink was build in FIPS only mode. If the flag
-// is set, then usage of algorithms will be restricted to algorithms which
-// utilize the FIPS validated BoringCrypto module.
-ABSL_CONST_INIT extern const bool kUseOnlyFips;
+// This function will return true if Tink has been built in FIPS mode or if
+// the FIPS restrictions have been enabled at runtime.
+bool IsFipsModeEnabled();
 
-// Should be used to indicate whether an algorithm can be used in FIPS only
-// mode or not.
-enum class FipsCompatibility {
-  kNotFips = 0,  // The algorithm can not use a FIPS validated implementation.
-  kRequiresBoringCrypto,  // The algorithm requires BoringCrypto to use a FIPS
-                          // validated implementation.
-};
-
-// Allows to check for a cryptographic algorithm whether it is available in
-// the FIPS only mode, based on it's FipsCompatibility flag. If FIPS only
-// mode is enabled this will return an INTERNAL error if:
-// 1) The algorithm has no FIPS support.
-// 2) The algorithm has FIPS support, but BoringSSL has not been compiled with
-//    the BoringCrypto module.
-crypto::tink::util::Status ChecksFipsCompatibility(
-    FipsCompatibility fips_status);
-
-// Utility function wich calls CheckFipsCompatibility(T::kFipsStatus).
-template <class T>
-crypto::tink::util::Status CheckFipsCompatibility() {
-  return ChecksFipsCompatibility(T::kFipsStatus);
-}
+// Enables the FIPS restrictions for the registry and subtle primitives. If Tink
+// has been built in FIPS this is redundant. This method must be called before
+// handling any key material or calling any of the functions in subtle.
+crypto::tink::util::Status RestrictToFips();
 
 }  // namespace tink
 }  // namespace crypto

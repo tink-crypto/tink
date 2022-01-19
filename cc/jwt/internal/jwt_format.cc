@@ -16,13 +16,20 @@
 
 #include "tink/jwt/internal/jwt_format.h"
 
+#include <string>
+
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
+#include "tink/crypto_format.h"
 #include "tink/jwt/internal/json_util.h"
+#include "proto/tink.pb.h"
 
 namespace crypto {
 namespace tink {
 namespace jwt_internal {
+
+using ::google::crypto::tink::OutputPrefixType;
 
 namespace {
 
@@ -40,8 +47,20 @@ bool StrictWebSafeBase64Unescape(absl::string_view src, std::string* dest) {
   return absl::WebSafeBase64Unescape(src, dest);
 }
 
-}  // namespace
+util::Status ValidateKidInHeader(const google::protobuf::Value& kid_in_header,
+                                 absl::string_view kid) {
+  if (kid_in_header.kind_case() != google::protobuf::Value::kStringValue) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "kid header is not a string");
+  }
+  if (kid_in_header.string_value() != kid) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "invalid kid header");
+  }
+  return util::OkStatus();
+}
 
+}  // namespace
 
 std::string EncodeHeader(absl::string_view json_header) {
   return absl::WebSafeBase64Escape(json_header);
@@ -51,47 +70,109 @@ bool DecodeHeader(absl::string_view header, std::string* json_header) {
   return StrictWebSafeBase64Unescape(header, json_header);
 }
 
-std::string CreateHeader(absl::string_view algorithm) {
-  std::string header = absl::StrCat(R"({"alg":")", algorithm, R"("})");
-  return EncodeHeader(header);
+absl::optional<std::string> GetKid(uint32_t key_id,
+                                   OutputPrefixType output_prefix_type) {
+  if (output_prefix_type != OutputPrefixType::TINK) {
+    return absl::nullopt;
+  }
+  char buffer[4];
+  absl::big_endian::Store32(buffer, key_id);
+  return absl::WebSafeBase64Escape(absl::string_view(buffer, 4));
 }
 
-util::Status ValidateHeader(absl::string_view encoded_header,
-                            absl::string_view algorithm) {
-  std::string json_header;
-  if (!DecodeHeader(encoded_header, &json_header)) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid header");
+absl::optional<uint32_t> GetKeyId(absl::string_view kid) {
+  std::string decoded_kid;
+  if (!StrictWebSafeBase64Unescape(kid, &decoded_kid)) {
+    return absl::nullopt;
   }
-  auto proto_or = JsonStringToProtoStruct(json_header);
-  if (!proto_or.ok()) {
-    return proto_or.status();
+  if (decoded_kid.size() != 4) {
+    return absl::nullopt;
   }
-  auto fields = proto_or.ValueOrDie().fields();
+
+  return absl::big_endian::Load32(decoded_kid.data());
+}
+
+util::StatusOr<std::string> CreateHeader(
+    absl::string_view algorithm, absl::optional<absl::string_view> type_header,
+    absl::optional<absl::string_view> kid) {
+  google::protobuf::Struct header;
+  auto fields = header.mutable_fields();
+  if (kid.has_value()) {
+    google::protobuf::Value kid_value;
+    (*fields)["kid"].set_string_value(std::string(kid.value()));
+  }
+  if (type_header.has_value()) {
+    (*fields)["typ"].set_string_value(std::string(type_header.value()));
+  }
+  (*fields)["alg"].set_string_value(std::string(algorithm));
+  util::StatusOr<std::string> json_header =
+      jwt_internal::ProtoStructToJsonString(header);
+  if (!json_header.ok()) {
+    return json_header.status();
+  }
+  return EncodeHeader(*json_header);
+}
+
+util::Status ValidateHeader(const google::protobuf::Struct& header,
+                            absl::string_view algorithm,
+                            absl::optional<absl::string_view> tink_kid,
+                            absl::optional<absl::string_view> custom_kid) {
+  auto fields = header.fields();
   auto it = fields.find("alg");
   if (it == fields.end()) {
-    return util::Status(util::error::INVALID_ARGUMENT, "header is missing alg");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "header is missing alg");
   }
-  const auto& alg = it->second;
+  const google::protobuf::Value& alg = it->second;
   if (alg.kind_case() != google::protobuf::Value::kStringValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "alg is not a string");
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "alg is not a string");
   }
   if (alg.string_value() != algorithm) {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid alg");
+    return util::Status(absl::StatusCode::kInvalidArgument, "invalid alg");
   }
-  auto it2 = fields.find("typ");
-  if (it2 == fields.end()) {
-    return util::OkStatus();
+  if (fields.find("crit") != fields.end()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "all tokens with crit headers are rejected");
   }
-  const auto& typ_value = it2->second;
-  if (typ_value.kind_case() != google::protobuf::Value::kStringValue) {
-    return util::Status(util::error::INVALID_ARGUMENT, "typ is not a string");
+
+  if (tink_kid.has_value() && custom_kid.has_value()) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "custom_kid can only be set for RAW keys");
   }
-  std::string typ = std::string(typ_value.string_value());
-  std::transform(typ.begin(), typ.end(), typ.begin(), ::toupper);
-  if (typ != "JWT") {
-    return util::Status(util::error::INVALID_ARGUMENT, "invalid typ");
+  auto kid_it = fields.find("kid");
+  bool header_has_kid = (kid_it != fields.end());
+  if (tink_kid.has_value()) {
+    if (!header_has_kid) {
+      // for output prefix type TINK, the kid header is required.
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          "missing kid in header");
+    }
+    util::Status status = ValidateKidInHeader(kid_it->second, *tink_kid);
+    if (!status.ok()) {
+      return status;
+    }
+  }
+  if (custom_kid.has_value() && header_has_kid) {
+    util::Status status = ValidateKidInHeader(kid_it->second, *custom_kid);
+    if (!status.ok()) {
+      return status;
+    }
   }
   return util::OkStatus();
+}
+
+absl::optional<std::string> GetTypeHeader(
+    const google::protobuf::Struct& header) {
+  auto it = header.fields().find("typ");
+  if (it == header.fields().end()) {
+    return absl::nullopt;
+  }
+  const auto& value = it->second;
+  if (value.kind_case() != google::protobuf::Value::kStringValue) {
+    return absl::nullopt;
+  }
+  return value.string_value();
 }
 
 std::string EncodePayload(absl::string_view json_payload) {
@@ -109,6 +190,11 @@ std::string EncodeSignature(absl::string_view signature) {
 bool DecodeSignature(absl::string_view encoded_signature,
                      std::string* signature) {
   return StrictWebSafeBase64Unescape(encoded_signature, signature);
+}
+
+util::StatusOr<RawJwt> RawJwtParser::FromJson(
+    absl::optional<std::string> type_header, absl::string_view json_payload) {
+  return RawJwt::FromJson(type_header, json_payload);
 }
 
 }  // namespace jwt_internal

@@ -32,6 +32,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code HkdfPrfKey} keys and produces new instances of {@code
@@ -128,6 +131,21 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
             .setParams(format.getParams())
             .build();
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<HkdfPrfKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<HkdfPrfKeyFormat>> result = new HashMap<>();
+        result.put(
+            "HKDF_SHA256",
+            new KeyFactory.KeyFormat<>(
+                HkdfPrfKeyFormat.newBuilder()
+                    .setKeySize(32) // the size in bytes of the HKDF key
+                    .setParams(HkdfPrfParams.newBuilder().setHash(HashType.SHA256))
+                    .build(),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -165,7 +183,10 @@ public class HkdfPrfKeyManager extends KeyTypeManager<HkdfPrfKey> {
    *   <li>HMAC key size: 32 bytes
    *   <li>Salt: empty
    * </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("HKDF_SHA256")}
    */
+  @Deprecated
   public static final KeyTemplate hkdfSha256Template() {
     HkdfPrfKeyFormat format =
         HkdfPrfKeyFormat.newBuilder()

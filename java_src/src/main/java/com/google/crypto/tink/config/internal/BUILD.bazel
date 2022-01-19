@@ -1,0 +1,37 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+java_library(
+    name = "tink_fips_status",
+    srcs = select({
+        "//src/main/java/com/google/crypto/tink/config:fips_enabled": ["TinkFipsEnabled.java"],
+        "//conditions:default": ["TinkFipsDisabled.java"],
+    }),
+)
+
+android_library(
+    name = "tink_fips_status-android",
+    srcs = select({
+        "//src/main/java/com/google/crypto/tink/config:fips_enabled": ["TinkFipsEnabled.java"],
+        "//conditions:default": ["TinkFipsDisabled.java"],
+        }),
+);
+
+java_library(
+    name = "tink_fips_util",
+    srcs = ["TinkFipsUtil.java"],
+    deps = [
+        ":tink_fips_status",
+    ],
+)
+
+android_library(
+    name = "tink_fips_util-android",
+    srcs = ["TinkFipsUtil.java"],
+    deps = [
+        ":tink_fips_status-android",
+    ],
+)

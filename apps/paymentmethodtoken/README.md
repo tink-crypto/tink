@@ -3,9 +3,9 @@
 ## Latest release
 
 The most recent release is
-[1.5.0](https://github.com/google/tink/releases/tag/v1.5.0), released
-2020-10-13. API docs can be found
-[here](https://google.github.com/tink/javadoc/apps-paymentmethodtoken/1.5.0).
+[1.6.1](https://github.com/google/tink/releases/tag/v1.6.1), released
+2021-07-12. API docs can be found
+[here](https://google.github.io/tink/javadoc/apps-paymentmethodtoken/1.6.1).
 
 The Maven group ID is `com.google.crypto.tink`, and the artifact ID is
 `apps-paymentmethodtoken`.
@@ -16,7 +16,7 @@ To add a dependency using Maven:
 <dependency>
   <groupId>com.google.crypto.tink</groupId>
   <artifactId>apps-paymentmethodtoken</artifactId>
-  <version>1.5.0</version>
+  <version>1.6.1</version>
 </dependency>
 ```
 
@@ -24,7 +24,7 @@ To add a dependency using Maven:
 
 Snapshots of this app built from the master branch are available through Maven
 using version `HEAD-SNAPSHOT`. API docs can be found
-[here](https://google.github.com/tink/javadoc/apps-paymentmethodtoken/HEAD-SNAPSHOT).
+[here](https://google.github.io/tink/javadoc/apps-paymentmethodtoken/HEAD-SNAPSHOT).
 
 To add a dependency using Maven:
 

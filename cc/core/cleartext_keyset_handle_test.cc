@@ -17,6 +17,7 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_reader.h"
@@ -65,7 +66,7 @@ TEST_F(CleartextKeysetHandleTest, testRead) {
         BinaryKeysetReader::New("invalid serialized keyset").ValueOrDie());
     auto result = CleartextKeysetHandle::Read(std::move(reader));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   }
 }
 
@@ -87,11 +88,11 @@ TEST_F(CleartextKeysetHandleTest, testWrite) {
 
   // Write a valid keyset.
   EXPECT_EQ(CleartextKeysetHandle::Write(writer.get(), *(handle.get())),
-            util::Status::OK);
+            util::OkStatus());
 
   // Null writer.
   EXPECT_NE(CleartextKeysetHandle::Write(nullptr, *(handle.get())),
-            util::Status::OK);
+            util::OkStatus());
 }
 
 }  // namespace

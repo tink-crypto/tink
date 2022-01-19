@@ -16,6 +16,8 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "proto/aes_ctr_hmac_aead.pb.h"
 #include "proto/aes_eax.pb.h"

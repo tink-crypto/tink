@@ -22,6 +22,7 @@
 #include <istream>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/input_stream.h"
 #include "tink/util/errors.h"
 #include "tink/util/status.h"
@@ -40,7 +41,7 @@ IstreamInputStream::IstreamInputStream(std::unique_ptr<std::istream> input,
   position_ = 0;
   buffer_ = absl::make_unique<uint8_t[]>(buffer_size_);
   buffer_offset_ = 0;
-  status_ = Status::OK;
+  status_ = util::OkStatus();
 }
 
 crypto::tink::util::StatusOr<int> IstreamInputStream::Next(const void** data) {
@@ -60,10 +61,10 @@ crypto::tink::util::StatusOr<int> IstreamInputStream::Next(const void** data) {
     if (input_->good()) return count_read;  // No bytes could be read.
     // If !good(), distinguish EOF from other failures.
     if (input_->eof()) {
-      status_ = Status(util::error::OUT_OF_RANGE, "EOF");
+      status_ = Status(absl::StatusCode::kOutOfRange, "EOF");
     } else {
-      status_ =
-          ToStatusF(util::error::INTERNAL, "I/O error: %s", strerror(errno));
+      status_ = ToStatusF(absl::StatusCode::kInternal, "I/O error: %s",
+                          strerror(errno));
     }
     return status_;
   }

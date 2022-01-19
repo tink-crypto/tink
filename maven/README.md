@@ -34,7 +34,7 @@ A plugin for the `tink` artifact that integrates Tink with GCP KMS.
 ```
 
 This command publishes latest snapshots to Maven, and their Javadocs to
-https://google.github.com/tink.
+https://google.github.io/tink.
 
 Snapshots are automatically published for every new commit to the master branch
 of https://github.com/google/tink.

@@ -18,10 +18,19 @@
 
 #import <Foundation/Foundation.h>
 
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 /** Converts a C++ Status code to NSError. */
 NSError* TINKStatusToError(const crypto::tink::util::Status& status);
 
-/** Creates an NSError given a Tink error code and a message. */
+#ifndef TINK_USE_ABSL_STATUS
+/**
+ * Creates an NSError given a Tink error code and a message.
+ * @deprecated use absl::StatusCode as the first argument instead.
+ */
 NSError* TINKError(crypto::tink::util::error::Code code, NSString* message);
+#endif
+
+/** Creates an NSError given an absl status code and a message. */
+NSError* TINKError(absl::StatusCode code, NSString* message);

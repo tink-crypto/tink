@@ -23,7 +23,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"
 #include "tink/mac.h"
-#include "tink/config/tink_fips.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -48,8 +48,8 @@ class HmacBoringSsl : public Mac {
       absl::string_view mac,
       absl::string_view data) const override;
 
-  static constexpr crypto::tink::FipsCompatibility kFipsStatus =
-      crypto::tink::FipsCompatibility::kRequiresBoringCrypto;
+  static constexpr crypto::tink::internal::FipsCompatibility kFipsStatus =
+      crypto::tink::internal::FipsCompatibility::kRequiresBoringCrypto;
 
  private:
   // Minimum HMAC key size in bytes.

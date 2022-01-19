@@ -1,3 +1,5 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
@@ -9,5 +11,36 @@ java_library(
         "//proto:tink_java_proto",
         "//src/main/java/com/google/crypto/tink:key_template",
         "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "key_status_type_proto_converter",
+    srcs = ["KeyStatusTypeProtoConverter.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_handle",
+    ],
+)
+
+android_library(
+    name = "key_status_type_proto_converter-android",
+    srcs = ["KeyStatusTypeProtoConverter.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink/tinkkey:key_handle-android",
+    ],
+)
+
+java_library(
+    name = "util",
+    srcs = ["Util.java"],
+    deps = [],
+)
+
+android_library(
+    name = "util-android",
+    srcs = ["Util.java"],
+    deps = [
     ],
 )

@@ -23,6 +23,7 @@
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
 #include "tink/core/key_type_manager.h"
+#include "tink/internal/fips_utils.h"
 #include "tink/key_manager.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/prf/prf_set_util.h"
@@ -95,8 +96,8 @@ class HmacPrfKeyManager
       const google::crypto::tink::HmacPrfKeyFormat& hmac_prf_key_format,
       InputStream* input_stream) const override;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

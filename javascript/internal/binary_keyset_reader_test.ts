@@ -18,7 +18,7 @@ describe('binary keyset reader test', function() {
       try {
         reader.read();
         fail('An exception should be thrown.');
-      } catch (e) {
+      } catch (e: any) {
         expect(e.toString()).toBe(ExceptionText.invalidSerialization());
       }
     }
@@ -64,7 +64,7 @@ describe('binary keyset reader test', function() {
     try {
       reader.readEncrypted();
       fail('An exception should be thrown.');
-    } catch (e) {
+    } catch (e: any) {
       expect(e.toString()).toBe(ExceptionText.notImplemented());
     }
   });

@@ -47,8 +47,8 @@ import java.security.spec.RSAKeyGenParameterSpec;
  * }</pre>
  *
  * @since 1.0.0
- * @deprecated use the key template methods in the key managers, e.g.,
- *     {@link com.google.crypto.tink.signature.RsaSsaPssSignKeyManager#rsa3072PssSha256F4Template).
+ * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
+ *     KeyTemplates.get("ECDSA_P256")
  */
 @Deprecated
 public final class SignatureKeyTemplates {
@@ -356,4 +356,6 @@ public final class SignatureKeyTemplates {
         .setOutputPrefixType(OutputPrefixType.TINK)
         .build();
   }
+
+  private SignatureKeyTemplates() {}
 }

@@ -16,15 +16,20 @@
 
 #include "tink/signature/rsa_ssa_pss_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "openssl/rsa.h"
+#include "tink/internal/bn_util.h"
+#include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_unique_ptr.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/signature/rsa_ssa_pss_sign_key_manager.h"
 #include "tink/subtle/rsa_ssa_pss_sign_boringssl.h"
-#include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -45,8 +50,8 @@ using ::google::crypto::tink::RsaSsaPssKeyFormat;
 using ::google::crypto::tink::RsaSsaPssPrivateKey;
 using ::google::crypto::tink::RsaSsaPssPublicKey;
 using ::testing::Eq;
-using ::testing::Not;
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 TEST(RsaSsaPssVerifyKeyManagerTest, Basics) {
   EXPECT_THAT(RsaSsaPssVerifyKeyManager().get_version(), Eq(0));
@@ -71,11 +76,10 @@ RsaSsaPssKeyFormat CreateKeyFormat(HashType sig_hash, HashType mgf1_hash,
   params->set_salt_length(salt_length);
   key_format.set_modulus_size_in_bits(modulus_size_in_bits);
 
-  bssl::UniquePtr<BIGNUM> e(BN_new());
+  internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      subtle::SubtleUtilBoringSSL::bn2str(e.get(), BN_num_bytes(e.get()))
-          .ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
 
   return key_format;
 }
@@ -132,7 +136,7 @@ TEST(RsaSsaPssVerifyKeyManagerTest, ValidateKeyFormatSmallModulusDisallowed) {
   key.set_n("\x23");
   key.set_e("\x3");
   EXPECT_THAT(RsaSsaPssVerifyKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("only modulus size >= 2048")));
 }
 
@@ -152,7 +156,7 @@ TEST(RsaSsaPssSignKeyManagerTest, Create) {
   RsaSsaPssPublicKey public_key =
       RsaSsaPssSignKeyManager().GetPublicKey(private_key).ValueOrDie();
 
-  subtle::SubtleUtilBoringSSL::RsaPrivateKey private_key_subtle;
+  internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
   private_key_subtle.e = private_key.public_key().e();
   private_key_subtle.d = util::SecretDataFromStringView(private_key.d());
@@ -238,4 +242,3 @@ TEST(RsaSsaPssVerifyKeyManagerTest, TestVector) {
 }  // namespace
 }  // namespace tink
 }  // namespace crypto
-

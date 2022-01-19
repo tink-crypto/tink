@@ -20,6 +20,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/streaming_aead.h"
@@ -81,7 +82,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyDerivedKeySizes) {
       EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKey(key), IsOk());
     } else {
       EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKey(key),
-                  StatusIs(util::error::INVALID_ARGUMENT));
+                  StatusIs(absl::StatusCode::kInvalidArgument));
     }
   }
 }
@@ -96,7 +97,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyDerivedKeyWrongVersion) {
   key.mutable_params()->mutable_hmac_params()->set_hash(HashType::SHA256);
   key.mutable_params()->mutable_hmac_params()->set_tag_size(32);
   EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKey(key),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesCtrHmacStreamingKeyManagerTest, GetPrimitive) {
@@ -156,7 +157,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, KeyType) {
 TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatEmpty) {
   EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(
                   AesCtrHmacStreamingKeyFormat()),
-              StatusIs(util::error::INVALID_ARGUMENT));
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormat) {
@@ -181,9 +182,9 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatSmallKey) {
   key_format.mutable_params()->mutable_hmac_params()->
       set_hash(HashType::SHA256);
   key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
-  EXPECT_THAT(
-      AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("derived_key_size")));
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("derived_key_size")));
 }
 
 TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatWrongHash) {
@@ -194,9 +195,9 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatWrongHash) {
   key_format.mutable_params()->mutable_hmac_params()->
       set_hash(HashType::SHA256);
   key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
-  EXPECT_THAT(
-      AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("hkdf_hash_type")));
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("hkdf_hash_type")));
 }
 
 TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatWrongHmacHash) {
@@ -206,9 +207,9 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatWrongHmacHash) {
   key_format.mutable_params()->set_hkdf_hash_type(HashType::SHA256);
   key_format.mutable_params()->set_ciphertext_segment_size(1024);
   key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
-  EXPECT_THAT(
-      AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("hmac_params.hash")));
+  EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
+              StatusIs(absl::StatusCode::kInvalidArgument,
+                       HasSubstr("hmac_params.hash")));
 }
 
 TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatSmallSegment) {
@@ -221,7 +222,7 @@ TEST(AesCtrHmacStreamingKeyManagerTest, ValidateKeyFormatSmallSegment) {
       set_hash(HashType::SHA256);
   key_format.mutable_params()->mutable_hmac_params()->set_tag_size(32);
   EXPECT_THAT(AesCtrHmacStreamingKeyManager().ValidateKeyFormat(key_format),
-              StatusIs(util::error::INVALID_ARGUMENT,
+              StatusIs(absl::StatusCode::kInvalidArgument,
                        HasSubstr("ciphertext_segment_size")));
 }
 
@@ -303,10 +304,11 @@ TEST(AesCtrHmacStreamingKeyManagerTest, DeriveKeyWrongVersion) {
   util::IstreamInputStream input_stream{
       absl::make_unique<std::stringstream>("0123456789abcdef")};
 
-  ASSERT_THAT(AesCtrHmacStreamingKeyManager()
-                  .DeriveKey(key_format, &input_stream)
-                  .status(),
-              StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("version")));
+  ASSERT_THAT(
+      AesCtrHmacStreamingKeyManager()
+          .DeriveKey(key_format, &input_stream)
+          .status(),
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("version")));
 }
 
 }  // namespace

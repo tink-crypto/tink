@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.security.Security;
@@ -83,7 +84,7 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testNistVector() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     byte[] rawCiphertext = TestUtil.hexDecode(NIST_CIPHERTEXT);
     byte[] iv = TestUtil.hexDecode(NIST_IV);
@@ -96,7 +97,7 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testMultipleEncrypts() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     // Checks whether multiple encryptions result in different ciphertexts.
     byte[] key = Random.randBytes(16);
@@ -110,7 +111,7 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testCtrProperty() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     // Counter mode is malleable, i.e., if we flip the ciphertext, the plaintext is flipped.
     byte[] key = Random.randBytes(16);
@@ -132,7 +133,7 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testEncryptDecrypt() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     byte[] key = Random.randBytes(16);
     int ivSize = 16;
@@ -143,7 +144,7 @@ public class AesCtrJceCipherTest {
 
   @Test
   public void testFailIfFipsModuleNotAvailable() throws Exception {
-    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     byte[] key = Random.randBytes(16);
     int ivSize = 16;

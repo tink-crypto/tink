@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/status.h"
@@ -58,7 +59,7 @@ GetComputeMacOutputStream() {
   util::StatusOr<std::unique_ptr<OutputStreamWithResult<std::string>>>
       stream_status = streaming_mac->NewComputeMacOutputStream();
   EXPECT_THAT(stream_status.status(), IsOk());
-  return std::move(stream_status.ValueOrDie());
+  return std::move(*stream_status);
 }
 
 // A helper for creating an OutputStreamWithResult<util::Status>,
@@ -72,7 +73,7 @@ std::unique_ptr<OutputStreamWithResult<util::Status>> GetVerifyMacOutputStream(
   util::StatusOr<std::unique_ptr<OutputStreamWithResult<util::Status>>>
       stream_status = streaming_mac->NewVerifyMacOutputStream(expected_mac);
   EXPECT_THAT(stream_status.status(), IsOk());
-  return std::move(stream_status.ValueOrDie());
+  return std::move(*stream_status);
 }
 
 TEST(StreamingMacImplTest, ComputeEmptyMac) {
@@ -82,7 +83,7 @@ TEST(StreamingMacImplTest, ComputeEmptyMac) {
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
   EXPECT_THAT(close_status.status(), IsOk());
-  EXPECT_EQ(close_status.ValueOrDie(), expected_mac);
+  EXPECT_EQ(*close_status, expected_mac);
 }
 
 TEST(StreamingMacImplTest, ComputeSmallMac) {
@@ -99,7 +100,7 @@ TEST(StreamingMacImplTest, ComputeSmallMac) {
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
   EXPECT_THAT(close_status.status(), IsOk());
-  EXPECT_EQ(close_status.ValueOrDie(), expected_mac);
+  EXPECT_EQ(*close_status, expected_mac);
 }
 
 TEST(StreamingMacImplTest, ComputeRandMac) {
@@ -119,7 +120,7 @@ TEST(StreamingMacImplTest, ComputeRandMac) {
     // Close stream and check result
     auto close_status = output_stream->CloseAndGetResult();
     EXPECT_THAT(close_status.status(), IsOk());
-    EXPECT_EQ(close_status.ValueOrDie(), expected_mac);
+    EXPECT_EQ(*close_status, expected_mac);
   }
 }
 
@@ -129,9 +130,9 @@ TEST(StreamingMacImplTest, ComputeCheckStreamPosition) {
 
   // Check position in first buffer returned by Next();
   void* buffer;
-  auto next_result = output_stream->Next(&buffer);
-  EXPECT_TRUE(next_result.ok()) << next_result.status();
-  int buffer_size = next_result.ValueOrDie();
+  util::StatusOr<int> next_result = output_stream->Next(&buffer);
+  EXPECT_THAT(next_result.status(), IsOk());
+  int buffer_size = *next_result;
   EXPECT_EQ(buffer_size, output_stream->Position());
 
   // Check position after calling BackUp
@@ -148,7 +149,7 @@ TEST(StreamingMacImplTest, ComputeCloseTwiceError) {
   // Try closing the stream again.
   auto reclose_status = output_stream->Close();
   EXPECT_FALSE(reclose_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, reclose_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, reclose_status.code());
 }
 
 TEST(StreamingMacImplTest, VerifyEmptyMac) {
@@ -157,7 +158,7 @@ TEST(StreamingMacImplTest, VerifyEmptyMac) {
 
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
-  EXPECT_TRUE(close_status.ok());
+  EXPECT_THAT(close_status, IsOk());
 }
 
 TEST(StreamingMacImplTest, VerifySmallMac) {
@@ -168,12 +169,12 @@ TEST(StreamingMacImplTest, VerifySmallMac) {
 
   // Write to the VerifyMacOutputStream
   auto status = test::WriteToStream(output_stream.get(), text, false);
-  EXPECT_TRUE(status.ok()) << status;
+  EXPECT_THAT(status, IsOk());
   EXPECT_EQ(output_stream->Position(), text.size());
 
   // Close stream and check result
   auto close_status = output_stream->CloseAndGetResult();
-  EXPECT_TRUE(close_status.ok());
+  EXPECT_THAT(close_status, IsOk());
 }
 
 TEST(StreamingMacImplTest, VerifyEmptyMacFail) {
@@ -183,7 +184,7 @@ TEST(StreamingMacImplTest, VerifyEmptyMacFail) {
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifySmallMacFail) {
@@ -193,13 +194,13 @@ TEST(StreamingMacImplTest, VerifySmallMacFail) {
 
   // Write to the VerifyMacOutputStream
   auto status = test::WriteToStream(output_stream.get(), text, false);
-  EXPECT_TRUE(status.ok()) << status;
+  EXPECT_THAT(status, IsOk());
   EXPECT_EQ(output_stream->Position(), text.size());
 
   // Close stream and check result
   EXPECT_THAT(
       output_stream->CloseAndGetResult(),
-      StatusIs(util::error::INVALID_ARGUMENT, HasSubstr("Incorrect MAC")));
+      StatusIs(absl::StatusCode::kInvalidArgument, HasSubstr("Incorrect MAC")));
 }
 
 TEST(StreamingMacImplTest, VerifyRandMac) {
@@ -213,12 +214,12 @@ TEST(StreamingMacImplTest, VerifyRandMac) {
 
     // Write to the VerifyMacOutputStream
     auto status = test::WriteToStream(output_stream.get(), text, false);
-    EXPECT_TRUE(status.ok()) << status;
+    EXPECT_THAT(status, IsOk());
     EXPECT_EQ(output_stream->Position(), text.size());
 
     // Close stream and check result
     auto close_status = output_stream->CloseAndGetResult();
-    EXPECT_TRUE(close_status.ok());
+    EXPECT_THAT(close_status, IsOk());
   }
 }
 
@@ -229,9 +230,9 @@ TEST(StreamingMacImplTest, VerifyCheckStreamPosition) {
 
   // Check position in first buffer returned by Next();
   void* buffer;
-  auto next_result = output_stream->Next(&buffer);
-  EXPECT_TRUE(next_result.ok()) << next_result.status();
-  int buffer_size = next_result.ValueOrDie();
+  util::StatusOr<int> next_result = output_stream->Next(&buffer);
+  EXPECT_THAT(next_result.status(), IsOk());
+  int buffer_size = *next_result;
   EXPECT_EQ(buffer_size, output_stream->Position());
 
   // Check position after calling BackUp
@@ -249,7 +250,7 @@ TEST(StreamingMacImplTest, VerifyCloseTwiceError) {
   // Try closing the stream again.
   auto reclose_status = output_stream->Close();
   EXPECT_FALSE(reclose_status.ok());
-  EXPECT_EQ(util::error::FAILED_PRECONDITION, reclose_status.error_code());
+  EXPECT_EQ(absl::StatusCode::kFailedPrecondition, reclose_status.code());
 }
 
 }  // namespace

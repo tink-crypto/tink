@@ -17,7 +17,9 @@
 #include "tink/cleartext_keyset_handle.h"
 
 #include <istream>
+#include <utility>
 
+#include "absl/status/status.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/util/errors.h"
@@ -36,9 +38,9 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
     std::unique_ptr<KeysetReader> reader) {
   auto keyset_result = reader->Read();
   if (!keyset_result.ok()) {
-    return ToStatusF(util::error::INVALID_ARGUMENT,
+    return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error reading keyset data: %s",
-                     keyset_result.status().error_message());
+                     keyset_result.status().message());
   }
   std::unique_ptr<KeysetHandle> handle(
       new KeysetHandle(std::move(keyset_result.ValueOrDie())));
@@ -49,7 +51,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
 crypto::tink::util::Status CleartextKeysetHandle::Write(
     KeysetWriter* writer, const KeysetHandle& keyset_handle) {
   if (!writer) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Error KeysetWriter cannot be null");
   }
   return writer->Write(keyset_handle.get_keyset());

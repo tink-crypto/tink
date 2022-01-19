@@ -19,29 +19,30 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
+#include "tink/config/tink_fips.h"
+#include "tink/internal/ec_util.h"
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/subtle/common_enums.h"
-#include "tink/subtle/ec_util.h"
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 #include "tink/subtle/subtle_util_boringssl.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/util/test_matchers.h"
-#include "tink/util/test_util.h"
 
 namespace crypto {
 namespace tink {
 namespace subtle {
 namespace {
 
+using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
-class EcdsaSignBoringSslTest : public ::testing::Test {
-};
+class EcdsaSignBoringSslTest : public ::testing::Test {};
 
 TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -82,7 +83,7 @@ TEST_F(EcdsaSignBoringSslTest, testBasicSigning) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -113,7 +114,7 @@ TEST_F(EcdsaSignBoringSslTest, testEncodingsMismatch) {
 }
 
 TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -139,13 +140,15 @@ TEST_F(EcdsaSignBoringSslTest, testSignatureSizesWithIEEE_P1364Encoding) {
     EXPECT_TRUE(status.ok()) << status;
 
     // Check signature size.
-    auto field_size_in_bytes = EcUtil::FieldSizeInBytes(curve);
-    EXPECT_EQ(2 * field_size_in_bytes, signature.size());
+    util::StatusOr<int32_t> field_size_in_bytes =
+        internal::EcFieldSizeInBytes(curve);
+    ASSERT_THAT(field_size_in_bytes.status(), IsOk());
+    EXPECT_EQ(signature.size(), 2 * (*field_size_in_bytes));
   }
 }
 
 TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
-  if (kUseOnlyFips && !FIPS_mode()) {
+  if (IsFipsModeEnabled() && !FIPS_mode()) {
     GTEST_SKIP()
         << "Test is skipped if kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -160,7 +163,7 @@ TEST_F(EcdsaSignBoringSslTest, testNewErrors) {
 
 // FIPS-only mode test
 TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
-  if (!kUseOnlyFips || FIPS_mode()) {
+  if (!IsFipsModeEnabled() || FIPS_mode()) {
     GTEST_SKIP()
         << "Test assumes kOnlyUseFips but BoringCrypto is unavailable.";
   }
@@ -168,20 +171,23 @@ TEST_F(EcdsaSignBoringSslTest, TestFipsFailWithoutBoringCrypto) {
   auto ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P256)
                     .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P384)
-                    .ValueOrDie();
+               .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 
   ec_key = SubtleUtilBoringSSL::GetNewEcKey(EllipticCurveType::NIST_P521)
-                    .ValueOrDie();
+               .ValueOrDie();
   EXPECT_THAT(EcdsaSignBoringSsl::New(ec_key, HashType::SHA256,
-                                      EcdsaSignatureEncoding::DER).status(),
-              StatusIs(util::error::INTERNAL));
+                                      EcdsaSignatureEncoding::DER)
+                  .status(),
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

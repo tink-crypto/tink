@@ -16,6 +16,9 @@
 
 #include "tink/aead/aead_key_templates.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"

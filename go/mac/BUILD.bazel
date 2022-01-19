@@ -28,7 +28,7 @@ go_library(
         "//signature:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
     ],
 )
 
@@ -55,6 +55,6 @@ go_test(
         "//testkeyset:go_default_library",
         "//testutil:go_default_library",
         "//tink:go_default_library",
-        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
     ],
 )

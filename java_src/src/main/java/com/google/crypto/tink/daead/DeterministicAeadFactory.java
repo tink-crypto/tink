@@ -50,4 +50,6 @@ public final class DeterministicAeadFactory {
     Registry.registerPrimitiveWrapper(new DeterministicAeadWrapper());
     return keysetHandle.getPrimitive(DeterministicAead.class);
   }
+
+  private DeterministicAeadFactory() {}
 }

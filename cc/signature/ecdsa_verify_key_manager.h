@@ -60,8 +60,8 @@ class EcdsaVerifyKeyManager
   crypto::tink::util::Status ValidateParams(
       const google::crypto::tink::EcdsaParams& params) const;
 
-  FipsCompatibility FipsStatus() const override {
-    return FipsCompatibility::kRequiresBoringCrypto;
+  internal::FipsCompatibility FipsStatus() const override {
+    return internal::FipsCompatibility::kRequiresBoringCrypto;
   }
 
  private:

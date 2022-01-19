@@ -193,9 +193,9 @@ function(tink_cc_test)
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
 
   if (${CMAKE_VERSION} VERSION_LESS 3.9)
-    add_test(NAME ${_target_name} COMMAND ${_target_name})
+    add_test(NAME ${_target_name} COMMAND ${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   else()
-    gtest_discover_tests(${_target_name})
+    gtest_discover_tests(${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   endif()
 endfunction(tink_cc_test)
 

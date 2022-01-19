@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC.
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/jwt/internal/jwt_ecdsa_verify_key_manager.h"
 
+#include <string>
+#include <utility>
+
+#include "absl/status/status.h"
 
 namespace crypto {
 namespace tink {
@@ -25,23 +29,25 @@ using crypto::tink::util::StatusOr;
 using google::crypto::tink::JwtEcdsaPublicKey;
 using google::crypto::tink::JwtEcdsaAlgorithm;
 
-
-StatusOr<std::unique_ptr<JwtPublicKeyVerify>>
+StatusOr<std::unique_ptr<JwtPublicKeyVerifyInternal>>
 JwtEcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
     const JwtEcdsaPublicKey& jwt_ecdsa_public_key) const {
-  StatusOr<std::string> name_or =
-      AlgorithmName(jwt_ecdsa_public_key.algorithm());
-  if (!name_or.ok()) {
-    return name_or.status();
+  StatusOr<std::string> name = AlgorithmName(jwt_ecdsa_public_key.algorithm());
+  if (!name.ok()) {
+    return name.status();
   }
-  auto result =
+  util::StatusOr<std::unique_ptr<PublicKeyVerify>> verify =
       raw_key_manager_.GetPrimitive<PublicKeyVerify>(jwt_ecdsa_public_key);
-  if (!result.ok()) {
-    return result.status();
+  if (!verify.ok()) {
+    return verify.status();
   }
-  std::unique_ptr<JwtPublicKeyVerify> jwt_public_key_verify =
+  absl::optional<absl::string_view> custom_kid = absl::nullopt;
+  if (jwt_ecdsa_public_key.has_custom_kid()) {
+    custom_kid = jwt_ecdsa_public_key.custom_kid().value();
+  }
+  std::unique_ptr<JwtPublicKeyVerifyInternal> jwt_public_key_verify =
       absl::make_unique<jwt_internal::JwtPublicKeyVerifyImpl>(
-          std::move(result.ValueOrDie()), name_or.ValueOrDie());
+          *std::move(verify), *name, custom_kid);
   return jwt_public_key_verify;
 }
 
@@ -73,7 +79,7 @@ StatusOr<std::string> JwtEcdsaVerifyKeyManager::AlgorithmName(
     case JwtEcdsaAlgorithm::ES512:
       return std::string("ES512");
     default:
-      return Status(util::error::INVALID_ARGUMENT, "Unknown algorithm");
+      return Status(absl::StatusCode::kInvalidArgument, "Unknown algorithm");
   }
 }
 

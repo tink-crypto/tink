@@ -16,9 +16,12 @@
 
 #include "tink/signature/ed25519_sign_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/status/status.h"
 #include "tink/public_key_sign.h"
 #include "tink/registry.h"
 #include "tink/signature/ed25519_verify_key_manager.h"
@@ -188,7 +191,7 @@ TEST(Ed25519SignKeyManagerTest, DeriveKeyNotEnoughRandomness) {
       absl::make_unique<std::stringstream>("tooshort")};
 
   ASSERT_THAT(Ed25519SignKeyManager().DeriveKey(format, &input_stream).status(),
-              test::StatusIs(util::error::INVALID_ARGUMENT));
+              test::StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

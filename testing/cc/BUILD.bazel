@@ -9,8 +9,8 @@ licenses(["notice"])
 
 cpp_grpc_library(
     name = "testing_api_cpp_library",
+    protos = ["@tink_base//proto/testing:testing_api_proto"],
     service_namespace = "testing_api",
-    deps = ["@tink_base//proto/testing:testing_api_proto"],
 )
 
 cc_library(
@@ -41,12 +41,21 @@ cc_library(
     deps = [
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:binary_keyset_writer",
         "@tink_cc//:cleartext_keyset_handle",
         "@tink_cc//:json_keyset_reader",
         "@tink_cc//:json_keyset_writer",
         "@tink_cc//:keyset_handle",
+        "@tink_cc//aead:aead_key_templates",
+        "@tink_cc//daead:deterministic_aead_key_templates",
+        "@tink_cc//hybrid:hybrid_key_templates",
+        "@tink_cc//jwt:jwt_key_templates",
+        "@tink_cc//mac:mac_key_templates",
+        "@tink_cc//prf:prf_key_templates",
+        "@tink_cc//signature:signature_key_templates",
+        "@tink_cc//streamingaead:streaming_aead_key_templates",
     ],
 )
 
@@ -125,6 +134,7 @@ cc_library(
     deps = [
         ":testing_api_cpp_library",
         "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
         "@tink_cc",
         "@tink_cc//:binary_keyset_reader",
         "@tink_cc//:cleartext_keyset_handle",
@@ -261,7 +271,9 @@ cc_library(
         "@com_google_absl//absl/time",
         "@tink_cc",
         "@tink_cc//:binary_keyset_reader",
+        "@tink_cc//:binary_keyset_writer",
         "@tink_cc//:cleartext_keyset_handle",
+        "@tink_cc//jwt:jwk_set_converter",
         "@tink_cc//jwt:jwt_mac",
         "@tink_cc//jwt:jwt_public_key_sign",
         "@tink_cc//jwt:jwt_public_key_verify",
@@ -305,6 +317,7 @@ cc_binary(
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@tink_cc//config:tink_config",
+        "@tink_cc//hybrid:hpke_config",
         "@tink_cc//jwt:jwt_mac_config",
         "@tink_cc//jwt:jwt_signature_config",
         "@tink_cc//util:fake_kms_client",

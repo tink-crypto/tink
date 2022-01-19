@@ -17,6 +17,7 @@
 #include "tink/subtle/streaming_mac_impl.h"
 
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/util/status.h"
 
 namespace crypto {
@@ -85,7 +86,8 @@ ComputeMacOutputStream::CloseStreamAndComputeResult() {
     return status_;
   }
   WriteIntoMac();
-  status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream Closed");
+  status_ =
+      util::Status(absl::StatusCode::kFailedPrecondition, "Stream Closed");
   return mac_->Finalize();
 }
 
@@ -155,7 +157,8 @@ util::Status VerifyMacOutputStream::CloseStreamAndComputeResult() {
     return status_;
   }
   WriteIntoMac();
-  status_ = util::Status(util::error::FAILED_PRECONDITION, "Stream Closed");
+  status_ =
+      util::Status(absl::StatusCode::kFailedPrecondition, "Stream Closed");
   util::StatusOr<std::string> mac_actual = mac_->Finalize();
   if (!mac_actual.ok()) {
     return mac_actual.status();
@@ -163,7 +166,7 @@ util::Status VerifyMacOutputStream::CloseStreamAndComputeResult() {
   if (mac_actual.ValueOrDie() == expected_) {
     return util::OkStatus();
   }
-  return util::Status(util::error::INVALID_ARGUMENT, "Incorrect MAC");
+  return util::Status(absl::StatusCode::kInvalidArgument, "Incorrect MAC");
 }
 
 void VerifyMacOutputStream::BackUp(int count) {

@@ -22,29 +22,23 @@ import com.google.crypto.tink.BinaryKeysetWriter;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.KeysetReader;
 import com.google.crypto.tink.KeysetWriter;
 import com.google.crypto.tink.KmsClients;
-import com.google.crypto.tink.aead.AeadKeyTemplates;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
-import com.google.crypto.tink.hybrid.HybridKeyTemplates;
-import com.google.crypto.tink.mac.MacKeyTemplates;
-import com.google.crypto.tink.prf.PrfKeyTemplates;
-import com.google.crypto.tink.proto.KeyTemplate;
-import com.google.crypto.tink.signature.SignatureKeyTemplates;
-import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
+import com.google.crypto.tink.proto.OutputPrefixType;
+import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 
 /** Various helpers. */
-class TinkeyUtil {
+final class TinkeyUtil {
   public enum CommandType {
     ADD_KEY,
     CONVERT_KEYSET,
@@ -58,20 +52,7 @@ class TinkeyUtil {
     LIST_KEYSET,
     ROTATE_KEYSET,
     PROMOTE_KEY
-  };
-
-  private static final Class<?>[] KEY_TEMPLATE_CLASSES =
-      new Class<?>[] {
-        AeadKeyTemplates.class,
-        DeterministicAeadKeyTemplates.class,
-        HybridKeyTemplates.class,
-        MacKeyTemplates.class,
-        PrfKeyTemplates.class,
-        SignatureKeyTemplates.class,
-        StreamingAeadKeyTemplates.class,
-        // place holder for KeyderivationKeyTemplates. DO NOT EDIT.
-        // place holder for Internal Prps. DO NOT EDIT.
-      };
+  }
 
   /** Creates a {@code KeysetReader} that can read the keyset in the right {@code inFormat}. */
   public static KeysetReader createKeysetReader(InputStream inputStream, String inFormat)
@@ -117,7 +98,9 @@ class TinkeyUtil {
       String credentialPath,
       KeyTemplate keyTemplate)
       throws GeneralSecurityException, IOException {
-    KeysetHandle handle = KeysetManager.withEmptyKeyset().rotate(keyTemplate).getKeysetHandle();
+    @SuppressWarnings("deprecation") // Need to maintain backward-compatibility
+    KeysetHandle handle =
+        KeysetManager.withEmptyKeyset().rotate(toProto(keyTemplate)).getKeysetHandle();
 
     writeKeyset(handle, outputStream, outFormat, masterKeyUri, credentialPath);
   }
@@ -178,16 +161,45 @@ class TinkeyUtil {
             getKeysetHandle(inputStream, inFormat, masterKeyUri, credentialPath));
     switch (type) {
       case ADD_KEY:
-        manager = manager.add(keyTemplate);
+        manager.add(keyTemplate);
         break;
       case ROTATE_KEYSET:
-        manager = manager.rotate(keyTemplate);
+        manager.rotate(toProto(keyTemplate));
         break;
       default:
         throw new GeneralSecurityException("invalid command");
     }
 
     writeKeyset(manager.getKeysetHandle(), outputStream, outFormat, masterKeyUri, credentialPath);
+  }
+
+  // TODO(b/153937575): remove this once KeysetManager allows to directly work with KeyTemplate
+  // POJO.
+  private static com.google.crypto.tink.proto.KeyTemplate toProto(KeyTemplate template) {
+    OutputPrefixType prefixType;
+
+    switch (template.getOutputPrefixType()) {
+      case TINK:
+        prefixType = OutputPrefixType.TINK;
+        break;
+      case LEGACY:
+        prefixType = OutputPrefixType.LEGACY;
+        break;
+      case RAW:
+        prefixType = OutputPrefixType.RAW;
+        break;
+      case CRUNCHY:
+        prefixType = OutputPrefixType.CRUNCHY;
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown output prefix type");
+    }
+
+    return com.google.crypto.tink.proto.KeyTemplate.newBuilder()
+        .setTypeUrl(template.getTypeUrl())
+        .setValue(ByteString.copyFrom(template.getValue()))
+        .setOutputPrefixType(prefixType)
+        .build();
   }
 
   /**
@@ -212,18 +224,6 @@ class TinkeyUtil {
       CleartextKeysetHandle.write(handle, writer);
     }
   }
-
-  /** Manipulates a keyset */
-  public static void manipulateEncryptedKeyset(
-      CommandType type,
-      OutputStream outputStream,
-      String outFormat,
-      InputStream inputStream,
-      String inFormat,
-      String masterKeyUri,
-      String credentialPath,
-      String keyId)
-      throws GeneralSecurityException, IOException {}
 
   /**
    * Returns a {@code KeysetHandle} from either a cleartext {@code Keyset} or a {@code
@@ -257,41 +257,11 @@ class TinkeyUtil {
     }
   }
 
-  /** Finds and prints all default key templates. */
-  public static void printAllKeyTemplates() {
-    System.out.println("The following key templates are supported:");
-    for (Class<?> c : KEY_TEMPLATE_CLASSES) {
-      for (Field field : c.getDeclaredFields()) {
-        try {
-          if (field.get(null /* Object */) instanceof KeyTemplate) {
-            System.out.println(field.getName());
-          }
-        } catch (Exception ex) {
-          // ignore
-        }
-      }
-    }
-  }
-
-  /** Finds a key template whose name is {@code templateName}. */
-  public static KeyTemplate findKeyTemplate(String templateName) throws Exception {
-    for (Class<?> c : KEY_TEMPLATE_CLASSES) {
-      try {
-        Field field = c.getDeclaredField(templateName);
-        Object v = field.get(null /* Object */);
-        if (v instanceof KeyTemplate) {
-          return (KeyTemplate) v;
-        }
-      } catch (Exception ex) {
-        // ignore
-      }
-    }
-    throw new IllegalArgumentException("cannot find key template: " + templateName);
-  }
-
   /** Prints an error then exits. */
   public static void die(String error) {
     System.err.print(String.format("Error: %s\n", error));
     System.exit(1);
   }
+
+  private TinkeyUtil() {}
 }

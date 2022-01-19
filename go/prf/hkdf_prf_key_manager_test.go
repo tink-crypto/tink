@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/google/tink/go/core/registry"
 	"github.com/google/tink/go/prf"
 	"github.com/google/tink/go/prf/subtle"

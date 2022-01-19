@@ -6,7 +6,10 @@ cc_library(
     name = "streaming_prf",
     hdrs = ["streaming_prf.h"],
     include_prefix = "tink/subtle/prf",
-    deps = ["//:input_stream"],
+    deps = [
+        "//:input_stream",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(
@@ -16,16 +19,17 @@ cc_library(
     include_prefix = "tink/subtle/prf",
     deps = [
         ":streaming_prf",
-        "//:input_stream",
-        "//config:tink_fips",
+        "//internal:fips_utils",
+        "//internal:md_util",
+        "//internal:ssl_unique_ptr",
         "//subtle",
         "//subtle:subtle_util",
-        "//subtle:subtle_util_boringssl",
         "//util:secret_data",
         "//util:status",
         "//util:statusor",
         "@boringssl//:crypto",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -40,6 +44,7 @@ cc_library(
         "//:primitive_set",
         "//:primitive_wrapper",
         "//util:statusor",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -57,6 +62,7 @@ cc_library(
         "//util:status",
         "//util:statusor",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -64,13 +70,16 @@ cc_library(
 cc_test(
     name = "hkdf_streaming_prf_test",
     srcs = ["hkdf_streaming_prf_test.cc"],
+    tags = ["fips"],
     deps = [
         ":hkdf_streaming_prf",
+        "//config:tink_fips",
         "//subtle",
         "//util:input_stream_util",
         "//util:secret_data",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -85,6 +94,7 @@ cc_test(
         "//util:istream_input_stream",
         "//util:test_matchers",
         "//util:test_util",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
@@ -101,6 +111,7 @@ cc_test(
         "//util:status",
         "//util:test_matchers",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],

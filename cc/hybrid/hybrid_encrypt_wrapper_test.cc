@@ -16,6 +16,10 @@
 
 #include "tink/hybrid/hybrid_encrypt_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "tink/hybrid_encrypt.h"
 #include "tink/primitive_set.h"
@@ -47,10 +51,10 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     auto hybrid_encrypt_result =
         HybridEncryptWrapper().Wrap(nullptr);
     EXPECT_FALSE(hybrid_encrypt_result.ok());
-    EXPECT_EQ(util::error::INTERNAL,
-        hybrid_encrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInternal,
+        hybrid_encrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-NULL",
-        hybrid_encrypt_result.status().error_message());
+                        std::string(hybrid_encrypt_result.status().message()));
   }
 
   { // hybrid_encrypt_set has no primary primitive.
@@ -59,10 +63,10 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
     auto hybrid_encrypt_result = HybridEncryptWrapper().Wrap(
         std::move(hybrid_encrypt_set));
     EXPECT_FALSE(hybrid_encrypt_result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT,
-        hybrid_encrypt_result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+        hybrid_encrypt_result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "no primary",
-        hybrid_encrypt_result.status().error_message());
+                        std::string(hybrid_encrypt_result.status().message()));
   }
 
   { // Correct hybrid_encrypt_set;

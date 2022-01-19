@@ -31,28 +31,28 @@ enum JwtEcdsaAlgorithm {
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey
 message JwtEcdsaPublicKey {
-  // Required.
   uint32 version = 1;
-  // Required.
   JwtEcdsaAlgorithm algorithm = 2;
-  // Required.
   bytes x = 3;
-  // Required.
   bytes y = 4;
+
+  // Optional, custom kid header value to be used with "RAW" keys.
+  // "TINK" keys with this value set will be rejected.
+  message CustomKid {
+    string value = 1;
+  }
+  CustomKid custom_kid = 5;
 }
 
 // key_type: type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey
 message JwtEcdsaPrivateKey {
-  // Required.
   uint32 version = 1;
-  // Required.
   JwtEcdsaPublicKey public_key = 2;
   // Unsigned big integer in bigendian representation.
-  // Required.
   bytes key_value = 3;
 }
 
 message JwtEcdsaKeyFormat {
-  // Required.
-  JwtEcdsaAlgorithm algorithm = 1;
+  uint32 version = 1;
+  JwtEcdsaAlgorithm algorithm = 2;
 }

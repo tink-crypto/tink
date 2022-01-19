@@ -41,6 +41,10 @@ import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * This key manager generates new {@code JwtEcdsaSignKey} keys and produces new instances of {@code
@@ -50,9 +54,9 @@ public final class JwtEcdsaSignKeyManager
     extends PrivateKeyTypeManager<JwtEcdsaPrivateKey, JwtEcdsaPublicKey> {
 
   private static class JwtPublicKeySignFactory
-      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySign, JwtEcdsaPrivateKey> {
+      extends KeyTypeManager.PrimitiveFactory<JwtPublicKeySignInternal, JwtEcdsaPrivateKey> {
     public JwtPublicKeySignFactory() {
-      super(JwtPublicKeySign.class);
+      super(JwtPublicKeySignInternal.class);
     }
 
     private static final void selfTestKey(ECPrivateKey privateKey, JwtEcdsaPrivateKey keyProto)
@@ -71,7 +75,7 @@ public final class JwtEcdsaSignKeyManager
     }
 
     @Override
-    public JwtPublicKeySign getPrimitive(JwtEcdsaPrivateKey keyProto)
+    public JwtPublicKeySignInternal getPrimitive(JwtEcdsaPrivateKey keyProto)
         throws GeneralSecurityException {
       ECPrivateKey privateKey =
           EllipticCurves.getEcPrivateKey(
@@ -84,12 +88,22 @@ public final class JwtEcdsaSignKeyManager
       Enums.HashType hash = JwtEcdsaVerifyKeyManager.hashForEcdsaAlgorithm(algorithm);
       final EcdsaSignJce signer = new EcdsaSignJce(privateKey, hash, EcdsaEncoding.IEEE_P1363);
       final String algorithmName = algorithm.name();
+      final Optional<String> customKid =
+          keyProto.getPublicKey().hasCustomKid()
+              ? Optional.of(keyProto.getPublicKey().getCustomKid().getValue())
+              : Optional.empty();
 
-      return new JwtPublicKeySign() {
+      return new JwtPublicKeySignInternal() {
         @Override
-        public String signAndEncode(RawJwt token) throws GeneralSecurityException {
-          String unsignedCompact =
-              JwtFormat.createUnsignedCompact(algorithmName, token.getJsonPayload());
+        public String signAndEncodeWithKid(RawJwt rawJwt, Optional<String> kid)
+            throws GeneralSecurityException {
+          if (customKid.isPresent()) {
+            if (kid.isPresent()) {
+              throw new JwtInvalidException("custom_kid can only be set for RAW keys.");
+            }
+            kid = customKid;
+          }
+          String unsignedCompact = JwtFormat.createUnsignedCompact(algorithmName, kid, rawJwt);
           return JwtFormat.createSignedCompact(
               unsignedCompact, signer.sign(unsignedCompact.getBytes(US_ASCII)));
         }
@@ -176,8 +190,38 @@ public final class JwtEcdsaSignKeyManager
             .setKeyValue(ByteString.copyFrom(privKey.getS().toByteArray()))
             .build();
       }
+
+      /**
+       * List of default templates to generate tokens with algorithms "ES256", "ES384" or "ES512".
+       * Use the template with the "_RAW" suffix if you want to generate tokens without a "kid"
+       * header.
+       */
+      @Override
+      public Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> keyFormats() {
+        Map<String, KeyFactory.KeyFormat<JwtEcdsaKeyFormat>> result = new HashMap<>();
+        result.put(
+            "JWT_ES256_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES256",
+            createKeyFormat(JwtEcdsaAlgorithm.ES256, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_ES384_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES384",
+            createKeyFormat(JwtEcdsaAlgorithm.ES384, KeyTemplate.OutputPrefixType.TINK));
+        result.put(
+            "JWT_ES512_RAW",
+            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "JWT_ES512",
+            createKeyFormat(JwtEcdsaAlgorithm.ES512, KeyTemplate.OutputPrefixType.TINK));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
+
   /**
    * Registers the {@link EcdsaSignKeyManager} and the {@link EcdsaVerifyKeyManager} with the
    * registry, so that the the Ecdsa-Keys can be used with Tink.
@@ -186,63 +230,10 @@ public final class JwtEcdsaSignKeyManager
     Registry.registerAsymmetricKeyManagers(
         new JwtEcdsaSignKeyManager(), new JwtEcdsaVerifyKeyManager(), newKeyAllowed);
   }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with ES256:
-   *
-   * <ul>
-   *   <li>Hash function: SHA256
-   *   <li>Curve: NIST P-256
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES256Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES256);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with the ES256:
-   *
-   * <ul>
-   *   <li>Hash function: SHA384
-   *   <li>Curve: NIST P-384
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES384Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES384);
-  }
-  /**
-   * Returns a {@link KeyTemplate} that generates new instances of ECDSA keys with ES512:
-   *
-   * <ul>
-   *   <li>Hash function: SHA512
-   *   <li>Curve: NIST P-512
-   *   <li>Signature encoding: IEEE P1363.
-   *   <li>Prefix type: RAW (no prefix).
-   * </ul>
-   *
-   * Keys generated from this template create raw signatures of exactly 64 bytes. It is compatible
-   * with JWS and most other libraries.
-   */
-  public static final KeyTemplate jwtES512Template() {
-    return createKeyTemplate(JwtEcdsaAlgorithm.ES512);
-  }
-  /**
-   * Returns a {@link KeyTemplate} containing a {@link JwtEcdsaKeyFormat} with some specified
-   * parameters.
-   */
-  private static KeyTemplate createKeyTemplate(JwtEcdsaAlgorithm algorithm) {
+
+  private static KeyFactory.KeyFormat<JwtEcdsaKeyFormat> createKeyFormat(
+      JwtEcdsaAlgorithm algorithm, KeyTemplate.OutputPrefixType prefixType) {
     JwtEcdsaKeyFormat format = JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
-    return KeyTemplate.create(
-        new JwtEcdsaSignKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return new KeyFactory.KeyFormat<>(format, prefixType);
   }
 }

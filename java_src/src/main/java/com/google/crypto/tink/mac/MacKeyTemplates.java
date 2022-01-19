@@ -38,8 +38,8 @@ import com.google.crypto.tink.proto.OutputPrefixType;
  * }</pre>
  *
  * @since 1.0.0
- * @deprecated use the key template methods in the key managers, e.g.,
- *     HmacKeyManager.hmacSha256HalfDigestTemplate().
+ * @deprecated use {@link com.google.crypto.tink.KeyTemplates#get}, e.g.,
+ *     KeyTemplates.get("HMAC_SHA256_128BITTAG")
  */
 @Deprecated
 public final class MacKeyTemplates {

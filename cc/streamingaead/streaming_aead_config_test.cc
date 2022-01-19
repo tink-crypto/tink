@@ -18,10 +18,12 @@
 
 #include <list>
 #include <sstream>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "tink/config.h"
 #include "tink/config/tink_fips.h"
 #include "tink/keyset_handle.h"
@@ -48,18 +50,18 @@ class StreamingAeadConfigTest : public ::testing::Test {
 };
 
 TEST_F(StreamingAeadConfigTest, Basic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesCtrHmacStreamingKeyManager().get_key_type())
                   .status(),
-              StatusIs(util::error::NOT_FOUND));
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(StreamingAeadConfig::Register(), IsOk());
   EXPECT_THAT(Registry::get_key_manager<StreamingAead>(
                   AesGcmHkdfStreamingKeyManager().get_key_type())
@@ -74,7 +76,7 @@ TEST_F(StreamingAeadConfigTest, Basic) {
 // Tests that the StreamingAeadWrapper has been properly registered
 // and we can wrap primitives.
 TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
 
@@ -99,7 +101,7 @@ TEST_F(StreamingAeadConfigTest, WrappersRegistered) {
 
 // FIPS-only mode tests
 TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
 
@@ -120,7 +122,7 @@ TEST_F(StreamingAeadConfigTest, RegisterNonFipsTemplates) {
 
   for (auto key_template : non_fips_key_templates) {
     EXPECT_THAT(KeysetHandle::GenerateNew(key_template).status(),
-                StatusIs(util::error::NOT_FOUND));
+                StatusIs(absl::StatusCode::kNotFound));
   }
 }
 

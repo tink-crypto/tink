@@ -23,6 +23,7 @@
 #include "aws/core/Aws.h"
 #include "aws/kms/KMSClient.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
@@ -85,7 +86,7 @@ TEST(AwsKmsClientTest, ClientCreationInvalidRegistry) {
       std::string(getenv("TEST_SRCDIR")) + "/tink_base/testdata/credential.json";
 
   auto client_result = AwsKmsClient::RegisterNewClient(non_aws_key, creds_file);
-  EXPECT_THAT(client_result, StatusIs(util::error::INVALID_ARGUMENT));
+  EXPECT_THAT(client_result, StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 }  // namespace

@@ -9,8 +9,8 @@ hacking guide](JAVA-HACKING.md).
 ## Setup instructions
 
 The most recent release is
-[1.5.0](https://github.com/google/tink/releases/tag/v1.5.0), released
-2020-07-13.
+[1.6.1](https://github.com/google/tink/releases/tag/v1.6.1), released
+2021-07-12.
 
 In addition to the versioned releases, snapshots of Tink are regularly built
 using the master branch of the Tink GitHub repository.
@@ -35,7 +35,7 @@ following configuration:
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -81,7 +81,7 @@ use AWS KMS, one should also add dependency on `tink-awskms`, and similarly
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-awskms</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -91,7 +91,7 @@ use AWS KMS, one should also add dependency on `tink-awskms`, and similarly
   <dependency>
     <groupId>com.google.crypto.tink</groupId>
     <artifactId>tink-gcpkms</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.1</version>
   </dependency>
 </dependencies>
 ```
@@ -105,7 +105,7 @@ following configuration:
 
 ```
 dependencies {
-  implementation 'com.google.crypto.tink:tink-android:1.5.0'
+  implementation 'com.google.crypto.tink:tink-android:1.6.1'
 }
 ```
 
@@ -125,11 +125,11 @@ dependencies {
 ## API documentation
 
 *   Java:
-    *   [1.5.0](https://google.github.com/tink/javadoc/tink/1.5.0)
-    *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink/HEAD-SNAPSHOT)
+    *   [1.6.1](https://google.github.io/tink/javadoc/tink/1.6.1)
+    *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink/HEAD-SNAPSHOT)
 *   Android:
-    *   [1.5.0](https://google.github.com/tink/javadoc/tink-android/1.5.0)
-    *   [HEAD-SNAPSHOT](https://google.github.com/tink/javadoc/tink-android/HEAD-SNAPSHOT)
+    *   [1.6.1](https://google.github.io/tink/javadoc/tink-android/1.6.1)
+    *   [HEAD-SNAPSHOT](https://google.github.io/tink/javadoc/tink-android/HEAD-SNAPSHOT)
 
 ## Important warnings
 
@@ -190,24 +190,15 @@ Still, if there is a need to generate a KeysetHandle with fresh key material
 directly in Java code, you can use
 [`KeysetHandle`](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/KeysetHandle.java).
 For example, you can generate a keyset containing a randomly generated
-AES128-GCM with the help of the factory methods from
-[`AesGcmKeyManager`](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/aead/AesGcmKeyManager.java)
-key as follows.
+AES128-GCM key as follows.
 
 ```java
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.KeyTemplate;
-    import com.google.crypto.tink.aead.AesGcmKeyManager;
 
-    KeyTemplate keysetTemplate = AesGcmKeyManager.aes128GcmTemplate();
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(keysetTemplate);
+    KeysetHandle keysetHandle = KeysetHandle.generateNew(
+        KeyTemplates.get("AES128_GCM"));
 ```
-
-Recommended factory methods to create key templates for other key types can be
-found in their respective key manager. For example, the method
-`hmacSha512Template()` in
-[HmacKeyManager](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/mac/HmacKeyManager.java)
-returns a key template for `HMAC-SHA512`.
 
 ## Storing keysets
 
@@ -217,13 +208,13 @@ e.g., writing to a file:
 ```java
     import com.google.crypto.tink.CleartextKeysetHandle;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AesGcmKeyManager;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.JsonKeysetWriter;
     import java.io.File;
 
     // Generate the key material...
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AesGcmKeyManager.aes128GcmTemplate());
+        KeyTemplates.get("AES128_GCM"));
 
     // and write it to a file.
     String keysetFilename = "my_keyset.json";
@@ -241,13 +232,13 @@ KMS key as follows:
 ```java
     import com.google.crypto.tink.JsonKeysetWriter;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AesGcmKeyManager;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
     import java.io.File;
 
     // Generate the key material...
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AesGcmKeyManager.aes128GcmTemplate());
+        KeyTemplates.get("AES128_GCM"));
 
     // and write it to a file...
     String keysetFilename = "my_keyset.json";
@@ -315,11 +306,11 @@ data:
 ```java
     import com.google.crypto.tink.Aead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.aead.AesGcmKeyManager;
+    import com.google.crypto.tink.KeyTemplates;
 
     // 1. Generate the key material.
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AesGcmKeyManager.aes128GcmTemplate());
+        KeyTemplates.get("AES128_GCM"));
 
     // 2. Get the primitive.
     Aead aead = keysetHandle.getPrimitive(Aead.class);
@@ -341,11 +332,11 @@ encrypt or decrypt data:
 ```java
     import com.google.crypto.tink.DeterministicAead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.daead.AesSivKeyManager;
+    import com.google.crypto.tink.KeyTemplates;
 
     // 1. Generate the key material.
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AesSivKeyManager.aes256SivTemplate());
+        KeyTemplates.get("AES256_SIV"));
 
     // 2. Get the primitive.
     DeterministicAead daead =
@@ -368,7 +359,7 @@ or decrypt data streams:
 ```java
     import com.google.crypto.tink.StreamingAead;
     import com.google.crypto.tink.KeysetHandle;
-    import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKeyManager;
+    import com.google.crypto.tink.KeyTemplates;
     import java.nio.ByteBuffer;
     import java.nio.channels.FileChannel;
     import java.nio.channels.SeekableByteChannel;
@@ -376,7 +367,7 @@ or decrypt data streams:
 
     // 1. Generate the key material.
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AesGcmHkdfStreamingKeyManager.aes128GcmHkdf4KBTemplate());
+        KeyTemplates.get("AES128_GCM_HKDF_1MB"));
 
     // 2. Get the primitive.
     StreamingAead streamingAead = keysetHandle.getPrimitive(StreamingAead.class);
@@ -423,12 +414,12 @@ You can compute or verify a [MAC](PRIMITIVES.md#message-authentication-code)
 
 ```java
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.Mac;
-    import com.google.crypto.tink.mac.HmacKeyManager;
 
     // 1. Generate the key material.
     KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        HmacKeyManager.hmacSha256HalfDigestTemplate());
+        KeyTemplates.get("HMAC_SHA256_128BITTAG"));
 
     // 2. Get the primitive.
     Mac mac = keysetHandle.getPrimitive(Mac.class);
@@ -447,15 +438,15 @@ signature](PRIMITIVES.md#digital-signatures):
 
 ```java
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.PublicKeySign;
     import com.google.crypto.tink.PublicKeyVerify;
-    import com.google.crypto.tink.signature.EcdsaSignKeyManager;
 
     // SIGNING
 
     // 1. Generate the private key material.
     KeysetHandle privateKeysetHandle = KeysetHandle.generateNew(
-        EcdsaSignKeyManager.ecdsaP256Template());
+        KeyTemplates.get("ECDSA_P256"));
 
     // 2. Get the primitive.
     PublicKeySign signer = privateKeysetHandle.getPrimitive(PublicKeySign.class);
@@ -485,12 +476,12 @@ use the following:
 ```java
     import com.google.crypto.tink.HybridDecrypt;
     import com.google.crypto.tink.HybridEncrypt;
-    import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
     import com.google.crypto.tink.KeysetHandle;
+    import com.google.crypto.tink.KeyTemplates;
 
     // 1. Generate the private key material.
     KeysetHandle privateKeysetHandle = KeysetHandle.generateNew(
-        EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate());
+        KeyTemplates.get("ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM"));
 
     // Obtain the public key material.
     KeysetHandle publicKeysetHandle =
@@ -526,23 +517,26 @@ using the credentials in `credentials.json` as follows:
 
 ```java
     import com.google.crypto.tink.Aead;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.KmsClients;
-    import com.google.crypto.tink.aead.AeadKeyTemplates;
+    import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
     import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
 
     // 1. Generate the key material.
     String kmsKeyUri =
         "gcp-kms://projects/tink-examples/locations/global/keyRings/foo/cryptoKeys/bar";
-    KeysetHandle keysetHandle = KeysetHandle.generateNew(
-        AeadKeyTemplates.createKmsEnvelopeAeadKeyTemplate(kmsKeyUri, AeadKeyTemplates.AES128_GCM));
+    KeysetHandle handle =
+        KeysetHandle.generateNew(
+            KmsEnvelopeAeadKeyManager.createKeyTemplate(
+                kmsKeyUri, KeyTemplates.get("AES128_GCM")));
 
     // 2. Register the KMS client.
     KmsClients.add(new GcpKmsClient()
         .withCredentials("credentials.json"));
 
     // 3. Get the primitive.
-    Aead aead = keysetHandle.getPrimitive(Aead.class);
+    Aead aead = handle.getPrimitive(Aead.class);
 
     // 4. Use the primitive.
     byte[] ciphertext = aead.encrypt(plaintext, aad);
@@ -560,23 +554,19 @@ be rotated, and a specification of the new key via a
 message.
 
 ```java
+    import com.google.crypto.tink.KeyTemplate;
+    import com.google.crypto.tink.KeyTemplates;
     import com.google.crypto.tink.KeysetHandle;
     import com.google.crypto.tink.KeysetManager;
-    import com.google.crypto.tink.proto.KeyTemplate;
 
     KeysetHandle keysetHandle = ...;   // existing keyset
-    KeyTemplate keyTemplate = ...;     // template for the new key
+    KeyTemplate keyTemplate = KeyTemplates.get("AES256_GCM"); // template for the new key
 
     KeysetHandle rotatedKeysetHandle = KeysetManager
         .withKeysetHandle(keysetHandle)
         .rotate(keyTemplate)
         .getKeysetHandle();
 ```
-
-Factory methods to create key templates can be found in the key manager classes.
-For example, the method `hmacSha512Template()` in
-[HmacKeyManager](https://github.com/google/tink/blob/master/java_src/src/main/java/com/google/crypto/tink/mac/HmacKeyManager.java)
-returns a key template for `HMAC-SHA512`.
 
 After a successful rotation, the resulting keyset contains a new key generated
 according to the specification in `keyTemplate`, and the new key becomes the

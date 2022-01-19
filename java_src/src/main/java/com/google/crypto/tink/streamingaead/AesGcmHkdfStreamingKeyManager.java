@@ -34,6 +34,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This key manager generates new {@code AesGcmHkdfStreamingKey} keys and produces new instances of
@@ -137,6 +140,31 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
           throw new GeneralSecurityException("Reading pseudorandomness failed", e);
         }
       }
+
+      @Override
+      public Map<String, KeyFactory.KeyFormat<AesGcmHkdfStreamingKeyFormat>> keyFormats()
+          throws GeneralSecurityException {
+        Map<String, KeyFactory.KeyFormat<AesGcmHkdfStreamingKeyFormat>> result = new HashMap<>();
+        result.put(
+            "AES128_GCM_HKDF_4KB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(16, HashType.SHA256, 16, 4096), KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES128_GCM_HKDF_1MB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(16, HashType.SHA256, 16, 1 << 20),
+                KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES256_GCM_HKDF_4KB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(32, HashType.SHA256, 32, 4096), KeyTemplate.OutputPrefixType.RAW));
+        result.put(
+            "AES256_GCM_HKDF_1MB",
+            new KeyFactory.KeyFormat<>(
+                createKeyFormat(32, HashType.SHA256, 32, 1 << 20),
+                KeyTemplate.OutputPrefixType.RAW));
+        return Collections.unmodifiableMap(result);
+      }
     };
   }
 
@@ -167,7 +195,10 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 16 bytes
    *       <li>Ciphertext segment size: 4096 bytes
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_GCM_HKDF_4KB")}
    */
+  @Deprecated
   public static final KeyTemplate aes128GcmHkdf4KBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, 4096);
   }
@@ -181,7 +212,10 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 16 bytes
    *       <li>Ciphertext segment size: 1MB
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES128_GCM_HKDF_1MB")}
    */
+  @Deprecated
   public static final KeyTemplate aes128GcmHkdf1MBTemplate() {
     return createKeyTemplate(16, HashType.SHA256, 16, 1 << 20);
   }
@@ -195,7 +229,10 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 32 bytes
    *       <li>Ciphertext segment size: 4096 bytes
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_GCM_HKDF_4KB")}
    */
+  @Deprecated
   public static final KeyTemplate aes256GcmHkdf4KBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, 4096);
   }
@@ -209,7 +246,10 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    *       <li>Size of AES-GCM derived keys: 32 bytes
    *       <li>Ciphertext segment size: 1MB
    *     </ul>
+   *
+   * @deprecated use {@code KeyTemplates.get("AES256_GCM_HKDF_1MB")}
    */
+  @Deprecated
   public static final KeyTemplate aes256GcmHkdf1MBTemplate() {
     return createKeyTemplate(32, HashType.SHA256, 32, 1 << 20);
   }
@@ -220,20 +260,25 @@ public final class AesGcmHkdfStreamingKeyManager extends KeyTypeManager<AesGcmHk
    */
   private static KeyTemplate createKeyTemplate(
       int mainKeySize, HashType hkdfHashType, int derivedKeySize, int ciphertextSegmentSize) {
+    AesGcmHkdfStreamingKeyFormat format =
+        createKeyFormat(mainKeySize, hkdfHashType, derivedKeySize, ciphertextSegmentSize);
+    return KeyTemplate.create(
+        new AesGcmHkdfStreamingKeyManager().getKeyType(),
+        format.toByteArray(),
+        KeyTemplate.OutputPrefixType.RAW);
+  }
+
+  private static AesGcmHkdfStreamingKeyFormat createKeyFormat(
+      int mainKeySize, HashType hkdfHashType, int derivedKeySize, int ciphertextSegmentSize) {
     AesGcmHkdfStreamingParams keyParams =
         AesGcmHkdfStreamingParams.newBuilder()
             .setCiphertextSegmentSize(ciphertextSegmentSize)
             .setDerivedKeySize(derivedKeySize)
             .setHkdfHashType(hkdfHashType)
             .build();
-    AesGcmHkdfStreamingKeyFormat format =
-        AesGcmHkdfStreamingKeyFormat.newBuilder()
-            .setKeySize(mainKeySize)
-            .setParams(keyParams)
-            .build();
-    return KeyTemplate.create(
-        new AesGcmHkdfStreamingKeyManager().getKeyType(),
-        format.toByteArray(),
-        KeyTemplate.OutputPrefixType.RAW);
+    return AesGcmHkdfStreamingKeyFormat.newBuilder()
+        .setKeySize(mainKeySize)
+        .setParams(keyParams)
+        .build();
   }
 }

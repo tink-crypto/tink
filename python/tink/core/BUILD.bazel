@@ -121,6 +121,5 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":_primitive_set",
-        requirement("six"),
     ],
 )

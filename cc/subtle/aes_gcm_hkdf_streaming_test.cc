@@ -21,7 +21,9 @@
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "tink/config/tink_fips.h"
 #include "tink/output_stream.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/random.h"
@@ -42,7 +44,7 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 
 TEST(AesGcmHkdfStreamingTest, testBasic) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (HashType hkdf_hash : {SHA1, SHA256, SHA512}) {
@@ -74,10 +76,10 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
             auto failed_result = streaming_aead->NewEncryptingStream(
                 nullptr, associated_data);
             EXPECT_FALSE(failed_result.ok());
-            EXPECT_EQ(util::error::INVALID_ARGUMENT,
-                      failed_result.status().error_code());
+            EXPECT_EQ(absl::StatusCode::kInvalidArgument,
+                      failed_result.status().code());
             EXPECT_PRED_FORMAT2(testing::IsSubstring, "non-null",
-                                failed_result.status().error_message());
+                                std::string(failed_result.status().message()));
 
             for (int pt_size : {0, 16, 100, 1000, 10000}) {
               SCOPED_TRACE(absl::StrCat(" pt_size = ", pt_size));
@@ -95,7 +97,7 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
 }
 
 TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -107,13 +109,13 @@ TEST(AesGcmHkdfStreamingTest, testIkmSmallerThanDerivedKey) {
   params.hkdf_hash = SHA256;
   auto result = AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testIkmSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   for (int ikm_size : {5, 10, 15}) {
@@ -126,14 +128,14 @@ TEST(AesGcmHkdfStreamingTest, testIkmSize) {
 
     auto result = AesGcmHkdfStreaming::New(std::move(params));
     EXPECT_FALSE(result.ok());
-    EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+    EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
     EXPECT_PRED_FORMAT2(testing::IsSubstring, "ikm too small",
-                        result.status().error_message());
+                        std::string(result.status().message()));
   }
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -146,13 +148,13 @@ TEST(AesGcmHkdfStreamingTest, testWrongHkdfHash) {
 
   auto result = AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "unsupported hkdf_hash",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -165,13 +167,13 @@ TEST(AesGcmHkdfStreamingTest, testWrongDerivedKeySize) {
 
   auto result = AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be 16 or 32",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -184,13 +186,13 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextOffset) {
 
   auto result = AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "must be non-negative",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
-  if (kUseOnlyFips) {
+  if (IsFipsModeEnabled()) {
     GTEST_SKIP() << "Not supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -203,15 +205,15 @@ TEST(AesGcmHkdfStreamingTest, testWrongCiphertextSegmentSize) {
 
   auto result = AesGcmHkdfStreaming::New(std::move(params));
   EXPECT_FALSE(result.ok());
-  EXPECT_EQ(util::error::INVALID_ARGUMENT, result.status().error_code());
+  EXPECT_EQ(absl::StatusCode::kInvalidArgument, result.status().code());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "ciphertext_segment_size too small",
-                      result.status().error_message());
+                      std::string(result.status().message()));
 }
 
 
 // FIPS only mode tests
 TEST(AesGcmHkdfStreamingTest, TestFipsOnly) {
-  if (!kUseOnlyFips) {
+  if (!IsFipsModeEnabled()) {
     GTEST_SKIP() << "Only supported in FIPS-only mode";
   }
   AesGcmHkdfStreaming::Params params;
@@ -223,7 +225,7 @@ TEST(AesGcmHkdfStreamingTest, TestFipsOnly) {
   params.hkdf_hash = SHA256;
 
   EXPECT_THAT(AesGcmHkdfStreaming::New(std::move(params)).status(),
-              StatusIs(util::error::INTERNAL));
+              StatusIs(absl::StatusCode::kInternal));
 }
 
 }  // namespace

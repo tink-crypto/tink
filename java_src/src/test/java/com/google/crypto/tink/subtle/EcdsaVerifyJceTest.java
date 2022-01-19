@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.config.TinkFips;
+import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.subtle.EllipticCurves.EcdsaEncoding;
 import com.google.crypto.tink.subtle.Enums.HashType;
 import com.google.crypto.tink.testing.TestUtil;
@@ -65,7 +66,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testWycheproofVectors() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     testWycheproofVectors(
         "../wycheproof/testvectors/ecdsa_secp256r1_sha256_test.json", EcdsaEncoding.DER);
@@ -155,7 +156,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testConstrutorExceptions() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -172,43 +173,43 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testAgainstJCEInstance256() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testAgainstJceSignatureInstance(EllipticCurves.getNistP256Params(), HashType.SHA256);
   }
 
   @Test
   public void testAgainstJCEInstance384() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testAgainstJceSignatureInstance(EllipticCurves.getNistP384Params(), HashType.SHA512);
   }
 
   @Test
   public void testAgainstJCEInstance512() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testAgainstJceSignatureInstance(EllipticCurves.getNistP521Params(), HashType.SHA512);
   }
 
   @Test
   public void testSignVerify256() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testSignVerify(EllipticCurves.getNistP256Params(), HashType.SHA256);
   }
 
   @Test
   public void testSignVerify384() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testSignVerify(EllipticCurves.getNistP384Params(), HashType.SHA512);
   }
 
   @Test
   public void testSignVerify512() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
     testSignVerify(EllipticCurves.getNistP521Params(), HashType.SHA512);
   }
 
   private static void testAgainstJceSignatureInstance(ECParameterSpec ecParams, HashType hash)
       throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     int numSignatures = 100;
     if (TestUtil.isTsan()) {
@@ -235,7 +236,7 @@ public class EcdsaVerifyJceTest {
   }
 
   private static void testSignVerify(ECParameterSpec ecParams, HashType hash) throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     int numSignatures = 100;
     if (TestUtil.isTsan()) {
@@ -265,7 +266,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testModification() throws Exception {
-    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 
     ECParameterSpec ecParams = EllipticCurves.getNistP256Params();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
@@ -306,7 +307,7 @@ public class EcdsaVerifyJceTest {
 
   @Test
   public void testFailIfFipsModuleNotAvailable() throws Exception {
-    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFips.fipsModuleAvailable());
+    Assume.assumeTrue(TinkFips.useOnlyFips() && !TinkFipsUtil.fipsModuleAvailable());
 
     assertThrows(
         GeneralSecurityException.class,

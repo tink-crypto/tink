@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/mac.h"
 #include "tink/subtle/hmac_boringssl.h"
@@ -37,10 +38,9 @@ namespace crypto {
 namespace tink {
 namespace jwt_internal {
 
-using crypto::tink::util::Enums;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
-using google::crypto::tink::HashType;
+using google::crypto::tink::JwtHmacAlgorithm;
 using google::crypto::tink::JwtHmacKey;
 using google::crypto::tink::JwtHmacKeyFormat;
 
@@ -48,14 +48,17 @@ namespace {
 
 constexpr int kMinKeySizeInBytes = 32;
 
-Status ValidateHashType(const ::google::crypto::tink::HashType hash_type) {
-  if ((hash_type != HashType::SHA256) && (hash_type != HashType::SHA384) &&
-      (hash_type != HashType::SHA512)) {
-    return util::Status(util::error::INVALID_ARGUMENT,
-                  absl::StrCat("HashType ", Enums::HashName(hash_type),
-                               " is not supported"));
+Status ValidateHmacAlgorithm(const JwtHmacAlgorithm& algorithm) {
+  switch (algorithm) {
+    case JwtHmacAlgorithm::HS256:
+    case JwtHmacAlgorithm::HS384:
+    case JwtHmacAlgorithm::HS512:
+      return util::OkStatus();
+    default:
+      return Status(absl::StatusCode::kInvalidArgument,
+                    "Unsupported algorithm.");
   }
-  return Status::OK;
+  return util::OkStatus();
 }
 
 }  // namespace
@@ -64,7 +67,7 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::CreateKey(
     const JwtHmacKeyFormat& jwt_hmac_key_format) const {
   JwtHmacKey jwt_hmac_key;
   jwt_hmac_key.set_version(get_version());
-  jwt_hmac_key.set_hash_type(jwt_hmac_key_format.hash_type());
+  jwt_hmac_key.set_algorithm(jwt_hmac_key_format.algorithm());
   jwt_hmac_key.set_key_value(
       subtle::Random::GetRandomBytes(jwt_hmac_key_format.key_size()));
   return jwt_hmac_key;
@@ -73,7 +76,7 @@ StatusOr<JwtHmacKey> RawJwtHmacKeyManager::CreateKey(
 StatusOr<JwtHmacKey> RawJwtHmacKeyManager::DeriveKey(
     const JwtHmacKeyFormat& jwt_hmac_key_format,
     InputStream* input_stream) const {
-  return util::Status(util::error::UNIMPLEMENTED,
+  return util::Status(absl::StatusCode::kUnimplemented,
                       "RawJwtHmacKeyManager::DeriveKey is not implemented");
 }
 
@@ -81,20 +84,20 @@ Status RawJwtHmacKeyManager::ValidateKey(const JwtHmacKey& key) const {
   Status status = ValidateVersion(key.version(), get_version());
   if (!status.ok()) return status;
   if (key.key_value().size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid JwtHmacKey: key_value is too short.");
   }
-  return ValidateHashType(key.hash_type());
+  return ValidateHmacAlgorithm(key.algorithm());
 }
 
 // static
 Status RawJwtHmacKeyManager::ValidateKeyFormat(
     const JwtHmacKeyFormat& key_format) const {
   if (key_format.key_size() < kMinKeySizeInBytes) {
-    return util::Status(util::error::INVALID_ARGUMENT,
+    return util::Status(absl::StatusCode::kInvalidArgument,
                         "Invalid HmacKeyFormat: key_size is too small.");
   }
-  return ValidateHashType(key_format.hash_type());
+  return ValidateHmacAlgorithm(key_format.algorithm());
 }
 
 }  // namespace jwt_internal

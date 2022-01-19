@@ -1,0 +1,163 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+java_library(
+    name = "cha_cha20_util",
+    srcs = ["ChaCha20Util.java"],
+)
+
+java_library(
+    name = "insecure_nonce_aes_gcm_jce",
+    srcs = ["InsecureNonceAesGcmJce.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_cha_cha20",
+    srcs = ["InsecureNonceChaCha20.java"],
+    deps = [
+        ":cha_cha20_util",
+        ":insecure_nonce_cha_cha20_base",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_cha_cha20_base",
+    srcs = ["InsecureNonceChaCha20Base.java"],
+    deps = [
+        ":cha_cha20_util",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_cha_cha20_poly1305",
+    srcs = ["InsecureNonceChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20",
+        ":insecure_nonce_cha_cha20_base",
+        ":insecure_nonce_cha_cha20_poly1305_base",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_cha_cha20_poly1305_base",
+    srcs = ["InsecureNonceChaCha20Poly1305Base.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base",
+        ":poly1305",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_x_cha_cha20",
+    srcs = ["InsecureNonceXChaCha20.java"],
+    deps = [
+        ":cha_cha20_util",
+        ":insecure_nonce_cha_cha20_base",
+    ],
+)
+
+java_library(
+    name = "insecure_nonce_x_cha_cha20_poly1305",
+    srcs = ["InsecureNonceXChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base",
+        ":insecure_nonce_cha_cha20_poly1305_base",
+        ":insecure_nonce_x_cha_cha20",
+    ],
+)
+
+java_library(
+    name = "poly1305",
+    srcs = ["Poly1305.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/subtle:bytes"],
+)
+
+# Android libraries
+
+android_library(
+    name = "cha_cha20_util-android",
+    srcs = ["ChaCha20Util.java"],
+)
+
+android_library(
+    name = "insecure_nonce_aes_gcm_jce-android",
+    srcs = ["InsecureNonceAesGcmJce.java"],
+    deps = [
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "//src/main/java/com/google/crypto/tink/subtle:subtle_util_cluster",
+        "//src/main/java/com/google/crypto/tink/subtle:validators",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_cha_cha20-android",
+    srcs = ["InsecureNonceChaCha20.java"],
+    deps = [
+        ":cha_cha20_util-android",
+        ":insecure_nonce_cha_cha20_base-android",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_cha_cha20_base-android",
+    srcs = ["InsecureNonceChaCha20Base.java"],
+    deps = [
+        ":cha_cha20_util-android",
+        "//src/main/java/com/google/crypto/tink/subtle:bytes",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_cha_cha20_poly1305-android",
+    srcs = ["InsecureNonceChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20-android",
+        ":insecure_nonce_cha_cha20_base-android",
+        ":insecure_nonce_cha_cha20_poly1305_base-android",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_cha_cha20_poly1305_base-android",
+    srcs = ["InsecureNonceChaCha20Poly1305Base.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base-android",
+        ":poly1305-android",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_x_cha_cha20-android",
+    srcs = ["InsecureNonceXChaCha20.java"],
+    deps = [
+        ":cha_cha20_util-android",
+        ":insecure_nonce_cha_cha20_base-android",
+    ],
+)
+
+android_library(
+    name = "insecure_nonce_x_cha_cha20_poly1305-android",
+    srcs = ["InsecureNonceXChaCha20Poly1305.java"],
+    deps = [
+        ":insecure_nonce_cha_cha20_base-android",
+        ":insecure_nonce_cha_cha20_poly1305_base-android",
+        ":insecure_nonce_x_cha_cha20-android",
+    ],
+)
+
+android_library(
+    name = "poly1305-android",
+    srcs = ["Poly1305.java"],
+    deps = ["//src/main/java/com/google/crypto/tink/subtle:bytes"],
+)

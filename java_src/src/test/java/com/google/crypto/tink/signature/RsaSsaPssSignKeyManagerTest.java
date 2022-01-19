@@ -30,6 +30,7 @@ import com.google.crypto.tink.proto.RsaSsaPssKeyFormat;
 import com.google.crypto.tink.proto.RsaSsaPssParams;
 import com.google.crypto.tink.proto.RsaSsaPssPrivateKey;
 import com.google.crypto.tink.proto.RsaSsaPssPublicKey;
+import com.google.crypto.tink.signature.internal.SigUtil;
 import com.google.crypto.tink.subtle.EngineFactory;
 import com.google.crypto.tink.subtle.Random;
 import com.google.crypto.tink.subtle.RsaSsaPssVerifyJce;
@@ -98,14 +99,14 @@ public class RsaSsaPssSignKeyManagerTest {
   }
 
   @Test
-  public void validateKeyFormat_Sha512Allowed() throws Exception {
+  public void validateKeyFormat_sha512Allowed() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA512, HashType.SHA512, 32, 3072, RSAKeyGenParameterSpec.F4);
     factory.validateKeyFormat(format);
   }
 
   @Test
-  public void validateKeyFormat_Sha1Disallowed_throws() throws Exception {
+  public void validateKeyFormat_sha1Disallowed_throws() throws Exception {
     RsaSsaPssKeyFormat format =
         createKeyFormat(HashType.SHA1, HashType.SHA1, 32, 3072, RSAKeyGenParameterSpec.F4);
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
@@ -147,8 +148,8 @@ public class RsaSsaPssSignKeyManagerTest {
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
-  private static void checkConsistency(RsaSsaPssPrivateKey privateKey,
-      RsaSsaPssKeyFormat keyFormat) {
+  private static void checkConsistency(
+      RsaSsaPssPrivateKey privateKey, RsaSsaPssKeyFormat keyFormat) {
     assertThat(privateKey.getPublicKey().getParams()).isEqualTo(keyFormat.getParams());
     assertThat(privateKey.getPublicKey().getE()).isEqualTo(keyFormat.getPublicExponent());
     assertThat(privateKey.getPublicKey().getN().toByteArray().length)
@@ -251,11 +252,12 @@ public class RsaSsaPssSignKeyManagerTest {
     RSAPublicKey publicKey =
         (RSAPublicKey) kf.generatePublic(new RSAPublicKeySpec(modulus, exponent));
     RsaSsaPssParams params = key.getPublicKey().getParams();
-    PublicKeyVerify verifier = new RsaSsaPssVerifyJce(
-        publicKey,
-        SigUtil.toHashType(params.getSigHash()),
-        SigUtil.toHashType(params.getMgf1Hash()),
-        params.getSaltLength());
+    PublicKeyVerify verifier =
+        new RsaSsaPssVerifyJce(
+            publicKey,
+            SigUtil.toHashType(params.getSigHash()),
+            SigUtil.toHashType(params.getMgf1Hash()),
+            params.getSaltLength());
 
     byte[] message = Random.randBytes(135);
     verifier.verify(signer.sign(message), message);
@@ -395,5 +397,18 @@ public class RsaSsaPssSignKeyManagerTest {
             RsaSsaPssSignKeyManager.rawRsa4096PssSha512F4Template().getValue(),
             ExtensionRegistryLite.getEmptyRegistry());
     new RsaSsaPssSignKeyManager().keyFactory().validateKeyFormat(format);
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_F4").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PSS_3072_SHA256_SHA256_32_F4").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_F4").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_F4_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("RSA_SSA_PSS_4096_SHA512_SHA512_64_F4").keyFormat);
   }
 }

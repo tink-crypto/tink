@@ -19,6 +19,7 @@ set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
 ./kokoro/copy_credentials.sh
+./kokoro/update_android_sdk.sh
 
 cd java_src
 use_bazel.sh $(cat .bazelversion)

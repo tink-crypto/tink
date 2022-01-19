@@ -23,6 +23,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/subtle/prf/streaming_prf.h"
@@ -36,16 +37,12 @@ namespace subtle {
 namespace {
 
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::StatusIs;
 using ::testing::_;
 using ::testing::AnyNumber;
-using ::testing::Contains;
 using ::testing::DefaultValue;
 using ::testing::Eq;
-using ::testing::Gt;
 using ::testing::NiceMock;
 using ::testing::Not;
-using ::testing::Pair;
 using ::testing::Return;
 using ::testing::StrEq;
 
@@ -112,19 +109,19 @@ TEST_F(PrfFromStatefulMacFactoryTest, ComputePrf) {
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfUpdateFails) {
-  SetUpWithResult(util::Status(util::error::INTERNAL, "UpdateFailed"),
+  SetUpWithResult(util::Status(absl::StatusCode::kInternal, "UpdateFailed"),
                   std::string("mock_stateful_mac"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("UpdateFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("UpdateFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfFinalizeFails) {
   SetUpWithResult(util::OkStatus(),
-                  util::Status(util::error::INTERNAL, "FinalizeFailed"));
+                  util::Status(absl::StatusCode::kInternal, "FinalizeFailed"));
   auto output_result = prf()->Compute("test_input", 5);
   EXPECT_FALSE(output_result.ok());
-  EXPECT_THAT(output_result.status().error_message(), StrEq("FinalizeFailed"));
+  EXPECT_THAT(output_result.status().message(), Eq("FinalizeFailed"));
 }
 
 TEST_F(PrfFromStatefulMacFactoryTest, ComputePrfTooMuchOutputRequested) {

@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,6 @@
 
 """Tests for tink.python.tink.aead_key_templates."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import absltest
 from absl.testing import parameterized
 from tink.proto import aes_ctr_hmac_aead_pb2
@@ -29,27 +25,9 @@ from tink.proto import kms_aead_pb2
 from tink.proto import kms_envelope_pb2
 from tink.proto import tink_pb2
 from tink import aead
-from tink.testing import helper
 
 
 class AeadKeyTemplatesTest(parameterized.TestCase):
-
-  @parameterized.parameters([
-      ('AES128_EAX', aead.aead_key_templates.AES128_EAX),
-      ('AES256_EAX', aead.aead_key_templates.AES256_EAX),
-      ('AES128_GCM', aead.aead_key_templates.AES128_GCM),
-      ('AES256_GCM', aead.aead_key_templates.AES256_GCM),
-      ('AES128_GCM_SIV', aead.aead_key_templates.AES128_GCM_SIV),
-      ('AES256_GCM_SIV', aead.aead_key_templates.AES256_GCM_SIV),
-      ('AES128_CTR_HMAC_SHA256',
-       aead.aead_key_templates.AES128_CTR_HMAC_SHA256),
-      ('AES256_CTR_HMAC_SHA256',
-       aead.aead_key_templates.AES256_CTR_HMAC_SHA256),
-      ('XCHACHA20_POLY1305', aead.aead_key_templates.XCHACHA20_POLY1305)
-  ])
-  def test_template(self, template_name, template):
-    self.assertEqual(template,
-                     helper.template_from_testdata(template_name, 'aead'))
 
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,

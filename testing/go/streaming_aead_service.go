@@ -34,6 +34,7 @@ const (
 
 // StreamingAEADService implements the StreamingAead testing service.
 type StreamingAEADService struct {
+	pb.StreamingAeadServer
 }
 
 func (s *StreamingAEADService) Encrypt(ctx context.Context, req *pb.StreamingAeadEncryptRequest) (*pb.StreamingAeadEncryptResponse, error) {

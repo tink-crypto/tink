@@ -232,7 +232,7 @@ public class EcdsaSignKeyManagerTest {
   // have leading zeros that are stripped off. These tests are flaky; the probability of
   // failure is 2^-64 which happens when a key has 8 leading zeros.
   @Test
-  public void createKey_NISTP256_keySize() throws Exception {
+  public void createKey_nistP256_keySize() throws Exception {
     EcdsaPrivateKey privateKey =
         factory.createKey(
             createKeyFormat(
@@ -245,7 +245,7 @@ public class EcdsaSignKeyManagerTest {
   // have leading zeros that are stripped off. These tests are flaky; the probability of
   // failure is 2^-64 which happens when a key has 8 leading zeros.
   @Test
-  public void createKey_NISTP384_keySize() throws Exception {
+  public void createKey_nistP384_keySize() throws Exception {
     EcdsaPrivateKey privateKey =
         factory.createKey(
             createKeyFormat(
@@ -258,7 +258,7 @@ public class EcdsaSignKeyManagerTest {
   // have leading zeros that are stripped off. These tests are flaky; the probability of
   // failure is 2^-64 which happens when a key has 8 leading zeros.
   @Test
-  public void createKey_NISTP521_keySize() throws Exception {
+  public void createKey_nistP521_keySize() throws Exception {
     EcdsaPrivateKey privateKey =
         factory.createKey(
             createKeyFormat(
@@ -268,7 +268,7 @@ public class EcdsaSignKeyManagerTest {
   }
 
   @Test
-  public void createKey_NISTP256_differentValues() throws Exception {
+  public void createKey_nistP256_differentValues() throws Exception {
     EcdsaKeyFormat format =
         createKeyFormat(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);
     Set<String> keys = new TreeSet<>();
@@ -280,7 +280,7 @@ public class EcdsaSignKeyManagerTest {
   }
 
   @Test
-  public void createKey_NISTP384_differentValues() throws Exception {
+  public void createKey_nistP384_differentValues() throws Exception {
     EcdsaKeyFormat format =
         createKeyFormat(HashType.SHA384, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER);
     Set<String> keys = new TreeSet<>();
@@ -291,9 +291,8 @@ public class EcdsaSignKeyManagerTest {
     assertThat(keys).hasSize(numTests);
   }
 
-
   @Test
-  public void createKey_NISTP521_differentValues() throws Exception {
+  public void createKey_nistP521_differentValues() throws Exception {
     EcdsaKeyFormat format =
         createKeyFormat(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER);
     Set<String> keys = new TreeSet<>();
@@ -338,5 +337,21 @@ public class EcdsaSignKeyManagerTest {
 
     testKeyTemplateCompatible(manager, EcdsaSignKeyManager.ecdsaP256Template());
     testKeyTemplateCompatible(manager, EcdsaSignKeyManager.rawEcdsaP256Template());
+  }
+
+  @Test
+  public void testKeyFormats() throws Exception {
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_IEEE_P1363").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P256_RAW").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("ECDSA_P256_IEEE_P1363_WITHOUT_PREFIX").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA384").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_SHA512").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P384_IEEE_P1363").keyFormat);
+
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521").keyFormat);
+    factory.validateKeyFormat(factory.keyFormats().get("ECDSA_P521_IEEE_P1363").keyFormat);
   }
 }

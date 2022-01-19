@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC.
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Tests for tink.python.tink.integration.gcp_kms_aead."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 
@@ -89,6 +86,4 @@ class GcpKmsAeadTest(absltest.TestCase):
         aead.decrypt(corrupted_ciphertext, b'')
 
 if __name__ == '__main__':
-  # TODO(b/154273145): re-enable this.
-  pass
-  # absltest.main()
+  absltest.main()

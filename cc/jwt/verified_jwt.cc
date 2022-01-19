@@ -16,6 +16,8 @@
 
 #include "tink/jwt/verified_jwt.h"
 
+#include <string>
+
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/substitute.h"
@@ -28,6 +30,12 @@ VerifiedJwt::VerifiedJwt() {}
 
 VerifiedJwt::VerifiedJwt(const RawJwt& raw_jwt) {
   raw_jwt_ = raw_jwt;
+}
+
+bool VerifiedJwt::HasTypeHeader() const { return raw_jwt_.HasTypeHeader(); }
+
+util::StatusOr<std::string> VerifiedJwt::GetTypeHeader() const {
+  return raw_jwt_.GetTypeHeader();
 }
 
 bool VerifiedJwt::HasIssuer() const {
@@ -139,8 +147,8 @@ std::vector<std::string> VerifiedJwt::CustomClaimNames() const {
   return raw_jwt_.CustomClaimNames();
 }
 
-util::StatusOr<std::string> VerifiedJwt::ToString() {
-  return raw_jwt_.ToString();
+util::StatusOr<std::string> VerifiedJwt::GetJsonPayload() {
+  return raw_jwt_.GetJsonPayload();
 }
 
 }  // namespace tink

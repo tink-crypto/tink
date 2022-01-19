@@ -18,11 +18,13 @@
 #define TINK_STREAMINGAEAD_DECRYPTING_RANDOM_ACCESS_STREAM_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/synchronization/mutex.h"
-#include "tink/random_access_stream.h"
 #include "tink/primitive_set.h"
+#include "tink/random_access_stream.h"
 #include "tink/streaming_aead.h"
 #include "tink/util/buffer.h"
 #include "tink/util/statusor.h"

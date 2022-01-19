@@ -20,15 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
-import com.google.crypto.tink.jwt.JwtEcdsaSignKeyManager;
 import com.google.crypto.tink.jwt.JwtHmacKeyManager;
 import com.google.crypto.tink.jwt.JwtMacConfig;
 import com.google.crypto.tink.jwt.JwtSignatureConfig;
 import com.google.crypto.tink.proto.testing.JwtClaimValue;
+import com.google.crypto.tink.proto.testing.JwtFromJwkSetRequest;
+import com.google.crypto.tink.proto.testing.JwtFromJwkSetResponse;
 import com.google.crypto.tink.proto.testing.JwtGrpc;
 import com.google.crypto.tink.proto.testing.JwtSignRequest;
 import com.google.crypto.tink.proto.testing.JwtSignResponse;
+import com.google.crypto.tink.proto.testing.JwtToJwkSetRequest;
+import com.google.crypto.tink.proto.testing.JwtToJwkSetResponse;
 import com.google.crypto.tink.proto.testing.JwtToken;
 import com.google.crypto.tink.proto.testing.JwtValidator;
 import com.google.crypto.tink.proto.testing.JwtVerifyRequest;
@@ -46,7 +50,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
-import java.time.Instant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,8 +106,9 @@ public final class JwtServiceImplTest {
     return keysetStub.public_(request);
   }
 
-  private JwtToken generateToken(String audience, Instant expiration) {
+  private JwtToken generateToken(String audience, long expSeconds, int expNanos) {
     return JwtToken.newBuilder()
+        .setTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
         .setIssuer(StringValue.newBuilder().setValue("issuer"))
         .addAudiences(audience)
         .addAudiences(audience + "2")
@@ -122,18 +126,20 @@ public final class JwtServiceImplTest {
         .putCustomClaims(
             "json_object",
             JwtClaimValue.newBuilder().setJsonObjectValue("{\"a\":[null,{\"b\":42}]}").build())
-        .setExpiration(Timestamp.newBuilder().setSeconds(expiration.getEpochSecond()))
+        .setExpiration(Timestamp.newBuilder().setSeconds(expSeconds).setNanos(expNanos))
         .build();
   }
 
   @Test
   public void jwtComputeVerifyMac_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(JwtHmacKeyManager.hs256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_HS256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -142,8 +148,10 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -152,9 +160,10 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test
@@ -171,7 +180,7 @@ public final class JwtServiceImplTest {
     JwtSignResponse signResponse = jwtStub.computeMacAndEncode(signRequest);
     assertThat(signResponse.getErr()).isEmpty();
 
-    JwtValidator validator = JwtValidator.getDefaultInstance();
+    JwtValidator validator = JwtValidator.newBuilder().setAllowMissingExpiration(true).build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(keyset))
@@ -186,8 +195,7 @@ public final class JwtServiceImplTest {
 
   @Test
   public void publicKeySignVerify_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(
-        JwtEcdsaSignKeyManager.jwtES256Template());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
@@ -196,7 +204,9 @@ public final class JwtServiceImplTest {
     assertThat(pubResponse.getErr()).isEmpty();
     byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    long expSecs = 1234 + 100;
+    int expNanos = 567000000;
+    JwtToken token = generateToken("audience", expSecs, expNanos);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -208,8 +218,10 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -218,16 +230,17 @@ public final class JwtServiceImplTest {
             .setValidator(validator)
             .build();
 
+    JwtToken expectedToken = generateToken("audience", expSecs, 0);
     JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isEmpty();
-    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(token);
+    assertThat(verifyResponse.getVerifiedJwt()).isEqualTo(expectedToken);
   }
 
   @Test
   public void signFailsOnBadKeyset() throws Exception {
     byte[] badKeyset = "bad keyset".getBytes(UTF_8);
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234, 0);
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
             .setKeyset(ByteString.copyFrom(badKeyset))
@@ -244,7 +257,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(-10));
+    JwtToken token = generateToken("audience", 1234 - 10, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder().setKeyset(ByteString.copyFrom(keyset)).setRawJwt(token).build();
@@ -253,8 +266,10 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -274,7 +289,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("wrong_audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("wrong_audience", 1234 + 100, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -286,8 +301,10 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
-            .setNow(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -308,7 +325,7 @@ public final class JwtServiceImplTest {
     assertThat(keysetResponse.getErr()).isEmpty();
     byte[] keyset = keysetResponse.getKeyset().toByteArray();
 
-    JwtToken token = generateToken("audience", Instant.now().plusSeconds(100));
+    JwtToken token = generateToken("audience", 1234 + 100, 0);
 
     JwtSignRequest signRequest =
         JwtSignRequest.newBuilder()
@@ -324,7 +341,10 @@ public final class JwtServiceImplTest {
 
     JwtValidator validator =
         JwtValidator.newBuilder()
-            .setAudience(StringValue.newBuilder().setValue("audience"))
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
             .build();
     JwtVerifyRequest verifyRequest =
         JwtVerifyRequest.newBuilder()
@@ -335,5 +355,56 @@ public final class JwtServiceImplTest {
 
     JwtVerifyResponse verifyResponse = jwtStub.verifyMacAndDecode(verifyRequest);
     assertThat(verifyResponse.getErr()).isNotEmpty();
+  }
+
+  @Test
+  public void jwtToFromJwt_success() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("JWT_ES256"));
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] privateKeyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetPublicResponse pubResponse = publicKeyset(keysetStub, privateKeyset);
+    assertThat(pubResponse.getErr()).isEmpty();
+    byte[] publicKeyset = pubResponse.getPublicKeyset().toByteArray();
+
+    JwtToken token = generateToken("audience", 1245, 0);
+
+    JwtSignRequest signRequest =
+        JwtSignRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(privateKeyset))
+            .setRawJwt(token)
+            .build();
+    JwtSignResponse signResponse = jwtStub.publicKeySignAndEncode(signRequest);
+    assertThat(signResponse.getErr()).isEmpty();
+
+    // Convert the public keyset to a JWK set
+    JwtToJwkSetRequest toRequest =
+        JwtToJwkSetRequest.newBuilder().setKeyset(ByteString.copyFrom(publicKeyset)).build();
+    JwtToJwkSetResponse toResponse = jwtStub.toJwkSet(toRequest);
+    assertThat(toResponse.getErr()).isEmpty();
+    assertThat(toResponse.getJwkSet()).contains("{\"keys\":[{\"kty\":\"EC\",\"crv\":\"P-256\",");
+    // Convert the public keyset to a JWK set
+    JwtFromJwkSetRequest fromRequest =
+        JwtFromJwkSetRequest.newBuilder().setJwkSet(toResponse.getJwkSet()).build();
+    JwtFromJwkSetResponse fromResponse = jwtStub.fromJwkSet(fromRequest);
+    assertThat(fromResponse.getErr()).isEmpty();
+
+    // Use that output keyset to verify the token
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .setExpectedTypeHeader(StringValue.newBuilder().setValue("typeHeader"))
+            .setExpectedIssuer(StringValue.newBuilder().setValue("issuer"))
+            .setExpectedAudience(StringValue.newBuilder().setValue("audience"))
+            .setNow(Timestamp.newBuilder().setSeconds(1234))
+            .build();
+    JwtVerifyRequest verifyRequest =
+        JwtVerifyRequest.newBuilder()
+            .setKeyset(fromResponse.getKeyset())
+            .setSignedCompactJwt(signResponse.getSignedCompactJwt())
+            .setValidator(validator)
+            .build();
+    JwtVerifyResponse verifyResponse = jwtStub.publicKeyVerifyAndDecode(verifyRequest);
+    assertThat(verifyResponse.getErr()).isEmpty();
   }
 }
