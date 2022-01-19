@@ -22,7 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.aead.AesGcmKeyManager;
+import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.daead.AesSivKeyManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
@@ -34,6 +34,7 @@ import com.google.crypto.tink.proto.testing.AeadDecryptResponse;
 import com.google.crypto.tink.proto.testing.AeadEncryptRequest;
 import com.google.crypto.tink.proto.testing.AeadEncryptResponse;
 import com.google.crypto.tink.proto.testing.AeadGrpc;
+import com.google.crypto.tink.proto.testing.BytesValue;
 import com.google.crypto.tink.proto.testing.ComputeMacRequest;
 import com.google.crypto.tink.proto.testing.ComputeMacResponse;
 import com.google.crypto.tink.proto.testing.DeterministicAeadDecryptRequest;
@@ -46,10 +47,14 @@ import com.google.crypto.tink.proto.testing.KeysetFromJsonResponse;
 import com.google.crypto.tink.proto.testing.KeysetGenerateRequest;
 import com.google.crypto.tink.proto.testing.KeysetGenerateResponse;
 import com.google.crypto.tink.proto.testing.KeysetGrpc;
+import com.google.crypto.tink.proto.testing.KeysetReadEncryptedRequest;
+import com.google.crypto.tink.proto.testing.KeysetReadEncryptedResponse;
 import com.google.crypto.tink.proto.testing.KeysetTemplateRequest;
 import com.google.crypto.tink.proto.testing.KeysetTemplateResponse;
 import com.google.crypto.tink.proto.testing.KeysetToJsonRequest;
 import com.google.crypto.tink.proto.testing.KeysetToJsonResponse;
+import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedRequest;
+import com.google.crypto.tink.proto.testing.KeysetWriteEncryptedResponse;
 import com.google.crypto.tink.proto.testing.MacGrpc;
 import com.google.crypto.tink.proto.testing.MetadataGrpc;
 import com.google.crypto.tink.proto.testing.PrfSetComputeRequest;
@@ -72,6 +77,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -194,7 +200,7 @@ public final class TestingServicesTest {
 
   @Test
   public void toFromJson_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
 
     KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
     assertThat(keysetResponse.getErr()).isEmpty();
@@ -209,6 +215,125 @@ public final class TestingServicesTest {
     byte[] output = fromResponse.getKeyset().toByteArray();
 
     assertThat(output).isEqualTo(keyset);
+  }
+
+  private static KeysetReadEncryptedResponse keysetReadEncrypted(
+      KeysetGrpc.KeysetBlockingStub keysetStub,
+      byte[] encryptedKeyset,
+      byte[] masterKeyset,
+      Optional<byte[]> associatedData) {
+    KeysetReadEncryptedRequest.Builder requestBuilder =
+        KeysetReadEncryptedRequest.newBuilder()
+            .setEncryptedKeyset(ByteString.copyFrom(encryptedKeyset))
+            .setMasterKeyset(ByteString.copyFrom(masterKeyset));
+    if (associatedData.isPresent()) {
+      requestBuilder.setAssociatedData(
+          BytesValue.newBuilder().setValue(ByteString.copyFrom(associatedData.get())).build());
+    }
+    return keysetStub.readEncrypted(requestBuilder.build());
+  }
+
+  private static KeysetWriteEncryptedResponse keysetWriteEncrypted(
+      KeysetGrpc.KeysetBlockingStub keysetStub, byte[] keyset, byte[] masterKeyset,
+      Optional<byte[]> associatedData) {
+    KeysetWriteEncryptedRequest.Builder requestBuilder =
+        KeysetWriteEncryptedRequest.newBuilder()
+            .setKeyset(ByteString.copyFrom(keyset))
+            .setMasterKeyset(ByteString.copyFrom(masterKeyset));
+    if (associatedData.isPresent()) {
+      requestBuilder.setAssociatedData(
+          BytesValue.newBuilder().setValue(ByteString.copyFrom(associatedData.get())).build());
+    }
+    return keysetStub.writeEncrypted(requestBuilder.build());
+  }
+
+  @Test
+  public void generateEncryptDecryptKeyset() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetGenerateResponse masterKeysetResponse = generateKeyset(keysetStub, template);
+    assertThat(masterKeysetResponse.getErr()).isEmpty();
+    byte[] masterKeyset = masterKeysetResponse.getKeyset().toByteArray();
+
+    KeysetWriteEncryptedResponse writeResponse =
+        keysetWriteEncrypted(keysetStub, keyset, masterKeyset, /*associatedData=*/Optional.empty());
+    assertThat(writeResponse.getErr()).isEmpty();
+    byte[] encryptedKeyset = writeResponse.getEncryptedKeyset().toByteArray();
+
+    assertThat(encryptedKeyset).isNotEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponse =
+        keysetReadEncrypted(
+            keysetStub, encryptedKeyset, masterKeyset, /*associatedData=*/ Optional.empty());
+    assertThat(readResponse.getErr()).isEmpty();
+    byte[] output = readResponse.getKeyset().toByteArray();
+
+    assertThat(output).isEqualTo(keyset);
+  }
+
+  @Test
+  public void generateEncryptDecryptKeysetWithAssociatedData() throws Exception {
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+    byte[] associatedData = "a".getBytes(UTF_8);
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetGenerateResponse masterKeysetResponse = generateKeyset(keysetStub, template);
+    assertThat(masterKeysetResponse.getErr()).isEmpty();
+    byte[] masterKeyset = masterKeysetResponse.getKeyset().toByteArray();
+
+    KeysetWriteEncryptedResponse writeResponse =
+        keysetWriteEncrypted(keysetStub, keyset, masterKeyset, Optional.of(associatedData));
+    assertThat(writeResponse.getErr()).isEmpty();
+    byte[] encryptedKeyset = writeResponse.getEncryptedKeyset().toByteArray();
+
+    assertThat(encryptedKeyset).isNotEqualTo(keyset);
+
+    KeysetReadEncryptedResponse readResponse =
+        keysetReadEncrypted(
+            keysetStub, encryptedKeyset, masterKeyset, Optional.of(associatedData));
+    assertThat(readResponse.getErr()).isEmpty();
+    byte[] output = readResponse.getKeyset().toByteArray();
+
+    assertThat(output).isEqualTo(keyset);
+  }
+
+  @Test
+  public void encryptDecryptInvalidKeyset_fails() throws Exception {
+    byte[] invalidData = "invalid".getBytes(UTF_8);
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
+
+    KeysetGenerateResponse keysetResponse = generateKeyset(keysetStub, template);
+    assertThat(keysetResponse.getErr()).isEmpty();
+    byte[] keyset = keysetResponse.getKeyset().toByteArray();
+
+    KeysetGenerateResponse masterKeysetResponse = generateKeyset(keysetStub, template);
+    assertThat(masterKeysetResponse.getErr()).isEmpty();
+    byte[] masterKeyset = masterKeysetResponse.getKeyset().toByteArray();
+
+    KeysetWriteEncryptedResponse writeResponse1 =
+        keysetWriteEncrypted(keysetStub, keyset, invalidData, /*associatedData=*/ Optional.empty());
+    assertThat(writeResponse1.getErr()).isNotEmpty();
+
+    KeysetWriteEncryptedResponse writeResponse2 =
+        keysetWriteEncrypted(
+            keysetStub, invalidData, masterKeyset, /*associatedData=*/ Optional.empty());
+    assertThat(writeResponse2.getErr()).isNotEmpty();
+
+    KeysetReadEncryptedResponse readResponse1 =
+        keysetReadEncrypted(keysetStub, keyset, invalidData, /*associatedData=*/ Optional.empty());
+    assertThat(readResponse1.getErr()).isNotEmpty();
+
+    KeysetReadEncryptedResponse readResponse2 =
+        keysetReadEncrypted(
+            keysetStub, invalidData, masterKeyset, /*associatedData=*/ Optional.empty());
+    assertThat(readResponse2.getErr()).isNotEmpty();
   }
 
   private static AeadEncryptResponse aeadEncrypt(
@@ -235,7 +360,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadGenerateEncryptDecrypt_success() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 
@@ -272,7 +397,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadDecrypt_failsOnBadCiphertext() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
     byte[] badCiphertext = "bad ciphertext".getBytes(UTF_8);
     byte[] associatedData = "aead_decrypt_fails_on_bad_ciphertext".getBytes(UTF_8);
 
@@ -286,7 +411,7 @@ public final class TestingServicesTest {
 
   @Test
   public void aeadDecrypt_failsOnBadKeyset() throws Exception {
-    byte[] template = KeyTemplateProtoConverter.toByteArray(AesGcmKeyManager.aes128GcmTemplate());
+    byte[] template = KeyTemplateProtoConverter.toByteArray(KeyTemplates.get("AES128_GCM"));
     byte[] plaintext = "The quick brown fox jumps over the lazy dog".getBytes(UTF_8);
     byte[] associatedData = "generate_encrypt_decrypt".getBytes(UTF_8);
 

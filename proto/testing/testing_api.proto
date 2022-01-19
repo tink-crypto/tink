@@ -45,6 +45,14 @@ service Keyset {
   rpc ToJson(KeysetToJsonRequest) returns (KeysetToJsonResponse) {}
   // Converts a Keyset from Json to Binary Format
   rpc FromJson(KeysetFromJsonRequest) returns (KeysetFromJsonResponse) {}
+  // Reads an encrypted keyset using KeysetHandle.read() or
+  // KeysetHandle.readWithAssociatedData() and the BinaryKeysetReader.
+  rpc ReadEncrypted(KeysetReadEncryptedRequest)
+      returns (KeysetReadEncryptedResponse) {}
+  // Writes an encrypted keyset using KeysetHandle.write() or
+  // KeysetHandle.writeWithAssociatedData() and the BinaryKeysetWriter.
+  rpc WriteEncrypted(KeysetWriteEncryptedRequest)
+      returns (KeysetWriteEncryptedResponse) {}
 }
 
 message KeysetTemplateRequest {
@@ -98,6 +106,38 @@ message KeysetFromJsonRequest {
 message KeysetFromJsonResponse {
   oneof result {
     bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+    string err = 2;
+  }
+}
+
+// Copy of google.protobuf.BytesValue
+message BytesValue {
+  // The bytes value.
+  bytes value = 1;
+}
+
+message KeysetReadEncryptedRequest {
+  bytes encrypted_keyset = 1;
+  bytes master_keyset = 2;  // serialized google.crypto.tink.Keyset.
+  BytesValue associated_data = 3;
+}
+
+message KeysetReadEncryptedResponse {
+  oneof result {
+    bytes keyset = 1;  // serialized google.crypto.tink.Keyset.
+    string err = 2;
+  }
+}
+
+message KeysetWriteEncryptedRequest {
+  bytes keyset = 1;         // serialized google.crypto.tink.Keyset.
+  bytes master_keyset = 2;  // serialized google.crypto.tink.Keyset.
+  BytesValue associated_data = 3;
+}
+
+message KeysetWriteEncryptedResponse {
+  oneof result {
+    bytes encrypted_keyset = 1;
     string err = 2;
   }
 }
@@ -360,7 +400,7 @@ enum NullValue { NULL_VALUE = 0; }
 
 // TODO(b/179867503): Remove these copies of Timestamp, Duration and StringValue
 
-// Copied from timestamp.proto
+// Copy of google.protobuf.Timestamp
 message Timestamp {
   // Represents seconds of UTC time since Unix epoch
   // 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
@@ -374,7 +414,7 @@ message Timestamp {
   int32 nanos = 2;
 }
 
-// Copied from duration.proto
+// Copy of google.protobuf.Duration
 message Duration {
   // Signed seconds of the span of time. Must be from -315,576,000,000
   // to +315,576,000,000 inclusive. Note: these bounds are computed from:
@@ -390,7 +430,7 @@ message Duration {
   int32 nanos = 2;
 }
 
-// Copied from wrappers.proto
+// Copy of google.protobuf.StringValue
 message StringValue {
   // The string value.
   string value = 1;

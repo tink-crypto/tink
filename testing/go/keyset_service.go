@@ -174,3 +174,13 @@ func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequ
 	return &pb.KeysetFromJsonResponse{
 		Result: &pb.KeysetFromJsonResponse_Keyset{buf.Bytes()}}, nil
 }
+
+func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteEncryptedRequest) (*pb.KeysetWriteEncryptedResponse, error) {
+	return &pb.KeysetWriteEncryptedResponse{
+		Result: &pb.KeysetWriteEncryptedResponse_Err{"not implemented"}}, nil
+}
+
+func (s *KeysetService) ReadEncrypted(ctx context.Context, req *pb.KeysetReadEncryptedRequest) (*pb.KeysetReadEncryptedResponse, error) {
+	return &pb.KeysetReadEncryptedResponse{
+		Result: &pb.KeysetReadEncryptedResponse_Err{"not implemented"}}, nil
+}
