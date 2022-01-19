@@ -12,7 +12,6 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/testutil",
     deps = [
-        "//aead:go_default_library",
         "//core/registry:go_default_library",
         "//daead:go_default_library",
         "//daead/subtle:go_default_library",
@@ -55,7 +54,6 @@ go_test(
         "@wycheproof//testvectors:all",
     ],
     deps = [
-        "//aead:go_default_library",
         "//subtle/random:go_default_library",
         "//testutil:go_default_library",
         "//tink:go_default_library",
