@@ -27,9 +27,13 @@ if [[ "${PLATFORM}" == 'darwin' ]]; then
   export JAVA_OPTS="-Djava.net.preferIPv6Addresses=true"
 fi
 
-# Install build-tools.
-(yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" "build-tools;30.0.3"
-
-# Install all necessary parts of the Android SDK.
-(yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" "platform-tools" \
-  "platforms;android-29" "platforms;android-30" "platforms;android-31"
+# Install build-tools and other SDK dependencies.
+#
+# Discard STDOUT due to noisy progress bar which can't be silenced.
+(yes || true) | "${ANDROID_HOME}/tools/bin/sdkmanager" \
+  "build-tools;30.0.3" \
+  "platform-tools" \
+  "platforms;android-29" \
+  "platforms;android-30" \
+  "platforms;android-31" \
+  > /dev/null
