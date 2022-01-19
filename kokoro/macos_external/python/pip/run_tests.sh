@@ -21,7 +21,7 @@ cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 ./kokoro/copy_credentials.sh
 
 install_temp_protoc() {
-  local protoc_version='3.14.0'
+  local protoc_version='3.17.3'
   local protoc_zip="protoc-${protoc_version}-osx-x86_64.zip"
   local protoc_url="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_version}/${protoc_zip}"
   local -r protoc_tmpdir="$(mktemp -dt tink-protoc.XXXXXX)"
