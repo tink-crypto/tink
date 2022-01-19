@@ -93,7 +93,7 @@ public class GooglePaymentsPublicKeysManager {
    *
    * <p>Meant to be called by {@link PaymentMethodTokenRecipient}.
    */
-  String getTrustedSigningKeysJson() throws IOException {
+  public String getTrustedSigningKeysJson() throws IOException {
     return this.downloader.download();
   }
 
