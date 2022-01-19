@@ -116,7 +116,6 @@ pod install
 *   [Key Management](docs/KEY-MANAGEMENT.md)
 *   [Managing keys with Tinkey](docs/TINKEY.md)
 *   [Known Issues](docs/KNOWN-ISSUES.md)
-*   [Feature Roadmap](docs/ROADMAP.md)
 
 ## Community-driven ports
 
