@@ -28,7 +28,7 @@ install_cmake() {
   local -r cmake_tmpdir="$(mktemp -dt tink-cmake.XXXXXX)"
   (
     cd "${cmake_tmpdir}"
-    curl -OLS "${cmake_url}"
+    curl -OLsS "${cmake_url}"
     echo "${cmake_sha256} ${cmake_archive}" | sha256sum -c
 
     tar xzf "${cmake_archive}"
@@ -47,7 +47,7 @@ install_openssl() {
   local -r openssl_tmpdir="$(mktemp -dt tink-openssl.XXXXXX)"
   (
     cd "${openssl_tmpdir}"
-    curl -OLS "${openssl_url}"
+    curl -OLsS "${openssl_url}"
     echo "${openssl_sha256} ${openssl_archive}" | sha256sum -c
 
     tar xzf "${openssl_archive}"

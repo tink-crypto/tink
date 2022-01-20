@@ -161,7 +161,7 @@ install_temp_protoc() {
   local -r protoc_tmpdir=$(mktemp -dt tink-protoc.XXXXXX)
   (
     cd "${protoc_tmpdir}"
-    curl -OL "${protoc_url}"
+    curl -OLsS "${protoc_url}"
     unzip ${protoc_zip} bin/protoc
   )
   export PATH="${protoc_tmpdir}/bin:${PATH}"
