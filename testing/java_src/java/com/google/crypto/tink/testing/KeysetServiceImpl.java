@@ -16,8 +16,6 @@
 
 package com.google.crypto.tink.testing;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.BinaryKeysetReader;
 import com.google.crypto.tink.BinaryKeysetWriter;
@@ -143,7 +141,7 @@ public final class KeysetServiceImpl extends KeysetImplBase {
       JsonKeysetWriter.withOutputStream(jsonKeysetStream).write(keyset);
       jsonKeysetStream.close();
       response =
-          KeysetToJsonResponse.newBuilder().setJsonKeyset(jsonKeysetStream.toString(UTF_8)).build();
+          KeysetToJsonResponse.newBuilder().setJsonKeyset(jsonKeysetStream.toString("UTF-8")).build();
     } catch (GeneralSecurityException | InvalidProtocolBufferException e) {
       response = KeysetToJsonResponse.newBuilder().setErr(e.toString()).build();
     } catch (IOException e) {
