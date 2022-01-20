@@ -31,7 +31,7 @@ install_python3() {
   )
   # Install Python.
   eval "$(pyenv init -)"
-  pyenv install -v "${PYTHON_VERSION}"
+  pyenv install "${PYTHON_VERSION}"
   pyenv global "${PYTHON_VERSION}"
 }
 

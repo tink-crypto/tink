@@ -186,7 +186,7 @@ main() {
         git checkout 783870759566a77d09b426e0305bc0993a522765
       )
       eval "$(pyenv init -)"
-      pyenv install -v "${PYTHON_VERSION}"
+      pyenv install "${PYTHON_VERSION}"
       pyenv global "${PYTHON_VERSION}"
     fi
 
