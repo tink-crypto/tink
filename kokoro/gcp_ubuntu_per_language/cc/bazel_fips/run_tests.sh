@@ -51,11 +51,11 @@ BAZEL_FLAGS=(
 )
 
 bazel build \
-  "{BAZEL_FLAGS[@]}" \
+  "${BAZEL_FLAGS[@]}" \
   -- ...
 
 bazel test \
-  "{BAZEL_FLAGS[@]}" \
+  "${BAZEL_FLAGS[@]}" \
   --build_tests_only \
   --test_output=errors \
   --test_tag_filters=fips,-requires_boringcrypto_update \
