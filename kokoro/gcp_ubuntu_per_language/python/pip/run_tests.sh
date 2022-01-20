@@ -39,7 +39,7 @@ install_python3() {
 }
 
 install_temp_protoc() {
-  local protoc_version='3.17.3'
+  local protoc_version='3.19.3'
   local protoc_zip="protoc-${protoc_version}-linux-x86_64.zip"
   local protoc_url="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_version}/${protoc_zip}"
   local -r protoc_tmpdir="$(mktemp -dt tink-protoc.XXXXXX)"

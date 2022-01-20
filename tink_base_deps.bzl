@@ -60,9 +60,9 @@ def tink_base_deps():
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            strip_prefix = "protobuf-3.17.3",
-            urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.17.3.zip"],
-            sha256 = "528927e398f4e290001886894dac17c5c6a2e5548f3fb68004cfb01af901b53a",
+            strip_prefix = "protobuf-3.19.3",
+            urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.19.3.zip"],
+            sha256 = "6b6bf5cd8d0cca442745c4c3c9f527c83ad6ef35a405f64db5215889ac779b42",
         )
 
     # Remote Build Execution

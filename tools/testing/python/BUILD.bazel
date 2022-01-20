@@ -13,9 +13,10 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
-        "@tink_py//tink:tink_python",
         "@tink_py//tink:cleartext_keyset_handle",
+        "@tink_py//tink:tink_python",
         "@tink_py//tink/aead",
         "@tink_py//tink/integration/awskms",
         "@tink_py//tink/integration/gcpkms",

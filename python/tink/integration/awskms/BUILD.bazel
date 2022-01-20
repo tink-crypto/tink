@@ -16,24 +16,25 @@ py_library(
 py_library(
     name = "_aws_kms_client",
     srcs = ["_aws_kms_client.py"],
-    srcs_version =  "PY3",
+    srcs_version = "PY3",
     deps = [
         "//tink/aead",
-        "//tink/core",
         "//tink/cc/pybind:tink_bindings",
+        "//tink/core",
     ],
 )
 
 py_test(
     name = "_aws_kms_client_test",
     srcs = ["_aws_kms_client_test.py"],
-    srcs_version =  "PY3",
     data = [
         "@tink_base//testdata:credentials",
     ],
+    srcs_version = "PY3",
     deps = [
         ":awskms",
         "//tink/testing:helper",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )
@@ -41,13 +42,14 @@ py_test(
 py_test(
     name = "_aws_kms_aead_test",
     srcs = ["_aws_kms_aead_test.py"],
-    srcs_version =  "PY3",
     data = [
         "@tink_base//testdata:credentials",
     ],
+    srcs_version = "PY3",
     deps = [
         ":awskms",
         "//tink/testing:helper",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
     ],
 )

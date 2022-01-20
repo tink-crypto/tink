@@ -44,6 +44,7 @@ py_test(
     srcs = ["cc_key_manager_test.py"],
     deps = [
         ":tink_bindings",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink/aead",
         "//tink/hybrid",
@@ -169,8 +170,8 @@ tink_pybind_library(
     hdrs = ["status.h"],
     deps = [
         ":status_utils",
-        "@pybind11",
         "@com_google_absl//absl/status",
+        "@pybind11",
         "@tink_cc//util:status",
     ],
 )
@@ -181,8 +182,8 @@ tink_pybind_library(
     hdrs = ["status_injector.h"],
     deps = [
         ":status_casters",
-        "@pybind11",
         "@com_google_absl//absl/status",
+        "@pybind11",
         "@tink_cc//util:status",
     ],
 )

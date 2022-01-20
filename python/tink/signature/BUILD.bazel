@@ -50,6 +50,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":signature",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/core",
@@ -78,6 +79,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":signature",
+        requirement("six"),  # needed by absl-py
         requirement("absl-py"),
         "//tink:tink_python",
         "//tink/testing:keyset_builder",
