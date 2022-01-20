@@ -54,7 +54,7 @@ install_pip_package() {
 
 run_tests_with_package() {
   # Get root certificates for gRPC
-  wget https://raw.githubusercontent.com/grpc/grpc/master/etc/roots.pem
+  curl -OLsS https://raw.githubusercontent.com/grpc/grpc/master/etc/roots.pem
   export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="${PWD}/roots.pem"
 
   # Set path to Tink base folder
