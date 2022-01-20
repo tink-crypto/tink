@@ -17,6 +17,8 @@
 #ifndef TINK_SUBTLE_NONCE_BASED_STREAMING_AEAD_H_
 #define TINK_SUBTLE_NONCE_BASED_STREAMING_AEAD_H_
 
+#include <memory>
+
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"

@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_SUBTLE_UTIL_BORINGSSL_H_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

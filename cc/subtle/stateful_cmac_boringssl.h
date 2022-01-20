@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_STATEFUL_CMAC_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "openssl/cmac.h"

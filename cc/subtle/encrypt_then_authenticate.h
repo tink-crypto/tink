@@ -18,6 +18,8 @@
 #define TINK_SUBTLE_ENCRYPT_THEN_AUTHENTICATE_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"

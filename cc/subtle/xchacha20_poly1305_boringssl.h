@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_XCHACHA20_POLY1305_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"

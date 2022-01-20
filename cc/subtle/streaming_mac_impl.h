@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_STREAMING_MAC_IMPL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "tink/streaming_mac.h"

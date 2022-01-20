@@ -18,6 +18,7 @@
 #define TINK_SUBTLE_AES_GCM_SIV_BORINGSSL_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "absl/strings/string_view.h"
