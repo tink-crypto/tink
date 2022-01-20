@@ -31,7 +31,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-creating-the-encryption-con
  */
 @ThreadSafe
-public final class HpkeContext {
+final class HpkeContext {
   private static final byte[] EMPTY_IKM = new byte[0];
 
   private final HpkeAead aead;
@@ -90,7 +90,7 @@ public final class HpkeContext {
    * @param aead authenticated encryption with associated data primitive
    * @param info application-specific information parameter to influence key generation
    */
-  public static HpkeContext createSenderContext(
+  static HpkeContext createSenderContext(
       HpkePublicKey recipientPublicKey, HpkeKem kem, HpkeKdf kdf, HpkeAead aead, byte[] info)
       throws GeneralSecurityException {
     HpkeKemEncapOutput encapOutput =
@@ -111,7 +111,7 @@ public final class HpkeContext {
    * @param aead authenticated encryption with associated data primitive
    * @param info application-specific information parameter to influence key generation
    */
-  public static HpkeContext createRecipientContext(
+  static HpkeContext createRecipientContext(
       byte[] encapsulatedKey,
       HpkePrivateKey recipientPrivateKey,
       HpkeKem kem,
@@ -161,7 +161,7 @@ public final class HpkeContext {
     return baseNonce;
   }
 
-  public byte[] getEncapsulatedKey() {
+  byte[] getEncapsulatedKey() {
     return encapsulatedKey;
   }
 
@@ -172,7 +172,7 @@ public final class HpkeContext {
    *
    * @return ciphertext
    */
-  public byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
+  byte[] seal(byte[] plaintext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.seal(key, nonce, plaintext, associatedData);
   }
@@ -184,7 +184,7 @@ public final class HpkeContext {
    *
    * @return plaintext
    */
-  public byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
+  byte[] open(byte[] ciphertext, byte[] associatedData) throws GeneralSecurityException {
     byte[] nonce = computeNonceAndIncrementSequenceNumber();
     return aead.open(key, nonce, ciphertext, associatedData);
   }

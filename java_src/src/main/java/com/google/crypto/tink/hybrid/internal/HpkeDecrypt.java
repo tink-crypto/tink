@@ -29,7 +29,7 @@ import java.util.Arrays;
  * <p>HPKE I.-D.: https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html
  */
 @Immutable
-public final class HpkeDecrypt implements HybridDecrypt {
+final class HpkeDecrypt implements HybridDecrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
   private final HpkePrivateKey recipientPrivateKey;
@@ -68,7 +68,7 @@ public final class HpkeDecrypt implements HybridDecrypt {
   }
 
   /** Returns an HPKE decryption primitive created from {@code recipientPrivateKey} */
-  public static HpkeDecrypt createHpkeDecrypt(HpkePrivateKey recipientPrivateKey)
+  static HpkeDecrypt createHpkeDecrypt(HpkePrivateKey recipientPrivateKey)
       throws GeneralSecurityException {
     if (!recipientPrivateKey.hasPublicKey()) {
       throw new IllegalArgumentException("HpkePrivateKey is missing public_key field.");

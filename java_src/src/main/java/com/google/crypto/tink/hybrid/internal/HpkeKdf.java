@@ -25,7 +25,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE I.-D. is available at https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
  */
 @Immutable
-public interface HpkeKdf {
+interface HpkeKdf {
   /**
    * Extracts pseudorandom key from {@code salt} and {@code ikm} using the HPKE-specific values
    * {@code ikmLabel} and {@code suiteId} to facilitate domain separation and context binding.
@@ -39,7 +39,7 @@ public interface HpkeKdf {
    * @param suiteId HPKE cipher suite identifier prepended to { {@code ikmLabel} || {@code ikm} }
    * @return pseudorandom key
    */
-  public byte[] labeledExtract(byte[] salt, byte[] ikm, String ikmLabel, byte[] suiteId)
+  byte[] labeledExtract(byte[] salt, byte[] ikm, String ikmLabel, byte[] suiteId)
       throws GeneralSecurityException;
 
   /**
@@ -57,7 +57,7 @@ public interface HpkeKdf {
    * @param length desired length (in bytes) of pseudorandom output
    * @return {@code length} pseudorandom bytes of output keying material
    */
-  public byte[] labeledExpand(byte[] prk, byte[] info, String infoLabel, byte[] suiteId, int length)
+  byte[] labeledExpand(byte[] prk, byte[] info, String infoLabel, byte[] suiteId, int length)
       throws GeneralSecurityException;
 
   /**
@@ -77,7 +77,7 @@ public interface HpkeKdf {
    * @param length desired length (in bytes) of pseudorandom output
    * @return {@code length} pseudorandom bytes of output keying material
    */
-  public byte[] extractAndExpand(
+  byte[] extractAndExpand(
       byte[] salt,
       byte[] ikm,
       String ikmLabel,
@@ -93,5 +93,5 @@ public interface HpkeKdf {
    * <p>More details at
    * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-derivation-functions-kd.
    */
-  public byte[] getKdfId() throws GeneralSecurityException;
+  byte[] getKdfId() throws GeneralSecurityException;
 }

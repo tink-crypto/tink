@@ -23,10 +23,10 @@ import java.security.InvalidAlgorithmParameterException;
 
 /** AES-GCM HPKE AEAD variant. */
 @Immutable
-public final class AesGcmHpkeAead implements HpkeAead {
+final class AesGcmHpkeAead implements HpkeAead {
   private final int keyLength;
 
-  public AesGcmHpkeAead(int keyLength) throws InvalidAlgorithmParameterException {
+  AesGcmHpkeAead(int keyLength) throws InvalidAlgorithmParameterException {
     if ((keyLength != 16) && (keyLength != 32)) {
       throw new InvalidAlgorithmParameterException("Unsupported key length: " + keyLength);
     }

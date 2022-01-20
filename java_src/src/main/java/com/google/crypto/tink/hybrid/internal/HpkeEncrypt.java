@@ -29,7 +29,7 @@ import java.security.GeneralSecurityException;
  * <p>HPKE I.-D.: https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html
  */
 @Immutable
-public final class HpkeEncrypt implements HybridEncrypt {
+final class HpkeEncrypt implements HybridEncrypt {
   private static final byte[] EMPTY_ASSOCIATED_DATA = new byte[0];
 
   private final HpkePublicKey recipientPublicKey;
@@ -45,7 +45,7 @@ public final class HpkeEncrypt implements HybridEncrypt {
   }
 
   /** Returns an HPKE encryption primitive created from {@code recipientPublicKey} */
-  public static HpkeEncrypt createHpkeEncrypt(HpkePublicKey recipientPublicKey)
+  static HpkeEncrypt createHpkeEncrypt(HpkePublicKey recipientPublicKey)
       throws GeneralSecurityException {
     if (recipientPublicKey.getPublicKey().isEmpty()) {
       throw new IllegalArgumentException("HpkePublicKey.public_key is empty.");

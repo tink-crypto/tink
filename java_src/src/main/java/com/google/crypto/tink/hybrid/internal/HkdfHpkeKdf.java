@@ -24,10 +24,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 /** HKDF HPKE KDF variant. */
 @Immutable
-public final class HkdfHpkeKdf implements HpkeKdf {
+final class HkdfHpkeKdf implements HpkeKdf {
   private final String macAlgorithm;
 
-  public HkdfHpkeKdf(String macAlgorithm) {
+  HkdfHpkeKdf(String macAlgorithm) {
     this.macAlgorithm = macAlgorithm;
   }
 

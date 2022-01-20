@@ -23,7 +23,7 @@ import java.security.InvalidAlgorithmParameterException;
 
 /** ChaCha20-Poly1305 HPKE AEAD variant. */
 @Immutable
-public final class ChaCha20Poly1305HpkeAead implements HpkeAead {
+final class ChaCha20Poly1305HpkeAead implements HpkeAead {
   @Override
   public byte[] seal(byte[] key, byte[] nonce, byte[] plaintext, byte[] associatedData)
       throws GeneralSecurityException {
