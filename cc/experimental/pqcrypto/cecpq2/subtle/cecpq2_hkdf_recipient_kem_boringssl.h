@@ -17,6 +17,9 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_CECPQ2_SUBTLE_CECPQ2_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_CECPQ2_SUBTLE_CECPQ2_HKDF_RECIPIENT_KEM_BORINGSSL_H_
 
+#include <memory>
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "openssl/curve25519.h"
 #include "openssl/ec.h"

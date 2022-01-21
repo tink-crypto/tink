@@ -17,6 +17,8 @@
 #ifndef TINK_EXPERIMENTAL_PQCRYPTO_CECPQ2_SUBTLE_CECPQ2_SUBTLE_BORINGSSL_UTIL_H_
 #define TINK_EXPERIMENTAL_PQCRYPTO_CECPQ2_SUBTLE_CECPQ2_SUBTLE_BORINGSSL_UTIL_H_
 
+#include <string>
+
 #include "openssl/hrss.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/util/secret_data.h"
