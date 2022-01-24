@@ -456,6 +456,7 @@ cc_test(
     deps = [
         ":aes_gcm_siv_key_manager",
         "//:aead",
+        "//internal:ssl_util",
         "//proto:aes_gcm_siv_cc_proto",
         "//subtle:aead_test_util",
         "//util:secret_data",

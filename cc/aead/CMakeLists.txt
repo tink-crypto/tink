@@ -428,6 +428,7 @@ tink_cc_test(
     gmock
     absl::status
     tink::core::aead
+    tink::internal::ssl_util
     tink::subtle::aead_test_util
     tink::util::secret_data
     tink::util::status

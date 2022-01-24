@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/aead.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/secret_data.h"
 #include "tink/util/status.h"
@@ -38,6 +39,7 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::AesGcmSivKey;
 using ::google::crypto::tink::AesGcmSivKeyFormat;
 using ::testing::Eq;
+using ::testing::Not;
 
 TEST(AesGcmSivKeyManagerTest, Basics) {
   EXPECT_THAT(AesGcmSivKeyManager().get_version(), Eq(0));
@@ -152,25 +154,41 @@ TEST(AesGcmSivKeyManagerTest, Create32ByteKey) {
   EXPECT_THAT(key_or.ValueOrDie().key_value().size(), Eq(format.key_size()));
 }
 
-TEST(AesGcmSivKeyManagerTest, CreateAead) {
+TEST(AesGcmSivKeyManagerTest, CreateAeadFailsWithOpenSsl) {
+  if (internal::IsBoringSsl()) {
+    GTEST_SKIP() << "OpenSSL-only test, skipping because Tink uses BoringSSL";
+  }
   AesGcmSivKeyFormat format;
   format.set_key_size(32);
-  StatusOr<AesGcmSivKey> key_or = AesGcmSivKeyManager().CreateKey(format);
-  ASSERT_THAT(key_or.status(), IsOk());
+  StatusOr<AesGcmSivKey> key = AesGcmSivKeyManager().CreateKey(format);
+  ASSERT_THAT(key.status(), IsOk());
 
-  StatusOr<std::unique_ptr<Aead>> aead_or =
-      AesGcmSivKeyManager().GetPrimitive<Aead>(key_or.ValueOrDie());
+  EXPECT_THAT(AesGcmSivKeyManager().GetPrimitive<Aead>(*key).status(),
+              Not(IsOk()));
+  EXPECT_THAT(subtle::AesGcmSivBoringSsl::New(
+                  util::SecretDataFromStringView(key->key_value()))
+                  .status(),
+              Not(IsOk()));
+}
 
-  ASSERT_THAT(aead_or.status(), IsOk());
+TEST(AesGcmSivKeyManagerTest, CreateAeadSucceedsWithBoringSsl) {
+  if (!internal::IsBoringSsl()) {
+    GTEST_SKIP() << "AES-GCM-SIV is not supported when OpenSSL is used";
+  }
+  AesGcmSivKeyFormat format;
+  format.set_key_size(32);
+  StatusOr<AesGcmSivKey> key = AesGcmSivKeyManager().CreateKey(format);
+  ASSERT_THAT(key.status(), IsOk());
 
-  StatusOr<std::unique_ptr<Aead>> boring_ssl_aead_or =
+  StatusOr<std::unique_ptr<Aead>> aead =
+      AesGcmSivKeyManager().GetPrimitive<Aead>(*key);
+  ASSERT_THAT(aead.status(), IsOk());
+
+  StatusOr<std::unique_ptr<Aead>> boring_ssl_aead =
       subtle::AesGcmSivBoringSsl::New(
-          util::SecretDataFromStringView(key_or.ValueOrDie().key_value()));
-  ASSERT_THAT(boring_ssl_aead_or.status(), IsOk());
-
-  ASSERT_THAT(EncryptThenDecrypt(*aead_or.ValueOrDie().get(),
-                                 *boring_ssl_aead_or.ValueOrDie().get(),
-                                 "message", "aad"),
+          util::SecretDataFromStringView(key->key_value()));
+  ASSERT_THAT(boring_ssl_aead.status(), IsOk());
+  EXPECT_THAT(EncryptThenDecrypt(**aead, **boring_ssl_aead, "message", "aad"),
               IsOk());
 }
 
