@@ -320,6 +320,7 @@ tink_cc_test(
     tink::internal::ec_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
+    tink::internal::ssl_util
     gmock
     absl::strings
     absl::span

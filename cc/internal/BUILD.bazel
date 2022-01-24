@@ -365,6 +365,7 @@ cc_test(
         ":ec_util",
         ":fips_utils",
         ":ssl_unique_ptr",
+        ":ssl_util",
         "//subtle:common_enums",
         "//subtle:subtle_util",
         "//subtle:wycheproof_util",
