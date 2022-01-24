@@ -55,6 +55,8 @@ list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 
 set(TINK_IDE_FOLDER "Tink")
 
+set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
+
 # Declare the beginning of a new Tink library namespace.
 #
 # As a rule of thumb, every CMakeLists.txt should be a different module, named
@@ -96,13 +98,21 @@ function(tink_cc_library)
   cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library
     "PUBLIC"
     "NAME"
-    "SRCS;DEPS"
+    "SRCS;DEPS;TAGS"
   )
 
   if (NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR
             "TINK_MODULE not defined, perhaps you are missing a tink_module() statement?")
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_library_tag ${tink_cc_library_TAGS})
+    if (${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
@@ -161,7 +171,7 @@ function(tink_cc_test)
   cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test
     ""
     "NAME"
-    "SRCS;DEPS;DATA"
+    "SRCS;DEPS;DATA;TAGS"
   )
 
   if (NOT TINK_BUILD_TESTS)
@@ -171,6 +181,14 @@ function(tink_cc_test)
   if (NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR "TINK_MODULE not defined")
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_test_tag ${tink_cc_test_TAGS})
+    if (${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
