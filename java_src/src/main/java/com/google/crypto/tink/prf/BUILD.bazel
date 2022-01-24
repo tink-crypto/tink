@@ -47,6 +47,7 @@ java_library(
         ":hkdf_prf_key_manager",
         ":hmac_prf_key_manager",
         ":prf_set_wrapper",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips",
     ],
 )
 
@@ -194,6 +195,7 @@ java_library(
         ":hkdf_prf_key_manager-android",
         ":hmac_prf_key_manager-android",
         ":prf_set_wrapper-android",
+        "//src/main/java/com/google/crypto/tink/config:tink_fips-android",
     ],
 )
 
