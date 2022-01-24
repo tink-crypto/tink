@@ -78,6 +78,7 @@ main() {
   # This list is expected to grow larger as new targets can use OpenSSL.
   TEST_TARGETS=(
     "tink_test_aead_aes_gcm_siv_key_manager_test"
+    "tink_test_aead_xchacha20_poly1305_key_manager_test"
     "tink_test_aead__internal_ssl_aead_test"
     "tink_test_aead__internal_ssl_aead_large_inputs_test"
     "tink_test_internal_aes_util_test"
