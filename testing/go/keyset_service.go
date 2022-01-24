@@ -176,11 +176,72 @@ func (s *KeysetService) FromJson(ctx context.Context, req *pb.KeysetFromJsonRequ
 }
 
 func (s *KeysetService) WriteEncrypted(ctx context.Context, req *pb.KeysetWriteEncryptedRequest) (*pb.KeysetWriteEncryptedResponse, error) {
+	masterReader := keyset.NewBinaryReader(bytes.NewReader(req.GetMasterKeyset()))
+	masterHandle, err := testkeyset.Read(masterReader)
+	if err != nil {
+		return &pb.KeysetWriteEncryptedResponse{
+			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
+	}
+	masterAead, err := aead.New(masterHandle)
+	if err != nil {
+		return &pb.KeysetWriteEncryptedResponse{
+			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
+	}
+
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetKeyset()))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return &pb.KeysetWriteEncryptedResponse{
+			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
+	}
+
+	buf := new(bytes.Buffer)
+	writer := keyset.NewBinaryWriter(buf)
+	if req.GetAssociatedData() != nil {
+		err = handle.WriteWithAssociatedData(writer, masterAead, req.GetAssociatedData().GetValue())
+	} else {
+		err = handle.Write(writer, masterAead)
+	}
+	if err != nil {
+		return &pb.KeysetWriteEncryptedResponse{
+			Result: &pb.KeysetWriteEncryptedResponse_Err{err.Error()}}, nil
+	}
 	return &pb.KeysetWriteEncryptedResponse{
-		Result: &pb.KeysetWriteEncryptedResponse_Err{"not implemented"}}, nil
+		Result: &pb.KeysetWriteEncryptedResponse_EncryptedKeyset{buf.Bytes()}}, nil
 }
 
 func (s *KeysetService) ReadEncrypted(ctx context.Context, req *pb.KeysetReadEncryptedRequest) (*pb.KeysetReadEncryptedResponse, error) {
+	masterReader := keyset.NewBinaryReader(bytes.NewReader(req.GetMasterKeyset()))
+	masterHandle, err := testkeyset.Read(masterReader)
+	if err != nil {
+		return &pb.KeysetReadEncryptedResponse{
+			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
+	}
+	masterAead, err := aead.New(masterHandle)
+	if err != nil {
+		return &pb.KeysetReadEncryptedResponse{
+			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
+	}
+
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.GetEncryptedKeyset()))
+
+	var handle *keyset.Handle
+	if req.GetAssociatedData() != nil {
+		handle, err = keyset.ReadWithAssociatedData(reader, masterAead, req.GetAssociatedData().GetValue())
+	} else {
+		handle, err = keyset.Read(reader, masterAead)
+	}
+	if err != nil {
+		return &pb.KeysetReadEncryptedResponse{
+			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
+	}
+
+	buf := new(bytes.Buffer)
+	writer := keyset.NewBinaryWriter(buf)
+	if err := testkeyset.Write(handle, writer); err != nil {
+		return &pb.KeysetReadEncryptedResponse{
+			Result: &pb.KeysetReadEncryptedResponse_Err{err.Error()}}, nil
+	}
 	return &pb.KeysetReadEncryptedResponse{
-		Result: &pb.KeysetReadEncryptedResponse_Err{"not implemented"}}, nil
+		Result: &pb.KeysetReadEncryptedResponse_Keyset{buf.Bytes()}}, nil
 }
