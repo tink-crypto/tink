@@ -75,13 +75,14 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
             tags = ["manual"],
         )
 
-def tink_android_test(name, srcs, deps, min_version = 19):
+def tink_android_test(name, srcs, deps, data = [], min_version = 19):
     """Creates android_instrumentation_test targets, testing them on multiple devices.
 
     Args:
         name: The name of the test created.
         srcs: The test source of the test.
         deps: The dependencies.
+        data: Data dependencies.
         min_version: The minimum version of android which should be tested.
     """
     TARGET_DEVICES = {
@@ -128,5 +129,6 @@ def tink_android_test(name, srcs, deps, min_version = 19):
                 name = name + "_" + str(version_num) + "_test",
                 target_device = device,
                 test_app = legacy_multidex_binary if version_num < 21 else native_multidex_binary,
+                data = data,
                 tags = ["manual"],
             )
