@@ -138,22 +138,22 @@ def tink_cc_deps():
 
     # gRPC.
     if not native.existing_rule("com_github_grpc_grpc"):
-        # Release from 2021-11-17
+        # Release from 2021-12-15
         http_archive(
             name = "com_github_grpc_grpc",
-            sha256 = "9f387689b7fdf6c003fd90ef55853107f89a2121792146770df5486f0199f400",
-            strip_prefix = "grpc-1.42.0",
-            url = "https://github.com/grpc/grpc/archive/v1.42.0.zip",
+            sha256 = "305fa696963fc4f97590931a0fcdc9c020410edd7ee31e4915bddc6bf954fbfe",
+            strip_prefix = "grpc-1.43.0",
+            url = "https://github.com/grpc/grpc/archive/v1.43.0.zip",
         )
 
     # Not used by Java Tink, but apparently needed for C++ gRPC library.
     if not native.existing_rule("io_grpc_grpc_java"):
-        # Release from 2021-11-17
+        # Release from 2021-12-15
         http_archive(
             name = "io_grpc_grpc_java",
-            sha256 = "1289abd750bee2ebc80679435301e046d587bdf0c0802a76907119725d18eef0",
-            strip_prefix = "grpc-java-1.42.0",
-            url = "https://github.com/grpc/grpc-java/archive/v1.42.0.tar.gz",
+            sha256 = "1356886b7f9d48b606c689ab027e88456cf7ccd671615d4da55e5f10a83e71d2",
+            strip_prefix = "grpc-java-1.43.0",
+            url = "https://github.com/grpc/grpc-java/archive/v1.43.0.tar.gz",
         )
 
     if not native.existing_rule("curl"):
