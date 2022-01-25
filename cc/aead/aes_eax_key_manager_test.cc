@@ -16,6 +16,8 @@
 
 #include "tink/aead/aes_eax_key_manager.h"
 
+#include <memory>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/aead.h"

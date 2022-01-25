@@ -16,6 +16,7 @@
 
 #include "tink/aead/kms_envelope_aead.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

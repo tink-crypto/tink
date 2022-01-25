@@ -16,6 +16,7 @@
 
 #include "tink/aead/cord_aead_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 

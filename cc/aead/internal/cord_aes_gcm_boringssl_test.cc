@@ -16,7 +16,9 @@
 
 #include "tink/aead/internal/cord_aes_gcm_boringssl.h"
 
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"

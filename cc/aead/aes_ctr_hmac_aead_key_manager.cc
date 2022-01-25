@@ -17,6 +17,7 @@
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
 #include <map>
+#include <memory>
 #include <utility>
 
 #include "absl/base/casts.h"

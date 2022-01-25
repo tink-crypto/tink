@@ -16,8 +16,10 @@
 
 #include "tink/aead/internal/zero_copy_aead_wrapper.h"
 
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "tink/aead/internal/mock_zero_copy_aead.h"

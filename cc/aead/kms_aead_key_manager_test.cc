@@ -16,6 +16,8 @@
 
 #include "tink/aead/kms_aead_key_manager.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/match.h"

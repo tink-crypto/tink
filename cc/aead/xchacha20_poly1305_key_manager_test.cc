@@ -16,6 +16,9 @@
 
 #include "tink/aead/xchacha20_poly1305_key_manager.h"
 
+#include <memory>
+#include <sstream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

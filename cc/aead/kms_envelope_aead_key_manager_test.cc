@@ -16,23 +16,25 @@
 
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 
+#include <memory>
+
+#include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "tink/aead.h"
-#include "tink/aead/aes_eax_key_manager.h"
-#include "tink/aead/kms_envelope_aead.h"
-#include "tink/registry.h"
-#include "tink/kms_client.h"
-#include "tink/kms_clients.h"
 #include "tink/aead/aead_config.h"
 #include "tink/aead/aead_key_templates.h"
+#include "tink/aead/aes_eax_key_manager.h"
+#include "tink/aead/kms_envelope_aead.h"
+#include "tink/kms_client.h"
+#include "tink/kms_clients.h"
+#include "tink/registry.h"
 #include "tink/subtle/aead_test_util.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
-#include "tink/util/test_util.h"
 #include "tink/util/test_matchers.h"
-#include "gtest/gtest.h"
+#include "tink/util/test_util.h"
 #include "proto/kms_envelope.pb.h"
 #include "proto/tink.pb.h"
 

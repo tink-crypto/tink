@@ -16,6 +16,11 @@
 
 #include "tink/aead/internal/zero_copy_aead_wrapper.h"
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/strings/string_view.h"
 #include "tink/crypto_format.h"
 #include "tink/subtle/subtle_util.h"
