@@ -16,6 +16,7 @@
 
 #include "tink/subtle/aes_cmac_boringssl.h"
 
+#include <cstdint>
 #include <string>
 
 #include "absl/memory/memory.h"
@@ -43,8 +44,7 @@ static constexpr size_t kSmallKeySize = 16;
 static constexpr size_t kBigKeySize = 32;
 static constexpr size_t kMaxTagSize = 16;
 
-#ifndef OPENSSL_IS_BORINGSSL
-util::StatusOr<const EVP_CIPHER*> CipherForKeySize(size_t key_size) {
+util::StatusOr<const EVP_CIPHER*> GetAesCbcCipherForKeySize(size_t key_size) {
   switch (key_size) {
     case 16:
       return EVP_aes_128_cbc();
@@ -54,7 +54,6 @@ util::StatusOr<const EVP_CIPHER*> CipherForKeySize(size_t key_size) {
   return ToStatusF(absl::StatusCode::kInvalidArgument, "Invalid key size %d",
                    key_size);
 }
-#endif
 
 }  // namespace
 
@@ -85,29 +84,22 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
 
   std::string result;
   ResizeStringUninitialized(&result, kMaxTagSize);
-#ifdef OPENSSL_IS_BORINGSSL
-  const int res =
-      AES_CMAC(reinterpret_cast<uint8_t*>(&result[0]), key_.data(), key_.size(),
-               reinterpret_cast<const uint8_t*>(data.data()), data.size());
-#else
   internal::SslUniquePtr<CMAC_CTX> context(CMAC_CTX_new());
-  util::StatusOr<const EVP_CIPHER*> cipher = CipherForKeySize(key_.size());
-  if (!cipher.ok()) return cipher.status();
-  if (CMAC_Init(context.get(), reinterpret_cast<const uint8_t*>(&key_[0]),
-                key_.size(), *cipher, nullptr) <= 0) {
-    return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
-  }
-  if (CMAC_Update(context.get(), reinterpret_cast<const uint8_t*>(data.data()),
-                  data.size()) <= 0) {
-    return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
+  util::StatusOr<const EVP_CIPHER*> cipher =
+      GetAesCbcCipherForKeySize(key_.size());
+  if (!cipher.ok()) {
+    return cipher.status();
   }
   size_t len = 0;
-  const int res =
-      CMAC_Final(context.get(), reinterpret_cast<uint8_t*>(&result[0]), &len);
-#endif
-  if (res == 0) {
+  const uint8_t* key_ptr = reinterpret_cast<const uint8_t*>(&key_[0]);
+  const uint8_t* data_ptr = reinterpret_cast<const uint8_t*>(data.data());
+  uint8_t* result_ptr = reinterpret_cast<uint8_t*>(&result[0]);
+  if (CMAC_Init(context.get(), key_ptr, key_.size(), *cipher, nullptr) <= 0 ||
+      CMAC_Update(context.get(), data_ptr, data.size()) <= 0 ||
+      CMAC_Final(context.get(), result_ptr, &len) == 0) {
     return util::Status(absl::StatusCode::kInternal, "Failed to compute CMAC");
   }
+
   result.resize(tag_size_);
   return result;
 }
