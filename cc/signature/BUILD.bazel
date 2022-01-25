@@ -569,6 +569,7 @@ cc_test(
         "//:public_key_sign",
         "//:public_key_verify",
         "//internal:ec_util",
+        "//internal:ssl_util",
         "//proto:ecdsa_cc_proto",
         "//subtle:ecdsa_verify_boringssl",
         "//util:enums",
@@ -578,6 +579,7 @@ cc_test(
         "//util:test_matchers",
         "//util:test_util",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
