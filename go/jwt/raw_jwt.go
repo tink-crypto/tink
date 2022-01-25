@@ -56,14 +56,14 @@ type RawJWTOptions struct {
 	NotBefore    *time.Time
 	CustomClaims map[string]interface{}
 
-	TypeHeader        string
+	TypeHeader        *string
 	WithoutExpiration bool
 }
 
 // RawJWT is an unsigned JSON Web Token (JWT), https://tools.ietf.org/html/rfc7519.
 type RawJWT struct {
 	jsonpb     *spb.Struct
-	typeHeader string
+	typeHeader *string
 }
 
 // NewRawJWT constructs a new RawJWT token based on the RawJwtOptions provided.
@@ -86,7 +86,7 @@ func NewRawJWT(opts *RawJWTOptions) (*RawJWT, error) {
 
 // NewRawJWTFromJSON builds a RawJWT from a marshaled JSON.
 // Users shouldn't call this function and instead use NewRawJWT.
-func NewRawJWTFromJSON(typeHeader string, jsonPayload []byte) (*RawJWT, error) {
+func NewRawJWTFromJSON(typeHeader *string, jsonPayload []byte) (*RawJWT, error) {
 	payload := &spb.Struct{}
 	if err := payload.UnmarshalJSON(jsonPayload); err != nil {
 		return nil, err
@@ -100,9 +100,270 @@ func NewRawJWTFromJSON(typeHeader string, jsonPayload []byte) (*RawJWT, error) {
 	}, nil
 }
 
-// JSONPayload a RawJWT marshals to JSON.
+// JSONPayload marshals a RawJWT payload to JSON.
 func (r *RawJWT) JSONPayload() ([]byte, error) {
 	return r.jsonpb.MarshalJSON()
+}
+
+// HasTypeHeader returns whether a RawJWT contains a type header.
+func (r *RawJWT) HasTypeHeader() bool {
+	return r.typeHeader != nil
+}
+
+// TypeHeader returns the JWT type header.
+func (r *RawJWT) TypeHeader() (string, error) {
+	if !r.HasTypeHeader() {
+		return "", fmt.Errorf("no type header present")
+	}
+	return *r.typeHeader, nil
+}
+
+// HasAudiences checks whether a JWT contains the audience claim ('aud').
+func (r *RawJWT) HasAudiences() bool {
+	return r.hasField(claimAudience)
+}
+
+// Audiences returns the audience claim ('aud') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) Audiences() ([]string, error) {
+	aud, ok := r.field(claimAudience)
+	if !ok {
+		return nil, fmt.Errorf("no audience claim found")
+	}
+	if err := validateAudienceClaim(aud); err != nil {
+		return nil, err
+	}
+	if val, isString := aud.GetKind().(*spb.Value_StringValue); isString {
+		return []string{val.StringValue}, nil
+	}
+	s := []string{}
+	for _, a := range aud.GetListValue().GetValues() {
+		s = append(s, a.GetStringValue())
+	}
+	return s, nil
+}
+
+// HasSubject checks whether a JWT contains an issuer claim ('sub').
+func (r *RawJWT) HasSubject() bool {
+	return r.hasField(claimSubject)
+}
+
+// Subject returns the subject claim ('sub') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) Subject() (string, error) {
+	return r.stringClaim(claimSubject)
+}
+
+// HasIssuer checks whether a JWT contains an issuer claim ('iss').
+func (r *RawJWT) HasIssuer() bool {
+	return r.hasField(claimIssuer)
+}
+
+// Issuer returns the issuer claim ('iss') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) Issuer() (string, error) {
+	return r.stringClaim(claimIssuer)
+}
+
+// HasJWTID checks whether a JWT contains an JWT ID claim ('jti').
+func (r *RawJWT) HasJWTID() bool {
+	return r.hasField(claimJWTID)
+}
+
+// JWTID returns the JWT ID claim ('jti') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) JWTID() (string, error) {
+	return r.stringClaim(claimJWTID)
+}
+
+// HasIssuedAt checks whether a JWT contains an issued at claim ('iat').
+func (r *RawJWT) HasIssuedAt() bool {
+	return r.hasField(claimIssuedAt)
+}
+
+// IssuedAt returns the issued at claim ('iat') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) IssuedAt() (time.Time, error) {
+	return r.timeClaim(claimIssuedAt)
+}
+
+// HasExpiration checks whether a JWT contains an expiration time claim ('exp').
+func (r *RawJWT) HasExpiration() bool {
+	return r.hasField(claimExpiration)
+}
+
+// ExpiresAt returns the expiration claim ('exp') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) ExpiresAt() (time.Time, error) {
+	return r.timeClaim(claimExpiration)
+}
+
+// HasNotBefore checks whether a JWT contains a not before claim ('nbf').
+func (r *RawJWT) HasNotBefore() bool {
+	return r.hasField(claimNotBefore)
+}
+
+// NotBefore returns the not before claim ('nbf') or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) NotBefore() (time.Time, error) {
+	return r.timeClaim(claimNotBefore)
+}
+
+// HasStringClaim checks whether a claim of type string is present.
+func (r *RawJWT) HasStringClaim(name string) bool {
+	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_StringValue{}})
+}
+
+// StringClaim returns a custom string claim or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) StringClaim(name string) (string, error) {
+	if isRegisteredClaim(name) {
+		return "", fmt.Errorf("claim '%q' is a registered claim", name)
+	}
+	return r.stringClaim(name)
+}
+
+// HasNumberClaim checks whether a claim of type number is present.
+func (r *RawJWT) HasNumberClaim(name string) bool {
+	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_NumberValue{}})
+}
+
+// NumberClaim returns a custom number claim or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) NumberClaim(name string) (float64, error) {
+	if isRegisteredClaim(name) {
+		return 0, fmt.Errorf("claim '%q' is a registered claim", name)
+	}
+	return r.numberClaim(name)
+}
+
+// HasBooleanClaim checks whether a claim of type boolean is present.
+func (r *RawJWT) HasBooleanClaim(name string) bool {
+	return r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_BoolValue{}})
+}
+
+// BooleanClaim returns a custom bool claim or an error if no claim is present or if an invalid claim is present.
+func (r *RawJWT) BooleanClaim(name string) (bool, error) {
+	val, err := r.customClaim(name)
+	if err != nil {
+		return false, err
+	}
+	b, ok := val.Kind.(*spb.Value_BoolValue)
+	if !ok {
+		return false, fmt.Errorf("claim '%q' is not a boolean", name)
+	}
+	return b.BoolValue, nil
+}
+
+// HasNullClaim checks whether a claim of type null is present.
+func (r *RawJWT) HasNullClaim(name string) bool {
+	return r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_NullValue{}})
+}
+
+// HasArrayClaim checks whether a claim of type list is present.
+func (r *RawJWT) HasArrayClaim(name string) bool {
+	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_ListValue{}})
+}
+
+// ArrayClaim returns a slice representing a JSON array for a claim or an error if the claim is empty or not a valid JSON array.
+func (r *RawJWT) ArrayClaim(name string) ([]interface{}, error) {
+	val, err := r.customClaim(name)
+	if err != nil {
+		return nil, err
+	}
+	if val.GetListValue() == nil {
+		return nil, fmt.Errorf("claim '%q' is not a list", name)
+	}
+	return val.GetListValue().AsSlice(), nil
+}
+
+// HasObjectClaim checks whether a claim of type JSON object is present.
+func (r *RawJWT) HasObjectClaim(name string) bool {
+	return r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_StructValue{}})
+}
+
+// ObjectClaim returns a map representing a JSON object for a claim or an error if the claim is empty or not a valid JSON object.
+func (r *RawJWT) ObjectClaim(name string) (map[string]interface{}, error) {
+	val, err := r.customClaim(name)
+	if err != nil {
+		return nil, err
+	}
+	if val.GetStructValue() == nil {
+		return nil, fmt.Errorf("claim '%q' is not a JSON object", name)
+	}
+	return val.GetStructValue().AsMap(), err
+}
+
+func (r *RawJWT) timeClaim(name string) (time.Time, error) {
+	n, err := r.numberClaim(name)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(int64(n), 0), err
+}
+
+func (r *RawJWT) numberClaim(name string) (float64, error) {
+	val, ok := r.field(name)
+	if !ok {
+		return 0, fmt.Errorf("no '%q' claim found", name)
+	}
+	s, ok := val.Kind.(*spb.Value_NumberValue)
+	if !ok {
+		return 0, fmt.Errorf("claim '%q' is not a number", name)
+	}
+	return s.NumberValue, nil
+}
+
+func (r *RawJWT) stringClaim(name string) (string, error) {
+	val, ok := r.field(name)
+	if !ok {
+		return "", fmt.Errorf("no '%q' claim found", name)
+	}
+	s, ok := val.Kind.(*spb.Value_StringValue)
+	if !ok {
+		return "", fmt.Errorf("claim '%q' is not a string", name)
+	}
+	if !utf8.ValidString(s.StringValue) {
+		return "", fmt.Errorf("claim '%q' is not a valid utf-8 encoded string", name)
+	}
+	return s.StringValue, nil
+}
+
+func (r *RawJWT) hasClaimOfKind(name string, exp *spb.Value) bool {
+	val, exist := r.field(name)
+	if !exist || exp == nil {
+		return false
+	}
+	var isKind bool
+	switch exp.GetKind().(type) {
+	case *spb.Value_StructValue:
+		_, isKind = val.GetKind().(*spb.Value_StructValue)
+	case *spb.Value_NullValue:
+		_, isKind = val.GetKind().(*spb.Value_NullValue)
+	case *spb.Value_BoolValue:
+		_, isKind = val.GetKind().(*spb.Value_BoolValue)
+	case *spb.Value_ListValue:
+		_, isKind = val.GetKind().(*spb.Value_ListValue)
+	case *spb.Value_StringValue:
+		_, isKind = val.GetKind().(*spb.Value_StringValue)
+	case *spb.Value_NumberValue:
+		_, isKind = val.GetKind().(*spb.Value_NumberValue)
+	default:
+		isKind = false
+	}
+	return isKind
+}
+
+func (r *RawJWT) customClaim(name string) (*spb.Value, error) {
+	if isRegisteredClaim(name) {
+		return nil, fmt.Errorf("'%q' is a registered claim", name)
+	}
+	val, ok := r.field(name)
+	if !ok {
+		return nil, fmt.Errorf("claim '%q' not found", name)
+	}
+	return val, nil
+}
+
+func (r *RawJWT) hasField(name string) bool {
+	_, ok := r.field(name)
+	return ok
+}
+
+func (r *RawJWT) field(name string) (*spb.Value, bool) {
+	val, ok := r.jsonpb.GetFields()[name]
+	return val, ok
 }
 
 // createPayload creates a JSON payload from JWT options.
