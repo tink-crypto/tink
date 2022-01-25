@@ -721,6 +721,7 @@ cc_test(
         ":signature_pem_keyset_reader",
         "//:tink_cc",
         "//internal:rsa_util",
+        "//internal:ssl_util",
         "//proto:common_cc_proto",
         "//proto:ecdsa_cc_proto",
         "//proto:rsa_ssa_pss_cc_proto",

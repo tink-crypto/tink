@@ -689,6 +689,7 @@ tink_cc_test(
     absl::strings
     tink::core::cc
     tink::internal::rsa_util
+    tink::internal::ssl_util
     tink::subtle::pem_parser_boringssl
     tink::util::enums
     tink::util::secret_data

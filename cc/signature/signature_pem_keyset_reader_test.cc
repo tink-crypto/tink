@@ -26,6 +26,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/internal/rsa_util.h"
+#include "tink/internal/ssl_util.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
 #include "tink/public_key_sign.h"
@@ -640,8 +641,22 @@ TEST(SignaturePemKeysetReaderTest, ReadSecp256k1ShouldFail) {
   auto reader = builder.Build();
   ASSERT_THAT(reader.status(), IsOk());
   auto keyset_read = reader->get()->Read();
-  ASSERT_THAT(keyset_read.status(),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  // With BoringSSL parsing of the PEM key fails when an unsupported curve is
+  // used [1]; Supported curves are defined here [2]. Tink doesn't distinguish
+  // between an error caused by a malformed PEM and an unsupported group by
+  // BoringSSL. On the other hand, with OpenSSL parsing succeeds, but this
+  // curve is unsupported by Tink. As a consequence, this fails with two
+  // different errors.
+  //
+  // [1]https://github.com/google/boringssl/blob/master/crypto/ec_extra/ec_asn1.c#L324
+  // [2]https://github.com/google/boringssl/blob/master/crypto/fipsmodule/ec/ec.c#L218
+  if (internal::IsBoringSsl()) {
+    EXPECT_THAT(keyset_read.status(),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  } else {
+    EXPECT_THAT(keyset_read.status(),
+                StatusIs(absl::StatusCode::kUnimplemented));
+  }
 }
 
 TEST(SignaturePemKeysetReaderTest, ReadEcdsaP384ShouldFail) {

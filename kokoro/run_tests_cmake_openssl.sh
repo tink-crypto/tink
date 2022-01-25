@@ -88,6 +88,7 @@ main() {
     "tink_test_internal_md_util_test"
     "tink_test_internal_rsa_util_test"
     "tink_test_signature_ecdsa_sign_key_manager_test"
+    "tink_test_signature_signature_pem_keyset_reader_test"
     "tink_test_subtle__prf_hkdf_streaming_prf_test"
     "tink_test_subtle__prf_prf_set_util_test"
     "tink_test_subtle__prf_streaming_prf_wrapper_test"
