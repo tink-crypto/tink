@@ -402,9 +402,12 @@ TEST(RsaUtilTest, RsaCheckPublicKeyExponentNotOdd) {
 
 TEST(RsaUtilTest, RsaCheckPublicKeyModulusTooLarge) {
   // Get 1 byte more than 16384 bits (2048 bytes).
-  const std::string kModulusTooLarge = subtle::Random::GetRandomBytes(2049);
+  std::string too_large_modulus = subtle::Random::GetRandomBytes(2049);
+  if (too_large_modulus[0] == '\0') {
+    too_large_modulus[0] = 0x01;
+  }
   util::StatusOr<internal::SslUniquePtr<RSA>> key =
-      NewRsaPublicKey(absl::BytesToHexString(kModulusTooLarge), RSA_F4);
+      NewRsaPublicKey(absl::BytesToHexString(too_large_modulus), RSA_F4);
   ASSERT_THAT(key.status(), IsOk());
   EXPECT_THAT(RsaCheckPublicKey(key->get()), Not(IsOk()));
 }
