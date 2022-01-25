@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -285,6 +286,22 @@ util::Status SslNewKeyPairFromEcKey(SslEvpPkeyType key_type,
   }
 
   return util::OkStatus();
+}
+
+util::StatusOr<std::string> SslEcdsaSignatureToBytes(
+    const ECDSA_SIG *ecdsa_signature) {
+  if (ecdsa_signature == nullptr) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "ECDSA signature is null");
+  }
+  uint8_t *der = nullptr;
+  int der_len = i2d_ECDSA_SIG(ecdsa_signature, &der);
+  if (der_len <= 0) {
+    return util::Status(absl::StatusCode::kInternal, "i2d_ECDSA_SIG failed");
+  }
+  auto result = std::string(reinterpret_cast<char *>(der), der_len);
+  OPENSSL_free(der);
+  return result;
 }
 
 }  // namespace
@@ -709,22 +726,7 @@ util::StatusOr<std::string> EcSignatureIeeeToDer(const EC_GROUP *group,
   r->release();
   s->release();
 
-  uint8_t *der = nullptr;
-#ifdef OPENSSL_IS_BORINGSSL
-  size_t der_len = 0;
-  if (!ECDSA_SIG_to_bytes(&der, &der_len, ecdsa.get())) {
-    return util::Status(absl::StatusCode::kInternal,
-                        "ECDSA_SIG_to_bytes failed");
-  }
-#else
-  int der_len = i2d_ECDSA_SIG(ecdsa.get(), &der);
-  if (der_len <= 0) {
-    return util::Status(absl::StatusCode::kInternal, "i2d_ECDSA_SIG failed");
-  }
-#endif
-  auto result = std::string(reinterpret_cast<char *>(der), der_len);
-  OPENSSL_free(der);
-  return result;
+  return SslEcdsaSignatureToBytes(ecdsa.get());
 }
 
 }  // namespace internal
