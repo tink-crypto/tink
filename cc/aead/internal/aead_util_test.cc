@@ -70,6 +70,20 @@ TEST(AeadUtilTest, GetAesAeadForKeySize) {
   }
 }
 
+TEST(AeadUtilTest, GetAesGcmSivAeadCipherForKeySize) {
+  for (int i = 0; i < 64; i++) {
+    util::StatusOr<const EVP_AEAD*> cipher =
+        GetAesGcmSivAeadCipherForKeySize(i);
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_128_gcm_siv()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aead_aes_256_gcm_siv()));
+    } else {
+      EXPECT_THAT(cipher.status(), Not(IsOk()));
+    }
+  }
+}
+
 #endif
 
 }  // namespace

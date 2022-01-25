@@ -63,6 +63,21 @@ util::StatusOr<const EVP_AEAD *> GetAesGcmAeadForKeySize(
                        "Invalid key size %d", key_size_in_bytes);
   }
 }
+
+util::StatusOr<const EVP_AEAD *> GetAesGcmSivAeadCipherForKeySize(
+    int key_size_in_bytes) {
+  switch (key_size_in_bytes) {
+    case 16:
+      return EVP_aead_aes_128_gcm_siv();
+    case 32:
+      return EVP_aead_aes_256_gcm_siv();
+    default:
+      return ToStatusF(
+          absl::StatusCode::kInvalidArgument,
+          "Invalid key size; valid values are {16, 32} bytes, got %d",
+          key_size_in_bytes);
+  }
+}
 #endif
 
 }  // namespace internal
