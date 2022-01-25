@@ -60,6 +60,32 @@ install_openssl() {
   export PATH="${openssl_tmpdir}/bin:${PATH}"
 }
 
+#######################################
+# Build Tink C++ and runs unit test with CMake.
+#
+# Arguments:
+#   cmake_project_dir cc directory path relative to the Tink root.
+#   cmake_use_openssl "true" if Tink links against OpenSSL "false" otherwise.
+#######################################
+cc_cmake_build_and_run_tests() {
+  local cmake_project_dir="$1"
+  local cmake_use_openssl="$2"
+  (
+    local -a cmake_parameters
+    cmake_parameters+=( -DTINK_BUILD_TESTS=ON )
+    cmake_parameters+=( -DCMAKE_CXX_STANDARD=11 )
+    if [[ "${cmake_use_openssl}" == "true" ]]; then
+      cmake_parameters+=( -DTINK_USE_SYSTEM_OPENSSL=ON )
+    fi
+    readonly cmake_parameters
+    cd "${cmake_project_dir}"
+    cmake --version
+    cmake . "${cmake_parameters[@]}"
+    make -j"$(nproc)" all
+    CTEST_OUTPUT_ON_FAILURE=1 make test
+  )
+}
+
 main() {
   cd git*/tink
 
@@ -70,81 +96,10 @@ main() {
     sudo rm -f /usr/share/ca-certificates/mozilla/DST_Root_CA_X3.crt
     sudo update-ca-certificates
 
-    install_cmake
     install_openssl
   fi
 
-  # Currently there is a limited list of targets that can be built with OpenSSL.
-  # This list is expected to grow larger as new targets can use OpenSSL.
-  TEST_TARGETS=(
-    "tink_test_aead_aes_gcm_siv_key_manager_test"
-    "tink_test_aead_xchacha20_poly1305_key_manager_test"
-    "tink_test_aead__internal_ssl_aead_test"
-    "tink_test_aead__internal_ssl_aead_large_inputs_test"
-    "tink_test_hybrid_ecies_aead_hkdf_hybrid_decrypt_test"
-    "tink_test_internal_aes_util_test"
-    "tink_test_internal_err_util_test"
-    "tink_test_internal_ec_util_test"
-    "tink_test_internal_md_util_test"
-    "tink_test_internal_rsa_util_test"
-    "tink_test_signature_ecdsa_sign_key_manager_test"
-    "tink_test_signature_signature_pem_keyset_reader_test"
-    "tink_test_subtle__prf_hkdf_streaming_prf_test"
-    "tink_test_subtle__prf_prf_set_util_test"
-    "tink_test_subtle__prf_streaming_prf_wrapper_test"
-    "tink_test_subtle_aead_test_util_test"
-    "tink_test_subtle_aes_cmac_boringssl_test"
-    "tink_test_subtle_aes_ctr_boringssl_test"
-    "tink_test_subtle_aes_ctr_hmac_streaming_test"
-    "tink_test_subtle_aes_eax_boringssl_test"
-    "tink_test_subtle_aes_gcm_boringssl_test"
-    "tink_test_subtle_aes_gcm_hkdf_streaming_test"
-    "tink_test_subtle_aes_gcm_hkdf_stream_segment_decrypter_test"
-    "tink_test_subtle_aes_gcm_hkdf_stream_segment_encrypter_test"
-    "tink_test_subtle_aes_gcm_siv_boringssl_test"
-    "tink_test_subtle_aes_siv_boringssl_test"
-    "tink_test_subtle_common_enums_test"
-    "tink_test_subtle_decrypting_random_access_stream_test"
-    "tink_test_subtle_ecdsa_sign_boringssl_test"
-    "tink_test_subtle_ecdsa_verify_boringssl_test"
-    "tink_test_subtle_ecies_hkdf_recipient_kem_boringssl_test"
-    "tink_test_subtle_ecies_hkdf_sender_kem_boringssl_test"
-    "tink_test_subtle_ed25519_sign_boringssl_test"
-    "tink_test_subtle_ed25519_verify_boringssl_test"
-    "tink_test_subtle_encrypt_then_authenticate_test"
-    "tink_test_subtle_ecies_hkdf_recipient_kem_boringssl_test"
-    "tink_test_subtle_ecies_hkdf_sender_kem_boringssl_test"
-    "tink_test_subtle_hkdf_test"
-    "tink_test_subtle_hmac_boringssl_test"
-    "tink_test_subtle_hybrid_test_util_test"
-    "tink_test_subtle_pem_parser_boringssl_test"
-    "tink_test_subtle_random_test"
-    "tink_test_subtle_rsa_ssa_pkcs1_sign_boringssl_test"
-    "tink_test_subtle_rsa_ssa_pkcs1_verify_boringssl_test"
-    "tink_test_subtle_rsa_ssa_pss_sign_boringssl_test"
-    "tink_test_subtle_rsa_ssa_pss_verify_boringssl_test"
-    "tink_test_subtle_stateful_cmac_boringssl_test"
-    "tink_test_subtle_streaming_aead_decrypting_stream_test"
-    "tink_test_subtle_streaming_aead_encrypting_stream_test"
-    "tink_test_subtle_streaming_aead_test_util_test"
-    "tink_test_subtle_streaming_mac_impl_test"
-    "tink_test_subtle_subtle_util_test"
-    "tink_test_subtle_stateful_hmac_boringssl_test"
-    "tink_test_subtle_xchacha20_poly1305_boringssl_test"
-  )
-
-  echo "========================================================= Running cmake"
-  cmake --version
-  cmake . \
-    -DTINK_BUILD_TESTS=ON \
-    -DCMAKE_CXX_STANDARD=11 \
-    -DTINK_USE_SYSTEM_OPENSSL=ON
-  echo "==================================================== Building with make"
-  make -j "$(nproc)" "${TEST_TARGETS[@]}"
-  echo "======================================================= Testing targets"
-  # Execute all tests that were built using the above make invocation.
-  ctest -E ".*_NOT_BUILT"
-  echo "================================================== Done testing targets"
+  cc_cmake_build_and_run_tests . "true"
 }
 
 main "$@"
