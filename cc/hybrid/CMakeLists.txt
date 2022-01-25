@@ -408,6 +408,7 @@ tink_cc_test(
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
     tink::internal::ec_util
+    tink::internal::ssl_util
     tink::subtle::random
     tink::util::enums
     tink::util::statusor

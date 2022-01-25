@@ -81,6 +81,7 @@ main() {
     "tink_test_aead_xchacha20_poly1305_key_manager_test"
     "tink_test_aead__internal_ssl_aead_test"
     "tink_test_aead__internal_ssl_aead_large_inputs_test"
+    "tink_test_hybrid_ecies_aead_hkdf_hybrid_decrypt_test"
     "tink_test_internal_aes_util_test"
     "tink_test_internal_err_util_test"
     "tink_test_internal_ec_util_test"
