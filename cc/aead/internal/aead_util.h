@@ -23,10 +23,6 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-// Returns a pointer to an AES-CTR EVP_CIPHER for the given key size.
-util::StatusOr<const EVP_CIPHER *> GetAesCtrCipherForKeySize(
-    uint32_t key_size_in_bytes);
-
 // Returns a pointer to an AES-GCM EVP_CIPHER for the given key size.
 util::StatusOr<const EVP_CIPHER *> GetAesGcmCipherForKeySize(
     uint32_t key_size_in_bytes);

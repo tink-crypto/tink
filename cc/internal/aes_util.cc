@@ -23,6 +23,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aes.h"
+#include "openssl/evp.h"
 #ifndef OPENSSL_IS_BORINGSSL
 // This is needed to use block128_f, which is necessary when OpenSSL is used.
 #include "openssl/modes.h"
@@ -68,6 +69,19 @@ util::Status AesCtr128Crypt(absl::string_view data, uint8_t iv[AesBlockSize()],
                         reinterpret_cast<block128_f>(AES_encrypt));
 #endif
   return util::OkStatus();
+}
+
+util::StatusOr<const EVP_CIPHER*> GetAesCtrCipherForKeySize(
+    uint32_t key_size_in_bytes) {
+  switch (key_size_in_bytes) {
+    case 16:
+      return EVP_aes_128_ctr();
+    case 32:
+      return EVP_aes_256_ctr();
+    default:
+      return util::Status(absl::StatusCode::kInvalidArgument,
+                          absl::StrCat("Invalid key size ", key_size_in_bytes));
+  }
 }
 
 }  // namespace internal

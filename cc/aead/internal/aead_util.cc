@@ -24,19 +24,6 @@ namespace crypto {
 namespace tink {
 namespace internal {
 
-util::StatusOr<const EVP_CIPHER *> GetAesCtrCipherForKeySize(
-    uint32_t key_size_in_bytes) {
-  switch (key_size_in_bytes) {
-    case 16:
-      return EVP_aes_128_ctr();
-    case 32:
-      return EVP_aes_256_ctr();
-    default:
-      return ToStatusF(absl::StatusCode::kInvalidArgument,
-                       "Invalid key size %d", key_size_in_bytes);
-  }
-}
-
 util::StatusOr<const EVP_CIPHER *> GetAesGcmCipherForKeySize(
     uint32_t key_size_in_bytes) {
   switch (key_size_in_bytes) {

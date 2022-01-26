@@ -29,19 +29,6 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::IsOkAndHolds;
 using ::testing::Not;
 
-TEST(AeadUtilTest, GetAesCtrCipherForKeySize) {
-  for (int i = 0; i < 64; i++) {
-    util::StatusOr<const EVP_CIPHER*> cipher = GetAesCtrCipherForKeySize(i);
-    if (i == 16) {
-      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_ctr()));
-    } else if (i == 32) {
-      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_ctr()));
-    } else {
-      EXPECT_THAT(cipher.status(), Not(IsOk()));
-    }
-  }
-}
-
 TEST(AeadUtilTest, GetAesGcmCipherForKeySize) {
   for (int i = 0; i < 64; i++) {
     util::StatusOr<const EVP_CIPHER*> cipher = GetAesGcmCipherForKeySize(i);

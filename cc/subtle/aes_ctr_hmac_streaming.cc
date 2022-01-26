@@ -26,7 +26,7 @@
 #include "absl/strings/string_view.h"
 #include "openssl/err.h"
 #include "openssl/evp.h"
-#include "tink/aead/internal/aead_util.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/subtle/common_enums.h"
 #include "tink/subtle/hkdf.h"

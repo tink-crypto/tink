@@ -443,7 +443,7 @@ tink_cc_library(
     absl::strings
     crypto
     tink::core::mac
-    tink::aead::internal::aead_util
+    tink::internal::aes_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::util::errors
@@ -506,7 +506,7 @@ tink_cc_library(
     absl::memory
     absl::status
     crypto
-    tink::aead::internal::aead_util
+    tink::internal::aes_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -617,16 +617,11 @@ tink_cc_library(
     subtle_util_boringssl.h
   DEPS
     tink::subtle::common_enums
-    tink::subtle::random
-    tink::subtle::subtle_util
     absl::core_headers
-    absl::memory
-    absl::status
     absl::strings
-    absl::span
     crypto
     tink::aead::internal::aead_util
-    tink::config::tink_fips
+    tink::internal::aes_util
     tink::internal::bn_util
     tink::internal::ec_util
     tink::internal::err_util
@@ -634,7 +629,6 @@ tink_cc_library(
     tink::internal::rsa_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
-    tink::util::errors
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
