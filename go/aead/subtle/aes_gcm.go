@@ -25,6 +25,8 @@ import (
 	"github.com/google/tink/go/tink"
 )
 
+// TODO(b/201070904): Rewrite as wrapper of internal.InsecureIvAesGcm.
+
 const (
 	// AESGCMIVSize is the only IV size that this implementation supports.
 	AESGCMIVSize = 12
