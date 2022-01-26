@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/core/private_key_manager_impl.h"
 
+#include <memory>
 #include <string>
 
 #include "gmock/gmock.h"

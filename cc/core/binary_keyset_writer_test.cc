@@ -16,6 +16,7 @@
 
 #include "tink/binary_keyset_writer.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>

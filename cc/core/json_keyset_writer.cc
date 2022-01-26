@@ -17,6 +17,7 @@
 #include "tink/json_keyset_writer.h"
 
 #include <istream>
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>

@@ -16,8 +16,10 @@
 
 #include "tink/json_keyset_reader.h"
 
+#include <ios>
 #include <iostream>
 #include <istream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>

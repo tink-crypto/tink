@@ -16,6 +16,8 @@
 
 #include "tink/core/key_manager_impl.h"
 
+#include <memory>
+#include <sstream>
 #include <string>
 
 #include "gmock/gmock.h"
