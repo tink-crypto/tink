@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "jwt_validator.go",
         "raw_jwt.go",
+        "verified_jwt.go",
     ],
     importpath = "github.com/google/tink/go/jwt",
     deps = [
@@ -21,6 +22,7 @@ go_test(
     srcs = [
         "raw_jwt_test.go",
         "jwt_validator_test.go",
+        "verified_jwt_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

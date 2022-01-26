@@ -123,7 +123,7 @@ func (r *RawJWT) HasAudiences() bool {
 	return r.hasField(claimAudience)
 }
 
-// Audiences returns the audience claim ('aud') or an error if no claim is present or if an invalid claim is present.
+// Audiences returns a list of audiences from the 'aud' claim. If the 'aud' claim is a single string, it is converted into a list with a single entry.
 func (r *RawJWT) Audiences() ([]string, error) {
 	aud, ok := r.field(claimAudience)
 	if !ok {
@@ -147,7 +147,7 @@ func (r *RawJWT) HasSubject() bool {
 	return r.hasField(claimSubject)
 }
 
-// Subject returns the subject claim ('sub') or an error if no claim is present or if an invalid claim is present.
+// Subject returns the subject claim ('sub') or an error if no claim is present.
 func (r *RawJWT) Subject() (string, error) {
 	return r.stringClaim(claimSubject)
 }
@@ -157,7 +157,7 @@ func (r *RawJWT) HasIssuer() bool {
 	return r.hasField(claimIssuer)
 }
 
-// Issuer returns the issuer claim ('iss') or an error if no claim is present or if an invalid claim is present.
+// Issuer returns the issuer claim ('iss') or an error if no claim is present.
 func (r *RawJWT) Issuer() (string, error) {
 	return r.stringClaim(claimIssuer)
 }
@@ -167,7 +167,7 @@ func (r *RawJWT) HasJWTID() bool {
 	return r.hasField(claimJWTID)
 }
 
-// JWTID returns the JWT ID claim ('jti') or an error if no claim is present or if an invalid claim is present.
+// JWTID returns the JWT ID claim ('jti') or an error if no claim is present.
 func (r *RawJWT) JWTID() (string, error) {
 	return r.stringClaim(claimJWTID)
 }
@@ -177,7 +177,7 @@ func (r *RawJWT) HasIssuedAt() bool {
 	return r.hasField(claimIssuedAt)
 }
 
-// IssuedAt returns the issued at claim ('iat') or an error if no claim is present or if an invalid claim is present.
+// IssuedAt returns the issued at claim ('iat') or an error if no claim is present.
 func (r *RawJWT) IssuedAt() (time.Time, error) {
 	return r.timeClaim(claimIssuedAt)
 }
@@ -187,7 +187,7 @@ func (r *RawJWT) HasExpiration() bool {
 	return r.hasField(claimExpiration)
 }
 
-// ExpiresAt returns the expiration claim ('exp') or an error if no claim is present or if an invalid claim is present.
+// ExpiresAt returns the expiration claim ('exp') or an error if no claim is present.
 func (r *RawJWT) ExpiresAt() (time.Time, error) {
 	return r.timeClaim(claimExpiration)
 }
@@ -197,7 +197,7 @@ func (r *RawJWT) HasNotBefore() bool {
 	return r.hasField(claimNotBefore)
 }
 
-// NotBefore returns the not before claim ('nbf') or an error if no claim is present or if an invalid claim is present.
+// NotBefore returns the not before claim ('nbf') or an error if no claim is present.
 func (r *RawJWT) NotBefore() (time.Time, error) {
 	return r.timeClaim(claimNotBefore)
 }
@@ -207,7 +207,7 @@ func (r *RawJWT) HasStringClaim(name string) bool {
 	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_StringValue{}})
 }
 
-// StringClaim returns a custom string claim or an error if no claim is present or if an invalid claim is present.
+// StringClaim returns a custom string claim or an error if no claim is present.
 func (r *RawJWT) StringClaim(name string) (string, error) {
 	if isRegisteredClaim(name) {
 		return "", fmt.Errorf("claim '%q' is a registered claim", name)
@@ -220,7 +220,7 @@ func (r *RawJWT) HasNumberClaim(name string) bool {
 	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_NumberValue{}})
 }
 
-// NumberClaim returns a custom number claim or an error if no claim is present or if an invalid claim is present.
+// NumberClaim returns a custom number claim or an error if no claim is present.
 func (r *RawJWT) NumberClaim(name string) (float64, error) {
 	if isRegisteredClaim(name) {
 		return 0, fmt.Errorf("claim '%q' is a registered claim", name)
@@ -233,7 +233,7 @@ func (r *RawJWT) HasBooleanClaim(name string) bool {
 	return r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_BoolValue{}})
 }
 
-// BooleanClaim returns a custom bool claim or an error if no claim is present or if an invalid claim is present.
+// BooleanClaim returns a custom bool claim or an error if no claim is present.
 func (r *RawJWT) BooleanClaim(name string) (bool, error) {
 	val, err := r.customClaim(name)
 	if err != nil {
@@ -256,7 +256,7 @@ func (r *RawJWT) HasArrayClaim(name string) bool {
 	return !isRegisteredClaim(name) && r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_ListValue{}})
 }
 
-// ArrayClaim returns a slice representing a JSON array for a claim or an error if the claim is empty or not a valid JSON array.
+// ArrayClaim returns a slice representing a JSON array for a claim or an error if the claim is empty.
 func (r *RawJWT) ArrayClaim(name string) ([]interface{}, error) {
 	val, err := r.customClaim(name)
 	if err != nil {
@@ -273,7 +273,7 @@ func (r *RawJWT) HasObjectClaim(name string) bool {
 	return r.hasClaimOfKind(name, &spb.Value{Kind: &spb.Value_StructValue{}})
 }
 
-// ObjectClaim returns a map representing a JSON object for a claim or an error if the claim is empty or not a valid JSON object.
+// ObjectClaim returns a map representing a JSON object for a claim or an error if the claim is empty.
 func (r *RawJWT) ObjectClaim(name string) (map[string]interface{}, error) {
 	val, err := r.customClaim(name)
 	if err != nil {
