@@ -23,12 +23,13 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "openssl/aes.h"
-#include "tink/internal/util.h"
-#include "tink/util/status.h"
-#if !defined(OPENSSL_IS_BORINGSSL)
+#ifndef OPENSSL_IS_BORINGSSL
+// This is needed to use block128_f, which is necessary when OpenSSL is used.
 #include "openssl/modes.h"
 #endif
+#include "tink/internal/util.h"
 #include "tink/util/secret_data.h"
+#include "tink/util/status.h"
 
 namespace crypto {
 namespace tink {
@@ -52,6 +53,10 @@ util::Status AesCtr128Crypt(absl::string_view data, uint8_t iv[AesBlockSize()],
 
   unsigned int num = 0;
   std::vector<uint8_t> ecount_buf(AesBlockSize(), 0);
+  // OpenSSL >= v1.1.0 public APIs no longer exposes an AES_ctr128_encrypt
+  // function; as an alternative we use CRYPTO_ctr128_encrypt when OpenSSL is
+  // used as a backend. The latter is not part of the public API of BoringSSL,
+  // so we must selectively compile using either of them.
 #ifdef OPENSSL_IS_BORINGSSL
   AES_ctr128_encrypt(reinterpret_cast<const uint8_t*>(data.data()),
                      reinterpret_cast<uint8_t*>(out.data()), data.size(), key,
