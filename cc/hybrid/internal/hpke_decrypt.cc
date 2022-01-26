@@ -16,6 +16,7 @@
 
 #include "tink/hybrid/internal/hpke_decrypt.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -81,6 +82,11 @@ util::StatusOr<std::string> HpkeDecrypt::Decrypt(
   util::StatusOr<int32_t> encoding_size = EncodingSize(hpke_params_.kem());
   if (!encoding_size.ok()) {
     return encoding_size.status();
+  }
+  // Verify that ciphertext length is at least the encapsulated key length.
+  if (ciphertext.size() < *encoding_size) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "Ciphertext is too short.");
   }
   absl::string_view encapsulated_key = ciphertext.substr(0, *encoding_size);
   absl::string_view ciphertext_payload = ciphertext.substr(*encoding_size);
