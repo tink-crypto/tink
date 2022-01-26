@@ -165,6 +165,19 @@ TEST(AesUtilTest, GetAesCtrCipherForKeySize) {
   }
 }
 
+TEST(AesUtilTest, GetAesCbcCipherForKeySize) {
+  for (int i = 0; i < 64; i++) {
+    util::StatusOr<const EVP_CIPHER*> cipher = GetAesCbcCipherForKeySize(i);
+    if (i == 16) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_128_cbc()));
+    } else if (i == 32) {
+      EXPECT_THAT(cipher, IsOkAndHolds(EVP_aes_256_cbc()));
+    } else {
+      EXPECT_THAT(cipher.status(), Not(IsOk()));
+    }
+  }
+}
+
 }  // namespace
 }  // namespace internal
 }  // namespace tink

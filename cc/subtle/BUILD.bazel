@@ -183,6 +183,7 @@ cc_library(
     deps = [
         ":subtle_util",
         "//:mac",
+        "//internal:aes_util",
         "//internal:fips_utils",
         "//internal:ssl_unique_ptr",
         "//internal:util",
@@ -881,6 +882,7 @@ cc_library(
     include_prefix = "tink/subtle",
     deps = [
         ":common_enums",
+        "//internal:aes_util",
         "//internal:ssl_unique_ptr",
         "//internal:util",
         "//subtle/mac:stateful_mac",

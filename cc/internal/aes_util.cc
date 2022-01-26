@@ -84,6 +84,18 @@ util::StatusOr<const EVP_CIPHER*> GetAesCtrCipherForKeySize(
   }
 }
 
+util::StatusOr<const EVP_CIPHER*> GetAesCbcCipherForKeySize(
+    uint32_t key_size_in_bytes) {
+  switch (key_size_in_bytes) {
+    case 16:
+      return EVP_aes_128_cbc();
+    case 32:
+      return EVP_aes_256_cbc();
+  }
+  return util::Status(absl::StatusCode::kInvalidArgument,
+                      absl::StrCat("Invalid key size ", key_size_in_bytes));
+}
+
 }  // namespace internal
 }  // namespace tink
 }  // namespace crypto

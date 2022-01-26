@@ -138,23 +138,6 @@ TEST(StatefulCmacBoringSslTest, testMultipleUpdates) {
                      expected_small);
 }
 
-TEST(StatefulCmacBoringSslTest, testInvalidKeySizes) {
-  size_t tag_size = 16;
-
-  for (int keysize = 0; keysize < 65; keysize++) {
-    std::string key(keysize, 'x');
-    auto cmac_result = StatefulCmacBoringSsl::New(
-        tag_size, util::SecretDataFromStringView(key));
-    if (keysize == 16 || keysize == 32) {
-      EXPECT_THAT(cmac_result.status(), IsOk());
-    } else {
-      EXPECT_THAT(cmac_result.status(),
-                  StatusIs(absl::StatusCode::kInvalidArgument,
-                           HasSubstr("invalid key size")));
-    }
-  }
-}
-
 TEST(StatefulCmacFactoryTest, createsObjects) {
   std::string key(test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
   std::string data = "Some data to test.";

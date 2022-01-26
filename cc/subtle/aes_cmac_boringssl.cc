@@ -23,6 +23,7 @@
 #include "absl/status/status.h"
 #include "openssl/cmac.h"
 #include "openssl/evp.h"
+#include "tink/internal/aes_util.h"
 #include "tink/internal/ssl_unique_ptr.h"
 #include "tink/internal/util.h"
 #include "tink/subtle/subtle_util.h"
@@ -33,8 +34,6 @@
 namespace crypto {
 namespace tink {
 namespace subtle {
-namespace {
-
 // CMAC key sizes in bytes.
 // The small key size is used only to check RFC 4493's test vectors due to
 // the attack described in
@@ -43,19 +42,6 @@ namespace {
 static constexpr size_t kSmallKeySize = 16;
 static constexpr size_t kBigKeySize = 32;
 static constexpr size_t kMaxTagSize = 16;
-
-util::StatusOr<const EVP_CIPHER*> GetAesCbcCipherForKeySize(size_t key_size) {
-  switch (key_size) {
-    case 16:
-      return EVP_aes_128_cbc();
-    case 32:
-      return EVP_aes_256_cbc();
-  }
-  return ToStatusF(absl::StatusCode::kInvalidArgument, "Invalid key size %d",
-                   key_size);
-}
-
-}  // namespace
 
 // static
 util::StatusOr<std::unique_ptr<Mac>> AesCmacBoringSsl::New(util::SecretData key,
@@ -86,7 +72,7 @@ util::StatusOr<std::string> AesCmacBoringSsl::ComputeMac(
   ResizeStringUninitialized(&result, kMaxTagSize);
   internal::SslUniquePtr<CMAC_CTX> context(CMAC_CTX_new());
   util::StatusOr<const EVP_CIPHER*> cipher =
-      GetAesCbcCipherForKeySize(key_.size());
+      internal::GetAesCbcCipherForKeySize(key_.size());
   if (!cipher.ok()) {
     return cipher.status();
   }

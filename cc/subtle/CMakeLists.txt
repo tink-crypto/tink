@@ -173,6 +173,7 @@ tink_cc_library(
     absl::status
     crypto
     tink::core::mac
+    tink::internal::aes_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
     tink::internal::util
@@ -833,6 +834,7 @@ tink_cc_library(
     absl::memory
     absl::status
     crypto
+    tink::internal::aes_util
     tink::internal::ssl_unique_ptr
     tink::internal::util
     tink::subtle::mac::stateful_mac
