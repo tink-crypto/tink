@@ -30,8 +30,8 @@ using ::testing::ElementsAreArray;
 using ::testing::Eq;
 
 
-constexpr int kTwoMb = 2097152;
-struct alignas(kTwoMb) TwoMbAlignedStruct {
+constexpr int kEightKb = 8192;
+struct alignas(kEightKb) TwoMbAlignedStruct {
   int data;
 };
 
@@ -42,7 +42,7 @@ struct alignas(kTwoMb) TwoMbAlignedStruct {
 TEST(SecretUniqueptrTest, Alignment) {
   SecretUniquePtr<TwoMbAlignedStruct> s =
       MakeSecretUniquePtr<TwoMbAlignedStruct>();
-  EXPECT_THAT(reinterpret_cast<size_t>(s.get()) % kTwoMb, Eq(0));
+  EXPECT_THAT(reinterpret_cast<size_t>(s.get()) % kEightKb, Eq(0));
 }
 
 #endif
