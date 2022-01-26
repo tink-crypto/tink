@@ -34,11 +34,6 @@
 
 include(CMakeParseArguments)
 
-if (NOT ${CMAKE_VERSION} VERSION_LESS 3.9)
-  include(GoogleTest)
-endif()
-
-
 if (TINK_BUILD_TESTS)
   enable_testing()
 endif()
@@ -210,11 +205,9 @@ function(tink_cc_test)
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD ${TINK_CXX_STANDARD})
   set_property(TARGET ${_target_name} PROPERTY CXX_STANDARD_REQUIRED true)
 
-  if (${CMAKE_VERSION} VERSION_LESS 3.9)
-    add_test(NAME ${_target_name} COMMAND ${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  else()
-    gtest_discover_tests(${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-  endif()
+  # Note: This was preferred over using gtest_discover_tests because of [1].
+  # [1] https://gitlab.kitware.com/cmake/cmake/-/issues/23039
+  add_test(NAME ${_target_name} COMMAND ${_target_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 endfunction(tink_cc_test)
 
 # Declare a C++ Proto library.
