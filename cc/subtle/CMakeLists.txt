@@ -1512,11 +1512,12 @@ tink_cc_test(
     gmock
     absl::memory
     absl::status
+    absl::strings
+    tink::subtle::mac::stateful_mac
     tink::util::secret_data
     tink::util::status
     tink::util::statusor
     tink::util::test_matchers
-    tink::util::test_util
 )
 
 tink_cc_test(
