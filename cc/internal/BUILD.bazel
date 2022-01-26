@@ -335,7 +335,7 @@ cc_test(
 
 cc_test(
     name = "rsa_util_test",
-    size = "small",
+    size = "large",
     srcs = ["rsa_util_test.cc"],
     deps = [
         ":bn_util",
