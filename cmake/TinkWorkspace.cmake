@@ -44,12 +44,18 @@ http_archive(
   SHA256 a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118
 )
 
-# Commit from 2021-12-03
-http_archive(
-  NAME com_google_absl
-  URL https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip
-  SHA256 368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c
-)
+if (NOT TINK_USE_INSTALLED_ABSEIL)
+  # Commit from 2021-12-03
+  http_archive(
+    NAME com_google_absl
+    URL https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip
+    SHA256 368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c
+  )
+else()
+  # This is everything that needs to be done here. Abseil already defines its
+  # targets, which gets linked in tink_cc_(library|test).
+  find_package(absl REQUIRED)
+endif()
 
 http_archive(
   NAME wycheproof
