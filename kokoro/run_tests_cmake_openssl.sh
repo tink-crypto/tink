@@ -96,6 +96,7 @@ main() {
     sudo rm -f /usr/share/ca-certificates/mozilla/DST_Root_CA_X3.crt
     sudo update-ca-certificates
 
+    install_cmake
     install_openssl
   fi
 
