@@ -16,6 +16,8 @@
 
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_private_key_manager.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/aead/aead_key_templates.h"

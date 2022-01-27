@@ -16,6 +16,8 @@
 
 #include "experimental/pqcrypto/cecpq2/subtle/cecpq2_subtle_boringssl_util.h"
 
+#include <string>
+
 #include "openssl/hrss.h"
 #include "tink/subtle/random.h"
 #include "tink/subtle/subtle_util.h"

@@ -16,6 +16,9 @@
 
 #include "experimental/pqcrypto/cecpq2/util/test_util.h"
 
+#include <string>
+#include <utility>
+
 #include "openssl/curve25519.h"
 #include "openssl/hrss.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"

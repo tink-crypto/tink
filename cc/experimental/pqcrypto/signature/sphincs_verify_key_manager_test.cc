@@ -16,6 +16,8 @@
 
 #include "tink/experimental/pqcrypto/signature/sphincs_verify_key_manager.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_set.h"

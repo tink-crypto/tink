@@ -17,6 +17,8 @@
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_hybrid_config.h"
 
 #include <list>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
