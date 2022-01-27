@@ -17,7 +17,7 @@ import os
 import subprocess
 import time
 
-from typing import List
+from typing import List, Optional
 from absl import logging
 import grpc
 import portpicker
@@ -269,6 +269,21 @@ def keyset_to_json(lang: str, keyset: bytes) -> str:
 def keyset_from_json(lang: str, json_keyset: str) -> bytes:
   global _ts
   return _primitives.keyset_from_json(_ts.keyset_stub(lang), json_keyset)
+
+
+def keyset_read_encrypted(lang: str, encrypted_keyset: bytes,
+                          master_keyset: bytes,
+                          associated_data: Optional[bytes]) -> bytes:
+  global _ts
+  return _primitives.keyset_read_encrypted(
+      _ts.keyset_stub(lang), encrypted_keyset, master_keyset, associated_data)
+
+
+def keyset_write_encrypted(lang: str, keyset: bytes, master_keyset: bytes,
+                           associated_data: Optional[bytes]) -> bytes:
+  global _ts
+  return _primitives.keyset_write_encrypted(
+      _ts.keyset_stub(lang), keyset, master_keyset, associated_data)
 
 
 def jwk_set_to_keyset(lang: str, jwk_set: str) -> bytes:

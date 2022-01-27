@@ -76,6 +76,35 @@ class TestingServersTest(parameterized.TestCase):
     self.assertEqual(template.type_url,
                      'type.googleapis.com/google.crypto.tink.AesGcmKey')
 
+  @parameterized.parameters(['cc', 'java', 'go', 'python'])
+  def test_read_write_encrypted_keyset(self, lang):
+    keyset = testing_servers.new_keyset(lang,
+                                        aead.aead_key_templates.AES128_GCM)
+    master_keyset = testing_servers.new_keyset(
+        lang, aead.aead_key_templates.AES128_GCM)
+    encrypted_keyset = testing_servers.keyset_write_encrypted(
+        lang, keyset, master_keyset, b'associated_data')
+    output_keyset = testing_servers.keyset_read_encrypted(
+        lang, encrypted_keyset, master_keyset, b'associated_data')
+    self.assertEqual(output_keyset, keyset)
+
+    with self.assertRaises(tink.TinkError):
+      testing_servers.keyset_read_encrypted(lang, encrypted_keyset,
+                                            master_keyset,
+                                            b'invalid_associated_data')
+    with self.assertRaises(tink.TinkError):
+      testing_servers.keyset_read_encrypted(lang, b'invalid_encrypted_keyset',
+                                            master_keyset,
+                                            b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      testing_servers.keyset_read_encrypted(lang, encrypted_keyset,
+                                            b'invalid_master_keyset',
+                                            b'associated_data')
+    with self.assertRaises(tink.TinkError):
+      testing_servers.keyset_write_encrypted(lang, keyset,
+                                             b'invalid_master_keyset',
+                                             b'associated_data')
+
   @parameterized.parameters(_SUPPORTED_LANGUAGES['aead'])
   def test_aead(self, lang):
     keyset = testing_servers.new_keyset(lang,
