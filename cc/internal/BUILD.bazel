@@ -353,7 +353,7 @@ cc_test(
 
 cc_test(
     name = "ec_util_test",
-    size = "small",
+    size = "large",
     srcs = ["ec_util_test.cc"],
     data = [
         "@wycheproof//testvectors:ecdh",
