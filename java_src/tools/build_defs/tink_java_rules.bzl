@@ -1,5 +1,6 @@
 """Tink rules for java."""
 
+load("//devtools/build_cleaner/skylark:build_defs.bzl", "register_extension_info")
 load("//tools/build_defs/android:rules.bzl", "android_binary", "android_instrumentation_test")
 
 ## TODO(b/185807287): Remove the remaining instances of collect_android_libraries_and_make_test_suite
@@ -132,3 +133,10 @@ def tink_android_test(name, srcs, deps, data = [], min_version = 19):
                 data = data,
                 tags = ["manual"],
             )
+
+## Tell build_cleaner how to update dependencies in tink_android_test.
+## For a target name foobar, it should use what as deps into foobar_native_binary.
+register_extension_info(
+    extension = tink_android_test,
+    label_regex_for_dep = "{extension_name}_native_binary",
+)
