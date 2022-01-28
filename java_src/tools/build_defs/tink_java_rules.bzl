@@ -76,7 +76,7 @@ def collect_android_libraries_and_make_test_suite(name, shard_count = 1):
             tags = ["manual"],
         )
 
-def tink_android_test(name, srcs, deps, data = [], min_version = 19):
+def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version = 19):
     """Creates android_instrumentation_test targets, testing them on multiple devices.
 
     Args:
@@ -132,6 +132,7 @@ def tink_android_test(name, srcs, deps, data = [], min_version = 19):
                 test_app = legacy_multidex_binary if version_num < 21 else native_multidex_binary,
                 data = data,
                 tags = ["manual"],
+                shard_count = shard_count,
             )
 
 ## Tell build_cleaner how to update dependencies in tink_android_test.
