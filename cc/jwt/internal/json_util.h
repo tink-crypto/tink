@@ -17,6 +17,8 @@
 #ifndef TINK_JWT_INTERNAL_JWT_UTIL_H_
 #define TINK_JWT_INTERNAL_JWT_UTIL_H_
 
+#include <string>
+
 #include "google/protobuf/struct.pb.h"
 #include "absl/strings/substitute.h"
 #include "tink/util/status.h"
