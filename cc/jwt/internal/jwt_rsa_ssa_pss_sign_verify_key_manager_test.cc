@@ -43,7 +43,6 @@ using ::google::crypto::tink::JwtRsaSsaPssAlgorithm;
 using ::google::crypto::tink::JwtRsaSsaPssKeyFormat;
 using ::google::crypto::tink::JwtRsaSsaPssPrivateKey;
 using ::google::crypto::tink::JwtRsaSsaPssPublicKey;
-using ::google::crypto::tink::KeyData;
 using ::testing::Eq;
 using ::testing::Not;
 

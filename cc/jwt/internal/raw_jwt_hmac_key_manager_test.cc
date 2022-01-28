@@ -43,7 +43,6 @@ using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::JwtHmacAlgorithm;
 using ::google::crypto::tink::JwtHmacKey;
 using ::google::crypto::tink::JwtHmacKeyFormat;
-using ::google::crypto::tink::KeyData;
 using ::google::crypto::tink::KeyTemplate;
 using ::google::crypto::tink::OutputPrefixType;
 using ::testing::Eq;

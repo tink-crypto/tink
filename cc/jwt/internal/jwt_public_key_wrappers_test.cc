@@ -34,9 +34,7 @@
 #include "proto/jwt_ecdsa.pb.h"
 #include "proto/tink.pb.h"
 
-using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::test::IsOk;
-using ::crypto::tink::test::IsOkAndHolds;
 using ::google::crypto::tink::JwtEcdsaAlgorithm;
 using ::google::crypto::tink::JwtEcdsaKeyFormat;
 using ::google::crypto::tink::Keyset;
