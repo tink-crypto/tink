@@ -14,8 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TINK_JWT_MAC_H_
-#define TINK_JWT_MAC_H_
+#ifndef TINK_JWT_JWT_MAC_H_
+#define TINK_JWT_JWT_MAC_H_
 
 #include <string>
 
@@ -62,4 +62,4 @@ class JwtMac {
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_JWT_MAC_H_
+#endif  // TINK_JWT_JWT_MAC_H_

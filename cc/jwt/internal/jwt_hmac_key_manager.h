@@ -120,4 +120,4 @@ class JwtHmacKeyManager
 }  // namespace tink
 }  // namespace crypto
 
-#endif  // TINK_JWT_JWT_HMAC_KEY_MANAGER_H_
+#endif  // TINK_JWT_INTERNAL_JWT_HMAC_KEY_MANAGER_H_
