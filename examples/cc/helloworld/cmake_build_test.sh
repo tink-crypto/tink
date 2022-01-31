@@ -17,6 +17,8 @@
 
 set -e
 
+readonly TINK_USE_CXX_STANDARD=11
+
 # Test for using Tink in a CMake project.
 
 if [[ -z "${TEST_TMPDIR}" ]]; then
@@ -35,7 +37,6 @@ TEST_DATA_DIR="${TEST_SRCDIR}/tink/examples/cc/helloworld"
 CMAKE_LISTS_FILE="${TEST_DATA_DIR}/CMakeLists_for_CMakeBuildTest.txt"
 HELLO_WORLD_SRC="${TEST_DATA_DIR}/hello_world.cc"
 KEYSET_FILE="${TEST_DATA_DIR}/aes128_gcm_test_keyset_json.txt"
-USE_OPENSSL="false"
 
 PROJECT_DIR="${TEST_TMPDIR}/my_project"
 PLAINTEXT_FILE="${TEST_TMPDIR}/example_plaintext.txt"
@@ -43,11 +44,21 @@ CIPHERTEXT_FILE="${TEST_TMPDIR}/ciphertext.bin"
 DECRYPTED_FILE="${TEST_TMPDIR}/decrypted.txt"
 AAD_TEXT="some associated data"
 
+# If "true" build and install OpenSSL and build Tink against it.
+USE_OPENSSL="false"
+# If "true" build and install Abseil and build Tink against it.
+USE_INSTALLED_ABSEIL="false"
+
 # Parse parameters.
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
     --openssl)
       USE_OPENSSL="true"
+      shift
+      ;;
+    # Use prebuilt static libraries of Abseil.
+    --use_installed_abseil)
+      USE_INSTALLED_ABSEIL="true"
       shift
       ;;
     *)
@@ -61,6 +72,9 @@ done
 #
 # Adds the directory to PATH and sets OPENSSL_ROOT_DIR accordingly.
 #
+# Globals:
+#   OPENSSL_ROOT_DIR Gets populated with OpenSSL temporary directory.
+#   PATH Gets updated with bin's path.
 # Arguments:
 #   openssl_version Version of OpenSSL to install, e.g., 1.1.1l.
 #######################################
@@ -89,22 +103,61 @@ install_openssl() {
 }
 
 #######################################
+# Install Abeseil into a temporary folder.
+#
+# Globals:
+#   ABSEIL_INSTALL_PATH Gets populated with Abseil's installation path.
+# Arguments:
+#   abseil_commit Abseils commit to lookup.
+#######################################
+install_abseil() {
+  local -r abseil_commit="$1"
+  local -r abseil_tmpdir="$(mktemp -dt tink-abseil.XXXXXX)"
+  local -r abseil_install_dir="${abseil_tmpdir}/install"
+  (
+    cd "${abseil_tmpdir}"
+    mkdir "install"
+    curl -OLsS "https://github.com/abseil/abseil-cpp/archive/${abseil_commit}.zip"
+    unzip "${abseil_commit}.zip" && cd "abseil-cpp-${abseil_commit}"
+    mkdir build && cd build
+    cmake .. \
+      -DCMAKE_INSTALL_PREFIX="${abseil_install_dir}" \
+      -DCMAKE_CXX_STANDARD="${TINK_USE_CXX_STANDARD}"
+    cmake --build . --target install
+  )
+  export ABSEIL_INSTALL_PATH="${abseil_install_dir}"
+}
+
+
+#######################################
 # Builds the hello world project
+#
+# Globals:
+#   USE_OPENSSL if "true" install OpenSSL and build against it.
+#   USE_INSTALLED_ABSEIL if "true" install Abseil and build against it.
+# Arguments:
+#   None
 #######################################
 build_hello_world() {
-  local cmake_paramters=(
-    -DCMAKE_CXX_STANDARD=11
+  local cmake_parameters=(
+    -DCMAKE_CXX_STANDARD="${TINK_USE_CXX_STANDARD}"
   )
   if [[ "${USE_OPENSSL}" == "true" ]]; then
     # Install OpenSSL in a temporary directory.
     install_openssl "1.1.1l"
-    cmake_paramters+=( -DTINK_USE_SYSTEM_OPENSSL=ON )
+    cmake_parameters+=( -DTINK_USE_SYSTEM_OPENSSL=ON )
   fi
-  readonly cmake_paramters
+  if [[ "${USE_INSTALLED_ABSEIL}" == "true" ]]; then
+    # Commit from 2021-12-03
+    install_abseil "9336be04a242237cd41a525bedfcf3be1bb55377"
+    cmake_parameters+=( -DCMAKE_PREFIX_PATH="${ABSEIL_INSTALL_PATH}" )
+    cmake_parameters+=( -DTINK_USE_INSTALLED_ABSEIL=ON )
+  fi
+  readonly cmake_parameters
   (
     mkdir build && cd build
     cmake --version
-    cmake .. "${cmake_paramters[@]}"
+    cmake .. "${cmake_parameters[@]}"
     make -j"$(nproc)"
   )
 }
