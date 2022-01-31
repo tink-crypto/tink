@@ -24,38 +24,41 @@ import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.KeysetManager;
 import com.google.crypto.tink.internal.KeyTemplateProtoConverter;
+import com.google.crypto.tink.testing.TestUtil;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Tests for JwtSignKeyverifyWrapper. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class JwtPublicKeySignVerifyWrappersTest {
 
-  private static Object[] templateNamess() throws GeneralSecurityException {
-    return new Object[] {
-      "JWT_ES256",
-      "JWT_ES384",
-      "JWT_ES512",
-      "JWT_ES256_RAW",
-      "JWT_RS256_2048_F4",
-      "JWT_RS256_3072_F4",
-      "JWT_RS384_3072_F4",
-      "JWT_RS512_4096_F4",
-      "JWT_RS256_2048_F4_RAW",
-      "JWT_PS256_2048_F4",
-      "JWT_PS256_3072_F4",
-      "JWT_PS384_3072_F4",
-      "JWT_PS512_4096_F4",
-      "JWT_PS256_2048_F4_RAW",
-    };
-  }
+  @DataPoints("templateNames")
+  public static final String[] TEMPLATE_NAMES =
+      new String[] {
+        "JWT_ES256",
+        "JWT_ES384",
+        "JWT_ES512",
+        "JWT_ES256_RAW",
+        "JWT_RS256_2048_F4",
+        "JWT_RS256_3072_F4",
+        "JWT_RS384_3072_F4",
+        "JWT_RS512_4096_F4",
+        "JWT_RS256_2048_F4_RAW",
+        "JWT_PS256_2048_F4",
+        "JWT_PS256_3072_F4",
+        "JWT_PS384_3072_F4",
+        "JWT_PS512_4096_F4",
+        "JWT_PS256_2048_F4_RAW",
+      };
 
   @Before
   public void setUp() throws GeneralSecurityException {
@@ -198,9 +201,14 @@ public class JwtPublicKeySignVerifyWrappersTest {
         () -> oldVerifier.verifyAndDecode(newSignedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templateNamess")
-  public void wrongKey_throwsInvalidSignatureException(String templateName) throws Exception {
+  @Theory
+  public void wrongKey_throwsInvalidSignatureException(
+      @FromDataPoints("templateNames") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeyTemplate template = KeyTemplates.get(templateName);
     KeysetHandle keysetHandle = KeysetHandle.generateNew(template);
     JwtPublicKeySign jwtSign = keysetHandle.getPrimitive(JwtPublicKeySign.class);

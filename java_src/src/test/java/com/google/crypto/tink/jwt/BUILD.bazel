@@ -300,7 +300,7 @@ java_test(
 
 java_test(
     name = "JwtPublicKeySignVerifyWrappersTest",
-    size = "enormous",
+    size = "large",
     srcs = ["JwtPublicKeySignVerifyWrappersTest.java"],
     deps = [
         "//proto:tink_java_proto",
@@ -320,6 +320,7 @@ java_test(
         "//src/main/java/com/google/crypto/tink/jwt:raw_jwt",
         "//src/main/java/com/google/crypto/tink/jwt:verified_jwt",
         "//src/main/java/com/google/crypto/tink/subtle:elliptic_curves",
+        "//src/main/java/com/google/crypto/tink/testing:test_util",
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@maven//:pl_pragmatists_JUnitParams",
