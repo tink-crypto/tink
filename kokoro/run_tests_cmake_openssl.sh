@@ -101,6 +101,13 @@ main() {
   fi
 
   cc_cmake_build_and_run_tests . "true"
+
+  (
+    export TEST_TMPDIR="$(mktemp -dt tink-examples.XXXXXX)"
+    export TEST_SRCDIR="$(cd ..; pwd)"
+    cd examples/cc/helloworld
+    ./cmake_build_test.sh --openssl
+  )
 }
 
 main "$@"
