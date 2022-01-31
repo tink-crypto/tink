@@ -671,17 +671,6 @@ cc_library(
     deps = [":key_access"],
 )
 
-# Settings for building in various environments.
-config_setting(
-    name = "linux_x86_64",
-    values = {"cpu": "k8"},
-)
-
-config_setting(
-    name = "mac_x86_64",
-    values = {"cpu": "darwin"},
-)
-
 # tests
 
 cc_test(

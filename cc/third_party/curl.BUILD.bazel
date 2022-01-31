@@ -14,6 +14,13 @@ config_setting(
     values = {"cpu": "darwin"},
 )
 
+config_setting(
+    name = "darwin_arm64",
+    values = {
+        "cpu": "darwin_arm64",
+    },
+)
+
 cc_library(
     name = "curl",
     srcs = [
@@ -216,6 +223,9 @@ cc_library(
         ":mac_x86_64": [
             "lib/vtls/darwinssl.c",
         ],
+        ":darwin_arm64": [
+            "lib/vtls/darwinssl.c",
+        ],
         ":linux_x86_64": [
             "lib/vtls/openssl.c",
         ],
@@ -245,6 +255,9 @@ cc_library(
         ":mac_x86_64": [
             "-fno-constant-cfstrings",
         ],
+        ":darwin_arm64": [
+            "-fno-constant-cfstrings",
+        ],
         ":linux_x86_64": [
             "-DCURL_MAX_WRITE_SIZE=65536",
         ],
@@ -253,6 +266,12 @@ cc_library(
     includes = ["include"],
     linkopts = select({
         ":mac_x86_64": [
+            "-Wl,-framework",
+            "-Wl,CoreFoundation",
+            "-Wl,-framework",
+            "-Wl,Security",
+        ],
+        ":darwin_arm64": [
             "-Wl,-framework",
             "-Wl,CoreFoundation",
             "-Wl,-framework",
