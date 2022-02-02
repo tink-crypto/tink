@@ -55,6 +55,8 @@ KeysetImpl::KeysetImpl() {
   key_templates_["AES128_EAX"] = crypto::tink::AeadKeyTemplates::Aes128Eax();
   key_templates_["AES256_EAX"] = crypto::tink::AeadKeyTemplates::Aes256Eax();
   key_templates_["AES128_GCM"] = crypto::tink::AeadKeyTemplates::Aes128Gcm();
+  key_templates_["AES128_GCM_RAW"] =
+      crypto::tink::AeadKeyTemplates::Aes128GcmNoPrefix();
   key_templates_["AES256_GCM"] = crypto::tink::AeadKeyTemplates::Aes256Gcm();
   key_templates_["AES256_GCM_RAW"] =
       crypto::tink::AeadKeyTemplates::Aes256GcmNoPrefix();

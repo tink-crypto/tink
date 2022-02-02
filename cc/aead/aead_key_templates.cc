@@ -132,6 +132,13 @@ const KeyTemplate& AeadKeyTemplates::Aes128Gcm() {
 }
 
 // static
+const KeyTemplate& AeadKeyTemplates::Aes128GcmNoPrefix() {
+  static const KeyTemplate* key_template =
+      NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 16, OutputPrefixType::RAW);
+  return *key_template;
+}
+
+// static
 const KeyTemplate& AeadKeyTemplates::Aes256Gcm() {
   static const KeyTemplate* key_template =
       NewAesGcmKeyTemplate(/* key_size_in_bytes= */ 32, OutputPrefixType::TINK);

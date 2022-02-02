@@ -52,7 +52,6 @@ UNDEFINED_TEMPLATES = [
     ('AES256_GCM_SIV_RAW', 'cc'),
     ('AES128_GCM_SIV_RAW', 'go'),
     ('AES256_GCM_SIV_RAW', 'go'),
-    ('AES128_GCM_RAW', 'cc'),
     ('AES128_GCM_RAW', 'go'),
     ('AES128_CTR_HMAC_SHA256_RAW', 'cc'),
     ('AES256_CTR_HMAC_SHA256_RAW', 'cc'),

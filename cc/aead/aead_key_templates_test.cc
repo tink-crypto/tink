@@ -111,6 +111,37 @@ TEST(AeadKeyTemplatesTest, testAesEaxKeyTemplates) {
   }
 }
 
+TEST(Aes128GcmNoPrefix, Basics) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().type_url(),
+              Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().type_url(),
+              Eq(AesGcmKeyManager().get_key_type()));
+}
+
+TEST(Aes128GcmNoPrefix, OutputPrefixType) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix().output_prefix_type(),
+              Eq(OutputPrefixType::RAW));
+}
+
+TEST(Aes128GcmNoPrefix, MultipleCallsSameReference) {
+  EXPECT_THAT(AeadKeyTemplates::Aes128GcmNoPrefix(),
+              Ref(AeadKeyTemplates::Aes128GcmNoPrefix()));
+}
+
+TEST(Aes128GcmNoPrefix, WorksWithKeyTypeManager) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128GcmNoPrefix();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(AesGcmKeyManager().ValidateKeyFormat(key_format), IsOk());
+}
+
+TEST(Aes128GcmNoPrefix, CheckValues) {
+  const KeyTemplate& key_template = AeadKeyTemplates::Aes128GcmNoPrefix();
+  AesGcmKeyFormat key_format;
+  EXPECT_TRUE(key_format.ParseFromString(key_template.value()));
+  EXPECT_THAT(key_format.key_size(), Eq(16));
+}
+
 TEST(Aes256GcmNoPrefix, Basics) {
   EXPECT_THAT(AeadKeyTemplates::Aes256GcmNoPrefix().type_url(),
               Eq("type.googleapis.com/google.crypto.tink.AesGcmKey"));
