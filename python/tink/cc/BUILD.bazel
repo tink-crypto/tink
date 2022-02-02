@@ -42,6 +42,16 @@ cc_library(
 )
 
 cc_library(
+    name = "cc_hpke_config",
+    srcs = ["cc_hpke_config.cc"],
+    hdrs = ["cc_hpke_config.h"],
+    deps = [
+        "@tink_cc//hybrid:hpke_config",
+        "@tink_cc//util:status",
+    ],
+)
+
+cc_library(
     name = "python_file_object_adapter",
     hdrs = ["python_file_object_adapter.h"],
     include_prefix = "tink/cc",

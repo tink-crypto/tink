@@ -23,6 +23,7 @@ from tink.proto import ecdsa_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hmac_pb2
 from tink.proto import hmac_prf_pb2
+from tink.proto import hpke_pb2
 from tink.proto import jwt_ecdsa_pb2
 from tink.proto import jwt_hmac_pb2
 from tink.proto import tink_pb2
@@ -34,6 +35,7 @@ from tink.cc.pybind import tink_bindings
 def setUpModule():
   tink_bindings.register()
   tink_bindings.register_jwt()
+  tink_bindings.register_hpke()
 
 
 class AeadKeyManagerTest(absltest.TestCase):
@@ -187,6 +189,85 @@ class HybridKeyManagerTest(absltest.TestCase):
     hybrid_decrypt = decrypt_key_manager.primitive(key_data)
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
                                 'ciphertext too short'):
+      hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
+
+
+class HpkeKeyManagerTest(absltest.TestCase):
+
+  def hybrid_decrypt_key_manager(self):
+    return tink_bindings.HybridDecryptKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.HpkePrivateKey')
+
+  def hybrid_encrypt_key_manager(self):
+    return tink_bindings.HybridEncryptKeyManager.from_cc_registry(
+        'type.googleapis.com/google.crypto.tink.HpkePublicKey')
+
+  def test_new_key_data(self):
+    key_manager = self.hybrid_decrypt_key_manager()
+    key_data = tink_pb2.KeyData.FromString(
+        key_manager.new_key_data(
+            hybrid.hybrid_key_templates
+            .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString(
+            )))
+    self.assertEqual(key_data.type_url, key_manager.key_type())
+    self.assertEqual(key_data.key_material_type,
+                     tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
+    key = hpke_pb2.HpkePrivateKey.FromString(key_data.value)
+    self.assertLen(key.private_key, 32)  # HPKE 'Nsk' parameter length  = 32
+    self.assertEqual(key.public_key.params.kem,
+                     hpke_pb2.DHKEM_X25519_HKDF_SHA256)
+    self.assertEqual(key.public_key.params.kdf, hpke_pb2.HKDF_SHA256)
+    self.assertEqual(key.public_key.params.aead, hpke_pb2.AES_128_GCM)
+
+  def test_new_key_data_invalid_kem_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Invalid KEM param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.KEM_UNKNOWN,
+              hpke_kdf=hpke_pb2.HKDF_SHA256,
+              hpke_aead=hpke_pb2.AES_128_GCM).SerializeToString())
+
+  def test_new_key_data_invalid_kdf_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Invalid KDF param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+              hpke_kdf=hpke_pb2.KDF_UNKNOWN,
+              hpke_aead=hpke_pb2.AES_128_GCM).SerializeToString())
+
+  def test_new_key_data_invalid_aead_raise_exception(self):
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Invalid AEAD param.'):
+      self.hybrid_decrypt_key_manager().new_key_data(
+          hybrid.hybrid_key_templates._create_hpke_key_template(
+              hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+              hpke_kdf=hpke_pb2.HKDF_SHA256,
+              hpke_aead=hpke_pb2.AEAD_UNKNOWN).SerializeToString())
+
+  def test_encrypt_decrypt(self):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    encrypt_key_manager = self.hybrid_encrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString())
+    public_key_data = decrypt_key_manager.public_key_data(key_data)
+    hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
+    ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    self.assertEqual(
+        hybrid_decrypt.decrypt(ciphertext, b'some context info'),
+        b'some plaintext')
+
+  def test_decrypt_fails(self):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString())
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    with self.assertRaisesRegex(tink_bindings.StatusNotOk,
+                                'Ciphertext is too short.'):
       hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 

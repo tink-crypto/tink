@@ -57,6 +57,7 @@ py_test(
         "//tink/core",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -96,6 +97,7 @@ py_library(
         "//tink/daead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )
@@ -111,6 +113,7 @@ py_test(
         "//tink/aead",
         "//tink/proto:common_py_pb2",
         "//tink/proto:ecies_aead_hkdf_py_pb2",
+        "//tink/proto:hpke_py_pb2",
         "//tink/proto:tink_py_pb2",
     ],
 )

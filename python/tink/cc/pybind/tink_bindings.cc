@@ -21,6 +21,7 @@
 #include "tink/cc/pybind/cc_aws_kms_client.h"
 #include "tink/cc/pybind/cc_gcp_kms_client.h"
 #include "tink/cc/pybind/cc_fake_kms_client_testonly.h"
+#include "tink/cc/pybind/cc_hpke_config.h"
 #include "tink/cc/pybind/cc_jwt_config.h"
 #include "tink/cc/pybind/cc_key_manager.h"
 #include "tink/cc/pybind/cc_streaming_aead_wrappers.h"
@@ -50,6 +51,7 @@ PYBIND11_MODULE(tink_bindings, m) {
   PybindRegisterAead(&m);
   PybindRegisterHybridEncrypt(&m);
   PybindRegisterCcTinkConfig(&m);
+  PybindRegisterCcHpkeConfig(&m);
   PybindRegisterCcJwtConfig(&m);
   PybindRegisterStreamingAead(&m);
   PybindRegisterDeterministicAead(&m);

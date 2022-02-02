@@ -19,6 +19,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
+from tink.proto import hpke_pb2
 from tink.proto import tink_pb2
 import tink
 from tink import aead
@@ -54,7 +55,7 @@ class HybridKeyManagerTest(parameterized.TestCase):
     with self.assertRaises(core.TinkError):
       tink.new_keyset_handle(key_template)
 
-  def test_new_keyset_hanlde_on_public_key_fails(self):
+  def test_new_keyset_handle_on_public_key_fails(self):
     key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
     key_template = tink_pb2.KeyTemplate()
     key_template.type_url = (
@@ -86,6 +87,90 @@ class HybridKeyManagerTest(parameterized.TestCase):
     hybrid_dec = private_handle.primitive(hybrid.HybridDecrypt)
     with self.assertRaises(core.TinkError):
       hybrid_dec.decrypt(b'bad ciphertext', b'some context info')
+
+
+class HpkeKeyManagerTest(parameterized.TestCase):
+
+  def test_new_key_data(self):
+    tmpl = hybrid.hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM
+    key_manager = core.Registry.key_manager(tmpl.type_url)
+    key_data = key_manager.new_key_data(tmpl)
+    self.assertEqual(key_data.type_url, key_manager.key_type())
+    self.assertEqual(key_data.key_material_type,
+                     tink_pb2.KeyData.ASYMMETRIC_PRIVATE)
+    key = hpke_pb2.HpkePrivateKey.FromString(key_data.value)
+    self.assertLen(key.private_key, 32)  # HPKE 'Nsk' parameter length  = 32
+    self.assertEqual(key.public_key.params.kem,
+                     hpke_pb2.DHKEM_X25519_HKDF_SHA256)
+    self.assertEqual(key.public_key.params.kdf, hpke_pb2.HKDF_SHA256)
+    self.assertEqual(key.public_key.params.aead, hpke_pb2.AES_128_GCM)
+
+  def test_new_keyset_handle_invalid_kem_raises_exception(self):
+    templates = hybrid.hybrid_key_templates
+    key_template = templates._create_hpke_key_template(
+        hpke_kem=hpke_pb2.KEM_UNKNOWN,
+        hpke_kdf=hpke_pb2.HKDF_SHA256,
+        hpke_aead=hpke_pb2.AES_128_GCM)
+    with self.assertRaises(core.TinkError):
+      tink.new_keyset_handle(key_template)
+
+  def test_new_keyset_handle_invalid_kdf_raises_exception(self):
+    templates = hybrid.hybrid_key_templates
+    key_template = templates._create_hpke_key_template(
+        hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+        hpke_kdf=hpke_pb2.KDF_UNKNOWN,
+        hpke_aead=hpke_pb2.AES_128_GCM)
+    with self.assertRaises(core.TinkError):
+      tink.new_keyset_handle(key_template)
+
+  def test_new_keyset_handle_invalid_aead_raises_exception(self):
+    templates = hybrid.hybrid_key_templates
+    key_template = templates._create_hpke_key_template(
+        hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+        hpke_kdf=hpke_pb2.HKDF_SHA256,
+        hpke_aead=hpke_pb2.AEAD_UNKNOWN)
+    with self.assertRaises(core.TinkError):
+      tink.new_keyset_handle(key_template)
+
+  def test_new_keyset_handle_on_public_key_fails(self):
+    key_format = hpke_pb2.HpkeKeyFormat()
+    key_template = tink_pb2.KeyTemplate()
+    key_template.type_url = (
+        'type.googleapis.com/google.crypto.tink.HpkePublicKey')
+    key_template.value = key_format.SerializeToString()
+    key_template.output_prefix_type = tink_pb2.TINK
+    with self.assertRaises(core.TinkError):
+      tink.new_keyset_handle(key_template)
+
+  @parameterized.parameters([
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM, hybrid
+      .hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305
+  ])
+  def test_encrypt_decrypt(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    public_handle = private_handle.public_keyset_handle()
+    hybrid_encrypt = public_handle.primitive(hybrid.HybridEncrypt)
+    ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
+    hybrid_decrypt = private_handle.primitive(hybrid.HybridDecrypt)
+    self.assertEqual(
+        hybrid_decrypt.decrypt(ciphertext, b'some context info'),
+        b'some plaintext')
+
+  @parameterized.parameters([
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM, hybrid
+      .hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305
+  ])
+  def test_decrypt_fails(self, template):
+    private_handle = tink.new_keyset_handle(template)
+    hybrid_decrypt = private_handle.primitive(hybrid.HybridDecrypt)
+    with self.assertRaises(core.TinkError):
+      hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 if __name__ == '__main__':
   absltest.main()
