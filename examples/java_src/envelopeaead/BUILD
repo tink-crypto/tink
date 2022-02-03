@@ -35,8 +35,6 @@ sh_test(
     ],
     tags = [
         "manual",
-        "notap",
-        "requires-net:external",
-        "tink_guitar",
+        "requires-network",
     ],
 )
