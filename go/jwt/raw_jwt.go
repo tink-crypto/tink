@@ -14,7 +14,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Package jwt implements a subset of JSON Web Token (JWT) as defined by RFC 7519 (https://tools.ietf.org/html/rfc7519) that is considered safe and most often used.
 package jwt
 
 import (
