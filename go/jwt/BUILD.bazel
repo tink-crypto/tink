@@ -11,6 +11,7 @@ go_library(
         "jwt_encoding.go",
         "jwt_hmac_key_manager.go",
         "jwt_mac.go",
+        "jwt_mac_factory.go",
         "jwt_mac_kid.go",
         "jwt_validator.go",
         "raw_jwt.go",
@@ -19,6 +20,7 @@ go_library(
     importpath = "github.com/google/tink/go/jwt",
     deps = [
         "//core/registry:go_default_library",
+        "//core/primitiveset:go_default_library",
         "//keyset:go_default_library",
         "//mac/subtle:go_default_library",
         "//subtle:go_default_library",
@@ -34,14 +36,22 @@ go_library(
 go_test(
     name = "go_default_test_test",
     srcs = [
+        "jwt_mac_factory_test.go",
         "jwt_validator_test.go",
         "raw_jwt_test.go",
         "verified_jwt_test.go",
     ],
     deps = [
         "//jwt:go_default_library",
+        "//keyset:go_default_library",
+        "//signature:go_default_library",
+        "//subtle/random:go_default_library",
+        "//testkeyset:go_default_library",
+        "//testutil:go_default_library",
+        "//proto:jwt_hmac_go_proto",
         "//proto:tink_go_proto",
         "@com_github_google_go_cmp//cmp:go_default_library",
+        "@org_golang_google_protobuf//proto:go_default_library",
         "@org_golang_google_protobuf//types/known/structpb:structpb",
     ],
 )
