@@ -63,6 +63,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtEcdsaPublicKey.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKey_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws Exception {
@@ -76,6 +77,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     verifyManager.validateKey(publicKey);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createPrimitive_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws Exception {
@@ -96,6 +98,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createPrimitive_anotherKey_throw(
       @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {

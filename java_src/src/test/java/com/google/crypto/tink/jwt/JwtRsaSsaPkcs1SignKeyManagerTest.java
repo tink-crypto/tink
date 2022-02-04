@@ -114,6 +114,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         () -> factory.validateKeyFormat(JwtRsaSsaPkcs1KeyFormat.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKeyFormat_ok(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
@@ -131,6 +132,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     }
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void invalidKeyFormat_smallKey_throw(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm)
@@ -139,6 +141,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThrows(GeneralSecurityException.class, () -> factory.validateKeyFormat(format));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void invalidKeyFormat_smallPublicExponents_throw(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
@@ -176,6 +179,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertEquals(crt, q.modInverse(p));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createKeys_ok(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
@@ -192,6 +196,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     checkKey(key);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createKey_alwaysNewElement_ok(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
@@ -215,6 +220,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThat(keys).hasSize(2 * numTests);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createCorruptedModulusPrimitive_throws(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,
@@ -358,6 +364,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     new JwtRsaSsaPkcs1SignKeyManager().keyFactory().validateKeyFormat(format);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_success(@FromDataPoints("templates") String templateName)
       throws Exception {
@@ -391,6 +398,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerifyDifferentKey_throw(@FromDataPoints("templates") String templateName)
       throws Exception {
@@ -414,6 +422,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_header_modification_throw(
       @FromDataPoints("templates") String templateName) throws Exception {
@@ -440,6 +449,7 @@ public class JwtRsaSsaPkcs1SignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_payload_modification_throw(
       @FromDataPoints("templates") String templateName) throws Exception {

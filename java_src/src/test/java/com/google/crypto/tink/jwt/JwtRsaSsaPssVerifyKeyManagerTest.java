@@ -67,6 +67,7 @@ public final class JwtRsaSsaPssVerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtRsaSsaPssPublicKey.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKey_ok(
       @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm,

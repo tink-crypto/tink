@@ -223,6 +223,7 @@ public class JwtHmacKeyManagerTest {
     testKeyTemplateCompatible(manager, KeyTemplates.get("JWT_HS512_RAW"));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_success(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
@@ -234,6 +235,7 @@ public class JwtHmacKeyManagerTest {
     assertThat(verifiedToken.getJwtId()).isEqualTo("jwtId");
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerifyDifferentKey_throw(String templateNames) throws Exception {
     KeyTemplate template = KeyTemplates.get(templateNames);
@@ -250,6 +252,7 @@ public class JwtHmacKeyManagerTest {
         () -> otherPrimitive.verifyMacAndDecode(compact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_modifiedHeader_throw(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
@@ -272,6 +275,7 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_modifiedPayload_throw(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));
@@ -294,6 +298,7 @@ public class JwtHmacKeyManagerTest {
     }
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void verify_modifiedSignature_shouldThrow(String templateNames) throws Exception {
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateNames));

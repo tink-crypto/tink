@@ -201,6 +201,7 @@ public class JwtPublicKeySignVerifyWrappersTest {
         () -> oldVerifier.verifyAndDecode(newSignedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void wrongKey_throwsInvalidSignatureException(
       @FromDataPoints("templateNames") String templateName) throws Exception {
