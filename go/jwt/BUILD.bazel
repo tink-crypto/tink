@@ -9,6 +9,7 @@ go_library(
     srcs = [
         "jwt_encoding.go",
         "jwt_mac.go",
+        "jwt_mac_kid.go",
         "jwt_validator.go",
         "raw_jwt.go",
         "verified_jwt.go",
@@ -16,6 +17,7 @@ go_library(
     importpath = "github.com/google/tink/go/jwt",
     deps = [
         "//proto:tink_go_proto",
+        "//tink:go_default_library",
         "@org_golang_google_protobuf//types/known/structpb:structpb",
     ],
 )
@@ -39,9 +41,11 @@ go_test(
     name = "go_default_test",
     srcs = [
         "jwt_encoding_test.go",
+        "jwt_mac_kid_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
+        "//mac/subtle:go_default_library",
         "//proto:tink_go_proto",
         "@com_github_google_go_cmp//cmp:go_default_library",
     ],
