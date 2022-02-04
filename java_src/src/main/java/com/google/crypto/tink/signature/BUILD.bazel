@@ -331,7 +331,7 @@ android_library(
         "//proto:rsa_ssa_pss_java_proto_lite",
         "//proto:tink_java_proto_lite",
         "//src/main/java/com/google/crypto/tink:keyset_reader-android",
-        "//src/main/java/com/google/crypto/tink:pem_key_type",
+        "//src/main/java/com/google/crypto/tink:pem_key_type-android",
         "//src/main/java/com/google/crypto/tink/signature/internal:sig_util-android",
         "//src/main/java/com/google/crypto/tink/subtle:random",
     ],
