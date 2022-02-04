@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package tink
+package jwt
 
-import "github.com/google/tink/go/jwt"
-
-// JWTMAC is an interface for authenticating and verifying JSON Web Tokens (JWT) with JSON Web Signature (JWS) MAC.
+// MAC is an interface for authenticating and verifying JSON Web Tokens (JWT) with JSON Web Signature (JWS) MAC.
 // See RFC 7519 and RFC 7515. Security guarantees: similar to Message Authentication Code (MAC).
-type JWTMAC interface {
+type MAC interface {
 	// Computes a MAC and encodes the raw JWT token and the MAC in the JWS compact serialization format.
-	ComputeMACAndEncode(token *jwt.RawJWT) (string, error)
+	ComputeMACAndEncode(token *RawJWT) (string, error)
 
 	// Verifies and decodes a JWT token in the JWS compact serialization format.
 	//
@@ -37,5 +35,5 @@ type JWTMAC interface {
 	// (iat) or not_before (nbf), they will also be validated. validator allows to
 	// set a clock skew, to deal with small clock differences among different
 	// machines.
-	VerifyMACAndDecode(compact string, validator *jwt.Validator) (*jwt.VerifiedJWT, error)
+	VerifyMACAndDecode(compact string, validator *Validator) (*VerifiedJWT, error)
 }

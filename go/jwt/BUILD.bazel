@@ -8,6 +8,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "jwt_encoding.go",
+        "jwt_mac.go",
         "jwt_validator.go",
         "raw_jwt.go",
         "verified_jwt.go",

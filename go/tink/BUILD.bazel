@@ -11,7 +11,6 @@ go_library(
         "deterministic_aead.go",
         "hybrid_decrypt.go",
         "hybrid_encrypt.go",
-        "jwt_mac.go",
         "mac.go",
         "signer.go",
         "streamingaead.go",
@@ -20,5 +19,4 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/tink",
     visibility = ["//visibility:public"],
-    deps = ["//jwt:go_default_library"],
 )
