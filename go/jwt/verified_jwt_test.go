@@ -14,37 +14,38 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package jwt
+package jwt_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/tink/go/jwt"
 )
 
 // TODO(b/202065153): In the future Verified JWT creation will be limited to subtle libraries.
-func createVerifiedJWT(rawJWT *RawJWT) (*VerifiedJWT, error) {
-	return NewVerifiedJWT(rawJWT)
+func createVerifiedJWT(rawJWT *jwt.RawJWT) (*jwt.VerifiedJWT, error) {
+	return jwt.NewVerifiedJWT(rawJWT)
 }
 
 func TestRawJWTCantBeNull(t *testing.T) {
-	if _, err := NewVerifiedJWT(nil); err == nil {
+	if _, err := jwt.NewVerifiedJWT(nil); err == nil {
 		t.Errorf("NewVerifiedJWT(nil) err = nil, want error")
 	}
 }
 
 func TestGetRegisteredStringClaims(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader:        refString("typeHeader"),
 		Subject:           refString("test-subject"),
 		Issuer:            refString("test-issuer"),
 		JWTID:             refString("1"),
 		WithoutExpiration: true,
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -94,14 +95,14 @@ func TestGetRegisteredStringClaims(t *testing.T) {
 
 func TestGetRegisteredTimestampClaims(t *testing.T) {
 	now := time.Now()
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		ExpiresAt: refTime(now.Add(time.Hour * 24).Unix()),
 		IssuedAt:  refTime(now.Unix()),
 		NotBefore: refTime(now.Add(time.Hour * 2).Unix()),
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -140,13 +141,13 @@ func TestGetRegisteredTimestampClaims(t *testing.T) {
 }
 
 func TestGetAudiencesClaim(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
 		Audiences:         []string{"foo", "bar"},
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -165,7 +166,7 @@ func TestGetAudiencesClaim(t *testing.T) {
 }
 
 func TestGetCustomClaims(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
 		CustomClaims: map[string]interface{}{
 			"cc-null":   nil,
@@ -176,9 +177,9 @@ func TestGetCustomClaims(t *testing.T) {
 			"cc-object": map[string]interface{}{"cc-nested-num": 5.99},
 		},
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -240,7 +241,7 @@ func TestGetCustomClaims(t *testing.T) {
 }
 
 func TestCustomClaimIsFalseForWrongType(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
 		CustomClaims: map[string]interface{}{
 			"cc-null":   nil,
@@ -251,9 +252,9 @@ func TestCustomClaimIsFalseForWrongType(t *testing.T) {
 			"cc-object": map[string]interface{}{"cc-nested-num": 5.99},
 		},
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -280,12 +281,12 @@ func TestCustomClaimIsFalseForWrongType(t *testing.T) {
 }
 
 func TestNoClaimsCallHasAndGet(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -316,7 +317,7 @@ func TestNoClaimsCallHasAndGet(t *testing.T) {
 
 func TestCantGetRegisteredClaimsThroughCustomClaims(t *testing.T) {
 	now := time.Now()
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader: refString("typeHeader"),
 		Subject:    refString("test-subject"),
 		Issuer:     refString("test-issuer"),
@@ -326,9 +327,9 @@ func TestCantGetRegisteredClaimsThroughCustomClaims(t *testing.T) {
 		IssuedAt:   refTime(now.Unix()),
 		NotBefore:  refTime(now.Add(time.Hour * 2).Unix()),
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
@@ -358,13 +359,13 @@ func TestCantGetRegisteredClaimsThroughCustomClaims(t *testing.T) {
 }
 
 func TestGetJSONPayload(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		Subject:           refString("test-subject"),
 		WithoutExpiration: true,
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {

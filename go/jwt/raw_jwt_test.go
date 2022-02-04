@@ -14,13 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package jwt
+package jwt_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/tink/go/jwt"
 )
 
 const (
@@ -30,9 +31,9 @@ const (
 
 type testCase struct {
 	tag   string
-	opts  *RawJWTOptions
+	opts  *jwt.RawJWTOptions
 	json  string
-	token *RawJWT
+	token *jwt.RawJWT
 }
 
 func refString(a string) *string {
@@ -61,7 +62,7 @@ func TestCreatingRawJWTWithAllClaims(t *testing.T) {
 				"cc-object": {"nested-cc-num": 5.5}
 			}`
 
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader: refString("typeHeader"),
 		Subject:    refString("tink-test-subject"),
 		Issuer:     refString("tink-test-issuer"),
@@ -79,17 +80,17 @@ func TestCreatingRawJWTWithAllClaims(t *testing.T) {
 			"cc-object": map[string]interface{}{"nested-cc-num": 5.5},
 		},
 	}
-	fromJSON, err := NewRawJWTFromJSON(refString("typeHeader"), []byte(json))
+	fromJSON, err := jwt.NewRawJWTFromJSON(refString("typeHeader"), []byte(json))
 	if err != nil {
-		t.Fatalf("NewRawJWTFromJSON(%q): %v", json, err)
+		t.Fatalf("jwt.NewRawJWTFromJSON(%q): %v", json, err)
 	}
-	fromOpts, err := NewRawJWT(opts)
+	fromOpts, err := jwt.NewRawJWT(opts)
 	if err != nil {
-		t.Fatalf("NewRawJWT(%v): %v", opts, err)
+		t.Fatalf("jwt.NewRawJWT(%v): %v", opts, err)
 	}
 	for _, tc := range []testCase{
 		{
-			tag:   "NewRawJWTFromJSON",
+			tag:   "jwt.NewRawJWTFromJSON",
 			token: fromJSON,
 		},
 		{
@@ -237,17 +238,17 @@ func TestCreatingRawJWTWithAllClaims(t *testing.T) {
 }
 
 func TestGeneratingRawJWTWithoutClaims(t *testing.T) {
-	jsonToken, err := NewRawJWTFromJSON(nil, []byte("{}"))
+	jsonToken, err := jwt.NewRawJWTFromJSON(nil, []byte("{}"))
 	if err != nil {
-		t.Fatalf("NewRawJWTFromJSON({}): %v", err)
+		t.Fatalf("jwt.NewRawJWTFromJSON({}): %v", err)
 	}
-	optsToken, err := NewRawJWT(&RawJWTOptions{WithoutExpiration: true})
+	optsToken, err := jwt.NewRawJWT(&jwt.RawJWTOptions{WithoutExpiration: true})
 	if err != nil {
 		t.Fatalf("NewRawJWT with no claims: %v", err)
 	}
 	for _, tc := range []testCase{
 		{
-			tag:   "NewRawJWTFromJSON",
+			tag:   "jwt.NewRawJWTFromJSON",
 			token: jsonToken,
 		},
 		{
@@ -304,13 +305,13 @@ func TestGeneratingRawJWTWithoutClaims(t *testing.T) {
 }
 
 func TestNewRawJWTLargeValidTimestamps(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader: refString("typeHeader"),
 		ExpiresAt:  refTime(253402300799),
 		NotBefore:  refTime(253402300700),
 		IssuedAt:   refTime(253402300000),
 	}
-	token, err := NewRawJWT(opts)
+	token, err := jwt.NewRawJWT(opts)
 	if err != nil {
 		t.Fatalf("generating RawJWT with valid timestamps (%q, %q, %q): %v", opts.ExpiresAt, opts.NotBefore, opts.IssuedAt, err)
 	}
@@ -340,11 +341,11 @@ func TestNewRawJWTLargeValidTimestamps(t *testing.T) {
 }
 
 func TestNewRawJWTSingleStringAudience(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		WithoutExpiration: true,
 		Audience:          refString("tink-aud"),
 	}
-	rawJWT, err := NewRawJWT(opts)
+	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
 		t.Fatalf("generating RawJWT with a single audience: %v", err)
 	}
@@ -359,7 +360,7 @@ func TestNewRawJWTSingleStringAudience(t *testing.T) {
 }
 
 func TestSingleStringAudienceFromJSON(t *testing.T) {
-	rawJWT, err := NewRawJWTFromJSON(nil, []byte(`{"aud": "tink-aud"}`))
+	rawJWT, err := jwt.NewRawJWTFromJSON(nil, []byte(`{"aud": "tink-aud"}`))
 	if err != nil {
 		t.Fatalf("parsing valid RawJWT: %v", err)
 	}
@@ -376,17 +377,17 @@ func TestSingleStringAudienceFromJSON(t *testing.T) {
 func TestNewRawJWTValidationFailures(t *testing.T) {
 	testCases := []testCase{
 		{
-			tag: "empty RawJWTOptions options fails",
+			tag: "empty jwt.RawJWTOptions options fails",
 		},
 		{
 			tag: "no ExpiresAt specified and WithoutExpiration = false fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 			},
 		},
 		{
 			tag: "ExpiresAt and WithoutExpiration = true fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				ExpiresAt:         refTime(validExpiration),
 				WithoutExpiration: true,
@@ -394,7 +395,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "specifying Audenience and Audiences fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				Audience:          refString("tink-bar"),
 				WithoutExpiration: true,
@@ -402,21 +403,21 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "empty audiences array fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				ExpiresAt: refTime(validExpiration),
 				Audiences: []string{},
 			},
 		},
 		{
 			tag: "audiences with invalid UTF-8 string fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Audiences:         []string{"valid", invalidUTF8},
 			},
 		},
 		{
 			tag: "custom claims containing registered subject claims fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -426,7 +427,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "custom claims containing registered issuer claims fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -436,7 +437,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "custom claims containing registered jwt id claims fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -446,7 +447,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "custom claims containing registered expiration claims fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -456,7 +457,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "custom claims containing registered audience claims fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				CustomClaims: map[string]interface{}{
@@ -466,7 +467,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "custom claims with non standard JSON types fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				CustomClaims: map[string]interface{}{
@@ -476,7 +477,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "non UTF-8 string on isser claim fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				Issuer:    refString(invalidUTF8),
@@ -484,7 +485,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "non UTF-8 string on subject claim fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				Subject:           refString(invalidUTF8),
@@ -492,7 +493,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "non UTF-8 string on JWT ID claim fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences:         []string{"tink-foo"},
 				WithoutExpiration: true,
 				JWTID:             refString(invalidUTF8),
@@ -500,7 +501,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "non UTF-8 string on custom claim fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				Issuer:    refString("ise-testing"),
 				ExpiresAt: refTime(validExpiration),
@@ -511,7 +512,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "issued at timestamp greater than valid JWT max time fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				IssuedAt:  refTime(253402300800),
@@ -519,14 +520,14 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 		},
 		{
 			tag: "expires at timestamp greater than valid JWT max time fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(253402300800),
 			},
 		},
 		{
 			tag: "not before timestamp smaller than valid JWT min time fails",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				Audiences: []string{"tink-foo"},
 				ExpiresAt: refTime(validExpiration),
 				NotBefore: refTime(-5),
@@ -535,7 +536,7 @@ func TestNewRawJWTValidationFailures(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.tag, func(t *testing.T) {
-			_, err := NewRawJWT(tc.opts)
+			_, err := jwt.NewRawJWT(tc.opts)
 			if err == nil {
 				t.Errorf("expected error instead got nil")
 			}
@@ -547,7 +548,7 @@ func TestJSONPayload(t *testing.T) {
 	for _, tc := range []testCase{
 		{
 			tag: "subject",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Subject:           refString("tink-subject"),
 			},
@@ -555,7 +556,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "audience list",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Audiences:         []string{"one"},
 			},
@@ -563,7 +564,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "audience string",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Audience:          refString("one"),
 			},
@@ -571,7 +572,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "issuer",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				Issuer:            refString("tink-test"),
 			},
@@ -579,7 +580,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "jwt id",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				JWTID:             refString("tink-id"),
 			},
@@ -587,7 +588,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "issued at",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				IssuedAt:          refTime(78324),
 			},
@@ -595,7 +596,7 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "not before",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				NotBefore:         refTime(78324),
 			},
@@ -603,14 +604,14 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "expiration",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				ExpiresAt: refTime(78324),
 			},
 			json: `{"exp":78324}`,
 		},
 		{
 			tag: "custom-claim",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 				CustomClaims: map[string]interface{}{
 					"cust": []interface{}{map[string]interface{}{"key": "val"}},
@@ -620,14 +621,14 @@ func TestJSONPayload(t *testing.T) {
 		},
 		{
 			tag: "no claims",
-			opts: &RawJWTOptions{
+			opts: &jwt.RawJWTOptions{
 				WithoutExpiration: true,
 			},
 			json: `{}`,
 		},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			token, err := NewRawJWT(tc.opts)
+			token, err := jwt.NewRawJWT(tc.opts)
 			if err != nil {
 				t.Errorf("generating valid RawJWT: %v", err)
 			}
@@ -712,7 +713,7 @@ func TestFromJSONValidationFailures(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.tag, func(t *testing.T) {
-			if _, err := NewRawJWTFromJSON(nil, []byte(tc.json)); err == nil {
+			if _, err := jwt.NewRawJWTFromJSON(nil, []byte(tc.json)); err == nil {
 				t.Errorf("expected error instead got nil")
 			}
 		})
@@ -720,7 +721,7 @@ func TestFromJSONValidationFailures(t *testing.T) {
 }
 
 func TestHasCustomClaimsOfKind(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader:        refString("typeHeader"),
 		WithoutExpiration: true,
 		CustomClaims: map[string]interface{}{
@@ -734,7 +735,7 @@ func TestHasCustomClaimsOfKind(t *testing.T) {
 			},
 		},
 	}
-	token, err := NewRawJWT(opts)
+	token, err := jwt.NewRawJWT(opts)
 	if err != nil {
 		t.Fatalf("generating valid RawJWT: %v", err)
 	}
@@ -759,7 +760,7 @@ func TestHasCustomClaimsOfKind(t *testing.T) {
 }
 
 func TestGettingRegisteredClaimsThroughCustomFails(t *testing.T) {
-	opts := &RawJWTOptions{
+	opts := &jwt.RawJWTOptions{
 		TypeHeader: refString("typeHeader"),
 		Subject:    refString("tink-test-subject"),
 		Issuer:     refString("tink-test-issuer"),
@@ -769,7 +770,7 @@ func TestGettingRegisteredClaimsThroughCustomFails(t *testing.T) {
 		IssuedAt:   refTime(validExpiration - 100),
 		NotBefore:  refTime(validExpiration - 50),
 	}
-	token, err := NewRawJWT(opts)
+	token, err := jwt.NewRawJWT(opts)
 	if err != nil {
 		t.Fatalf("generating valid RawJWT: %v", err)
 	}

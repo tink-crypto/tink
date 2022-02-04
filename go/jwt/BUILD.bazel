@@ -7,12 +7,29 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
+        "jwt_encoding.go",
         "jwt_validator.go",
         "raw_jwt.go",
         "verified_jwt.go",
     ],
     importpath = "github.com/google/tink/go/jwt",
     deps = [
+        "//proto:tink_go_proto",
+        "@org_golang_google_protobuf//types/known/structpb:structpb",
+    ],
+)
+
+go_test(
+    name = "go_default_test_test",
+    srcs = [
+        "jwt_validator_test.go",
+        "raw_jwt_test.go",
+        "verified_jwt_test.go",
+    ],
+    deps = [
+        "//jwt:go_default_library",
+        "//proto:tink_go_proto",
+        "@com_github_google_go_cmp//cmp:go_default_library",
         "@org_golang_google_protobuf//types/known/structpb:structpb",
     ],
 )
@@ -20,13 +37,11 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "raw_jwt_test.go",
-        "jwt_validator_test.go",
-        "verified_jwt_test.go",
+        "jwt_encoding_test.go",
     ],
     embed = [":go_default_library"],
     deps = [
+        "//proto:tink_go_proto",
         "@com_github_google_go_cmp//cmp:go_default_library",
-        "@org_golang_google_protobuf//types/known/structpb:structpb",
     ],
 )
