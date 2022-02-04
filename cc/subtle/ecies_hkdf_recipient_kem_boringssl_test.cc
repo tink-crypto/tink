@@ -16,6 +16,9 @@
 
 #include "tink/subtle/ecies_hkdf_recipient_kem_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/escaping.h"

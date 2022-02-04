@@ -15,8 +15,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "tink/subtle/streaming_aead_test_util.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "tink/random_access_stream.h"
 #include "tink/subtle/test_util.h"

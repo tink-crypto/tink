@@ -16,6 +16,10 @@
 
 #include "tink/subtle/streaming_mac_impl.h"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "tink/util/status.h"

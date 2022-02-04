@@ -17,6 +17,7 @@
 #include "tink/subtle/aes_ctr_boringssl.h"
 
 #include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

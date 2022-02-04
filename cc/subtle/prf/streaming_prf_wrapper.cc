@@ -16,6 +16,8 @@
 
 #include "tink/subtle/prf/streaming_prf_wrapper.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "tink/subtle/prf/streaming_prf.h"

@@ -16,6 +16,7 @@
 
 #include "tink/subtle/stateful_hmac_boringssl.h"
 
+#include <string>
 #include <utility>
 
 #include "absl/memory/memory.h"

@@ -16,8 +16,10 @@
 
 #include "tink/subtle/aes_ctr_hmac_streaming.h"
 
+#include <algorithm>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/memory/memory.h"
