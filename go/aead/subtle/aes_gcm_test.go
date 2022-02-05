@@ -122,7 +122,7 @@ func TestAESGCMModifyCiphertext(t *testing.T) {
 			t.Errorf("expect an error ciphertext is truncated until byte %d", i)
 		}
 	}
-	// modify additinal authenticated data
+	// modify additional authenticated data
 	for i := 0; i < len(ad); i++ {
 		tmp := ad[i]
 		for j := 0; j < 8; j++ {
@@ -131,6 +131,14 @@ func TestAESGCMModifyCiphertext(t *testing.T) {
 				t.Errorf("expect an error when flipping bit of ad: byte %d, bit %d", i, j)
 			}
 			ad[i] = tmp
+		}
+	}
+	// replace ciphertext with a random string with a small, unacceptable size
+	for _, ctSize := range []uint32{subtle.AESGCMIVSize / 2, subtle.AESGCMIVSize - 1} {
+		smallCT := random.GetRandomBytes(ctSize)
+		emptyAD := []byte{}
+		if _, err := a.Decrypt(smallCT, emptyAD); err == nil {
+			t.Error("Decrypt: got success, want err")
 		}
 	}
 }

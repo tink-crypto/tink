@@ -17,7 +17,6 @@
 package subtle_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/google/tink/go/aead/subtle"
@@ -49,23 +48,14 @@ type AEADCase struct {
 }
 
 func TestValidateAESKeySize(t *testing.T) {
-	var i uint32
-	for i = 0; i < 65; i++ {
-		err := subtle.ValidateAESKeySize(i)
-		switch i {
-		case 16, 32: // Valid key sizes.
+	for _, keySize := range []uint32{8, 16, 24, 32, 40} {
+		err := subtle.ValidateAESKeySize(keySize)
+		if keySize == 16 || keySize == 32 {
 			if err != nil {
-				t.Errorf("want no error, got %v", err)
+				t.Errorf("ValidateAESKeySize(%d): got err %q, want success", keySize, err)
 			}
-
-		default:
-			// Invalid key sizes.
-			if err == nil {
-				t.Errorf("invalid key size (%d) should not be accepted", i)
-			}
-			if !strings.Contains(err.Error(), "invalid AES key size; want 16 or 32") {
-				t.Errorf("wrong error message; want a string starting with \"invalid AES key size; want 16 or 32\", got %v", err)
-			}
+		} else if err == nil {
+			t.Errorf("ValidateAESKeySize(%d): got success, want error", keySize)
 		}
 	}
 }
