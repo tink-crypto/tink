@@ -10,6 +10,7 @@ go_library(
         "jwt.go",
         "jwt_encoding.go",
         "jwt_hmac_key_manager.go",
+        "jwt_key_templates.go",
         "jwt_mac.go",
         "jwt_mac_factory.go",
         "jwt_mac_kid.go",
@@ -36,6 +37,7 @@ go_library(
 go_test(
     name = "go_default_test_test",
     srcs = [
+        "jwt_key_templates_test.go",
         "jwt_mac_factory_test.go",
         "jwt_validator_test.go",
         "raw_jwt_test.go",
