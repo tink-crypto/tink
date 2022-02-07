@@ -527,7 +527,9 @@ public class SelfKeyTestValidatorsTest {
         new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 2048, 64),
         new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 3072, 64),
         new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 4096, 64),
-        // Not supported by Tink
+        // Different hash functions are not supported by Tink, but the test currently happens in
+        // SigUtil.validateRsaSsaPssParams which is called by the key manager, not in the self test
+        // validation.
         new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA512, 2048, 32),
       };
 
