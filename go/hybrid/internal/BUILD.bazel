@@ -5,7 +5,9 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
+        "aes_gcm_hpke_aead.go",
         "hkdf_hpke_kdf.go",
+        "hpke_aead.go",
         "hpke_kdf.go",
         "hpke_kem.go",
         "hpke_util.go",
@@ -14,6 +16,7 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/hybrid/internal",
     deps = [
+        "//aead/subtle:go_default_library",
         "//subtle:go_default_library",
         "@org_golang_x_crypto//hkdf:go_default_library",
     ],
@@ -22,6 +25,7 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
+        "aes_gcm_hpke_aead_test.go",
         "hkdf_hpke_kdf_test.go",
         "hpke_test.go",
         "x25519_hpke_kem_test.go",

@@ -27,6 +27,8 @@ import (
 	"github.com/google/tink/go/testutil"
 )
 
+// TODO(b/201070904): Separate tests into internal_test package.
+
 var hpkeAeadIds = []struct {
 	name   string
 	aeadID uint16
@@ -56,6 +58,14 @@ type hpkeVector struct {
 	secret           []byte
 	key              []byte
 	baseNonce        []byte
+}
+
+type hpkeEncryptionVector struct {
+	key            []byte
+	plaintext      []byte
+	associatedData []byte
+	nonce          []byte
+	ciphertext     []byte
 }
 
 // TODO(b/201070904): Include all Tink-supported I-D test vectors.
@@ -143,6 +153,96 @@ func hpkeInternetDraftTestVector(t *testing.T) (hpkeID, hpkeVector, error) {
 		}, nil
 }
 
+func hpkeAESGCMEncryptionVectors(t *testing.T) map[hpkeID]hpkeEncryptionVector {
+	t.Helper()
+
+	// Test vectors from HPKE I-D. Must only include AES-GCM vectors.
+	vecs := []struct {
+		mode                                              uint8
+		kemID, kdfID, aeadID                              uint16
+		key, plaintext, associatedData, nonce, ciphertext string
+	}{
+		// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#appendix-A.1.1.1
+		{
+			mode:           0,
+			kemID:          32,
+			kdfID:          1,
+			aeadID:         1,
+			key:            "4531685d41d65f03dc48f6b8302c05b0",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d30",
+			nonce:          "56d890e5accaaf011cff4b7d",
+			ciphertext:     "f938558b5d72f1a23810b4be2ab4f84331acc02fc97babc53a52ae8218a355a96d8770ac83d07bea87e13c512a",
+		},
+		{
+			mode:           0,
+			kemID:          32,
+			kdfID:          1,
+			aeadID:         1,
+			key:            "4531685d41d65f03dc48f6b8302c05b0",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d31",
+			nonce:          "56d890e5accaaf011cff4b7c",
+			ciphertext:     "af2d7e9ac9ae7e270f46ba1f975be53c09f8d875bdc8535458c2494e8a6eab251c03d0c22a56b8ca42c2063b84",
+		},
+		// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#appendix-A.6.1.1
+		{
+			mode:           0,
+			kemID:          18,
+			kdfID:          3,
+			aeadID:         2,
+			key:            "751e346ce8f0ddb2305c8a2a85c70d5cf559c53093656be636b9406d4d7d1b70",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d30",
+			nonce:          "55ff7a7d739c69f44b25447b",
+			ciphertext:     "170f8beddfe949b75ef9c387e201baf4132fa7374593dfafa90768788b7b2b200aafcc6d80ea4c795a7c5b841a",
+		},
+		{
+			mode:           0,
+			kemID:          18,
+			kdfID:          3,
+			aeadID:         2,
+			key:            "751e346ce8f0ddb2305c8a2a85c70d5cf559c53093656be636b9406d4d7d1b70",
+			plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+			associatedData: "436f756e742d31",
+			nonce:          "55ff7a7d739c69f44b25447a",
+			ciphertext:     "d9ee248e220ca24ac00bbbe7e221a832e4f7fa64c4fbab3945b6f3af0c5ecd5e16815b328be4954a05fd352256",
+		},
+	}
+
+	m := make(map[hpkeID]hpkeEncryptionVector)
+	for _, v := range vecs {
+		var key, plaintext, associatedData, nonce, ciphertext []byte
+		var err error
+		if key, err = hex.DecodeString(v.key); err != nil {
+			t.Fatalf("hex.DecodeString(key): err %q", err)
+		}
+		if plaintext, err = hex.DecodeString(v.plaintext); err != nil {
+			t.Fatalf("hex.DecodeString(plaintext): err %q", err)
+		}
+		if associatedData, err = hex.DecodeString(v.associatedData); err != nil {
+			t.Fatalf("hex.DecodeString(associatedData): err %q", err)
+		}
+		if nonce, err = hex.DecodeString(v.nonce); err != nil {
+			t.Fatalf("hex.DecodeString(nonce): err %q", err)
+		}
+		if ciphertext, err = hex.DecodeString(v.ciphertext); err != nil {
+			t.Fatalf("hex.DecodeString(ciphertext): err %q", err)
+		}
+
+		id := hpkeID{v.mode, v.kemID, v.kdfID, v.aeadID}
+		m[id] = hpkeEncryptionVector{
+			key:            key,
+			plaintext:      plaintext,
+			associatedData: associatedData,
+			nonce:          nonce,
+			ciphertext:     ciphertext,
+		}
+	}
+
+	return m
+}
+
 func hpkeX25519HkdfSha256BaseModeTestVectors(t *testing.T) map[hpkeID]hpkeVector {
 	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	t.Helper()
@@ -182,8 +282,8 @@ func hpkeX25519HkdfSha256BaseModeTestVectors(t *testing.T) map[hpkeID]hpkeVector
 			continue
 		}
 
-		key := hpkeID{v.Mode, v.KEMID, v.KDFID, v.AEADID}
-		m[key] = hpkeVector{
+		id := hpkeID{v.Mode, v.KEMID, v.KDFID, v.AEADID}
+		m[id] = hpkeVector{
 			info:             v.Info,
 			senderPubKey:     v.SenderPubKey,
 			senderPrivKey:    v.SenderPrivKey,
