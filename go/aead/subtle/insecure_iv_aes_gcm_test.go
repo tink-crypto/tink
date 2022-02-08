@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal_test
+package subtle_test
 
 import (
 	"bytes"
@@ -22,26 +22,21 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/google/tink/go/aead/internal"
+	"github.com/google/tink/go/aead/subtle"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/testutil"
 )
-
-var keySizes = []int{
-	16, /*AES-128*/
-	32, /*AES-256*/
-}
 
 func TestInsecureIvAesGcmCiphertextSize(t *testing.T) {
 	for _, keySize := range keySizes {
 		for _, prependIv := range []bool{true, false} {
 			t.Run(fmt.Sprintf("keySize-%d/prependIv-%t", keySize, prependIv), func(t *testing.T) {
 				key := random.GetRandomBytes(uint32(keySize))
-				a, err := internal.NewInsecureIvAesGcm(key, prependIv)
+				a, err := subtle.NewInsecureIvAesGcm(key, prependIv)
 				if err != nil {
 					t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 				}
-				iv := random.GetRandomBytes(internal.AesGcmIvSize)
+				iv := random.GetRandomBytes(subtle.AESGCMIVSize)
 				pt := random.GetRandomBytes(32)
 				ad := random.GetRandomBytes(32)
 
@@ -50,9 +45,9 @@ func TestInsecureIvAesGcmCiphertextSize(t *testing.T) {
 					t.Fatalf("Encrypt: got err %q, want success", err)
 				}
 
-				wantSize := len(pt) + internal.AesGcmTagSize
+				wantSize := len(pt) + subtle.AESGCMTagSize
 				if prependIv {
-					wantSize += internal.AesGcmIvSize
+					wantSize += subtle.AESGCMIVSize
 				}
 				if len(ct) != wantSize {
 					t.Errorf("unexpected ciphertext length: got %d, want %d", len(ct), wantSize)
@@ -66,13 +61,13 @@ func TestInsecureIvAesGcmKeySize(t *testing.T) {
 	for _, keySize := range keySizes {
 		for _, prependIv := range []bool{true, false} {
 			t.Run(fmt.Sprintf("keySize-%d/prependIv-%t", keySize, prependIv), func(t *testing.T) {
-				if _, err := internal.NewInsecureIvAesGcm(make([]byte, keySize), prependIv); err != nil {
+				if _, err := subtle.NewInsecureIvAesGcm(make([]byte, keySize), prependIv); err != nil {
 					t.Errorf("NewInsecureIvAesGcm: got err %q, want success", err)
 				}
-				if _, err := internal.NewInsecureIvAesGcm(make([]byte, keySize+1), prependIv); err == nil {
+				if _, err := subtle.NewInsecureIvAesGcm(make([]byte, keySize+1), prependIv); err == nil {
 					t.Error("NewInsecureIvAesGcm: got success, want err")
 				}
-				if _, err := internal.NewInsecureIvAesGcm(make([]byte, keySize-1), prependIv); err == nil {
+				if _, err := subtle.NewInsecureIvAesGcm(make([]byte, keySize-1), prependIv); err == nil {
 					t.Error("NewInsecureIvAesGcm: got success, want err")
 				}
 			})
@@ -84,11 +79,11 @@ func TestInsecureIvAesGcmIvMismatch(t *testing.T) {
 	for _, keySize := range keySizes {
 		t.Run(fmt.Sprintf("keySize-%d", keySize), func(t *testing.T) {
 			key := random.GetRandomBytes(uint32(keySize))
-			a, err := internal.NewInsecureIvAesGcm(key, true /*=prependIv*/)
+			a, err := subtle.NewInsecureIvAesGcm(key, true /*=prependIv*/)
 			if err != nil {
 				t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 			}
-			iv := random.GetRandomBytes(internal.AesGcmIvSize)
+			iv := random.GetRandomBytes(subtle.AESGCMIVSize)
 			pt := random.GetRandomBytes(32)
 			ad := random.GetRandomBytes(32)
 
@@ -98,13 +93,13 @@ func TestInsecureIvAesGcmIvMismatch(t *testing.T) {
 			}
 
 			newIv := iv
-			randByte, randBit := rand.Intn(internal.AesGcmIvSize), rand.Intn(8)
+			randByte, randBit := rand.Intn(subtle.AESGCMIVSize), rand.Intn(8)
 			newIv[randByte] ^= (1 << uint8(randBit))
 
 			if _, err := a.Decrypt(newIv, ct, ad); err == nil {
 				t.Error("Decrypt with wrong iv argument: want err, got success")
 			}
-			ctPrefixedWithNewIv := append(newIv, ct[internal.AesGcmIvSize:]...)
+			ctPrefixedWithNewIv := append(newIv, ct[subtle.AESGCMIVSize:]...)
 			if _, err := a.Decrypt(iv, ctPrefixedWithNewIv, ad); err == nil {
 				t.Error("Decrypt with ct prefixed with wrong IV: want err, got success")
 			}
@@ -118,11 +113,11 @@ func TestInsecureIvAesGcm(t *testing.T) {
 			for ptSize := 0; ptSize < 75; ptSize++ {
 				t.Run(fmt.Sprintf("keySize-%d/prependIv-%t/ptSize-%d", keySize, prependIv, ptSize), func(t *testing.T) {
 					key := random.GetRandomBytes(uint32(keySize))
-					a, err := internal.NewInsecureIvAesGcm(key, prependIv)
+					a, err := subtle.NewInsecureIvAesGcm(key, prependIv)
 					if err != nil {
 						t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 					}
-					iv := random.GetRandomBytes(internal.AesGcmIvSize)
+					iv := random.GetRandomBytes(subtle.AESGCMIVSize)
 					pt := random.GetRandomBytes(uint32(ptSize))
 					ad := random.GetRandomBytes(uint32(5))
 
@@ -151,11 +146,11 @@ func TestInsecureIvAesGcmLongPlaintext(t *testing.T) {
 			for ptSize <= 1<<24 {
 				t.Run(fmt.Sprintf("keySize-%d/prependIv-%t/ptSize-%d", keySize, prependIv, ptSize), func(t *testing.T) {
 					key := random.GetRandomBytes(uint32(keySize))
-					a, err := internal.NewInsecureIvAesGcm(key, prependIv)
+					a, err := subtle.NewInsecureIvAesGcm(key, prependIv)
 					if err != nil {
 						t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 					}
-					iv := random.GetRandomBytes(internal.AesGcmIvSize)
+					iv := random.GetRandomBytes(subtle.AESGCMIVSize)
 					pt := random.GetRandomBytes(uint32(ptSize))
 					ad := random.GetRandomBytes(uint32(ptSize / 3))
 
@@ -182,11 +177,11 @@ func TestInsecureIvAesGcmModifyCiphertext(t *testing.T) {
 	key := random.GetRandomBytes(16)
 	for _, prependIv := range []bool{true, false} {
 		t.Run(fmt.Sprintf("prependIv-%t", prependIv), func(t *testing.T) {
-			a, err := internal.NewInsecureIvAesGcm(key, prependIv)
+			a, err := subtle.NewInsecureIvAesGcm(key, prependIv)
 			if err != nil {
 				t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 			}
-			iv := random.GetRandomBytes(internal.AesGcmIvSize)
+			iv := random.GetRandomBytes(subtle.AESGCMIVSize)
 			pt := random.GetRandomBytes(32)
 			ad := random.GetRandomBytes(33)
 			ct, err := a.Encrypt(iv, pt, ad)
@@ -201,7 +196,7 @@ func TestInsecureIvAesGcmModifyCiphertext(t *testing.T) {
 					ct[i] ^= 1 << uint8(j)
 					tmpIv := iv
 					if prependIv {
-						tmpIv = ct[:internal.AesGcmIvSize]
+						tmpIv = ct[:subtle.AESGCMIVSize]
 					}
 					if _, err := a.Decrypt(tmpIv, ct, ad); err == nil {
 						t.Errorf("ciphertext with flipped byte %d, bit %d: expected err, got success", i, j)
@@ -264,16 +259,16 @@ func TestInsecureIvAesGcmWycheproofVectors(t *testing.T) {
 		t.Fatalf("failed to populate suite: %s", err)
 	}
 	for _, group := range suite.TestGroups {
-		if err := internal.ValidateAESKeySize(group.KeySize / 8); err != nil {
+		if err := subtle.ValidateAESKeySize(group.KeySize / 8); err != nil {
 			continue
 		}
-		if group.IvSize != internal.AesGcmIvSize*8 {
+		if group.IvSize != subtle.AESGCMIVSize*8 {
 			continue
 		}
 		for _, tc := range group.Tests {
 			name := fmt.Sprintf("%s-%s(%d,%d)/Case-%d", suite.Algorithm, group.Type, group.KeySize, group.TagSize, tc.CaseID)
 			t.Run(name, func(t *testing.T) {
-				a, err := internal.NewInsecureIvAesGcm(tc.Key, false /*=prependIv*/)
+				a, err := subtle.NewInsecureIvAesGcm(tc.Key, false /*=prependIv*/)
 				if err != nil {
 					t.Fatalf("NewInsecureIvAesGcm: got err %q, want success", err)
 				}

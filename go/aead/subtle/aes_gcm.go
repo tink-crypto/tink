@@ -19,21 +19,20 @@ package subtle
 import (
 	"fmt"
 
-	"github.com/google/tink/go/aead/internal"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
 
 const (
 	// AESGCMIVSize is the acceptable IV size defined by RFC 5116.
-	AESGCMIVSize = internal.AesGcmIvSize
+	AESGCMIVSize = 12
 	// AESGCMTagSize is the acceptable tag size defined by RFC 5116.
-	AESGCMTagSize = internal.AesGcmTagSize
+	AESGCMTagSize = 16
 )
 
 // AESGCM is an implementation of AEAD interface.
 type AESGCM struct {
-	insecureIvAesGcm *internal.InsecureIvAesGcm
+	insecureIvAesGcm *InsecureIvAesGcm
 }
 
 // Assert that AESGCM implements the AEAD interface.
@@ -42,7 +41,7 @@ var _ tink.AEAD = (*AESGCM)(nil)
 // NewAESGCM returns an AESGCM instance, where key is the AES key with length
 // 16 bytes (AES-128) or 32 bytes (AES-256).
 func NewAESGCM(key []byte) (*AESGCM, error) {
-	insecureIvAesGcm, err := internal.NewInsecureIvAesGcm(key, true /*=prependIv*/)
+	insecureIvAesGcm, err := NewInsecureIvAesGcm(key, true /*=prependIv*/)
 	return &AESGCM{insecureIvAesGcm}, err
 }
 

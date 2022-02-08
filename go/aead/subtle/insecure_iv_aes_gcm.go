@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal
+package subtle
 
 import (
 	"bytes"
@@ -27,19 +27,11 @@ import (
 const (
 	// TODO(b/201070904): Re-evaluate capitalization of long initialisms.
 
-	// AesGcmIvSize is the acceptable IV size defined by RFC 5116.
-	AesGcmIvSize = 12
-	// AesGcmTagSize is the acceptable tag size defined by RFC 5116.
-	AesGcmTagSize = 16
 	// aesGcmMaxPlaintextSize is the maximum plaintext size defined by RFC 5116.
-	aesGcmMaxPlaintextSize = (1 << 36) - 31
-
-	intSize             = 32 << (^uint(0) >> 63) // 32 or 64
-	maxInt              = 1<<(intSize-1) - 1
-	maxIntPlaintextSize = maxInt - AesGcmIvSize - AesGcmTagSize
-
-	minNoIvCiphertextSize      = AesGcmTagSize
-	minPrependIvCiphertextSize = AesGcmIvSize + AesGcmTagSize
+	aesGcmMaxPlaintextSize     = (1 << 36) - 31
+	maxIntPlaintextSize        = maxInt - AESGCMIVSize - AESGCMTagSize
+	minNoIvCiphertextSize      = AESGCMTagSize
+	minPrependIvCiphertextSize = AESGCMIVSize + AESGCMTagSize
 )
 
 // InsecureIvAesGcm is an insecure implementation of the AEAD interface that
@@ -73,9 +65,9 @@ func NewInsecureIvAesGcm(key []byte, prependIv bool) (*InsecureIvAesGcm, error) 
 // If false, the returned ciphertext contains only the actual ciphertext.
 //
 // Note: The crypto library's AES-GCM implementation always returns the
-// ciphertext with an AesGcmTagSize (16-byte) tag.
+// ciphertext with an AESGCMTagSize (16-byte) tag.
 func (i *InsecureIvAesGcm) Encrypt(iv, plaintext, associatedData []byte) ([]byte, error) {
-	if got, want := len(iv), AesGcmIvSize; got != want {
+	if got, want := len(iv), AESGCMIVSize; got != want {
 		return nil, fmt.Errorf("unexpected IV size: got %d, want %d", got, want)
 	}
 	// Seal() checks plaintext length, but this duplicated check avoids panic.
@@ -98,15 +90,15 @@ func (i *InsecureIvAesGcm) Encrypt(iv, plaintext, associatedData []byte) ([]byte
 // Decrypt decrypts ciphertext with iv as the initialization vector and
 // associatedData as associated data.
 //
-// If prependIv is true, the iv argument and the first AesGcmIvSize bytes of
+// If prependIv is true, the iv argument and the first AESGCMIVSize bytes of
 // ciphertext must be equal. The ciphertext argument is as follows:
 //     | iv | actual ciphertext | tag |
 //
 // If false, the ciphertext argument is as follows:
 //     | actual ciphertext | tag |
 func (i *InsecureIvAesGcm) Decrypt(iv, ciphertext, associatedData []byte) ([]byte, error) {
-	if len(iv) != AesGcmIvSize {
-		return nil, fmt.Errorf("unexpected IV size: got %d, want %d", len(iv), AesGcmIvSize)
+	if len(iv) != AESGCMIVSize {
+		return nil, fmt.Errorf("unexpected IV size: got %d, want %d", len(iv), AESGCMIVSize)
 	}
 
 	var actualCiphertext []byte
@@ -114,10 +106,10 @@ func (i *InsecureIvAesGcm) Decrypt(iv, ciphertext, associatedData []byte) ([]byt
 		if len(ciphertext) < minPrependIvCiphertextSize {
 			return nil, fmt.Errorf("ciphertext too short: got %d, want >= %d", len(ciphertext), minPrependIvCiphertextSize)
 		}
-		if !bytes.Equal(iv, ciphertext[:AesGcmIvSize]) {
-			return nil, fmt.Errorf("unequal IVs: iv argument %x, ct prefix %x", iv, ciphertext[:AesGcmIvSize])
+		if !bytes.Equal(iv, ciphertext[:AESGCMIVSize]) {
+			return nil, fmt.Errorf("unequal IVs: iv argument %x, ct prefix %x", iv, ciphertext[:AESGCMIVSize])
 		}
-		actualCiphertext = ciphertext[AesGcmIvSize:]
+		actualCiphertext = ciphertext[AESGCMIVSize:]
 	} else {
 		if len(ciphertext) < minNoIvCiphertextSize {
 			return nil, fmt.Errorf("ciphertext too short: got %d, want >= %d", len(ciphertext), minNoIvCiphertextSize)

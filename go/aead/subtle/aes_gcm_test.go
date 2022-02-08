@@ -27,7 +27,10 @@ import (
 	"github.com/google/tink/go/testutil"
 )
 
-var keySizes = []int{16, 32}
+var keySizes = []int{
+	16, /*AES-128*/
+	32, /*AES-256*/
+}
 
 // Since the tag size depends on the Seal() function of crypto library,
 // this test checks that the tag size is always 128 bit.
