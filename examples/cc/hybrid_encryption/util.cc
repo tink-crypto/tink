@@ -18,6 +18,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <utility>
 
 #include "tink/binary_keyset_reader.h"
 #include "tink/binary_keyset_writer.h"

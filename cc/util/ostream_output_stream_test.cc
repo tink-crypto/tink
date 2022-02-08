@@ -16,9 +16,12 @@
 
 #include "tink/util/ostream_output_stream.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
