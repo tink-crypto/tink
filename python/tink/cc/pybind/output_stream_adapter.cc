@@ -16,6 +16,8 @@
 
 #include "tink/cc/output_stream_adapter.h"
 
+#include <string>
+
 #include "pybind11/pybind11.h"
 #include "tink/cc/pybind/status_casters.h"
 

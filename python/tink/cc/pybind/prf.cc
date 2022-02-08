@@ -16,6 +16,8 @@
 
 #include "tink/cc/pybind/prf.h"
 
+#include <string>
+
 #include "pybind11/pybind11.h"
 #include "tink/prf/prf_set.h"
 #include "tink/util/statusor.h"

@@ -23,6 +23,8 @@
 
 #include <exception>
 #include <functional>
+#include <string>
+#include <utility>
 
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"

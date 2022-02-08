@@ -17,6 +17,9 @@
 // Implementation of a PrfSet Service.
 #include "prf_set_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/prf/prf_set.h"

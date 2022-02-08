@@ -17,10 +17,14 @@
 // Implementation of a StreamingAEAD Service.
 #include "streaming_aead_impl.h"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
-#include "tink/streaming_aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/streaming_aead.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/ostream_output_stream.h"
 #include "tink/util/status.h"

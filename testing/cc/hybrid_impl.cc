@@ -17,6 +17,9 @@
 // Implementation of a Hybrid encryption service
 #include "hybrid_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/hybrid_decrypt.h"

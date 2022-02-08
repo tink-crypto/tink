@@ -21,6 +21,7 @@
 
 #include <exception>
 #include <stdexcept>
+#include <string>
 
 #include "pybind11/attr.h"
 #include "tink/util/status.h"

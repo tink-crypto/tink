@@ -16,12 +16,14 @@
 
 #include "streaming_aead_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tink/streamingaead/streaming_aead_config.h"
-#include "tink/streamingaead/streaming_aead_key_templates.h"
 #include "tink/binary_keyset_writer.h"
 #include "tink/cleartext_keyset_handle.h"
+#include "tink/streamingaead/streaming_aead_config.h"
+#include "tink/streamingaead/streaming_aead_key_templates.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 
 namespace crypto {

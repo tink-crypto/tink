@@ -17,6 +17,9 @@
 // Implementation of an AEAD Service.
 #include "aead_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/aead.h"
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"

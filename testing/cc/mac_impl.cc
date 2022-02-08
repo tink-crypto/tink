@@ -17,6 +17,9 @@
 // Implementation of a MAC Service.
 #include "mac_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/mac.h"

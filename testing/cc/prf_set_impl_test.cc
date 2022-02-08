@@ -16,6 +16,8 @@
 
 #include "prf_set_impl.h"
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/binary_keyset_writer.h"

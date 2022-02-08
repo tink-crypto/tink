@@ -17,6 +17,9 @@
 // Implementation of an Deterministic AEAD Service.
 #include "deterministic_aead_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/deterministic_aead.h"
