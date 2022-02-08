@@ -55,9 +55,9 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 			if err != nil {
 				t.Errorf("m.ComputeMACAndEncode() err = %v, expected nil", err)
 			}
-			verifier, err := jwt.NewJWTValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+			verifier, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 			if err != nil {
-				t.Errorf("NewJWTValidator() err = %v, expected nil", err)
+				t.Errorf("NewValidator() err = %v, expected nil", err)
 			}
 			if _, err := m.VerifyMACAndDecode(compact, verifier); err != nil {
 				t.Errorf("m.VerifyMACAndDecode() err = %v, expected nil", err)

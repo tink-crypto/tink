@@ -96,9 +96,9 @@ func TestFactorySameKeyMaterialWithRawPrefixAndNoKIDShouldIgnoreHeader(t *testin
 	if err != nil {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := jwt.NewJWTValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 	if err != nil {
-		t.Errorf("jwt.NewJWTValidator() err = %v, want nil", err)
+		t.Errorf("jwt.NewValidator() err = %v, want nil", err)
 	}
 	compact, err := p.ComputeMACAndEncode(rawJWT)
 	if err != nil {
@@ -131,9 +131,9 @@ func TestFactorySameKeyMaterialWithDifferentPrefixAndKIDShouldFailVerification(t
 	if err != nil {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := jwt.NewJWTValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 	if err != nil {
-		t.Errorf("jwt.NewJWTValidator() err = %v, want nil", err)
+		t.Errorf("jwt.NewValidator() err = %v, want nil", err)
 	}
 	compact, err := p.ComputeMACAndEncode(rawJWT)
 	if err != nil {
@@ -172,9 +172,9 @@ func TestFactoryDifferentKeyShouldFailValidation(t *testing.T) {
 	if err != nil {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := jwt.NewJWTValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 	if err != nil {
-		t.Errorf("jwt.NewJWTValidator() err = %v, want nil", err)
+		t.Errorf("jwt.NewValidator() err = %v, want nil", err)
 	}
 	compact, err := p.ComputeMACAndEncode(rawJWT)
 	if err != nil {
@@ -221,9 +221,9 @@ func TestFactoryWithRAWKeyAndKID(t *testing.T) {
 	if err != nil {
 		t.Errorf("p.ComputeMACAndEncode() err = %v, want nil", err)
 	}
-	validator, err := jwt.NewJWTValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
+	validator, err := jwt.NewValidator(&jwt.ValidatorOpts{AllowMissingExpiration: true})
 	if err != nil {
-		t.Errorf("NewJWTValidator() err = %v, want nil", err)
+		t.Errorf("NewValidator() err = %v, want nil", err)
 	}
 	if _, err := p.VerifyMACAndDecode(compact, validator); err != nil {
 		t.Errorf("p.VerifyMACAndDecode() err = %v, want nil", err)

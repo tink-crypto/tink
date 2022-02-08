@@ -66,9 +66,9 @@ func TestCreateAndValidateToken(t *testing.T) {
 		ExpectedTypeHeader:     refString("typeHeader"),
 		AllowMissingExpiration: true,
 	}
-	validator, err := NewJWTValidator(validatorOps)
+	validator, err := NewValidator(validatorOps)
 	if err != nil {
-		t.Errorf("NewJWTValidator err = %v, want nil", err)
+		t.Errorf("NewValidator err = %v, want nil", err)
 	}
 	verifiedJWT, err := m.VerifyMACAndDecodeWithKID(compact, validator, nil)
 	if err != nil {
@@ -93,9 +93,9 @@ func TestCreateAndValidateToken(t *testing.T) {
 		ExpectedTypeHeader:     refString("notTypeHeader"),
 		AllowMissingExpiration: true,
 	}
-	validator, err = NewJWTValidator(validatorOps)
+	validator, err = NewValidator(validatorOps)
 	if err != nil {
-		t.Errorf("NewJWTValidator err = %v, want nil", err)
+		t.Errorf("NewValidator err = %v, want nil", err)
 	}
 	if _, err := m.VerifyMACAndDecodeWithKID(compact, validator, nil); err == nil {
 		t.Errorf("m.VerifyMACAndDecodeWithKID() err = nil, want error")
@@ -124,9 +124,9 @@ func TestCreateAndValidateTokenWithKID(t *testing.T) {
 		ExpectedTypeHeader:     refString("typeHeader"),
 		AllowMissingExpiration: true,
 	}
-	validator, err := NewJWTValidator(opts)
+	validator, err := NewValidator(opts)
 	if err != nil {
-		t.Fatalf("creating JWT validator, NewJWTValidator: %v", err)
+		t.Fatalf("creating JWT validator, NewValidator: %v", err)
 	}
 	verifiedJWT, err := m.VerifyMACAndDecodeWithKID(compact, validator, refString("kid-123"))
 	if err != nil {
@@ -168,7 +168,7 @@ func TestValidateFixedToken(t *testing.T) {
 		ExpectedIssuer:     refString("joe"),
 		FixedNow:           time.Unix(12345, 0),
 	}
-	pastValidator, err := NewJWTValidator(opts)
+	pastValidator, err := NewValidator(opts)
 	if err != nil {
 		t.Fatalf("creating JWTValidator: %v", err)
 	}
@@ -201,7 +201,7 @@ func TestValidateFixedToken(t *testing.T) {
 
 	// expired token fails verification
 	opts.FixedNow = time.Now()
-	presentValidator, err := NewJWTValidator(opts)
+	presentValidator, err := NewValidator(opts)
 	if err != nil {
 		t.Fatalf("creating JWTValidator: %v", err)
 	}
@@ -221,7 +221,7 @@ func TestInvalidTokens(t *testing.T) {
 	if err != nil {
 		t.Fatalf("creating JWTMACwithKID primitive: %v", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{})
+	validator, err := NewValidator(&ValidatorOpts{})
 	if err != nil {
 		t.Fatalf("creating JWTValidator: %v", err)
 	}

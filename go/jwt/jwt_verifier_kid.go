@@ -56,5 +56,5 @@ func (v *verifierWithKID) VerifyAndDecodeWithKID(compact string, validator *Vali
 	if err := validator.Validate(rawJWT); err != nil {
 		return nil, err
 	}
-	return NewVerifiedJWT(rawJWT)
+	return newVerifiedJWT(rawJWT)
 }

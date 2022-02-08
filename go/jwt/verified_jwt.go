@@ -26,9 +26,8 @@ type VerifiedJWT struct {
 	token *RawJWT
 }
 
-// NewVerifiedJWT generates a new VerifiedJWT
-// TODO(b/202065153): Restrict use to subtle jwt libraries based on access token.
-func NewVerifiedJWT(rawJWT *RawJWT) (*VerifiedJWT, error) {
+// newVerifiedJWT generates a new VerifiedJWT
+func newVerifiedJWT(rawJWT *RawJWT) (*VerifiedJWT, error) {
 	if rawJWT == nil {
 		return nil, fmt.Errorf("rawJWT can't be nil")
 	}
@@ -57,7 +56,8 @@ func (v *VerifiedJWT) HasAudiences() bool {
 	return v.token.HasAudiences()
 }
 
-// Audiences returns a list of audiences from the 'aud' claim. If the 'aud' claim is a single string, it is converted into a list with a single entry.
+// Audiences returns a list of audiences from the 'aud' claim.
+// If the 'aud' claim is a single string, it is converted into a list with a single entry.
 func (v *VerifiedJWT) Audiences() ([]string, error) {
 	return v.token.Audiences()
 }

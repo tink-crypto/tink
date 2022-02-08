@@ -63,8 +63,8 @@ func TestNewValidatorFailure(t *testing.T) {
 		},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			if _, err := jwt.NewJWTValidator(tc.validatorOpts); err == nil {
-				t.Errorf("NewJWTValidator(%v) err = nil, want error", tc.validatorOpts)
+			if _, err := jwt.NewValidator(tc.validatorOpts); err == nil {
+				t.Errorf("NewValidator(%v) err = nil, want error", tc.validatorOpts)
 			}
 		})
 	}
@@ -230,9 +230,9 @@ func TestValidationFailures(t *testing.T) {
 			if err != nil {
 				t.Fatalf("jwt.NewRawJWT(%v) err = %v, want nil", tc.tokenOpts, err)
 			}
-			validator, err := jwt.NewJWTValidator(tc.validatorOpts)
+			validator, err := jwt.NewValidator(tc.validatorOpts)
 			if err != nil {
-				t.Fatalf("jwt.NewJWTValidator(%v) err = %v, want nil", tc.validatorOpts, err)
+				t.Fatalf("jwt.NewValidator(%v) err = %v, want nil", tc.validatorOpts, err)
 			}
 			if err := validator.Validate(token); err == nil {
 				t.Errorf("validator.Validate(%v) err = nil, want error", token)
@@ -425,9 +425,9 @@ func TestValidationSuccess(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewRawJWT(%v) err = %v, want nil", tc.tokenOpts, err)
 			}
-			validator, err := jwt.NewJWTValidator(tc.validatorOpts)
+			validator, err := jwt.NewValidator(tc.validatorOpts)
 			if err != nil {
-				t.Fatalf("NewJWTValidator(%v) err = %v, want nil", tc.validatorOpts, err)
+				t.Fatalf("NewValidator(%v) err = %v, want nil", tc.validatorOpts, err)
 			}
 			if err := validator.Validate(token); err != nil {
 				t.Errorf("validator.Validate(%v) err = %v, want nil", token, err)

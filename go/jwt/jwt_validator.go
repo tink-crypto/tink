@@ -47,8 +47,8 @@ type Validator struct {
 	opts ValidatorOpts
 }
 
-// NewJWTValidator creates a new JWTValidator.
-func NewJWTValidator(opts *ValidatorOpts) (*Validator, error) {
+// NewValidator creates a new Validator.
+func NewValidator(opts *ValidatorOpts) (*Validator, error) {
 	if opts == nil {
 		return nil, fmt.Errorf("ValidatorOpts can't be nil")
 	}

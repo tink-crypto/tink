@@ -86,9 +86,9 @@ func TestVerifierWithFixedToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{ExpectedIssuer: refString("joe"), FixedNow: time.Unix(1300819300, 0)})
+	validator, err := NewValidator(&ValidatorOpts{ExpectedIssuer: refString("joe"), FixedNow: time.Unix(1300819300, 0)})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	verified, err := v.VerifyAndDecodeWithKID(compact, validator, nil)
 	if err != nil {
@@ -123,9 +123,9 @@ func TestCreateSignValidateToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
+	validator, err := NewValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	s, err := createESSigner(nil)
 	if err != nil {
@@ -182,9 +182,9 @@ func TestSignVerifyWithKID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
+	validator, err := NewValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	for _, tc := range []signerVerifierKIDTestCase{
 		{
@@ -244,9 +244,9 @@ func TestSignVerifyWithKIDFailure(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
+	validator, err := NewValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	for _, tc := range []signerVerifierKIDTestCase{
 		{
@@ -294,9 +294,9 @@ func TestVerifierModifiedCompact(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
+	validator, err := NewValidator(&ValidatorOpts{ExpectedTypeHeader: refString("JWT"), AllowMissingExpiration: true})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	s, err := createESSigner(nil)
 	if err != nil {
@@ -326,9 +326,9 @@ func TestVerifierModifiedCompact(t *testing.T) {
 }
 
 func TestVerifierInvalidInputs(t *testing.T) {
-	validator, err := NewJWTValidator(&ValidatorOpts{AllowMissingExpiration: true})
+	validator, err := NewValidator(&ValidatorOpts{AllowMissingExpiration: true})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	v, err := createESVerifier(nil)
 	if err != nil {
