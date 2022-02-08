@@ -16,6 +16,8 @@
 
 #include "tink/cc/cc_streaming_aead_wrappers.h"
 
+#include <utility>
+
 #include "tink/input_stream.h"
 #include "tink/output_stream.h"
 

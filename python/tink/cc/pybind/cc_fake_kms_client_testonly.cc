@@ -14,6 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+
 #include "pybind11/pybind11.h"
 #include "tink/util/fake_kms_client.h"
 #include "tink/util/statusor.h"

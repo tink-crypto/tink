@@ -18,6 +18,8 @@
 #define TINK_PYTHON_CC_INPUT_STREAM_ADAPTER_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "tink/input_stream.h"
 #include "tink/util/statusor.h"

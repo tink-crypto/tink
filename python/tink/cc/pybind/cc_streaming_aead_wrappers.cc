@@ -16,6 +16,8 @@
 
 #include "tink/cc/cc_streaming_aead_wrappers.h"
 
+#include <string>
+
 #include "pybind11/pybind11.h"
 #include "tink/cc/pybind/import_helper.h"
 #include "tink/cc/pybind/status_casters.h"
