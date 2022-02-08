@@ -192,17 +192,18 @@ public class JwtRsaSsaPssSignKeyManagerTest {
     checkKey(key);
   }
 
-  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
-  @Theory
-  public void createKey_alwaysNewElement_ok(
-      @FromDataPoints("algorithmParam") JwtRsaSsaPssAlgorithm algorithm, int keySize)
+  // This test needs to create several new keys, which is expensive. Therefore, we only do it for
+  // one set of parameters.
+  @Test
+  public void createKey_alwaysNewElement_ok()
       throws Exception {
     if (TestUtil.isTsan()) {
       // creating keys is too slow in Tsan.
       // We do not use assume because Theories expects to find something which is not skipped.
       return;
     }
-    JwtRsaSsaPssKeyFormat format = createKeyFormat(algorithm, keySize, RSAKeyGenParameterSpec.F4);
+    JwtRsaSsaPssKeyFormat format =
+        createKeyFormat(JwtRsaSsaPssAlgorithm.PS256, 2048, RSAKeyGenParameterSpec.F4);
     Set<String> keys = new TreeSet<>();
     // Calls newKey multiple times and make sure that they generate different keys -- takes about a
     // second per key.
