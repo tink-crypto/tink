@@ -18,6 +18,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "grpcpp/channel.h"
 #include "grpcpp/create_channel.h"

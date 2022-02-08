@@ -18,6 +18,7 @@
 #define TINK_PRF_PRF_SET_H_
 
 #include <map>
+#include <string>
 
 #include "absl/strings/string_view.h"
 #include "tink/util/statusor.h"

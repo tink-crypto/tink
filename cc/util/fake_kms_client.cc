@@ -18,6 +18,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"

@@ -18,6 +18,8 @@
 #define TINK_EXPERIMENTAL_PQCRYPTO_CECPQ2_HYBRID_INTERNAL_CECPQ2_AEAD_HKDF_HYBRID_ENCRYPT_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "experimental/pqcrypto/cecpq2/hybrid/cecpq2_aead_hkdf_dem_helper.h"
 #include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_sender_kem_boringssl.h"

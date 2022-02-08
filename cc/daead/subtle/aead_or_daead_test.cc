@@ -16,6 +16,9 @@
 
 #include "tink/daead/subtle/aead_or_daead.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tink/util/test_matchers.h"

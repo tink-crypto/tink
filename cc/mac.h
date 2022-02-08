@@ -17,6 +17,8 @@
 #ifndef TINK_MAC_H_
 #define TINK_MAC_H_
 
+#include <string>
+
 #include "absl/strings/string_view.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
