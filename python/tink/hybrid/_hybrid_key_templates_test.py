@@ -29,11 +29,14 @@ class HybridKeyTemplatesTest(parameterized.TestCase):
   def test_create_aes_eax_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-        curve_type=common_pb2.NIST_P521,
-        ec_point_format=common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
-        hash_type=common_pb2.SHA1,
-        dem_key_template=aead.aead_key_templates.AES256_EAX)
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+              curve_type=common_pb2.NIST_P521,
+              ec_point_format=common_pb2.DO_NOT_USE_CRUNCHY_UNCOMPRESSED,
+              hash_type=common_pb2.SHA1,
+              dem_key_template=aead.aead_key_templates.AES256_EAX))
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.EciesAeadHkdfPrivateKey',
         template.type_url)

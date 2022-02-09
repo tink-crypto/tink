@@ -20,6 +20,8 @@ tink_pb2.HmacKey, one can do:
 handle = keyset_handle.KeysetHandle(mac_key_templates.HMAC_SHA256_128BITTAG).
 """
 
+import warnings
+
 from tink.proto import common_pb2
 from tink.proto import ecies_aead_hkdf_pb2
 from tink.proto import hpke_pb2
@@ -27,11 +29,9 @@ from tink.proto import tink_pb2
 from tink import aead
 
 
-# TODO(b/217380829): Do not export the following function.
-def create_ecies_aead_hkdf_key_template(
+def _create_ecies_aead_hkdf_key_template(
     curve_type: common_pb2.EllipticCurveType,
-    ec_point_format: common_pb2.EcPointFormat,
-    hash_type: common_pb2.HashType,
+    ec_point_format: common_pb2.EcPointFormat, hash_type: common_pb2.HashType,
     dem_key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
   """Creates an ECIES-AEAD-HKDF KeyTemplate, and fills in its values."""
   key_format = ecies_aead_hkdf_pb2.EciesAeadHkdfKeyFormat()
@@ -65,27 +65,27 @@ def _create_hpke_key_template(
   return key_template
 
 
-ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM = create_ecies_aead_hkdf_key_template(
+ECIES_P256_HKDF_HMAC_SHA256_AES128_GCM = _create_ecies_aead_hkdf_key_template(
     curve_type=common_pb2.NIST_P256,
     ec_point_format=common_pb2.UNCOMPRESSED,
     hash_type=common_pb2.SHA256,
     dem_key_template=aead.aead_key_templates.AES128_GCM)
 
-ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM = create_ecies_aead_hkdf_key_template(
+ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_GCM = _create_ecies_aead_hkdf_key_template(
     curve_type=common_pb2.NIST_P256,
     ec_point_format=common_pb2.COMPRESSED,
     hash_type=common_pb2.SHA256,
     dem_key_template=aead.aead_key_templates.AES128_GCM)
 
 ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 = (
-    create_ecies_aead_hkdf_key_template(
+    _create_ecies_aead_hkdf_key_template(
         curve_type=common_pb2.NIST_P256,
         ec_point_format=common_pb2.UNCOMPRESSED,
         hash_type=common_pb2.SHA256,
         dem_key_template=aead.aead_key_templates.AES128_CTR_HMAC_SHA256))
 
 ECIES_P256_COMPRESSED_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256 = (
-    create_ecies_aead_hkdf_key_template(
+    _create_ecies_aead_hkdf_key_template(
         curve_type=common_pb2.NIST_P256,
         ec_point_format=common_pb2.COMPRESSED,
         hash_type=common_pb2.SHA256,
@@ -108,3 +108,15 @@ DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305 = (
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
         hpke_aead=hpke_pb2.CHACHA20_POLY1305))
+
+
+# Deprecated. Use the predefined constant templates above instead.
+def create_ecies_aead_hkdf_key_template(
+    curve_type: common_pb2.EllipticCurveType,
+    ec_point_format: common_pb2.EcPointFormat, hash_type: common_pb2.HashType,
+    dem_key_template: tink_pb2.KeyTemplate) -> tink_pb2.KeyTemplate:
+  warnings.warn(
+      'The "create_ecies_aead_hkdf_key_template" function is deprecated.',
+      DeprecationWarning, 2)
+  return _create_ecies_aead_hkdf_key_template(curve_type, ec_point_format,
+                                              hash_type, dem_key_template)
