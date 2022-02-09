@@ -25,9 +25,6 @@ tink_py_deps()
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
 tink_py_deps_init("tink_py")
 
-load("@tink_py_pip_deps//:requirements.bzl", tink_pip_install = "pip_install")
-tink_pip_install()
-
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
 tink_base_deps()
 
@@ -39,13 +36,6 @@ tink_cc_deps()
 
 load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 tink_cc_deps_init()
-
-# Release from 2021-10-26
-http_archive(
-    name = "rules_python",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.5.0/rules_python-0.5.0.tar.gz",
-    sha256 = "cd6730ed53a002c56ce4e2f396ba3b3be262fd7cb68339f0377a45e8227fe332",
-)
 
 # Release from 2021-12-12
 http_archive(
@@ -66,25 +56,14 @@ load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
 
 grpc_deps()
 
-load("@rules_python//python:repositories.bzl", "py_repositories")
-py_repositories()
+load("@rules_python//python:pip.bzl", "pip_install")
 
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
-pip_repositories()
-
-pip3_import(
+pip_install(
    name = "pip_deps",
    requirements = "//:requirements.txt",
 )
 
-load("@pip_deps//:requirements.bzl", "pip_install")
-pip_install()
-
-pip3_import(
+pip_install(
     name = "rules_proto_grpc_py3_deps",
     requirements = "@rules_proto_grpc//python:requirements.txt",
 )
-
-load("@rules_proto_grpc_py3_deps//:requirements.bzl", pip3_install="pip_install")
-pip3_install()
-

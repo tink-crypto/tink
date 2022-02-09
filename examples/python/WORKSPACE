@@ -1,6 +1,6 @@
 workspace(name = "examples_python")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+# load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # The local_repository() rule is used below because the workspaces referenced
 # are all located within the Tink git repository.
@@ -44,8 +44,6 @@ local_repository(
 
 # Load Tink dependencies.
 
-# NOTE: The Python dependencies have to be loaded first, as they rely on a
-# newer version of rules_python.
 load("@tink_py//:tink_py_deps.bzl", "tink_py_deps")
 
 tink_py_deps()
@@ -53,10 +51,6 @@ tink_py_deps()
 load("@tink_py//:tink_py_deps_init.bzl", "tink_py_deps_init")
 
 tink_py_deps_init("tink_py")
-
-load("@tink_py_pip_deps//:requirements.bzl", tink_pip_install = "pip_install")
-
-tink_pip_install()
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
 
@@ -74,20 +68,7 @@ load("@tink_cc//:tink_cc_deps_init.bzl", "tink_cc_deps_init")
 
 tink_cc_deps_init()
 
-# Use a copy of rules-python which contains local to this workspace which
-# contains a pip_install that works with google-cloud-storage.
-#
-# See https://github.com/bazelbuild/rules_python/issues/93#issuecomment-710085646.
-#
-# TODO(b/217632272): Remove this.
-http_archive(
-    name = "rules_python_local",
-    sha256 = "a30abdfc7126d497a7698c29c46ea9901c6392d6ed315171a6df5ce433aa4502",
-    strip_prefix = "rules_python-0.6.0",
-    url = "https://github.com/bazelbuild/rules_python/archive/0.6.0.tar.gz",
-)
-
-load("@rules_python_local//python:pip.bzl", "pip_install")
+load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
     name = "pip_deps",
