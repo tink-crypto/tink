@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal
+package hpke
 
 // hpkeKem is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) key encapsulation mechanism (KEM).

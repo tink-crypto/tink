@@ -14,14 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal
+// Package hpke provides implementations of Hybrid Public Key Encryption.
+package hpke
 
 import (
 	"encoding/binary"
 	"fmt"
 )
 
-// A collection of helper functions for HPKE.
 const (
 	// All identifier values are specified in
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.

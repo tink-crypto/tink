@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal
+package hpke
 
 // hpkeAead is a package-internal interface for the Hybrid Public Key
 // Encryption (HPKE) authenticated encryption with associated data (AEAD).

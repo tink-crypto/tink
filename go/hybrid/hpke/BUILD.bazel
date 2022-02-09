@@ -7,14 +7,13 @@ go_library(
     srcs = [
         "aes_gcm_hpke_aead.go",
         "hkdf_hpke_kdf.go",
+        "hpke.go",
         "hpke_aead.go",
         "hpke_kdf.go",
         "hpke_kem.go",
-        "hpke_util.go",
-        "internal.go",
         "x25519_hpke_kem.go",
     ],
-    importpath = "github.com/google/tink/go/hybrid/internal",
+    importpath = "github.com/google/tink/go/hybrid/hpke",
     deps = [
         "//aead/subtle:go_default_library",
         "//subtle:go_default_library",

@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-package internal
+package hpke
 
 import (
 	"encoding/hex"
@@ -248,7 +248,7 @@ func hpkeX25519HkdfSha256BaseModeTestVectors(t *testing.T) map[hpkeID]hpkeVector
 	t.Helper()
 
 	srcDir, _ := os.LookupEnv("TEST_SRCDIR")
-	path := filepath.Join(srcDir, os.Getenv("TEST_WORKSPACE"), "/hybrid/internal/testdata/boringssl_hpke_test_vectors.json")
+	path := filepath.Join(srcDir, os.Getenv("TEST_WORKSPACE"), "/hybrid/hpke/testdata/boringssl_hpke_test_vectors.json")
 	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
