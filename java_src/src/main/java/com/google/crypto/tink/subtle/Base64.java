@@ -96,11 +96,6 @@ public final class Base64 {
     return decode(input, DEFAULT | NO_WRAP);
   }
 
-  /** Decodes a url-safe base64 string to a byte array. */
-  public static byte[] urlSafeDecode(String input) {
-    return decode(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
-  }
-
   /**
    * Decode the Base64-encoded data in input and return the data in a new byte array.
    *
@@ -163,6 +158,11 @@ public final class Base64 {
     byte[] temp = new byte[decoder.op];
     System.arraycopy(decoder.output, 0, temp, 0, decoder.op);
     return temp;
+  }
+
+  /** Decodes a url-safe base64 string to a byte array. */
+  public static byte[] urlSafeDecode(String input) {
+    return decode(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
   }
 
   /* package */ static class Decoder extends Coder {
@@ -430,45 +430,6 @@ public final class Base64 {
     return encodeToString(input, DEFAULT | NO_WRAP);
   }
 
-  /** Url-safe base64 encodes a byte array to a string. */
-  public static String urlSafeEncode(final byte[] input) {
-    return encodeToString(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
-  }
-
-  /**
-   * Base64-encode the given data and return a newly allocated String with the result.
-   *
-   * @param input the data to encode
-   * @param flags controls certain features of the encoded output. Passing {@code DEFAULT} results
-   *     in output that adheres to RFC 2045.
-   */
-  public static String encodeToString(byte[] input, int flags) {
-    try {
-      return new String(encode(input, flags), "US-ASCII");
-    } catch (UnsupportedEncodingException e) {
-      // US-ASCII is guaranteed to be available.
-      throw new AssertionError(e);
-    }
-  }
-
-  /**
-   * Base64-encode the given data and return a newly allocated String with the result.
-   *
-   * @param input the data to encode
-   * @param offset the position within the input array at which to start
-   * @param len the number of bytes of input to encode
-   * @param flags controls certain features of the encoded output. Passing {@code DEFAULT} results
-   *     in output that adheres to RFC 2045.
-   */
-  public static String encodeToString(byte[] input, int offset, int len, int flags) {
-    try {
-      return new String(encode(input, offset, len, flags), "US-ASCII");
-    } catch (UnsupportedEncodingException e) {
-      // US-ASCII is guaranteed to be available.
-      throw new AssertionError(e);
-    }
-  }
-
   /**
    * Base64-encode the given data and return a newly allocated byte[] with the result.
    *
@@ -526,6 +487,45 @@ public final class Base64 {
     assert encoder.op == outputLen;
 
     return encoder.output;
+  }
+
+  /** Url-safe base64 encodes a byte array to a string. */
+  public static String urlSafeEncode(final byte[] input) {
+    return encodeToString(input, DEFAULT | NO_PADDING | NO_WRAP | URL_SAFE);
+  }
+
+  /**
+   * Base64-encode the given data and return a newly allocated String with the result.
+   *
+   * @param input the data to encode
+   * @param flags controls certain features of the encoded output. Passing {@code DEFAULT} results
+   *     in output that adheres to RFC 2045.
+   */
+  public static String encodeToString(byte[] input, int flags) {
+    try {
+      return new String(encode(input, flags), "US-ASCII");
+    } catch (UnsupportedEncodingException e) {
+      // US-ASCII is guaranteed to be available.
+      throw new AssertionError(e);
+    }
+  }
+
+  /**
+   * Base64-encode the given data and return a newly allocated String with the result.
+   *
+   * @param input the data to encode
+   * @param offset the position within the input array at which to start
+   * @param len the number of bytes of input to encode
+   * @param flags controls certain features of the encoded output. Passing {@code DEFAULT} results
+   *     in output that adheres to RFC 2045.
+   */
+  public static String encodeToString(byte[] input, int offset, int len, int flags) {
+    try {
+      return new String(encode(input, offset, len, flags), "US-ASCII");
+    } catch (UnsupportedEncodingException e) {
+      // US-ASCII is guaranteed to be available.
+      throw new AssertionError(e);
+    }
   }
 
   /* package */ static class Encoder extends Coder {

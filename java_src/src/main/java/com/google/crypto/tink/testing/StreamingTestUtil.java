@@ -514,6 +514,43 @@ public final class StreamingTestUtil {
     return ciphertext;
   }
 
+  // Methods for testEncryptDecryptLong.
+
+  /**
+   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
+   * used to test aynchronous encryption.
+   *
+   * @param ags the streaming encryption
+   * @param plaintext the channel containing the plaintext
+   * @param ciphertext the channel to which the ciphertext is written
+   * @param aad the additional data to authenticate
+   * @param chunkSize the size of blocks that are read and written. This size determines the
+   *     temporary memory used in this method but is independent of the streaming encryption.
+   * @throws RuntimeException if something goes wrong.
+   */
+  private static void encryptWithChannel(
+      StreamingAead ags,
+      ReadableByteChannel plaintext,
+      WritableByteChannel ciphertext,
+      byte[] aad,
+      int chunkSize) {
+    try (WritableByteChannel encChannel = ags.newEncryptingChannel(ciphertext, aad)) {
+      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
+      int read;
+      do {
+        chunk.clear();
+        read = plaintext.read(chunk);
+        if (read > 0) {
+          chunk.flip();
+          encChannel.write(chunk);
+        }
+      } while (read != -1);
+    } catch (Exception ex) {
+      // TODO(bleichen): What is the best way to chatch exceptions in threads?
+      throw new RuntimeException(ex);
+    }
+  }
+
   private static byte[] encryptWithStream(StreamingAead ags, byte[] plaintext, byte[] aad,
       int firstSegmentOffset) throws Exception {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1013,45 +1050,6 @@ public final class StreamingTestUtil {
       modifiedAad[pos] ^= (byte) 1;
       tryDecryptModifiedCiphertextWithSeekableByteChannel(
           ags, ciphertext, modifiedAad, new byte[0]);
-    }
-  }
-
-  // Methods for testEncryptDecryptLong.
-
-  /**
-   * Reads everything from plaintext, encrypt it and writes the result to ciphertext. This method is
-   * used to test aynchronous encryption.
-   *
-   * @param ags the streaming encryption
-   * @param plaintext the channel containing the plaintext
-   * @param ciphertext the channel to which the ciphertext is written
-   * @param aad the additional data to authenticate
-   * @param chunkSize the size of blocks that are read and written. This size determines the
-   *     temporary memory used in this method but is independent of the streaming encryption.
-   * @throws RuntimeException if something goes wrong.
-   */
-  private static void encryptWithChannel(
-      StreamingAead ags,
-      ReadableByteChannel plaintext,
-      WritableByteChannel ciphertext,
-      byte[] aad,
-      int chunkSize) {
-    try {
-      WritableByteChannel encChannel = ags.newEncryptingChannel(ciphertext, aad);
-      ByteBuffer chunk = ByteBuffer.allocate(chunkSize);
-      int read;
-      do {
-        chunk.clear();
-        read = plaintext.read(chunk);
-        if (read > 0) {
-          chunk.flip();
-          encChannel.write(chunk);
-        }
-      } while (read != -1);
-      encChannel.close();
-    } catch (Exception ex) {
-      // TODO(bleichen): What is the best way to chatch exceptions in threads?
-      throw new java.lang.RuntimeException(ex);
     }
   }
 
