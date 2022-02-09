@@ -20,6 +20,7 @@
 #ifndef TINK_UTIL_STATUS_H_
 #define TINK_UTIL_STATUS_H_
 
+#include <ostream>
 #include <string>
 
 #include "absl/base/attributes.h"

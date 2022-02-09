@@ -14,12 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <sstream>
-
 #include "tink/util/status.h"
 
-#include "absl/strings/str_cat.h"
+#include <sstream>
+#include <string>
+
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 
 using ::std::ostream;
 
