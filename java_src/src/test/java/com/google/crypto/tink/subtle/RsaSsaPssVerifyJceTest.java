@@ -84,12 +84,6 @@ public class RsaSsaPssVerifyJceTest {
         "../wycheproof/testvectors/rsa_pss_4096_sha512_mgf1_32_test.json");
   }
 
-  @Test
-  public void testWycheproofVectors3072() throws Exception {
-    testWycheproofVectors(
-        "../wycheproof/testvectors/rsa_pss_3072_sha256_mgf1_32_test.json");
-  }
-
   private static void testWycheproofVectors(String fileName) throws Exception {
     JsonObject jsonObj = WycheproofTestUtil.readJson(fileName);
 
@@ -109,11 +103,11 @@ public class RsaSsaPssVerifyJceTest {
       for (int j = 0; j < tests.size(); j++) {
         JsonObject testcase = tests.get(j).getAsJsonObject();
         String tcId =
-            String.format("testcase %d (%s)",
+            String.format(
+                "testcase %d (%s)",
                 testcase.get("tcId").getAsInt(), testcase.get("comment").getAsString());
-        RsaSsaPssVerifyJce verifier;
         RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(x509keySpec);
-        verifier = new RsaSsaPssVerifyJce(pubKey, sigHash, mgf1Hash, saltLength);
+        RsaSsaPssVerifyJce verifier = new RsaSsaPssVerifyJce(pubKey, sigHash, mgf1Hash, saltLength);
         byte[] msg = Hex.decode(testcase.get("msg").getAsString());
         byte[] sig = Hex.decode(testcase.get("sig").getAsString());
         String result = testcase.get("result").getAsString();
@@ -132,5 +126,11 @@ public class RsaSsaPssVerifyJceTest {
       }
     }
     assertEquals(0, errors);
+  }
+
+  @Test
+  public void testWycheproofVectors3072() throws Exception {
+    testWycheproofVectors(
+        "../wycheproof/testvectors/rsa_pss_3072_sha256_mgf1_32_test.json");
   }
 }
