@@ -398,16 +398,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Decodes a base64 string to a byte array.</div>
 </li>
 </ul>
-<a name="urlSafeDecode-java.lang.String-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>urlSafeDecode</h4>
-<pre>public static&nbsp;byte[]&nbsp;urlSafeDecode(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;input)</pre>
-<div class="block">Decodes a url-safe base64 string to a byte array.</div>
-</li>
-</ul>
 <a name="decode-java.lang.String-int-">
 <!--   -->
 </a>
@@ -478,6 +468,16 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
+<a name="urlSafeDecode-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>urlSafeDecode</h4>
+<pre>public static&nbsp;byte[]&nbsp;urlSafeDecode(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;input)</pre>
+<div class="block">Decodes a url-safe base64 string to a byte array.</div>
+</li>
+</ul>
 <a name="encode-byte:A-">
 <!--   -->
 </a>
@@ -486,6 +486,44 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <h4>encode</h4>
 <pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encode(byte[]&nbsp;input)</pre>
 <div class="block">Base64 encodes a byte array to a string.</div>
+</li>
+</ul>
+<a name="encode-byte:A-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>encode</h4>
+<pre>public static&nbsp;byte[]&nbsp;encode(byte[]&nbsp;input,
+                            int&nbsp;flags)</pre>
+<div class="block">Base64-encode the given data and return a newly allocated byte[] with the result.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>input</code> - the data to encode</dd>
+<dd><code>flags</code> - controls certain features of the encoded output. Passing <code>DEFAULT</code> results
+     in output that adheres to RFC 2045.</dd>
+</dl>
+</li>
+</ul>
+<a name="encode-byte:A-int-int-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>encode</h4>
+<pre>public static&nbsp;byte[]&nbsp;encode(byte[]&nbsp;input,
+                            int&nbsp;offset,
+                            int&nbsp;len,
+                            int&nbsp;flags)</pre>
+<div class="block">Base64-encode the given data and return a newly allocated byte[] with the result.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>input</code> - the data to encode</dd>
+<dd><code>offset</code> - the position within the input array at which to start</dd>
+<dd><code>len</code> - the number of bytes of input to encode</dd>
+<dd><code>flags</code> - controls certain features of the encoded output. Passing <code>DEFAULT</code> results
+     in output that adheres to RFC 2045.</dd>
+</dl>
 </li>
 </ul>
 <a name="urlSafeEncode-byte:A-">
@@ -518,7 +556,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <a name="encodeToString-byte:A-int-int-int-">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>encodeToString</h4>
 <pre>public static&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;encodeToString(byte[]&nbsp;input,
@@ -526,44 +564,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
                                     int&nbsp;len,
                                     int&nbsp;flags)</pre>
 <div class="block">Base64-encode the given data and return a newly allocated String with the result.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>input</code> - the data to encode</dd>
-<dd><code>offset</code> - the position within the input array at which to start</dd>
-<dd><code>len</code> - the number of bytes of input to encode</dd>
-<dd><code>flags</code> - controls certain features of the encoded output. Passing <code>DEFAULT</code> results
-     in output that adheres to RFC 2045.</dd>
-</dl>
-</li>
-</ul>
-<a name="encode-byte:A-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>encode</h4>
-<pre>public static&nbsp;byte[]&nbsp;encode(byte[]&nbsp;input,
-                            int&nbsp;flags)</pre>
-<div class="block">Base64-encode the given data and return a newly allocated byte[] with the result.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>input</code> - the data to encode</dd>
-<dd><code>flags</code> - controls certain features of the encoded output. Passing <code>DEFAULT</code> results
-     in output that adheres to RFC 2045.</dd>
-</dl>
-</li>
-</ul>
-<a name="encode-byte:A-int-int-int-">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>encode</h4>
-<pre>public static&nbsp;byte[]&nbsp;encode(byte[]&nbsp;input,
-                            int&nbsp;offset,
-                            int&nbsp;len,
-                            int&nbsp;flags)</pre>
-<div class="block">Base64-encode the given data and return a newly allocated byte[] with the result.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>input</code> - the data to encode</dd>
