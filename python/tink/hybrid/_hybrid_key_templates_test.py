@@ -56,7 +56,8 @@ class HybridKeyTemplatesTest(parameterized.TestCase):
     template = hybrid.hybrid_key_templates._create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.AES_128_GCM)
+        hpke_aead=hpke_pb2.AES_128_GCM,
+        output_prefix_type=tink_pb2.TINK)
     self.assertEqual('type.googleapis.com/google.crypto.tink.HpkePrivateKey',
                      template.type_url)
     self.assertEqual(tink_pb2.TINK, template.output_prefix_type)

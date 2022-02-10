@@ -50,7 +50,8 @@ def _create_ecies_aead_hkdf_key_template(
 
 def _create_hpke_key_template(
     hpke_kem: hpke_pb2.HpkeKem, hpke_kdf: hpke_pb2.HpkeKdf,
-    hpke_aead: hpke_pb2.HpkeAead) -> tink_pb2.KeyTemplate:
+    hpke_aead: hpke_pb2.HpkeAead,
+    output_prefix_type: tink_pb2.OutputPrefixType) -> tink_pb2.KeyTemplate:
   """Creates an HPKE KeyTemplate, and fills in its values."""
   key_format = hpke_pb2.HpkeKeyFormat()
   key_format.params.kem = hpke_kem
@@ -61,7 +62,7 @@ def _create_hpke_key_template(
   key_template.type_url = (
       'type.googleapis.com/google.crypto.tink.HpkePrivateKey')
   key_template.value = key_format.SerializeToString()
-  key_template.output_prefix_type = tink_pb2.TINK
+  key_template.output_prefix_type = output_prefix_type
   return key_template
 
 
@@ -95,19 +96,43 @@ DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM = (
     _create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.AES_128_GCM))
+        hpke_aead=hpke_pb2.AES_128_GCM,
+        output_prefix_type=tink_pb2.TINK))
+
+DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW = (
+    _create_hpke_key_template(
+        hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+        hpke_kdf=hpke_pb2.HKDF_SHA256,
+        hpke_aead=hpke_pb2.AES_128_GCM,
+        output_prefix_type=tink_pb2.RAW))
 
 DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM = (
     _create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.AES_256_GCM))
+        hpke_aead=hpke_pb2.AES_256_GCM,
+        output_prefix_type=tink_pb2.TINK))
+
+DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW = (
+    _create_hpke_key_template(
+        hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+        hpke_kdf=hpke_pb2.HKDF_SHA256,
+        hpke_aead=hpke_pb2.AES_256_GCM,
+        output_prefix_type=tink_pb2.RAW))
 
 DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305 = (
     _create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.CHACHA20_POLY1305))
+        hpke_aead=hpke_pb2.CHACHA20_POLY1305,
+        output_prefix_type=tink_pb2.TINK))
+
+DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW = (
+    _create_hpke_key_template(
+        hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+        hpke_kdf=hpke_pb2.HKDF_SHA256,
+        hpke_aead=hpke_pb2.CHACHA20_POLY1305,
+        output_prefix_type=tink_pb2.RAW))
 
 
 # Deprecated. Use the predefined constant templates above instead.

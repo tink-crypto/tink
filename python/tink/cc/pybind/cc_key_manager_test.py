@@ -16,6 +16,7 @@
 
 from typing import cast
 from absl.testing import absltest
+from absl.testing import parameterized
 from tink.proto import aes_eax_pb2
 from tink.proto import aes_siv_pb2
 from tink.proto import common_pb2
@@ -192,7 +193,7 @@ class HybridKeyManagerTest(absltest.TestCase):
       hybrid_decrypt.decrypt(b'bad ciphertext', b'some context info')
 
 
-class HpkeKeyManagerTest(absltest.TestCase):
+class HpkeKeyManagerTest(parameterized.TestCase):
 
   def hybrid_decrypt_key_manager(self):
     return tink_bindings.HybridDecryptKeyManager.from_cc_registry(
@@ -226,7 +227,8 @@ class HpkeKeyManagerTest(absltest.TestCase):
           hybrid.hybrid_key_templates._create_hpke_key_template(
               hpke_kem=hpke_pb2.KEM_UNKNOWN,
               hpke_kdf=hpke_pb2.HKDF_SHA256,
-              hpke_aead=hpke_pb2.AES_128_GCM).SerializeToString())
+              hpke_aead=hpke_pb2.AES_128_GCM,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
 
   def test_new_key_data_invalid_kdf_raise_exception(self):
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
@@ -235,7 +237,8 @@ class HpkeKeyManagerTest(absltest.TestCase):
           hybrid.hybrid_key_templates._create_hpke_key_template(
               hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
               hpke_kdf=hpke_pb2.KDF_UNKNOWN,
-              hpke_aead=hpke_pb2.AES_128_GCM).SerializeToString())
+              hpke_aead=hpke_pb2.AES_128_GCM,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
 
   def test_new_key_data_invalid_aead_raise_exception(self):
     with self.assertRaisesRegex(tink_bindings.StatusNotOk,
@@ -244,7 +247,8 @@ class HpkeKeyManagerTest(absltest.TestCase):
           hybrid.hybrid_key_templates._create_hpke_key_template(
               hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
               hpke_kdf=hpke_pb2.HKDF_SHA256,
-              hpke_aead=hpke_pb2.AEAD_UNKNOWN).SerializeToString())
+              hpke_aead=hpke_pb2.AEAD_UNKNOWN,
+              output_prefix_type=tink_pb2.TINK).SerializeToString())
 
   def test_encrypt_decrypt(self):
     decrypt_key_manager = self.hybrid_decrypt_key_manager()
@@ -252,6 +256,25 @@ class HpkeKeyManagerTest(absltest.TestCase):
     key_data = decrypt_key_manager.new_key_data(
         hybrid.hybrid_key_templates
         .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM.SerializeToString())
+    public_key_data = decrypt_key_manager.public_key_data(key_data)
+    hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
+    ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
+    hybrid_decrypt = decrypt_key_manager.primitive(key_data)
+    self.assertEqual(
+        hybrid_decrypt.decrypt(ciphertext, b'some context info'),
+        b'some plaintext')
+
+  @parameterized.parameters(
+      [tink_pb2.TINK, tink_pb2.RAW, tink_pb2.CRUNCHY, tink_pb2.LEGACY])
+  def test_encrypt_decrypt_by_prefix(self, prefix):
+    decrypt_key_manager = self.hybrid_decrypt_key_manager()
+    encrypt_key_manager = self.hybrid_encrypt_key_manager()
+    key_data = decrypt_key_manager.new_key_data(
+        hybrid.hybrid_key_templates._create_hpke_key_template(
+            hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
+            hpke_kdf=hpke_pb2.HKDF_SHA256,
+            hpke_aead=hpke_pb2.AES_128_GCM,
+            output_prefix_type=prefix).SerializeToString())
     public_key_data = decrypt_key_manager.public_key_data(key_data)
     hybrid_encrypt = encrypt_key_manager.primitive(public_key_data)
     ciphertext = hybrid_encrypt.encrypt(b'some plaintext', b'some context info')
