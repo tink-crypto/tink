@@ -8,6 +8,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "jwt.go",
+        "jwt_ecdsa_verifier_key_manager.go",
         "jwt_encoding.go",
         "jwt_hmac_key_manager.go",
         "jwt_key_templates.go",
@@ -28,9 +29,11 @@ go_library(
         "//core/primitiveset:go_default_library",
         "//keyset:go_default_library",
         "//mac/subtle:go_default_library",
+        "//signature/subtle:go_default_library",
         "//subtle:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
+        "//proto:jwt_ecdsa_go_proto",
         "//proto:jwt_hmac_go_proto",
         "//proto:tink_go_proto",
         "@org_golang_google_protobuf//proto:go_default_library",
@@ -65,6 +68,7 @@ go_test(
 go_test(
     name = "go_default_test",
     srcs = [
+        "jwt_ecdsa_verifier_key_manager_test.go",
         "jwt_encoding_test.go",
         "jwt_hmac_key_manager_test.go",
         "jwt_mac_kid_test.go",
@@ -77,6 +81,7 @@ go_test(
         "//signature/subtle:go_default_library",
         "//subtle/random:go_default_library",
         "//tink:go_default_library",
+        "//proto:jwt_ecdsa_go_proto",
         "//proto:jwt_hmac_go_proto",
         "//proto:tink_go_proto",
         "@com_github_google_go_cmp//cmp:go_default_library",

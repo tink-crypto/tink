@@ -25,6 +25,9 @@ import (
 
 func init() {
 	if err := registry.RegisterKeyManager(new(jwtHMACKeyManager)); err != nil {
-		panic(fmt.Sprintf("jwt.init() failed: %v", err))
+		panic(fmt.Sprintf("jwt.init() failed registering JWT HMAC key manger: %v", err))
+	}
+	if err := registry.RegisterKeyManager(new(jwtECDSAVerifierKeyManager)); err != nil {
+		panic(fmt.Sprintf("jwt.init() failed registering JWT ECDSA verifier key manger: %v", err))
 	}
 }
