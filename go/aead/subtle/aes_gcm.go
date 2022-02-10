@@ -19,6 +19,7 @@ package subtle
 import (
 	"fmt"
 
+	internalaead "github.com/google/tink/go/internal/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
@@ -32,7 +33,7 @@ const (
 
 // AESGCM is an implementation of AEAD interface.
 type AESGCM struct {
-	insecureIvAesGcm *InsecureIvAesGcm
+	aesGCMInsecureIV *internalaead.AESGCMInsecureIV
 }
 
 // Assert that AESGCM implements the AEAD interface.
@@ -41,8 +42,8 @@ var _ tink.AEAD = (*AESGCM)(nil)
 // NewAESGCM returns an AESGCM instance, where key is the AES key with length
 // 16 bytes (AES-128) or 32 bytes (AES-256).
 func NewAESGCM(key []byte) (*AESGCM, error) {
-	insecureIvAesGcm, err := NewInsecureIvAesGcm(key, true /*=prependIv*/)
-	return &AESGCM{insecureIvAesGcm}, err
+	aesGCMInsecureIV, err := internalaead.NewAESGCMInsecureIV(key, true /*=prependIV*/)
+	return &AESGCM{aesGCMInsecureIV}, err
 }
 
 // Encrypt encrypts plaintext with associatedData. The returned ciphertext
@@ -52,7 +53,7 @@ func NewAESGCM(key []byte) (*AESGCM, error) {
 // ciphertext with an AESGCMTagSize (16-byte) tag.
 func (a *AESGCM) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
 	iv := random.GetRandomBytes(AESGCMIVSize)
-	return a.insecureIvAesGcm.Encrypt(iv, plaintext, associatedData)
+	return a.aesGCMInsecureIV.Encrypt(iv, plaintext, associatedData)
 }
 
 // Decrypt decrypts ciphertext with associatedData.
@@ -61,10 +62,10 @@ func (a *AESGCM) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
 		return nil, fmt.Errorf("ciphertext with size %d is too short", len(ciphertext))
 	}
 	iv := ciphertext[:AESGCMIVSize]
-	return a.insecureIvAesGcm.Decrypt(iv, ciphertext, associatedData)
+	return a.aesGCMInsecureIV.Decrypt(iv, ciphertext, associatedData)
 }
 
 // Key returns the AES key.
 func (a *AESGCM) Key() []byte {
-	return a.insecureIvAesGcm.Key
+	return a.aesGCMInsecureIV.Key
 }

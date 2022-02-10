@@ -19,7 +19,7 @@ package hpke
 import (
 	"fmt"
 
-	"github.com/google/tink/go/aead/subtle"
+	internalaead "github.com/google/tink/go/internal/aead"
 )
 
 // aesGcmHpkeAead is an AES GCM HPKE AEAD variant that implements interface
@@ -52,9 +52,9 @@ func (a *aesGcmHpkeAead) seal(key, nonce, plaintext, associatedData []byte) ([]b
 	if len(key) != a.keyLength {
 		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
 	}
-	i, err := subtle.NewInsecureIvAesGcm(key, false /*=prependIv*/)
+	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewInsecureIvAesGcm: %q", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
 	}
 	return i.Encrypt(nonce, plaintext, associatedData)
 }
@@ -63,9 +63,9 @@ func (a *aesGcmHpkeAead) open(key, nonce, ciphertext, associatedData []byte) ([]
 	if len(key) != a.keyLength {
 		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
 	}
-	i, err := subtle.NewInsecureIvAesGcm(key, false /*=prependIv*/)
+	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewInsecureIvAesGcm: %q", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
 	}
 	return i.Decrypt(nonce, ciphertext, associatedData)
 }

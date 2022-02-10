@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-// Package subtle provides subtle implementations of the AEAD primitive.
-package subtle
+// Package aead provides internal implementations of the AEAD primitive.
+package aead
 
-import internalaead "github.com/google/tink/go/internal/aead"
+import "fmt"
 
 const (
-	intSize = 32 << (^uint(0) >> 63) // 32 or 64
-	maxInt  = 1<<(intSize-1) - 1
+	// AESGCMIVSize is the acceptable IV size defined by RFC 5116.
+	AESGCMIVSize = 12
+	// AESGCMTagSize is the acceptable tag size defined by RFC 5116.
+	AESGCMTagSize = 16
 )
 
 // ValidateAESKeySize checks if the given key size is a valid AES key size.
 func ValidateAESKeySize(sizeInBytes uint32) error {
-	return internalaead.ValidateAESKeySize(sizeInBytes)
+	switch sizeInBytes {
+	case 16, 32:
+		return nil
+	default:
+		return fmt.Errorf("invalid AES key size; want 16 or 32, got %d", sizeInBytes)
+	}
 }

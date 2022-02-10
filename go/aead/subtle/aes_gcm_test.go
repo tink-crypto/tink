@@ -27,7 +27,7 @@ import (
 	"github.com/google/tink/go/testutil"
 )
 
-var keySizes = []int{
+var aesKeySizes = []uint32{
 	16, /*AES-128*/
 	32, /*AES-256*/
 }
@@ -35,8 +35,8 @@ var keySizes = []int{
 // Since the tag size depends on the Seal() function of crypto library,
 // this test checks that the tag size is always 128 bit.
 func TestAESGCMTagLength(t *testing.T) {
-	for _, keySize := range keySizes {
-		key := random.GetRandomBytes(uint32(keySize))
+	for _, keySize := range aesKeySizes {
+		key := random.GetRandomBytes(keySize)
 		a, _ := subtle.NewAESGCM(key)
 		ad := random.GetRandomBytes(32)
 		pt := random.GetRandomBytes(32)
@@ -49,7 +49,7 @@ func TestAESGCMTagLength(t *testing.T) {
 }
 
 func TestAESGCMKeySize(t *testing.T) {
-	for _, keySize := range keySizes {
+	for _, keySize := range aesKeySizes {
 		if _, err := subtle.NewAESGCM(make([]byte, keySize)); err != nil {
 			t.Errorf("unexpected error when key size is %d btyes", keySize)
 		}
@@ -60,8 +60,8 @@ func TestAESGCMKeySize(t *testing.T) {
 }
 
 func TestAESGCMEncryptDecrypt(t *testing.T) {
-	for _, keySize := range keySizes {
-		key := random.GetRandomBytes(uint32(keySize))
+	for _, keySize := range aesKeySizes {
+		key := random.GetRandomBytes(keySize)
 		a, err := subtle.NewAESGCM(key)
 		if err != nil {
 			t.Errorf("unexpected error when creating new cipher: %s", err)
@@ -89,8 +89,8 @@ func TestAESGCMLongMessages(t *testing.T) {
 	for ptSize <= 1<<24 {
 		pt := random.GetRandomBytes(uint32(ptSize))
 		ad := random.GetRandomBytes(uint32(ptSize / 3))
-		for _, keySize := range keySizes {
-			key := random.GetRandomBytes(uint32(keySize))
+		for _, keySize := range aesKeySizes {
+			key := random.GetRandomBytes(keySize)
 			a, _ := subtle.NewAESGCM(key)
 			ct, _ := a.Encrypt(pt, ad)
 			decrypted, _ := a.Decrypt(ct, ad)

@@ -15,7 +15,7 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/hybrid/hpke",
     deps = [
-        "//aead/subtle:go_default_library",
+        "//internal/aead:go_default_library",
         "//subtle:go_default_library",
         "@org_golang_x_crypto//hkdf:go_default_library",
     ],
