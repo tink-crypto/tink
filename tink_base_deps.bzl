@@ -20,16 +20,6 @@ def tink_base_deps():
         ],
     )
 
-    # Release from 2019-11-07
-    http_archive(
-        name = "bazel_gazelle",
-        urls = [
-            "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-        ],
-        sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
-    )
-
     #-----------------------------------------------------------------------------
     # Actual tink base deps.
     #-----------------------------------------------------------------------------
