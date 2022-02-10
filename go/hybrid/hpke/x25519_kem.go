@@ -22,33 +22,33 @@ import (
 	"github.com/google/tink/go/subtle"
 )
 
-// x25519HpkeKem is a Diffie-Hellman-based X25519 HPKE KEM variant that
-// implements interface hpkeKem.
 var (
-	_ hpkeKem = (*x25519HpkeKem)(nil)
-
 	generatePrivateKey      = subtle.GeneratePrivateKeyX25519
 	publicFromPrivateX25519 = subtle.PublicFromPrivateX25519
 )
 
-type x25519HpkeKem struct {
+// x25519KEM is a Diffie-Hellman-based X25519 HPKE KEM variant that implements
+// interface kem.
+type x25519KEM struct {
 	// HPKE KEM algorithm identifier.
-	id     uint16
+	kemID  uint16
 	macAlg string
 }
 
-// newX25519HpkeKem constructs a X25519 HPKE KEM using macAlg.
-func newX25519HpkeKem(macAlg string) (*x25519HpkeKem, error) {
+var _ kem = (*x25519KEM)(nil)
+
+// newX25519KEM constructs a X25519 HPKE KEM using macAlg.
+func newX25519KEM(macAlg string) (*x25519KEM, error) {
 	if macAlg == sha256 {
-		return &x25519HpkeKem{
-			id:     x25519HkdfSha256,
+		return &x25519KEM{
+			kemID:  x25519HKDFSHA256,
 			macAlg: macAlg,
 		}, nil
 	}
 	return nil, fmt.Errorf("MAC algorithm %s is not supported", macAlg)
 }
 
-func (x *x25519HpkeKem) encapsulate(recipientPubKey []byte) (sharedSecret, senderPubKey []byte, err error) {
+func (x *x25519KEM) encapsulate(recipientPubKey []byte) (sharedSecret, senderPubKey []byte, err error) {
 	senderPrivKey, err := generatePrivateKey()
 	if err != nil {
 		return nil, nil, err
@@ -68,7 +68,7 @@ func (x *x25519HpkeKem) encapsulate(recipientPubKey []byte) (sharedSecret, sende
 	return sharedSecret, senderPubKey, nil
 }
 
-func (x *x25519HpkeKem) decapsulate(encapsulatedKey, recipientPrivKey []byte) ([]byte, error) {
+func (x *x25519KEM) decapsulate(encapsulatedKey, recipientPrivKey []byte) ([]byte, error) {
 	dh, err := subtle.ComputeSharedSecretX25519(recipientPrivKey, encapsulatedKey)
 	if err != nil {
 		return nil, err
@@ -80,14 +80,14 @@ func (x *x25519HpkeKem) decapsulate(encapsulatedKey, recipientPrivKey []byte) ([
 	return x.deriveKEMSharedSecret(dh, encapsulatedKey, recipientPubKey)
 }
 
-func (x *x25519HpkeKem) kemID() uint16 {
-	return x.id
+func (x *x25519KEM) id() uint16 {
+	return x.kemID
 }
 
 // deriveKEMSharedSecret returns a pseudorandom key obtained via HKDF SHA256.
-func (x *x25519HpkeKem) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []byte) ([]byte, error) {
+func (x *x25519KEM) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []byte) ([]byte, error) {
 	ctx := append(senderPubKey, recipientPubKey...)
-	suiteID := kemSuiteID(x25519HkdfSha256)
+	suiteID := kemSuiteID(x25519HKDFSHA256)
 	macLength, err := subtle.GetHashDigestSize(x.macAlg)
 	if err != nil {
 		return nil, err

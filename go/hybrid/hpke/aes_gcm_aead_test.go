@@ -22,8 +22,8 @@ import (
 	"testing"
 )
 
-func TestAesGcmHpkeAeadSealOpen(t *testing.T) {
-	vecs := hpkeAESGCMEncryptionVectors(t)
+func TestAESGCMAEADSealOpen(t *testing.T) {
+	vecs := aesGCMEncryptionVectors(t)
 	for k, v := range vecs {
 		t.Run(fmt.Sprintf("%d", k.aeadID), func(t *testing.T) {
 			{
@@ -36,25 +36,25 @@ func TestAesGcmHpkeAeadSealOpen(t *testing.T) {
 				default:
 					t.Fatalf("unsupported AEAD ID %d", k.aeadID)
 				}
-				a, err := newAesGcmHpkeAead(keyLength)
+				aead, err := newAESGCMAEAD(keyLength)
 				if err != nil {
-					t.Fatalf("newAesGcmHpkeAead(%d): got err %q, want success", keyLength, err)
+					t.Fatalf("newAESGCMAEAD(%d): got err %q, want success", keyLength, err)
 				}
 
-				ct, err := a.seal(v.key, v.nonce, v.plaintext, v.associatedData)
+				ciphertext, err := aead.seal(v.key, v.nonce, v.plaintext, v.associatedData)
 				if err != nil {
 					t.Fatalf("seal: got err %q, want success", err)
 				}
-				if !bytes.Equal(ct, v.ciphertext) {
-					t.Errorf("seal: got %x, want %x", ct, v.ciphertext)
+				if !bytes.Equal(ciphertext, v.ciphertext) {
+					t.Errorf("seal: got %x, want %x", ciphertext, v.ciphertext)
 				}
 
-				pt, err := a.open(v.key, v.nonce, v.ciphertext, v.associatedData)
+				plaintext, err := aead.open(v.key, v.nonce, v.ciphertext, v.associatedData)
 				if err != nil {
 					t.Fatalf("open: got err %q, want success", err)
 				}
-				if !bytes.Equal(pt, v.plaintext) {
-					t.Errorf("open: got %x, want %x", pt, v.plaintext)
+				if !bytes.Equal(plaintext, v.plaintext) {
+					t.Errorf("open: got %x, want %x", plaintext, v.plaintext)
 				}
 			}
 
@@ -71,15 +71,15 @@ func TestAesGcmHpkeAeadSealOpen(t *testing.T) {
 				default:
 					t.Fatalf("unsupported AEAD ID %d", k.aeadID)
 				}
-				a, err := newAesGcmHpkeAead(wrongKeyLength)
+				aead, err := newAESGCMAEAD(wrongKeyLength)
 				if err != nil {
-					t.Fatalf("newAesGcmHpkeAead(%d): got err %q, want success", wrongKeyLength, err)
+					t.Fatalf("newAESGCMAEAD(%d): got err %q, want success", wrongKeyLength, err)
 				}
 
-				if _, err := a.seal(v.key, v.nonce, v.plaintext, v.associatedData); err == nil {
+				if _, err := aead.seal(v.key, v.nonce, v.plaintext, v.associatedData); err == nil {
 					t.Error("seal with unexpected key length: got success, want err")
 				}
-				if _, err := a.open(v.key, v.nonce, v.ciphertext, v.associatedData); err == nil {
+				if _, err := aead.open(v.key, v.nonce, v.ciphertext, v.associatedData); err == nil {
 					t.Error("open with unexpected key length: got success, want err")
 				}
 			}
@@ -87,8 +87,26 @@ func TestAesGcmHpkeAeadSealOpen(t *testing.T) {
 	}
 }
 
-func TestAesGcmHpkeAeadUnsupportedKeyLength(t *testing.T) {
-	if _, err := newAesGcmHpkeAead(24); err == nil {
-		t.Error("newAesGcmHpkeAead with unsupported key length: got success, want err")
+func TestAESGCMAEADUnsupportedKeyLength(t *testing.T) {
+	if _, err := newAESGCMAEAD(24); err == nil {
+		t.Error("newAESGCMAEAD with unsupported key length: got success, want err")
+	}
+}
+
+func TestAESGCMAEADID(t *testing.T) {
+	aead, err := newAESGCMAEAD(16)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := aead.id(), aes128GCM; got != want {
+		t.Errorf("id: got %d, want %d", got, want)
+	}
+
+	aead, err = newAESGCMAEAD(32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := aead.id(), aes256GCM; got != want {
+		t.Errorf("id: got %d, want %d", got, want)
 	}
 }

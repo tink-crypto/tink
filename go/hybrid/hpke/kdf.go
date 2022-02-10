@@ -16,12 +16,12 @@
 
 package hpke
 
-// hpkeKdf is a package-internal interface for the Hybrid Public Key Encryption
+// kdf is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) key derivation function (KDF).
 //
 // The HPKE I-D is available at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
-type hpkeKdf interface {
+type kdf interface {
 	// labeledExtract extracts a pseudorandom key from salt, ikm using the
 	// HPKE-specified values suiteID, ikmLabel to facilitate domain separation
 	// and context binding.
@@ -41,9 +41,9 @@ type hpkeKdf interface {
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-3
 	extractAndExpand(salt, ikm []byte, ikmLabel string, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error)
 
-	// kdfID returns the HPKE KDF algorithm identifier for the underlying KDF
+	// id returns the HPKE KDF algorithm identifier for the underlying KDF
 	// implementation.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-derivation-functions-kd
-	kdfID() uint16
+	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2
+	id() uint16
 }

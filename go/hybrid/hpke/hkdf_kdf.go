@@ -24,36 +24,36 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-// hkdfHpkeKdf is a HKDF HPKE KDF variant that implements interface hpkeKdf.
-var _ hpkeKdf = (*hkdfHpkeKdf)(nil)
-
-type hkdfHpkeKdf struct {
+// hkdfKDF is a HKDF HPKE KDF variant that implements interface kdf.
+type hkdfKDF struct {
 	// HPKE KDF algorithm identifier.
-	id           uint16
+	kdfID        uint16
 	hashFunction crypto.Hash
 }
 
-// newHkdfHpkeKdf constructs a HKDF HPKE KDF using hashFunction.
-func newHkdfHpkeKdf(hashFunction string) (*hkdfHpkeKdf, error) {
+var _ kdf = (*hkdfKDF)(nil)
+
+// newHKDFKDF constructs a HKDF HPKE KDF using hashFunction.
+func newHKDFKDF(hashFunction string) (*hkdfKDF, error) {
 	if hashFunction == sha256 {
-		return &hkdfHpkeKdf{
-			id:           hkdfSha256,
+		return &hkdfKDF{
+			kdfID:        hkdfSHA256,
 			hashFunction: crypto.SHA256,
 		}, nil
 	}
 	return nil, fmt.Errorf("hash function %s is not supported", hashFunction)
 }
 
-func (h *hkdfHpkeKdf) labeledExtract(salt, ikm []byte, ikmLabel string, suiteID []byte) []byte {
-	return hkdf.Extract(h.kdfHash().New, labelIKM(ikmLabel, ikm, suiteID), salt)
+func (h *hkdfKDF) labeledExtract(salt, ikm []byte, ikmLabel string, suiteID []byte) []byte {
+	return hkdf.Extract(h.hashFunction.New, labelIKM(ikmLabel, ikm, suiteID), salt)
 }
 
-func (h *hkdfHpkeKdf) labeledExpand(prk, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error) {
+func (h *hkdfKDF) labeledExpand(prk, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error) {
 	labeledInfo, err := labelInfo(infoLabel, info, suiteID, length)
 	if err != nil {
 		return nil, err
 	}
-	reader := hkdf.Expand(h.kdfHash().New, prk, labeledInfo)
+	reader := hkdf.Expand(h.hashFunction.New, prk, labeledInfo)
 	key := make([]byte, length)
 	if _, err := io.ReadFull(reader, key); err != nil {
 		return nil, err
@@ -61,15 +61,11 @@ func (h *hkdfHpkeKdf) labeledExpand(prk, info []byte, infoLabel string, suiteID 
 	return key, nil
 }
 
-func (h *hkdfHpkeKdf) extractAndExpand(salt, ikm []byte, ikmLabel string, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error) {
+func (h *hkdfKDF) extractAndExpand(salt, ikm []byte, ikmLabel string, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error) {
 	prk := h.labeledExtract(salt, ikm, ikmLabel, suiteID)
 	return h.labeledExpand(prk, info, infoLabel, suiteID, length)
 }
 
-func (h *hkdfHpkeKdf) kdfID() uint16 {
-	return h.id
-}
-
-func (h *hkdfHpkeKdf) kdfHash() crypto.Hash {
-	return h.hashFunction
+func (h *hkdfKDF) id() uint16 {
+	return h.kdfID
 }

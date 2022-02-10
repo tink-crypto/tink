@@ -22,18 +22,18 @@ import (
 	internalaead "github.com/google/tink/go/internal/aead"
 )
 
-// aesGcmHpkeAead is an AES GCM HPKE AEAD variant that implements interface
-// hpkeAead.
-var _ hpkeAead = (*aesGcmHpkeAead)(nil)
-
-type aesGcmHpkeAead struct {
+// aesGCMAEAD is an AES GCM HPKE AEAD variant that implements interface
+// aead.
+type aesGCMAEAD struct {
 	// HPKE AEAD algorithm identifier.
-	id        uint16
+	aeadID    uint16
 	keyLength int
 }
 
-// newAesGcmHpkeAead constructs an AES-GCM HPKE AEAD using keyLength.
-func newAesGcmHpkeAead(keyLength int) (*aesGcmHpkeAead, error) {
+var _ aead = (*aesGCMAEAD)(nil)
+
+// newAESGCMAEAD constructs an AES-GCM HPKE AEAD using keyLength.
+func newAESGCMAEAD(keyLength int) (*aesGCMAEAD, error) {
 	var id uint16
 	if keyLength == 16 {
 		id = aes128GCM
@@ -42,34 +42,34 @@ func newAesGcmHpkeAead(keyLength int) (*aesGcmHpkeAead, error) {
 	} else {
 		return nil, fmt.Errorf("key length %d is not supported", keyLength)
 	}
-	return &aesGcmHpkeAead{
-		id:        id,
+	return &aesGCMAEAD{
+		aeadID:    id,
 		keyLength: keyLength,
 	}, nil
 }
 
-func (a *aesGcmHpkeAead) seal(key, nonce, plaintext, associatedData []byte) ([]byte, error) {
+func (a *aesGCMAEAD) seal(key, nonce, plaintext, associatedData []byte) ([]byte, error) {
 	if len(key) != a.keyLength {
 		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
 	}
 	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %q", err)
 	}
 	return i.Encrypt(nonce, plaintext, associatedData)
 }
 
-func (a *aesGcmHpkeAead) open(key, nonce, ciphertext, associatedData []byte) ([]byte, error) {
+func (a *aesGCMAEAD) open(key, nonce, ciphertext, associatedData []byte) ([]byte, error) {
 	if len(key) != a.keyLength {
 		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
 	}
 	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %q", err)
 	}
 	return i.Decrypt(nonce, ciphertext, associatedData)
 }
 
-func (a *aesGcmHpkeAead) aeadID() uint16 {
-	return a.id
+func (a *aesGCMAEAD) id() uint16 {
+	return a.aeadID
 }

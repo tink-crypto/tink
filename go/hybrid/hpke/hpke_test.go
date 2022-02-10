@@ -19,7 +19,6 @@ package hpke
 import (
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,7 +28,7 @@ import (
 
 // TODO(b/201070904): Separate tests into internal_test package.
 
-var hpkeAeadIds = []struct {
+var aeadIDs = []struct {
 	name   string
 	aeadID uint16
 }{
@@ -46,7 +45,7 @@ type hpkeID struct {
 	aeadID uint16
 }
 
-type hpkeVector struct {
+type vector struct {
 	info             []byte
 	senderPubKey     []byte
 	senderPrivKey    []byte
@@ -60,7 +59,7 @@ type hpkeVector struct {
 	baseNonce        []byte
 }
 
-type hpkeEncryptionVector struct {
+type encryptionVector struct {
 	key            []byte
 	plaintext      []byte
 	associatedData []byte
@@ -68,8 +67,8 @@ type hpkeEncryptionVector struct {
 	ciphertext     []byte
 }
 
-// TODO(b/201070904): Include all Tink-supported I-D test vectors.
-func hpkeInternetDraftTestVector(t *testing.T) (hpkeID, hpkeVector, error) {
+// TODO(b/201070904): Include all Tink-supported I-D vectors.
+func internetDraftVector(t *testing.T) (hpkeID, vector) {
 	t.Helper()
 
 	// Test vector from HPKE I-D
@@ -99,37 +98,37 @@ func hpkeInternetDraftTestVector(t *testing.T) (hpkeID, hpkeVector, error) {
 	var info, senderPubKey, senderPrivKey, recipientPubKey, recipientPrivKey, encapsulatedKey, sharedSecret, keyScheduleCtx, secret, key, baseNonce []byte
 	var err error
 	if info, err = hex.DecodeString(v.info); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(info) failed")
+		t.Fatalf("hex.DecodeString(info): err %q", err)
 	}
 	if senderPubKey, err = hex.DecodeString(v.pkEm); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(pkEm) failed")
+		t.Fatalf("hex.DecodeString(pkEm): err %q", err)
 	}
 	if senderPrivKey, err = hex.DecodeString(v.skEm); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(skEm) failed")
+		t.Fatalf("hex.DecodeString(skEm): err %q", err)
 	}
 	if recipientPubKey, err = hex.DecodeString(v.pkRm); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(pkRm) failed")
+		t.Fatalf("hex.DecodeString(pkRm): err %q", err)
 	}
 	if recipientPrivKey, err = hex.DecodeString(v.skRm); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(skRm) failed")
+		t.Fatalf("hex.DecodeString(skRm): err %q", err)
 	}
 	if encapsulatedKey, err = hex.DecodeString(v.enc); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(enc) failed")
+		t.Fatalf("hex.DecodeString(enc): err %q", err)
 	}
 	if sharedSecret, err = hex.DecodeString(v.sharedSecret); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(sharedSecret) failed")
+		t.Fatalf("hex.DecodeString(sharedSecret): err %q", err)
 	}
 	if keyScheduleCtx, err = hex.DecodeString(v.keyScheduleCtx); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(keyScheduleCtx) failed")
+		t.Fatalf("hex.DecodeString(keyScheduleCtx): err %q", err)
 	}
 	if secret, err = hex.DecodeString(v.secret); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(secret) failed")
+		t.Fatalf("hex.DecodeString(secret): err %q", err)
 	}
 	if key, err = hex.DecodeString(v.key); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(key) failed")
+		t.Fatalf("hex.DecodeString(key): err %q", err)
 	}
 	if baseNonce, err = hex.DecodeString(v.baseNonce); err != nil {
-		return hpkeID{}, hpkeVector{}, errors.New("hex.DecodeString(baseNonce) failed")
+		t.Fatalf("hex.DecodeString(baseNonce): err %q", err)
 	}
 
 	return hpkeID{
@@ -138,7 +137,7 @@ func hpkeInternetDraftTestVector(t *testing.T) (hpkeID, hpkeVector, error) {
 			kdfID:  v.kdfID,
 			aeadID: v.aeadID,
 		},
-		hpkeVector{
+		vector{
 			info:             info,
 			senderPubKey:     senderPubKey,
 			senderPrivKey:    senderPrivKey,
@@ -150,10 +149,10 @@ func hpkeInternetDraftTestVector(t *testing.T) (hpkeID, hpkeVector, error) {
 			secret:           secret,
 			key:              key,
 			baseNonce:        baseNonce,
-		}, nil
+		}
 }
 
-func hpkeAESGCMEncryptionVectors(t *testing.T) map[hpkeID]hpkeEncryptionVector {
+func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 	t.Helper()
 
 	// Test vectors from HPKE I-D. Must only include AES-GCM vectors.
@@ -210,7 +209,7 @@ func hpkeAESGCMEncryptionVectors(t *testing.T) map[hpkeID]hpkeEncryptionVector {
 		},
 	}
 
-	m := make(map[hpkeID]hpkeEncryptionVector)
+	m := make(map[hpkeID]encryptionVector)
 	for _, v := range vecs {
 		var key, plaintext, associatedData, nonce, ciphertext []byte
 		var err error
@@ -231,7 +230,7 @@ func hpkeAESGCMEncryptionVectors(t *testing.T) map[hpkeID]hpkeEncryptionVector {
 		}
 
 		id := hpkeID{v.mode, v.kemID, v.kdfID, v.aeadID}
-		m[id] = hpkeEncryptionVector{
+		m[id] = encryptionVector{
 			key:            key,
 			plaintext:      plaintext,
 			associatedData: associatedData,
@@ -243,7 +242,10 @@ func hpkeAESGCMEncryptionVectors(t *testing.T) map[hpkeID]hpkeEncryptionVector {
 	return m
 }
 
-func hpkeX25519HkdfSha256BaseModeTestVectors(t *testing.T) map[hpkeID]hpkeVector {
+// baseModeX25519HKDFSHA256Vectors returns BoringSSL test vectors for HPKE base
+// mode with Diffie-Hellman-based X25519, HKDF-SHA256 KEM as per
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
+func baseModeX25519HKDFSHA256Vectors(t *testing.T) map[hpkeID]vector {
 	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	t.Helper()
 
@@ -276,14 +278,14 @@ func hpkeX25519HkdfSha256BaseModeTestVectors(t *testing.T) map[hpkeID]hpkeVector
 		t.Fatal(err)
 	}
 
-	m := make(map[hpkeID]hpkeVector)
+	m := make(map[hpkeID]vector)
 	for _, v := range vecs {
-		if v.Mode != baseMode || v.KEMID != x25519HkdfSha256 {
+		if v.Mode != baseMode || v.KEMID != x25519HKDFSHA256 {
 			continue
 		}
 
 		id := hpkeID{v.Mode, v.KEMID, v.KDFID, v.AEADID}
-		m[id] = hpkeVector{
+		m[id] = vector{
 			info:             v.Info,
 			senderPubKey:     v.SenderPubKey,
 			senderPrivKey:    v.SenderPrivKey,

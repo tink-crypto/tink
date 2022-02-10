@@ -16,12 +16,12 @@
 
 package hpke
 
-// hpkeKem is a package-internal interface for the Hybrid Public Key Encryption
+// kem is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) key encapsulation mechanism (KEM).
 //
 // The HPKE I-D is available at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
-type hpkeKem interface {
+type kem interface {
 	// encapsulate generates and encapsulates a shared secret using
 	// recipientPubKey. It returns the raw shared secret and encapsulated key.
 	// The HPKE I-D refers to this function as Encap(). It is used by the sender.
@@ -32,9 +32,9 @@ type hpkeKem interface {
 	// to this function as Decap(). It is used by the recipient.
 	decapsulate(encapsulatedKey, recipientPrivKey []byte) ([]byte, error)
 
-	// kemID returns the HPKE KEM algorithm identifier for the underlying KEM
+	// id returns the HPKE KEM algorithm identifier for the underlying KEM
 	// implementation.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-encapsulation-mechanism
-	kemID() uint16
+	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1
+	id() uint16
 }

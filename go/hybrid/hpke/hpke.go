@@ -29,18 +29,16 @@ const (
 	baseMode uint8 = 0x00
 
 	// KEM algorithm identifiers.
-	x25519HkdfSha256 uint16 = 0x0020
+	x25519HKDFSHA256 uint16 = 0x0020
 
 	// KDF algorithm identifiers.
-	hkdfSha256 uint16 = 0x0001
+	hkdfSHA256 uint16 = 0x0001
 
 	// AEAD algorithm identifiers.
 	aes128GCM        uint16 = 0x0001
 	aes256GCM        uint16 = 0x0002
 	chaCha20Poly1305 uint16 = 0x0003
 
-	kem    = "KEM"
-	hpke   = "HPKE"
 	sha256 = "SHA256"
 	hpkeV1 = "HPKE-v1"
 )
@@ -50,14 +48,14 @@ var emptySalt = []byte{}
 // kemSuiteID generates the KEM suite ID from kemID according to
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5.
 func kemSuiteID(kemID uint16) []byte {
-	return appendBigEndianUint16([]byte(kem), kemID)
+	return appendBigEndianUint16([]byte("KEM"), kemID)
 }
 
 // hpkeSuiteID generates the HPKE suite ID according to
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-8.
 func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 	var res []byte
-	res = append(res, hpke...)
+	res = append(res, "HPKE"...)
 	res = appendBigEndianUint16(res, kemID)
 	res = appendBigEndianUint16(res, kdfID)
 	res = appendBigEndianUint16(res, aeadID)

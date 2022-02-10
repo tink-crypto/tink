@@ -5,13 +5,13 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
-        "aes_gcm_hpke_aead.go",
-        "hkdf_hpke_kdf.go",
+        "aead.go",
+        "aes_gcm_aead.go",
+        "hkdf_kdf.go",
         "hpke.go",
-        "hpke_aead.go",
-        "hpke_kdf.go",
-        "hpke_kem.go",
-        "x25519_hpke_kem.go",
+        "kdf.go",
+        "kem.go",
+        "x25519_kem.go",
     ],
     importpath = "github.com/google/tink/go/hybrid/hpke",
     deps = [
@@ -24,10 +24,10 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = [
-        "aes_gcm_hpke_aead_test.go",
-        "hkdf_hpke_kdf_test.go",
+        "aes_gcm_aead_test.go",
+        "hkdf_kdf_test.go",
         "hpke_test.go",
-        "x25519_hpke_kem_test.go",
+        "x25519_kem_test.go",
     ],
     data = [":testdata"],
     embed = [":go_default_library"],

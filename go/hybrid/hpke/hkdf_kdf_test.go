@@ -26,22 +26,18 @@ import (
 	"github.com/google/tink/go/subtle"
 )
 
-// TODO(b/201070904): Write tests using hpkeX25519HkdfSha256BaseModeTestVectors
-// with hpkeAeadIds.
-func TestHkdfHpkeKdfLabeledExtractWithHpkeInternetDraftTestVector(t *testing.T) {
-	kdf, err := newHkdfHpkeKdf(sha256)
+// TODO(b/201070904): Write tests using baseModeX25519HKDFSHA256Vectors.
+func TestHKDFKDFLabeledExtract(t *testing.T) {
+	kdf, err := newHKDFKDF(sha256)
 	if err != nil {
-		t.Fatalf("newHkdfHpkeKdf(SHA256): got err %q, want success", err)
+		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
 	}
-	id, v, err := hpkeInternetDraftTestVector(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	id, v := internetDraftVector(t)
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
 
 	// Base mode uses a default empty value for the pre-shared key (PSK), see
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-2.4.
-	pskIDHash := kdf.labeledExtract(emptySalt, []byte{} /*=defaultPskId*/, "psk_id_hash", suiteID)
+	pskIDHash := kdf.labeledExtract(emptySalt, []byte{} /*=defaultPSKID*/, "psk_id_hash", suiteID)
 	infoHash := kdf.labeledExtract(emptySalt, v.info, "info_hash", suiteID)
 	keyScheduleCtx := []byte{}
 	keyScheduleCtx = append(keyScheduleCtx, id.mode)
@@ -57,15 +53,12 @@ func TestHkdfHpkeKdfLabeledExtractWithHpkeInternetDraftTestVector(t *testing.T) 
 	}
 }
 
-func TestHkdfHpkeKdfLabeledExpand(t *testing.T) {
-	kdf, err := newHkdfHpkeKdf(sha256)
+func TestHKDFKDFLabeledExpand(t *testing.T) {
+	kdf, err := newHKDFKDF(sha256)
 	if err != nil {
-		t.Fatalf("newHkdfHpkeKdf(SHA256): got err %q, want success", err)
+		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
 	}
-	id, v, err := hpkeInternetDraftTestVector(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	id, v := internetDraftVector(t)
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
 
 	tests := []struct {
@@ -99,14 +92,14 @@ func TestHkdfHpkeKdfLabeledExpand(t *testing.T) {
 	}
 }
 
-func TestHkdfHpkeKdfLabeledExpandWithRFCTestVectors(t *testing.T) {
-	kdf, err := newHkdfHpkeKdf(sha256)
+func TestHKDFKDFLabeledExpandRFCVectors(t *testing.T) {
+	kdf, err := newHKDFKDF(sha256)
 	if err != nil {
-		t.Fatalf("newHkdfHpkeKdf(SHA256): got err %q, want success", err)
+		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
 	}
-	suiteID := hpkeSuiteID(x25519HkdfSha256, hkdfSha256, aes128GCM)
+	suiteID := hpkeSuiteID(x25519HKDFSHA256, hkdfSHA256, aes128GCM)
 
-	// Test vectors are defined at
+	// Vectors are defined at
 	// https://datatracker.ietf.org/doc/html/rfc5869#appendix-A.
 	var tests = []struct {
 		name   string
@@ -163,15 +156,12 @@ func TestHkdfHpkeKdfLabeledExpandWithRFCTestVectors(t *testing.T) {
 	}
 }
 
-func TestHkdfHpkeKdfExtractAndExpand(t *testing.T) {
-	kdf, err := newHkdfHpkeKdf(sha256)
+func TestHKDFKDFExtractAndExpand(t *testing.T) {
+	kdf, err := newHKDFKDF(sha256)
 	if err != nil {
-		t.Fatalf("newHkdfHpkeKdf(SHA256): got err %q, want success", err)
+		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
 	}
-	_, v, err := hpkeInternetDraftTestVector(t)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, v := internetDraftVector(t)
 
 	dhSharedSecret, err := subtle.ComputeSharedSecretX25519(v.senderPrivKey, v.recipientPubKey)
 	if err != nil {
@@ -198,7 +188,7 @@ func TestHkdfHpkeKdfExtractAndExpand(t *testing.T) {
 				"eae_prk",
 				kemCtx,
 				"shared_secret",
-				kemSuiteID(x25519HkdfSha256),
+				kemSuiteID(x25519HKDFSHA256),
 				test.length)
 			if test.wantErr {
 				if err == nil {
@@ -217,8 +207,18 @@ func TestHkdfHpkeKdfExtractAndExpand(t *testing.T) {
 	}
 }
 
-func TestHkdfHpkeKdfWithSha1Fails(t *testing.T) {
-	if _, err := newHkdfHpkeKdf("SHA1"); err == nil {
-		t.Fatalf("newHkdfHpkeKdf(SHA1): got success, want error")
+func TestHKDFKDFSHA1(t *testing.T) {
+	if _, err := newHKDFKDF("SHA1"); err == nil {
+		t.Fatalf("newHKDFKDF(SHA1): got success, want error")
+	}
+}
+
+func TestHKDFKDFID(t *testing.T) {
+	kdf, err := newHKDFKDF(sha256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := kdf.id(), hkdfSHA256; got != want {
+		t.Errorf("id: got %d, want %d", got, want)
 	}
 }
