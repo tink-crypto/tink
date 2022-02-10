@@ -97,10 +97,17 @@ KeysetImpl::KeysetImpl() {
               EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW"] =
+      crypto::tink::HybridKeyTemplates::
+          HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
   key_templates_["AES_CMAC"] = crypto::tink::MacKeyTemplates::AesCmac();
   key_templates_["HMAC_SHA256_128BITTAG"] =
       crypto::tink::MacKeyTemplates::HmacSha256HalfSizeTag();
