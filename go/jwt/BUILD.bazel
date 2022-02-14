@@ -8,6 +8,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "jwt.go",
+        "jwt_ecdsa_signer_key_manager.go",
         "jwt_ecdsa_verifier_key_manager.go",
         "jwt_encoding.go",
         "jwt_hmac_key_manager.go",
@@ -68,6 +69,7 @@ go_test(
 go_test(
     name = "go_default_test",
     srcs = [
+        "jwt_ecdsa_signer_key_manager_test.go",
         "jwt_ecdsa_verifier_key_manager_test.go",
         "jwt_encoding_test.go",
         "jwt_hmac_key_manager_test.go",

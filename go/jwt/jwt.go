@@ -30,4 +30,7 @@ func init() {
 	if err := registry.RegisterKeyManager(new(jwtECDSAVerifierKeyManager)); err != nil {
 		panic(fmt.Sprintf("jwt.init() failed registering JWT ECDSA verifier key manger: %v", err))
 	}
+	if err := registry.RegisterKeyManager(new(jwtECDSASignerKeyManager)); err != nil {
+		panic(fmt.Sprintf("jwt.init() failed registering JWT ECDSA signer key manger: %v", err))
+	}
 }
