@@ -27,18 +27,9 @@ func TestAESGCMAEADSealOpen(t *testing.T) {
 	for k, v := range vecs {
 		t.Run(fmt.Sprintf("%d", k.aeadID), func(t *testing.T) {
 			{
-				var keyLength int
-				switch k.aeadID {
-				case aes128GCM:
-					keyLength = 16
-				case aes256GCM:
-					keyLength = 32
-				default:
-					t.Fatalf("unsupported AEAD ID %d", k.aeadID)
-				}
-				aead, err := newAESGCMAEAD(keyLength)
+				aead, err := newAEAD(k.aeadID)
 				if err != nil {
-					t.Fatalf("newAESGCMAEAD(%d): got err %q, want success", keyLength, err)
+					t.Fatalf("newAEAD(%d): got err %q, want success", k.aeadID, err)
 				}
 
 				ciphertext, err := aead.seal(v.key, v.nonce, v.plaintext, v.associatedData)
@@ -62,18 +53,18 @@ func TestAESGCMAEADSealOpen(t *testing.T) {
 			// length that does not match the length of the key passed into seal and
 			// open.
 			{
-				var wrongKeyLength int
+				var wrongID uint16
 				switch k.aeadID {
 				case aes128GCM:
-					wrongKeyLength = 32
+					wrongID = aes256GCM
 				case aes256GCM:
-					wrongKeyLength = 16
+					wrongID = aes128GCM
 				default:
-					t.Fatalf("unsupported AEAD ID %d", k.aeadID)
+					t.Fatalf("AEAD ID %d is not supported", k.aeadID)
 				}
-				aead, err := newAESGCMAEAD(wrongKeyLength)
+				aead, err := newAEAD(wrongID)
 				if err != nil {
-					t.Fatalf("newAESGCMAEAD(%d): got err %q, want success", wrongKeyLength, err)
+					t.Fatalf("newAEAD(%d): got err %q, want success", wrongID, err)
 				}
 
 				if _, err := aead.seal(v.key, v.nonce, v.plaintext, v.associatedData); err == nil {
@@ -84,29 +75,5 @@ func TestAESGCMAEADSealOpen(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestAESGCMAEADUnsupportedKeyLength(t *testing.T) {
-	if _, err := newAESGCMAEAD(24); err == nil {
-		t.Error("newAESGCMAEAD with unsupported key length: got success, want err")
-	}
-}
-
-func TestAESGCMAEADID(t *testing.T) {
-	aead, err := newAESGCMAEAD(16)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := aead.id(), aes128GCM; got != want {
-		t.Errorf("id: got %d, want %d", got, want)
-	}
-
-	aead, err = newAESGCMAEAD(32)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := aead.id(), aes256GCM; got != want {
-		t.Errorf("id: got %d, want %d", got, want)
 	}
 }

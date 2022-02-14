@@ -28,9 +28,9 @@ import (
 
 // TODO(b/201070904): Write tests using baseModeX25519HKDFSHA256Vectors.
 func TestHKDFKDFLabeledExtract(t *testing.T) {
-	kdf, err := newHKDFKDF(sha256)
+	kdf, err := newKDF(hkdfSHA256)
 	if err != nil {
-		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
+		t.Fatalf("newKDF(hkdfSHA256): got err %q, want success", err)
 	}
 	id, v := internetDraftVector(t)
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
@@ -54,9 +54,9 @@ func TestHKDFKDFLabeledExtract(t *testing.T) {
 }
 
 func TestHKDFKDFLabeledExpand(t *testing.T) {
-	kdf, err := newHKDFKDF(sha256)
+	kdf, err := newKDF(hkdfSHA256)
 	if err != nil {
-		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
+		t.Fatalf("newKDF(hkdfSHA256): got err %q, want success", err)
 	}
 	id, v := internetDraftVector(t)
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
@@ -93,9 +93,9 @@ func TestHKDFKDFLabeledExpand(t *testing.T) {
 }
 
 func TestHKDFKDFLabeledExpandRFCVectors(t *testing.T) {
-	kdf, err := newHKDFKDF(sha256)
+	kdf, err := newKDF(hkdfSHA256)
 	if err != nil {
-		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
+		t.Fatalf("newKDF(hkdfSHA256): got err %q, want success", err)
 	}
 	suiteID := hpkeSuiteID(x25519HKDFSHA256, hkdfSHA256, aes128GCM)
 
@@ -157,9 +157,9 @@ func TestHKDFKDFLabeledExpandRFCVectors(t *testing.T) {
 }
 
 func TestHKDFKDFExtractAndExpand(t *testing.T) {
-	kdf, err := newHKDFKDF(sha256)
+	kdf, err := newKDF(hkdfSHA256)
 	if err != nil {
-		t.Fatalf("newHKDFKDF(SHA256): got err %q, want success", err)
+		t.Fatalf("newKDF(hkdfSHA256): got err %q, want success", err)
 	}
 	_, v := internetDraftVector(t)
 
@@ -204,21 +204,5 @@ func TestHKDFKDFExtractAndExpand(t *testing.T) {
 				t.Errorf("extractAndExpand: got %x, want %x", sharedSecret, v.sharedSecret)
 			}
 		})
-	}
-}
-
-func TestHKDFKDFSHA1(t *testing.T) {
-	if _, err := newHKDFKDF("SHA1"); err == nil {
-		t.Fatalf("newHKDFKDF(SHA1): got success, want error")
-	}
-}
-
-func TestHKDFKDFID(t *testing.T) {
-	kdf, err := newHKDFKDF(sha256)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := kdf.id(), hkdfSHA256; got != want {
-		t.Errorf("id: got %d, want %d", got, want)
 	}
 }

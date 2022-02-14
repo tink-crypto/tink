@@ -36,10 +36,7 @@ var _ kdf = (*hkdfKDF)(nil)
 // newHKDFKDF constructs a HKDF HPKE KDF using hashFunction.
 func newHKDFKDF(hashFunction string) (*hkdfKDF, error) {
 	if hashFunction == sha256 {
-		return &hkdfKDF{
-			kdfID:        hkdfSHA256,
-			hashFunction: crypto.SHA256,
-		}, nil
+		return &hkdfKDF{kdfID: hkdfSHA256, hashFunction: crypto.SHA256}, nil
 	}
 	return nil, fmt.Errorf("hash function %s is not supported", hashFunction)
 }

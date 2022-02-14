@@ -24,12 +24,6 @@ import (
 	"github.com/google/tink/go/subtle"
 )
 
-func TestX25519KEMBadMacAlg(t *testing.T) {
-	if _, err := newX25519KEM("BadMac"); err == nil {
-		t.Error("newX25519KEM(BadMac): got success, want error")
-	}
-}
-
 // TODO(b/201070904): Write tests using internetDraftVector.
 func TestX25519KEMEncapsulate(t *testing.T) {
 	vecs := baseModeX25519HKDFSHA256Vectors(t)
@@ -41,7 +35,7 @@ func TestX25519KEMEncapsulate(t *testing.T) {
 				t.Fatalf("failed to find vector %v", key)
 			}
 
-			kem, err := newX25519KEM(sha256)
+			kem, err := newKEM(x25519HKDFSHA256)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -66,7 +60,7 @@ func TestX25519KEMEncapsulate(t *testing.T) {
 
 func TestX25519KEMEncapsulateBadRecipientPubKey(t *testing.T) {
 	_, v := internetDraftVector(t)
-	kem, err := newX25519KEM(sha256)
+	kem, err := newKEM(x25519HKDFSHA256)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +72,7 @@ func TestX25519KEMEncapsulateBadRecipientPubKey(t *testing.T) {
 
 func TestX25519KEMEncapsulateBadSenderPrivKey(t *testing.T) {
 	_, v := internetDraftVector(t)
-	kem, err := newX25519KEM(sha256)
+	kem, err := newKEM(x25519HKDFSHA256)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +95,7 @@ func TestX25519KEMDecapsulate(t *testing.T) {
 				t.Fatalf("failed to find vector %v", key)
 			}
 
-			kem, err := newX25519KEM(sha256)
+			kem, err := newKEM(x25519HKDFSHA256)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -118,7 +112,7 @@ func TestX25519KEMDecapsulate(t *testing.T) {
 
 func TestX25519KEMDecapsulateBadEncapsulatedKey(t *testing.T) {
 	_, v := internetDraftVector(t)
-	kem, err := newX25519KEM(sha256)
+	kem, err := newKEM(x25519HKDFSHA256)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,22 +124,12 @@ func TestX25519KEMDecapsulateBadEncapsulatedKey(t *testing.T) {
 
 func TestX25519KEMDecapsulateBadRecipientPrivKey(t *testing.T) {
 	_, v := internetDraftVector(t)
-	kem, err := newX25519KEM(sha256)
+	kem, err := newKEM(x25519HKDFSHA256)
 	if err != nil {
 		t.Fatal(err)
 	}
 	badRecipientPrivKey := append(v.recipientPrivKey, []byte("hello")...)
 	if _, err := kem.decapsulate(v.encapsulatedKey, badRecipientPrivKey); err == nil {
 		t.Error("decapsulate: got success, want err")
-	}
-}
-
-func TestX25519KEMID(t *testing.T) {
-	kem, err := newX25519KEM(sha256)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := kem.id(), x25519HKDFSHA256; got != want {
-		t.Errorf("id: got %d, want %d", got, want)
 	}
 }

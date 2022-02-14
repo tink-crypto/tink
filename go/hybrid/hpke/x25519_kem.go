@@ -40,10 +40,7 @@ var _ kem = (*x25519KEM)(nil)
 // newX25519KEM constructs a X25519 HPKE KEM using macAlg.
 func newX25519KEM(macAlg string) (*x25519KEM, error) {
 	if macAlg == sha256 {
-		return &x25519KEM{
-			kemID:  x25519HKDFSHA256,
-			macAlg: macAlg,
-		}, nil
+		return &x25519KEM{kemID: x25519HKDFSHA256, macAlg: sha256}, nil
 	}
 	return nil, fmt.Errorf("MAC algorithm %s is not supported", macAlg)
 }

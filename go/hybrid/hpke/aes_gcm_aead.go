@@ -34,18 +34,14 @@ var _ aead = (*aesGCMAEAD)(nil)
 
 // newAESGCMAEAD constructs an AES-GCM HPKE AEAD using keyLength.
 func newAESGCMAEAD(keyLength int) (*aesGCMAEAD, error) {
-	var id uint16
-	if keyLength == 16 {
-		id = aes128GCM
-	} else if keyLength == 32 {
-		id = aes256GCM
-	} else {
+	switch keyLength {
+	case 16:
+		return &aesGCMAEAD{aeadID: aes128GCM, keyLength: 16}, nil
+	case 32:
+		return &aesGCMAEAD{aeadID: aes256GCM, keyLength: 32}, nil
+	default:
 		return nil, fmt.Errorf("key length %d is not supported", keyLength)
 	}
-	return &aesGCMAEAD{
-		aeadID:    id,
-		keyLength: keyLength,
-	}, nil
 }
 
 func (a *aesGCMAEAD) seal(key, nonce, plaintext, associatedData []byte) ([]byte, error) {
