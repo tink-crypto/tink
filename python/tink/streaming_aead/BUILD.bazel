@@ -219,3 +219,16 @@ py_test(
         requirement("six"),  # required by absl-py
     ],
 )
+
+py_test(
+    name = "_pybind11_python_file_object_adapter_test",
+    timeout = "short",
+    srcs = ["_pybind11_python_file_object_adapter_test.py"],
+    srcs_version = "PY3",
+    deps = [
+        ":streaming_aead",
+        requirement("six"),  # needed by absl-py
+        requirement("absl-py"),
+        "//tink:tink_python",
+    ],
+)
