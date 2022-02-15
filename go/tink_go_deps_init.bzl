@@ -19,7 +19,7 @@ def tink_go_deps_init():
 
     """
     go_rules_dependencies()
-    go_register_toolchains(nogo = "@//:tink_nogo")
+    go_register_toolchains()
     gazelle_dependencies()
     go_repository(
         name = "co_honnef_go_tools",
