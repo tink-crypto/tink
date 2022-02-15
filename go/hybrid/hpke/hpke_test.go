@@ -19,6 +19,7 @@ package hpke
 import (
 	"encoding/hex"
 	"encoding/json"
+	"math/big"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,14 +29,16 @@ import (
 
 // TODO(b/201070904): Separate tests into internal_test package.
 
+// aeadIDs are specified at
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3.
 var aeadIDs = []struct {
-	name   string
-	aeadID uint16
+	name      string
+	aeadID    uint16
+	keyLength int
 }{
-	{"AES128GCM", aes128GCM},
-	{"AES256GCM", aes256GCM},
-	{"ChaCha20Poly1305", chaCha20Poly1305},
-	{"ExportOnlyAEAD", 0xFFFF},
+	{"AES128GCM", aes128GCM, 16},
+	{"AES256GCM", aes256GCM, 32},
+	{"ChaCha20Poly1305", chaCha20Poly1305, 32},
 }
 
 type hpkeID struct {
@@ -46,17 +49,19 @@ type hpkeID struct {
 }
 
 type vector struct {
-	info             []byte
-	senderPubKey     []byte
-	senderPrivKey    []byte
-	recipientPubKey  []byte
-	recipientPrivKey []byte
-	encapsulatedKey  []byte
-	sharedSecret     []byte
-	keyScheduleCtx   []byte
-	secret           []byte
-	key              []byte
-	baseNonce        []byte
+	info                   []byte
+	senderPubKey           []byte
+	senderPrivKey          []byte
+	recipientPubKey        []byte
+	recipientPrivKey       []byte
+	encapsulatedKey        []byte
+	sharedSecret           []byte
+	keyScheduleCtx         []byte
+	secret                 []byte
+	key                    []byte
+	baseNonce              []byte
+	consecutiveEncryptions []encryptionVector
+	otherEncryptions       []encryptionVector
 }
 
 type encryptionVector struct {
@@ -65,6 +70,15 @@ type encryptionVector struct {
 	associatedData []byte
 	nonce          []byte
 	ciphertext     []byte
+	sequenceNumber *big.Int
+}
+
+type encryptionString struct {
+	sequenceNumber uint64
+	plaintext      string
+	associatedData string
+	nonce          string
+	ciphertext     string
 }
 
 // TODO(b/201070904): Include all Tink-supported I-D vectors.
@@ -77,6 +91,7 @@ func internetDraftVector(t *testing.T) (hpkeID, vector) {
 		mode                                                                                    uint8
 		kemID, kdfID, aeadID                                                                    uint16
 		info, pkEm, skEm, pkRm, skRm, enc, sharedSecret, keyScheduleCtx, secret, key, baseNonce string
+		consecutiveEncryptions, otherEncryptions                                                []encryptionString
 	}{
 		mode:           0,
 		kemID:          32,
@@ -93,6 +108,52 @@ func internetDraftVector(t *testing.T) (hpkeID, vector) {
 		secret:         "12fff91991e93b48de37e7daddb52981084bd8aa64289c3788471d9a9712f397",
 		key:            "4531685d41d65f03dc48f6b8302c05b0",
 		baseNonce:      "56d890e5accaaf011cff4b7d",
+		consecutiveEncryptions: []encryptionString{
+			{
+				sequenceNumber: 0,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d30",
+				nonce:          "56d890e5accaaf011cff4b7d",
+				ciphertext:     "f938558b5d72f1a23810b4be2ab4f84331acc02fc97babc53a52ae8218a355a96d8770ac83d07bea87e13c512a",
+			},
+			{
+				sequenceNumber: 1,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d31",
+				nonce:          "56d890e5accaaf011cff4b7c",
+				ciphertext:     "af2d7e9ac9ae7e270f46ba1f975be53c09f8d875bdc8535458c2494e8a6eab251c03d0c22a56b8ca42c2063b84",
+			},
+			{
+				sequenceNumber: 2,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d32",
+				nonce:          "56d890e5accaaf011cff4b7f",
+				ciphertext:     "498dfcabd92e8acedc281e85af1cb4e3e31c7dc394a1ca20e173cb72516491588d96a19ad4a683518973dcc180",
+			},
+		},
+		otherEncryptions: []encryptionString{
+			{
+				sequenceNumber: 4,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d34",
+				nonce:          "56d890e5accaaf011cff4b79",
+				ciphertext:     "583bd32bc67a5994bb8ceaca813d369bca7b2a42408cddef5e22f880b631215a09fc0012bc69fccaa251c0246d",
+			},
+			{
+				sequenceNumber: 255,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d323535",
+				nonce:          "56d890e5accaaf011cff4b82",
+				ciphertext:     "7175db9717964058640a3a11fb9007941a5d1757fda1a6935c805c21af32505bf106deefec4a49ac38d71c9e0a",
+			},
+			{
+				sequenceNumber: 256,
+				plaintext:      "4265617574792069732074727574682c20747275746820626561757479",
+				associatedData: "436f756e742d323536",
+				nonce:          "56d890e5accaaf011cff4a7d",
+				ciphertext:     "957f9800542b0b8891badb026d79cc54597cb2d225b54c00c5238c25d05c30e3fbeda97d2e0e1aba483a2df9f2",
+			},
+		},
 	}
 
 	var info, senderPubKey, senderPrivKey, recipientPubKey, recipientPrivKey, encapsulatedKey, sharedSecret, keyScheduleCtx, secret, key, baseNonce []byte
@@ -138,18 +199,52 @@ func internetDraftVector(t *testing.T) (hpkeID, vector) {
 			aeadID: v.aeadID,
 		},
 		vector{
-			info:             info,
-			senderPubKey:     senderPubKey,
-			senderPrivKey:    senderPrivKey,
-			recipientPubKey:  recipientPubKey,
-			recipientPrivKey: recipientPrivKey,
-			encapsulatedKey:  encapsulatedKey,
-			sharedSecret:     sharedSecret,
-			keyScheduleCtx:   keyScheduleCtx,
-			secret:           secret,
-			key:              key,
-			baseNonce:        baseNonce,
+			info:                   info,
+			senderPubKey:           senderPubKey,
+			senderPrivKey:          senderPrivKey,
+			recipientPubKey:        recipientPubKey,
+			recipientPrivKey:       recipientPrivKey,
+			encapsulatedKey:        encapsulatedKey,
+			sharedSecret:           sharedSecret,
+			keyScheduleCtx:         keyScheduleCtx,
+			secret:                 secret,
+			key:                    key,
+			baseNonce:              baseNonce,
+			consecutiveEncryptions: parseEncryptions(t, v.consecutiveEncryptions),
+			otherEncryptions:       parseEncryptions(t, v.otherEncryptions),
 		}
+}
+
+func parseEncryptions(t *testing.T, encs []encryptionString) []encryptionVector {
+	t.Helper()
+
+	var res []encryptionVector
+	for _, e := range encs {
+		var plaintext, associatedData, nonce, ciphertext []byte
+		var err error
+		if plaintext, err = hex.DecodeString(e.plaintext); err != nil {
+			t.Fatalf("hex.DecodeString(plaintext): err %q", err)
+		}
+		if associatedData, err = hex.DecodeString(e.associatedData); err != nil {
+			t.Fatalf("hex.DecodeString(associatedData): err %q", err)
+		}
+		if nonce, err = hex.DecodeString(e.nonce); err != nil {
+			t.Fatalf("hex.DecodeString(nonce): err %q", err)
+		}
+		if ciphertext, err = hex.DecodeString(e.ciphertext); err != nil {
+			t.Fatalf("hex.DecodeString(ciphertext): err %q", err)
+		}
+
+		res = append(res, encryptionVector{
+			plaintext:      plaintext,
+			associatedData: associatedData,
+			nonce:          nonce,
+			ciphertext:     ciphertext,
+			sequenceNumber: big.NewInt(int64(e.sequenceNumber)),
+		})
+	}
+
+	return res
 }
 
 func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {

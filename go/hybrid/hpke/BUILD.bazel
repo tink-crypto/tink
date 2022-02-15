@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "aead.go",
         "aes_gcm_aead.go",
+        "context.go",
         "hkdf_kdf.go",
         "hpke.go",
         "kdf.go",
@@ -26,6 +27,7 @@ go_test(
     name = "go_default_test",
     srcs = [
         "aes_gcm_aead_test.go",
+        "context_test.go",
         "hkdf_kdf_test.go",
         "hpke_test.go",
         "primitive_factory_test.go",
