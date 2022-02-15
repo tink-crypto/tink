@@ -23,8 +23,8 @@ import (
 )
 
 var (
-	generatePrivateKey      = subtle.GeneratePrivateKeyX25519
-	publicFromPrivateX25519 = subtle.PublicFromPrivateX25519
+	x25519KEMGeneratePrivateKey = subtle.GeneratePrivateKeyX25519
+	x25519KEMPublicFromPrivate  = subtle.PublicFromPrivateX25519
 )
 
 // x25519KEM is a Diffie-Hellman-based X25519 HPKE KEM variant that implements
@@ -46,7 +46,7 @@ func newX25519KEM(macAlg string) (*x25519KEM, error) {
 }
 
 func (x *x25519KEM) encapsulate(recipientPubKey []byte) (sharedSecret, senderPubKey []byte, err error) {
-	senderPrivKey, err := generatePrivateKey()
+	senderPrivKey, err := x25519KEMGeneratePrivateKey()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -54,7 +54,7 @@ func (x *x25519KEM) encapsulate(recipientPubKey []byte) (sharedSecret, senderPub
 	if err != nil {
 		return nil, nil, err
 	}
-	senderPubKey, err = publicFromPrivateX25519(senderPrivKey)
+	senderPubKey, err = x25519KEMPublicFromPrivate(senderPrivKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,7 +70,7 @@ func (x *x25519KEM) decapsulate(encapsulatedKey, recipientPrivKey []byte) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	recipientPubKey, err := publicFromPrivateX25519(recipientPrivKey)
+	recipientPubKey, err := x25519KEMPublicFromPrivate(recipientPrivKey)
 	if err != nil {
 		return nil, err
 	}

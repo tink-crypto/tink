@@ -39,4 +39,10 @@ type aead interface {
 	//
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3
 	id() uint16
+
+	// keyLength returns the length of the key.
+	keyLength() int
+
+	// nonceLength returns the length of the nonce.
+	nonceLength() int
 }

@@ -36,18 +36,15 @@ func TestHKDFKDFLabeledExtract(t *testing.T) {
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
 
 	// Base mode uses a default empty value for the pre-shared key (PSK), see
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-2.4.
-	pskIDHash := kdf.labeledExtract(emptySalt, []byte{} /*=defaultPSKID*/, "psk_id_hash", suiteID)
+	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1.1-4.
+	pskIDHash := kdf.labeledExtract(emptySalt, emptyIKM /*= default PSK ID*/, "psk_id_hash", suiteID)
 	infoHash := kdf.labeledExtract(emptySalt, v.info, "info_hash", suiteID)
-	keyScheduleCtx := []byte{}
-	keyScheduleCtx = append(keyScheduleCtx, id.mode)
-	keyScheduleCtx = append(keyScheduleCtx, pskIDHash...)
-	keyScheduleCtx = append(keyScheduleCtx, infoHash...)
+	keyScheduleCtx := keyScheduleContext(id.mode, pskIDHash, infoHash)
 	if !bytes.Equal(keyScheduleCtx, v.keyScheduleCtx) {
 		t.Errorf("labeledExtract: got %x, want %x", keyScheduleCtx, v.keyScheduleCtx)
 	}
 
-	secret := kdf.labeledExtract(v.sharedSecret, []byte{} /*=defaultPSK*/, "secret", suiteID)
+	secret := kdf.labeledExtract(v.sharedSecret, emptyIKM /*= default PSK*/, "secret", suiteID)
 	if !bytes.Equal(secret, v.secret) {
 		t.Errorf("labeledExtract: got %x, want %x", secret, v.secret)
 	}

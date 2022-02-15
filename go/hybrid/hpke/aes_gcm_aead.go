@@ -26,8 +26,8 @@ import (
 // aead.
 type aesGCMAEAD struct {
 	// HPKE AEAD algorithm identifier.
-	aeadID    uint16
-	keyLength int
+	aeadID uint16
+	keyLen int
 }
 
 var _ aead = (*aesGCMAEAD)(nil)
@@ -36,36 +36,44 @@ var _ aead = (*aesGCMAEAD)(nil)
 func newAESGCMAEAD(keyLength int) (*aesGCMAEAD, error) {
 	switch keyLength {
 	case 16:
-		return &aesGCMAEAD{aeadID: aes128GCM, keyLength: 16}, nil
+		return &aesGCMAEAD{aeadID: aes128GCM, keyLen: 16}, nil
 	case 32:
-		return &aesGCMAEAD{aeadID: aes256GCM, keyLength: 32}, nil
+		return &aesGCMAEAD{aeadID: aes256GCM, keyLen: 32}, nil
 	default:
 		return nil, fmt.Errorf("key length %d is not supported", keyLength)
 	}
 }
 
 func (a *aesGCMAEAD) seal(key, nonce, plaintext, associatedData []byte) ([]byte, error) {
-	if len(key) != a.keyLength {
-		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
+	if len(key) != a.keyLen {
+		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLen)
 	}
 	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewAESGCMInsecureIV: %q", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
 	}
 	return i.Encrypt(nonce, plaintext, associatedData)
 }
 
 func (a *aesGCMAEAD) open(key, nonce, ciphertext, associatedData []byte) ([]byte, error) {
-	if len(key) != a.keyLength {
-		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLength)
+	if len(key) != a.keyLen {
+		return nil, fmt.Errorf("unexpected key length: got %d, want %d", len(key), a.keyLen)
 	}
 	i, err := internalaead.NewAESGCMInsecureIV(key, false /*=prependIV*/)
 	if err != nil {
-		return nil, fmt.Errorf("NewAESGCMInsecureIV: %q", err)
+		return nil, fmt.Errorf("NewAESGCMInsecureIV: %v", err)
 	}
 	return i.Decrypt(nonce, ciphertext, associatedData)
 }
 
 func (a *aesGCMAEAD) id() uint16 {
 	return a.aeadID
+}
+
+func (a *aesGCMAEAD) keyLength() int {
+	return a.keyLen
+}
+
+func (a *aesGCMAEAD) nonceLength() int {
+	return internalaead.AESGCMIVSize
 }

@@ -25,7 +25,7 @@ import (
 )
 
 // TODO(b/201070904): Write tests using internetDraftVector.
-func TestX25519KEMEncapsulate(t *testing.T) {
+func TestX25519KEMEncapsulateBoringSSLVectors(t *testing.T) {
 	vecs := baseModeX25519HKDFSHA256Vectors(t)
 	for _, test := range aeadIDs {
 		t.Run(test.name, func(t *testing.T) {
@@ -39,7 +39,7 @@ func TestX25519KEMEncapsulate(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			generatePrivateKey = func() ([]byte, error) {
+			x25519KEMGeneratePrivateKey = func() ([]byte, error) {
 				return vec.senderPrivKey, nil
 			}
 
@@ -55,7 +55,7 @@ func TestX25519KEMEncapsulate(t *testing.T) {
 			}
 		})
 	}
-	generatePrivateKey = subtle.GeneratePrivateKeyX25519
+	x25519KEMGeneratePrivateKey = subtle.GeneratePrivateKeyX25519
 }
 
 func TestX25519KEMEncapsulateBadRecipientPubKey(t *testing.T) {
@@ -76,16 +76,17 @@ func TestX25519KEMEncapsulateBadSenderPrivKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	publicFromPrivateX25519 = func(privKey []byte) ([]byte, error) {
+
+	x25519KEMPublicFromPrivate = func(privKey []byte) ([]byte, error) {
 		return nil, errors.New("failed to compute public key")
 	}
 	if _, _, err := kem.encapsulate(v.recipientPubKey); err == nil {
 		t.Error("encapsulate: got success, want err")
 	}
-	publicFromPrivateX25519 = subtle.PublicFromPrivateX25519
+	x25519KEMPublicFromPrivate = subtle.PublicFromPrivateX25519
 }
 
-func TestX25519KEMDecapsulate(t *testing.T) {
+func TestX25519KEMDecapsulateBoringSSLVectors(t *testing.T) {
 	vecs := baseModeX25519HKDFSHA256Vectors(t)
 	for _, test := range aeadIDs {
 		t.Run(test.name, func(t *testing.T) {

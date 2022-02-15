@@ -43,7 +43,10 @@ const (
 	hpkeV1 = "HPKE-v1"
 )
 
-var emptySalt = []byte{}
+var (
+	emptySalt = []byte{}
+	emptyIKM  = []byte{}
+)
 
 // kemSuiteID generates the KEM suite ID from kemID according to
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5.
@@ -59,6 +62,16 @@ func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 	res = appendBigEndianUint16(res, kemID)
 	res = appendBigEndianUint16(res, kdfID)
 	res = appendBigEndianUint16(res, aeadID)
+	return res
+}
+
+// keyScheduleContext creates the key_schedule_context defined at
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
+func keyScheduleContext(mode uint8, pskIDHash, infoHash []byte) []byte {
+	var res []byte
+	res = append(res, mode)
+	res = append(res, pskIDHash...)
+	res = append(res, infoHash...)
 	return res
 }
 
