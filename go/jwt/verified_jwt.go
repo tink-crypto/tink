@@ -176,3 +176,8 @@ func (v *VerifiedJWT) HasObjectClaim(name string) bool {
 func (v *VerifiedJWT) ObjectClaim(name string) (map[string]interface{}, error) {
 	return v.token.ObjectClaim(name)
 }
+
+// CustomClaimNames returns a list with the name of custom claims in a VerifiedJWT.
+func (v *VerifiedJWT) CustomClaimNames() []string {
+	return v.token.CustomClaimNames()
+}

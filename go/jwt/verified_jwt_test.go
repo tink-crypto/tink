@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 )
@@ -115,6 +116,9 @@ func TestGetRegisteredStringClaims(t *testing.T) {
 	if !cmp.Equal(jwtID, *opts.JWTID) {
 		t.Errorf("verifiedJWT.JWTID() = %q, want %q", jwtID, *opts.JWTID)
 	}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), []string{}) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q want %q", verifiedJWT.CustomClaimNames(), []string{})
+	}
 }
 
 func TestGetRegisteredTimestampClaims(t *testing.T) {
@@ -208,6 +212,10 @@ func TestGetCustomClaims(t *testing.T) {
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
 		t.Fatalf("creating verifiedJWT: %v", err)
+	}
+	wantCustomClaims := []string{"cc-num", "cc-bool", "cc-null", "cc-string", "cc-array", "cc-object"}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), wantCustomClaims, cmpopts.SortSlices(func(a, b string) bool { return a < b })) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q, want %q", verifiedJWT.CustomClaimNames(), wantCustomClaims)
 	}
 	if !verifiedJWT.HasNullClaim("cc-null") {
 		t.Errorf("verifiedJWT.HasNullClaim('cc-null') = false, want true")
@@ -336,6 +344,9 @@ func TestNoClaimsCallHasAndGet(t *testing.T) {
 	}
 	if verifiedJWT.HasIssuedAt() {
 		t.Errorf("verifiedJWT.HasIssuedAt() = true, want false")
+	}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), []string{}) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q want %q", verifiedJWT.CustomClaimNames(), []string{})
 	}
 }
 
