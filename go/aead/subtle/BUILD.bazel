@@ -39,8 +39,8 @@ go_test(
         "xchacha20poly1305_vectors_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
+    embed = [":go_default_library"],
     deps = [
-        ":go_default_library",
         "//mac/subtle:go_default_library",
         "//subtle/random:go_default_library",
         "//testutil:go_default_library",

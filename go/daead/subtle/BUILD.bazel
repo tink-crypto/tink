@@ -4,20 +4,14 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "aes_siv.go",
-    ],
+    srcs = ["aes_siv.go"],
     importpath = "github.com/google/tink/go/daead/subtle",
 )
 
 go_test(
     name = "go_default_test",
-    srcs = [
-        "aes_siv_test.go",
-    ],
+    srcs = ["aes_siv_test.go"],
     data = ["@wycheproof//testvectors:all"],
-    deps = [
-        ":go_default_library",
-        "//subtle/random:go_default_library",
-    ],
+    embed = [":go_default_library"],
+    deps = ["//subtle/random:go_default_library"],
 )

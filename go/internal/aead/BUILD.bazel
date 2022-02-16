@@ -18,8 +18,8 @@ go_test(
         "aes_gcm_insecure_iv_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
+    embed = [":go_default_library"],
     deps = [
-        ":go_default_library",
         "//subtle/random:go_default_library",
         "//testutil:go_default_library",
     ],

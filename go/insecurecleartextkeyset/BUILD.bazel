@@ -12,7 +12,7 @@ go_library(
     deps = [
         "//internal:go_default_library",
         "//keyset:go_default_library",
-        "//proto:tink_go_proto",
+        "//proto/tink_go_proto:go_default_library",
     ],
 )
 
@@ -22,9 +22,8 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//keyset:go_default_library",
-        "//mac:go_default_library",
+        "//proto/tink_go_proto:go_default_library",
         "//testutil:go_default_library",
-        "//proto:tink_go_proto",
         "@org_golang_google_protobuf//proto:go_default_library",
     ],
 )

@@ -1,8 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 licenses(["notice"])  # keep
-
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -11,7 +11,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core/cryptofmt:go_default_library",
-        "//proto:tink_go_proto",
+        "//proto/tink_go_proto:go_default_library",
     ],
 )
 
@@ -21,7 +21,7 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//core/cryptofmt:go_default_library",
+        "//proto/tink_go_proto:go_default_library",
         "//testutil:go_default_library",
-        "//proto:tink_go_proto",
     ],
 )

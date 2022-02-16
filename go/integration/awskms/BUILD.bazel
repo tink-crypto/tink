@@ -37,7 +37,6 @@ go_test(
     tags = ["no_rbe"],
     deps = [
         "//aead:go_default_library",
-        "//aead/subtle:go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//subtle/random:go_default_library",

@@ -11,5 +11,10 @@ nogo(
     visibility = ["//visibility:public"],
 )
 
-# gazelle:prefix github.com/google/tink
-gazelle(name = "gazelle")
+# gazelle:prefix github.com/google/tink/go
+gazelle(
+    name = "gazelle",
+    args = [
+        "-go_naming_convention=go_default_library",
+    ],
+)
