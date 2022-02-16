@@ -14,8 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/cc_hpke_config.h"
+#include "tink/cc/pybind/cc_hpke_config.h"
 
+#include "tink/cc/cc_hpke_config.h"
 #include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {

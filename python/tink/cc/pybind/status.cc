@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "absl/status/status.h"
+#include "tink/cc/pybind/status.h"
 
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "absl/status/status.h"
 #include "pybind11/attr.h"
 #include "tink/util/status.h"
 #include "tink/cc/pybind/status_utils.h"

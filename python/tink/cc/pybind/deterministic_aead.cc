@@ -14,11 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/deterministic_aead.h"
+#include "tink/cc/pybind/deterministic_aead.h"
 
 #include <string>
 
 #include "pybind11/pybind11.h"
+#include "tink/deterministic_aead.h"
 #include "tink/util/statusor.h"
 #include "tink/cc/pybind/status_casters.h"
 

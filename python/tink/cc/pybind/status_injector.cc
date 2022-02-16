@@ -14,8 +14,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <pybind11/pybind11.h>
+#include "tink/cc/pybind/status_injector.h"
 
+#include <pybind11/pybind11.h>
 #include <string>
 
 #include "absl/memory/memory.h"

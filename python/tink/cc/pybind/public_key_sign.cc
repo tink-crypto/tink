@@ -14,11 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/public_key_sign.h"
+#include "tink/cc/pybind/public_key_sign.h"
 
 #include <string>
 
 #include "pybind11/pybind11.h"
+#include "tink/public_key_sign.h"
 #include "tink/util/statusor.h"
 #include "tink/cc/pybind/status_casters.h"
 

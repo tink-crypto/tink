@@ -14,9 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/input_stream_adapter.h"
+#include "tink/cc/pybind/input_stream_adapter.h"
 
 #include "pybind11/pybind11.h"
+#include "tink/cc/input_stream_adapter.h"
 #include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {

@@ -16,6 +16,8 @@
 #ifndef TINK_PYTHON_TINK_CC_PYBIND_STATUS_H_
 #define TINK_PYTHON_TINK_CC_PYBIND_STATUS_H_
 
+#include "pybind11/pybind11.h"
+
 namespace pybind11 {
 namespace google_tink {
 

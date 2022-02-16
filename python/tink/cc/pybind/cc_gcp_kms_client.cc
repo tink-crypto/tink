@@ -14,6 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "tink/cc/pybind/cc_gcp_kms_client.h"
+
 #include "pybind11/pybind11.h"
 #include "tink/integration/gcpkms/gcp_kms_client.h"
 #include "tink/kms_clients.h"

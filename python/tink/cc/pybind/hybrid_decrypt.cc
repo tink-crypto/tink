@@ -14,11 +14,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/hybrid_decrypt.h"
+#include "tink/cc/pybind/hybrid_decrypt.h"
 
 #include <string>
 
 #include "pybind11/pybind11.h"
+#include "tink/hybrid_decrypt.h"
 #include "tink/util/statusor.h"
 #include "tink/cc/pybind/status_casters.h"
 

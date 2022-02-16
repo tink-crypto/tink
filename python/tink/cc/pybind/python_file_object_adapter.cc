@@ -14,13 +14,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/python_file_object_adapter.h"
+#include "tink/cc/pybind/python_file_object_adapter.h"
 
 #include <string>
 
 #include "absl/status/status.h"
 #include "pybind11/pybind11.h"
 #include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {
