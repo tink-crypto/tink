@@ -134,7 +134,8 @@ install_tink_via_pip() {
 
   # Check if we can build Tink python package.
   pip3 install "${PIP_FLAGS[@]}" --upgrade pip
-  pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
+  # TODO(b/219813176): Remove once Kokoro environment is compatible.
+  pip3 install "${PIP_FLAGS[@]}" --upgrade 'setuptools==60.9.0'
   pip3 install "${PIP_FLAGS[@]}" ./python
 
   # Install dependencies for the examples/python tests

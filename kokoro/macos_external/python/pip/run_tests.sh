@@ -14,7 +14,6 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 
@@ -46,9 +45,10 @@ install_pip_package() {
 
     # Update pip and install all requirements. Note that on MacOS we need to
     # use the --user flag as otherwise pip will complain about permissions.
-    pip3 install --upgrade pip --user
-    pip3 install --upgrade setuptools --user
-    pip3 install . --user
+    python3 -m pip install --user --upgrade pip
+    # TODO(b/219813176): Remove once Kokoro environment is compatible.
+    python3 -m pip install --user --upgrade 'setuptools==60.9.0'
+    python3 -m pip install --user .
   )
 }
 
