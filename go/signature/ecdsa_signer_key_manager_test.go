@@ -64,6 +64,16 @@ func TestECDSASignGetPrimitiveWithInvalidInput(t *testing.T) {
 			t.Errorf("expect an error in test case %d", i)
 		}
 	}
+	for _, tc := range genUnkownECDSAParams() {
+		k := testutil.NewRandomECDSAPrivateKey(commonpb.HashType_SHA256, commonpb.EllipticCurveType_NIST_P256)
+		k.GetPublicKey().GetParams().Curve = tc.curve
+		k.GetPublicKey().GetParams().HashType = tc.hashType
+		serializedKey, _ := proto.Marshal(k)
+		if _, err := km.Primitive(serializedKey); err == nil {
+			t.Errorf("expect an error in test case with params: (curve = %q, hash = %q)", tc.curve, tc.hashType)
+		}
+	}
+
 	// invalid version
 	key := testutil.NewRandomECDSAPrivateKey(commonpb.HashType_SHA256,
 		commonpb.EllipticCurveType_NIST_P256)
@@ -349,6 +359,19 @@ func genValidECDSAParams() []ecdsaParams {
 		ecdsaParams{
 			hashType: commonpb.HashType_SHA512,
 			curve:    commonpb.EllipticCurveType_NIST_P521,
+		},
+	}
+}
+
+func genUnkownECDSAParams() []ecdsaParams {
+	return []ecdsaParams{
+		ecdsaParams{
+			hashType: commonpb.HashType_UNKNOWN_HASH,
+			curve:    commonpb.EllipticCurveType_NIST_P256,
+		},
+		ecdsaParams{
+			hashType: commonpb.HashType_SHA256,
+			curve:    commonpb.EllipticCurveType_UNKNOWN_CURVE,
 		},
 	}
 }

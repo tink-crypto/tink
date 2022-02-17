@@ -175,6 +175,10 @@ func genECDSAInvalidParams() []paramsTestECDSA {
 	testCases := []paramsTestECDSA{
 		// invalid encoding
 		{hash: "SHA256", curve: "NIST_P256", encoding: "UNKNOWN_ENCODING"},
+		// invalid hash
+		{hash: "SHA1", curve: "NIST_P256", encoding: "IEEE_P1363"},
+		// invalid curve
+		{hash: "SHA1", curve: "UNKNOWN_CURVE", encoding: "IEEE_P1363"},
 	}
 	for _, encoding := range encodings {
 		testCases = append(testCases,

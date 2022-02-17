@@ -40,6 +40,23 @@ func TestECDSAVerifyGetPrimitiveBasic(t *testing.T) {
 	}
 }
 
+func TestECDSAVerifyWithInvalidPublicKeyFailsCreatingPrimitive(t *testing.T) {
+	km, err := registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
+	if err != nil {
+		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
+	}
+	pubKey := testutil.NewRandomECDSAPublicKey(commonpb.HashType_SHA256, commonpb.EllipticCurveType_NIST_P256)
+	pubKey.X = []byte{0, 32, 0}
+	pubKey.Y = []byte{0, 32, 0}
+	serializedPubKey, err := proto.Marshal(pubKey)
+	if err != nil {
+		t.Errorf("proto.Marhsal() err = %v, want nil", err)
+	}
+	if _, err := km.Primitive(serializedPubKey); err == nil {
+		t.Errorf("km.Primitive() err = nil, want error")
+	}
+}
+
 func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 	testParams := genInvalidECDSAParams()
 	km, err := registry.GetKeyManager(testutil.ECDSAVerifierTypeURL)
@@ -47,9 +64,18 @@ func TestECDSAVerifyGetPrimitiveWithInvalidInput(t *testing.T) {
 		t.Errorf("cannot obtain ECDSAVerifier key manager: %s", err)
 	}
 	for i := 0; i < len(testParams); i++ {
-		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPrivateKey(testParams[i].hashType, testParams[i].curve))
+		serializedKey, _ := proto.Marshal(testutil.NewRandomECDSAPublicKey(testParams[i].hashType, testParams[i].curve))
 		if _, err := km.Primitive(serializedKey); err == nil {
 			t.Errorf("expect an error in test case %d", i)
+		}
+	}
+	for _, tc := range genUnkownECDSAParams() {
+		k := testutil.NewRandomECDSAPublicKey(commonpb.HashType_SHA256, commonpb.EllipticCurveType_NIST_P256)
+		k.GetParams().Curve = tc.curve
+		k.GetParams().HashType = tc.hashType
+		serializedKey, _ := proto.Marshal(k)
+		if _, err := km.Primitive(serializedKey); err == nil {
+			t.Errorf("expect an error in test case with params: (curve = %q, hash = %q)", tc.curve, tc.hashType)
 		}
 	}
 	// invalid version
