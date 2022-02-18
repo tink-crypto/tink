@@ -914,7 +914,7 @@ TEST_F(JwkSetToPublicKeysetHandleTest, Es256PrivateKeyFails) {
     "keys":[{
     "kty":"EC",
     "crv":"P-256",
-    "alg":"ES256"
+    "alg":"ES256",
     "x":"SVqB4JcUD6lsfvqMr-OKUNUphdNn64Eay60978ZlL74",
     "y":"lf0u0pMj4lGAzZix5u4Cm5CMQIgMNpkwy163wtKYVKI",
     "d":"0g5vAEKzugrXaRbgKG0Tj2qJ5lMP4Bezds1_sTybkfk"
