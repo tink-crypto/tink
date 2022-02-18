@@ -7,6 +7,7 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 go_library(
     name = "go_default_library",
     srcs = [
+        "jwk_converter.go",
         "jwt.go",
         "jwt_ecdsa_signer_key_manager.go",
         "jwt_ecdsa_verifier_key_manager.go",
@@ -47,6 +48,7 @@ go_library(
 go_test(
     name = "go_default_test_test",
     srcs = [
+        "jwk_converter_test.go",
         "jwt_key_templates_test.go",
         "jwt_mac_factory_test.go",
         "jwt_signer_verifier_factory_test.go",
@@ -55,6 +57,7 @@ go_test(
         "verified_jwt_test.go",
     ],
     deps = [
+        "//insecurecleartextkeyset:go_default_library",
         "//jwt:go_default_library",
         "//keyset:go_default_library",
         "//proto/jwt_ecdsa_go_proto:go_default_library",
