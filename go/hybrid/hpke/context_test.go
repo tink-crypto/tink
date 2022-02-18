@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/subtle"
+	pb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
 // TODO(b/201070904): Write tests using baseModeX25519HKDFSHA256Vectors.
@@ -43,7 +44,8 @@ func TestContextSender(t *testing.T) {
 		t.Fatalf("newAEAD(%d): err %q", id.aeadID, err)
 	}
 
-	senderCtx, err := newSenderContext(vec.recipientPubKey, kem, kdf, aead, vec.info)
+	recipientPubKey := &pb.HpkePublicKey{PublicKey: vec.recipientPubKey}
+	senderCtx, err := newSenderContext(recipientPubKey, kem, kdf, aead, vec.info)
 	if err != nil {
 		t.Fatalf("newSenderContext: err %q", err)
 	}
@@ -93,7 +95,8 @@ func TestContextRecipient(t *testing.T) {
 		t.Fatalf("newAEAD(%d): err %q", id.aeadID, err)
 	}
 
-	recipientCtx, err := newRecipientContext(vec.encapsulatedKey, vec.recipientPrivKey, kem, kdf, aead, vec.info)
+	recipientPrivKey := &pb.HpkePrivateKey{PrivateKey: vec.recipientPrivKey}
+	recipientCtx, err := newRecipientContext(vec.encapsulatedKey, recipientPrivKey, kem, kdf, aead, vec.info)
 	if err != nil {
 		t.Fatalf("newRecipientContext: err %q", err)
 	}
@@ -151,7 +154,8 @@ func TestComputeNonce(t *testing.T) {
 		t.Fatalf("newAEAD(%d): err %q", id.aeadID, err)
 	}
 
-	ctx, err := newRecipientContext(vec.encapsulatedKey, vec.recipientPrivKey, kem, kdf, aead, vec.info)
+	recipientPrivKey := &pb.HpkePrivateKey{PrivateKey: vec.recipientPrivKey}
+	ctx, err := newRecipientContext(vec.encapsulatedKey, recipientPrivKey, kem, kdf, aead, vec.info)
 	if err != nil {
 		t.Fatalf("newRecipientContext: err %q", err)
 	}

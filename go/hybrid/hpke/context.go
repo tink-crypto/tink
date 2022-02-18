@@ -20,6 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+
+	pb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
 type context struct {
@@ -33,8 +35,11 @@ type context struct {
 
 // newSenderContext creates the HPKE sender context as per KeySchedule()
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
-func newSenderContext(recipientPubKey []byte, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
-	sharedSecret, encapsulatedKey, err := kem.encapsulate(recipientPubKey)
+func newSenderContext(recipientPubKey *pb.HpkePublicKey, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
+	if recipientPubKey.GetPublicKey() == nil {
+		return nil, errors.New("HpkePublicKey has an empty PublicKey")
+	}
+	sharedSecret, encapsulatedKey, err := kem.encapsulate(recipientPubKey.GetPublicKey())
 	if err != nil {
 		return nil, fmt.Errorf("encapsulate: %v", err)
 	}
@@ -43,8 +48,11 @@ func newSenderContext(recipientPubKey []byte, kem kem, kdf kdf, aead aead, info 
 
 // newRecipientContext creates the HPKE recipient context as per KeySchedule()
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
-func newRecipientContext(encapsulatedKey []byte, recipientPrivKey []byte, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
-	sharedSecret, err := kem.decapsulate(encapsulatedKey, recipientPrivKey)
+func newRecipientContext(encapsulatedKey []byte, recipientPrivKey *pb.HpkePrivateKey, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
+	if recipientPrivKey.GetPrivateKey() == nil {
+		return nil, errors.New("HpkePrivateKey has an empty PrivateKey")
+	}
+	sharedSecret, err := kem.decapsulate(encapsulatedKey, recipientPrivKey.GetPrivateKey())
 	if err != nil {
 		return nil, fmt.Errorf("decapsulate: %v", err)
 	}
