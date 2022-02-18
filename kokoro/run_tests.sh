@@ -206,6 +206,8 @@ main() {
 
     ./kokoro/testutils/copy_credentials.sh
     ./kokoro/testutils/update_android_sdk.sh
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_go.sh
   fi
 
   # Verify required environment variables.

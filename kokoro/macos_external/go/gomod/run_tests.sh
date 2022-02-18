@@ -14,10 +14,15 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
 
 REPO_DIR="${KOKORO_ARTIFACTS_DIR}/git/tink"
+(
+  cd "${REPO_DIR}"
+  ./kokoro/testutils/copy_credentials.sh
+  # Sourcing required to update callers environment.
+  source ./kokoro/testutils/install_go.sh
+)
 
 TINK_VERSION="$(cat ${REPO_DIR}/tink_version.bzl | grep ^TINK | cut -f 2 -d \")"
 
@@ -26,11 +31,6 @@ TMP_DIR="$(mktemp -dt go-module-test.XXXXXX)"
 GO_MOD_DIR="${TMP_DIR}/go-mod-test"
 
 REPO_URL_PREFIX="github.com/google/tink"
-
-(
-  cd "${REPO_DIR}"
-  ./kokoro/testutils/copy_credentials.sh
-)
 
 #######################################
 # Test an individual Go module within the Tink repository.
