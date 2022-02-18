@@ -17,15 +17,18 @@
 #include "tink/cc/pybind/cc_fake_kms_client_testonly.h"
 
 #include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
 #include "tink/util/fake_kms_client.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
 namespace test {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterCcFakeKmsClientTestonly(pybind11::module* module) {
   namespace py = pybind11;
@@ -33,8 +36,12 @@ void PybindRegisterCcFakeKmsClientTestonly(pybind11::module* module) {
   m.def(
       "register_fake_kms_client_testonly",
       [](const std::string& key_uri,
-         const std::string& credentials_path) -> util::Status {
-        return FakeKmsClient::RegisterNewClient(key_uri, credentials_path);
+         const std::string& credentials_path) -> void {
+        crypto::tink::util::Status result =
+            FakeKmsClient::RegisterNewClient(key_uri, credentials_path);
+        if (!result.ok()) {
+          throw TinkException(result);
+        }
       },
       py::arg("key_uri"), "URI of the key which should be used.",
       py::arg("credentials_path"), "Path to the credentials for the client.");

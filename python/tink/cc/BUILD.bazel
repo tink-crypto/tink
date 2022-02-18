@@ -1,3 +1,5 @@
+load("@tink_py//tools/build_defs:tink_python_rules.bzl", "tink_pybind_library")
+
 package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
@@ -7,17 +9,22 @@ cc_library(
     hdrs = ["cc_key_manager.h"],
     include_prefix = "tink/cc",
     deps = [
+        "//tink/cc/pybind:tink_exception",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@tink_cc",
         "@tink_cc//util:status",
         "@tink_cc//util:statusor",
     ],
 )
 
-cc_library(
+tink_pybind_library(
     name = "cc_tink_config",
     srcs = ["cc_tink_config.cc"],
     hdrs = ["cc_tink_config.h"],
     deps = [
+        "//tink/cc/pybind:tink_exception",
         "@tink_cc",
         "@tink_cc//config:tink_config",
         "@tink_cc//util:status",

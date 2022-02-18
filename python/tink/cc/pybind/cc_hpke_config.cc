@@ -16,16 +16,26 @@
 
 #include "tink/cc/pybind/cc_hpke_config.h"
 
+#include <utility>
+
+#include "pybind11/pybind11.h"
 #include "tink/cc/cc_hpke_config.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
 
+using pybind11::google_tink::TinkException;
+
 void PybindRegisterCcHpkeConfig(pybind11::module* module) {
   namespace py = pybind11;
   py::module& m = *module;
-  m.def("register_hpke", CcHpkeConfigRegister);
+  m.def("register_hpke", []() -> void {
+    crypto::tink::util::Status result = CcHpkeConfigRegister();
+    if (!result.ok()) {
+      throw TinkException(result);
+    }
+  });
 }
 
 }  // namespace tink

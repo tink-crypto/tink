@@ -30,7 +30,6 @@
 #include "tink/streaming_aead.h"
 #include "tink/cc/cc_key_manager.h"
 #include "tink/cc/pybind/import_helper.h"
-#include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

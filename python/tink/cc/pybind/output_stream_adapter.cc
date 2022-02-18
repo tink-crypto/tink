@@ -13,17 +13,20 @@
 // limitations under the License.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #include "tink/cc/pybind/output_stream_adapter.h"
 
+#include <algorithm>
 #include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
 #include "tink/cc/output_stream_adapter.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterOutputStreamAdapter(pybind11::module* module) {
   namespace py = pybind11;
@@ -33,12 +36,20 @@ void PybindRegisterOutputStreamAdapter(pybind11::module* module) {
   py::class_<OutputStreamAdapter>(m, "OutputStreamAdapter")
       .def(
           "write",
-          [](OutputStreamAdapter* self,
-             const py::bytes& data) -> util::StatusOr<int64_t> {
-            return self->Write(std::string(data));
+          [](OutputStreamAdapter* self, const py::bytes& data) -> int64_t {
+            util::StatusOr<int64_t> result = self->Write(std::string(data));
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("data"))
-      .def("close", &OutputStreamAdapter::Close);
+      .def("close", [](OutputStreamAdapter* self) -> void {
+        util::Status result = self->Close();
+        if (!result.ok()) {
+          throw TinkException(result);
+        }
+      });
 }
 
 }  // namespace tink

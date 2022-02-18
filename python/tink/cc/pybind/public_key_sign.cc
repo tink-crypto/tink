@@ -17,14 +17,17 @@
 #include "tink/cc/pybind/public_key_sign.h"
 
 #include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
 #include "tink/public_key_sign.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterPublicKeySign(pybind11::module* module) {
   namespace py = pybind11;
@@ -45,9 +48,13 @@ void PybindRegisterPublicKeySign(pybind11::module* module) {
       .def(
           "sign",
           [](const PublicKeySign& self,
-             const py::bytes& data) -> util::StatusOr<py::bytes> {
+             const py::bytes& data) -> py::bytes {
             // TODO(b/145925674)
-            return self.Sign(std::string(data));
+            util::StatusOr<std::string> result = self.Sign(std::string(data));
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("data"), "Computes the signature for 'data'.");
 }

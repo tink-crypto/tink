@@ -1,4 +1,4 @@
-// Copyright 2019 Google Inc.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,26 +14,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/pybind/status_utils.h"
+#ifndef TINK_PYTHON_TINK_CC_PYBIND_TINK_EXCEPTION_H_
+#define TINK_PYTHON_TINK_CC_PYBIND_TINK_EXCEPTION_H_
 
-#include <pybind11/pybind11.h>
+#include <exception>
+#include <string>
+#include <utility>
 
-#include "tink/cc/pybind/import_helper.h"
+#include "tink/util/status.h"
 
 namespace pybind11 {
 namespace google_tink {
 
-void ImportStatusModule() {
-  // This function is called each time a Status object is passed from
-  // C++ to Python or vice versa. While it is safe to call module::import
-  // on an already-imported module, this is a super simple optimization
-  // certain to cut out any overhead.
-  static bool imported_already = false;
-  if (!imported_already) {
-    // crypto::tink::ImportTinkPythonModule("python.tink.cc.pybind.status");
-    imported_already = true;
+class TinkException : public std::exception {
+ public:
+  explicit TinkException(const crypto::tink::util::Status& status)
+      : error_code_(static_cast<int>(status.code())),
+        what_(status.ToString()) {}
+
+  int error_code() const {
+    return error_code_;
   }
-}
+
+  const char* what() const noexcept override {
+    return what_.c_str();
+  }
+
+ private:
+  int error_code_;
+  std::string what_;
+};
 
 }  // namespace google_tink
 }  // namespace pybind11
+
+#endif  // TINK_PYTHON_TINK_CC_PYBIND_TINK_EXCEPTION_H_

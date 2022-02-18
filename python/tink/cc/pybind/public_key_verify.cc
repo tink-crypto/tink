@@ -17,14 +17,17 @@
 #include "tink/cc/pybind/public_key_verify.h"
 
 #include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
 #include "tink/public_key_verify.h"
 #include "tink/util/status.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterPublicKeyVerify(pybind11::module* module) {
   namespace py = pybind11;
@@ -45,9 +48,14 @@ void PybindRegisterPublicKeyVerify(pybind11::module* module) {
       .def(
           "verify",
           [](const PublicKeyVerify& self, const py::bytes& signature,
-             const py::bytes& data) -> util::Status {
+             const py::bytes& data) -> void {
             // TODO(b/145925674)
-            return self.Verify(std::string(signature), std::string(data));
+            util::Status result =
+                self.Verify(std::string(signature), std::string(data));
+            if (!result.ok()) {
+              throw TinkException(result);
+            }
+            return;
           },
           py::arg("signature"), py::arg("data"),
           "Verifies that signature is a digital signature for data.");

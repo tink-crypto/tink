@@ -16,15 +16,19 @@
 
 #include "tink/cc/pybind/prf.h"
 
+#include <algorithm>
 #include <string>
+#include <utility>
 
 #include "pybind11/pybind11.h"
 #include "tink/prf/prf_set.h"
 #include "tink/util/statusor.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/pybind/tink_exception.h"
 
 namespace crypto {
 namespace tink {
+
+using pybind11::google_tink::TinkException;
 
 void PybindRegisterPrf(pybind11::module* module) {
   namespace py = pybind11;
@@ -36,9 +40,14 @@ void PybindRegisterPrf(pybind11::module* module) {
       .def(
           "compute",
           [](const Prf& self, const py::bytes& input_data,
-             size_t output_length) -> util::StatusOr<py::bytes> {
+             size_t output_length) -> py::bytes {
             // TODO(b/145925674)
-            return self.Compute(std::string(input_data), output_length);
+            util::StatusOr<std::string> result =
+                self.Compute(std::string(input_data), output_length);
+            if (!result.ok()) {
+              throw TinkException(result.status());
+            }
+            return *std::move(result);
           },
           py::arg("input_data"), py::arg("output_length"),
           "Computes the value of the primary (and only) PRF.");
