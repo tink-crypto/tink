@@ -29,7 +29,7 @@ REPO_URL_PREFIX="github.com/google/tink"
 
 (
   cd "${REPO_DIR}"
-  ./kokoro/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh
 )
 
 #######################################

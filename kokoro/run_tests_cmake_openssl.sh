@@ -89,7 +89,7 @@ cc_cmake_build_and_run_tests() {
 main() {
   cd git*/tink
 
-  ./kokoro/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh
   if [[ -n "${KOKORO_ROOT}" ]]; then
     # TODO(b/201806781): Remove when no longer necessary.
     sudo apt-get install -y ca-certificates

@@ -19,7 +19,7 @@ set -e
 
 cd git*/tink
 
-./kokoro/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh
 
 echo "========================================================= Running cmake"
 cmake --version

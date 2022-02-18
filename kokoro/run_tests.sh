@@ -204,8 +204,8 @@ main() {
       pip3 install --user protobuf
     fi
 
-    ./kokoro/copy_credentials.sh
-    ./kokoro/update_android_sdk.sh
+    ./kokoro/testutils/copy_credentials.sh
+    ./kokoro/testutils/update_android_sdk.sh
   fi
 
   # Verify required environment variables.

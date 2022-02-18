@@ -33,7 +33,7 @@ sudo apt-get upgrade -y ca-certificates
 
 (
   cd "${REPO_DIR}"
-  ./kokoro/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh
 )
 
 #######################################

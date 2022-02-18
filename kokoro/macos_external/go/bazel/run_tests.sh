@@ -18,7 +18,7 @@ set -euo pipefail
 
 if [[ -n "${KOKORO_ROOT}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  ./kokoro/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh
 fi
 
 cd go/

@@ -51,8 +51,8 @@ main() {
   if [[ -n "${KOKORO_ROOT:-}" ]] ; then
     install_python3
     cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-    ./kokoro/copy_credentials.sh
-    ./kokoro/update_android_sdk.sh
+    ./kokoro/testutils/copy_credentials.sh
+    ./kokoro/testutils/update_android_sdk.sh
   fi
   (
     cd testing/cc
