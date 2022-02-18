@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +15,39 @@
 # limitations under the License.
 ####################################################################################
 
-if [[ -n "${KOKORO_ROOT}" ]]; then
-  # The env variable is set up in common.cfg.
-  cp "${TINK_TEST_SERVICE_ACCOUNT}" "testdata/credential.json"
+# This script takes credentials injected into the environment via the Kokoro job
+# configuration and copies them to the expected locations to facilitate
+# continuous integration testing.
+#
+# Usage insructions:
+#
+#   ./kokoro/testutils/copy_credentials.sh
 
-  # Create the different format for the AWS credentials
-  AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
-  AWS_KEY=$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})
-
-  printf "[default]\naws_access_key_id = ${AWS_KEY_ID}\naws_secret_access_key = ${AWS_KEY}\n" > testdata/aws_credentials_cc.txt
-  printf "[default]\naccessKey = ${AWS_KEY_ID}\nsecretKey = ${AWS_KEY}\n" > testdata/credentials_aws.cred
-  printf "[default]\naws_access_key_id = ${AWS_KEY_ID}\naws_secret_access_key = ${AWS_KEY}\n" > testdata/credentials_aws.ini
-  printf "User name,Password,Access key ID,Secret access key,Console login link\ntink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console\n" > testdata/credentials_aws.csv
+if [[ -z "${KOKORO_ROOT}" ]]; then
+  exit 0
 fi
+
+cp "${TINK_TEST_SERVICE_ACCOUNT}" "testdata/credential.json"
+
+# Create the different format for the AWS credentials
+readonly AWS_KEY_ID="AKIATNYZMJOHVMN7MSYH"
+readonly AWS_KEY="$(cat ${AWS_TINK_TEST_SERVICE_ACCOUNT})"
+
+cat <<END \
+  | tee testdata/aws_credentials_cc.txt testdata/credentials_aws.ini \
+  > /dev/null
+[default]
+aws_access_key_id = ${AWS_KEY_ID}
+aws_secret_access_key = ${AWS_KEY}
+END
+
+cat <<END > testdata/credentials_aws.cred
+[default]
+accessKey = ${AWS_KEY_ID}
+secretKey = ${AWS_KEY}
+END
+
+cat <<END > testdata/credentials_aws.csv
+User name,Password,Access key ID,Secret access key,Console login link
+tink-user1,,${AWS_KEY_ID},${AWS_KEY},https://235739564943.signin.aws.amazon.com/console
+END
