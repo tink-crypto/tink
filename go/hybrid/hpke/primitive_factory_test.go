@@ -16,10 +16,22 @@
 
 package hpke
 
-import "testing"
+import (
+	"testing"
+
+	pb "github.com/google/tink/go/proto/hpke_go_proto"
+)
 
 func TestNewKEM(t *testing.T) {
-	kem, err := newKEM(x25519HKDFSHA256)
+	kemID, err := kemIDFromProto(pb.HpkeKem_DHKEM_X25519_HKDF_SHA256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if kemID != x25519HKDFSHA256 {
+		t.Errorf("kemID: got %d, want %d", kemID, x25519HKDFSHA256)
+	}
+
+	kem, err := newKEM(kemID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,8 +46,22 @@ func TestNewKEMUnsupportedID(t *testing.T) {
 	}
 }
 
+func TestKEMIDFromProtoUnsupportedID(t *testing.T) {
+	if _, err := kemIDFromProto(pb.HpkeKem_KEM_UNKNOWN); err == nil {
+		t.Fatal("kemIDFromProto(unsupported ID): got success, want err")
+	}
+}
+
 func TestNewKDF(t *testing.T) {
-	kdf, err := newKDF(hkdfSHA256)
+	kdfID, err := kdfIDFromProto(pb.HpkeKdf_HKDF_SHA256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if kdfID != hkdfSHA256 {
+		t.Errorf("kdfID: got %d, want %d", kdfID, hkdfSHA256)
+	}
+
+	kdf, err := newKDF(kdfID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,16 +76,40 @@ func TestNewKDFUnsupportedID(t *testing.T) {
 	}
 }
 
-func TestNewAEAD(t *testing.T) {
-	aead, err := newAEAD(aes128GCM)
+func TestKDFIDFromProtoUnsupportedID(t *testing.T) {
+	if _, err := kdfIDFromProto(pb.HpkeKdf_KDF_UNKNOWN); err == nil {
+		t.Fatal("kdfIDFromProto(unsupported ID): got success, want err")
+	}
+}
+
+func TestNewAEADAES128GCM(t *testing.T) {
+	aeadID, err := aeadIDFromProto(pb.HpkeAead_AES_128_GCM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if aeadID != aes128GCM {
+		t.Errorf("aeadID: got %d, want %d", aeadID, aes128GCM)
+	}
+
+	aead, err := newAEAD(aeadID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if aead.id() != aes128GCM {
 		t.Errorf("id: got %d, want %d", aead.id(), aes128GCM)
 	}
+}
 
-	aead, err = newAEAD(aes256GCM)
+func TestNewAEADAES256GCM(t *testing.T) {
+	aeadID, err := aeadIDFromProto(pb.HpkeAead_AES_256_GCM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if aeadID != aes256GCM {
+		t.Errorf("aeadID: got %d, want %d", aeadID, aes256GCM)
+	}
+
+	aead, err := newAEAD(aeadID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,5 +121,11 @@ func TestNewAEAD(t *testing.T) {
 func TestNewAEADUnsupportedID(t *testing.T) {
 	if _, err := newAEAD(0xFFFF /*= Export-only*/); err == nil {
 		t.Fatal("newAEAD(unsupported ID): got success, want err")
+	}
+}
+
+func TestAEADIDFromProtoUnsupportedID(t *testing.T) {
+	if _, err := aeadIDFromProto(pb.HpkeAead_AEAD_UNKNOWN); err == nil {
+		t.Fatal("aeadIDFromProto(unsupported ID): got success, want err")
 	}
 }

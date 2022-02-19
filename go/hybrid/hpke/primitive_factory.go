@@ -16,7 +16,11 @@
 
 package hpke
 
-import "fmt"
+import (
+	"fmt"
+
+	pb "github.com/google/tink/go/proto/hpke_go_proto"
+)
 
 // newKEM constructs a HPKE KEM using kemID, which are specified at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
@@ -27,6 +31,16 @@ func newKEM(kemID uint16) (kem, error) {
 	return nil, fmt.Errorf("KEM ID %d is not supported", kemID)
 }
 
+// kemIDFromProto returns the KEM ID from the HpkeKem enum value. KEM IDs are
+// specified at
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
+func kemIDFromProto(enum pb.HpkeKem) (uint16, error) {
+	if enum == pb.HpkeKem_DHKEM_X25519_HKDF_SHA256 {
+		return x25519HKDFSHA256, nil
+	}
+	return 0, fmt.Errorf("HpkeKem enum value %d is not supported", enum)
+}
+
 // newKDF constructs a HPKE KDF using kdfID, which are specified at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2.
 func newKDF(kdfID uint16) (kdf, error) {
@@ -34,6 +48,16 @@ func newKDF(kdfID uint16) (kdf, error) {
 		return newHKDFKDF(sha256)
 	}
 	return nil, fmt.Errorf("KDF ID %d is not supported", kdfID)
+}
+
+// kdfIDFromProto returns the KDF ID from the HpkeKdf enum value. KDF IDs are
+// specified at
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2.
+func kdfIDFromProto(enum pb.HpkeKdf) (uint16, error) {
+	if enum == pb.HpkeKdf_HKDF_SHA256 {
+		return hkdfSHA256, nil
+	}
+	return 0, fmt.Errorf("HpkeKdf enum value %d is not supported", enum)
 }
 
 // newAEAD constructs a HPKE AEAD using aeadID, which are specified at
@@ -46,5 +70,19 @@ func newAEAD(aeadID uint16) (aead, error) {
 		return newAESGCMAEAD(32)
 	default:
 		return nil, fmt.Errorf("AEAD ID %d is not supported", aeadID)
+	}
+}
+
+// aeadIDFromProto returns the AEAD ID from the HpkeAead enum value. AEAD IDs
+// are specified at
+// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3.
+func aeadIDFromProto(enum pb.HpkeAead) (uint16, error) {
+	switch enum {
+	case pb.HpkeAead_AES_128_GCM:
+		return aes128GCM, nil
+	case pb.HpkeAead_AES_256_GCM:
+		return aes256GCM, nil
+	default:
+		return 0, fmt.Errorf("HpkeAead enum value %d is not supported", enum)
 	}
 }
