@@ -21,7 +21,10 @@ import (
 	"fmt"
 	"testing"
 
+	spb "google.golang.org/protobuf/types/known/structpb"
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/testing/protocmp"
 	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/testkeyset"
@@ -33,9 +36,10 @@ type jwkSetTestCase struct {
 	tag           string
 	jwkSet        string
 	privateKeyset string
+	publicKeyset  string
 }
 
-// syncronized with tests cases from JWK converter for C++
+// synchronized with tests cases from JWK converter for C++
 var jwkSetTestCases = []jwkSetTestCase{
 	{
 		tag: "ES256",
@@ -138,15 +142,77 @@ var jwkSetTestCases = []jwkSetTestCase{
 			]
 		}`,
 	},
+	{
+		tag: "multiple keys",
+		jwkSet: `{
+			"keys":[
+				{
+					"kty":"EC",
+					"crv":"P-256",
+					"x":"wO6uIxh8SkKOO8VjZXNRTteRcwCPE4_4JElKyaa0fcQ",
+					"y":"7oRiYhnmkP6nqrdXWgtsWUWq5uFRLJkhyVFiWPRB278",
+					"use":"sig","alg":"ES256","key_ops":["verify"],
+					"kid":"EhuduQ"
+				},
+				{
+					"kty":"EC",
+					"crv":"P-384",
+					"x":"AEUCTkKhRDEgJ2pTiyPoSsIOERywrB2xjBDgUH8LLg0Ao9xT2SxKadxLdRFIr8Ll",
+					"y":"wQcqkI9pV66PJFmJVyZ7BsqvFaqoWT-jAFvYNjsgdvAIpyB3MHWXkxNhlPYcpEIf",
+					"use":"sig","alg":"ES384","key_ops":["verify"],
+					"kid":"f-fUcw"
+				}
+			]
+		}`,
+		privateKeyset: `{
+				"primaryKeyId": 303799737,
+				"key": [
+				{
+					"keyData": {
+					"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+					"value": "GiA2S/eedsXqu0DhnOlCJugsHugdpPaAGr/byxXXsZBiVRJGIiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ==",
+					"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 303799737,
+					"outputPrefixType": "TINK"
+				},
+				{
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPrivateKey",
+						"value": "GjCfHcFYHsiwTcBCATSyjOyJ64iy4LGa4OuFaR9wZqkYTuYrY1I3ssxO4UK11j/IUe4SZiIwwQcqkI9pV66PJFmJVyZ7BsqvFaqoWT+jAFvYNjsgdvAIpyB3MHWXkxNhlPYcpEIfGjAARQJOQqFEMSAnalOLI+hKwg4RHLCsHbGMEOBQfwsuDQCj3FPZLEpp3Et1EUivwuUQAg==",
+						"keyMaterialType": "ASYMMETRIC_PRIVATE"
+					},
+					"status": "ENABLED",
+					"keyId": 2145899635,
+					"outputPrefixType": "TINK"
+				}
+			]
+		}`,
+	},
 }
 
-// TODO(b/202065153): Test To KeysetHandle and back to JWT set.
-// TODO(b/202065153): Test case with multiple keysets.
 func TestToPublicKeysetHandle(t *testing.T) {
 	for _, tc := range jwkSetTestCases {
 		t.Run(tc.tag, func(t *testing.T) {
-			if _, err := jwt.JWKSetToPublicKeysetHandle([]byte(tc.jwkSet)); err != nil {
+			ks, err := jwt.JWKSetToPublicKeysetHandle([]byte(tc.jwkSet))
+			if err != nil {
 				t.Errorf("jwt.JWKSetToPublicKeysetHandle() err = %v, want nil", err)
+			}
+			jwkSet, err := jwt.JWKSetFromPublicKeysetHandle(ks)
+			if err != nil {
+				t.Errorf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
+			}
+			want := &spb.Struct{}
+			if err := want.UnmarshalJSON([]byte(tc.jwkSet)); err != nil {
+				t.Errorf("want.UnmarshalJSON() err = %v, want nil", err)
+			}
+			got := &spb.Struct{}
+			if err := got.UnmarshalJSON(jwkSet); err != nil {
+				t.Errorf("got.UnmarshalJSON() err = %v, want nil", err)
+			}
+			if !cmp.Equal(want, got, protocmp.Transform()) {
+				t.Errorf("mismatch in jwk sets: diff (-want,+got): %v", cmp.Diff(want, got, protocmp.Transform()))
 			}
 		})
 	}
@@ -522,6 +588,172 @@ func TestJWKSetToPublicKeysetInvalidES256PublicKeys(t *testing.T) {
 		t.Run(tc.tag, func(t *testing.T) {
 			if _, err := jwt.JWKSetToPublicKeysetHandle([]byte(tc.jwkSet)); err == nil {
 				t.Fatalf("jwt.JWKSetToPublicKeysetHandle() err = nil, want error")
+			}
+		})
+	}
+}
+
+func TestJWKSetFromPublicKeysetNonEnabledKeysAreIgnored(t *testing.T) {
+	key := `{
+      "primaryKeyId": 303799737,
+      "key": [
+          {
+              "keyId": 303799737,
+              "status": "DISABLED",
+              "outputPrefixType": "TINK",
+              "keyData": {
+                  "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+                  "keyMaterialType": "ASYMMETRIC_PUBLIC",
+                  "value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ=="
+              }
+          }
+      ]
+  }`
+	handle, err := createKeysetHandle(key)
+	if err != nil {
+		t.Fatalf("createKeysetHandle() err = %v, want nil", err)
+	}
+	jwkSet, err := jwt.JWKSetFromPublicKeysetHandle(handle)
+	if err != nil {
+		t.Fatalf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
+	}
+	want := `{"keys":[]}`
+	if string(jwkSet) != want {
+		t.Fatalf("jwt.JWKSetFromPublicKeysetHandle() = %q, want %q", string(jwkSet), want)
+	}
+}
+
+func TestJWKSetFromPublicKeysetHandleECDSAWithTinkOutputPrefixHasKID(t *testing.T) {
+	key := `{
+      "primaryKeyId": 303799737,
+      "key": [
+          {
+              "keyId": 303799737,
+              "status": "ENABLED",
+              "outputPrefixType": "TINK",
+              "keyData": {
+                  "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+                  "keyMaterialType": "ASYMMETRIC_PUBLIC",
+                  "value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ=="
+              }
+          }
+      ]
+  }`
+	jwkES256PublicKey := `{
+		"keys":[{
+		"kty":"EC",
+		"crv":"P-256",
+		"x":"wO6uIxh8SkKOO8VjZXNRTteRcwCPE4_4JElKyaa0fcQ",
+		"y":"7oRiYhnmkP6nqrdXWgtsWUWq5uFRLJkhyVFiWPRB278",
+		"use":"sig",
+		"alg":"ES256",
+		"key_ops":["verify"],
+		"kid":"EhuduQ"}]
+	}`
+	handle, err := createKeysetHandle(key)
+	if err != nil {
+		t.Fatalf("createKeysetHandle() err = %v, want nil", err)
+	}
+	jwkSet, err := jwt.JWKSetFromPublicKeysetHandle(handle)
+	if err != nil {
+		t.Fatalf("jwt.JWKSetFromPublicKeysetHandle() err = %v, want nil", err)
+	}
+
+	got := &spb.Struct{}
+	if err := got.UnmarshalJSON(jwkSet); err != nil {
+		t.Fatalf("got.UnmarshalJSON() err = %v, want nil", err)
+	}
+	want := &spb.Struct{}
+	if err := want.UnmarshalJSON([]byte(jwkES256PublicKey)); err != nil {
+		t.Fatalf("want.UnmarshalJSON() err = %v, want nil", err)
+	}
+	if !cmp.Equal(want, got, protocmp.Transform()) {
+		t.Errorf("mismatch in jwk sets: diff (-want,+got): %v", cmp.Diff(want, got, protocmp.Transform()))
+	}
+}
+
+func TestJWKSetFromPublicKeysetHandleInvalidKeysetsFails(t *testing.T) {
+	for _, tc := range []jwkSetTestCase{
+		{
+			tag: "invalid output prefix",
+			publicKeyset: `{
+      "primaryKeyId": 303799737,
+      "key": [
+          {
+              "keyId": 303799737,
+              "status": "ENABLED",
+              "outputPrefixType": "LEGACY",
+              "keyData": {
+                  "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+                  "keyMaterialType": "ASYMMETRIC_PUBLIC",
+                  "value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ=="
+              }
+          }
+      ]
+  	}`,
+		},
+		{
+			tag: "unknown algorithm", // The algorithm is set in the base64 encoded value of the key data.
+			publicKeyset: `{
+			"primaryKeyId": 303799737,
+			"key": [
+				{
+					"keyId": 303799737,
+					"status": "ENABLED",
+					"outputPrefixType": "TINK",
+					"keyData": {
+						"typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+						"value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQ=",
+						"keyMaterialType": "ASYMMETRIC_PUBLIC"
+					}
+				}
+			]
+		}`,
+		},
+		{
+			tag: "private keyset",
+			publicKeyset: `{
+      "primaryKeyId": 303799737,
+      "key": [
+          {
+              "keyId": 303799737,
+              "status": "ENABLED",
+              "outputPrefixType": "TINK",
+              "keyData": {
+                  "typeUrl": "type.googleapis.com/google.crypto.tink.JwtEcdsaPublicKey",
+                  "keyMaterialType": "ASYMMETRIC_PRIVATE",
+                  "value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ=="
+              }
+          }
+      ]
+  }`,
+		},
+		{
+			tag: "unknown key type",
+			publicKeyset: `{
+      "primaryKeyId": 303799737,
+      "key": [
+          {
+              "keyId": 303799737,
+              "status": "ENABLED",
+              "outputPrefixType": "TINK",
+              "keyData": {
+                  "typeUrl": "type.googleapis.com/google.crypto.tink.Unknown",
+                  "keyMaterialType": "ASYMMETRIC_PUBLIC",
+                  "value": "IiDuhGJiGeaQ/qeqt1daC2xZRarm4VEsmSHJUWJY9EHbvxogwO6uIxh8SkKOO8VjZXNRTteRcwCPE4/4JElKyaa0fcQQAQ=="
+              }
+          }
+      ]
+  }`,
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			handle, err := createKeysetHandle(tc.publicKeyset)
+			if err != nil {
+				t.Fatalf("createKeysetHandle() err = %v, want nil", err)
+			}
+			if _, err := jwt.JWKSetFromPublicKeysetHandle(handle); err == nil {
+				t.Errorf("jwt.JWKSetFromPublicKeysetHandle() err = nil, want error")
 			}
 		})
 	}

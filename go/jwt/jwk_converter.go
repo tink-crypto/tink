@@ -17,6 +17,7 @@
 package jwt
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 
@@ -266,4 +267,96 @@ func JWKSetToPublicKeysetHandle(jwkSet []byte) (*keyset.Handle, error) {
 	}
 	ks.PrimaryKeyId = ks.Key[len(ks.Key)-1].GetKeyId()
 	return keyset.NewHandleWithNoSecrets(ks)
+}
+
+func addKeyOPSVerify(s *spb.Struct) {
+	s.GetFields()["key_ops"] = spb.NewListValue(&spb.ListValue{Values: []*spb.Value{spb.NewStringValue("verify")}})
+}
+
+func addStringEntry(s *spb.Struct, key, val string) {
+	s.GetFields()[key] = spb.NewStringValue(val)
+}
+
+func esPublicKeyToStruct(key *tinkpb.Keyset_Key) (*spb.Struct, error) {
+	pubKey := &jepb.JwtEcdsaPublicKey{}
+	if err := proto.Unmarshal(key.GetKeyData().GetValue(), pubKey); err != nil {
+		return nil, err
+	}
+	outKey := &spb.Struct{
+		Fields: map[string]*spb.Value{},
+	}
+	var algorithm, curve string
+	switch pubKey.GetAlgorithm() {
+	case jepb.JwtEcdsaAlgorithm_ES256:
+		curve, algorithm = "P-256", "ES256"
+	case jepb.JwtEcdsaAlgorithm_ES384:
+		curve, algorithm = "P-384", "ES384"
+	case jepb.JwtEcdsaAlgorithm_ES512:
+		curve, algorithm = "P-521", "ES512"
+	default:
+		return nil, fmt.Errorf("invalid algorithm")
+	}
+	addStringEntry(outKey, "crv", curve)
+	addStringEntry(outKey, "alg", algorithm)
+	addStringEntry(outKey, "kty", "EC")
+	addStringEntry(outKey, "x", base64Encode(pubKey.GetX()))
+	addStringEntry(outKey, "y", base64Encode(pubKey.GetY()))
+	addStringEntry(outKey, "use", "sig")
+	addKeyOPSVerify(outKey)
+
+	if key.GetOutputPrefixType() == tinkpb.OutputPrefixType_TINK {
+		kid := keyID(key.KeyId, key.GetOutputPrefixType())
+		if kid == nil {
+			return nil, fmt.Errorf("tink KID shouldn't be nil")
+		}
+		addStringEntry(outKey, "kid", *kid)
+	} else if pubKey.GetCustomKid() != nil {
+		addStringEntry(outKey, "kid", pubKey.GetCustomKid().GetValue())
+	}
+	return outKey, nil
+}
+
+// JWKSetFromPublicKeysetHandle converts a Tink KeysetHandle with JWT keys into a Json Web Key (JWK) set.
+// Currently only public keys for algorithms ES256, ES384 and ES512 are supported.
+// JWK is defined in https://www.rfc-editor.org/rfc/rfc7517.html.
+func JWKSetFromPublicKeysetHandle(kh *keyset.Handle) ([]byte, error) {
+	b := &bytes.Buffer{}
+	if err := kh.WriteWithNoSecrets(keyset.NewBinaryWriter(b)); err != nil {
+		return nil, err
+	}
+	ks := &tinkpb.Keyset{}
+	if err := proto.Unmarshal(b.Bytes(), ks); err != nil {
+		return nil, err
+	}
+	keyValList := []*spb.Value{}
+	for _, k := range ks.Key {
+		if k.GetStatus() != tinkpb.KeyStatusType_ENABLED {
+			continue
+		}
+		if k.GetOutputPrefixType() != tinkpb.OutputPrefixType_TINK &&
+			k.GetOutputPrefixType() != tinkpb.OutputPrefixType_RAW {
+			return nil, fmt.Errorf("unsupported output prefix type")
+		}
+		keyData := k.GetKeyData()
+		if keyData == nil {
+			return nil, fmt.Errorf("invalid key data")
+		}
+		if keyData.GetKeyMaterialType() != tinkpb.KeyData_ASYMMETRIC_PUBLIC {
+			return nil, fmt.Errorf("only asymmetric public keys are supported")
+		}
+		if keyData.GetTypeUrl() != jwtECDSAPublicKeyType {
+			return nil, fmt.Errorf("unsupported key type url")
+		}
+		keyStruct, err := esPublicKeyToStruct(k)
+		if err != nil {
+			return nil, err
+		}
+		keyValList = append(keyValList, spb.NewStructValue(keyStruct))
+	}
+	output := &spb.Struct{
+		Fields: map[string]*spb.Value{
+			"keys": spb.NewListValue(&spb.ListValue{Values: keyValList}),
+		},
+	}
+	return output.MarshalJSON()
 }
