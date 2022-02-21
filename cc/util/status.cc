@@ -50,6 +50,7 @@ const Status& GetOk() {
 }
 
 }  // namespace
+#endif
 
 Status::Status(const ::absl::Status& status)
     : code_(absl::StatusCode::kOk) {
@@ -66,6 +67,7 @@ Status::operator ::absl::Status() const {
 Status::Status() : code_(absl::StatusCode::kOk), message_("") {
 }
 
+#ifndef TINK_USE_ABSL_STATUS
 Status::Status(::crypto::tink::util::error::Code error,
                const std::string& error_message)
     : code_(static_cast<absl::StatusCode>(error)), message_(error_message) {
@@ -73,6 +75,7 @@ Status::Status(::crypto::tink::util::error::Code error,
     message_.clear();
   }
 }
+#endif
 
 Status::Status(absl::StatusCode code, absl::string_view error_message)
     : code_(code),
@@ -88,9 +91,11 @@ Status& Status::operator=(const Status& other) {
   return *this;
 }
 
+#ifndef TINK_USE_ABSL_STATUS
 const Status& Status::CANCELLED = GetCancelled();
 const Status& Status::UNKNOWN = GetUnknown();
 const Status& Status::OK = GetOk();
+#endif
 
 std::string Status::ToString() const {
   if (code_ == absl::StatusCode::kOk) {
@@ -102,6 +107,7 @@ std::string Status::ToString() const {
   return oss.str();
 }
 
+#ifndef TINK_USE_ABSL_STATUS
 std::string ErrorCodeString(crypto::tink::util::error::Code error) {
   switch (error) {
     case crypto::tink::util::error::OK:
@@ -148,13 +154,12 @@ extern ostream& operator<<(ostream& os, crypto::tink::util::error::Code code) {
   os << ErrorCodeString(code);
   return os;
 }
+#endif
 
 extern ostream& operator<<(ostream& os, const Status& other) {
   os << other.ToString();
   return os;
 }
-
-#endif  // TINK_USE_ABSL_STATUS
 
 
 }  // namespace util
