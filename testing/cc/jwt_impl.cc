@@ -377,20 +377,20 @@ grpc::Status JwtImpl::PublicKeyVerifyAndDecode(grpc::ServerContext* context,
   StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
       JwkSetToPublicKeysetHandle(request->jwk_set());
   if (!keyset_handle.ok()) {
-    response->set_err(keyset_handle.status().error_message());
+    response->set_err(keyset_handle.status().message());
     return ::grpc::Status::OK;
   }
   std::stringbuf keyset;
   StatusOr<std::unique_ptr<crypto::tink::BinaryKeysetWriter>> writer =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer.ok()) {
-    response->set_err(writer.status().error_message());
+    response->set_err(writer.status().message());
     return ::grpc::Status::OK;
   }
   crypto::tink::util::Status status =
       CleartextKeysetHandle::Write(writer->get(), **keyset_handle);
   if (!status.ok()) {
-    response->set_err(status.error_message());
+    response->set_err(status.message());
     return ::grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
