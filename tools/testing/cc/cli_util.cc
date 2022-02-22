@@ -194,7 +194,7 @@ void CliUtil::InitTink() {
 
   Status aws_result = InitAws();
   if (!aws_result.ok()) {
-    std::clog << aws_result.error_message() << std::endl;
+    std::clog << aws_result.message() << std::endl;
   }
 }
 
