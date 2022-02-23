@@ -94,6 +94,38 @@ class MonitoringKeySetInfo {
   const uint32_t primary_key_id_;
 };
 
+// Defines a context for monitoring events, wich includes the primitive and API
+// used, and info on the keyset.
+class MonitoringContext {
+ public:
+  // Construct a new constext for the given `primitive`, `api_function` and
+  // `keyset_info`.
+  MonitoringContext(absl::string_view primitive, absl::string_view api_function,
+                    const MonitoringKeySetInfo& keyset_info)
+      : primitive_(primitive),
+        api_function_(api_function),
+        keyset_info_(keyset_info) {}
+
+  // Returns the primitive.
+  std::string GetPrimitive() const { return primitive_; }
+  // Returns the API function.
+  std::string GetApi() const { return api_function_; }
+  // Returns a constant reference to the keyset info.
+  const MonitoringKeySetInfo& GetKeySetInfo() { return keyset_info_; }
+
+ private:
+  const std::string primitive_;
+  const std::string api_function_;
+  const MonitoringKeySetInfo keyset_info_;
+};
+
+// A monitoring event, which includes the ID of the key used and the amount of
+// data processed by this event.
+struct MonitoringEvent {
+  int32_t key_id;
+  int64_t num_bytes_as_input;
+};
+
 }  // namespace tink
 }  // namespace crypto
 
