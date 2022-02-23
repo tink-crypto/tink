@@ -33,7 +33,7 @@ def tink_cc_deps():
         http_archive(
             name = "com_google_googletest",
             strip_prefix = "googletest-1.10.x",
-            url = "https://github.com/google/googletest/archive/v1.10.x.zip",
+            url = "https://github.com/google/googletest/archive/refs/tags/v1.10.x.zip",
             sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
         )
 
