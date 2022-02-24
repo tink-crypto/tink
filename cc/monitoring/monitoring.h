@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "tink/util/statusor.h"
 
 namespace crypto {
 namespace tink {
@@ -98,7 +99,7 @@ class MonitoringKeySetInfo {
 // used, and info on the keyset.
 class MonitoringContext {
  public:
-  // Construct a new constext for the given `primitive`, `api_function` and
+  // Construct a new context for the given `primitive`, `api_function` and
   // `keyset_info`.
   MonitoringContext(absl::string_view primitive, absl::string_view api_function,
                     const MonitoringKeySetInfo& keyset_info)
@@ -119,11 +120,37 @@ class MonitoringContext {
   const MonitoringKeySetInfo keyset_info_;
 };
 
-// A monitoring event, which includes the ID of the key used and the amount of
-// data processed by this event.
-struct MonitoringEvent {
-  int32_t key_id;
-  int64_t num_bytes_as_input;
+// Interface for a monitoring client which can be registered with Tink. A
+// monitoring client getis informed by Tink about certain events happening
+// during cryptographic operations.
+class MonitoringClient {
+ public:
+  virtual ~MonitoringClient() = default;
+  // Logs a successful use of `key_id` on an input of `num_bytes_as_input`. Tink
+  // primitive wrappers call this method when they successfully used a key to
+  // carry out a primitive method, e.g. Aead::Encrypt(). As a consequence,
+  // subclasses of MonitoringClient should be mindful on the amount of work
+  // performed by this method, as this will be called on each cryptographic
+  // operation. Implementations of MonitoringClient are responsible to add
+  // context to identify, e.g., the primitive and the API function.
+  virtual void Log(uint32_t key_id, int64_t num_bytes_as_input) = 0;
+
+  // Logs a failure. Tink calls this method when a cryptographic operation
+  // failed, e.g. no key could be found to decrypt a ciphertext. In this
+  // case the failure is not associated with a specific key, therefore this
+  // method has no arguments. The MonitoringClient implementation is responsible
+  // to add context to identify where the failure comes from.
+  virtual void LogFailure() = 0;
+};
+
+// Interface for a factory class that creates monitoring clients.
+class MonitoringClientFactory {
+ public:
+  virtual ~MonitoringClientFactory() = default;
+  // Create a new monitoring client that logs events related to the given
+  // `context`.
+  virtual crypto::tink::util::StatusOr<std::unique_ptr<MonitoringClient>> New(
+      const MonitoringContext& context) = 0;
 };
 
 }  // namespace tink

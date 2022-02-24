@@ -6,4 +6,5 @@ tink_cc_library(
     monitoring.h
   DEPS
     absl::flat_hash_map
+    tink::util::statusor
 )
