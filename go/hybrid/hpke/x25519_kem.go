@@ -81,6 +81,10 @@ func (x *x25519KEM) id() uint16 {
 	return x.kemID
 }
 
+func (x *x25519KEM) encapsulatedKeyLength() int {
+	return 32
+}
+
 // deriveKEMSharedSecret returns a pseudorandom key obtained via HKDF SHA256.
 func (x *x25519KEM) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []byte) ([]byte, error) {
 	ctx := append(senderPubKey, recipientPubKey...)

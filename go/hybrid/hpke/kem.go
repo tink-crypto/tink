@@ -37,4 +37,10 @@ type kem interface {
 	//
 	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1
 	id() uint16
+
+	// encapsulatedKeyLength returns the length of the encapsulated key,
+	// corresponding to Nenc in the following table.
+	//
+	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1
+	encapsulatedKeyLength() int
 }

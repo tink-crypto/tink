@@ -134,3 +134,13 @@ func TestX25519KEMDecapsulateBadRecipientPrivKey(t *testing.T) {
 		t.Error("decapsulate: got success, want err")
 	}
 }
+
+func TestX25519KEMEncapsulatedKeyLength(t *testing.T) {
+	kem, err := newKEM(x25519HKDFSHA256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if kem.encapsulatedKeyLength() != 32 {
+		t.Errorf("encapsulatedKeyLength: got %d, want 32", kem.encapsulatedKeyLength())
+	}
+}
