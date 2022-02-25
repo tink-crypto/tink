@@ -22,6 +22,38 @@ import (
 	pb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
+// newPrimitivesFromProto constructs new KEM, KDF, AEADs from HpkeParams.
+func newPrimitivesFromProto(params *pb.HpkeParams) (kem, kdf, aead, error) {
+	kemID, err := kemIDFromProto(params.GetKem())
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("kemIDFromProto(%d): %v", params.GetKem(), err)
+	}
+	kem, err := newKEM(kemID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("newKEM(%d): %v", kemID, err)
+	}
+
+	kdfID, err := kdfIDFromProto(params.GetKdf())
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("kdfIDFromProto(%d): %v", params.GetKdf(), err)
+	}
+	kdf, err := newKDF(kdfID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("newKDF(%d): %v", kdfID, err)
+	}
+
+	aeadID, err := aeadIDFromProto(params.GetAead())
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("aeadIDFromProto(%d): %v", params.GetAead(), err)
+	}
+	aead, err := newAEAD(aeadID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("newAEAD(%d): %v", aeadID, err)
+	}
+
+	return kem, kdf, aead, nil
+}
+
 // newKEM constructs a HPKE KEM using kemID, which are specified at
 // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
 func newKEM(kemID uint16) (kem, error) {

@@ -8,6 +8,8 @@ go_library(
         "aead.go",
         "aes_gcm_aead.go",
         "context.go",
+        "decrypt.go",
+        "encrypt.go",
         "hkdf_kdf.go",
         "hpke.go",
         "kdf.go",
@@ -20,6 +22,7 @@ go_library(
         "//internal/aead:go_default_library",
         "//proto/hpke_go_proto:go_default_library",
         "//subtle:go_default_library",
+        "//tink:go_default_library",
         "@org_golang_x_crypto//hkdf:go_default_library",
     ],
 )
@@ -29,6 +32,7 @@ go_test(
     srcs = [
         "aes_gcm_aead_test.go",
         "context_test.go",
+        "encrypt_decrypt_test.go",
         "hkdf_kdf_test.go",
         "hpke_test.go",
         "primitive_factory_test.go",
@@ -39,6 +43,7 @@ go_test(
     deps = [
         "//proto/hpke_go_proto:go_default_library",
         "//subtle:go_default_library",
+        "//subtle/random:go_default_library",
         "//testutil:go_default_library",
     ],
 )

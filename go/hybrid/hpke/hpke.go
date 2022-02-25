@@ -44,8 +44,9 @@ const (
 )
 
 var (
-	emptySalt = []byte{}
-	emptyIKM  = []byte{}
+	emptySalt           = []byte{}
+	emptyIKM            = []byte{}
+	emptyAssociatedData = []byte{}
 )
 
 // kemSuiteID generates the KEM suite ID from kemID according to
