@@ -111,6 +111,38 @@ func TestX25519KEMDecapsulateBoringSSLVectors(t *testing.T) {
 	}
 }
 
+// TestX25519KEMDecapsulateEncapsulatedKeyPrefixesLargerSlice checks that--if
+// the encapsulated key is part of a larger slice, as is the case in HPKE--that
+// decapsulate does not modify the larger slice.
+// TODO(b/201070904): Link hpke.Encrypt once merged.
+func TestX25519KEMDecapsulateEncapsulatedKeyPrefixesLargerSlice(t *testing.T) {
+	_, v := internetDraftVector(t)
+	kem, err := newKEM(x25519HKDFSHA256)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	largerSlice := make([]byte, 3*len(v.encapsulatedKey))
+	suffix := largerSlice[len(v.encapsulatedKey):]
+	zeroedSlice := make([]byte, len(suffix))
+	if !bytes.Equal(suffix, zeroedSlice) {
+		t.Errorf("suffix: got %x, want %x", suffix, zeroedSlice)
+	}
+
+	copy(largerSlice, v.encapsulatedKey)
+	if !bytes.Equal(suffix, zeroedSlice) {
+		t.Errorf("suffix: got %x, want %x", suffix, zeroedSlice)
+	}
+
+	encapsulatedKey := largerSlice[:len(v.encapsulatedKey)]
+	if _, err := kem.decapsulate(encapsulatedKey, v.recipientPrivKey); err != nil {
+		t.Errorf("decapsulate: got err %q, want success", err)
+	}
+	if !bytes.Equal(suffix, zeroedSlice) {
+		t.Errorf("suffix: got %x, want %x", suffix, zeroedSlice)
+	}
+}
+
 func TestX25519KEMDecapsulateBadEncapsulatedKey(t *testing.T) {
 	_, v := internetDraftVector(t)
 	kem, err := newKEM(x25519HKDFSHA256)

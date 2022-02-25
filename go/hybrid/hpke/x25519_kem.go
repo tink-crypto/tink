@@ -87,7 +87,10 @@ func (x *x25519KEM) encapsulatedKeyLength() int {
 
 // deriveKEMSharedSecret returns a pseudorandom key obtained via HKDF SHA256.
 func (x *x25519KEM) deriveKEMSharedSecret(dh, senderPubKey, recipientPubKey []byte) ([]byte, error) {
-	ctx := append(senderPubKey, recipientPubKey...)
+	ctx := make([]byte, len(senderPubKey))
+	copy(ctx, senderPubKey)
+	ctx = append(ctx, recipientPubKey...)
+
 	suiteID := kemSuiteID(x25519HKDFSHA256)
 	macLength, err := subtle.GetHashDigestSize(x.macAlg)
 	if err != nil {
