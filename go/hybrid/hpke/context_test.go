@@ -83,9 +83,6 @@ func TestContextRecipient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newKEM(%d): err %q", id.kemID, err)
 	}
-	x25519KEMGeneratePrivateKey = func() ([]byte, error) {
-		return vec.senderPrivKey, nil
-	}
 	kdf, err := newKDF(id.kdfID)
 	if err != nil {
 		t.Fatalf("newKDF(%d): err %q", id.kdfID, err)
@@ -124,8 +121,6 @@ func TestContextRecipient(t *testing.T) {
 			t.Errorf("plaintext: got %x, want %x", pt, enc.plaintext)
 		}
 	}
-
-	x25519KEMGeneratePrivateKey = subtle.GeneratePrivateKeyX25519
 }
 
 func TestContextMaxSequenceNumber(t *testing.T) {
