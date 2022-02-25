@@ -3,8 +3,8 @@
 # Incorporating Tink into your project
 
 If you are developing a project that uses Tink, you might incorporate the
-library following one of the following approaches. At the moment, only the
-in-tree dependency is supported, although all of them should work.
+library using one of the following approaches. At the moment, only the in-tree
+dependency is supported, although all of them should work.
 
 ## In-tree dependency
 
