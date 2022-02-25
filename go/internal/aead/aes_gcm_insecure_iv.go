@@ -73,11 +73,12 @@ func (i *AESGCMInsecureIV) Encrypt(iv, plaintext, associatedData []byte) ([]byte
 		return nil, fmt.Errorf("unexpected IV size: got %d, want %d", got, want)
 	}
 	// Seal() checks plaintext length, but this duplicated check avoids panic.
-	maxPlaintextSize := maxIntPlaintextSize
+	var maxPlaintextSize uint64
+	maxPlaintextSize = maxIntPlaintextSize
 	if maxIntPlaintextSize > aesGCMMaxPlaintextSize {
 		maxPlaintextSize = aesGCMMaxPlaintextSize
 	}
-	if len(plaintext) > maxPlaintextSize {
+	if uint64(len(plaintext)) > maxPlaintextSize {
 		return nil, fmt.Errorf("plaintext too long: got %d", len(plaintext))
 	}
 
