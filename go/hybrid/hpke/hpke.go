@@ -24,7 +24,7 @@ import (
 
 const (
 	// All identifier values are specified in
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+	// https://www.rfc-editor.org/rfc/rfc9180.html.
 	// Mode identifiers.
 	baseMode uint8 = 0x00
 
@@ -50,13 +50,13 @@ var (
 )
 
 // kemSuiteID generates the KEM suite ID from kemID according to
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-5.
 func kemSuiteID(kemID uint16) []byte {
 	return appendBigEndianUint16([]byte("KEM"), kemID)
 }
 
 // hpkeSuiteID generates the HPKE suite ID according to
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-8.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-8.
 func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 	var res []byte
 	res = append(res, "HPKE"...)
@@ -67,7 +67,7 @@ func hpkeSuiteID(kemID, kdfID, aeadID uint16) []byte {
 }
 
 // keyScheduleContext creates the key_schedule_context defined at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-10.
 func keyScheduleContext(mode uint8, pskIDHash, infoHash []byte) []byte {
 	var res []byte
 	res = append(res, mode)
@@ -77,7 +77,7 @@ func keyScheduleContext(mode uint8, pskIDHash, infoHash []byte) []byte {
 }
 
 // labelIKM returns a labeled IKM according to LabeledExtract() defined at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-4.
 func labelIKM(label string, ikm, suiteID []byte) []byte {
 	var res []byte
 	res = append(res, hpkeV1...)
@@ -88,7 +88,7 @@ func labelIKM(label string, ikm, suiteID []byte) []byte {
 }
 
 // labelInfo returns a labeled info according to LabeledExpand() defined at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-4.
 func labelInfo(label string, info, suiteID []byte, length int) ([]byte, error) {
 	length16 := uint16(length)
 	if int(length16) != length {

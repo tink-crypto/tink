@@ -30,7 +30,7 @@ import (
 // TODO(b/201070904): Separate tests into internal_test package.
 
 // aeadIDs are specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.3.
 var aeadIDs = []struct {
 	name      string
 	aeadID    uint16
@@ -81,12 +81,12 @@ type encryptionString struct {
 	ciphertext     string
 }
 
-// TODO(b/201070904): Include all Tink-supported I-D vectors.
+// TODO(b/201070904): Include all Tink-supported RFC vectors.
 func internetDraftVector(t *testing.T) (hpkeID, vector) {
 	t.Helper()
 
-	// Test vector from HPKE I-D
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#appendix-A.1.1.
+	// Test vector from HPKE RFC
+	// https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.1.1.
 	v := struct {
 		mode                                                                                    uint8
 		kemID, kdfID, aeadID                                                                    uint16
@@ -250,13 +250,13 @@ func parseEncryptions(t *testing.T, encs []encryptionString) []encryptionVector 
 func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 	t.Helper()
 
-	// Test vectors from HPKE I-D. Must only include AES-GCM vectors.
+	// Test vectors from HPKE RFC. Must only include AES-GCM vectors.
 	vecs := []struct {
 		mode                                              uint8
 		kemID, kdfID, aeadID                              uint16
 		key, plaintext, associatedData, nonce, ciphertext string
 	}{
-		// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#appendix-A.1.1.1
+		// https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.1.1.1
 		{
 			mode:           0,
 			kemID:          32,
@@ -279,7 +279,7 @@ func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 			nonce:          "56d890e5accaaf011cff4b7c",
 			ciphertext:     "af2d7e9ac9ae7e270f46ba1f975be53c09f8d875bdc8535458c2494e8a6eab251c03d0c22a56b8ca42c2063b84",
 		},
-		// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#appendix-A.6.1.1
+		// https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.6.1.1
 		{
 			mode:           0,
 			kemID:          18,
@@ -339,7 +339,7 @@ func aesGCMEncryptionVectors(t *testing.T) map[hpkeID]encryptionVector {
 
 // baseModeX25519HKDFSHA256Vectors returns BoringSSL test vectors for HPKE base
 // mode with Diffie-Hellman-based X25519, HKDF-SHA256 KEM as per
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.
 func baseModeX25519HKDFSHA256Vectors(t *testing.T) map[hpkeID]vector {
 	testutil.SkipTestIfTestSrcDirIsNotSet(t)
 	t.Helper()

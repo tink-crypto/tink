@@ -34,7 +34,7 @@ type context struct {
 }
 
 // newSenderContext creates the HPKE sender context as per KeySchedule()
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-10.
 func newSenderContext(recipientPubKey *pb.HpkePublicKey, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
 	if recipientPubKey.GetPublicKey() == nil {
 		return nil, errors.New("HpkePublicKey has an empty PublicKey")
@@ -47,7 +47,7 @@ func newSenderContext(recipientPubKey *pb.HpkePublicKey, kem kem, kdf kdf, aead 
 }
 
 // newRecipientContext creates the HPKE recipient context as per KeySchedule()
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-10.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-10.
 func newRecipientContext(encapsulatedKey []byte, recipientPrivKey *pb.HpkePrivateKey, kem kem, kdf kdf, aead aead, info []byte) (*context, error) {
 	if recipientPrivKey.GetPrivateKey() == nil {
 		return nil, errors.New("HpkePrivateKey has an empty PrivateKey")
@@ -63,7 +63,7 @@ func createContext(encapsulatedKey []byte, sharedSecret []byte, kem kem, kdf kdf
 	suiteID := hpkeSuiteID(kem.id(), kdf.id(), aead.id())
 	// In base mode, both the pre-shared key (default_psk) and pre-shared key ID
 	// (default_psk_id) are empty strings, see
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1.1-4.
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1.1-4.
 	pskIDHash := kdf.labeledExtract(emptySalt, emptyIKM /*= default PSK ID*/, "psk_id_hash", suiteID)
 	infoHash := kdf.labeledExtract(emptySalt, info, "info_hash", suiteID)
 	keyScheduleCtx := keyScheduleContext(baseMode, pskIDHash, infoHash)
@@ -90,7 +90,7 @@ func createContext(encapsulatedKey []byte, sharedSecret []byte, kem kem, kdf kdf
 
 // maxSequenceNumber returns the maximum sequence number indicating that the
 // message limit is reached, calculated as per
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-11.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-11.
 func maxSequenceNumber(nonceLength int) *big.Int {
 	res := new(big.Int)
 	one := big.NewInt(1)
@@ -107,7 +107,7 @@ func (c *context) incrementSequenceNumber() error {
 }
 
 // computeNonce computes the nonce as per
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-12.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-12.
 func (c *context) computeNonce() ([]byte, error) {
 	nonce := make([]byte, len(c.baseNonce))
 
@@ -129,7 +129,7 @@ func (c *context) computeNonce() ([]byte, error) {
 
 // seal allows the sender's context to encrypt plaintext with associatedData,
 // defined as ContextS.Seal in
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-7.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-7.
 func (c *context) seal(plaintext, associatedData []byte) ([]byte, error) {
 	nonce, err := c.computeNonce()
 	if err != nil {
@@ -147,7 +147,7 @@ func (c *context) seal(plaintext, associatedData []byte) ([]byte, error) {
 
 // open allows the receiver's context to decrypt ciphertext with
 // associatedData, defined as ContextR.Open in
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-9.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-9.
 func (c *context) open(ciphertext, associatedData []byte) ([]byte, error) {
 	nonce, err := c.computeNonce()
 	if err != nil {

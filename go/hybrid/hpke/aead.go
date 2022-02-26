@@ -19,25 +19,25 @@ package hpke
 // aead is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) authenticated encryption with associated data (AEAD).
 //
-// The HPKE I-D is available at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+// The HPKE RFC is available at
+// https://www.rfc-editor.org/rfc/rfc9180.html.
 type aead interface {
 	// seal performs authenticated encryption of plaintext and associatedData
 	// using key and nonce.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2
 	seal(key, nonce, plaintext, associatedData []byte) ([]byte, error)
 
 	// open performs authenticated decryption of ciphertext and associatedData
 	// using key and nonce.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2
 	open(key, nonce, ciphertext, associatedData []byte) ([]byte, error)
 
 	// id returns the HPKE AEAD algorithm identifier for the underlying AEAD
 	// implementation.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.3
 	id() uint16
 
 	// keyLength returns the length of the key.

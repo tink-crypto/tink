@@ -19,28 +19,28 @@ package hpke
 // kem is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) key encapsulation mechanism (KEM).
 //
-// The HPKE I-D is available at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+// The HPKE RFC is available at
+// https://www.rfc-editor.org/rfc/rfc9180.html.
 type kem interface {
 	// encapsulate generates and encapsulates a shared secret using
 	// recipientPubKey. It returns the raw shared secret and encapsulated key.
-	// The HPKE I-D refers to this function as Encap(). It is used by the sender.
+	// The HPKE RFC refers to this function as Encap(). It is used by the sender.
 	encapsulate(recipientPubKey []byte) ([]byte, []byte, error)
 
 	// decapsulate extracts the shared secret from encapsulatedKey using
-	// recipientPrivKey. It returns the raw shared secret. The HPKE I-D refers
+	// recipientPrivKey. It returns the raw shared secret. The HPKE RFC refers
 	// to this function as Decap(). It is used by the recipient.
 	decapsulate(encapsulatedKey, recipientPrivKey []byte) ([]byte, error)
 
 	// id returns the HPKE KEM algorithm identifier for the underlying KEM
 	// implementation.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1
 	id() uint16
 
 	// encapsulatedKeyLength returns the length of the encapsulated key,
 	// corresponding to Nenc in the following table.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1
 	encapsulatedKeyLength() int
 }

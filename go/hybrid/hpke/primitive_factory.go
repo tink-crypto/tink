@@ -55,7 +55,7 @@ func newPrimitivesFromProto(params *pb.HpkeParams) (kem, kdf, aead, error) {
 }
 
 // newKEM constructs a HPKE KEM using kemID, which are specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.
 func newKEM(kemID uint16) (kem, error) {
 	if kemID == x25519HKDFSHA256 {
 		return newX25519KEM(sha256)
@@ -65,7 +65,7 @@ func newKEM(kemID uint16) (kem, error) {
 
 // kemIDFromProto returns the KEM ID from the HpkeKem enum value. KEM IDs are
 // specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.1.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.1.
 func kemIDFromProto(enum pb.HpkeKem) (uint16, error) {
 	if enum == pb.HpkeKem_DHKEM_X25519_HKDF_SHA256 {
 		return x25519HKDFSHA256, nil
@@ -74,7 +74,7 @@ func kemIDFromProto(enum pb.HpkeKem) (uint16, error) {
 }
 
 // newKDF constructs a HPKE KDF using kdfID, which are specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.2.
 func newKDF(kdfID uint16) (kdf, error) {
 	if kdfID == hkdfSHA256 {
 		return newHKDFKDF(sha256)
@@ -84,7 +84,7 @@ func newKDF(kdfID uint16) (kdf, error) {
 
 // kdfIDFromProto returns the KDF ID from the HpkeKdf enum value. KDF IDs are
 // specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.2.
 func kdfIDFromProto(enum pb.HpkeKdf) (uint16, error) {
 	if enum == pb.HpkeKdf_HKDF_SHA256 {
 		return hkdfSHA256, nil
@@ -93,7 +93,7 @@ func kdfIDFromProto(enum pb.HpkeKdf) (uint16, error) {
 }
 
 // newAEAD constructs a HPKE AEAD using aeadID, which are specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.3.
 func newAEAD(aeadID uint16) (aead, error) {
 	switch aeadID {
 	case aes128GCM:
@@ -107,7 +107,7 @@ func newAEAD(aeadID uint16) (aead, error) {
 
 // aeadIDFromProto returns the AEAD ID from the HpkeAead enum value. AEAD IDs
 // are specified at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.3.
+// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.3.
 func aeadIDFromProto(enum pb.HpkeAead) (uint16, error) {
 	switch enum {
 	case pb.HpkeAead_AES_128_GCM:

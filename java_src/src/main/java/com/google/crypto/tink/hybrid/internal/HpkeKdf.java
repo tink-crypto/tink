@@ -22,7 +22,7 @@ import java.security.GeneralSecurityException;
 /**
  * Interface for Hybrid Public Key Encryption (HPKE) key derivation function (KDF).
  *
- * <p>HPKE I.-D. is available at https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+ * <p>HPKE RFC is available at https://www.rfc-editor.org/rfc/rfc9180.html.
  */
 @Immutable
 interface HpkeKdf {
@@ -30,8 +30,7 @@ interface HpkeKdf {
    * Extracts pseudorandom key from {@code salt} and {@code ikm} using the HPKE-specific values
    * {@code ikmLabel} and {@code suiteId} to facilitate domain separation and context binding.
    *
-   * <p>More details available at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4-9.
+   * <p>More details available at https://www.rfc-editor.org/rfc/rfc9180.html#section-4-9.
    *
    * @param salt optional (possibly non-secret) random value
    * @param ikm input keying material
@@ -47,8 +46,7 @@ interface HpkeKdf {
    * along with the HPKE-specific values {@code infoLabel} and {@code suiteId} to facilitate domain
    * separation and context binding.
    *
-   * <p>More details available at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4-10.
+   * <p>More details available at https://www.rfc-editor.org/rfc/rfc9180.html#section-4-10.
    *
    * @param prk pseudorandom key
    * @param info optional context and application-specific information
@@ -64,8 +62,7 @@ interface HpkeKdf {
    * Combines {@link #labeledExtract(byte[], byte[], String, byte[])} and {@link
    * #labeledExpand(byte[], byte[], String, byte[], int)} into a single method.
    *
-   * <p>More details available at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-3.
+   * <p>More details available at https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-3.
    *
    * @param salt optional (possibly non-secret) random value
    * @param ikm input keying material
@@ -91,7 +88,7 @@ interface HpkeKdf {
    * Returns the HPKE KDF algorithm identifier for the underlying KDF implementation.
    *
    * <p>More details at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-derivation-functions-kd.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#name-key-derivation-functions-kd.
    */
   byte[] getKdfId() throws GeneralSecurityException;
 }

@@ -28,7 +28,7 @@ import javax.annotation.concurrent.ThreadSafe;
 /**
  * Hybrid Public Key Encryption (HPKE) context for either a sender or a recipient.
  *
- * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-creating-the-encryption-con
+ * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-creating-the-encryption-con
  */
 @ThreadSafe
 final class HpkeContext {
@@ -82,7 +82,7 @@ final class HpkeContext {
 
   /**
    * Creates HPKE sender context according to KeySchedule() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-9.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-9.
    *
    * @param recipientPublicKey recipient's public key (pkR)
    * @param kem key encapsulation mechanism primitive
@@ -102,7 +102,7 @@ final class HpkeContext {
 
   /**
    * Creates HPKE sender recipient context according to KeySchedule() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-9.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-9.
    *
    * @param encapsulatedKey encapsulated key (enc)
    * @param recipientPrivateKey recipient's private key (skR)
@@ -136,10 +136,7 @@ final class HpkeContext {
     sequenceNumber = sequenceNumber.add(BigInteger.ONE);
   }
 
-  /**
-   * ComputeNonce() from
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-11.
-   */
+  /** ComputeNonce() from https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-11. */
   @GuardedBy("this")
   private byte[] computeNonce() throws GeneralSecurityException {
     return Bytes.xor(baseNonce, SubtleUtil.integer2Bytes(sequenceNumber, aead.getNonceLength()));
@@ -167,8 +164,7 @@ final class HpkeContext {
 
   /**
    * Performs AEAD encryption of {@code plaintext} with {@code associatedData} according to
-   * ContextS.Seal() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-8.
+   * ContextS.Seal() defined in https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-8.
    *
    * @return ciphertext
    */
@@ -179,8 +175,7 @@ final class HpkeContext {
 
   /**
    * Performs AEAD decryption of {@code ciphertext} with {@code associatedData} according to
-   * ContextR.Open() defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.2-10.
+   * ContextR.Open() defined in https://www.rfc-editor.org/rfc/rfc9180.html#section-5.2-10.
    *
    * @return plaintext
    */

@@ -26,7 +26,7 @@ import java.util.Arrays;
 /**
  * Hybrid Public Key Encryption (HPKE) decryption.
  *
- * <p>HPKE I.-D.: https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html
+ * <p>HPKE RFC: https://www.rfc-editor.org/rfc/rfc9180.html
  */
 @Immutable
 final class HpkeDecrypt implements HybridDecrypt {
@@ -55,7 +55,7 @@ final class HpkeDecrypt implements HybridDecrypt {
    * Returns the encapsulated key length (in bytes) for the specified {@code kemProtoEnum}. This
    * value corresponds to the 'Nenc' column in the following table.
    *
-   * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-key-encapsulation-mechanism.
+   * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-key-encapsulation-mechanism.
    */
   private static int encodingSizeInBytes(com.google.crypto.tink.proto.HpkeKem kemProtoEnum) {
     switch (kemProtoEnum) {

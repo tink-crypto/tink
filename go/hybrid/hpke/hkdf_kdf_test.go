@@ -36,7 +36,7 @@ func TestHKDFKDFLabeledExtract(t *testing.T) {
 	suiteID := hpkeSuiteID(id.kemID, id.kdfID, id.aeadID)
 
 	// Base mode uses a default empty value for the pre-shared key (PSK), see
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1.1-4.
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1.1-4.
 	pskIDHash := kdf.labeledExtract(emptySalt, emptyIKM /*= default PSK ID*/, "psk_id_hash", suiteID)
 	infoHash := kdf.labeledExtract(emptySalt, v.info, "info_hash", suiteID)
 	keyScheduleCtx := keyScheduleContext(id.mode, pskIDHash, infoHash)

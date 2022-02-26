@@ -251,7 +251,7 @@ type HpkePublicKey struct {
 	Version uint32      `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
 	Params  *HpkeParams `protobuf:"bytes,2,opt,name=params,proto3" json:"params,omitempty"`
 	// KEM-encoding of public key (i.e., SerializePublicKey() ) as described in
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html#name-cryptographic-dependencies.
+	// https://www.rfc-editor.org/rfc/rfc9180.html#name-cryptographic-dependencies.
 	PublicKey []byte `protobuf:"bytes,3,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
 }
 
@@ -316,7 +316,7 @@ type HpkePrivateKey struct {
 	Version   uint32         `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
 	PublicKey *HpkePublicKey `protobuf:"bytes,2,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
 	// KEM-encoding of private key (i.e., SerializePrivateKey() ) as described in
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html#name-cryptographic-dependencies.
+	// https://www.rfc-editor.org/rfc/rfc9180.html#name-cryptographic-dependencies.
 	PrivateKey []byte `protobuf:"bytes,3,opt,name=private_key,json=privateKey,proto3" json:"private_key,omitempty"`
 }
 

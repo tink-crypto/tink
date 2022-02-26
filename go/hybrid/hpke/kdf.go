@@ -19,31 +19,31 @@ package hpke
 // kdf is a package-internal interface for the Hybrid Public Key Encryption
 // (HPKE) key derivation function (KDF).
 //
-// The HPKE I-D is available at
-// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+// The HPKE RFC is available at
+// https://www.rfc-editor.org/rfc/rfc9180.html.
 type kdf interface {
 	// labeledExtract extracts a pseudorandom key from salt, ikm using the
 	// HPKE-specified values suiteID, ikmLabel to facilitate domain separation
 	// and context binding.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4-9
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-4-9
 	labeledExtract(salt, ikm []byte, ikmLabel string, suiteID []byte) []byte
 
 	// labeledExpand expands the pseudorandom key prk into length pseudorandom
 	// bytes using info with other HPKE-specific values infoLabel, suiteID to
 	// facilitate domain separation and context binding.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4-9
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-4-9
 	labeledExpand(prk, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error)
 
 	// extractAndExpand calls labeledExtract and labeledExpand in order.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-3
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-3
 	extractAndExpand(salt, ikm []byte, ikmLabel string, info []byte, infoLabel string, suiteID []byte, length int) ([]byte, error)
 
 	// id returns the HPKE KDF algorithm identifier for the underlying KDF
 	// implementation.
 	//
-	// https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-7.2
+	// https://www.rfc-editor.org/rfc/rfc9180.html#section-7.2
 	id() uint16
 }
