@@ -33,7 +33,7 @@ using ::google::crypto::tink::HpkeParams;
 using ::google::crypto::tink::HpkePrivateKey;
 using ::google::crypto::tink::HpkePublicKey;
 
-// Test vector from Appendix A.1 of draft-irtf-cfrg-hpke-09.
+// Test vector from https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.1.
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, AES-128-GCM
 const absl::string_view kTestX25519HkdfSha256Aes128Gcm[] = {
     "3948cfe0ad1ddb695d780e59077195da6c56506b027329794ab02bca80815c4d",  // pkRm
@@ -47,7 +47,7 @@ const absl::string_view kTestX25519HkdfSha256Aes128Gcm[] = {
     "37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431"   // enc
 };
 
-// Test vector from Appendix A.2 of draft-irtf-cfrg-hpke-09.
+// Test vector from https://www.rfc-editor.org/rfc/rfc9180.html#appendix-A.2.
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, ChaCha20Poly1305
 const absl::string_view kTestX25519HkdfSha256ChaCha20Poly1305[] = {
     "4310ee97d88cc1f088a5576c77ab0cf5c3ac797f3d95139c6c84b5429c59662a",  // pkRm
@@ -62,7 +62,7 @@ const absl::string_view kTestX25519HkdfSha256ChaCha20Poly1305[] = {
 };
 
 // BoringSSL test vectors with aead_id = 2.  Missing 'skRm' and 'enc'.
-// (No test vectors provided by draft-irtf-cfrg-hpke-09 for this test case).
+// (No test vectors provided by RFC 9180 for this test case).
 // DHKEM(X25519, HKDF-SHA256), HKDF-SHA256, AES-256-GCM
 const absl::string_view kTestX25519HkdfSha256Aes256Gcm[] = {
     "ac66bae9ffa270cf4a89ed9f274e30c0456babae2572aaaf002ff0d8884ab018",  // pkRm
