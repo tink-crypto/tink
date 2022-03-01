@@ -15,7 +15,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/registry_impl.h"
 
+#include <utility>
+
 #include "absl/status/status.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/util/errors.h"
 #include "tink/util/statusor.h"
 #include "proto/tink.pb.h"
@@ -27,6 +30,8 @@ using google::crypto::tink::KeyTemplate;
 namespace crypto {
 namespace tink {
 namespace internal {
+
+using ::crypto::tink::MonitoringClientFactory;
 
 StatusOr<const RegistryImpl::KeyTypeInfo*> RegistryImpl::get_key_type_info(
     absl::string_view type_url) const {
@@ -105,6 +110,17 @@ RegistryImpl::DeriveKey(const google::crypto::tink::KeyTemplate& key_template,
   }
   return key_type_info_or.ValueOrDie()->key_deriver()(key_template.value(),
                                                       randomness);
+}
+
+util::Status RegistryImpl::RegisterMonitoringClientFactory(
+    std::unique_ptr<MonitoringClientFactory> factory) {
+  absl::MutexLock lock(&monitoring_factory_mutex_);
+  if (monitoring_factory_ != nullptr) {
+    return util::Status(absl::StatusCode::kAlreadyExists,
+                        "A monitoring factory is already registered");
+  }
+  monitoring_factory_ = std::move(factory);
+  return util::OkStatus();
 }
 
 void RegistryImpl::Reset() {
