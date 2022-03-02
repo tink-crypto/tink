@@ -26,7 +26,7 @@
 #  source ./kokoro/testutils/install_go.sh
 
 install_temp_go() {
-  local -r go_version="1.16.14"
+  local -r go_version="1.17.7"
 
   local -r platform="$(uname | tr '[:upper:]' '[:lower:]')"
   local go_platform
@@ -54,6 +54,7 @@ install_temp_go() {
     tar -xzf "${go_archive}"
   )
 
+  export GOROOT="${go_tmpdir}/go"
   export PATH="${go_tmpdir}/go/bin:${PATH}"
 }
 

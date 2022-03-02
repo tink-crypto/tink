@@ -41,6 +41,8 @@ cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 
+echo "Using go binary from $(which go): $(go version)"
+
 cd tools
 use_bazel.sh $(cat .bazelversion)
 time bazel build -- ...

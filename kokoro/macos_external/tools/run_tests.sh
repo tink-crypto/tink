@@ -29,6 +29,8 @@ cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
 # Sourcing required to update callers environment.
 source ./kokoro/testutils/install_go.sh
 
+echo "Using go binary from $(which go): $(go version)"
+
 # TODO(b/155225382): Avoid modifying the sytem Python installation.
 pip3 install --user protobuf
 

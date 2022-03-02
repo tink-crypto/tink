@@ -229,8 +229,7 @@ main() {
   echo "using java binary: $(which java)"
   java -version
 
-  echo "using go: $(which go)"
-  go version
+  echo "Using go binary from $(which go): $(go version)"
 
   echo "using python: $(which python)"
   python --version

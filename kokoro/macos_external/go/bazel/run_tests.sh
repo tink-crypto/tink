@@ -23,6 +23,11 @@ if [[ -n "${KOKORO_ROOT}" ]]; then
   source ./kokoro/testutils/install_go.sh
 fi
 
+echo "Using go binary from $(which go): $(go version)"
+
+echo "Using go binary from $(which go): $(go version)"
+
+
 cd go/
 use_bazel.sh "$(cat .bazelversion)"
 time bazel build -- ...
