@@ -46,38 +46,9 @@ go_library(
 )
 
 go_test(
-    name = "go_default_test_test",
-    srcs = [
-        "jwk_converter_test.go",
-        "jwt_key_templates_test.go",
-        "jwt_mac_factory_test.go",
-        "jwt_signer_verifier_factory_test.go",
-        "jwt_validator_test.go",
-        "raw_jwt_test.go",
-        "verified_jwt_test.go",
-    ],
-    deps = [
-        "//insecurecleartextkeyset:go_default_library",
-        "//jwt:go_default_library",
-        "//keyset:go_default_library",
-        "//proto/jwt_ecdsa_go_proto:go_default_library",
-        "//proto/jwt_hmac_go_proto:go_default_library",
-        "//proto/tink_go_proto:go_default_library",
-        "//signature:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testkeyset:go_default_library",
-        "//testutil:go_default_library",
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
-        "@org_golang_google_protobuf//testing/protocmp:go_default_library",
-        "@org_golang_google_protobuf//types/known/structpb",
-    ],
-)
-
-go_test(
     name = "go_default_test",
     srcs = [
+        "jwk_converter_test.go",
         "jwt_ecdsa_signer_key_manager_test.go",
         "jwt_ecdsa_verifier_key_manager_test.go",
         "jwt_encoding_test.go",
@@ -108,5 +79,7 @@ go_test(
         "@com_github_google_go_cmp//cmp:go_default_library",
         "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
         "@org_golang_google_protobuf//proto:go_default_library",
+        "@org_golang_google_protobuf//testing/protocmp:go_default_library",
+        "@org_golang_google_protobuf//types/known/structpb:go_default_library",
     ],
 )
