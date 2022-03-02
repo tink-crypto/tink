@@ -18,3 +18,13 @@ gazelle(
         "-go_naming_convention=go_default_library",
     ],
 )
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
