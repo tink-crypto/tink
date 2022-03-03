@@ -36,8 +36,8 @@ go_test(
         "daead_key_templates_test.go",
         "daead_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",
         "//daead/subtle:go_default_library",

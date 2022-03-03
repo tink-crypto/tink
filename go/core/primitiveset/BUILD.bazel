@@ -18,8 +18,8 @@ go_library(
 go_test(
     name = "go_default_test",
     srcs = ["primitiveset_test.go"],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//core/cryptofmt:go_default_library",
         "//proto/tink_go_proto:go_default_library",
         "//testutil:go_default_library",

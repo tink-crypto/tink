@@ -27,6 +27,8 @@ go_test(
         "subtle_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
-    embed = [":go_default_library"],
-    deps = ["//testutil:go_default_library"],
+    deps = [
+        ":go_default_library",
+        "//testutil:go_default_library",
+    ],
 )

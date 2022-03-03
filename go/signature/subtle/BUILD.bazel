@@ -33,8 +33,8 @@ go_test(
     data = [
         "@wycheproof//testvectors:all",
     ],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//subtle:go_default_library",
         "//subtle/random:go_default_library",
         "//testutil:go_default_library",

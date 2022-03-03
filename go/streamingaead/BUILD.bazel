@@ -43,8 +43,8 @@ go_test(
         "streamingaead_key_templates_test.go",
         "streamingaead_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//core/registry:go_default_library",
         "//keyset:go_default_library",
         "//mac:go_default_library",

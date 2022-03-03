@@ -43,8 +43,8 @@ go_test(
         "manager_test.go",
         "validation_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//aead/subtle:go_default_library",
         "//mac:go_default_library",
         "//proto/common_go_proto:go_default_library",

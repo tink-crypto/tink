@@ -23,5 +23,5 @@ go_test(
     name = "go_default_test",
     size = "small",
     srcs = ["fakekms_test.go"],
-    embed = [":go_default_library"],
+    deps = [":go_default_library"],
 )

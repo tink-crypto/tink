@@ -57,8 +57,8 @@ go_test(
         "kms_envelope_aead_test.go",
         "xchacha20poly1305_key_manager_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
+        ":go_default_library",
         "//aead/subtle:go_default_library",
         "//core/cryptofmt:go_default_library",
         "//core/registry:go_default_library",

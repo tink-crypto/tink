@@ -25,6 +25,8 @@ go_test(
         "aes_gcm_hkdf_test.go",
         "subtle_test.go",
     ],
-    embed = [":go_default_library"],
-    deps = ["//tink:go_default_library"],
+    deps = [
+        ":go_default_library",
+        "//tink:go_default_library",
+    ],
 )
