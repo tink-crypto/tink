@@ -295,6 +295,16 @@ func jwtVerifyResponseError(err error) *pb.JwtVerifyResponse {
 		Result: &pb.JwtVerifyResponse_Err{err.Error()}}
 }
 
+func jwtToJWKSetResponseError(err error) *pb.JwtToJwkSetResponse {
+	return &pb.JwtToJwkSetResponse{
+		Result: &pb.JwtToJwkSetResponse_Err{err.Error()}}
+}
+
+func jwtFromJwkSetResponseError(err error) *pb.JwtFromJwkSetResponse {
+	return &pb.JwtFromJwkSetResponse{
+		Result: &pb.JwtFromJwkSetResponse_Err{err.Error()}}
+}
+
 func (s *JWTService) ComputeMacAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
 	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
 	handle, err := testkeyset.Read(reader)
@@ -396,9 +406,33 @@ func (s *JWTService) PublicKeyVerifyAndDecode(ctx context.Context, req *pb.JwtVe
 }
 
 func (s *JWTService) ToJwkSet(ctx context.Context, req *pb.JwtToJwkSetRequest) (*pb.JwtToJwkSetResponse, error) {
-	return nil, fmt.Errorf("ToJwkSet not implemented")
+	ks, err := keyset.NewBinaryReader(bytes.NewReader(req.GetKeyset())).Read()
+	if err != nil {
+		return jwtToJWKSetResponseError(err), nil
+	}
+	handle, err := keyset.NewHandleWithNoSecrets(ks)
+	if err != nil {
+		return jwtToJWKSetResponseError(err), nil
+	}
+	jwkSet, err := jwt.JWKSetFromPublicKeysetHandle(handle)
+	if err != nil {
+		return jwtToJWKSetResponseError(err), nil
+	}
+	return &pb.JwtToJwkSetResponse{
+		Result: &pb.JwtToJwkSetResponse_JwkSet{string(jwkSet)},
+	}, nil
 }
 
 func (s *JWTService) FromJwkSet(ctx context.Context, req *pb.JwtFromJwkSetRequest) (*pb.JwtFromJwkSetResponse, error) {
-	return nil, fmt.Errorf("FromJwkSet not implemented")
+	handle, err := jwt.JWKSetToPublicKeysetHandle([]byte(req.GetJwkSet()))
+	if err != nil {
+		return jwtFromJwkSetResponseError(err), nil
+	}
+	b := &bytes.Buffer{}
+	if err := testkeyset.Write(handle, keyset.NewBinaryWriter(b)); err != nil {
+		return jwtFromJwkSetResponseError(err), nil
+	}
+	return &pb.JwtFromJwkSetResponse{
+		Result: &pb.JwtFromJwkSetResponse_Keyset{b.Bytes()},
+	}, nil
 }

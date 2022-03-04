@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"testing"
 
+	spb "google.golang.org/protobuf/types/known/structpb"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -50,6 +51,28 @@ func signedCompactJWTFromResponse(response *pb.JwtSignResponse) (string, error) 
 		return "", errors.New(r.Err)
 	default:
 		return "", fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func jwkSetFromResponse(response *pb.JwtToJwkSetResponse) (string, error) {
+	switch r := response.Result.(type) {
+	case *pb.JwtToJwkSetResponse_JwkSet:
+		return r.JwkSet, nil
+	case *pb.JwtToJwkSetResponse_Err:
+		return "", errors.New(r.Err)
+	default:
+		return "", fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func keysetFromResponse(response *pb.JwtFromJwkSetResponse) ([]byte, error) {
+	switch r := response.Result.(type) {
+	case *pb.JwtFromJwkSetResponse_Keyset:
+		return r.Keyset, nil
+	case *pb.JwtFromJwkSetResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
 	}
 }
 
@@ -457,5 +480,90 @@ func TestJWTPublicKeySignAndEncodeVerifyAndDecode(t *testing.T) {
 	}
 	if !cmp.Equal(verifiedJWT, rawJWT, protocmp.Transform()) {
 		t.Errorf("verifiedJWT doesn't match expected value: (+ got, - want) %v", cmp.Diff(verifiedJWT, rawJWT, protocmp.Transform()))
+	}
+}
+
+func TestToJwkSetWithPrivateKeyFails(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+
+	ctx := context.Background()
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(jwt.ES256Template()) failed: %v", err)
+	}
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	toJWKResponse, err := jwtService.ToJwkSet(ctx, &pb.JwtToJwkSetRequest{Keyset: privateKeyset})
+	if err != nil {
+		t.Fatalf("jwtService.ToJwkSet() err = %v, want nil", err)
+	}
+	if _, err := jwkSetFromResponse(toJWKResponse); err == nil {
+		t.Fatalf("JwtToJwkSetResponse_Err: = nil, want error")
+	}
+}
+
+func TestFromJwkSetPrivateKeyFails(t *testing.T) {
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+	jwkES256PublicKey := `{
+	  "keys":[{
+	  "kty":"EC",
+	  "crv":"P-256",
+	  "x":"wO6uIxh8SkKOO8VjZXNRTteRcwCPE4_4JElKyaa0fcQ",
+	  "y":"7oRiYhnmkP6nqrdXWgtsWUWq5uFRLJkhyVFiWPRB278",
+		"d":"8oRinhnmkYjkqrdXWgtsWUWq5uFRLJkhyVFiWPRB278",
+	  "use":"sig","alg":"ES256","key_ops":["verify"],
+	  "kid":"EhuduQ"}]
+	}`
+	fromJWKResponse, err := jwtService.FromJwkSet(ctx, &pb.JwtFromJwkSetRequest{JwkSet: jwkES256PublicKey})
+	if err != nil {
+		t.Fatalf("jwtService.FromJwkSet() err = %v, want nil", err)
+	}
+	if _, err := keysetFromResponse(fromJWKResponse); err == nil {
+		t.Fatalf("JwtFromJwkSetResponse_Err = nil, want error")
+	}
+}
+
+func TestFromJwkToJwkSet(t *testing.T) {
+	jwtService := &services.JWTService{}
+	ctx := context.Background()
+	jwkES256PublicKey := `{
+	  "keys":[{
+	  "kty":"EC",
+	  "crv":"P-256",
+	  "x":"wO6uIxh8SkKOO8VjZXNRTteRcwCPE4_4JElKyaa0fcQ",
+	  "y":"7oRiYhnmkP6nqrdXWgtsWUWq5uFRLJkhyVFiWPRB278",
+	  "use":"sig","alg":"ES256","key_ops":["verify"],
+	  "kid":"EhuduQ"}]
+	}`
+	fromJWKResponse, err := jwtService.FromJwkSet(ctx, &pb.JwtFromJwkSetRequest{JwkSet: jwkES256PublicKey})
+	if err != nil {
+		t.Fatalf("jwtService.FromJwkSet() err = %v, want nil", err)
+	}
+	ks, err := keysetFromResponse(fromJWKResponse)
+	if err != nil {
+		t.Fatalf("JwtFromJwkSetResponse_Err: = %v, want nil", err)
+	}
+	toJWKResponse, err := jwtService.ToJwkSet(ctx, &pb.JwtToJwkSetRequest{Keyset: ks})
+	if err != nil {
+		t.Fatalf("jwtService.ToJwkSet() err = %v, want nil", err)
+	}
+	jwkSet, err := jwkSetFromResponse(toJWKResponse)
+	if err != nil {
+		t.Fatalf("JwtToJwkSetResponse_Err: = %v, want nil", err)
+	}
+	got := &spb.Struct{}
+	if err := got.UnmarshalJSON([]byte(jwkSet)); err != nil {
+		t.Fatalf("got.UnmarshalJSON() err = %v, want nil", err)
+	}
+	want := &spb.Struct{}
+	if err := want.UnmarshalJSON([]byte(jwkES256PublicKey)); err != nil {
+		t.Fatalf("want.UnmarshalJSON() err = %v, want nil", err)
+	}
+	if !cmp.Equal(want, got, protocmp.Transform()) {
+		t.Errorf("mismatch in jwk sets: diff (-want,+got): %v", cmp.Diff(want, got, protocmp.Transform()))
 	}
 }
