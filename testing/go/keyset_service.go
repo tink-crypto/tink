@@ -24,6 +24,7 @@ import (
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/hybrid"
+	"github.com/google/tink/go/jwt"
 	"github.com/google/tink/go/keyset"
 	"github.com/google/tink/go/mac"
 	"github.com/google/tink/go/prf"
@@ -79,6 +80,18 @@ func (s *KeysetService) GetTemplate(ctx context.Context, req *pb.KeysetTemplateR
 			"HMAC_SHA256_PRF":                                    prf.HMACSHA256PRFKeyTemplate(),
 			"HMAC_SHA512_PRF":                                    prf.HMACSHA512PRFKeyTemplate(),
 			"HKDF_SHA256":                                        prf.HKDFSHA256PRFKeyTemplate(),
+			"JWT_HS256":                                          jwt.HS256Template(),
+			"JWT_HS256_RAW":                                      jwt.RawHS256Template(),
+			"JWT_HS384":                                          jwt.HS384Template(),
+			"JWT_HS384_RAW":                                      jwt.RawHS384Template(),
+			"JWT_HS512":                                          jwt.HS512Template(),
+			"JWT_HS512_RAW":                                      jwt.RawHS512Template(),
+			"JWT_ES256":                                          jwt.ES256Template(),
+			"JWT_ES256_RAW":                                      jwt.RawES256Template(),
+			"JWT_ES384":                                          jwt.ES384Template(),
+			"JWT_ES384_RAW":                                      jwt.RawES384Template(),
+			"JWT_ES512":                                          jwt.ES512Template(),
+			"JWT_ES512_RAW":                                      jwt.RawES512Template(),
 		}
 	}
 	template, success := s.Templates[req.GetTemplateName()]
