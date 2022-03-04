@@ -124,10 +124,16 @@ util::Status RegistryImpl::RegisterMonitoringClientFactory(
 }
 
 void RegistryImpl::Reset() {
-  absl::MutexLock lock(&maps_mutex_);
-  type_url_to_info_.clear();
-  name_to_catalogue_map_.clear();
-  primitive_to_wrapper_.clear();
+  {
+    absl::MutexLock lock(&maps_mutex_);
+    type_url_to_info_.clear();
+    name_to_catalogue_map_.clear();
+    primitive_to_wrapper_.clear();
+  }
+  {
+    absl::MutexLock lock(&monitoring_factory_mutex_);
+    monitoring_factory_.reset();
+  }
 }
 
 }  // namespace internal
