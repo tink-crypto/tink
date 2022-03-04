@@ -28,6 +28,7 @@ go_library(
         "verified_jwt.go",
     ],
     importpath = "github.com/google/tink/go/jwt",
+    visibility = ["//visibility:public"],
     deps = [
         "//core/primitiveset:go_default_library",
         "//core/registry:go_default_library",
