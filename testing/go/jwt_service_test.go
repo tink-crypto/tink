@@ -303,3 +303,159 @@ func TestJWTVerifyMACFailures(t *testing.T) {
 		})
 	}
 }
+
+func TestJWTPublicKeySignWithInvalidKeysetFails(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+
+	ctx := context.Background()
+	template, err := proto.Marshal(aead.AES256GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES256GCMKeyTemplate()) failed: %v", err)
+	}
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	rawJWT := &pb.JwtToken{
+		Subject: &pb.StringValue{Value: "tink-subject"},
+	}
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	if err != nil {
+		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
+	}
+	if _, err := signedCompactJWTFromResponse(signResponse); err == nil {
+		t.Fatalf("JwtSignResponse_Err: nil want error")
+	}
+}
+
+func TestJWTPublicKeySignInvalidTokenFails(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+
+	ctx := context.Background()
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(jwt.ES256Template()) failed: %v", err)
+	}
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	for _, tc := range []jwtTestCase{
+		{
+			tag:    "nil rawJWT",
+			rawJWT: nil,
+		},
+		{
+			tag: "invalid json array string",
+			rawJWT: &pb.JwtToken{
+				CustomClaims: map[string]*pb.JwtClaimValue{
+					"cc-array": &pb.JwtClaimValue{Kind: &pb.JwtClaimValue_JsonArrayValue{JsonArrayValue: "{35}"}},
+				},
+			},
+		},
+		{
+			tag: "invalid json object string",
+			rawJWT: &pb.JwtToken{
+				CustomClaims: map[string]*pb.JwtClaimValue{
+					"cc-object": &pb.JwtClaimValue{Kind: &pb.JwtClaimValue_JsonObjectValue{JsonObjectValue: `["o":"a"]`}},
+				},
+			},
+		},
+	} {
+		t.Run(tc.tag, func(t *testing.T) {
+			signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: tc.rawJWT})
+			if err != nil {
+				t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
+			}
+			if _, err := signedCompactJWTFromResponse(signResponse); err == nil {
+				t.Fatalf("JwtSignResponse_Err: nil want error")
+			}
+		})
+	}
+}
+
+func TestJWTPublicKeyVerifyFails(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+
+	ctx := context.Background()
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(jwt.ES256Template()) failed: %v", err)
+	}
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+	rawJWT := &pb.JwtToken{
+		Subject: &pb.StringValue{Value: "tink-subject"},
+	}
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	if err != nil {
+		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
+	}
+	compact, err := signedCompactJWTFromResponse(signResponse)
+	if err != nil {
+		t.Fatalf("JwtSignResponse_Err failed: %v", err)
+	}
+	validator := &pb.JwtValidator{
+		ExpectedTypeHeader: &pb.StringValue{Value: "JWT"},
+	}
+	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: publicKeyset, SignedCompactJwt: compact, Validator: validator})
+	if err != nil {
+		t.Fatalf("jwtVerifySignature failed: %v", err)
+	}
+	if _, err := verifiedJWTFromResponse(verifyResponse); err == nil {
+		t.Fatalf("JwtVerifyResponse_Err: nil want error")
+	}
+}
+
+func TestJWTPublicKeySignAndEncodeVerifyAndDecode(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	jwtService := &services.JWTService{}
+
+	ctx := context.Background()
+	template, err := proto.Marshal(jwt.ES256Template())
+	if err != nil {
+		t.Fatalf("proto.Marshal(jwt.ES256Template()) failed: %v", err)
+	}
+	privateKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	publicKeyset, err := pubKeyset(ctx, keysetService, privateKeyset)
+	if err != nil {
+		t.Fatalf("pubKeyset failed: %v", err)
+	}
+	rawJWT := &pb.JwtToken{
+		Subject: &pb.StringValue{Value: "tink-subject"},
+	}
+	signResponse, err := jwtService.PublicKeySignAndEncode(ctx, &pb.JwtSignRequest{Keyset: privateKeyset, RawJwt: rawJWT})
+	if err != nil {
+		t.Fatalf("jwtService.PublicKeySignAndEncode() err = %v", err)
+	}
+	compact, err := signedCompactJWTFromResponse(signResponse)
+	if err != nil {
+		t.Fatalf("JwtSignResponse_Err failed: %v", err)
+	}
+	validator := &pb.JwtValidator{
+		AllowMissingExpiration: true,
+	}
+	verifyResponse, err := jwtService.PublicKeyVerifyAndDecode(ctx, &pb.JwtVerifyRequest{Keyset: publicKeyset, SignedCompactJwt: compact, Validator: validator})
+	if err != nil {
+		t.Fatalf("jwtVerifySignature failed: %v", err)
+	}
+	verifiedJWT, err := verifiedJWTFromResponse(verifyResponse)
+	if err != nil {
+		t.Fatalf("JwtVerifyResponse_Err: %v", err)
+	}
+	if !cmp.Equal(verifiedJWT, rawJWT, protocmp.Transform()) {
+		t.Errorf("verifiedJWT doesn't match expected value: (+ got, - want) %v", cmp.Diff(verifiedJWT, rawJWT, protocmp.Transform()))
+	}
+}

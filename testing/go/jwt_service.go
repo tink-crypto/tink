@@ -346,11 +346,53 @@ func (s *JWTService) VerifyMacAndDecode(ctx context.Context, req *pb.JwtVerifyRe
 }
 
 func (s *JWTService) PublicKeySignAndEncode(ctx context.Context, req *pb.JwtSignRequest) (*pb.JwtSignResponse, error) {
-	return nil, fmt.Errorf("PublicKeyVerifyAndDecode not implemented")
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return jwtSignResponseError(err), nil
+	}
+	signer, err := jwt.NewSigner(handle)
+	if err != nil {
+		return jwtSignResponseError(err), nil
+	}
+	rawJWT, err := tokenFromProto(req.GetRawJwt())
+	if err != nil {
+		return jwtSignResponseError(err), nil
+	}
+	compact, err := signer.SignAndEncode(rawJWT)
+	if err != nil {
+		return jwtSignResponseError(err), nil
+	}
+	return &pb.JwtSignResponse{
+		Result: &pb.JwtSignResponse_SignedCompactJwt{compact},
+	}, nil
 }
 
 func (s *JWTService) PublicKeyVerifyAndDecode(ctx context.Context, req *pb.JwtVerifyRequest) (*pb.JwtVerifyResponse, error) {
-	return nil, fmt.Errorf("PublicKeyVerifyAndDecode not implemented")
+	reader := keyset.NewBinaryReader(bytes.NewReader(req.Keyset))
+	handle, err := testkeyset.Read(reader)
+	if err != nil {
+		return jwtVerifyResponseError(err), nil
+	}
+	verifier, err := jwt.NewVerifier(handle)
+	if err != nil {
+		return jwtVerifyResponseError(err), nil
+	}
+	validator, err := validatorFromProto(req.GetValidator())
+	if err != nil {
+		return jwtVerifyResponseError(err), nil
+	}
+	verified, err := verifier.VerifyAndDecode(req.GetSignedCompactJwt(), validator)
+	if err != nil {
+		return jwtVerifyResponseError(err), nil
+	}
+	verifiedJWT, err := tokenToProto(verified)
+	if err != nil {
+		return jwtVerifyResponseError(err), nil
+	}
+	return &pb.JwtVerifyResponse{
+		Result: &pb.JwtVerifyResponse_VerifiedJwt{verifiedJWT},
+	}, nil
 }
 
 func (s *JWTService) ToJwkSet(ctx context.Context, req *pb.JwtToJwkSetRequest) (*pb.JwtToJwkSetResponse, error) {
