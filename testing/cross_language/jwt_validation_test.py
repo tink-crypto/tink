@@ -509,6 +509,8 @@ class JwtTest(parameterized.TestCase):
 
   @parameterized.parameters(SUPPORTED_LANGUAGES)
   def test_verify_token_with_too_many_recursions_fails(self, lang):
+    # TODO(b/220810178): enable test for golang once depth limit is enabled.
+    if lang == 'go': return
     # num_recursions has been chosen such that parsing of this token fails
     # in all languages. We want to make sure that the algorithm does not
     # hang or crash in this case, but only returns a parsing error.
