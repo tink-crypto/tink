@@ -18,7 +18,7 @@ local_repository(
 )
 
 local_repository(
-    name = "com_github_google_tink_go",
+    name = "tink_go",
     path = "../go",
 )
 
@@ -68,7 +68,7 @@ tink_base_deps()
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
 tink_base_deps_init()
 
-load("@com_github_google_tink_go//:deps.bzl", "go_dependencies")
+load("@tink_go//:deps.bzl", "go_dependencies")
 
 go_dependencies()
 

@@ -1,4 +1,4 @@
-workspace(name = "com_github_google_tink_go")
+workspace(name = "tink_go")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
