@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/google/tink/go/subtle/random"
-	"github.com/google/tink/go/subtle"
 	pb "github.com/google/tink/go/proto/hpke_go_proto"
 )
 
@@ -100,7 +99,7 @@ func TestNewDecryptMissingPrivKeyBytes(t *testing.T) {
 	}
 }
 
-func TestEncryptDecryptX25519HKDFSHA256AESGCM(t *testing.T) {
+func TestEncryptDecrypt(t *testing.T) {
 	aeadIDs := []pb.HpkeAead{pb.HpkeAead_AES_128_GCM, pb.HpkeAead_AES_256_GCM}
 	for _, aeadID := range aeadIDs {
 		params := &pb.HpkeParams{
@@ -242,38 +241,6 @@ func TestDecryptEncapsulatedKeyWithFlippedMSB(t *testing.T) {
 	if _, err := dec.Decrypt(ct, ctxInfo); err == nil {
 		t.Error("Decrypt with encapsulated key MSB flipped: got success, want err")
 	}
-}
-
-func validParams(t *testing.T) *pb.HpkeParams {
-	t.Helper()
-	return &pb.HpkeParams{
-		Kem:  pb.HpkeKem_DHKEM_X25519_HKDF_SHA256,
-		Kdf:  pb.HpkeKdf_HKDF_SHA256,
-		Aead: pb.HpkeAead_AES_256_GCM,
-	}
-}
-
-func pubPrivKeys(t *testing.T, params *pb.HpkeParams) (*pb.HpkePublicKey, *pb.HpkePrivateKey) {
-	t.Helper()
-
-	priv, err := subtle.GeneratePrivateKeyX25519()
-	if err != nil {
-		t.Fatalf("GeneratePrivateKeyX25519: err %q", err)
-	}
-	pub, err := subtle.PublicFromPrivateX25519(priv)
-	if err != nil {
-		t.Fatalf("PublicFromPrivateX25519: err %q", err)
-	}
-
-	pubKey := &pb.HpkePublicKey{
-		Params:    params,
-		PublicKey: pub,
-	}
-	privKey := &pb.HpkePrivateKey{
-		PublicKey:  pubKey,
-		PrivateKey: priv,
-	}
-	return pubKey, privKey
 }
 
 func flipRandByte(t *testing.T, b []byte) []byte {
