@@ -16,7 +16,7 @@
 
 from tink.cc.pybind import tink_bindings
 
-KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.StatusNotOk,)
+KNOWN_STATUS_NOT_OK_TYPES = (tink_bindings.PythonTinkException,)
 
 
 def register_status_not_ok_type(status_not_ok_type):

@@ -18,8 +18,15 @@ set -euo pipefail
 
 if [[ -n "${KOKORO_ROOT}" ]]; then
   cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-  ./kokoro/copy_credentials.sh
+  ./kokoro/testutils/copy_credentials.sh
+  # Sourcing required to update callers environment.
+  source ./kokoro/testutils/install_go.sh
 fi
+
+echo "Using go binary from $(which go): $(go version)"
+
+echo "Using go binary from $(which go): $(go version)"
+
 
 cd go/
 use_bazel.sh "$(cat .bazelversion)"

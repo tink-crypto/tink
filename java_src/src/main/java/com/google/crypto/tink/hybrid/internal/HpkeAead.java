@@ -23,7 +23,7 @@ import java.security.GeneralSecurityException;
  * Interface for Hybrid Public Key Encryption (HPKE) authenticated encryption with associated data
  * (AEAD).
  *
- * <p>HPKE I.-D. is available at https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html.
+ * <p>HPKE RFC is available at https://www.rfc-editor.org/rfc/rfc9180.html.
  */
 @Immutable
 interface HpkeAead {
@@ -32,7 +32,7 @@ interface HpkeAead {
    * key} and {@code nonce} according to the HPKE AEAD specification.
    *
    * <p>More details available at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-encryption-and-decryption.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#name-encryption-and-decryption.
    */
   byte[] seal(byte[] key, byte[] nonce, byte[] plaintext, byte[] associatedData)
       throws GeneralSecurityException;
@@ -42,7 +42,7 @@ interface HpkeAead {
    * key} and {@code nonce} according to the HPKE AEAD specification.
    *
    * <p>More details available at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-encryption-and-decryption.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#name-encryption-and-decryption.
    */
   byte[] open(byte[] key, byte[] nonce, byte[] ciphertext, byte[] associatedData)
       throws GeneralSecurityException;
@@ -51,13 +51,13 @@ interface HpkeAead {
    * Returns the HPKE AEAD algorithm identifier for the underlying AEAD implementation.
    *
    * <p>More details at
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-authenticated-encryption-wi.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#name-authenticated-encryption-wi.
    */
   byte[] getAeadId() throws GeneralSecurityException;
 
-  /** Returns key length (in bytes) for this algorithm (i.e., parameter 'Nk' in HPKE I.-D.). */
+  /** Returns key length (in bytes) for this algorithm (i.e., parameter 'Nk' in HPKE RFC). */
   int getKeyLength();
 
-  /** Returns nonce length (in bytes) for this algorithm (i.e., parameter 'Nn' in HPKE I.-D.). */
+  /** Returns nonce length (in bytes) for this algorithm (i.e., parameter 'Nn' in HPKE RFC). */
   int getNonceLength();
 }

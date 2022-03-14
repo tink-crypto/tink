@@ -26,13 +26,14 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for {@link SelfKeyTestValidators}. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class SelfKeyTestValidatorsTest {
 
   private RSAPublicKey publicRsaKey;
@@ -498,47 +499,90 @@ public class SelfKeyTestValidatorsTest {
     }
   };
 
-  private static Object[] parametersPssValid() {
-    return new Object[] {
-      new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 2048, 32},
-      new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 3072, 32},
-      new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 4096, 32},
-      new Object[] {Enums.HashType.SHA384, Enums.HashType.SHA384, 2048, 48},
-      new Object[] {Enums.HashType.SHA384, Enums.HashType.SHA384, 3072, 48},
-      new Object[] {Enums.HashType.SHA384, Enums.HashType.SHA384, 4096, 48},
-      new Object[] {Enums.HashType.SHA512, Enums.HashType.SHA512, 2048, 64},
-      new Object[] {Enums.HashType.SHA512, Enums.HashType.SHA512, 3072, 64},
-      new Object[] {Enums.HashType.SHA512, Enums.HashType.SHA512, 4096, 64},
+  /** Pss Parameters */
+  public static class PssParams {
+    public PssParams(
+        Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength) {
+      this.sigHash = sigHash;
+      this.mgf1Hash = mgf1Hash;
+      this.bitLength = bitLength;
+      this.saltLength = saltLength;
+    }
+
+    public Enums.HashType sigHash;
+    public Enums.HashType mgf1Hash;
+    public int bitLength;
+    public int saltLength;
+  }
+
+  @DataPoints("pss_valid")
+  public static final PssParams[] PARAMS_PSS_VALID =
+      new PssParams[] {
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 2048, 32),
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 3072, 32),
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 4096, 32),
+        new PssParams(Enums.HashType.SHA384, Enums.HashType.SHA384, 2048, 48),
+        new PssParams(Enums.HashType.SHA384, Enums.HashType.SHA384, 3072, 48),
+        new PssParams(Enums.HashType.SHA384, Enums.HashType.SHA384, 4096, 48),
+        new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 2048, 64),
+        new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 3072, 64),
+        new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 4096, 64),
+        // Different hash functions are not supported by Tink, but the test currently happens in
+        // SigUtil.validateRsaSsaPssParams which is called by the key manager, not in the self test
+        // validation.
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA512, 2048, 32),
+      };
+
+  @DataPoints("pss_invalid")
+  public static final PssParams[] PARAMS_PSS_INVALID =
+      new PssParams[] {
+        // Low security: SHA1
+        new PssParams(Enums.HashType.SHA1, Enums.HashType.SHA1, 2048, 20),
+        // Low security: 1024 bit keys
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 1024, 20),
+        // Unsupported modulus sizes.
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 2047, 32),
+        new PssParams(Enums.HashType.SHA256, Enums.HashType.SHA256, 2047, 32),
+        new PssParams(Enums.HashType.SHA384, Enums.HashType.SHA384, 2047, 48),
+        new PssParams(Enums.HashType.SHA512, Enums.HashType.SHA512, 2047, 64),
+      };
+
+  /** Pkcs Parameters */
+  public static class PkcsParams {
+    public PkcsParams(Enums.HashType hash, int bitLength) {
+      this.hash = hash;
+      this.bitLength = bitLength;
+    }
+
+    public Enums.HashType hash;
+    public int bitLength;
+  }
+
+  @DataPoints("pkcs_valid")
+  public static PkcsParams[] parametersPkcs1Valid() {
+    return new PkcsParams []{
+      new PkcsParams(Enums.HashType.SHA256, 2048),
+      new PkcsParams(Enums.HashType.SHA256, 3072),
+      new PkcsParams(Enums.HashType.SHA256, 4096),
+      new PkcsParams(Enums.HashType.SHA384, 2048),
+      new PkcsParams(Enums.HashType.SHA384, 3072),
+      new PkcsParams(Enums.HashType.SHA384, 4096),
+      new PkcsParams(Enums.HashType.SHA512, 2048),
+      new PkcsParams(Enums.HashType.SHA512, 3072),
+      new PkcsParams(Enums.HashType.SHA512, 4096),
     };
   }
 
-  private static Object[] parametersPssInvalid() {
+  @DataPoints("pkcs_invalid")
+  public static Object[] parametersPkcs1Invalid() {
     return new Object[] {
-      new Object[] {Enums.HashType.SHA256, Enums.HashType.SHA256, 2047, 32},
-      new Object[] {Enums.HashType.SHA384, Enums.HashType.SHA384, 2047, 48},
-      new Object[] {Enums.HashType.SHA512, Enums.HashType.SHA512, 2047, 64},
-    };
-  }
-
-  private static Object[] parametersPkcs1Valid() {
-    return new Object[] {
-      new Object[] {Enums.HashType.SHA256, 2048},
-      new Object[] {Enums.HashType.SHA256, 3072},
-      new Object[] {Enums.HashType.SHA256, 4096},
-      new Object[] {Enums.HashType.SHA384, 2048},
-      new Object[] {Enums.HashType.SHA384, 3072},
-      new Object[] {Enums.HashType.SHA384, 4096},
-      new Object[] {Enums.HashType.SHA512, 2048},
-      new Object[] {Enums.HashType.SHA512, 3072},
-      new Object[] {Enums.HashType.SHA512, 4096},
-    };
-  }
-
-  private static Object[] parametersPkcs1Invalid() {
-    return new Object[] {
-      new Object[] {Enums.HashType.SHA256, 2047},
-      new Object[] {Enums.HashType.SHA384, 2047},
-      new Object[] {Enums.HashType.SHA512, 2047},
+      // Low security
+      new PkcsParams(Enums.HashType.SHA1, 2048),
+      new PkcsParams(Enums.HashType.SHA256, 1024),
+      // Odd modulus sizes
+      new PkcsParams(Enums.HashType.SHA256, 2047),
+      new PkcsParams(Enums.HashType.SHA384, 2047),
+      new PkcsParams(Enums.HashType.SHA512, 2047),
     };
   }
 
@@ -578,53 +622,63 @@ public class SelfKeyTestValidatorsTest {
                     new BigInteger(keyInfo[6], 16)));
   }
 
-  @Test
-  @Parameters(method = "parametersPssValid")
-  public void testValidateRsaSsaPssValid(
-      Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void testValidateRsaSsaPssValid(@FromDataPoints("pss_valid") PssParams params)
       throws Exception {
-    createRsaKey(bitLength);
+    createRsaKey(params.bitLength);
     SelfKeyTestValidators.validateRsaSsaPss(
-        privateRsaKey, publicRsaKey, sigHash, mgf1Hash, saltLength);
+        privateRsaKey, publicRsaKey, params.sigHash, params.mgf1Hash, params.saltLength);
   }
 
-  @Test
-  @Parameters(method = "parametersPssInvalid")
-  public void testValidateRsaSsaPssInvalid(
-      Enums.HashType sigHash, Enums.HashType mgf1Hash, int bitLength, int saltLength)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void testValidateRsaSsaPssInvalid(@FromDataPoints("pss_invalid") PssParams params)
       throws Exception {
-    createRsaKey(bitLength);
+    createRsaKey(params.bitLength);
     assertThrows(
         Exception.class,
         () ->
             SelfKeyTestValidators.validateRsaSsaPss(
-                privateRsaKey, publicRsaKey, sigHash, mgf1Hash, saltLength));
+                privateRsaKey, publicRsaKey, params.sigHash, params.mgf1Hash, params.saltLength));
   }
 
-  @Test
-  @Parameters(method = "parametersPkcs1Valid")
-  public void testValidateRsaSsaPkcs1Valid(Enums.HashType sigHash, int bitLength) throws Exception {
-    createRsaKey(bitLength);
-    SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, sigHash);
-  }
-
-  @Test
-  @Parameters(method = "parametersPkcs1Invalid")
-  public void testValidateRsaSsaPkcs1Invalid(Enums.HashType sigHash, int bitLength)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void testValidateRsaSsaPkcs1Valid(@FromDataPoints("pkcs_valid") PkcsParams params)
       throws Exception {
-    createRsaKey(bitLength);
+    createRsaKey(params.bitLength);
+    SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, params.hash);
+  }
+
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void testValidateRsaSsaPkcs1Invalid(@FromDataPoints("pkcs_invalid") PkcsParams params)
+      throws Exception {
+    createRsaKey(params.bitLength);
     assertThrows(
         Exception.class,
-        () -> SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, sigHash));
+        () -> SelfKeyTestValidators.validateRsaSsaPkcs1(privateRsaKey, publicRsaKey, params.hash));
   }
 
-  private static Object[] parametersEcdsaValid() {
-    return new Object[] {
-      new Object[] {Enums.HashType.SHA256, EllipticCurves.CurveType.NIST_P256},
-      new Object[] {Enums.HashType.SHA384, EllipticCurves.CurveType.NIST_P384},
-      new Object[] {Enums.HashType.SHA512, EllipticCurves.CurveType.NIST_P521},
-    };
+  /** Ecdsa parameters */
+  public static class EcdsaParams {
+    public EcdsaParams(Enums.HashType hash, EllipticCurves.CurveType curveType) {
+      this.hash = hash;
+      this.curveType = curveType;
+    }
+
+    public Enums.HashType hash;
+    public EllipticCurves.CurveType curveType;
   }
+
+  @DataPoints("ecdsa_valid")
+  public static EcdsaParams[] parametersEcdsaValid =
+      new EcdsaParams[] {
+        new EcdsaParams(Enums.HashType.SHA256, EllipticCurves.CurveType.NIST_P256),
+        new EcdsaParams(Enums.HashType.SHA384, EllipticCurves.CurveType.NIST_P384),
+        new EcdsaParams(Enums.HashType.SHA512, EllipticCurves.CurveType.NIST_P521)
+      };
 
   public static final byte[][] getEcdsaKeyInfo(EllipticCurves.CurveType curveType)
       throws Exception {
@@ -647,12 +701,12 @@ public class SelfKeyTestValidatorsTest {
     privateEcdsaKey = EllipticCurves.getEcPrivateKey(curveType, key[2]);
   }
 
-  @Test
-  @Parameters(method = "parametersEcdsaValid")
-  public void testValidateEcdsaValid(Enums.HashType hash, EllipticCurves.CurveType curveType)
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void testValidateEcdsaValid(@FromDataPoints("ecdsa_valid") EcdsaParams params)
       throws Exception {
-    createEcdsaKey(curveType);
+    createEcdsaKey(params.curveType);
     SelfKeyTestValidators.validateEcdsa(
-        privateEcdsaKey, publicEcdsaKey, hash, EllipticCurves.EcdsaEncoding.IEEE_P1363);
+        privateEcdsaKey, publicEcdsaKey, params.hash, EllipticCurves.EcdsaEncoding.IEEE_P1363);
   }
 }

@@ -17,6 +17,7 @@
 #include "tink/cc/input_stream_adapter.h"
 
 #include <algorithm>
+#include <string>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"

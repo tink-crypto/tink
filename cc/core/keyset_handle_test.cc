@@ -17,6 +17,8 @@
 #include "tink/keyset_handle.h"
 
 #include <memory>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <utility>
 

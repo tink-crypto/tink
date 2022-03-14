@@ -99,12 +99,23 @@ public final class GcpKmsClient implements KmsClient {
     }
     try {
       GoogleCredential credentials =
-          GoogleCredential.fromStream(
-              new FileInputStream(new File(credentialPath)));
+          GoogleCredential.fromStream(new FileInputStream(new File(credentialPath)));
       return withCredentials(credentials);
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load credentials", e);
     }
+  }
+
+  /** Loads the provided credential. */
+  public KmsClient withCredentials(GoogleCredential credential) {
+    if (credential.createScopedRequired()) {
+      credential = credential.createScoped(CloudKMSScopes.all());
+    }
+    this.client =
+        new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
+            .setApplicationName(APPLICATION_NAME)
+            .build();
+    return this;
   }
 
   /**
@@ -120,18 +131,6 @@ public final class GcpKmsClient implements KmsClient {
     } catch (IOException e) {
       throw new GeneralSecurityException("cannot load default credentials", e);
     }
-  }
-
-  /** Loads the provided credential. */
-  public KmsClient withCredentials(GoogleCredential credential) {
-    if (credential.createScopedRequired()) {
-      credential = credential.createScoped(CloudKMSScopes.all());
-    }
-    this.client =
-        new CloudKMS.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
-            .setApplicationName(APPLICATION_NAME)
-            .build();
-    return this;
   }
 
   @Override

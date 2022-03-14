@@ -110,11 +110,20 @@ public final class HpkePrivateKeyManagerTest {
     factory.validateKeyFormat(
         factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM").keyFormat);
     factory.validateKeyFormat(
+        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW").keyFormat);
+    factory.validateKeyFormat(
         factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM").keyFormat);
+    factory.validateKeyFormat(
+        factory.keyFormats().get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW").keyFormat);
     factory.validateKeyFormat(
         factory
             .keyFormats()
             .get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305")
+            .keyFormat);
+    factory.validateKeyFormat(
+        factory
+            .keyFormats()
+            .get("DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW")
             .keyFormat);
   }
 

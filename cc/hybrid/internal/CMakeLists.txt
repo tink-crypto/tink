@@ -16,6 +16,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -33,6 +35,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -47,6 +51,8 @@ tink_cc_library(
     tink::core::hybrid_encrypt
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -64,6 +70,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -78,6 +86,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -90,6 +100,8 @@ tink_cc_library(
     tink::util::status
     tink::util::validation
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -112,6 +124,8 @@ tink_cc_library(
     tink::util::validation
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -134,6 +148,8 @@ tink_cc_library(
     tink::util::statusor
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -147,6 +163,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -161,6 +179,8 @@ tink_cc_library(
     tink::util::status
     tink::util::statusor
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 # tests
@@ -180,6 +200,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -197,6 +219,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -214,6 +238,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -229,6 +255,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -246,6 +274,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -259,6 +289,8 @@ tink_cc_test(
     absl::status
     tink::util::status
     tink::util::test_matchers
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -278,6 +310,8 @@ tink_cc_test(
     tink::util::test_util
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -292,6 +326,8 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -306,5 +342,6 @@ tink_cc_test(
     tink::util::test_matchers
     tink::util::test_util
     tink::proto::hpke_cc_proto
+  TAGS
+    exclude_if_openssl
 )
-#include "third_party/absl/status/status.h"

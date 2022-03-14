@@ -14,8 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <utility>
 
 #include "tink/aead.h"
 #include "tink/keyset_handle.h"

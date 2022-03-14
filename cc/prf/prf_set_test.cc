@@ -17,6 +17,8 @@
 #include "tink/prf/prf_set.h"
 
 #include <map>
+#include <string>
+#include <utility>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

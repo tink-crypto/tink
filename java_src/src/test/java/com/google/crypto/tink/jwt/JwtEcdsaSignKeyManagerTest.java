@@ -49,14 +49,16 @@ import java.security.interfaces.ECPrivateKey;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
 /** Unit tests for JwtEcdsaSignKeyManager. */
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Theories.class)
 public class JwtEcdsaSignKeyManagerTest {
 
   @BeforeClass
@@ -72,18 +74,17 @@ public class JwtEcdsaSignKeyManagerTest {
     return JwtEcdsaKeyFormat.newBuilder().setAlgorithm(algorithm).build();
   }
 
-  private static Object[] parametersAlgos() {
-    return new Object[] {JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512};
-  }
+  @DataPoints("parametersAlgos")
+  public static final JwtEcdsaAlgorithm[] PARAMETERS_ALGOS =
+      new JwtEcdsaAlgorithm[] {
+        JwtEcdsaAlgorithm.ES256, JwtEcdsaAlgorithm.ES384, JwtEcdsaAlgorithm.ES512
+      };
 
-  private static Object[] templates() throws GeneralSecurityException {
-    return new Object[] {
-      "JWT_ES256",
-      "JWT_ES384",
-      "JWT_ES512",
-      "JWT_ES256_RAW",
-    };
-  }
+  @DataPoints("templates")
+  public static final String[] TEMPLATES =
+      new String[] {
+        "JWT_ES256", "JWT_ES384", "JWT_ES512", "JWT_ES256_RAW",
+      };
 
   @Test
   public void basics() throws Exception {
@@ -100,9 +101,10 @@ public class JwtEcdsaSignKeyManagerTest {
         () -> factory.validateKeyFormat(JwtEcdsaKeyFormat.getDefaultInstance()));
   }
 
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void validateKeyFormat_ok(JwtEcdsaAlgorithm algorithm) throws GeneralSecurityException {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void validateKeyFormat_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws GeneralSecurityException {
     JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
     factory.validateKeyFormat(format);
   }
@@ -111,18 +113,20 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(privateKey.getPublicKey().getAlgorithm()).isEqualTo(keyFormat.getAlgorithm());
   }
 
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void createKeys_ok(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createKeys_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
+      throws Exception {
 
     JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
     JwtEcdsaPrivateKey key = factory.createKey(format);
     checkConsistency(key, format);
   }
 
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void createKey_alwaysNewElement_ok(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createKey_alwaysNewElement_ok(
+      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
 
     JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
     Set<String> keys = new TreeSet<>();
@@ -136,19 +140,20 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(keys).hasSize(numTests);
   }
 
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void getPublicKey_checkValues(JwtEcdsaAlgorithm algorithm) throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void getPublicKey_checkValues(
+      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
     JwtEcdsaPrivateKey privateKey = factory.createKey(createKeyFormat(algorithm));
     JwtEcdsaPublicKey publicKey = manager.getPublicKey(privateKey);
 
     assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
   }
 
-  @Test
-  @Parameters(method = "parametersAlgos")
-  public void createCorruptedPublicKeyPrimitive_throws(JwtEcdsaAlgorithm algorithm)
-      throws Exception {
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createCorruptedPublicKeyPrimitive_throws(
+      @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
 
     JwtEcdsaKeyFormat format = createKeyFormat(algorithm);
     JwtEcdsaPrivateKey originalKey = factory.createKey(format);
@@ -219,10 +224,15 @@ public class JwtEcdsaSignKeyManagerTest {
     }
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_success(String templateName) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_success(@FromDataPoints("templates") String templateName)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -248,10 +258,15 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerifyDifferentKey_throw(String templateName) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerifyDifferentKey_throw(@FromDataPoints("templates") String templateName)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     RawJwt rawToken = RawJwt.newBuilder().setJwtId("id123").withoutExpiration().build();
@@ -266,10 +281,15 @@ public class JwtEcdsaSignKeyManagerTest {
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_header_modification_throw(String templateName) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_header_modification_throw(
+      @FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -288,10 +308,15 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_payload_modification_throw(String templateName) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_payload_modification_throw(
+      @FromDataPoints("templates") String templateName) throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =
@@ -310,10 +335,15 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
-  @Test
-  @Parameters(method = "templates")
-  public void createSignVerify_bitFlipped_throw(String templateName) throws Exception {
-    assumeFalse(TestUtil.isTsan());  // KeysetHandle.generateNew is too slow in Tsan.
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
+  @Theory
+  public void createSignVerify_bitFlipped_throw(@FromDataPoints("templates") String templateName)
+      throws Exception {
+    if (TestUtil.isTsan()) {
+      // KeysetHandle.generateNew is too slow in Tsan.
+      // We do not use assume because Theories expects to find something which is not skipped.
+      return;
+    }
     KeysetHandle handle = KeysetHandle.generateNew(KeyTemplates.get(templateName));
     JwtPublicKeySign signer = handle.getPrimitive(JwtPublicKeySign.class);
     JwtPublicKeyVerify verifier =

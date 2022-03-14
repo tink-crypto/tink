@@ -31,8 +31,10 @@ def setUpModule():
 class PublicKeySignKeyManagerTest(parameterized.TestCase):
 
   def test_new_key_data_ecdsa(self):
-    template = signature.signature_key_templates.create_ecdsa_key_template(
-        common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER)
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = signature.signature_key_templates.create_ecdsa_key_template(
+          common_pb2.SHA256, common_pb2.NIST_P256, ecdsa_pb2.DER)
     key_manager = core.Registry.key_manager(template.type_url)
     key_data = key_manager.new_key_data(template)
     self.assertEqual(key_data.type_url, template.type_url)

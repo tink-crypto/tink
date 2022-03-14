@@ -17,6 +17,7 @@
 #ifndef TINK_PRIMITIVE_SET_H_
 #define TINK_PRIMITIVE_SET_H_
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 

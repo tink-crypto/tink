@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

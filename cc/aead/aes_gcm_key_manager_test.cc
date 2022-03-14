@@ -16,6 +16,9 @@
 
 #include "tink/aead/aes_gcm_key_manager.h"
 
+#include <memory>
+#include <sstream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

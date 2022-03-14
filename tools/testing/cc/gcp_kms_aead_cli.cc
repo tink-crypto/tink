@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   auto client_result = GcpKmsClient::New("", credentials_filename);
   if (!client_result.ok()) {
     std::clog << "Aead creation failed: "
-              << client_result.status().error_message()
+              << client_result.status().message()
               << "\n";
     exit(1);
   }
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
   auto aead_result = client->GetAead("gcp-kms://" + key_name);
   if (!aead_result.ok()) {
     std::clog << "Aead creation failed: "
-              << aead_result.status().error_message()
+              << aead_result.status().message()
               << "\n";
     exit(1);
   }
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     auto encrypt_result = aead->Encrypt(input, associated_data);
     if (!encrypt_result.ok()) {
       std::clog << "Error while encrypting the input:"
-                << encrypt_result.status().error_message() << std::endl;
+                << encrypt_result.status().message() << std::endl;
       exit(1);
     }
     output = encrypt_result.ValueOrDie();
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
       std::clog << "Error while decrypting the input:"
-                << decrypt_result.status().error_message() << std::endl;
+                << decrypt_result.status().message() << std::endl;
       exit(1);
     }
     output = decrypt_result.ValueOrDie();

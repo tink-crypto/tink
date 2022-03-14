@@ -35,14 +35,9 @@ util::Status BignumToBinaryPadded(absl::Span<char> buffer,
     return util::Status(absl::StatusCode::kInvalidArgument, "BIGNUM is NULL");
   }
 
-// BN_bn2binpad returns the length of the buffer on success and -1 on failure.
-#ifdef OPENSSL_IS_BORINGSSL
-  int len = BN_bn2binpad(bignum, reinterpret_cast<uint8_t *>(buffer.data()),
-                         buffer.size());
-#else
+  // BN_bn2binpad returns the length of the buffer on success and -1 on failure.
   int len = BN_bn2binpad(
       bignum, reinterpret_cast<unsigned char *>(buffer.data()), buffer.size());
-#endif
   if (len == -1) {
     return util::Status(absl::StatusCode::kInternal,
                         "Value too large to fit into the given buffer");

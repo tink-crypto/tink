@@ -17,6 +17,7 @@
 #include "tink/subtle/random.h"
 
 #include <cstdint>
+#include <string>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"

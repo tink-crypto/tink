@@ -17,6 +17,7 @@
 #include "tink/subtle/aes_ctr_boringssl.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"

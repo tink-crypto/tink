@@ -16,6 +16,9 @@
 
 #include "tink/jwt/internal/jwt_public_key_sign_wrapper.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "tink/jwt/internal/jwt_format.h"
 #include "tink/jwt/internal/jwt_public_key_sign_internal.h"

@@ -21,6 +21,8 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/support/status.h>
 
+#include <string>
+
 #include "absl/container/flat_hash_map.h"
 #include "proto/testing/testing_api.grpc.pb.h"
 #include "proto/tink.pb.h"
@@ -55,6 +57,15 @@ class KeysetImpl final : public Keyset::Service {
                         const KeysetFromJsonRequest* request,
                         KeysetFromJsonResponse* response) override;
 
+  // Writes an encrypted keyset.
+  grpc::Status WriteEncrypted(grpc::ServerContext* context,
+                              const KeysetWriteEncryptedRequest* request,
+                              KeysetWriteEncryptedResponse* response) override;
+
+  // Reads an encrypted keyset.
+  grpc::Status ReadEncrypted(grpc::ServerContext* context,
+                             const KeysetReadEncryptedRequest* request,
+                             KeysetReadEncryptedResponse* response) override;
   KeysetImpl();
 
  private:

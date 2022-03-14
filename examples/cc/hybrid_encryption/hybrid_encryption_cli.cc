@@ -50,6 +50,8 @@
 //     output-file: name of the file for the decrypted message
 
 #include <iostream>
+#include <string>
+#include <utility>
 
 #include "tink/hybrid/hybrid_key_templates.h"
 #include "tink/hybrid_decrypt.h"

@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "tink/subtle/subtle_util.h"
+
+#include <string>
 // placeholder_subtle_util_cc
 
 namespace crypto {

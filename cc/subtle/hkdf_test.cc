@@ -16,6 +16,8 @@
 
 #include "tink/subtle/hkdf.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/strings/escaping.h"
 #include "tink/subtle/common_enums.h"

@@ -18,6 +18,7 @@
 #define TINK_AEAD_INTERNAL_CORD_AES_GCM_BORINGSSL_H_
 
 #include <memory>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "openssl/evp.h"

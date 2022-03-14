@@ -16,6 +16,8 @@
 
 #include "tink/jwt/jwt_key_templates.h"
 
+#include <string>
+
 #include "openssl/bn.h"
 #include "openssl/rsa.h"
 #include "tink/internal/bn_util.h"

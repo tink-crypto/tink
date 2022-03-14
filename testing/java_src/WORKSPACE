@@ -13,25 +13,43 @@ local_repository(
 )
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
+
 tink_base_deps()
 
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
+
 tink_base_deps_init()
 
-load("@tink_java//:tink_java_deps.bzl", "tink_java_deps")
-tink_java_deps()
+load("@tink_java//:tink_java_deps.bzl", "TINK_MAVEN_ARTIFACTS", "tink_java_deps")
 
-load("@tink_java//:tink_java_deps_init.bzl", "tink_java_deps_init")
-tink_java_deps_init()
+tink_java_deps()
 
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = "446ad7a2e85bbd05406dbf95232c7c49ed90de83b3b60cb2048b0c4c9f254d29",
-    strip_prefix = "grpc-java-1.29.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.29.0.zip",
+    sha256 = "1356886b7f9d48b606c689ab027e88456cf7ccd671615d4da55e5f10a83e71d2",
+    strip_prefix = "grpc-java-1.43.0",
+    url = "https://github.com/grpc/grpc-java/archive/v1.43.0.tar.gz",
 )
 
-load("@io_grpc_grpc_java//:repositories.bzl", "grpc_java_repositories")
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+load("@io_grpc_grpc_java//:repositories.bzl", "IO_GRPC_GRPC_JAVA_ARTIFACTS", "IO_GRPC_GRPC_JAVA_OVERRIDE_TARGETS", "grpc_java_repositories")
 
 grpc_java_repositories()
 
+load("@com_google_protobuf//:protobuf_deps.bzl", "PROTOBUF_MAVEN_ARTIFACTS", "protobuf_deps")
+
+protobuf_deps()
+
+maven_install(
+    artifacts = TINK_MAVEN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS + PROTOBUF_MAVEN_ARTIFACTS,
+    generate_compat_repositories = True,
+    override_targets = IO_GRPC_GRPC_JAVA_OVERRIDE_TARGETS,
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+)
+
+load("@maven//:compat.bzl", "compat_repositories")
+
+compat_repositories()

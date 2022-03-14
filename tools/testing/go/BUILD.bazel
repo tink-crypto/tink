@@ -12,12 +12,12 @@ go_binary(
         "@tink_base//testdata:credentials",
     ],
     deps = [
-        "@tink_go//aead:go_default_library",
-        "@tink_go//core/registry:go_default_library",
-        "@tink_go//integration/awskms:go_default_library",
-        "@tink_go//integration/gcpkms:go_default_library",
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@com_github_google_tink_go//aead:go_default_library",
+        "@com_github_google_tink_go//core/registry:go_default_library",
+        "@com_github_google_tink_go//integration/awskms:go_default_library",
+        "@com_github_google_tink_go//integration/gcpkms:go_default_library",
+        "@com_github_google_tink_go//keyset:go_default_library",
+        "@com_github_google_tink_go//testkeyset:go_default_library",
     ],
 )
 
@@ -27,9 +27,9 @@ go_binary(
     srcs = ["public_key_sign_cli.go"],
     out = "public_key_sign_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//signature:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@com_github_google_tink_go//keyset:go_default_library",
+        "@com_github_google_tink_go//signature:go_default_library",
+        "@com_github_google_tink_go//testkeyset:go_default_library",
     ],
 )
 
@@ -39,9 +39,9 @@ go_binary(
     srcs = ["public_key_verify_cli.go"],
     out = "public_key_verify_cli_go",
     deps = [
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//signature:go_default_library",
-        "@tink_go//testkeyset:go_default_library",
+        "@com_github_google_tink_go//keyset:go_default_library",
+        "@com_github_google_tink_go//signature:go_default_library",
+        "@com_github_google_tink_go//testkeyset:go_default_library",
     ],
 )
 go_binary(
@@ -54,12 +54,12 @@ go_binary(
     ],
     tags = ["no_rbe"],
     deps = [
-        "@tink_go//aead:go_default_library",
-        "@tink_go//core/registry:go_default_library",
-        "@tink_go//insecurecleartextkeyset:go_default_library",
-        "@tink_go//integration/awskms:go_default_library",
-        "@tink_go//integration/gcpkms:go_default_library",
-        "@tink_go//keyset:go_default_library",
-        "@tink_go//proto:tink_go_proto",
+        "@com_github_google_tink_go//aead:go_default_library",
+        "@com_github_google_tink_go//core/registry:go_default_library",
+        "@com_github_google_tink_go//insecurecleartextkeyset:go_default_library",
+        "@com_github_google_tink_go//integration/awskms:go_default_library",
+        "@com_github_google_tink_go//integration/gcpkms:go_default_library",
+        "@com_github_google_tink_go//keyset:go_default_library",
+        "@com_github_google_tink_go//proto/tink_go_proto:go_default_library",
     ],
 )

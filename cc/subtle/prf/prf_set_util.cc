@@ -16,6 +16,8 @@
 #include "tink/subtle/prf/prf_set_util.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

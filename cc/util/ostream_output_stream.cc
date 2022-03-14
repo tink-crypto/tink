@@ -21,6 +21,7 @@
 #include <cstring>
 #include <memory>
 #include <ostream>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

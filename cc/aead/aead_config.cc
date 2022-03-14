@@ -16,6 +16,8 @@
 
 #include "tink/aead/aead_config.h"
 
+#include <memory>
+
 #include "absl/memory/memory.h"
 #include "tink/aead/aead_wrapper.h"
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"

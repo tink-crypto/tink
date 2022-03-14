@@ -50,7 +50,6 @@ using ::crypto::tink::test::IsOk;
 using ::crypto::tink::test::StatusIs;
 using ::testing::AllOf;
 using ::testing::Eq;
-using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::SizeIs;
 using ::testing::TestWithParam;

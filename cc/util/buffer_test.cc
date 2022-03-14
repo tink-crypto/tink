@@ -14,9 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cstring>
-
 #include "tink/util/buffer.h"
+
+#include <cstring>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"

@@ -17,6 +17,7 @@
 #include "tink/subtle/ecdsa_sign_boringssl.h"
 
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

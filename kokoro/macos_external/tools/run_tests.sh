@@ -24,8 +24,12 @@ export ANDROID_HOME="/Users/kbuilder/Library/Android/sdk"
 export COURSIER_OPTS="-Djava.net.preferIPv6Addresses=true"
 
 cd "${KOKORO_ARTIFACTS_DIR}/git/tink"
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/update_android_sdk.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
 
 # TODO(b/155225382): Avoid modifying the sytem Python installation.
 pip3 install --user protobuf

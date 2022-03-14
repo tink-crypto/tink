@@ -189,6 +189,54 @@ public class InsecureNonceAesGcmJceTest {
   }
 
   @Test
+  public void testModifyPrependedIv() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    byte[] aad = generateAad();
+    byte[] key = Random.randBytes(16);
+    byte[] message = Random.randBytes(32);
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
+    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
+
+    byte[] ciphertext = gcm.encrypt(iv, message, aad);
+    ciphertext[0] = (byte) (ciphertext[0] ^ 1);  // Flip single bit in prepended IV.
+
+    assertThrows(GeneralSecurityException.class, () -> gcm.decrypt(iv, ciphertext, aad));
+  }
+
+  @Test
+  public void testTruncatedCiphertext() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    byte[] aad = generateAad();
+    byte[] key = Random.randBytes(16);
+    byte[] message = new byte[0];
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ false);
+    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
+
+    byte[] ciphertext = gcm.encrypt(iv, message, aad);
+    byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length - 1);
+
+    assertThrows(GeneralSecurityException.class, () -> gcm.decrypt(iv, truncatedCiphertext, aad));
+  }
+
+  @Test
+  public void testTruncatedCiphertextWithPrependedIv() throws Exception {
+    Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
+
+    byte[] aad = generateAad();
+    byte[] key = Random.randBytes(16);
+    byte[] message = new byte[0];
+    InsecureNonceAesGcmJce gcm = new InsecureNonceAesGcmJce(key, /*prependIv=*/ true);
+    byte[] iv = Random.randBytes(InsecureNonceAesGcmJce.IV_SIZE_IN_BYTES);
+
+    byte[] ciphertext = gcm.encrypt(iv, message, aad);
+    byte[] truncatedCiphertext = Arrays.copyOf(ciphertext, ciphertext.length - 1);
+
+    assertThrows(GeneralSecurityException.class, () -> gcm.decrypt(iv, truncatedCiphertext, aad));
+  }
+
+  @Test
   public void testWycheproofVectors() throws Exception {
     Assume.assumeTrue(!TinkFips.useOnlyFips() || TinkFipsUtil.fipsModuleAvailable());
 

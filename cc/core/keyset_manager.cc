@@ -16,6 +16,7 @@
 
 #include "tink/keyset_manager.h"
 
+#include <memory>
 #include <random>
 #include <utility>
 

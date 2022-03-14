@@ -17,9 +17,11 @@
 #include "tink/util/istream_input_stream.h"
 
 #include <unistd.h>
+
 #include <algorithm>
 #include <cstring>
 #include <istream>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

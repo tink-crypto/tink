@@ -17,8 +17,9 @@
 #ifndef EXAMPLES_CC_DIGITAL_SIGNATURES_UTIL_H_
 #define EXAMPLES_CC_DIGITAL_SIGNATURES_UTIL_H_
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
 #include "tink/keyset_handle.h"
 

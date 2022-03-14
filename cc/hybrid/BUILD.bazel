@@ -439,6 +439,7 @@ cc_test(
         "//aead:xchacha20_poly1305_key_manager",
         "//daead:aes_siv_key_manager",
         "//internal:ec_util",
+        "//internal:ssl_util",
         "//proto:aes_gcm_cc_proto",
         "//proto:common_cc_proto",
         "//proto:ecies_aead_hkdf_cc_proto",

@@ -16,7 +16,10 @@
 
 #include "tink/subtle/streaming_aead_decrypting_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -24,8 +27,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/input_stream.h"
-#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/random.h"
+#include "tink/subtle/stream_segment_decrypter.h"
 #include "tink/subtle/test_util.h"
 #include "tink/util/istream_input_stream.h"
 #include "tink/util/status.h"

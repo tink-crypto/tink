@@ -16,6 +16,9 @@
 
 #include "experimental/pqcrypto/cecpq2/hybrid/internal/cecpq2_aead_hkdf_hybrid_encrypt.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

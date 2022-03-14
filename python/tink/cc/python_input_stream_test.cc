@@ -16,6 +16,10 @@
 
 #include "tink/cc/python_input_stream.h"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

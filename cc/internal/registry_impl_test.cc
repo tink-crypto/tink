@@ -37,6 +37,7 @@
 #include "tink/hybrid/ecies_aead_hkdf_private_key_manager.h"
 #include "tink/hybrid/ecies_aead_hkdf_public_key_manager.h"
 #include "tink/keyset_manager.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/registry.h"
 #include "tink/subtle/aes_gcm_boringssl.h"
 #include "tink/subtle/random.h"
@@ -86,6 +87,7 @@ using ::google::crypto::tink::OutputPrefixType;
 using ::portable_proto::MessageLite;
 using ::testing::Eq;
 using ::testing::HasSubstr;
+using ::testing::IsNull;
 using ::testing::Not;
 using ::testing::SizeIs;
 
@@ -2011,6 +2013,28 @@ TEST_F(RegistryImplTest, FipsFailsIfNotEmpty) {
   EXPECT_THAT(status, IsOk());
   EXPECT_THAT(registry_impl.RestrictToFipsIfEmpty(),
               StatusIs(absl::StatusCode::kInternal));
+}
+
+class FakeMonitoringClientFactory : public MonitoringClientFactory {
+ public:
+  util::StatusOr<std::unique_ptr<MonitoringClient>> New(
+      const MonitoringContext& context) override {
+    return util::Status(absl::StatusCode::kUnimplemented, "Unimplemented");
+  }
+};
+
+TEST_F(RegistryImplTest, CanRegisterOnlyOneMonitoringFactory) {
+  auto monitoring_client_factory =
+      absl::make_unique<FakeMonitoringClientFactory>();
+
+  RegistryImpl registry_impl;
+  EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(
+                  std::move(monitoring_client_factory)),
+              IsOk());
+  ASSERT_THAT(registry_impl.GetMonitoringClientFactory(), Not(IsNull()));
+  EXPECT_THAT(registry_impl.RegisterMonitoringClientFactory(
+                  std::move(monitoring_client_factory)),
+              StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 }  // namespace

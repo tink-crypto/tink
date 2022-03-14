@@ -427,4 +427,35 @@ public final class JwtValidatorTest {
         IllegalArgumentException.class,
         () -> JwtValidator.newBuilder().expectAudience("a").ignoreAudiences().build());
   }
+
+  @Test
+  public void toStringWithoutIgnore_success() throws Exception {
+    JwtValidator validator =
+        JwtValidator.newBuilder()
+            .expectTypeHeader("type")
+            .expectIssuer("issuer")
+            .expectAudience("audience")
+            .allowMissingExpiration()
+            .expectIssuedInThePast()
+            .setClockSkew(Duration.ofMinutes(1))
+            .build();
+    assertThat(validator.toString())
+        .isEqualTo(
+            "JwtValidator{expectedTypeHeader=type,expectedIssuer=issuer,expectedAudience=audience,"
+                + "allowMissingExpiration,expectIssuedInThePast,clockSkew=PT1M}");
+  }
+
+  @Test
+  public void toStringWithIgnore_success() throws Exception {
+    JwtValidator validator =
+        JwtValidator.newBuilder().ignoreTypeHeader().ignoreIssuer().ignoreAudiences().build();
+    assertThat(validator.toString())
+        .isEqualTo("JwtValidator{ignoreTypeHeader,ignoreIssuer,ignoreAudiences}");
+  }
+
+  @Test
+  public void emptyValidatorToString_success() throws Exception {
+    JwtValidator validator = JwtValidator.newBuilder().build();
+    assertThat(validator.toString()).isEqualTo("JwtValidator{}");
+  }
 }

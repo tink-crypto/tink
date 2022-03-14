@@ -16,6 +16,7 @@
 
 #include "tink/aead/kms_envelope_aead_key_manager.h"
 
+#include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"

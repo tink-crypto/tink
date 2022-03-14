@@ -49,7 +49,7 @@ message HpkePublicKey {
   uint32 version = 1;
   HpkeParams params = 2;
   // KEM-encoding of public key (i.e., SerializePublicKey() ) as described in
-  // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html#name-cryptographic-dependencies.
+  // https://www.rfc-editor.org/rfc/rfc9180.html#name-cryptographic-dependencies.
   bytes public_key = 3;
 }
 
@@ -57,7 +57,7 @@ message HpkePrivateKey {
   uint32 version = 1;
   HpkePublicKey public_key = 2;
   // KEM-encoding of private key (i.e., SerializePrivateKey() ) as described in
-  // https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-09.html#name-cryptographic-dependencies.
+  // https://www.rfc-editor.org/rfc/rfc9180.html#name-cryptographic-dependencies.
   bytes private_key = 3;
 }
 

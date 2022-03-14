@@ -19,6 +19,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "tink/keyset_handle.h"
 

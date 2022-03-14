@@ -175,6 +175,143 @@ func TestKeysetToJSONFail(t *testing.T) {
 	}
 }
 
+func keysetWriteEncrypted(ctx context.Context, keysetService *services.KeysetService, keyset []byte, masterKeyset []byte, associatedData []byte) ([]byte, error) {
+	var request *pb.KeysetWriteEncryptedRequest
+	if associatedData != nil {
+		request = &pb.KeysetWriteEncryptedRequest{Keyset: keyset, MasterKeyset: masterKeyset, AssociatedData: &pb.BytesValue{Value: associatedData}}
+	} else {
+		request = &pb.KeysetWriteEncryptedRequest{Keyset: keyset, MasterKeyset: masterKeyset}
+	}
+	response, err := keysetService.WriteEncrypted(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.KeysetWriteEncryptedResponse_EncryptedKeyset:
+		return r.EncryptedKeyset, nil
+	case *pb.KeysetWriteEncryptedResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func keysetReadEncrypted(ctx context.Context, keysetService *services.KeysetService, encryptedKeyset []byte, masterKeyset []byte, associatedData []byte) ([]byte, error) {
+	var request *pb.KeysetReadEncryptedRequest
+	if associatedData != nil {
+		request = &pb.KeysetReadEncryptedRequest{EncryptedKeyset: encryptedKeyset, MasterKeyset: masterKeyset, AssociatedData: &pb.BytesValue{Value: associatedData}}
+	} else {
+		request = &pb.KeysetReadEncryptedRequest{EncryptedKeyset: encryptedKeyset, MasterKeyset: masterKeyset}
+	}
+	response, err := keysetService.ReadEncrypted(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	switch r := response.Result.(type) {
+	case *pb.KeysetReadEncryptedResponse_Keyset:
+		return r.Keyset, nil
+	case *pb.KeysetReadEncryptedResponse_Err:
+		return nil, errors.New(r.Err)
+	default:
+		return nil, fmt.Errorf("response.Result has unexpected type %T", r)
+	}
+}
+
+func TestKeysetWriteReadEncrypted(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	masterKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+
+	encryptedKeyset, err := keysetWriteEncrypted(ctx, keysetService, keyset, masterKeyset, nil)
+	if err != nil {
+		t.Fatalf("keysetWriteEncrypted failed: %v", err)
+	}
+
+	readKeyset, err := keysetReadEncrypted(ctx, keysetService, encryptedKeyset, masterKeyset, nil)
+	if err != nil {
+		t.Fatalf("keysetReadEncrypted failed: %v", err)
+	}
+	if bytes.Compare(readKeyset, keyset) != 0 {
+		t.Fatalf("readKeyset is %v, want %v", readKeyset, keyset)
+	}
+
+	if _, err := keysetWriteEncrypted(ctx, keysetService, []byte("badKeyset"), masterKeyset, nil); err == nil {
+		t.Fatalf("keysetWriteEncrypted with bad keyset succeeded unexpectedly.")
+	}
+	if _, err := keysetWriteEncrypted(ctx, keysetService, keyset, []byte("badMasterKeyset"), nil); err == nil {
+		t.Fatalf("keysetWriteEncrypted with bad masterKeyset succeeded unexpectedly.")
+	}
+	if _, err := keysetReadEncrypted(ctx, keysetService, []byte("badEncryptedKeyset"), masterKeyset, nil); err == nil {
+		t.Fatalf("keysetReadEncrypted with bad encryptedKeyset succeeded unexpectedly.")
+	}
+	if _, err := keysetReadEncrypted(ctx, keysetService, encryptedKeyset, []byte("badMasterKeyset"), nil); err == nil {
+		t.Fatalf("keysetService with bad masterKeyset succeeded unexpectedly.")
+	}
+}
+
+func TestKeysetWriteReadEncryptedWithAssociatedData(t *testing.T) {
+	keysetService := &services.KeysetService{}
+	ctx := context.Background()
+
+	template, err := proto.Marshal(aead.AES128GCMKeyTemplate())
+	if err != nil {
+		t.Fatalf("proto.Marshal(aead.AES128GCMKeyTemplate()) failed: %v", err)
+	}
+
+	keyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	masterKeyset, err := genKeyset(ctx, keysetService, template)
+	if err != nil {
+		t.Fatalf("genKeyset failed: %v", err)
+	}
+	associatedData := []byte("Associated Data")
+
+	encryptedKeyset, err := keysetWriteEncrypted(ctx, keysetService, keyset, masterKeyset, associatedData)
+	if err != nil {
+		t.Fatalf("keysetWriteEncrypted failed: %v", err)
+	}
+
+	readKeyset, err := keysetReadEncrypted(ctx, keysetService, encryptedKeyset, masterKeyset, associatedData)
+	if err != nil {
+		t.Fatalf("keysetReadEncrypted failed: %v", err)
+	}
+	if bytes.Compare(readKeyset, keyset) != 0 {
+		t.Fatalf("readKeyset is %v, want %v", readKeyset, keyset)
+	}
+
+	if _, err := keysetReadEncrypted(ctx, keysetService, encryptedKeyset, masterKeyset, []byte("Invalid Associated Data")); err == nil {
+		t.Fatalf("keysetWriteEncrypted with bad associatedData succeeded unexpectedly.")
+	}
+
+	if _, err := keysetWriteEncrypted(ctx, keysetService, []byte("badKeyset"), masterKeyset, associatedData); err == nil {
+		t.Fatalf("keysetWriteEncrypted with bad keyset succeeded unexpectedly.")
+	}
+	if _, err := keysetWriteEncrypted(ctx, keysetService, keyset, []byte("badMasterKeyset"), associatedData); err == nil {
+		t.Fatalf("keysetWriteEncrypted with bad masterKeyset succeeded unexpectedly.")
+	}
+	if _, err := keysetReadEncrypted(ctx, keysetService, []byte("badEncryptedKeyset"), masterKeyset, associatedData); err == nil {
+		t.Fatalf("keysetReadEncrypted with bad encryptedKeyset succeeded unexpectedly.")
+	}
+	if _, err := keysetReadEncrypted(ctx, keysetService, encryptedKeyset, []byte("badMasterKeyset"), associatedData); err == nil {
+		t.Fatalf("keysetService with bad masterKeyset succeeded unexpectedly.")
+	}
+}
+
 func aeadEncrypt(ctx context.Context, aeadService *services.AEADService, keyset []byte, plaintext []byte, associatedData []byte) ([]byte, error) {
 	encRequest := &pb.AeadEncryptRequest{
 		Keyset:         keyset,

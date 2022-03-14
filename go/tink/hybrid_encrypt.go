@@ -57,7 +57,7 @@ the ciphertext in various ways, for example:
       derivation function, cf. https://tools.ietf.org/html/rfc5869).
 */
 type HybridEncrypt interface {
-	// Encrypt operation: encrypts plaintext} binding contextInfo to the resulting
-	// ciphertext. Returns resulting ciphertext
+	// Encrypt operation: encrypts plaintext, binding contextInfo to the resulting
+	// ciphertext. Returns resulting ciphertext.
 	Encrypt(plaintext, contextInfo []byte) ([]byte, error)
 }

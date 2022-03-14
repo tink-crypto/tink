@@ -59,8 +59,8 @@ the ciphertext in various ways, for example:
 */
 type HybridDecrypt interface {
 	/**
-	 * Decrypt operation: decrypts ciphertext verifying the integrity of contextInfo.
-	 * returns resulting plaintext
+	 * Decrypt operation: decrypts ciphertext, verifying the integrity of contextInfo.
+	 * Returns resulting plaintext.
 	 */
 	Decrypt(ciphertext, contextInfo []byte) ([]byte, error)
 }

@@ -16,6 +16,9 @@
 
 #include "experimental/pqcrypto/cecpq2/subtle/cecpq2_hkdf_sender_kem_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

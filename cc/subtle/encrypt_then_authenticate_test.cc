@@ -17,6 +17,7 @@
 #include "tink/subtle/encrypt_then_authenticate.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"

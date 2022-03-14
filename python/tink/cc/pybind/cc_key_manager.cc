@@ -14,7 +14,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/cc_key_manager.h"
+#include "tink/cc/pybind/cc_key_manager.h"
 
 #include <memory>
 
@@ -28,8 +28,8 @@
 #include "tink/public_key_sign.h"
 #include "tink/public_key_verify.h"
 #include "tink/streaming_aead.h"
+#include "tink/cc/cc_key_manager.h"
 #include "tink/cc/pybind/import_helper.h"
-#include "tink/cc/pybind/status_casters.h"
 
 namespace crypto {
 namespace tink {

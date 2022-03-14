@@ -16,6 +16,8 @@
 #ifndef TINK_PYTHON_TINK_CC_PYBIND_OUTPUT_STREAM_ADAPTER_H_
 #define TINK_PYTHON_TINK_CC_PYBIND_OUTPUT_STREAM_ADAPTER_H_
 
+#include "pybind11/pybind11.h"
+
 namespace crypto {
 namespace tink {
 

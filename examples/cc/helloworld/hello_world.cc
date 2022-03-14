@@ -23,17 +23,19 @@
 //   associated-data:  a string to be used as assciated data
 //   output-file:  name of the file for the resulting output
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "tink/aead.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/config.h"
+#include "tink/config/tink_config.h"
 #include "tink/json_keyset_reader.h"
 #include "tink/keyset_handle.h"
 #include "tink/keyset_reader.h"
-#include "tink/config/tink_config.h"
 
 namespace {
 

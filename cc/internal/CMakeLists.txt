@@ -99,6 +99,7 @@ tink_cc_library(
     tink::core::key_manager
     tink::core::primitive_set
     tink::core::primitive_wrapper
+    tink::monitoring::monitoring
     tink::util::errors
     tink::util::protobuf_helper
     tink::util::status
@@ -236,6 +237,7 @@ tink_cc_test(
     tink::config::tink_fips
     tink::hybrid::ecies_aead_hkdf_private_key_manager
     tink::hybrid::ecies_aead_hkdf_public_key_manager
+    tink::monitoring::monitoring
     tink::subtle::aes_gcm_boringssl
     tink::subtle::random
     tink::util::istream_input_stream
@@ -320,6 +322,7 @@ tink_cc_test(
     tink::internal::ec_util
     tink::internal::fips_utils
     tink::internal::ssl_unique_ptr
+    tink::internal::ssl_util
     gmock
     absl::strings
     absl::span

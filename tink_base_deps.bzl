@@ -20,26 +20,19 @@ def tink_base_deps():
         ],
     )
 
-    # Release from 2019-11-07
-    http_archive(
-        name = "bazel_gazelle",
-        urls = [
-            "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.19.1/bazel-gazelle-v0.19.1.tar.gz",
-        ],
-        sha256 = "86c6d481b3f7aedc1d60c1c211c6f76da282ae197c3b3160f54bd3a8f847896f",
-    )
-
     #-----------------------------------------------------------------------------
     # Actual tink base deps.
     #-----------------------------------------------------------------------------
     # Basic rules we need to add to bazel.
     if not native.existing_rule("bazel_skylib"):
-        # Release from 2019-10-09
+        # Release from 2021-09-27
         http_archive(
             name = "bazel_skylib",
-            url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-            sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+            urls = [
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
+            ],
+            sha256 = "c6966ec828da198c5d9adbaa94c05e3a1c7f21bd012a0b29ba8ddbccb2c93b0d",
         )
 
     # Google PKI certs for connecting to GCP KMS

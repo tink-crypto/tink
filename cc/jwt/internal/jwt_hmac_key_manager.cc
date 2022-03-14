@@ -17,6 +17,7 @@
 #include "tink/jwt/internal/jwt_hmac_key_manager.h"
 
 #include <map>
+#include <string>
 
 #include "absl/strings/string_view.h"
 #include "tink/jwt/internal/raw_jwt_hmac_key_manager.h"

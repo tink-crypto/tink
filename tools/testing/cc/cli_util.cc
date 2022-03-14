@@ -16,9 +16,12 @@
 
 #include "testing/cc/cli_util.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "tink/binary_keyset_reader.h"
@@ -191,7 +194,7 @@ void CliUtil::InitTink() {
 
   Status aws_result = InitAws();
   if (!aws_result.ok()) {
-    std::clog << aws_result.error_message() << std::endl;
+    std::clog << aws_result.message() << std::endl;
   }
 }
 

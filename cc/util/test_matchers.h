@@ -17,6 +17,8 @@
 #ifndef TINK_UTIL_TEST_MATCHERS_H_
 #define TINK_UTIL_TEST_MATCHERS_H_
 
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

@@ -17,6 +17,8 @@
 #include "tink/subtle/ecies_hkdf_sender_kem_boringssl.h"
 
 #include <iostream>
+#include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

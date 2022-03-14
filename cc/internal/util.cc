@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/internal/util.h"
 
+#include <iterator>
 #include <functional>
 
 #include "absl/strings/string_view.h"
@@ -33,22 +34,27 @@ absl::string_view EnsureStringNonNull(absl::string_view str) {
 bool BuffersOverlap(absl::string_view first, absl::string_view second) {
   // first begins within second's buffer.
   bool first_begins_in_second =
-      std::less_equal<const char *>{}(second.begin(), first.begin()) &&
-      std::less<const char *>{}(first.begin(), second.end());
+      std::less_equal<absl::string_view::const_iterator>{}(second.begin(),
+                                                           first.begin()) &&
+      std::less<absl::string_view::const_iterator>{}(first.begin(),
+                                                     second.end());
 
   // second begins within first's buffer.
   bool second_begins_in_first =
-      std::less_equal<const char *>{}(first.begin(), second.begin()) &&
-      std::less<const char *>{}(second.begin(), first.end());
+      std::less_equal<absl::string_view::const_iterator>{}(first.begin(),
+                                                           second.begin()) &&
+      std::less<absl::string_view::const_iterator>{}(second.begin(),
+                                                     first.end());
 
   return first_begins_in_second || second_begins_in_first;
 }
 
 bool BuffersAreIdentical(absl::string_view first, absl::string_view second) {
   return !first.empty() && !second.empty() &&
-         std::equal_to<const char *>{}(first.begin(), second.begin()) &&
-         std::equal_to<const char *>{}(std::prev(first.end()),
-                                       std::prev(second.end()));
+         std::equal_to<absl::string_view::const_iterator>{}(first.begin(),
+                                                            second.begin()) &&
+         std::equal_to<absl::string_view::const_iterator>{}(
+             std::prev(first.end()), std::prev(second.end()));
 }
 
 }  // namespace internal

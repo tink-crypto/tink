@@ -16,6 +16,9 @@
 
 #include "tink/util/file_input_stream.h"
 
+#include <algorithm>
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"

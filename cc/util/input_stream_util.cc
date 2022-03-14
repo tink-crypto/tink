@@ -17,6 +17,7 @@
 #include "tink/util/input_stream_util.h"
 
 #include <algorithm>
+#include <string>
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"

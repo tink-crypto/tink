@@ -98,16 +98,8 @@ class RawDecryptingStream(io.RawIOBase):
         data = self._read_from_input_stream_adapter(size)
         if data:
           return data
-    except core.TinkError as e:
-      # We are checking if the exception was raised because of C++
-      # OUT_OF_RANGE status, which signals EOF.
-      wrapped_e = e.args[0]
-      if (isinstance(wrapped_e, tink_bindings.StatusNotOk) and
-          (wrapped_e.status.error_code() ==
-           tink_bindings.ErrorCode.OUT_OF_RANGE)):
-        return b''
-      else:
-        raise e
+    except tink_bindings.PythonTinkStreamFinishedException:
+      return b''
 
   def readinto(self, b: bytearray) -> int:
     """Read bytes into a pre-allocated bytes-like object b.

@@ -17,6 +17,9 @@
 // Implementation of a Signature Service
 #include "signature_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "tink/binary_keyset_reader.h"
 #include "tink/cleartext_keyset_handle.h"
 #include "tink/public_key_sign.h"

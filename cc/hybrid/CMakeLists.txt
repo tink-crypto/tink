@@ -36,6 +36,8 @@ tink_cc_library(
     tink::hybrid::internal::hpke_private_key_manager
     tink::hybrid::internal::hpke_public_key_manager
     tink::util::status
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_library(
@@ -278,6 +280,8 @@ tink_cc_test(
     tink::util::status
     tink::util::test_matchers
     tink::util::test_util
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -368,6 +372,8 @@ tink_cc_test(
     tink::proto::ecies_aead_hkdf_cc_proto
     tink::proto::hpke_cc_proto
     tink::proto::tink_cc_proto
+  TAGS
+    exclude_if_openssl
 )
 
 tink_cc_test(
@@ -402,6 +408,7 @@ tink_cc_test(
     tink::aead::xchacha20_poly1305_key_manager
     tink::daead::aes_siv_key_manager
     tink::internal::ec_util
+    tink::internal::ssl_util
     tink::subtle::random
     tink::util::enums
     tink::util::statusor

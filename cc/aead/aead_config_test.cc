@@ -17,6 +17,7 @@
 #include "tink/aead/aead_config.h"
 
 #include <list>
+#include <memory>
 #include <string>
 #include <utility>
 

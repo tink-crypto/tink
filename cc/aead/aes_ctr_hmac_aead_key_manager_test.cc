@@ -16,6 +16,7 @@
 
 #include "tink/aead/aes_ctr_hmac_aead_key_manager.h"
 
+#include <memory>
 #include <utility>
 
 #include "gmock/gmock.h"

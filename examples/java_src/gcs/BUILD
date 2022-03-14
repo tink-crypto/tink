@@ -41,7 +41,6 @@ sh_test(
     ],
     tags = [
         "manual",
-        "notap",
-        "tink_guitar",
+        "requires-network",
     ],
 )

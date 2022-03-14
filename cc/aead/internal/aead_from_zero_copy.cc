@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "tink/aead/internal/aead_from_zero_copy.h"
 
+#include <string>
+
 #include "absl/memory/memory.h"
 #include "tink/aead/internal/zero_copy_aead.h"
 #include "tink/subtle/subtle_util.h"

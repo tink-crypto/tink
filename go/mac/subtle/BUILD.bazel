@@ -22,8 +22,6 @@ go_test(
         "hmac_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
-    deps = [
-        ":go_default_library",
-        "//subtle/random:go_default_library",
-    ],
+    embed = [":go_default_library"],
+    deps = ["//subtle/random:go_default_library"],
 )

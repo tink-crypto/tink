@@ -47,27 +47,6 @@ const int kAesGcmTagSizeInBytes = 16;
 
 namespace {
 
-#ifdef OPENSSL_IS_BORINGSSL
-
-// Returns an EVP_AEAD cipher or an error if `key_size_in_bytes` is invalid.
-util::StatusOr<const EVP_AEAD *> GetAesGcmSivAeadCipherForKeySize(
-    int key_size_in_bytes) {
-  switch (key_size_in_bytes) {
-    case 16:
-      return EVP_aead_aes_128_gcm_siv();
-    case 32:
-      return EVP_aead_aes_256_gcm_siv();
-    default:
-      return util::Status(
-          absl::StatusCode::kInvalidArgument,
-          absl::StrCat(
-              "Invalid key size; valid values are {16, 32} bytes, got ",
-              key_size_in_bytes));
-  }
-}
-
-#endif
-
 // Sets `iv` to the given `context`, as well as the "direction"
 // (encrypt/decrypt) based on `encryption`.
 util::Status SetIvAndDirection(EVP_CIPHER_CTX *context, absl::string_view iv,

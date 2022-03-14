@@ -16,9 +16,11 @@
 
 #include "tink/primitive_set.h"
 
+#include <memory>
 #include <string>
 #include <thread>  // NOLINT(build/c++11)
 #include <utility>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -18,6 +18,7 @@
 #define TINK_PYTHON_CC_PYTHON_INPUT_STREAM_H_
 
 #include <memory>
+#include <string>
 
 #include "tink/input_stream.h"
 #include "tink/util/status.h"

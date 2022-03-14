@@ -17,6 +17,9 @@
 // Implementation of a Keyset Service.
 #include "keyset_impl.h"
 
+#include <ostream>
+#include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -44,12 +47,16 @@ using ::crypto::tink::CleartextKeysetHandle;
 using ::crypto::tink::JsonKeysetReader;
 using ::crypto::tink::JsonKeysetWriter;
 using ::crypto::tink::KeysetHandle;
+using ::crypto::tink::KeysetReader;
+using ::crypto::tink::util::StatusOr;
 using ::google::crypto::tink::KeyTemplate;
 
 KeysetImpl::KeysetImpl() {
   key_templates_["AES128_EAX"] = crypto::tink::AeadKeyTemplates::Aes128Eax();
   key_templates_["AES256_EAX"] = crypto::tink::AeadKeyTemplates::Aes256Eax();
   key_templates_["AES128_GCM"] = crypto::tink::AeadKeyTemplates::Aes128Gcm();
+  key_templates_["AES128_GCM_RAW"] =
+      crypto::tink::AeadKeyTemplates::Aes128GcmNoPrefix();
   key_templates_["AES256_GCM"] = crypto::tink::AeadKeyTemplates::Aes256Gcm();
   key_templates_["AES256_GCM_RAW"] =
       crypto::tink::AeadKeyTemplates::Aes256GcmNoPrefix();
@@ -90,10 +97,17 @@ KeysetImpl::KeysetImpl() {
               EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW"] =
+      crypto::tink::HybridKeyTemplates::
+          HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
   key_templates_["AES_CMAC"] = crypto::tink::MacKeyTemplates::AesCmac();
   key_templates_["HMAC_SHA256_128BITTAG"] =
       crypto::tink::MacKeyTemplates::HmacSha256HalfSizeTag();
@@ -183,155 +197,285 @@ KeysetImpl::KeysetImpl() {
 }
 
 // Returns the key template for the given template name.
-::grpc::Status KeysetImpl::GetTemplate(grpc::ServerContext* context,
+grpc::Status KeysetImpl::GetTemplate(grpc::ServerContext* context,
                                        const KeysetTemplateRequest* request,
                                        KeysetTemplateResponse* response) {
   auto it = key_templates_.find(request->template_name());
   if (it == key_templates_.end()) {
     response->set_err(
         absl::StrCat("key template not found: ", request->template_name()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   std::string templ;
   if (!it->second.SerializeToString(&templ)) {
     response->set_err("Failed to serialize template.");
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   response->set_key_template(templ);
-  return ::grpc::Status::OK;
+  return grpc::Status::OK;
 }
 
 // Generates a new keyset with one key from a template.
-::grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
+grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
                                     const KeysetGenerateRequest* request,
                                     KeysetGenerateResponse* response) {
   KeyTemplate key_template;
   if (!key_template.ParseFromString(request->template_())) {
     response->set_err("Could not parse the key template");
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto handle_result = KeysetHandle::GenerateNew(key_template);
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   std::stringbuf keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer_result.ok()) {
     response->set_err(std::string(writer_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
-  return ::grpc::Status::OK;
+  return grpc::Status::OK;
 }
 
 // Returns a public keyset for a given private keyset.
-::grpc::Status KeysetImpl::Public(grpc::ServerContext* context,
+grpc::Status KeysetImpl::Public(grpc::ServerContext* context,
                                   const KeysetPublicRequest* request,
                                   KeysetPublicResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->private_keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto private_handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!private_handle_result.ok()) {
     response->set_err(std::string(private_handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto public_handle_result =
       private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
   if (!public_handle_result.ok()) {
     response->set_err(std::string(public_handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   std::stringbuf public_keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&public_keyset));
   if (!writer_result.ok()) {
     response->set_err(std::string(writer_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(
       writer_result.ValueOrDie().get(), *public_handle_result.ValueOrDie());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   response->set_public_keyset(public_keyset.str());
-  return ::grpc::Status::OK;
+  return grpc::Status::OK;
 }
 
 // Converts a keyset from binary to JSON format.
-::grpc::Status KeysetImpl::ToJson(grpc::ServerContext* context,
+grpc::Status KeysetImpl::ToJson(grpc::ServerContext* context,
                                   const KeysetToJsonRequest* request,
                                   KeysetToJsonResponse* response) {
   auto reader_result = BinaryKeysetReader::New(request->keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   std::stringbuf json_keyset;
   auto writer_result =
       JsonKeysetWriter::New(absl::make_unique<std::ostream>(&json_keyset));
   if (!writer_result.ok()) {
     response->set_err(std::string(writer_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   response->set_json_keyset(json_keyset.str());
-  return ::grpc::Status::OK;
+  return grpc::Status::OK;
 }
 
 // Converts a keyset from JSON to binary format.
-::grpc::Status KeysetImpl::FromJson(grpc::ServerContext* context,
+grpc::Status KeysetImpl::FromJson(grpc::ServerContext* context,
                                     const KeysetFromJsonRequest* request,
                                     KeysetFromJsonResponse* response) {
   auto reader_result = JsonKeysetReader::New(request->json_keyset());
   if (!reader_result.ok()) {
     response->set_err(std::string(reader_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto handle_result =
       CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   std::stringbuf keyset;
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   if (!writer_result.ok()) {
     response->set_err(std::string(writer_result.status().message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
                                              *handle_result.ValueOrDie());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
-    return ::grpc::Status::OK;
+    return grpc::Status::OK;
   }
   response->set_keyset(keyset.str());
-  return ::grpc::Status::OK;
+  return grpc::Status::OK;
+}
+
+grpc::Status KeysetImpl::WriteEncrypted(
+    grpc::ServerContext* context, const KeysetWriteEncryptedRequest* request,
+    KeysetWriteEncryptedResponse* response) {
+  StatusOr<std::unique_ptr<KeysetReader>>
+      master_keyset_reader = BinaryKeysetReader::New(request->master_keyset());
+  if (!master_keyset_reader.ok()) {
+    response->set_err(std::string(master_keyset_reader.status().message()));
+    return grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<KeysetHandle>> master_keyset_handle =
+      CleartextKeysetHandle::Read(*std::move(master_keyset_reader));
+  if (!master_keyset_handle.ok()) {
+    response->set_err(std::string(master_keyset_handle.status().message()));
+    return grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<crypto::tink::Aead>> master_aead =
+      (*master_keyset_handle)->GetPrimitive<crypto::tink::Aead>();
+  if (!master_aead.ok()) {
+    response->set_err(std::string(master_aead.status().message()));
+    return grpc::Status::OK;
+  }
+
+  StatusOr<std::unique_ptr<KeysetReader>> keyset_reader =
+      BinaryKeysetReader::New(request->keyset());
+  if (!keyset_reader.ok()) {
+    response->set_err(std::string(keyset_reader.status().message()));
+    return grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<KeysetHandle>> keyset_handle =
+      CleartextKeysetHandle::Read(*std::move(keyset_reader));
+  if (!keyset_handle.ok()) {
+    response->set_err(std::string(keyset_handle.status().message()));
+    return grpc::Status::OK;
+  }
+
+  std::stringbuf encrypted_keyset;
+  StatusOr<std::unique_ptr<BinaryKeysetWriter>> keyset_writer =
+      BinaryKeysetWriter::New(
+          absl::make_unique<std::ostream>(&encrypted_keyset));
+  if (!keyset_writer.ok()) {
+    response->set_err(std::string(keyset_writer.status().message()));
+    return grpc::Status::OK;
+  }
+  if (request->has_associated_data()) {
+    crypto::tink::util::Status status =
+        (*keyset_handle)
+            ->WriteWithAssociatedData(keyset_writer->get(), **master_aead,
+                                      request->associated_data().value());
+    if (!status.ok()) {
+      response->set_err(std::string(status.message()));
+      return grpc::Status::OK;
+    }
+  } else {
+    crypto::tink::util::Status status =
+        (*keyset_handle)->Write(keyset_writer->get(), **master_aead);
+    if (!status.ok()) {
+      response->set_err(std::string(status.message()));
+      return grpc::Status::OK;
+    }
+  }
+  response->set_encrypted_keyset(encrypted_keyset.str());
+  return grpc::Status::OK;
+}
+
+grpc::Status KeysetImpl::ReadEncrypted(
+    grpc::ServerContext* context, const KeysetReadEncryptedRequest* request,
+    KeysetReadEncryptedResponse* response) {
+  StatusOr<std::unique_ptr<KeysetReader>> master_keyset_reader =
+      BinaryKeysetReader::New(request->master_keyset());
+  if (!master_keyset_reader.ok()) {
+    response->set_err(std::string(master_keyset_reader.status().message()));
+    return grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<KeysetHandle>> master_keyset_handle =
+      CleartextKeysetHandle::Read(*std::move(master_keyset_reader));
+  if (!master_keyset_handle.ok()) {
+    response->set_err(std::string(master_keyset_handle.status().message()));
+    return grpc::Status::OK;
+  }
+  StatusOr<std::unique_ptr<crypto::tink::Aead>> master_aead =
+      (*master_keyset_handle)->GetPrimitive<crypto::tink::Aead>();
+  if (!master_aead.ok()) {
+    response->set_err(std::string(master_aead.status().message()));
+    return grpc::Status::OK;
+  }
+
+  StatusOr<std::unique_ptr<KeysetReader>> keyset_reader =
+      BinaryKeysetReader::New(request->encrypted_keyset());
+  if (!keyset_reader.ok()) {
+    response->set_err(std::string(keyset_reader.status().message()));
+    return grpc::Status::OK;
+  }
+  std::unique_ptr<KeysetHandle> keyset_handle;
+  if (request->has_associated_data()) {
+    StatusOr<std::unique_ptr<KeysetHandle>> read_result =
+        KeysetHandle::ReadWithAssociatedData(
+            *std::move(keyset_reader), **master_aead,
+            request->associated_data().value());
+    if (!read_result.ok()) {
+      response->set_err(std::string(read_result.status().message()));
+      return grpc::Status::OK;
+    }
+    keyset_handle = *std::move(read_result);
+  } else {
+    StatusOr<std::unique_ptr<KeysetHandle>> read_result =
+      KeysetHandle::Read(*std::move(keyset_reader), **master_aead);
+    if (!read_result.ok()) {
+      response->set_err(std::string(read_result.status().message()));
+      return grpc::Status::OK;
+    }
+    keyset_handle = *std::move(read_result);
+  }
+
+  std::stringbuf keyset;
+  StatusOr<std::unique_ptr<BinaryKeysetWriter>> keyset_writer =
+      BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
+  if (!keyset_writer.ok()) {
+    response->set_err(std::string(keyset_writer.status().message()));
+    return grpc::Status::OK;
+  }
+  crypto::tink::util::Status status =
+      CleartextKeysetHandle::Write(keyset_writer->get(), *keyset_handle);
+  if (!status.ok()) {
+    response->set_err(std::string(status.message()));
+    return grpc::Status::OK;
+  }
+  response->set_keyset(keyset.str());
+  return grpc::Status::OK;
 }
 
 }  // namespace tink_testing_api

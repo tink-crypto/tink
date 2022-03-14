@@ -16,6 +16,7 @@
 
 #include "tink/kms_clients.h"
 
+#include <memory>
 #include <string>
 
 #include "gtest/gtest.h"

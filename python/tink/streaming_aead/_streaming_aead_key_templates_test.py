@@ -27,12 +27,16 @@ class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
   def test_create_aes_gcm_hkdf_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = streaming_aead.streaming_aead_key_templates.create_aes_gcm_hkdf_streaming_key_template(
-        aes_key_size=42,
-        hash_type=common_pb2.HashType.SHA1,
-        derived_key_size=76,
-        ciphertext_segment_size=64,
-    )
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          streaming_aead.streaming_aead_key_templates
+          .create_aes_gcm_hkdf_streaming_key_template(
+              aes_key_size=42,
+              hash_type=common_pb2.HashType.SHA1,
+              derived_key_size=76,
+              ciphertext_segment_size=64,
+          ))
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey',
         template.type_url)
@@ -47,14 +51,18 @@ class StreamingAeadKeyTemplatesTest(parameterized.TestCase):
   def test_create_aes_ctr_hmac_streaming_key_template(self):
     # Intentionally using 'weird' or invalid values for parameters,
     # to test that the function correctly puts them in the resulting template.
-    template = streaming_aead.streaming_aead_key_templates.create_aes_ctr_hmac_streaming_key_template(
-        aes_key_size=42,
-        hkdf_hash_type=common_pb2.HashType.SHA1,
-        derived_key_size=76,
-        mac_hash_type=common_pb2.HashType.UNKNOWN_HASH,
-        tag_size=39,
-        ciphertext_segment_size=64,
-    )
+    template = None
+    with self.assertWarns(DeprecationWarning):
+      template = (
+          streaming_aead.streaming_aead_key_templates
+          .create_aes_ctr_hmac_streaming_key_template(
+              aes_key_size=42,
+              hkdf_hash_type=common_pb2.HashType.SHA1,
+              derived_key_size=76,
+              mac_hash_type=common_pb2.HashType.UNKNOWN_HASH,
+              tag_size=39,
+              ciphertext_segment_size=64,
+          ))
     self.assertEqual(
         'type.googleapis.com/google.crypto.tink.AesCtrHmacStreamingKey',
         template.type_url)
