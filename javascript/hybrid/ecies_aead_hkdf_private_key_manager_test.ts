@@ -9,7 +9,7 @@ import {AeadKeyTemplates} from '../aead/aead_key_templates';
 import {PbAesCtrKeyFormat, PbEciesAeadDemParams, PbEciesAeadHkdfKeyFormat, PbEciesAeadHkdfParams, PbEciesAeadHkdfPrivateKey, PbEciesAeadHkdfPublicKey, PbEciesHkdfKemParams, PbEllipticCurveType, PbHashType, PbKeyData, PbKeyTemplate, PbPointFormat} from '../internal/proto';
 import * as Registry from '../internal/registry';
 import * as Random from '../subtle/random';
-import {assertExists, assertInstanceof} from '../testing/internal/test_utils';
+import {assertExists, assertInstanceof, assertMessageEquals} from '../testing/internal/test_utils';
 
 import {EciesAeadHkdfPrivateKeyManager} from './ecies_aead_hkdf_private_key_manager';
 import {EciesAeadHkdfPublicKeyManager} from './ecies_aead_hkdf_public_key_manager';
@@ -166,7 +166,8 @@ describe('ecies aead hkdf private key manager test', function() {
 
       const key =
           PbEciesAeadHkdfPrivateKey.deserializeBinary(keyData.getValue_asU8());
-      expect(key.getPublicKey()?.getParams()).toEqual(keyFormat.getParams());
+      assertMessageEquals(
+          key.getPublicKey()?.getParams()!, keyFormat.getParams()!);
       // The keys are tested more in tests for getPrimitive method below, where
       // the primitive based on the created key is tested.
     }
@@ -198,8 +199,9 @@ describe('ecies aead hkdf private key manager test', function() {
         publicKeyData.getValue_asU8());
     expect(publicKey.getVersion())
         .toEqual(assertExists(privateKey.getPublicKey()).getVersion());
-    expect(publicKey.getParams())
-        .toEqual(assertExists(privateKey.getPublicKey()).getParams());
+    assertMessageEquals(
+        publicKey.getParams()!,
+        assertExists(privateKey.getPublicKey()).getParams()!);
     expect(publicKey.getX_asU8())
         .toEqual(assertExists(privateKey.getPublicKey()).getX_asU8());
     expect(publicKey.getY_asU8())

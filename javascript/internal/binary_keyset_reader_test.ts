@@ -5,6 +5,7 @@
  */
 
 import * as Random from '../subtle/random';
+import {assertMessageEquals} from '../testing/internal/test_utils';
 
 import {BinaryKeysetReader} from './binary_keyset_reader';
 import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from './proto';
@@ -55,7 +56,7 @@ describe('binary keyset reader test', function() {
     const keysetFromReader = reader.read();
 
     // Test that it returns the same object as was created.
-    expect(keysetFromReader).toEqual(keyset);
+    assertMessageEquals(keysetFromReader, keyset);
   });
 
   it('read encrypted, not implemented yet', function() {

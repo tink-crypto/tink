@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbOutputPrefixType} from '../../internal/proto';
+import {PbKeyData, PbKeyset, PbKeysetKey, PbKeyStatusType, PbMessage, PbOutputPrefixType} from '../../internal/proto';
 
 /**
  * Returns its input type-narrowed not to be null or undefined. Throws a failed
@@ -81,4 +81,9 @@ export function createKeyset(keysetSize: number = 20): PbKeyset {
   }
   keyset.setPrimaryKeyId(1);
   return keyset;
+}
+
+/** Asserts that two protos are equal. */
+export function assertMessageEquals<T extends PbMessage>(m1: T, m2: T) {
+  expect(PbMessage.equals(m1, m2)).toBeTrue();
 }
