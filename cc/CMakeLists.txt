@@ -34,7 +34,6 @@ tink_cc_library(
     binary_keyset_reader.h
     binary_keyset_writer.h
     catalogue.h
-    cleartext_keyset_handle.h
     config.h
     deterministic_aead.h
     deterministic_aead_config.h
@@ -79,7 +78,6 @@ tink_cc_library(
     tink::core::aead
     tink::core::binary_keyset_reader
     tink::core::binary_keyset_writer
-    tink::core::cleartext_keyset_handle
     tink::core::deterministic_aead
     tink::core::hybrid_decrypt
     tink::core::hybrid_encrypt
