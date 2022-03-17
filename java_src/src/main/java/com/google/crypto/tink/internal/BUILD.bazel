@@ -2,7 +2,7 @@ load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//:__subpackages__"])
 
 java_library(
     name = "key_template_proto_converter",
@@ -12,6 +12,8 @@ java_library(
         "//src/main/java/com/google/crypto/tink:key_template",
         "@com_google_protobuf//:protobuf_javalite",
     ],
+    # Visible for our cross language tests only
+    visibility = ["//visibility:public"],
 )
 
 java_library(
