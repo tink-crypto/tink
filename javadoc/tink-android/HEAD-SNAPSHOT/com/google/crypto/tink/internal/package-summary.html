@@ -89,6 +89,39 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
+<td class="colLast">
+<div class="block">An object which collects all the operations which one can do on for a single key type, identified
+ by a single KeyProto.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory</a>&lt;KeyFormatProtoT extends com.google.protobuf.MessageLite,KeyT&gt;</td>
+<td class="colLast">
+<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.KeyFactory.KeyFormat.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.KeyFactory.KeyFormat</a>&lt;KeyFormatProtoT&gt;</td>
+<td class="colLast">
+<div class="block">A container that contains key format and other information that form key templates supported
+ by this factory.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.PrimitiveFactory.html" title="class in com.google.crypto.tink.internal">KeyTypeManager.PrimitiveFactory</a>&lt;PrimitiveT,KeyT&gt;</td>
+<td class="colLast">
+<div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</td>
+<td class="colLast">
+<div class="block">A PrivateKeyManager is like an <a href="../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>, but additionally has a method to create a
+ public key.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../../com/google/crypto/tink/internal/Util.html" title="class in com.google.crypto.tink.internal">Util</a></td>
 <td class="colLast">
 <div class="block">Helper functions used throughout Tink, for Tink internal use only.</div>

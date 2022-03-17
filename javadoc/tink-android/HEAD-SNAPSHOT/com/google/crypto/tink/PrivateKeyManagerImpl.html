@@ -49,7 +49,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/PrivateKeyManagerImpl.html" target="_top">Frames</a></li>
@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 public class <span class="typeNameLabel">PrivateKeyManagerImpl&lt;PrimitiveT,KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
 implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink">PrivateKeyManager</a>&lt;PrimitiveT&gt;</pre>
-<div class="block">Implementation of the <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>.
+<div class="block">Implementation of the <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>.
 
  <p>Choosing <code>PrimitiveT</code> equal to <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html?is-external=true" title="class or interface in java.lang"><code>Void</code></a> is valid; in this case the
  functions <a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html#getPrimitive-com.google.protobuf.ByteString-"><code>getPrimitive(com.google.protobuf.ByteString)</code></a> will throw if invoked.
@@ -139,8 +139,8 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html#PrivateKeyManagerImpl-com.google.crypto.tink.PrivateKeyTypeManager-com.google.crypto.tink.KeyTypeManager-java.lang.Class-">PrivateKeyManagerImpl</a></span>(<a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">KeyProtoT</a>,<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;privateKeyManager,
-                     <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;publicKeyManager,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html#PrivateKeyManagerImpl-com.google.crypto.tink.internal.PrivateKeyTypeManager-com.google.crypto.tink.internal.KeyTypeManager-java.lang.Class-">PrivateKeyManagerImpl</a></span>(<a href="../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">KeyProtoT</a>,<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;privateKeyManager,
+                     <a href="../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;publicKeyManager,
                      <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PrimitiveT</a>&gt;&nbsp;primitiveClass)</code>&nbsp;</td>
 </tr>
 </table>
@@ -243,14 +243,14 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="PrivateKeyManagerImpl-com.google.crypto.tink.PrivateKeyTypeManager-com.google.crypto.tink.KeyTypeManager-java.lang.Class-">
+<a name="PrivateKeyManagerImpl-com.google.crypto.tink.internal.PrivateKeyTypeManager-com.google.crypto.tink.internal.KeyTypeManager-java.lang.Class-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>PrivateKeyManagerImpl</h4>
-<pre>public&nbsp;PrivateKeyManagerImpl(<a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">KeyProtoT</a>,<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;privateKeyManager,
-                             <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;publicKeyManager,
+<pre>public&nbsp;PrivateKeyManagerImpl(<a href="../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">KeyProtoT</a>,<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;privateKeyManager,
+                             <a href="../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a>&gt;&nbsp;publicKeyManager,
                              <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;<a href="../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PrimitiveT</a>&gt;&nbsp;primitiveClass)</pre>
 </li>
 </ul>
@@ -479,7 +479,7 @@ implements <a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" t
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/crypto/tink/PublicKeySign.html" title="interface in com.google.crypto.tink"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../index.html?com/google/crypto/tink/PrivateKeyManagerImpl.html" target="_top">Frames</a></li>
