@@ -100,6 +100,7 @@ TEST(StatusOrTest, AssignToErrorStatus) {
   error_initially = ok_initially;
   ASSERT_THAT(error_initially.status(), IsOk());
   ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+  ASSERT_THAT(error_initially.value(), Eq("Hi"));
 }
 
 // This tests that when we assign to something which is previously an error and
@@ -114,12 +115,20 @@ TEST(StatusOrTest, AssignToErrorStatusImplicitConvertible) {
   error_initially = ok_initially;
   ASSERT_THAT(error_initially.status(), IsOk());
   ASSERT_THAT(error_initially.ValueOrDie(), Eq("Hi"));
+  ASSERT_THAT(error_initially.value(), Eq("Hi"));
 }
 
-TEST(StatusOrTest, MoveOutMoveOnly) {
+TEST(StatusOrTest, MoveOutMoveOnlyValueOrDie) {
   StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
       absl::make_unique<int>(10);
   std::unique_ptr<int> ten = std::move(status_or_unique_ptr_int.ValueOrDie());
+  ASSERT_THAT(*ten, Eq(10));
+}
+
+TEST(StatusOrTest, MoveOutMoveOnlyValue) {
+  StatusOr<std::unique_ptr<int>> status_or_unique_ptr_int =
+      absl::make_unique<int>(10);
+  std::unique_ptr<int> ten = std::move(status_or_unique_ptr_int.value());
   ASSERT_THAT(*ten, Eq(10));
 }
 
