@@ -1,12 +1,18 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
-    name = "go_default_library",
+    name = "jwt_hmac_go_proto",
     srcs = ["jwt_hmac.pb.go"],
     importpath = "github.com/google/tink/go/proto/jwt_hmac_go_proto",
     visibility = ["//:__subpackages__"],
     deps = [
-        "@org_golang_google_protobuf//reflect/protoreflect:go_default_library",
-        "@org_golang_google_protobuf//runtime/protoimpl:go_default_library",
+        "@org_golang_google_protobuf//reflect/protoreflect",
+        "@org_golang_google_protobuf//runtime/protoimpl",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":jwt_hmac_go_proto",
+    visibility = ["//:__subpackages__"],
 )

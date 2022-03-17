@@ -73,7 +73,7 @@ time bazel test --test_output="errors" -- ...
 if [[ -n "${KOKORO_ROOT}" ]]; then
   declare -a MANUAL_TARGETS
   MANUAL_TARGETS=(
-    "//integration/gcpkms:go_default_test"
+    "//integration/gcpkms:gcpkms_test"
   )
   readonly MANUAL_TARGETS
   time bazel test --test_output="errors" -- "${MANUAL_TARGETS[@]}"

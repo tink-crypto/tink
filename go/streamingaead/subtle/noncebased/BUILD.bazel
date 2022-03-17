@@ -1,14 +1,20 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "go_default_library",
+    name = "noncebased",
     srcs = ["noncebased.go"],
     importpath = "github.com/google/tink/go/streamingaead/subtle/noncebased",
     visibility = ["//visibility:public"],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "noncebased_test",
     srcs = ["noncebased_test.go"],
-    deps = [":go_default_library"],
+    deps = [":noncebased"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":noncebased",
+    visibility = ["//visibility:public"],
 )

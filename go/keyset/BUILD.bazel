@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 licenses(["notice"])
 
 go_library(
-    name = "go_default_library",
+    name = "keyset",
     srcs = [
         "binary_io.go",
         "handle.go",
@@ -22,20 +22,20 @@ go_library(
         "//visibility:public",
     ],
     deps = [
-        "//core/primitiveset:go_default_library",
-        "//core/registry:go_default_library",
-        "//internal:go_default_library",
-        "//proto/tink_go_proto:go_default_library",
-        "//subtle/random:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_google_protobuf//encoding/protojson:go_default_library",
-        "@org_golang_google_protobuf//encoding/prototext:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        "//core/primitiveset",
+        "//core/registry",
+        "//internal",
+        "//proto/tink_go_proto",
+        "//subtle/random",
+        "//tink",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//encoding/prototext",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "keyset_test",
     srcs = [
         "binary_io_test.go",
         "handle_test.go",
@@ -44,14 +44,20 @@ go_test(
         "validation_test.go",
     ],
     deps = [
-        ":go_default_library",
-        "//aead/subtle:go_default_library",
-        "//mac:go_default_library",
-        "//proto/common_go_proto:go_default_library",
-        "//proto/tink_go_proto:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testkeyset:go_default_library",
-        "//testutil:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        ":keyset",
+        "//aead/subtle",
+        "//mac",
+        "//proto/common_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
+        "//testkeyset",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":keyset",
+    visibility = ["//visibility:public"],
 )

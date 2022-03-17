@@ -5,23 +5,28 @@ licenses(["notice"])
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "fakekms",
     testonly = 1,
     srcs = ["fakekms.go"],
     importpath = "github.com/google/tink/go/testing/fakekms",
     visibility = ["//visibility:public"],
     deps = [
-        "//aead:go_default_library",
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
-        "//testkeyset:go_default_library",
-        "//tink:go_default_library",
+        "//aead",
+        "//core/registry",
+        "//keyset",
+        "//testkeyset",
+        "//tink",
     ],
 )
 
 go_test(
-    name = "go_default_test",
-    size = "small",
+    name = "fakekms_test",
     srcs = ["fakekms_test.go"],
-    deps = [":go_default_library"],
+    deps = [":fakekms"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":fakekms",
+    visibility = ["//visibility:public"],
 )
