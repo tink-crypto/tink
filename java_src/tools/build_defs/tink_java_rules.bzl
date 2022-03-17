@@ -14,14 +14,14 @@ def tink_android_test(name, srcs, deps, shard_count = 1, data = [], min_version 
         min_version: The minimum version of android which should be tested.
     """
     TARGET_DEVICES = {
-        19: "//tools/mobile/devices/android/nexus_5:google_19_x86_gms_stable",
-        21: "//tools/mobile/devices/android/nexus_6:google_21_x86",
-        22: "//tools/mobile/devices/android/nexus_6:google_22_x86",
-        23: "//tools/mobile/devices/android/nexus_6:google_23_x86",
-        24: "//tools/mobile/devices/android/nexus_6:google_24_x86",
-        25: "//tools/mobile/devices/android/nexus_6p:google_25_x86",
-        26: "//tools/mobile/devices/android/pixel_c:google_26_x86",
-        27: "//tools/mobile/devices/android/pixel_xl:google_27_x86",
+        19: "//tools/mobile/devices/android/generic_phone:android_19_x86",
+        21: "//tools/mobile/devices/android/generic_phone:android_21_x86",
+        22: "//tools/mobile/devices/android/generic_phone:android_22_x86",
+        23: "//tools/mobile/devices/android/generic_phone:android_23_x86",
+        24: "//tools/mobile/devices/android/generic_phone:android_24_x86",
+        25: "//tools/mobile/devices/android/generic_phone:android_25_x86",
+        26: "//tools/mobile/devices/android/generic_phone:android_26_x86",
+        27: "//tools/mobile/devices/android/generic_phone:android_27_x86",
     }
 
     deps.append("//java/com/google/android/apps/common/testing/testrunner")
