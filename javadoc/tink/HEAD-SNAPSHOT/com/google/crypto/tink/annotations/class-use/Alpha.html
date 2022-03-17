@@ -90,6 +90,10 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><a href="#com.google.crypto.tink.internal">com.google.crypto.tink.internal</a></td>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><a href="#com.google.crypto.tink.subtle">com.google.crypto.tink.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -111,22 +115,8 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink">KeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;</span></code>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink">PrivateKeyManagerImpl</a>&lt;PrimitiveT,KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</span></code>
-<div class="block">Implementation of the <a href="../../../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="../../../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="../../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink">PrivateKeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</span></code>
-<div class="block">A PrivateKeyManager is like an <a href="../../../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
- public key.</div>
+<div class="block">Implementation of the <a href="../../../../../../com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="../../../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="../../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>.</div>
 </td>
 </tr>
 </tbody>
@@ -147,6 +137,34 @@
 <td class="colFirst"><code>class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/aead/subtle/AesGcmSiv.html" title="class in com.google.crypto.tink.aead.subtle">AesGcmSiv</a></span></code>
 <div class="block">This primitive implements AES-GCM-SIV (as defined in RFC 8452) using JCE.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li class="blockList"><a name="com.google.crypto.tink.internal">
+<!--   -->
+</a>
+<h3>Uses of <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a> in <a href="../../../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></h3>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a> with annotations of type <a href="../../../../../../com/google/crypto/tink/annotations/Alpha.html" title="annotation in com.google.crypto.tink.annotations">Alpha</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal">KeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite&gt;</span></code>
+<div class="block">An object which collects all the operations which one can do on for a single key type, identified
+ by a single KeyProto.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal">PrivateKeyTypeManager</a>&lt;KeyProtoT extends com.google.protobuf.MessageLite,PublicKeyProtoT extends com.google.protobuf.MessageLite&gt;</span></code>
+<div class="block">A PrivateKeyManager is like an <a href="../../../../../../com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>, but additionally has a method to create a
+ public key.</div>
 </td>
 </tr>
 </tbody>

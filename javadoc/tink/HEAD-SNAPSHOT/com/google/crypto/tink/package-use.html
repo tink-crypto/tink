@@ -102,11 +102,11 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.hybrid.internal">com.google.crypto.tink.hybrid.internal</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.hybrid.subtle">com.google.crypto.tink.hybrid.subtle</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="#com.google.crypto.tink.hybrid.subtle">com.google.crypto.tink.hybrid.subtle</a></td>
+<td class="colFirst"><a href="#com.google.crypto.tink.internal">com.google.crypto.tink.internal</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -208,28 +208,6 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.KeyFormat.html#com.google.crypto.tink">KeyTypeManager.KeyFactory.KeyFormat</a>
-<div class="block">A container that contains key format and other information that form key templates supported
- by this factory.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.PrimitiveFactory.html#com.google.crypto.tink">KeyTypeManager.PrimitiveFactory</a>
-<div class="block">A PrimitiveFactory knows how to create primitives from a given key.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KmsClient.html#com.google.crypto.tink">KmsClient</a>
 <div class="block">A KmsClient knows how to produce primitives backed by keys stored in remote KMS services.</div>
 </td>
@@ -260,12 +238,6 @@
 <div class="block">A <a href="../../../../com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> that understands asymmetric private key types.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrivateKeyTypeManager.html#com.google.crypto.tink">PrivateKeyTypeManager</a>
-<div class="block">A PrivateKeyManager is like an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
- public key.</div>
-</td>
-</tr>
 </tbody>
 </table>
 </li>
@@ -286,17 +258,6 @@
 <tr class="rowColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTemplate.html#com.google.crypto.tink.aead">KeyTemplate</a>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.aead">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.aead">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -356,17 +317,6 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.daead">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.daead">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrimitiveSet.html#com.google.crypto.tink.daead">PrimitiveSet</a>
 <div class="block">A container class for a set of primitives -- implementations of cryptographic primitives offered
  by Tink.</div>
@@ -411,17 +361,6 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.hybrid">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.hybrid">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrimitiveSet.html#com.google.crypto.tink.hybrid">PrimitiveSet</a>
 <div class="block">A container class for a set of primitives -- implementations of cryptographic primitives offered
  by Tink.</div>
@@ -430,41 +369,6 @@
 <tr class="rowColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrimitiveWrapper.html#com.google.crypto.tink.hybrid">PrimitiveWrapper</a>
 <div class="block">Basic interface for wrapping a primitive.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrivateKeyTypeManager.html#com.google.crypto.tink.hybrid">PrivateKeyTypeManager</a>
-<div class="block">A PrivateKeyManager is like an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
- public key.</div>
-</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li class="blockList"><a name="com.google.crypto.tink.hybrid.internal">
-<!--   -->
-</a>
-<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
-<caption><span>Classes in <a href="../../../../com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a> used by <a href="../../../../com/google/crypto/tink/hybrid/internal/package-summary.html">com.google.crypto.tink.hybrid.internal</a></span><span class="tabEnd">&nbsp;</span></caption>
-<tr>
-<th class="colOne" scope="col">Class and Description</th>
-</tr>
-<tbody>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.hybrid.internal">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.hybrid.internal">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrivateKeyTypeManager.html#com.google.crypto.tink.hybrid.internal">PrivateKeyTypeManager</a>
-<div class="block">A PrivateKeyManager is like an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
- public key.</div>
 </td>
 </tr>
 </tbody>
@@ -502,6 +406,23 @@
 </tbody>
 </table>
 </li>
+<li class="blockList"><a name="com.google.crypto.tink.internal">
+<!--   -->
+</a>
+<table class="useSummary" border="0" cellpadding="3" cellspacing="0" summary="Use table, listing classes, and an explanation">
+<caption><span>Classes in <a href="../../../../com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a> used by <a href="../../../../com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Class and Description</th>
+</tr>
+<tbody>
+<tr class="altColor">
+<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTemplate.OutputPrefixType.html#com.google.crypto.tink.internal">KeyTemplate.OutputPrefixType</a>
+<div class="block">Tink produces and accepts ciphertexts or signatures that consist of a prefix and a payload.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</li>
 <li class="blockList"><a name="com.google.crypto.tink.mac">
 <!--   -->
 </a>
@@ -520,17 +441,6 @@
 <tr class="rowColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTemplate.html#com.google.crypto.tink.mac">KeyTemplate</a>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.mac">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.mac">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -553,17 +463,6 @@
 <tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTemplate.html#com.google.crypto.tink.prf">KeyTemplate</a>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.prf">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.prf">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -611,17 +510,6 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.signature">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.signature">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PemKeyType.html#com.google.crypto.tink.signature">PemKeyType</a>
 <div class="block">PEM key types that Tink supports</div>
 </td>
@@ -638,17 +526,11 @@
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PrivateKeyTypeManager.html#com.google.crypto.tink.signature">PrivateKeyTypeManager</a>
-<div class="block">A PrivateKeyManager is like an <a href="../../../../com/google/crypto/tink/KeyTypeManager.html" title="class in com.google.crypto.tink"><code>KeyTypeManager</code></a>, but additionally has a method to create a
- public key.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PublicKeySign.html#com.google.crypto.tink.signature">PublicKeySign</a>
 <div class="block">Interface for public key signing.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/PublicKeyVerify.html#com.google.crypto.tink.signature">PublicKeyVerify</a>
 <div class="block">Interface for public key signing.</div>
 </td>
@@ -674,17 +556,6 @@
 <tr class="rowColor">
 <td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTemplate.html#com.google.crypto.tink.streamingaead">KeyTemplate</a>
 <div class="block">A KeyTemplate specifies how to generate keys of a particular type.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.html#com.google.crypto.tink.streamingaead">KeyTypeManager</a>
-<div class="block">An object which collects all the operations which one can do on for a single key type, identified
- by a single KeyProto.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><a href="../../../../com/google/crypto/tink/class-use/KeyTypeManager.KeyFactory.html#com.google.crypto.tink.streamingaead">KeyTypeManager.KeyFactory</a>
-<div class="block">A <code>KeyFactory</code> creates new keys from a given KeyFormat.</div>
 </td>
 </tr>
 <tr class="altColor">
