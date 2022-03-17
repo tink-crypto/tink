@@ -21,8 +21,8 @@ import static com.google.crypto.tink.testing.KeyTypeManagerTestUtil.testKeyTempl
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Mac;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.HmacKey;
 import com.google.crypto.tink.proto.HmacKeyFormat;

@@ -115,7 +115,7 @@ java_library(
     srcs = ["KeyTypeManagerTestUtil.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template",
-        "//src/main/java/com/google/crypto/tink:key_type_manager",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],
@@ -126,7 +126,7 @@ java_library(
     srcs = ["KeyTypeManagerTestUtil.java"],
     deps = [
         "//src/main/java/com/google/crypto/tink:key_template-android",
-        "//src/main/java/com/google/crypto/tink:key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/internal:key_type_manager-android",
         "@com_google_protobuf//:protobuf_javalite",
         "@maven//:com_google_truth_truth",
     ],

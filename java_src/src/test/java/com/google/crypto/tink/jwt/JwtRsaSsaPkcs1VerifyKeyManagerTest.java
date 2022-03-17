@@ -18,7 +18,7 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;

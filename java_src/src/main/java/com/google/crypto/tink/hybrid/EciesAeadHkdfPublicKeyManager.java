@@ -17,7 +17,7 @@
 package com.google.crypto.tink.hybrid;
 
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.EciesAeadHkdfParams;
 import com.google.crypto.tink.proto.EciesAeadHkdfPublicKey;
 import com.google.crypto.tink.proto.EciesHkdfKemParams;

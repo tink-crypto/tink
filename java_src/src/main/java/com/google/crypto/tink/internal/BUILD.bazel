@@ -46,3 +46,47 @@ android_library(
     deps = [
     ],
 )
+
+java_library(
+    name = "key_type_manager",
+    srcs = ["KeyTypeManager.java"],
+    deps = [
+        "//proto:tink_java_proto",
+        "//src/main/java/com/google/crypto/tink:key_template",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "key_type_manager-android",
+    srcs = ["KeyTypeManager.java"],
+    deps = [
+        "//proto:tink_java_proto_lite",
+        "//src/main/java/com/google/crypto/tink:key_template-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "//src/main/java/com/google/crypto/tink/config/internal:tink_fips_util-android",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+java_library(
+    name = "private_key_type_manager",
+    srcs = ["PrivateKeyTypeManager.java"],
+    deps = [
+        ":key_type_manager",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)
+
+android_library(
+    name = "private_key_type_manager-android",
+    srcs = ["PrivateKeyTypeManager.java"],
+    deps = [
+        ":key_type_manager-android",
+        "//src/main/java/com/google/crypto/tink/annotations:alpha",
+        "@com_google_protobuf//:protobuf_javalite",
+    ],
+)

@@ -28,6 +28,8 @@ import com.google.crypto.tink.aead.AesEaxKeyManager;
 import com.google.crypto.tink.aead.AesGcmKeyManager;
 import com.google.crypto.tink.config.TinkConfig;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
+import com.google.crypto.tink.internal.KeyTypeManager;
+import com.google.crypto.tink.internal.PrivateKeyTypeManager;
 import com.google.crypto.tink.mac.MacConfig;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.AesEaxKey;
@@ -1034,8 +1036,9 @@ public class RegistryTest {
     }
 
     @Override
-    public KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
-      return new KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(Ed25519KeyFormat.class) {
+    public KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey> keyFactory() {
+      return new KeyTypeManager.KeyFactory<Ed25519KeyFormat, Ed25519PrivateKey>(
+          Ed25519KeyFormat.class) {
         @Override
         public void validateKeyFormat(Ed25519KeyFormat format) throws GeneralSecurityException {}
 
@@ -1062,7 +1065,7 @@ public class RegistryTest {
         }
 
         @Override
-        public Map<String, KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
+        public Map<String, KeyTypeManager.KeyFactory.KeyFormat<Ed25519KeyFormat>> keyFormats() {
           return keyFormats;
         }
       };

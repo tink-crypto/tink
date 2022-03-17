@@ -17,7 +17,7 @@
 package com.google.crypto.tink.hybrid.internal;
 
 import com.google.crypto.tink.HybridEncrypt;
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.HpkePublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
 import com.google.crypto.tink.subtle.Validators;

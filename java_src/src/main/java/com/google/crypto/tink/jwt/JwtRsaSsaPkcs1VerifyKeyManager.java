@@ -17,7 +17,7 @@ package com.google.crypto.tink.jwt;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PublicKey;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
