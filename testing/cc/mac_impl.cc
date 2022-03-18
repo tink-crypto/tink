@@ -42,23 +42,22 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto mac_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
     response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto compute_result = mac_result.ValueOrDie()->ComputeMac(request->data());
+  auto compute_result = mac_result.value()->ComputeMac(request->data());
   if (!compute_result.ok()) {
     response->set_err(std::string(compute_result.status().message()));
     return ::grpc::Status::OK;
   }
-  response->set_mac_value(compute_result.ValueOrDie());
+  response->set_mac_value(compute_result.value());
   return ::grpc::Status::OK;
 }
 
@@ -72,19 +71,18 @@ using ::grpc::Status;
     return ::grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return ::grpc::Status::OK;
   }
-  auto mac_result =
-      handle_result.ValueOrDie()->GetPrimitive<crypto::tink::Mac>();
+  auto mac_result = handle_result.value()->GetPrimitive<crypto::tink::Mac>();
   if (!mac_result.ok()) {
     response->set_err(std::string(mac_result.status().message()));
     return ::grpc::Status::OK;
   }
   auto status =
-      mac_result.ValueOrDie()->VerifyMac(request->mac_value(), request->data());
+      mac_result.value()->VerifyMac(request->mac_value(), request->data());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
     return ::grpc::Status::OK;

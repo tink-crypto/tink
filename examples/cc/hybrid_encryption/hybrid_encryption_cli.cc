@@ -87,7 +87,7 @@ void GeneratePrivateKey(const std::string& output_filename) {
               << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
+  auto keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename << "..."
             << std::endl;
@@ -112,7 +112,7 @@ void ExtractPublicKey(const std::string& private_keyset_filename,
               << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
+  auto public_keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename << "..."
             << std::endl;
@@ -135,7 +135,7 @@ void Encrypt(const std::string& keyset_filename,
               << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto hybrid_encrypt = std::move(primitive_result.ValueOrDie());
+  auto hybrid_encrypt = std::move(primitive_result.value());
 
   std::clog << "Encrypting message from file " << message_filename
             << " using public keyset from file " << keyset_filename << "..."
@@ -150,7 +150,7 @@ void Encrypt(const std::string& keyset_filename,
               << encrypt_result.status().message() << std::endl;
     exit(1);
   }
-  std::string encrypted_message = encrypt_result.ValueOrDie();
+  std::string encrypted_message = encrypt_result.value();
 
   std::clog << "Writing the resulting encrypted message to file "
             << output_filename << "..." << std::endl;
@@ -173,7 +173,7 @@ void Decrypt(const std::string& keyset_filename,
               << "failed: " << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto hybrid_decrypt = std::move(primitive_result.ValueOrDie());
+  auto hybrid_decrypt = std::move(primitive_result.value());
 
   std::clog << "Decrypting the encrypted file " << message_filename
             << " to the file " << output_filename
@@ -191,7 +191,7 @@ void Decrypt(const std::string& keyset_filename,
     exit(1);
   }
 
-  std::string decrypted_message = decrypt_status.ValueOrDie();
+  std::string decrypted_message = decrypt_status.value();
 
   std::clog << "Writing the resulting decrypted message to file "
             << output_filename << "..." << std::endl;

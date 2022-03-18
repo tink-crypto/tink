@@ -67,7 +67,7 @@ std::unique_ptr<crypto::tink::KeysetReader> GetJsonKeysetReader(
               << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // Creates a KeysetHandle that for a keyset read from the given file,
@@ -82,7 +82,7 @@ std::unique_ptr<crypto::tink::KeysetHandle> ReadKeyset(
               << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_handle_result.ValueOrDie());
+  return std::move(keyset_handle_result.value());
 }
 
 // Reads the specified file and returns the read content as a string.
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
   std::unique_ptr<crypto::tink::Aead> aead =
-      std::move(primitive_result.ValueOrDie());
+      std::move(primitive_result.value());
 
   // Read the input.
   std::string input = Read(input_filename);
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
                 << encrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = encrypt_result.ValueOrDie();
+    output = encrypt_result.value();
   } else {  // operation == "decrypt"
     auto decrypt_result = aead->Decrypt(input, associated_data);
     if (!decrypt_result.ok()) {
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
                 << decrypt_result.status().message() << std::endl;
       exit(1);
     }
-    output = decrypt_result.ValueOrDie();
+    output = decrypt_result.value();
   }
 
   // Write the output to the output file.

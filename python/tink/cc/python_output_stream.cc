@@ -72,7 +72,7 @@ crypto::tink::util::StatusOr<int> PythonOutputStream::Next(void** data) {
   if (!write_result.ok()) return status_ = write_result.status();
 
   // Some data was written, so we can return some portion of buffer_.
-  int written = write_result.ValueOrDie();
+  int written = write_result.value();
   position_ += written;
   count_in_buffer_ = buffer_.size();
   buffer_offset_ = buffer_.size() - written;
@@ -103,7 +103,7 @@ util::Status PythonOutputStream::Close() {
       auto write_result = adapter_->Write(absl::string_view(buffer_).substr(
           written, count_in_buffer_ - written));
       if (!write_result.ok()) return write_result.status();
-      written += write_result.ValueOrDie();
+      written += write_result.value();
     }
   }
   status_ = adapter_->Close();

@@ -49,8 +49,8 @@ std::string KeysetBytes(const KeysetHandle& keyset_handle) {
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   EXPECT_TRUE(writer_result.ok());
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             keyset_handle);
+  auto status =
+      CleartextKeysetHandle::Write(writer_result.value().get(), keyset_handle);
   EXPECT_TRUE(status.ok());
   return keyset.str();
 }
@@ -67,12 +67,11 @@ TEST_F(HybridImplTest, EncryptDecryptSuccess) {
   auto private_handle_result = KeysetHandle::GenerateNew(key_template);
   EXPECT_TRUE(private_handle_result.ok());
   auto public_handle_result =
-      private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+      private_handle_result.value()->GetPublicKeysetHandle();
   EXPECT_TRUE(public_handle_result.ok());
 
   HybridEncryptRequest enc_request;
-  enc_request.set_public_keyset(
-      KeysetBytes(*public_handle_result.ValueOrDie()));
+  enc_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
   enc_request.set_plaintext("Plain text");
   enc_request.set_context_info("context");
   HybridEncryptResponse enc_response;
@@ -81,8 +80,7 @@ TEST_F(HybridImplTest, EncryptDecryptSuccess) {
   EXPECT_THAT(enc_response.err(), IsEmpty());
 
   HybridDecryptRequest dec_request;
-  dec_request.set_private_keyset(
-      KeysetBytes(*private_handle_result.ValueOrDie()));
+  dec_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
   dec_request.set_ciphertext(enc_response.ciphertext());
   dec_request.set_context_info("context");
   HybridDecryptResponse dec_response;
@@ -112,8 +110,7 @@ TEST_F(HybridImplTest, DecryptBadCiphertextFail) {
   EXPECT_TRUE(private_handle_result.ok());
 
   HybridDecryptRequest dec_request;
-  dec_request.set_private_keyset(
-      KeysetBytes(*private_handle_result.ValueOrDie()));
+  dec_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
   dec_request.set_ciphertext("bad ciphertext");
   dec_request.set_context_info("context");
   HybridDecryptResponse dec_response;

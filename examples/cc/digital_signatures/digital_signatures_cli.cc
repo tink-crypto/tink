@@ -83,7 +83,7 @@ void GeneratePrivateKey(const std::string& output_filename) {
               << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto keyset_handle = std::move(new_keyset_handle_result.ValueOrDie());
+  auto keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename
             << "..." << std::endl;
@@ -108,8 +108,7 @@ void ExtractPublicKey(const std::string& private_keyset_filename,
               << new_keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_keyset_handle =
-      std::move(new_keyset_handle_result.ValueOrDie());
+  auto public_keyset_handle = std::move(new_keyset_handle_result.value());
 
   std::clog << "Writing the keyset to file " << output_filename
             << "..." << std::endl;
@@ -131,7 +130,7 @@ void Sign(const std::string& keyset_filename,
               << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_key_sign = std::move(primitive_result.ValueOrDie());
+  auto public_key_sign = std::move(primitive_result.value());
 
   std::clog << "Signing message from file " << message_filename
             << " using private keyset from file " << keyset_filename
@@ -145,7 +144,7 @@ void Sign(const std::string& keyset_filename,
               << sign_result.status().message() << std::endl;
     exit(1);
   }
-  std::string signature = sign_result.ValueOrDie();
+  std::string signature = sign_result.value();
 
   std::clog << "Writing the resulting signature to file " << output_filename
             << "..." << std::endl;
@@ -168,7 +167,7 @@ void Verify(const std::string& keyset_filename,
               << "failed: " << primitive_result.status().message() << std::endl;
     exit(1);
   }
-  auto public_key_verify = std::move(primitive_result.ValueOrDie());
+  auto public_key_verify = std::move(primitive_result.value());
 
   std::clog << "Verifying signature from file " << signature_filename
             << " of the message from file " << message_filename

@@ -54,8 +54,7 @@ class CcKeyManager {
                        absl::StrCat("No manager for key type '", type_url,
                                     "' found in the registry.")));
     }
-    return absl::make_unique<CcKeyManager<P>>(
-        key_manager_result.ValueOrDie());
+    return absl::make_unique<CcKeyManager<P>>(key_manager_result.value());
   }
 
   explicit CcKeyManager(const KeyManager<P>* key_manager)
@@ -90,7 +89,7 @@ class CcKeyManager {
     if (!key_data.ok()) {
       throw TinkException(key_data.status());
     }
-    return pybind11::bytes(key_data.ValueOrDie()->SerializeAsString());
+    return pybind11::bytes(key_data.value()->SerializeAsString());
   }
 
   // Returns public key data extracted from the given private_key_data.
@@ -112,7 +111,7 @@ class CcKeyManager {
     if (!result.ok()) {
       throw TinkException(result.status());
     }
-    return pybind11::bytes(result.ValueOrDie()->SerializeAsString());
+    return pybind11::bytes(result.value()->SerializeAsString());
   }
 
   // Returns the type_url identifying the key type handled by this manager.
