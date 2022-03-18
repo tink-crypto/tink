@@ -50,7 +50,7 @@ std::unique_ptr<KeysetReader> Util::GetBinaryKeysetReader(
               << keyset_reader_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_reader_result.ValueOrDie());
+  return std::move(keyset_reader_result.value());
 }
 
 // static
@@ -64,7 +64,7 @@ std::unique_ptr<KeysetWriter> Util::GetBinaryKeysetWriter(
               << keyset_writer_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_writer_result.ValueOrDie());
+  return std::move(keyset_writer_result.value());
 }
 
 // static
@@ -77,7 +77,7 @@ std::unique_ptr<KeysetHandle> Util::ReadKeyset(const std::string& filename) {
               << keyset_handle_result.status().message() << std::endl;
     exit(1);
   }
-  return std::move(keyset_handle_result.ValueOrDie());
+  return std::move(keyset_handle_result.value());
 }
 
 // static

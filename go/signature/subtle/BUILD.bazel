@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "subtle",
     srcs = [
         "ecdsa.go",
         "ecdsa_signer.go",
@@ -16,13 +16,13 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/signature/subtle",
     deps = [
-        "//subtle:go_default_library",
-        "@org_golang_x_crypto//ed25519:go_default_library",
+        "//subtle",
+        "@org_golang_x_crypto//ed25519",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "subtle_test",
     srcs = [
         "ecdsa_signer_verifier_test.go",
         "ecdsa_test.go",
@@ -33,11 +33,17 @@ go_test(
     data = [
         "@wycheproof//testvectors:all",
     ],
-    embed = [":go_default_library"],
     deps = [
-        "//subtle:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testutil:go_default_library",
-        "@org_golang_x_crypto//ed25519:go_default_library",
+        ":subtle",
+        "//subtle",
+        "//subtle/random",
+        "//testutil",
+        "@org_golang_x_crypto//ed25519",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":subtle",
+    visibility = ["//visibility:public"],
 )

@@ -45,7 +45,7 @@ TEST(InputStreamAdapterTest, BasicRead) {
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data);
+  EXPECT_EQ(read_result.value(), data);
 }
 
 TEST(InputStreamAdapterTest, ReadEOFError) {
@@ -53,7 +53,7 @@ TEST(InputStreamAdapterTest, ReadEOFError) {
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data);
+  EXPECT_EQ(read_result.value(), data);
   read_result = adapter->Read(10);
   EXPECT_EQ(read_result.status().code(), absl::StatusCode::kOutOfRange);
 }
@@ -63,13 +63,13 @@ TEST(InputStreamAdapterTest, MultipleRead) {
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(5);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 5));
+  EXPECT_EQ(read_result.value(), data.substr(0, 5));
   read_result = adapter->Read(5);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(5, 5));
+  EXPECT_EQ(read_result.value(), data.substr(5, 5));
   read_result = adapter->Read(5);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(10, 5));
+  EXPECT_EQ(read_result.value(), data.substr(10, 5));
 }
 
 // In this test size of the IstreamInputStream buffer is smaller than the
@@ -80,7 +80,7 @@ TEST(InputStreamAdapterTest, OnlyOneNext) {
   auto adapter = GetInputStreamAdapter(10, data);
   auto read_result = adapter->Read(35);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 10));
+  EXPECT_EQ(read_result.value(), data.substr(0, 10));
 }
 
 TEST(InputStreamAdapterTest, ReadLessThanAvailable) {
@@ -88,7 +88,7 @@ TEST(InputStreamAdapterTest, ReadLessThanAvailable) {
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(10);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data.substr(0, 10));
+  EXPECT_EQ(read_result.value(), data.substr(0, 10));
 }
 
 TEST(InputStreamAdapterTest, ReadMoreThanAvailable) {
@@ -96,7 +96,7 @@ TEST(InputStreamAdapterTest, ReadMoreThanAvailable) {
   auto adapter = GetInputStreamAdapter(-1, data);
   auto read_result = adapter->Read(30);
   ASSERT_TRUE(read_result.status().ok()) << read_result.status();
-  EXPECT_EQ(read_result.ValueOrDie(), data);
+  EXPECT_EQ(read_result.value(), data);
 }
 
 TEST(InputStreamAdapterTest, ReadFromEmptyStream) {

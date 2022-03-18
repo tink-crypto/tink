@@ -40,7 +40,7 @@ util::StatusOr<std::unique_ptr<OutputStreamAdapter>> NewCcEncryptingStream(
   }
 
   // Get an OutputStreamAdapter from the EncryptingStream
-  return absl::make_unique<OutputStreamAdapter>(std::move(result.ValueOrDie()));
+  return absl::make_unique<OutputStreamAdapter>(std::move(result.value()));
 }
 
 util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
@@ -57,7 +57,7 @@ util::StatusOr<std::unique_ptr<InputStreamAdapter>> NewCcDecryptingStream(
   }
 
   // Get an InputStreamAdapter from the DecryptingStream
-  return absl::make_unique<InputStreamAdapter>(std::move(result.ValueOrDie()));
+  return absl::make_unique<InputStreamAdapter>(std::move(result.value()));
 }
 
 }  // namespace tink

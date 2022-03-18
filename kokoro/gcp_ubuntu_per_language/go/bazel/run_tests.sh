@@ -27,6 +27,45 @@ echo "Using go binary from $(which go): $(go version)"
 
 cd go/
 use_bazel.sh "$(cat .bazelversion)"
+
+# Check that build files are up-to-date.
+
+TEMP_DIR_CURRENT="$(mktemp -dt current_tink_go_build_files.XXXXXX)"
+REPO_FILES=(
+  ./go.mod
+  ./go.sum
+  ./deps.bzl
+)
+
+# Copy all current generated build files into TEMP_DIR_CURRENT
+readarray -t CURRENT_GENERATED_FILES < <(find . -name BUILD.bazel)
+CURRENT_GENERATED_FILES+=( "${REPO_FILES[@]}" )
+
+readonly CURRENT_GENERATED_FILES
+for generated_file_path in "${CURRENT_GENERATED_FILES[@]}"; do
+  mkdir -p "$(dirname "${TEMP_DIR_CURRENT}/${generated_file_path}")"
+  cp "${generated_file_path}" "${TEMP_DIR_CURRENT}/${generated_file_path}"
+done
+
+# Update build files
+go mod tidy
+# Update deps.bzl
+bazel run //:gazelle-update-repos
+# Update all BUILD.bazel files
+bazel run //:gazelle
+
+# Compare current with new build files
+readarray -t NEW_GENERATED_FILES < <(find . -name BUILD.bazel)
+NEW_GENERATED_FILES+=( "${REPO_FILES[@]}" )
+readonly NEW_GENERATED_FILES
+for generated_file_path in "${NEW_GENERATED_FILES[@]}"; do
+  if ! cmp -s "${generated_file_path}" "${TEMP_DIR_CURRENT}/${generated_file_path}"; then
+    echo "FAIL: ${generated_file_path} needs to be updated. Please follow the instructions on go/tink-workflows#update-go-build."
+    exit 1
+  fi
+done
+
+# Build and run tests.
 time bazel build -- ...
 time bazel test --test_output="errors" -- ...
 
@@ -34,7 +73,7 @@ time bazel test --test_output="errors" -- ...
 if [[ -n "${KOKORO_ROOT}" ]]; then
   declare -a MANUAL_TARGETS
   MANUAL_TARGETS=(
-    "//integration/gcpkms:go_default_test"
+    "//integration/gcpkms:gcpkms_test"
   )
   readonly MANUAL_TARGETS
   time bazel test --test_output="errors" -- "${MANUAL_TARGETS[@]}"

@@ -129,7 +129,7 @@ func (i *AESGCMInsecureIV) Decrypt(iv, ciphertext, associatedData []byte) ([]byt
 	}
 	plaintext, err := cipher.Open(nil, iv, actualCiphertext, associatedData)
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, err
 	}
 	return plaintext, nil
 }

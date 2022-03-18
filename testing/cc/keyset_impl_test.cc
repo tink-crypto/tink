@@ -79,7 +79,7 @@ TEST_F(KeysetImplTest, GenerateSuccess) {
   auto reader_result = BinaryKeysetReader::New(response.keyset());
   ASSERT_TRUE(reader_result.ok());
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   EXPECT_TRUE(handle_result.ok());
 }
 
@@ -148,7 +148,7 @@ TEST_F(KeysetImplTest, PublicSuccess) {
   auto reader_result = BinaryKeysetReader::New(response.public_keyset());
   ASSERT_TRUE(reader_result.ok());
   auto public_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   EXPECT_TRUE(public_handle_result.ok());
 }
 
@@ -189,9 +189,9 @@ TEST_F(KeysetImplTest, FromJsonSuccess) {
 
   auto reader_result = BinaryKeysetReader::New(from_response.keyset());
   EXPECT_TRUE(reader_result.ok());
-  auto keyset_proto_result = reader_result.ValueOrDie()->Read();
+  auto keyset_proto_result = reader_result.value()->Read();
   EXPECT_TRUE(keyset_proto_result.ok());
-  EXPECT_THAT(keyset_proto_result.ValueOrDie()->primary_key_id(), Eq(42));
+  EXPECT_THAT(keyset_proto_result.value()->primary_key_id(), Eq(42));
 }
 
 TEST_F(KeysetImplTest, ToFromJsonSuccess) {

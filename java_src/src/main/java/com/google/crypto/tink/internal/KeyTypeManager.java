@@ -14,8 +14,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
+import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.crypto.tink.config.internal.TinkFipsUtil;
 import com.google.crypto.tink.proto.KeyData.KeyMaterialType;
@@ -49,6 +50,9 @@ import java.util.Set;
  * <p>If the key manager can create new keys, one also needs to implement the method {@code
  * #keyFactory}. In this case it needs to return an object of type {@code KeyFactory<KeyFormatProto,
  * KeyProtoT>}, where one has to specify a proto for the key format as well.
+ *
+ * <p>This should not be used by Tink users outside of Google, since we first want to change it such
+ * that it can be independent of the protobuf library.
  */
 @Alpha
 public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
@@ -169,7 +173,7 @@ public abstract class KeyTypeManager<KeyProtoT extends MessageLite> {
    * Returns the first class object of the first supported primitive, or {@code Class<Void>} if the
    * key manager supports no primitive at all.
    */
-  final Class<?> firstSupportedPrimitiveClass() {
+  public final Class<?> firstSupportedPrimitiveClass() {
     return firstPrimitiveClass;
   }
 

@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "prf",
     srcs = [
         "aes_cmac_prf_key_manager.go",
         "hkdf_prf_key_manager.go",
@@ -17,23 +17,22 @@ go_library(
     importpath = "github.com/google/tink/go/prf",
     visibility = ["//visibility:public"],
     deps = [
-        "//core/primitiveset:go_default_library",
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
-        "//prf/subtle:go_default_library",
-        "//proto/aes_cmac_prf_go_proto:go_default_library",
-        "//proto/common_go_proto:go_default_library",
-        "//proto/hkdf_prf_go_proto:go_default_library",
-        "//proto/hmac_prf_go_proto:go_default_library",
-        "//proto/tink_go_proto:go_default_library",
-        "//subtle/random:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        "//core/primitiveset",
+        "//core/registry",
+        "//keyset",
+        "//prf/subtle",
+        "//proto/aes_cmac_prf_go_proto",
+        "//proto/common_go_proto",
+        "//proto/hkdf_prf_go_proto",
+        "//proto/hmac_prf_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
+        "@org_golang_google_protobuf//proto",
     ],
 )
 
 go_test(
-    name = "go_default_test",
-    size = "small",
+    name = "prf_test",
     srcs = [
         "aes_cmac_prf_key_manager_test.go",
         "hkdf_prf_key_manager_test.go",
@@ -42,19 +41,25 @@ go_test(
         "prf_set_factory_test.go",
         "prf_test.go",
     ],
-    embed = [":go_default_library"],
     deps = [
-        "//core/registry:go_default_library",
-        "//keyset:go_default_library",
-        "//mac:go_default_library",
-        "//prf/subtle:go_default_library",
-        "//proto/aes_cmac_prf_go_proto:go_default_library",
-        "//proto/common_go_proto:go_default_library",
-        "//proto/hkdf_prf_go_proto:go_default_library",
-        "//proto/hmac_prf_go_proto:go_default_library",
-        "//proto/tink_go_proto:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testutil:go_default_library",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        ":prf",
+        "//core/registry",
+        "//keyset",
+        "//mac",
+        "//prf/subtle",
+        "//proto/aes_cmac_prf_go_proto",
+        "//proto/common_go_proto",
+        "//proto/hkdf_prf_go_proto",
+        "//proto/hmac_prf_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle/random",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":prf",
+    visibility = ["//visibility:public"],
 )

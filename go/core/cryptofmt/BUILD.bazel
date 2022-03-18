@@ -5,16 +5,24 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "cryptofmt",
     srcs = ["cryptofmt.go"],
     importpath = "github.com/google/tink/go/core/cryptofmt",
     visibility = ["//visibility:public"],
-    deps = ["//proto/tink_go_proto:go_default_library"],
+    deps = ["//proto/tink_go_proto"],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "cryptofmt_test",
     srcs = ["cryptofmt_test.go"],
-    embed = [":go_default_library"],
-    deps = ["//proto/tink_go_proto:go_default_library"],
+    deps = [
+        ":cryptofmt",
+        "//proto/tink_go_proto",
+    ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":cryptofmt",
+    visibility = ["//visibility:public"],
 )

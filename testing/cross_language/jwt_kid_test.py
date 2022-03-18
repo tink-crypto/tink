@@ -127,7 +127,9 @@ class JwtKidTest(parameterized.TestCase):
     key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
-    for lang in SUPPORTED_LANGUAGES:
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        template_name]
+    for lang in supported_langs:
       jwt_sign = testing_servers.jwt_public_key_sign(lang, keyset)
       compact = jwt_sign.sign_and_encode(raw_jwt)
       self.assertIsNotNone(decode_kid(compact))
@@ -139,7 +141,9 @@ class JwtKidTest(parameterized.TestCase):
     key_template = supported_key_types.KEY_TEMPLATE[template_name]
     keyset = testing_servers.new_keyset('cc', key_template)
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
-    for lang in SUPPORTED_LANGUAGES:
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        template_name]
+    for lang in supported_langs:
       jwt_sign = testing_servers.jwt_public_key_sign(lang, keyset)
       compact = jwt_sign.sign_and_encode(raw_jwt)
       self.assertIsNone(decode_kid(compact))
@@ -174,7 +178,9 @@ class JwtKidTest(parameterized.TestCase):
     keyset = generate_jwt_signature_keyset_with_custom_kid(
         template_name=template_name, custom_kid='my kid')
     raw_jwt = jwt.new_raw_jwt(without_expiration=True)
-    for lang in SUPPORTED_LANGUAGES:
+    supported_langs = supported_key_types.SUPPORTED_LANGUAGES_BY_TEMPLATE_NAME[
+        template_name]
+    for lang in supported_langs:
       jwt_sign = testing_servers.jwt_public_key_sign(lang,
                                                      keyset.SerializeToString())
       compact = jwt_sign.sign_and_encode(raw_jwt)

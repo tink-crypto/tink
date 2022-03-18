@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(default_visibility = ["//:__subpackages__"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "subtle",
     srcs = [
         "aes_ctr.go",
         "aes_gcm.go",
@@ -17,15 +17,15 @@ go_library(
     ],
     importpath = "github.com/google/tink/go/aead/subtle",
     deps = [
-        "//internal/aead:go_default_library",
-        "//subtle/random:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_x_crypto//chacha20poly1305:go_default_library",
+        "//internal/aead",
+        "//subtle/random",
+        "//tink",
+        "@org_golang_x_crypto//chacha20poly1305",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "subtle_test",
     srcs = [
         "aes_ctr_test.go",
         "aes_gcm_siv_test.go",
@@ -39,12 +39,18 @@ go_test(
         "xchacha20poly1305_vectors_test.go",
     ],
     data = ["@wycheproof//testvectors:all"],
-    embed = [":go_default_library"],
     deps = [
-        "//mac/subtle:go_default_library",
-        "//subtle/random:go_default_library",
-        "//testutil:go_default_library",
-        "//tink:go_default_library",
-        "@org_golang_x_crypto//chacha20poly1305:go_default_library",
+        ":subtle",
+        "//mac/subtle",
+        "//subtle/random",
+        "//testutil",
+        "//tink",
+        "@org_golang_x_crypto//chacha20poly1305",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":subtle",
+    visibility = ["//visibility:public"],
 )

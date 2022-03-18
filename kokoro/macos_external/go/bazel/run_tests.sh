@@ -25,11 +25,16 @@ fi
 
 echo "Using go binary from $(which go): $(go version)"
 
-echo "Using go binary from $(which go): $(go version)"
-
 
 cd go/
 use_bazel.sh "$(cat .bazelversion)"
+
+# TODO(b/219879042): Add tests that build files are up-to-date.
+# We already do these tests in gcp_ubuntu_per_language/go/bazel/run_tests.sh.
+# Since macos uses an older version of bash, these tests don't work here yet.
+# We either need to use a different version of bash, or replace readarray with
+# while loops.
+
 time bazel build -- ...
 time bazel test --test_output="errors" -- ...
 
@@ -37,7 +42,7 @@ time bazel test --test_output="errors" -- ...
 if [[ -n "${KOKORO_ROOT}" ]]; then
   declare -a MANUAL_TARGETS
   MANUAL_TARGETS=(
-    "//integration/gcpkms:go_default_test"
+    "//integration/gcpkms:gcpkms_test"
   )
   readonly MANUAL_TARGETS
   time bazel test --test_output="errors" -- "${MANUAL_TARGETS[@]}"

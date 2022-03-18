@@ -77,7 +77,7 @@ util::StatusOr<int> PythonInputStream::Next(const void** data) {
   } else if (!read_result.ok()) {
     return status_ = read_result.status();
   }
-  std::string read_string = read_result.ValueOrDie();
+  std::string read_string = read_result.value();
   int count_read = read_string.length();
   buffer_.replace(0, count_read, read_string);
   buffer_offset_ = 0;

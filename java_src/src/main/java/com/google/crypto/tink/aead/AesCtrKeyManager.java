@@ -16,8 +16,8 @@
 
 package com.google.crypto.tink.aead;
 
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.Registry;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrKey;
 import com.google.crypto.tink.proto.AesCtrKeyFormat;
 import com.google.crypto.tink.proto.AesCtrParams;

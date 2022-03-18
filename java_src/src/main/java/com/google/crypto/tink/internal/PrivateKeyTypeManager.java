@@ -14,7 +14,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.google.crypto.tink;
+package com.google.crypto.tink.internal;
 
 import com.google.crypto.tink.annotations.Alpha;
 import com.google.protobuf.MessageLite;

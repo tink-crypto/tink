@@ -117,35 +117,34 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
   JwtToken token;
   if (verified_jwt.HasTypeHeader()) {
     token.mutable_type_header()->set_value(
-        verified_jwt.GetTypeHeader().ValueOrDie());
+        verified_jwt.GetTypeHeader().value());
   }
   if (verified_jwt.HasIssuer()) {
-    token.mutable_issuer()->set_value(verified_jwt.GetIssuer().ValueOrDie());
+    token.mutable_issuer()->set_value(verified_jwt.GetIssuer().value());
   }
   if (verified_jwt.HasSubject()) {
-    token.mutable_subject()->set_value(verified_jwt.GetSubject().ValueOrDie());
+    token.mutable_subject()->set_value(verified_jwt.GetSubject().value());
   }
   if (verified_jwt.HasAudiences()) {
-    std::vector<std::string> audiences =
-        verified_jwt.GetAudiences().ValueOrDie();
+    std::vector<std::string> audiences = verified_jwt.GetAudiences().value();
     for (const std::string& audience : audiences) {
       token.add_audiences(audience);
     }
   }
   if (verified_jwt.HasJwtId()) {
-    token.mutable_jwt_id()->set_value(verified_jwt.GetJwtId().ValueOrDie());
+    token.mutable_jwt_id()->set_value(verified_jwt.GetJwtId().value());
   }
   if (verified_jwt.HasExpiration()) {
     *token.mutable_expiration() =
-        TimeToTimestamp(verified_jwt.GetExpiration().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetExpiration().value());
   }
   if (verified_jwt.HasIssuedAt()) {
     *token.mutable_issued_at() =
-        TimeToTimestamp(verified_jwt.GetIssuedAt().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetIssuedAt().value());
   }
   if (verified_jwt.HasNotBefore()) {
     *token.mutable_not_before() =
-        TimeToTimestamp(verified_jwt.GetNotBefore().ValueOrDie());
+        TimeToTimestamp(verified_jwt.GetNotBefore().value());
   }
   std::vector<std::string> names = verified_jwt.CustomClaimNames();
   for (const std::string& name : names) {
@@ -154,19 +153,19 @@ JwtToken VerifiedJwtToProto(const crypto::tink::VerifiedJwt& verified_jwt) {
           NullValue::NULL_VALUE);
     } else if (verified_jwt.HasBooleanClaim(name)) {
       (*token.mutable_custom_claims())[name].set_bool_value(
-          verified_jwt.GetBooleanClaim(name).ValueOrDie());
+          verified_jwt.GetBooleanClaim(name).value());
     } else if (verified_jwt.HasNumberClaim(name)) {
       (*token.mutable_custom_claims())[name].set_number_value(
-          verified_jwt.GetNumberClaim(name).ValueOrDie());
+          verified_jwt.GetNumberClaim(name).value());
     } else if (verified_jwt.HasStringClaim(name)) {
       (*token.mutable_custom_claims())[name].set_string_value(
-          verified_jwt.GetStringClaim(name).ValueOrDie());
+          verified_jwt.GetStringClaim(name).value());
     } else if (verified_jwt.HasJsonObjectClaim(name)) {
       (*token.mutable_custom_claims())[name].set_json_object_value(
-          verified_jwt.GetJsonObjectClaim(name).ValueOrDie());
+          verified_jwt.GetJsonObjectClaim(name).value());
     } else if (verified_jwt.HasJsonArrayClaim(name)) {
       (*token.mutable_custom_claims())[name].set_json_array_value(
-          verified_jwt.GetJsonArrayClaim(name).ValueOrDie());
+          verified_jwt.GetJsonArrayClaim(name).value());
     }
   }
   return token;

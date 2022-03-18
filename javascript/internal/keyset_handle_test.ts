@@ -13,7 +13,7 @@ import {HybridKeyTemplates} from '../hybrid/hybrid_key_templates';
 import {Mac} from '../mac';
 import * as Bytes from '../subtle/bytes';
 import * as Random from '../subtle/random';
-import {assertExists, createKeyset} from '../testing/internal/test_utils';
+import {assertExists, assertMessageEquals, createKeyset} from '../testing/internal/test_utils';
 
 import {BinaryKeysetReader} from './binary_keyset_reader';
 import {BinaryKeysetWriter} from './binary_keyset_writer';
@@ -548,7 +548,7 @@ describe('KeysetHandle', () => {
           BinaryKeysetReader.withUint8Array(keyset.serializeBinary());
       const keysetHandle = readNoSecret(reader);
 
-      expect(keysetHandle.getKeyset()).toEqual(keyset);
+      assertMessageEquals(keysetHandle.getKeyset(), keyset);
     });
   });
 
@@ -594,7 +594,7 @@ describe('KeysetHandle', () => {
       const keysetBytes = publicHandle.writeNoSecret(new BinaryKeysetWriter());
 
       const importedHandle = readNoSecret(new BinaryKeysetReader(keysetBytes));
-      expect(publicHandle.getKeyset()).toEqual(importedHandle.getKeyset());
+      assertMessageEquals(publicHandle.getKeyset(), importedHandle.getKeyset());
     });
   });
 });

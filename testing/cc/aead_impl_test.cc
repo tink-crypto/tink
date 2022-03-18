@@ -53,8 +53,8 @@ std::string ValidKeyset() {
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   EXPECT_TRUE(writer_result.ok());
 
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   EXPECT_TRUE(status.ok());
   return keyset.str();
 }

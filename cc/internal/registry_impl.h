@@ -144,7 +144,7 @@ class RegistryImpl {
       const google::crypto::tink::KeyTemplate& key_template,
       InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_, monitoring_factory_mutex_);
 
   crypto::tink::util::Status RestrictToFipsIfEmpty() const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);

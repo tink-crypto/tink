@@ -48,8 +48,8 @@ std::string KeysetBytes(const KeysetHandle& keyset_handle) {
   auto writer_result =
       BinaryKeysetWriter::New(absl::make_unique<std::ostream>(&keyset));
   EXPECT_TRUE(writer_result.ok());
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             keyset_handle);
+  auto status =
+      CleartextKeysetHandle::Write(writer_result.value().get(), keyset_handle);
   EXPECT_TRUE(status.ok());
   return keyset.str();
 }
@@ -67,12 +67,11 @@ TEST_F(SignatureImplTest, SignVerifySuccess) {
   auto private_handle_result = KeysetHandle::GenerateNew(key_template);
   EXPECT_TRUE(private_handle_result.ok());
   auto public_handle_result =
-      private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+      private_handle_result.value()->GetPublicKeysetHandle();
   EXPECT_TRUE(public_handle_result.ok());
 
   SignatureSignRequest sign_request;
-  sign_request.set_private_keyset(
-      KeysetBytes(*private_handle_result.ValueOrDie()));
+  sign_request.set_private_keyset(KeysetBytes(*private_handle_result.value()));
   sign_request.set_data("some data");
   SignatureSignResponse sign_response;
 
@@ -80,8 +79,7 @@ TEST_F(SignatureImplTest, SignVerifySuccess) {
   EXPECT_THAT(sign_response.err(), IsEmpty());
 
   SignatureVerifyRequest verify_request;
-  verify_request.set_public_keyset(
-      KeysetBytes(*public_handle_result.ValueOrDie()));
+  verify_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
   verify_request.set_signature(sign_response.signature());
   verify_request.set_data("some data");
   SignatureVerifyResponse verify_response;
@@ -108,12 +106,11 @@ TEST_F(SignatureImplTest, VerifyBadCiphertextFail) {
   auto private_handle_result = KeysetHandle::GenerateNew(key_template);
   EXPECT_TRUE(private_handle_result.ok());
   auto public_handle_result =
-      private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+      private_handle_result.value()->GetPublicKeysetHandle();
   EXPECT_TRUE(public_handle_result.ok());
 
   SignatureVerifyRequest verify_request;
-  verify_request.set_public_keyset(
-      KeysetBytes(*public_handle_result.ValueOrDie()));
+  verify_request.set_public_keyset(KeysetBytes(*public_handle_result.value()));
   verify_request.set_signature("bad signature");
   verify_request.set_data("some data");
   SignatureVerifyResponse verify_response;
