@@ -132,6 +132,16 @@ TEST(StatusOrTest, MoveOutMoveOnlyValue) {
   ASSERT_THAT(*ten, Eq(10));
 }
 
+TEST(STatusOrTest, CallValueOnConst) {
+  const StatusOr<int> const_status_or_ten = 10;
+  ASSERT_THAT(const_status_or_ten.value(), Eq(10));
+}
+
+TEST(StatusOrTest, CallValueOnConstTemp) {
+  const StatusOr<int> const_status_or_ten = 10;
+  ASSERT_THAT(std::move(const_status_or_ten).value(), Eq(10));
+}
+
 TEST(StatusOrTest, TestValueConst) {
   const int kI = 4;
   const absl::StatusOr<int> thing(kI);

@@ -169,7 +169,7 @@ class StatusOr {
     }
   }
 
-  void AbortWithMessageFrom(crypto::tink::util::Status status) {
+  void AbortWithMessageFrom(crypto::tink::util::Status status) const {
     std::cerr << "Attempting to fetch value instead of handling error\n";
     std::cerr << status.ToString();
     std::abort();
