@@ -6538,8 +6538,6 @@
 <dd>
 <div class="block">Extracts the public key data from the private key data.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyManagerImpl.html#getPublicKeyData-com.google.protobuf.ByteString-">getPublicKeyData(ByteString)</a></span> - Method in class com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink">PrivateKeyManagerImpl</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/crypto/tink/Registry.html#getPublicKeyData-java.lang.String-com.google.protobuf.ByteString-">getPublicKeyData(String, ByteString)</a></span> - Static method in class com.google.crypto.tink.<a href="com/google/crypto/tink/Registry.html" title="class in com.google.crypto.tink">Registry</a></dt>
 <dd>
 <div class="block">Convenience method for extracting the public key data from the private key given in <code>serializedPrivateKey</code>.</div>
@@ -12320,12 +12318,6 @@
 <dd>
 <div class="block">A <a href="com/google/crypto/tink/KeyManager.html" title="interface in com.google.crypto.tink"><code>KeyManager</code></a> that understands asymmetric private key types.</div>
 </dd>
-<dt><a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink"><span class="typeNameLink">PrivateKeyManagerImpl</span></a>&lt;<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PrimitiveT</a>,<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">KeyProtoT</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="type parameter in PrivateKeyManagerImpl">PublicKeyProtoT</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/package-summary.html">com.google.crypto.tink</a></dt>
-<dd>
-<div class="block">Implementation of the <a href="com/google/crypto/tink/PrivateKeyManager.html" title="interface in com.google.crypto.tink"><code>PrivateKeyManager</code></a> interface based on an <a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>PrivateKeyTypeManager</code></a> and the corresponding public key manager, implemented by an <a href="com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="com/google/crypto/tink/PrivateKeyManagerImpl.html#PrivateKeyManagerImpl-com.google.crypto.tink.internal.PrivateKeyTypeManager-com.google.crypto.tink.internal.KeyTypeManager-java.lang.Class-">PrivateKeyManagerImpl(PrivateKeyTypeManager&lt;KeyProtoT, PublicKeyProtoT&gt;, KeyTypeManager&lt;PublicKeyProtoT&gt;, Class&lt;PrimitiveT&gt;)</a></span> - Constructor for class com.google.crypto.tink.<a href="com/google/crypto/tink/PrivateKeyManagerImpl.html" title="class in com.google.crypto.tink">PrivateKeyManagerImpl</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="class in com.google.crypto.tink.internal"><span class="typeNameLink">PrivateKeyTypeManager</span></a>&lt;<a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="type parameter in PrivateKeyTypeManager">KeyProtoT</a> extends com.google.protobuf.MessageLite,<a href="com/google/crypto/tink/internal/PrivateKeyTypeManager.html" title="type parameter in PrivateKeyTypeManager">PublicKeyProtoT</a> extends com.google.protobuf.MessageLite&gt; - Class in <a href="com/google/crypto/tink/internal/package-summary.html">com.google.crypto.tink.internal</a></dt>
 <dd>
 <div class="block">A PrivateKeyManager is like an <a href="com/google/crypto/tink/internal/KeyTypeManager.html" title="class in com.google.crypto.tink.internal"><code>KeyTypeManager</code></a>, but additionally has a method to create a
