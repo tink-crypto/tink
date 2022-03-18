@@ -32,10 +32,9 @@ import java.security.GeneralSecurityException;
  *
  * <p>Choosing {@code PrimitiveT} equal to {@link java.lang.Void} is valid; in this case the
  * functions {@link #getPrimitive} will throw if invoked.
- * TODO(tholenst) Reduce visibility to package visible once all managers have been migrated.
  */
 @Alpha
-public class PrivateKeyManagerImpl<
+class PrivateKeyManagerImpl<
         PrimitiveT, KeyProtoT extends MessageLite, PublicKeyProtoT extends MessageLite>
     extends KeyManagerImpl<PrimitiveT, KeyProtoT> implements PrivateKeyManager<PrimitiveT> {
 
