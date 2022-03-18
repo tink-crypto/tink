@@ -16,6 +16,9 @@
 
 #include "tink/subtle/stateful_cmac_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "openssl/evp.h"

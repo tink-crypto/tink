@@ -17,6 +17,8 @@
 #ifndef TINK_CONFIG_CONFIG_UTIL_H_
 #define TINK_CONFIG_CONFIG_UTIL_H_
 
+#include <string>
+
 #include "proto/config.pb.h"
 
 namespace crypto {

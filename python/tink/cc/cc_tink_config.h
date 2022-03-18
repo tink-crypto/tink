@@ -23,7 +23,7 @@
 namespace crypto {
 namespace tink {
 
-crypto::tink::util::Status CcTinkConfigRegister();
+void CcTinkConfigRegister();
 
 }  // namespace tink
 }  // namespace crypto

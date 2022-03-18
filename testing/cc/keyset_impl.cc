@@ -97,10 +97,17 @@ KeysetImpl::KeysetImpl() {
               EciesP256CompressedHkdfHmacSha256Aes128CtrHmacSha256();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes128GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256Gcm();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW"] =
+      crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256Aes256GcmRaw();
   key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305"] =
       crypto::tink::HybridKeyTemplates::HpkeX25519HkdfSha256ChaCha20Poly1305();
+  key_templates_["DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW"] =
+      crypto::tink::HybridKeyTemplates::
+          HpkeX25519HkdfSha256ChaCha20Poly1305Raw();
   key_templates_["AES_CMAC"] = crypto::tink::MacKeyTemplates::AesCmac();
   key_templates_["HMAC_SHA256_128BITTAG"] =
       crypto::tink::MacKeyTemplates::HmacSha256HalfSizeTag();
@@ -229,8 +236,8 @@ grpc::Status KeysetImpl::Generate(grpc::ServerContext* context,
     response->set_err(std::string(writer_result.status().message()));
     return grpc::Status::OK;
   }
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
     return grpc::Status::OK;
@@ -249,13 +256,13 @@ grpc::Status KeysetImpl::Public(grpc::ServerContext* context,
     return grpc::Status::OK;
   }
   auto private_handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!private_handle_result.ok()) {
     response->set_err(std::string(private_handle_result.status().message()));
     return grpc::Status::OK;
   }
   auto public_handle_result =
-      private_handle_result.ValueOrDie()->GetPublicKeysetHandle();
+      private_handle_result.value()->GetPublicKeysetHandle();
   if (!public_handle_result.ok()) {
     response->set_err(std::string(public_handle_result.status().message()));
     return grpc::Status::OK;
@@ -267,8 +274,8 @@ grpc::Status KeysetImpl::Public(grpc::ServerContext* context,
     response->set_err(std::string(writer_result.status().message()));
     return grpc::Status::OK;
   }
-  auto status = CleartextKeysetHandle::Write(
-      writer_result.ValueOrDie().get(), *public_handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *public_handle_result.value());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
     return grpc::Status::OK;
@@ -287,7 +294,7 @@ grpc::Status KeysetImpl::ToJson(grpc::ServerContext* context,
     return grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return grpc::Status::OK;
@@ -299,8 +306,8 @@ grpc::Status KeysetImpl::ToJson(grpc::ServerContext* context,
     response->set_err(std::string(writer_result.status().message()));
     return grpc::Status::OK;
   }
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
     return grpc::Status::OK;
@@ -319,7 +326,7 @@ grpc::Status KeysetImpl::FromJson(grpc::ServerContext* context,
     return grpc::Status::OK;
   }
   auto handle_result =
-      CleartextKeysetHandle::Read(std::move(reader_result.ValueOrDie()));
+      CleartextKeysetHandle::Read(std::move(reader_result.value()));
   if (!handle_result.ok()) {
     response->set_err(std::string(handle_result.status().message()));
     return grpc::Status::OK;
@@ -331,8 +338,8 @@ grpc::Status KeysetImpl::FromJson(grpc::ServerContext* context,
     response->set_err(std::string(writer_result.status().message()));
     return grpc::Status::OK;
   }
-  auto status = CleartextKeysetHandle::Write(writer_result.ValueOrDie().get(),
-                                             *handle_result.ValueOrDie());
+  auto status = CleartextKeysetHandle::Write(writer_result.value().get(),
+                                             *handle_result.value());
   if (!status.ok()) {
     response->set_err(std::string(status.message()));
     return grpc::Status::OK;

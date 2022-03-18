@@ -46,10 +46,6 @@ const (
 	aesgcmsivPolyvalSize = aesgcmsivBlockSize
 )
 
-// AESGCMSIVKeySizes is an array of byte lengths of keys acceptable by the
-// AES-GCM-SIV algorithm.
-var AESGCMSIVKeySizes = [...]uint32{16, 32}
-
 // AESGCMSIV is an implementation of AEAD interface.
 type AESGCMSIV struct {
 	Key []byte

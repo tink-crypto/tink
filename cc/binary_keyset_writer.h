@@ -18,6 +18,7 @@
 #define TINK_BINARY_KEYSET_WRITER_H_
 
 #include <ostream>
+#include <utility>
 
 #include "absl/strings/string_view.h"
 #include "tink/keyset_writer.h"

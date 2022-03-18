@@ -16,6 +16,7 @@
 import itertools
 from typing import Iterable, Tuple
 
+from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
 
@@ -386,7 +387,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
     if failures not in [0, len(supported_langs)]:
       self.fail('key generation for template %s is inconsistent: %s' %
                 (name, results))
-
+    logging.info('Key generation status: %s',
+                 'Success' if failures == 0 else 'Fail')
 
 if __name__ == '__main__':
   absltest.main()

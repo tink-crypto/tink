@@ -54,7 +54,7 @@ public final class HpkeUtil {
    *
    * <p>The HPKE standard defines this function as I2OSP(n, w) where w = capacity and n = value.
    *
-   * <p>https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#name-notation
+   * <p>https://www.rfc-editor.org/rfc/rfc9180.html#name-notation
    *
    * @param capacity size of the resulting byte array
    * @param value that should be represented as a byte array
@@ -69,8 +69,7 @@ public final class HpkeUtil {
 
   /**
    * Generates KEM suite id from {@code kemId} according to the definition in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.1-5. Only used for KEM
-   * suite id.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-4.1-5. Only used for KEM suite id.
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
@@ -80,8 +79,8 @@ public final class HpkeUtil {
 
   /**
    * Generates HPKE suite id from {@code kemId}, {@code kdfId}, and {@code aeadId} according to the
-   * definition in https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-5.1-8. Used
-   * for any non-KEM suite id.
+   * definition in https://www.rfc-editor.org/rfc/rfc9180.html#section-5.1-8. Used for any non-KEM
+   * suite id.
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
@@ -92,20 +91,18 @@ public final class HpkeUtil {
 
   /**
    * Transforms {@code ikm} into labeled ikm using {@code label} and {@code suiteId} according to
-   * {@code LabeledExtract()} defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.
+   * {@code LabeledExtract()} defined in https://www.rfc-editor.org/rfc/rfc9180.html#section-4.
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */
-  static byte[] labelIkm(String label, byte[] ikm, byte[] suiteId)
-      throws GeneralSecurityException {
+  static byte[] labelIkm(String label, byte[] ikm, byte[] suiteId) throws GeneralSecurityException {
     return Bytes.concat(HPKE_V1, suiteId, label.getBytes(UTF_8), ikm);
   }
 
   /**
    * Transforms {@code info} into labeled info using {@code label}, {@code suiteId}, and {@code
    * length} according to {@code LabeledExpand()} defined in
-   * https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html#section-4.
+   * https://www.rfc-editor.org/rfc/rfc9180.html#section-4.
    *
    * @throws GeneralSecurityException when byte concatenation fails.
    */

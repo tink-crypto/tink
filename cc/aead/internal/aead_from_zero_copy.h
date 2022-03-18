@@ -17,6 +17,8 @@
 #define TINK_AEAD_INTERNAL_AEAD_FROM_ZERO_COPY_H_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"

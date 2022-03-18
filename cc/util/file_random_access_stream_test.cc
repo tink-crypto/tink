@@ -16,7 +16,9 @@
 
 #include "tink/util/file_random_access_stream.h"
 
+#include <string>
 #include <thread>  // NOLINT(build/c++11)
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"

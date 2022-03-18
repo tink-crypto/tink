@@ -100,8 +100,8 @@ SUPPORTED_LANGUAGES = {
     'AesCmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HmacPrfKey': ['cc', 'java', 'go', 'python'],
     'HkdfPrfKey': ['cc', 'java', 'go', 'python'],
-    'JwtHmacKey': ['cc', 'java', 'python'],
-    'JwtEcdsaPrivateKey': ['cc', 'java', 'python'],
+    'JwtHmacKey': ['cc', 'java', 'go', 'python'],
+    'JwtEcdsaPrivateKey': ['cc', 'java', 'go', 'python'],
     'JwtRsaSsaPkcs1PrivateKey': ['cc', 'java', 'python'],
     'JwtRsaSsaPssPrivateKey': ['cc', 'java', 'python'],
 }
@@ -152,8 +152,11 @@ KEY_TEMPLATE_NAMES = {
     ],
     'HpkePrivateKey': [
         'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM',
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW',
         'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM',
-        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305'
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW',
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305',
+        'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW',
     ],
     'AesCmacKey': ['AES_CMAC'],
     'HmacKey': [
@@ -277,12 +280,21 @@ KEY_TEMPLATE = {
     'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM':
         hybrid.hybrid_key_templates
         .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW,
     'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM':
         hybrid.hybrid_key_templates
         .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW,
     'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305':
         hybrid.hybrid_key_templates
         .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305,
+    'DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW':
+        hybrid.hybrid_key_templates
+        .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW,
     'AES_CMAC':
         mac.mac_key_templates.AES_CMAC,
     'HMAC_SHA256_128BITTAG':

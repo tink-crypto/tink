@@ -60,6 +60,6 @@ go_binary(
         "@tink_go//integration/awskms:go_default_library",
         "@tink_go//integration/gcpkms:go_default_library",
         "@tink_go//keyset:go_default_library",
-        "@tink_go//proto:tink_go_proto",
+        "@tink_go//proto/tink_go_proto:go_default_library",
     ],
 )

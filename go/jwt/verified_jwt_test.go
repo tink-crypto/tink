@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,18 +21,43 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/jwt"
+	"github.com/google/tink/go/keyset"
 )
 
-// TODO(b/202065153): In the future Verified JWT creation will be limited to subtle libraries.
 func createVerifiedJWT(rawJWT *jwt.RawJWT) (*jwt.VerifiedJWT, error) {
-	return jwt.NewVerifiedJWT(rawJWT)
-}
-
-func TestRawJWTCantBeNull(t *testing.T) {
-	if _, err := jwt.NewVerifiedJWT(nil); err == nil {
-		t.Errorf("NewVerifiedJWT(nil) err = nil, want error")
+	kh, err := keyset.NewHandle(jwt.HS256Template())
+	if err != nil {
+		return nil, err
 	}
+	m, err := jwt.NewMAC(kh)
+	if err != nil {
+		return nil, err
+	}
+	compact, err := m.ComputeMACAndEncode(rawJWT)
+	if err != nil {
+		return nil, err
+	}
+	// This validator is purposely instantiated to always pass.
+	// It isn't really validating much and probably shouldn't
+	// be used like this out side of these tests.
+	opts := &jwt.ValidatorOpts{
+		AllowMissingExpiration: true,
+		IgnoreTypeHeader:       true,
+		IgnoreAudiences:        true,
+		IgnoreIssuer:           true,
+	}
+	issuedAt, err := rawJWT.IssuedAt()
+	if err == nil {
+		opts.FixedNow = issuedAt
+	}
+
+	validator, err := jwt.NewValidator(opts)
+	if err != nil {
+		return nil, err
+	}
+	return m.VerifyMACAndDecode(compact, validator)
 }
 
 func TestGetRegisteredStringClaims(t *testing.T) {
@@ -91,6 +116,9 @@ func TestGetRegisteredStringClaims(t *testing.T) {
 	if !cmp.Equal(jwtID, *opts.JWTID) {
 		t.Errorf("verifiedJWT.JWTID() = %q, want %q", jwtID, *opts.JWTID)
 	}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), []string{}) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q want %q", verifiedJWT.CustomClaimNames(), []string{})
+	}
 }
 
 func TestGetRegisteredTimestampClaims(t *testing.T) {
@@ -98,7 +126,7 @@ func TestGetRegisteredTimestampClaims(t *testing.T) {
 	opts := &jwt.RawJWTOptions{
 		ExpiresAt: refTime(now.Add(time.Hour * 24).Unix()),
 		IssuedAt:  refTime(now.Unix()),
-		NotBefore: refTime(now.Add(time.Hour * 2).Unix()),
+		NotBefore: refTime(now.Add(-time.Hour * 2).Unix()),
 	}
 	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {
@@ -184,6 +212,10 @@ func TestGetCustomClaims(t *testing.T) {
 	verifiedJWT, err := createVerifiedJWT(rawJWT)
 	if err != nil {
 		t.Fatalf("creating verifiedJWT: %v", err)
+	}
+	wantCustomClaims := []string{"cc-num", "cc-bool", "cc-null", "cc-string", "cc-array", "cc-object"}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), wantCustomClaims, cmpopts.SortSlices(func(a, b string) bool { return a < b })) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q, want %q", verifiedJWT.CustomClaimNames(), wantCustomClaims)
 	}
 	if !verifiedJWT.HasNullClaim("cc-null") {
 		t.Errorf("verifiedJWT.HasNullClaim('cc-null') = false, want true")
@@ -313,6 +345,9 @@ func TestNoClaimsCallHasAndGet(t *testing.T) {
 	if verifiedJWT.HasIssuedAt() {
 		t.Errorf("verifiedJWT.HasIssuedAt() = true, want false")
 	}
+	if !cmp.Equal(verifiedJWT.CustomClaimNames(), []string{}) {
+		t.Errorf("verifiedJWT.CustomClaimNames() = %q want %q", verifiedJWT.CustomClaimNames(), []string{})
+	}
 }
 
 func TestCantGetRegisteredClaimsThroughCustomClaims(t *testing.T) {
@@ -325,7 +360,7 @@ func TestCantGetRegisteredClaimsThroughCustomClaims(t *testing.T) {
 		Audiences:  []string{"foo", "bar"},
 		ExpiresAt:  refTime(now.Add(time.Hour * 24).Unix()),
 		IssuedAt:   refTime(now.Unix()),
-		NotBefore:  refTime(now.Add(time.Hour * 2).Unix()),
+		NotBefore:  refTime(now.Add(-time.Hour * 2).Unix()),
 	}
 	rawJWT, err := jwt.NewRawJWT(opts)
 	if err != nil {

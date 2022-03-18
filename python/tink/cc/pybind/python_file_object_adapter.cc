@@ -14,13 +14,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tink/cc/python_file_object_adapter.h"
+#include "tink/cc/pybind/python_file_object_adapter.h"
 
 #include <string>
 
 #include "absl/status/status.h"
 #include "pybind11/pybind11.h"
-#include "tink/cc/pybind/status_casters.h"
+#include "tink/cc/python_file_object_adapter.h"
 
 namespace crypto {
 namespace tink {
@@ -97,23 +97,32 @@ void PybindRegisterPythonFileObjectAdapter(pybind11::module *module) {
   namespace py = pybind11;
   py::module &m = *module;
 
-  // TODO(b/146492561): Reduce the number of complicated lambdas.
   py::class_<PythonFileObjectAdapter, Pybind11PythonFileObjectAdapter,
              std::shared_ptr<PythonFileObjectAdapter>>(
       m, "PythonFileObjectAdapter")
       .def(py::init<>())
       .def(
           "write",
-          [](PythonFileObjectAdapter *self,
-             const py::bytes &data) -> util::StatusOr<int> {
-            return self->Write(std::string(data));  // TODO(b/145925674)
+          [](PythonFileObjectAdapter *self, const py::bytes &data) -> int {
+            /**
+             * This and the following methods are purely virtual, and should
+             * never be called. We use std::abort to decouple Python bindings
+             * from the C++ interface's usage of Status{,Or}, while still
+             * marking the method non-callable.
+             *
+             * For the explanation of why we need a helper `trampoline` class
+             * and the details of its implementation, please see the docs:
+             * https://pybind11.readthedocs.io/en/stable/advanced/classes.html#extended-trampoline-class-functionality
+             */
+            std::abort();
           },
           py::arg("data"))
-      .def("close", &PythonFileObjectAdapter::Close)
+      .def("close", [](PythonFileObjectAdapter *self) -> void { std::abort(); })
       .def(
           "read",
-          [](PythonFileObjectAdapter *self, int size)
-              -> util::StatusOr<py::bytes> { return self->Read(size); },
+          [](PythonFileObjectAdapter *self, int size) -> py::bytes {
+            std::abort();
+          },
           py::arg("size"));
 }
 

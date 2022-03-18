@@ -16,6 +16,7 @@
 #include "tink/prf/aes_cmac_prf_key_manager.h"
 
 #include <sstream>
+#include <string>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <initializer_list>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <typeindex>
@@ -43,6 +44,7 @@
 #include "tink/internal/keyset_wrapper.h"
 #include "tink/internal/keyset_wrapper_impl.h"
 #include "tink/key_manager.h"
+#include "tink/monitoring/monitoring.h"
 #include "tink/primitive_set.h"
 #include "tink/primitive_wrapper.h"
 #include "tink/util/errors.h"
@@ -142,10 +144,24 @@ class RegistryImpl {
       const google::crypto::tink::KeyTemplate& key_template,
       InputStream* randomness) const ABSL_LOCKS_EXCLUDED(maps_mutex_);
 
-  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_);
+  void Reset() ABSL_LOCKS_EXCLUDED(maps_mutex_, monitoring_factory_mutex_);
 
   crypto::tink::util::Status RestrictToFipsIfEmpty() const
       ABSL_LOCKS_EXCLUDED(maps_mutex_);
+
+  // Registers a `monitoring_factory`. Only one factory can be registered,
+  // subsequent calls to this method will return a kAlreadyExists error.
+  crypto::tink::util::Status RegisterMonitoringClientFactory(
+      std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory)
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_);
+
+  // Returns a pointer to the registered monitoring factory if any, and nullptr
+  // otherwise.
+  crypto::tink::MonitoringClientFactory* GetMonitoringClientFactory() const
+      ABSL_LOCKS_EXCLUDED(monitoring_factory_mutex_) {
+    absl::MutexLock lock(&monitoring_factory_mutex_);
+    return monitoring_factory_.get();
+  }
 
  private:
   // All information for a given type url.
@@ -421,6 +437,10 @@ class RegistryImpl {
 
   absl::flat_hash_map<std::string, LabelInfo> name_to_catalogue_map_
       ABSL_GUARDED_BY(maps_mutex_);
+
+  mutable absl::Mutex monitoring_factory_mutex_;
+  std::unique_ptr<crypto::tink::MonitoringClientFactory> monitoring_factory_
+      ABSL_GUARDED_BY(monitoring_factory_mutex_);
 };
 
 template <class P>

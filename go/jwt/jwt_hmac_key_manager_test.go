@@ -204,9 +204,9 @@ func TestGetPrimitiveWithValidKeys(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRawJWT() err = %v, want nil", err)
 	}
-	validator, err := NewJWTValidator(&ValidatorOpts{AllowMissingExpiration: true, ExpectedAudiences: refString("tink-aud")})
+	validator, err := NewValidator(&ValidatorOpts{AllowMissingExpiration: true, ExpectedAudiences: refString("tink-aud")})
 	if err != nil {
-		t.Fatalf("NewJWTValidator() err = %v, want nil", err)
+		t.Fatalf("NewValidator() err = %v, want nil", err)
 	}
 	for _, tc := range []jwtKeyManagerTestCase{
 		{
@@ -302,7 +302,7 @@ func TestSpecyfingCustomKIDAndTINKKIDFails(t *testing.T) {
 		ExpectedIssuer:     refString("joe"),
 		FixedNow:           time.Unix(12345, 0),
 	}
-	validator, err := NewJWTValidator(opts)
+	validator, err := NewValidator(opts)
 	if err != nil {
 		t.Errorf("creating new JWTValidator: %v", err)
 	}

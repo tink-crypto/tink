@@ -53,8 +53,8 @@ set(gtest_force_shared_crt ON CACHE BOOL "Tink dependency override" FORCE)
 if (NOT TINK_USE_INSTALLED_GOOGLETEST)
   http_archive(
     NAME com_google_googletest
-    URL https://github.com/google/googletest/archive/eb9225ce361affe561592e0912320b9db84985d0.zip
-    SHA256 a7db7d1295ce46b93f3d1a90dbbc55a48409c00d19684fcd87823037add88118
+    URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+    SHA256 b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
   )
 else()
   # This uses the CMake's FindGTest module; if successful, this call to

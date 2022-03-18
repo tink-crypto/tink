@@ -20,6 +20,8 @@ import com.google.errorprone.annotations.Immutable;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /** Defines how the headers and claims of a JWT should be validated. */
@@ -171,7 +173,7 @@ public final class JwtValidator {
     }
 
     /** Sets the clock used to verify timestamp claims. */
-    public Builder setClock(java.time.Clock clock) {
+    public Builder setClock(Clock clock) {
       if (clock == null) {
         throw new NullPointerException("clock cannot be null");
       }
@@ -314,5 +316,51 @@ public final class JwtValidator {
             "token has a invalid iat claim in the future: " + target.getIssuedAt());
       }
     }
+  }
+
+  /**
+   * Returns a brief description of a JwtValidator object. The exact details of the representation
+   * are unspecified and subject to change.
+   */
+  @Override
+  public String toString() {
+    List<String> items = new ArrayList<>();
+    if (expectedTypeHeader.isPresent()) {
+      items.add("expectedTypeHeader=" + expectedTypeHeader.get());
+    }
+    if (ignoreTypeHeader) {
+      items.add("ignoreTypeHeader");
+    }
+    if (expectedIssuer.isPresent()) {
+      items.add("expectedIssuer=" + expectedIssuer.get());
+    }
+    if (ignoreIssuer) {
+      items.add("ignoreIssuer");
+    }
+    if (expectedAudience.isPresent()) {
+      items.add("expectedAudience=" + expectedAudience.get());
+    }
+    if (ignoreAudiences) {
+      items.add("ignoreAudiences");
+    }
+    if (allowMissingExpiration) {
+      items.add("allowMissingExpiration");
+    }
+    if (expectIssuedInThePast) {
+      items.add("expectIssuedInThePast");
+    }
+    if (!clockSkew.isZero()) {
+      items.add("clockSkew=" + clockSkew);
+    }
+    StringBuilder b = new StringBuilder();
+    b.append("JwtValidator{");
+    String currentSeparator = "";
+    for (String i : items) {
+      b.append(currentSeparator);
+      b.append(i);
+      currentSeparator = ",";
+    }
+    b.append("}");
+    return b.toString();
   }
 }

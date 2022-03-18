@@ -17,105 +17,55 @@
 package subtle
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"fmt"
 
+	internalaead "github.com/google/tink/go/internal/aead"
 	"github.com/google/tink/go/subtle/random"
 	"github.com/google/tink/go/tink"
 )
 
-// TODO(b/201070904): Rewrite as wrapper of internal.InsecureIvAesGcm.
-
 const (
-	// AESGCMIVSize is the only IV size that this implementation supports.
+	// AESGCMIVSize is the acceptable IV size defined by RFC 5116.
 	AESGCMIVSize = 12
-	// AESGCMTagSize is the only tag size that this implementation supports.
-	AESGCMTagSize          = 16
-	maxAESGCMPlaintextSize = (1 << 36) - 32
+	// AESGCMTagSize is the acceptable tag size defined by RFC 5116.
+	AESGCMTagSize = 16
 )
 
 // AESGCM is an implementation of AEAD interface.
 type AESGCM struct {
-	Key []byte
+	aesGCMInsecureIV *internalaead.AESGCMInsecureIV
 }
 
 // Assert that AESGCM implements the AEAD interface.
 var _ tink.AEAD = (*AESGCM)(nil)
 
-// NewAESGCM returns an AESGCM instance.
-// The key argument should be the AES key, either 16 or 32 bytes to select
-// AES-128 or AES-256.
+// NewAESGCM returns an AESGCM instance, where key is the AES key with length
+// 16 bytes (AES-128) or 32 bytes (AES-256).
 func NewAESGCM(key []byte) (*AESGCM, error) {
-	keySize := uint32(len(key))
-	if err := ValidateAESKeySize(keySize); err != nil {
-		return nil, fmt.Errorf("aes_gcm: %s", err)
-	}
-	return &AESGCM{Key: key}, nil
+	aesGCMInsecureIV, err := internalaead.NewAESGCMInsecureIV(key, true /*=prependIV*/)
+	return &AESGCM{aesGCMInsecureIV}, err
 }
 
-// Encrypt encrypts pt with aad as additional authenticated data.
-// The resulting ciphertext consists of two parts:
-// (1) the IV used for encryption and (2) the actual ciphertext.
+// Encrypt encrypts plaintext with associatedData. The returned ciphertext
+// contains both the IV used for encryption and the actual ciphertext.
 //
-// Note: AES-GCM implementation of crypto library always returns ciphertext with
-// 128-bit tag.
-func (a *AESGCM) Encrypt(pt, aad []byte) ([]byte, error) {
-	// Although Seal() function already checks for plaintext length,
-	// this check is repeated here to avoid panic.
-	if len(pt) > maxPtSize() {
-		return nil, fmt.Errorf("aes_gcm: plaintext too long")
-	}
-	cipher, err := a.newCipher(a.Key)
-	if err != nil {
-		return nil, err
-	}
-	iv := a.newIV()
-	ct := cipher.Seal(nil, iv, pt, aad)
-	return append(iv, ct...), nil
+// Note: The crypto library's AES-GCM implementation always returns the
+// ciphertext with an AESGCMTagSize (16-byte) tag.
+func (a *AESGCM) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
+	iv := random.GetRandomBytes(AESGCMIVSize)
+	return a.aesGCMInsecureIV.Encrypt(iv, plaintext, associatedData)
 }
 
-// Decrypt decrypts ct with aad as the additional authenticated data.
-func (a *AESGCM) Decrypt(ct, aad []byte) ([]byte, error) {
-	if len(ct) < AESGCMIVSize+AESGCMTagSize {
-		return nil, fmt.Errorf("aes_gcm: ciphertext too short")
+// Decrypt decrypts ciphertext with associatedData.
+func (a *AESGCM) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
+	if len(ciphertext) < AESGCMIVSize {
+		return nil, fmt.Errorf("ciphertext with size %d is too short", len(ciphertext))
 	}
-	cipher, err := a.newCipher(a.Key)
-	if err != nil {
-		return nil, err
-	}
-	iv := ct[:AESGCMIVSize]
-	pt, err := cipher.Open(nil, iv, ct[AESGCMIVSize:], aad)
-	if err != nil {
-		return nil, fmt.Errorf("aes_gcm: %s", err)
-	}
-	return pt, nil
+	iv := ciphertext[:AESGCMIVSize]
+	return a.aesGCMInsecureIV.Decrypt(iv, ciphertext, associatedData)
 }
 
-// newIV creates a new IV for encryption.
-func (a *AESGCM) newIV() []byte {
-	return random.GetRandomBytes(AESGCMIVSize)
-}
-
-var errCipher = fmt.Errorf("aes_gcm: initializing cipher failed")
-
-// newCipher creates a new AES-GCM cipher using the given key and the crypto library.
-func (a *AESGCM) newCipher(key []byte) (cipher.AEAD, error) {
-	aesCipher, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, errCipher
-	}
-	ret, err := cipher.NewGCM(aesCipher)
-	if err != nil {
-		return nil, errCipher
-	}
-	return ret, nil
-}
-
-func maxPtSize() int {
-	x := maxInt - AESGCMIVSize - AESGCMTagSize
-	if x > maxAESGCMPlaintextSize {
-		return maxAESGCMPlaintextSize
-	}
-	return x
+// Key returns the AES key.
+func (a *AESGCM) Key() []byte {
+	return a.aesGCMInsecureIV.Key
 }

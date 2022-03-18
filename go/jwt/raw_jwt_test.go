@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/tink/go/jwt"
 )
 
@@ -179,7 +180,10 @@ func TestCreatingRawJWTWithAllClaims(t *testing.T) {
 		if !cmp.Equal(notBefore, *opts.NotBefore) {
 			t.Errorf("tc.token.NotBefore() = %q, want %q", notBefore, *opts.NotBefore)
 		}
-
+		wantCustomClaims := []string{"cc-num", "cc-bool", "cc-null", "cc-string", "cc-array", "cc-object"}
+		if !cmp.Equal(tc.token.CustomClaimNames(), wantCustomClaims, cmpopts.SortSlices(func(a, b string) bool { return a < b })) {
+			t.Errorf("tc.token.CustomClaimNames() = %q, want %q", tc.token.CustomClaimNames(), wantCustomClaims)
+		}
 		if !tc.token.HasNumberClaim("cc-num") {
 			t.Errorf("tc.token.HasNumberClaim('cc-num') = false, want true")
 		}
@@ -300,6 +304,9 @@ func TestGeneratingRawJWTWithoutClaims(t *testing.T) {
 		}
 		if _, err := tc.token.NotBefore(); err == nil {
 			t.Errorf("tc.token.NotBefore() err = nil, want error")
+		}
+		if !cmp.Equal(tc.token.CustomClaimNames(), []string{}) {
+			t.Errorf("tc.token.CustomClaimNames() = %q want %q", tc.token.CustomClaimNames(), []string{})
 		}
 	}
 }
@@ -773,6 +780,9 @@ func TestGettingRegisteredClaimsThroughCustomFails(t *testing.T) {
 	token, err := jwt.NewRawJWT(opts)
 	if err != nil {
 		t.Fatalf("generating valid RawJWT: %v", err)
+	}
+	if !cmp.Equal(token.CustomClaimNames(), []string{}) {
+		t.Errorf("tc.token.CustomClaimNames() = %q want %q", token.CustomClaimNames(), []string{})
 	}
 	for _, c := range []string{"sub", "iss", "aud", "nbf", "exp", "iat", "jti"} {
 		if token.HasNullClaim(c) {

@@ -16,6 +16,8 @@
 
 #include "tink/config/config_util.h"
 
+#include <string>
+
 namespace crypto {
 namespace tink {
 

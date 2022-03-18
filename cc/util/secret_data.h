@@ -18,6 +18,7 @@
 #define TINK_UTIL_SECRET_DATA_H_
 
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 

@@ -101,6 +101,25 @@ class StatusOr {
     return *std::move(value_);
   }
 
+  // Returns value if ok(), otherwise crashes if exceptions are disabled OR
+  // throws if exceptions are enabled.
+  inline const T& value() const& {
+    if (!ok()) AbortWithMessageFrom(status_);
+    return *value_;
+  }
+  inline T& value() & {
+    if (!ok()) AbortWithMessageFrom(status_);
+    return *value_;
+  }
+  inline const T&& value() const&& {
+    if (!ok()) AbortWithMessageFrom(std::move(status_));
+    return *std::move(value_);
+  }
+  inline T&& value() && {
+    if (!ok()) AbortWithMessageFrom(std::move(status_));
+    return *std::move(value_);
+  }
+
   // Implicitly convertible to absl::StatusOr. Implicit conversions explicitly
   // allowed by style arbiter waiver in cl/351594378.
   operator ::absl::StatusOr<T>() const&;  // NOLINT
@@ -149,6 +168,13 @@ class StatusOr {
       std::_Exit(1);
     }
   }
+
+  void AbortWithMessageFrom(crypto::tink::util::Status status) const {
+    std::cerr << "Attempting to fetch value instead of handling error\n";
+    std::cerr << status.ToString();
+    std::abort();
+  }
+
 
   Status status_;
   absl::optional<T> value_;

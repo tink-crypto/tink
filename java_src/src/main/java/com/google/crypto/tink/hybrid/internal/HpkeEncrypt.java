@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
 /**
  * Hybrid Public Key Encryption (HPKE) encryption.
  *
- * <p>HPKE I.-D.: https://www.ietf.org/archive/id/draft-irtf-cfrg-hpke-12.html
+ * <p>HPKE RFC: https://www.rfc-editor.org/rfc/rfc9180.html
  */
 @Immutable
 final class HpkeEncrypt implements HybridEncrypt {

@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ type Validator struct {
 	opts ValidatorOpts
 }
 
-// NewJWTValidator creates a new JWTValidator.
-func NewJWTValidator(opts *ValidatorOpts) (*Validator, error) {
+// NewValidator creates a new Validator.
+func NewValidator(opts *ValidatorOpts) (*Validator, error) {
 	if opts == nil {
 		return nil, fmt.Errorf("ValidatorOpts can't be nil")
 	}

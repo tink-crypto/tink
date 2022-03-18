@@ -16,6 +16,9 @@
 
 #include "tink/subtle/prf/hkdf_streaming_prf.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

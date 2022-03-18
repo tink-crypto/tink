@@ -13,12 +13,15 @@ local_repository(
 )
 
 load("@tink_base//:tink_base_deps.bzl", "tink_base_deps")
+
 tink_base_deps()
 
 load("@tink_base//:tink_base_deps_init.bzl", "tink_base_deps_init")
+
 tink_base_deps_init()
 
 load("@tink_java//:tink_java_deps.bzl", "TINK_MAVEN_ARTIFACTS", "tink_java_deps")
+
 tink_java_deps()
 
 http_archive(
@@ -42,8 +45,6 @@ maven_install(
     generate_compat_repositories = True,
     override_targets = IO_GRPC_GRPC_JAVA_OVERRIDE_TARGETS,
     repositories = [
-        # TODO(b/214259089): Disable during bintray outage.
-        #"https://jcenter.bintray.com/",
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],

@@ -141,7 +141,7 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
       return util::Status(absl::StatusCode::kInvalidArgument,
                           absl::StrCat("Invalid format of credentials in file ",
                                        credentials_path, " : ",
-                                       key_id_result.status().error_message()));
+                                       key_id_result.status().message()));
     }
     auto secret_key_result = GetValue("aws_secret_access_key", creds_lines[2]);
     if (!secret_key_result.ok()) {
@@ -149,7 +149,7 @@ StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
           absl::StatusCode::kInvalidArgument,
           absl::StrCat("Invalid format of credentials in file ",
                        credentials_path, " : ",
-                       secret_key_result.status().error_message()));
+                       secret_key_result.status().message()));
     }
     return Aws::Auth::AWSCredentials(key_id_result.ValueOrDie().c_str(),
                                      secret_key_result.ValueOrDie().c_str());

@@ -18,7 +18,7 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
@@ -63,6 +63,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtEcdsaPublicKey.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKey_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws Exception {
@@ -76,6 +77,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
     verifyManager.validateKey(publicKey);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createPrimitive_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws Exception {
@@ -96,6 +98,7 @@ public final class JwtEcdsaVerifyKeyManagerTest {
         signer.signAndEncodeWithKid(token, Optional.empty()), validator, Optional.empty());
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createPrimitive_anotherKey_throw(
       @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {

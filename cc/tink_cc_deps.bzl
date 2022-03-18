@@ -29,12 +29,12 @@ def tink_cc_deps():
 
     # GoogleTest/GoogleMock framework. Used by most C++ unit-tests.
     if not native.existing_rule("com_google_googletest"):
-        # Release from 2019-10-03
+        # Release from 2021-06-11
         http_archive(
             name = "com_google_googletest",
-            strip_prefix = "googletest-1.10.x",
-            url = "https://github.com/google/googletest/archive/v1.10.x.zip",
-            sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
+            strip_prefix = "googletest-release-1.11.0",
+            url = "https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz",
+            sha256 = "b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5",
         )
 
     if not native.existing_rule("rapidjson"):

@@ -23,8 +23,8 @@ import static org.junit.Assume.assumeFalse;
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtEcdsaAlgorithm;
 import com.google.crypto.tink.proto.JwtEcdsaKeyFormat;
 import com.google.crypto.tink.proto.JwtEcdsaPrivateKey;
@@ -101,6 +101,7 @@ public class JwtEcdsaSignKeyManagerTest {
         () -> factory.validateKeyFormat(JwtEcdsaKeyFormat.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKeyFormat_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws GeneralSecurityException {
@@ -112,6 +113,7 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(privateKey.getPublicKey().getAlgorithm()).isEqualTo(keyFormat.getAlgorithm());
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createKeys_ok(@FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm)
       throws Exception {
@@ -121,6 +123,7 @@ public class JwtEcdsaSignKeyManagerTest {
     checkConsistency(key, format);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createKey_alwaysNewElement_ok(
       @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
@@ -137,6 +140,7 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(keys).hasSize(numTests);
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void getPublicKey_checkValues(
       @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
@@ -146,6 +150,7 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(publicKey).isEqualTo(privateKey.getPublicKey());
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createCorruptedPublicKeyPrimitive_throws(
       @FromDataPoints("parametersAlgos") JwtEcdsaAlgorithm algorithm) throws Exception {
@@ -219,6 +224,7 @@ public class JwtEcdsaSignKeyManagerTest {
     }
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_success(@FromDataPoints("templates") String templateName)
       throws Exception {
@@ -252,6 +258,7 @@ public class JwtEcdsaSignKeyManagerTest {
     assertThat(verifiedTokenWithType.getTypeHeader()).isEqualTo("typeHeader");
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerifyDifferentKey_throw(@FromDataPoints("templates") String templateName)
       throws Exception {
@@ -274,6 +281,7 @@ public class JwtEcdsaSignKeyManagerTest {
         () -> otherVerifier.verifyAndDecode(signedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_header_modification_throw(
       @FromDataPoints("templates") String templateName) throws Exception {
@@ -300,6 +308,7 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_payload_modification_throw(
       @FromDataPoints("templates") String templateName) throws Exception {
@@ -326,6 +335,7 @@ public class JwtEcdsaSignKeyManagerTest {
         GeneralSecurityException.class, () -> verifier.verifyAndDecode(modifiedCompact, validator));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void createSignVerify_bitFlipped_throw(@FromDataPoints("templates") String templateName)
       throws Exception {

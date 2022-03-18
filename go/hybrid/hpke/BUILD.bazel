@@ -1,0 +1,68 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+package(default_visibility = ["//:__subpackages__"])  # keep
+
+go_library(
+    name = "hpke",
+    srcs = [
+        "aead.go",
+        "aes_gcm_aead.go",
+        "context.go",
+        "decrypt.go",
+        "encrypt.go",
+        "hkdf_kdf.go",
+        "hpke.go",
+        "kdf.go",
+        "kem.go",
+        "primitive_factory.go",
+        "public_key_manager.go",
+        "x25519_kem.go",
+    ],
+    importpath = "github.com/google/tink/go/hybrid/hpke",
+    deps = [
+        "//core/registry",
+        "//internal/aead",
+        "//keyset",
+        "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
+        "//subtle",
+        "//tink",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_x_crypto//hkdf",
+    ],
+)
+
+go_test(
+    name = "hpke_test",
+    srcs = [
+        "aes_gcm_aead_test.go",
+        "context_test.go",
+        "encrypt_decrypt_test.go",
+        "hkdf_kdf_test.go",
+        "hpke_test.go",
+        "primitive_factory_test.go",
+        "public_key_manager_test.go",
+        "x25519_kem_test.go",
+    ],
+    data = [":testdata"],
+    embed = [":hpke"],
+    deps = [
+        "//core/registry",
+        "//proto/hpke_go_proto",
+        "//subtle",
+        "//subtle/random",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
+    ],
+)
+
+filegroup(
+    name = "testdata",
+    srcs = ["testdata/boringssl_hpke_test_vectors.json"],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":hpke",
+    visibility = ["//visibility:public"],
+)

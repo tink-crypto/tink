@@ -52,12 +52,3 @@ def tink_java_deps():
             sha256 = "cd06d15dd8bb59926e4d65f9003bfc20f9da4b2519985c27e190cddc8b7a7806",
             strip_prefix = "rules_android-0.1.1",
         )
-
-    if not native.existing_rule("rules_python"):
-        # Needed by @com_google_protobuf_javalite.
-        http_archive(
-            name = "rules_python",
-            sha256 = "e5470e92a18aa51830db99a4d9c492cc613761d5bdb7131c04bd92b9834380f6",
-            strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",
-            urls = ["https://github.com/bazelbuild/rules_python/archive/4b84ad270387a7c439ebdccfd530e2339601ef27.tar.gz"],
-        )

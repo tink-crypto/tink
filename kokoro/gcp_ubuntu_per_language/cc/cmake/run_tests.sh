@@ -18,13 +18,15 @@
 set -euo pipefail
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
+./kokoro/testutils/copy_credentials.sh
 
 echo "========================================================= Running cmake"
 cmake --version
-cmake . cmake . -DTINK_BUILD_TESTS=ON -DCMAKE_CXX_STANDARD=11
+cmake . \
+  -DTINK_BUILD_TESTS=ON \
+  -DCMAKE_CXX_STANDARD=11
 echo "==================================================== Building with make"
-make -j8 all
+make -j"$(nproc)" all
 echo "===================================================== Testing with make"
 CTEST_OUTPUT_ON_FAILURE=1 make test
 echo "================================================ Done testing with make"

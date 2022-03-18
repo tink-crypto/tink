@@ -18,7 +18,7 @@ package com.google.crypto.tink.jwt;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.google.crypto.tink.KeyTypeManager;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1Algorithm;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1KeyFormat;
 import com.google.crypto.tink.proto.JwtRsaSsaPkcs1PrivateKey;
@@ -67,6 +67,7 @@ public final class JwtRsaSsaPkcs1VerifyKeyManagerTest {
         () -> verifyManager.validateKey(JwtRsaSsaPkcs1PublicKey.getDefaultInstance()));
   }
 
+  // Note: we use Theory as a parametrized test -- different from what the Theory framework intends.
   @Theory
   public void validateKey_ok(
       @FromDataPoints("algorithmParam") JwtRsaSsaPkcs1Algorithm algorithm,

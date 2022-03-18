@@ -284,6 +284,17 @@ func (r *RawJWT) ObjectClaim(name string) (map[string]interface{}, error) {
 	return val.GetStructValue().AsMap(), err
 }
 
+// CustomClaimNames returns a list with the name of custom claims in a RawJWT.
+func (r *RawJWT) CustomClaimNames() []string {
+	names := []string{}
+	for key := range r.jsonpb.GetFields() {
+		if !isRegisteredClaim(key) {
+			names = append(names, key)
+		}
+	}
+	return names
+}
+
 func (r *RawJWT) timeClaim(name string) (time.Time, error) {
 	n, err := r.numberClaim(name)
 	if err != nil {

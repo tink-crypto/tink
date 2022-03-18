@@ -5,26 +5,31 @@ package(default_visibility = ["//:__subpackages__"])  # keep
 licenses(["notice"])  # keep
 
 go_library(
-    name = "go_default_library",
+    name = "insecurecleartextkeyset",
     srcs = ["insecurecleartextkeyset.go"],
     importpath = "github.com/google/tink/go/insecurecleartextkeyset",
     visibility = ["//visibility:public"],
     deps = [
-        "//internal:go_default_library",
-        "//keyset:go_default_library",
-        "//proto:tink_go_proto",
+        "//internal",
+        "//keyset",
+        "//proto/tink_go_proto",
     ],
 )
 
 go_test(
-    name = "go_default_test",
+    name = "insecurecleartextkeyset_test",
     srcs = ["insecurecleartextkeyset_test.go"],
-    embed = [":go_default_library"],
     deps = [
-        "//keyset:go_default_library",
-        "//mac:go_default_library",
-        "//testutil:go_default_library",
-        "//proto:tink_go_proto",
-        "@org_golang_google_protobuf//proto:go_default_library",
+        ":insecurecleartextkeyset",
+        "//keyset",
+        "//proto/tink_go_proto",
+        "//testutil",
+        "@org_golang_google_protobuf//proto",
     ],
+)
+
+alias(
+    name = "go_default_library",
+    actual = ":insecurecleartextkeyset",
+    visibility = ["//visibility:public"],
 )

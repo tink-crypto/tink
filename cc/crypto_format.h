@@ -17,6 +17,7 @@
 #ifndef TINK_CRYPTO_FORMAT_H_
 #define TINK_CRYPTO_FORMAT_H_
 
+#include <string>
 #include <vector>
 
 #include "tink/util/statusor.h"

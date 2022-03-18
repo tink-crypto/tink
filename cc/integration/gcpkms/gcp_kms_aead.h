@@ -17,10 +17,10 @@
 #ifndef TINK_INTEGRATION_GCPKMS_GCP_KMS_AEAD_H_
 #define TINK_INTEGRATION_GCPKMS_GCP_KMS_AEAD_H_
 
-#include "absl/strings/string_view.h"
+#include <string>
 
 #include "google/cloud/kms/v1/service.grpc.pb.h"
-
+#include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/util/statusor.h"
 

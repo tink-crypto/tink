@@ -16,6 +16,9 @@
 
 #include "tink/util/input_stream_util.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"

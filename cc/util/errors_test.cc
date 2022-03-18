@@ -60,10 +60,11 @@ TEST(ErrorsTest, ToStatusFAbslStatusCodeTest) {
   crypto::tink::util::Status status =
       ToStatusF(absl::StatusCode::kUnknown, msg, "asdf", 42);
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(expected_msg, status.error_message());
+  EXPECT_EQ(expected_msg, status.message());
   EXPECT_EQ(absl::StatusCode::kUnknown, status.code());
 
   #ifndef TINK_USE_ABSL_STATUS
+  EXPECT_EQ(expected_msg, status.error_message());
   EXPECT_EQ(crypto::tink::util::error::UNKNOWN, status.error_code());
   #endif
 }

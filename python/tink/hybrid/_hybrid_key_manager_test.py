@@ -110,7 +110,8 @@ class HpkeKeyManagerTest(parameterized.TestCase):
     key_template = templates._create_hpke_key_template(
         hpke_kem=hpke_pb2.KEM_UNKNOWN,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.AES_128_GCM)
+        hpke_aead=hpke_pb2.AES_128_GCM,
+        output_prefix_type=tink_pb2.TINK)
     with self.assertRaises(core.TinkError):
       tink.new_keyset_handle(key_template)
 
@@ -119,7 +120,8 @@ class HpkeKeyManagerTest(parameterized.TestCase):
     key_template = templates._create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.KDF_UNKNOWN,
-        hpke_aead=hpke_pb2.AES_128_GCM)
+        hpke_aead=hpke_pb2.AES_128_GCM,
+        output_prefix_type=tink_pb2.TINK)
     with self.assertRaises(core.TinkError):
       tink.new_keyset_handle(key_template)
 
@@ -128,7 +130,8 @@ class HpkeKeyManagerTest(parameterized.TestCase):
     key_template = templates._create_hpke_key_template(
         hpke_kem=hpke_pb2.DHKEM_X25519_HKDF_SHA256,
         hpke_kdf=hpke_pb2.HKDF_SHA256,
-        hpke_aead=hpke_pb2.AEAD_UNKNOWN)
+        hpke_aead=hpke_pb2.AEAD_UNKNOWN,
+        output_prefix_type=tink_pb2.TINK)
     with self.assertRaises(core.TinkError):
       tink.new_keyset_handle(key_template)
 
@@ -144,10 +147,16 @@ class HpkeKeyManagerTest(parameterized.TestCase):
 
   @parameterized.parameters([
       hybrid.hybrid_key_templates
-      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM, hybrid
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW, hybrid
       .hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
       hybrid.hybrid_key_templates
-      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW
   ])
   def test_encrypt_decrypt(self, template):
     private_handle = tink.new_keyset_handle(template)
@@ -161,10 +170,16 @@ class HpkeKeyManagerTest(parameterized.TestCase):
 
   @parameterized.parameters([
       hybrid.hybrid_key_templates
-      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM, hybrid
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_128_GCM_RAW, hybrid
       .hybrid_key_templates.DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM,
       hybrid.hybrid_key_templates
-      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_AES_256_GCM_RAW,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305,
+      hybrid.hybrid_key_templates
+      .DHKEM_X25519_HKDF_SHA256_HKDF_SHA256_CHACHA20_POLY1305_RAW
   ])
   def test_decrypt_fails(self, template):
     private_handle = tink.new_keyset_handle(template)

@@ -14,12 +14,34 @@
 # limitations under the License.
 ################################################################################
 
-
 set -euo pipefail
+
+install_python3() {
+  : "${PYTHON_VERSION:=3.7.1}"
+
+  # Update python version list.
+  (
+    cd /home/kbuilder/.pyenv/plugins/python-build/../..
+    git pull
+    # TODO(b/187879867): Remove once pyenv issue is resolved.
+    git checkout 783870759566a77d09b426e0305bc0993a522765
+  )
+  # Install Python.
+  eval "$(pyenv init -)"
+  pyenv install "${PYTHON_VERSION}"
+  pyenv global "${PYTHON_VERSION}"
+}
+
+install_python3
+
 cd ${KOKORO_ARTIFACTS_DIR}/git/tink
 
-./kokoro/copy_credentials.sh
-./kokoro/update_android_sdk.sh
+./kokoro/testutils/copy_credentials.sh
+./kokoro/testutils/update_android_sdk.sh
+# Sourcing required to update callers environment.
+source ./kokoro/testutils/install_go.sh
+
+echo "Using go binary from $(which go): $(go version)"
 
 cd tools
 use_bazel.sh $(cat .bazelversion)

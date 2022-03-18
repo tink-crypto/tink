@@ -16,6 +16,9 @@
 
 #include "tink/prf/hkdf_prf_key_manager.h"
 
+#include <string>
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"

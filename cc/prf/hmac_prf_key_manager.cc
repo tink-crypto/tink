@@ -16,6 +16,7 @@
 #include "tink/prf/hmac_prf_key_manager.h"
 
 #include <set>
+#include <string>
 
 #include "absl/status/status.h"
 #include "tink/subtle/common_enums.h"

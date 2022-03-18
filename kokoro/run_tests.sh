@@ -134,7 +134,8 @@ install_tink_via_pip() {
 
   # Check if we can build Tink python package.
   pip3 install "${PIP_FLAGS[@]}" --upgrade pip
-  pip3 install "${PIP_FLAGS[@]}" --upgrade setuptools
+  # TODO(b/219813176): Remove once Kokoro environment is compatible.
+  pip3 install "${PIP_FLAGS[@]}" --upgrade 'setuptools==60.9.0'
   pip3 install "${PIP_FLAGS[@]}" ./python
 
   # Install dependencies for the examples/python tests
@@ -203,8 +204,10 @@ main() {
       pip3 install --user protobuf
     fi
 
-    ./kokoro/copy_credentials.sh
-    ./kokoro/update_android_sdk.sh
+    ./kokoro/testutils/copy_credentials.sh
+    ./kokoro/testutils/update_android_sdk.sh
+    # Sourcing required to update callers environment.
+    source ./kokoro/testutils/install_go.sh
   fi
 
   # Verify required environment variables.
@@ -226,8 +229,7 @@ main() {
   echo "using java binary: $(which java)"
   java -version
 
-  echo "using go: $(which go)"
-  go version
+  echo "Using go binary from $(which go): $(go version)"
 
   echo "using python: $(which python)"
   python --version

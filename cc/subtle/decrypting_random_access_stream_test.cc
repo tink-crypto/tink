@@ -16,7 +16,10 @@
 
 #include "tink/subtle/decrypting_random_access_stream.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"

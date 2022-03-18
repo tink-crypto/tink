@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC.
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@ type VerifiedJWT struct {
 	token *RawJWT
 }
 
-// NewVerifiedJWT generates a new VerifiedJWT
-// TODO(b/202065153): Restrict use to subtle jwt libraries based on access token.
-func NewVerifiedJWT(rawJWT *RawJWT) (*VerifiedJWT, error) {
+// newVerifiedJWT generates a new VerifiedJWT
+func newVerifiedJWT(rawJWT *RawJWT) (*VerifiedJWT, error) {
 	if rawJWT == nil {
 		return nil, fmt.Errorf("rawJWT can't be nil")
 	}
@@ -57,7 +56,8 @@ func (v *VerifiedJWT) HasAudiences() bool {
 	return v.token.HasAudiences()
 }
 
-// Audiences returns a list of audiences from the 'aud' claim. If the 'aud' claim is a single string, it is converted into a list with a single entry.
+// Audiences returns a list of audiences from the 'aud' claim.
+// If the 'aud' claim is a single string, it is converted into a list with a single entry.
 func (v *VerifiedJWT) Audiences() ([]string, error) {
 	return v.token.Audiences()
 }
@@ -175,4 +175,9 @@ func (v *VerifiedJWT) HasObjectClaim(name string) bool {
 // ObjectClaim returns a map representing a JSON object for a claim or an error if the claim is empty.
 func (v *VerifiedJWT) ObjectClaim(name string) (map[string]interface{}, error) {
 	return v.token.ObjectClaim(name)
+}
+
+// CustomClaimNames returns a list with the name of custom claims in a VerifiedJWT.
+func (v *VerifiedJWT) CustomClaimNames() []string {
+	return v.token.CustomClaimNames()
 }

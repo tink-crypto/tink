@@ -20,8 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import com.google.crypto.tink.KeyTemplate;
-import com.google.crypto.tink.KeyTypeManager;
 import com.google.crypto.tink.StreamingAead;
+import com.google.crypto.tink.internal.KeyTypeManager;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKey;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingKeyFormat;
 import com.google.crypto.tink.proto.AesCtrHmacStreamingParams;

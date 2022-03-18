@@ -16,6 +16,9 @@
 
 #include "tink/subtle/ecdsa_verify_boringssl.h"
 
+#include <string>
+#include <utility>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "openssl/bn.h"

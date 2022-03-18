@@ -16,6 +16,9 @@
 
 #include "tink/subtle/streaming_mac_impl.h"
 
+#include <string>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "tink/subtle/random.h"

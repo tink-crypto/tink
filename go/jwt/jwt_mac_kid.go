@@ -70,5 +70,5 @@ func (jm *macWithKID) VerifyMACAndDecodeWithKID(compact string, verifier *Valida
 	if err := verifier.Validate(rawJWT); err != nil {
 		return nil, err
 	}
-	return NewVerifiedJWT(rawJWT)
+	return newVerifiedJWT(rawJWT)
 }
