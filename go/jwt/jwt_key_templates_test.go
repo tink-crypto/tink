@@ -26,8 +26,8 @@ import (
 )
 
 type templateTestCase struct {
-	tag     string
-	temlate *tinkpb.KeyTemplate
+	tag      string
+	template *tinkpb.KeyTemplate
 }
 
 func TestJWTComputeVerifyMAC(t *testing.T) {
@@ -36,15 +36,15 @@ func TestJWTComputeVerifyMAC(t *testing.T) {
 		t.Errorf("NewRawJWT() err = %v, want nil", err)
 	}
 	for _, tc := range []templateTestCase{
-		{tag: "JWT_HS256", temlate: jwt.HS256Template()},
-		{tag: "JWT_HS384", temlate: jwt.HS384Template()},
-		{tag: "JWT_HS512", temlate: jwt.HS512Template()},
-		{tag: "JWT_HS256_RAW", temlate: jwt.RawHS256Template()},
-		{tag: "JWT_HS384_RAW", temlate: jwt.RawHS384Template()},
-		{tag: "JWT_HS512_RAW", temlate: jwt.RawHS512Template()},
+		{tag: "JWT_HS256", template: jwt.HS256Template()},
+		{tag: "JWT_HS384", template: jwt.HS384Template()},
+		{tag: "JWT_HS512", template: jwt.HS512Template()},
+		{tag: "JWT_HS256_RAW", template: jwt.RawHS256Template()},
+		{tag: "JWT_HS384_RAW", template: jwt.RawHS384Template()},
+		{tag: "JWT_HS512_RAW", template: jwt.RawHS512Template()},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			handle, err := keyset.NewHandle(tc.temlate)
+			handle, err := keyset.NewHandle(tc.template)
 			if err != nil {
 				t.Errorf("keyset.NewHandle() err = %v, want nil", err)
 			}
@@ -73,15 +73,15 @@ func TestJWTSignVerifyECDSA(t *testing.T) {
 		t.Errorf("jwt.NewRawJWT() err = %v, want nil", err)
 	}
 	for _, tc := range []templateTestCase{
-		{tag: "JWT_ES256", temlate: jwt.ES256Template()},
-		{tag: "JWT_ES384", temlate: jwt.ES384Template()},
-		{tag: "JWT_ES512", temlate: jwt.ES512Template()},
-		{tag: "JWT_ES256_RAW", temlate: jwt.RawES256Template()},
-		{tag: "JWT_ES384_RAW", temlate: jwt.RawES384Template()},
-		{tag: "JWT_ES512_RAW", temlate: jwt.RawES512Template()},
+		{tag: "JWT_ES256", template: jwt.ES256Template()},
+		{tag: "JWT_ES384", template: jwt.ES384Template()},
+		{tag: "JWT_ES512", template: jwt.ES512Template()},
+		{tag: "JWT_ES256_RAW", template: jwt.RawES256Template()},
+		{tag: "JWT_ES384_RAW", template: jwt.RawES384Template()},
+		{tag: "JWT_ES512_RAW", template: jwt.RawES512Template()},
 	} {
 		t.Run(tc.tag, func(t *testing.T) {
-			kh, err := keyset.NewHandle(tc.temlate)
+			kh, err := keyset.NewHandle(tc.template)
 			if err != nil {
 				t.Errorf("keyset.NewHandle() err = %v, want nil", err)
 			}
