@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	publicKeyKeyVersion = 0
-	publicKeyTypeURL    = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
+	publicKeyKeyVersion uint32 = 0
+	publicKeyTypeURL           = "type.googleapis.com/google.crypto.tink.HpkePublicKey"
 )
 
 var (
