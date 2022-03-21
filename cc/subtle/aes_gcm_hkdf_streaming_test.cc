@@ -70,7 +70,7 @@ TEST(AesGcmHkdfStreamingTest, testBasic) {
             params.ciphertext_offset = ciphertext_offset;
             auto result = AesGcmHkdfStreaming::New(std::move(params));
             EXPECT_TRUE(result.ok()) << result.status();
-            auto streaming_aead = std::move(result.ValueOrDie());
+            auto streaming_aead = std::move(result.value());
 
             // Try to get an encrypting stream to a "null" ct_destination.
             std::string associated_data = "some associated data";

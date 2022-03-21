@@ -59,7 +59,7 @@ Status ReadAndVerifyFragment(RandomAccessStream* ras, int pos, int count,
     return Status(absl::StatusCode::kInternal,
                   absl::StrCat("Could not allocate buffer of size ", count));
   }
-  auto buf = std::move(buf_result.ValueOrDie());
+  auto buf = std::move(buf_result.value());
   int full_size = full_contents.size();
   auto status = ras->PRead(pos, count, buf.get());
   if (!status.ok() && status.code() != absl::StatusCode::kOutOfRange) {
@@ -105,7 +105,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
   auto enc_stream_result = encrypter->NewEncryptingStream(
       std::move(ct_destination), associated_data);
   if (!enc_stream_result.ok()) return enc_stream_result.status();
-  auto enc_stream = std::move(enc_stream_result.ValueOrDie());
+  auto enc_stream = std::move(enc_stream_result.value());
   status = subtle::test::WriteToStream(enc_stream.get(), plaintext);
   if (!status.ok()) return status;
   if (plaintext.size() != enc_stream->Position()) {
@@ -124,7 +124,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
   auto dec_stream_result = decrypter->NewDecryptingStream(
       std::move(ct_source), associated_data);
   if (!dec_stream_result.ok()) return dec_stream_result.status();
-  auto dec_stream = std::move(dec_stream_result.ValueOrDie());
+  auto dec_stream = std::move(dec_stream_result.value());
   std::string decrypted;
   status = subtle::test::ReadFromStream(dec_stream.get(), &decrypted);
   if (!status.ok()) {
@@ -142,7 +142,7 @@ crypto::tink::util::Status EncryptThenDecrypt(StreamingAead* encrypter,
   auto dec_ras_result = decrypter->NewDecryptingRandomAccessStream(
       std::move(ct_ras), associated_data);
   if (!dec_ras_result.ok()) return dec_ras_result.status();
-  auto dec_ras = std::move(dec_ras_result.ValueOrDie());
+  auto dec_ras = std::move(dec_ras_result.value());
   int pt_size = plaintext.size();
   for (int pos : {0, pt_size / 2, std::max(pt_size - 10, 0)}) {
     for (int count : {1, 10, std::max(pt_size / 2, 1), std::max(pt_size, 1)}) {

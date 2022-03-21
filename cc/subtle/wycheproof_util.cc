@@ -62,7 +62,7 @@ util::StatusOr<std::string> HexDecode(absl::string_view hex) {
 }
 
 std::string HexDecodeOrDie(absl::string_view hex) {
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace
@@ -134,7 +134,7 @@ std::string WycheproofUtil::GetInteger(const rapidjson::Value &val) {
       hex = "0" + hex;
     }
   }
-  return HexDecode(hex).ValueOrDie();
+  return HexDecode(hex).value();
 }
 
 }  // namespace subtle

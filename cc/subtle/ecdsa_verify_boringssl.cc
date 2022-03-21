@@ -44,7 +44,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   // Check curve.
   auto group_result = internal::EcGroupFromCurveType(ec_key.curve);
   if (!group_result.ok()) return group_result.status();
-  internal::SslUniquePtr<EC_GROUP> group = std::move(group_result.ValueOrDie());
+  internal::SslUniquePtr<EC_GROUP> group = std::move(group_result.value());
   internal::SslUniquePtr<EC_KEY> key(EC_KEY_new());
   EC_KEY_set_group(key.get(), group.get());
 
@@ -52,8 +52,7 @@ util::StatusOr<std::unique_ptr<EcdsaVerifyBoringSsl>> EcdsaVerifyBoringSsl::New(
   auto ec_point_result =
       internal::GetEcPoint(ec_key.curve, ec_key.pub_x, ec_key.pub_y);
   if (!ec_point_result.ok()) return ec_point_result.status();
-  internal::SslUniquePtr<EC_POINT> pub_key =
-      std::move(ec_point_result.ValueOrDie());
+  internal::SslUniquePtr<EC_POINT> pub_key = std::move(ec_point_result.value());
   if (!EC_KEY_set_public_key(key.get(), pub_key.get())) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
@@ -108,7 +107,7 @@ util::Status EcdsaVerifyBoringSsl::Verify(absl::string_view signature,
     if (!status_or_der.ok()) {
       return status_or_der.status();
     }
-    derSig = status_or_der.ValueOrDie();
+    derSig = status_or_der.value();
   }
 
   // Verify the signature.

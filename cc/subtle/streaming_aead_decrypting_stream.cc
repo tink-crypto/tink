@@ -64,7 +64,7 @@ util::Status ReadFromStream(InputStream* input_stream, int count,
       return next_result.status();
     }
     if (!next_result.ok()) return next_result.status();
-    read_bytes = next_result.ValueOrDie();
+    read_bytes = next_result.value();
     needed_bytes = std::min(read_bytes, bytes_to_be_read);
     memcpy(output->data() + (count - bytes_to_be_read), buffer, needed_bytes);
     bytes_to_be_read -= needed_bytes;

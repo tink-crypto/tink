@@ -68,8 +68,7 @@ StreamingMacImpl::NewComputeMacOutputStream() const {
   }
 
   std::unique_ptr<OutputStreamWithResult<std::string>> string_to_return =
-      absl::make_unique<ComputeMacOutputStream>(
-          std::move(mac_status.ValueOrDie()));
+      absl::make_unique<ComputeMacOutputStream>(std::move(mac_status.value()));
   return string_to_return;
 }
 
@@ -167,7 +166,7 @@ util::Status VerifyMacOutputStream::CloseStreamAndComputeResult() {
   if (!mac_actual.ok()) {
     return mac_actual.status();
   }
-  if (mac_actual.ValueOrDie() == expected_) {
+  if (mac_actual.value() == expected_) {
     return util::OkStatus();
   }
   return util::Status(absl::StatusCode::kInvalidArgument, "Incorrect MAC");
@@ -198,8 +197,8 @@ StreamingMacImpl::NewVerifyMacOutputStream(const std::string& mac_value) const {
     return mac_status.status();
   }
   return std::unique_ptr<OutputStreamWithResult<util::Status>>(
-      absl::make_unique<VerifyMacOutputStream>(
-          mac_value, std::move(mac_status.ValueOrDie())));
+      absl::make_unique<VerifyMacOutputStream>(mac_value,
+                                               std::move(mac_status.value())));
 }
 }  // namespace subtle
 }  // namespace tink

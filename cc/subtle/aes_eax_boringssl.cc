@@ -160,8 +160,8 @@ crypto::tink::util::StatusOr<std::unique_ptr<Aead>> AesEaxBoringSsl::New(
   if (!aeskey_or.ok()) {
     return aeskey_or.status();
   }
-  return {absl::WrapUnique(new AesEaxBoringSsl(
-      std::move(aeskey_or).ValueOrDie(), nonce_size_in_bytes))};
+  return {absl::WrapUnique(
+      new AesEaxBoringSsl(std::move(aeskey_or).value(), nonce_size_in_bytes))};
 }
 
 AesEaxBoringSsl::Block AesEaxBoringSsl::Pad(

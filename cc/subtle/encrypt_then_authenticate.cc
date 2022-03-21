@@ -75,7 +75,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   if (!ct.ok()) {
     return ct.status();
   }
-  std::string ciphertext(ct.ValueOrDie());
+  std::string ciphertext(ct.value());
   std::string toAuthData = absl::StrCat(additional_data, ciphertext,
                                         longToBigEndianStr(aad_size_in_bits));
 
@@ -83,10 +83,10 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Encrypt(
   if (!tag.ok()) {
     return tag.status();
   }
-  if (tag.ValueOrDie().size() != tag_size_) {
+  if (tag.value().size() != tag_size_) {
     return util::Status(absl::StatusCode::kInternal, "invalid tag size");
   }
-  return ciphertext.append(tag.ValueOrDie());
+  return ciphertext.append(tag.value());
 }
 
 util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
@@ -122,7 +122,7 @@ util::StatusOr<std::string> EncryptThenAuthenticate::Decrypt(
     return pt.status();
   }
 
-  return pt.ValueOrDie();
+  return pt.value();
 }
 
 }  // namespace subtle

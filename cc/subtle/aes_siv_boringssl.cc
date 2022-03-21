@@ -67,13 +67,13 @@ AesSivBoringSsl::New(const util::SecretData& key) {
   if (!k1_or.ok()) {
     return k1_or.status();
   }
-  util::SecretUniquePtr<AES_KEY> k1 = std::move(k1_or).ValueOrDie();
+  util::SecretUniquePtr<AES_KEY> k1 = std::move(k1_or).value();
   auto k2_or = InitializeAesKey(absl::MakeSpan(key).subspan(key.size() / 2));
   if (!k2_or.ok()) {
     return k2_or.status();
   }
 
-  util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).ValueOrDie();
+  util::SecretUniquePtr<AES_KEY> k2 = std::move(k2_or).value();
   return {absl::WrapUnique(new AesSivBoringSsl(std::move(k1), std::move(k2)))};
 }
 

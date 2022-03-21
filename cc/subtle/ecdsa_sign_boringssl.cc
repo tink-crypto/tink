@@ -173,7 +173,7 @@ util::StatusOr<std::string> EcdsaSignBoringSsl::Sign(
     if (!status_or_sig.ok()) {
       return status_or_sig.status();
     }
-    return status_or_sig.ValueOrDie();
+    return status_or_sig.value();
   }
 
   return std::string(reinterpret_cast<char*>(buffer.data()), sig_length);

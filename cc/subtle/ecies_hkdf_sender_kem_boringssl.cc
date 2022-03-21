@@ -73,7 +73,7 @@ EciesHkdfNistPCurveSendKemBoringSsl::New(subtle::EllipticCurveType curve,
   if (!status_or_ec_point.ok()) return status_or_ec_point.status();
   std::unique_ptr<const EciesHkdfSenderKemBoringSsl> sender_kem(
       new EciesHkdfNistPCurveSendKemBoringSsl(
-          curve, pubx, puby, std::move(status_or_ec_point.ValueOrDie())));
+          curve, pubx, puby, std::move(status_or_ec_point.value())));
   return std::move(sender_kem);
 }
 
@@ -92,7 +92,7 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
     return status_or_ec_group.status();
   }
   internal::SslUniquePtr<EC_GROUP> group =
-      std::move(status_or_ec_group.ValueOrDie());
+      std::move(status_or_ec_group.value());
   internal::SslUniquePtr<EC_KEY> ephemeral_key(EC_KEY_new());
   if (1 != EC_KEY_set_group(ephemeral_key.get(), group.get())) {
     return util::Status(absl::StatusCode::kInternal, "EC_KEY_set_group failed");
@@ -108,19 +108,19 @@ EciesHkdfNistPCurveSendKemBoringSsl::GenerateKey(
   if (!status_or_string_kem.ok()) {
     return status_or_string_kem.status();
   }
-  std::string kem_bytes = status_or_string_kem.ValueOrDie();
+  std::string kem_bytes = status_or_string_kem.value();
   auto status_or_string_shared_secret = internal::ComputeEcdhSharedSecret(
       curve_, ephemeral_priv, peer_pub_key_.get());
   if (!status_or_string_shared_secret.ok()) {
     return status_or_string_shared_secret.status();
   }
-  util::SecretData shared_secret = status_or_string_shared_secret.ValueOrDie();
+  util::SecretData shared_secret = status_or_string_shared_secret.value();
   auto symmetric_key_or = Hkdf::ComputeEciesHkdfSymmetricKey(
       hash, kem_bytes, shared_secret, hkdf_salt, hkdf_info, key_size_in_bytes);
   if (!symmetric_key_or.ok()) {
     return symmetric_key_or.status();
   }
-  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
+  util::SecretData symmetric_key = symmetric_key_or.value();
   return absl::make_unique<const KemKey>(std::move(kem_bytes),
                                          std::move(symmetric_key));
 }

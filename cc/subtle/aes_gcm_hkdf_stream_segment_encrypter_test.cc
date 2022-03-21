@@ -56,7 +56,7 @@ TEST(AesGcmHkdfStreamSegmentEncrypterTest, testBasic) {
         EXPECT_TRUE(result.ok()) << result.status();
 
         // Use the Constructed encrypter.
-        auto enc = std::move(result.ValueOrDie());
+        auto enc = std::move(result.value());
         EXPECT_EQ(0, enc->get_segment_number());
         int header_size = key_size + /* nonce_prefix_size = */ 7 + 1;
         EXPECT_EQ(header_size, enc->get_header().size());

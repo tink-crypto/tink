@@ -62,14 +62,14 @@ TEST(AesSivBoringSslTest, testEncryptDecrypt) {
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string aad = "Additional data";
   std::string message = "Some data to encrypt.";
   auto ct = cipher->EncryptDeterministically(message, aad);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), aad);
+  auto pt = cipher->DecryptDeterministically(ct.value(), aad);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  EXPECT_EQ(pt.value(), message);
 }
 
 TEST(AesSivBoringSslTest, testNullPtrStringView) {
@@ -82,26 +82,26 @@ TEST(AesSivBoringSslTest, testNullPtrStringView) {
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
   // Checks that a default constructed string_view works.
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   absl::string_view null;
   auto ct = cipher->EncryptDeterministically(null, null);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), null);
+  auto pt = cipher->DecryptDeterministically(ct.value(), null);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ("", pt.ValueOrDie());
+  EXPECT_EQ("", pt.value());
   // Decryption with ct == null should return an appropriate status.
   pt = cipher->DecryptDeterministically(null, "");
   EXPECT_FALSE(pt.ok());
   // Additional data with an empty string view is the same an empty string.
   std::string message("123456789abcdefghijklmnop");
   ct = cipher->EncryptDeterministically(message, null);
-  pt = cipher->DecryptDeterministically(ct.ValueOrDie(), "");
+  pt = cipher->DecryptDeterministically(ct.value(), "");
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(message, pt.ValueOrDie());
+  EXPECT_EQ(message, pt.value());
   ct = cipher->EncryptDeterministically(message, "");
-  pt = cipher->DecryptDeterministically(ct.ValueOrDie(), null);
+  pt = cipher->DecryptDeterministically(ct.value(), null);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(message, pt.ValueOrDie());
+  EXPECT_EQ(message, pt.value());
 }
 
 // Only 64 byte key sizes are supported.
@@ -137,23 +137,23 @@ TEST(AesSivBoringSslTest, testEncryptDecryptMessageSize) {
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string aad = "Additional data";
   for (int i = 0; i < 1024; ++i) {
     std::string message = std::string(i, 'a');
     auto ct = cipher->EncryptDeterministically(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
   for (int i = 1024; i < 100000; i+= 5000) {
     std::string message = std::string(i, 'a');
     auto ct = cipher->EncryptDeterministically(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
 }
 
@@ -167,15 +167,15 @@ TEST(AesSivBoringSslTest, testEncryptDecryptAadSize) {
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string message = "Some plaintext";
   for (int i = 0; i < 1028; ++i) {
     std::string aad = std::string(i, 'a');
     auto ct = cipher->EncryptDeterministically(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    auto pt = cipher->DecryptDeterministically(ct.ValueOrDie(), aad);
+    auto pt = cipher->DecryptDeterministically(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
 }
 
@@ -188,13 +188,13 @@ TEST(AesSivBoringSslTest, testDecryptModification) {
       "00112233445566778899aabbccddeefff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
   auto res = AesSivBoringSsl::New(key);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string aad = "Additional data";
   for (int i = 0; i < 50; ++i) {
     std::string message = std::string(i, 'a');
     auto ct = cipher->EncryptDeterministically(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    std::string ciphertext = ct.ValueOrDie();
+    std::string ciphertext = ct.value();
     for (size_t b = 0; b < ciphertext.size(); ++b) {
       for (int bit = 0; bit < 8; ++bit) {
         std::string modified = ciphertext;
@@ -226,12 +226,12 @@ void WycheproofTest(const rapidjson::Document &root) {
       std::string aad = WycheproofUtil::GetBytes(test["aad"]);
       int id = test["tcId"].GetInt();
       std::string result = test["result"].GetString();
-      auto cipher = std::move(AesSivBoringSsl::New(key).ValueOrDie());
+      auto cipher = std::move(AesSivBoringSsl::New(key).value());
 
       // Test encryption.
       // Encryption should always succeed since msg and aad are valid inputs.
       std::string encrypted =
-          cipher->EncryptDeterministically(msg, aad).ValueOrDie();
+          cipher->EncryptDeterministically(msg, aad).value();
       std::string encrypted_hex = test::HexEncode(encrypted);
       std::string ct_hex = test::HexEncode(ct);
       if (result == "valid" || result == "acceptable") {
@@ -248,8 +248,7 @@ void WycheproofTest(const rapidjson::Document &root) {
         if (result == "invalid") {
           ADD_FAILURE() << "decrypted invalid ciphertext:" << id;
         } else {
-          EXPECT_EQ(test::HexEncode(msg),
-                    test::HexEncode(decrypted.ValueOrDie()))
+          EXPECT_EQ(test::HexEncode(msg), test::HexEncode(decrypted.value()))
               << "incorrect decryption: " << id << " " << comment;
         }
       } else {

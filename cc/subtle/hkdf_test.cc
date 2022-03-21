@@ -100,7 +100,7 @@ TEST_F(HkdfTest, testBasic) {
                           absl::HexStringToBytes(test.salt_hex),
                           absl::HexStringToBytes(test.info_hex), test.out_len);
     ASSERT_TRUE(hkdf_or.ok());
-    EXPECT_EQ(absl::BytesToHexString(hkdf_or.ValueOrDie()), test.out_key_hex);
+    EXPECT_EQ(absl::BytesToHexString(hkdf_or.value()), test.out_key_hex);
   }
 }
 
@@ -112,9 +112,9 @@ TEST_F(HkdfTest, testBasicSecretData) {
         absl::HexStringToBytes(test.salt_hex),
         absl::HexStringToBytes(test.info_hex), test.out_len);
     ASSERT_TRUE(hkdf_or.ok());
-    EXPECT_EQ(absl::BytesToHexString(
-                  util::SecretDataAsStringView(hkdf_or.ValueOrDie())),
-              test.out_key_hex);
+    EXPECT_EQ(
+        absl::BytesToHexString(util::SecretDataAsStringView(hkdf_or.value())),
+        test.out_key_hex);
   }
 }
 
@@ -139,9 +139,9 @@ TEST_F(HkdfTest, ComputeEciesHkdfSecretData) {
         absl::HexStringToBytes(test.salt_hex),
         absl::HexStringToBytes(test.info_hex), test.out_len);
     ASSERT_TRUE(hkdf_or.ok());
-    EXPECT_EQ(absl::BytesToHexString(
-                  util::SecretDataAsStringView(hkdf_or.ValueOrDie())),
-              test.out_key_hex);
+    EXPECT_EQ(
+        absl::BytesToHexString(util::SecretDataAsStringView(hkdf_or.value())),
+        test.out_key_hex);
   }
 }
 

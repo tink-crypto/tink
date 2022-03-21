@@ -49,15 +49,15 @@ TEST(AesEaxBoringSslTest, TestBasic) {
   size_t nonce_size = 12;
   auto res = AesEaxBoringSsl::New(key, nonce_size);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto ct = cipher->Encrypt(message, aad);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  EXPECT_EQ(ct.ValueOrDie().size(), message.size() + nonce_size + 16);
-  auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+  EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
+  auto pt = cipher->Decrypt(ct.value(), aad);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  EXPECT_EQ(pt.value(), message);
 }
 
 TEST(AesEaxBoringSslTest, TestMessageSize) {
@@ -70,16 +70,16 @@ TEST(AesEaxBoringSslTest, TestMessageSize) {
   size_t nonce_size = 12;
   auto res = AesEaxBoringSsl::New(key, nonce_size);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   for (size_t size = 0; size < 260; size++) {
     std::string message(size, 'x');
     std::string aad = "";
     auto ct = cipher->Encrypt(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    EXPECT_EQ(ct.ValueOrDie().size(), message.size() + nonce_size + 16);
-    auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+    EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
+    auto pt = cipher->Decrypt(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
 }
 
@@ -93,16 +93,16 @@ TEST(AesEaxBoringSslTest, TestAadSize) {
   size_t nonce_size = 12;
   auto res = AesEaxBoringSsl::New(key, nonce_size);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   for (size_t size = 0; size < 260; size++) {
     std::string message("Some message");
     std::string aad(size, 'x');
     auto ct = cipher->Encrypt(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    EXPECT_EQ(ct.ValueOrDie().size(), message.size() + nonce_size + 16);
-    auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+    EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
+    auto pt = cipher->Decrypt(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
 }
 
@@ -116,15 +116,15 @@ TEST(AesEaxBoringSslTest, TestLongNonce) {
   size_t nonce_size = 16;
   auto res = AesEaxBoringSsl::New(key, nonce_size);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto ct = cipher->Encrypt(message, aad);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  EXPECT_EQ(ct.ValueOrDie().size(), message.size() + nonce_size + 16);
-  auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+  EXPECT_EQ(ct.value().size(), message.size() + nonce_size + 16);
+  auto pt = cipher->Decrypt(ct.value(), aad);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  EXPECT_EQ(pt.value(), message);
 }
 
 TEST(AesEaxBoringSslTest, TestModification) {
@@ -135,10 +135,10 @@ TEST(AesEaxBoringSslTest, TestModification) {
   size_t nonce_size = 12;
   util::SecretData key = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"));
-  auto cipher = std::move(AesEaxBoringSsl::New(key, nonce_size).ValueOrDie());
+  auto cipher = std::move(AesEaxBoringSsl::New(key, nonce_size).value());
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
+  std::string ct = cipher->Encrypt(message, aad).value();
   EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
   // Modify the ciphertext
   for (size_t i = 0; i < ct.size() * 8; i++) {
@@ -151,7 +151,7 @@ TEST(AesEaxBoringSslTest, TestModification) {
     std::string modified_aad = aad;
     modified_aad[i / 8] ^= 1 << (i % 8);
     auto decrypted = cipher->Decrypt(ct, modified_aad);
-    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.ValueOrDie();
+    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.value();
   }
   // Truncate the ciphertext
   for (size_t i = 0; i < ct.size(); i++) {
@@ -191,7 +191,7 @@ TEST(AesEaxBoringSslTest, TestEmpty) {
   std::string ciphertext = nonce + tag;
   auto res = AesEaxBoringSsl::New(key, nonce_size);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
 
   // Test decryption of the arguments above.
   std::string empty_string("");
@@ -200,40 +200,40 @@ TEST(AesEaxBoringSslTest, TestEmpty) {
 
   auto pt = cipher->Decrypt(ciphertext, empty_string);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   pt = cipher->Decrypt(ciphertext, empty_string_view);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   pt = cipher->Decrypt(ciphertext, null_string_view);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   // Test encryption.
   auto ct = cipher->Encrypt(empty_string, empty_string);
   EXPECT_TRUE(ct.ok());
-  pt = cipher->Decrypt(ct.ValueOrDie(), empty_string);
+  pt = cipher->Decrypt(ct.value(), empty_string);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   ct = cipher->Encrypt(empty_string_view, empty_string_view);
   EXPECT_TRUE(ct.ok());
-  pt = cipher->Decrypt(ct.ValueOrDie(), empty_string);
+  pt = cipher->Decrypt(ct.value(), empty_string);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   ct = cipher->Encrypt(empty_string_view, empty_string_view);
   EXPECT_TRUE(ct.ok());
-  pt = cipher->Decrypt(ct.ValueOrDie(), empty_string);
+  pt = cipher->Decrypt(ct.value(), empty_string);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 
   ct = cipher->Encrypt(null_string_view, null_string_view);
   EXPECT_TRUE(ct.ok());
-  pt = cipher->Decrypt(ct.ValueOrDie(), empty_string);
+  pt = cipher->Decrypt(ct.value(), empty_string);
   EXPECT_TRUE(pt.ok());
-  EXPECT_EQ(0, pt.ValueOrDie().size());
+  EXPECT_EQ(0, pt.value().size());
 }
 
 static std::string GetError() {
@@ -283,12 +283,11 @@ bool WycheproofTest(const rapidjson::Document &root) {
       std::string tag = WycheproofUtil::GetBytes(test["tag"]);
       std::string id = absl::StrCat(test["tcId"].GetInt());
       std::string expected = test["result"].GetString();
-      auto cipher =
-         std::move(AesEaxBoringSsl::New(key, iv_size / 8).ValueOrDie());
+      auto cipher = std::move(AesEaxBoringSsl::New(key, iv_size / 8).value());
       auto result = cipher->Decrypt(iv + ct + tag, aad);
       bool success = result.ok();
       if (success) {
-        std::string decrypted = result.ValueOrDie();
+        std::string decrypted = result.value();
         if (expected == "invalid") {
           ADD_FAILURE() << "decrypted invalid ciphertext:" << id;
           errors++;

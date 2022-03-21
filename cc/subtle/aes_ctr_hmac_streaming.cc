@@ -65,7 +65,7 @@ static util::Status DeriveKeys(const util::SecretData& ikm, HashType hkdf_algo,
   auto hkdf_result = Hkdf::ComputeHkdf(hkdf_algo, ikm, salt, associated_data,
                                        derived_key_material_size);
   if (!hkdf_result.ok()) return hkdf_result.status();
-  util::SecretData key_material = std::move(hkdf_result.ValueOrDie());
+  util::SecretData key_material = std::move(hkdf_result.value());
   *key_value =
       util::SecretData(key_material.begin(), key_material.begin() + key_size);
   *hmac_key_value =
@@ -177,7 +177,7 @@ AesCtrHmacStreamSegmentEncrypter::New(const AesCtrHmacStreaming::Params& params,
   auto hmac_result = HmacBoringSsl::New(params.tag_algo, params.tag_size,
                                         std::move(hmac_key_value));
   if (!hmac_result.ok()) return hmac_result.status();
-  auto mac = std::move(hmac_result.ValueOrDie());
+  auto mac = std::move(hmac_result.value());
 
   return {absl::WrapUnique(new AesCtrHmacStreamSegmentEncrypter(
       std::move(key_value), header, nonce_prefix,
@@ -238,7 +238,7 @@ util::Status AesCtrHmacStreamSegmentEncrypter::EncryptSegment(
       plaintext.size());
   auto tag_result = mac_->ComputeMac(absl::StrCat(nonce, ciphertext_string));
   if (!tag_result.ok()) return tag_result.status();
-  std::string tag = tag_result.ValueOrDie();
+  std::string tag = tag_result.value();
   memcpy(ciphertext_buffer->data() + plaintext.size(),
          reinterpret_cast<const uint8_t*>(tag.data()), tag_size_);
 
@@ -297,7 +297,7 @@ util::Status AesCtrHmacStreamSegmentDecrypter::Init(
   auto hmac_result =
       HmacBoringSsl::New(tag_algo_, tag_size_, std::move(hmac_key_value));
   if (!hmac_result.ok()) return hmac_result.status();
-  mac_ = std::move(hmac_result.ValueOrDie());
+  mac_ = std::move(hmac_result.value());
 
   is_initialized_ = true;
   return util::OkStatus();

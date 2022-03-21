@@ -101,13 +101,12 @@ util::StatusOr<std::unique_ptr<Aead>> createAead2(
   if (!mac_res.ok()) {
     return mac_res.status();
   }
-  auto cipher_res =
-      EncryptThenAuthenticate::New(std::move(ind_cipher_res.ValueOrDie()),
-                                   std::move(mac_res.ValueOrDie()), tag_size);
+  auto cipher_res = EncryptThenAuthenticate::New(
+      std::move(ind_cipher_res.value()), std::move(mac_res.value()), tag_size);
   if (!cipher_res.ok()) {
     return cipher_res.status();
   }
-  return std::move(cipher_res.ValueOrDie());
+  return std::move(cipher_res.value());
 }
 
 util::StatusOr<std::unique_ptr<Aead>> createAead(int encryption_key_size,
@@ -132,7 +131,7 @@ TEST(AesGcmBoringSslTest, testRfcVectors) {
     auto res = createAead2(std::move(enc_key), test.iv_size, std::move(mac_key),
                            test.tag_size, test.hash_type);
     EXPECT_TRUE(res.ok()) << res.status();
-    auto cipher = std::move(res.ValueOrDie());
+    auto cipher = std::move(res.value());
     auto pt = cipher->Decrypt(ct, aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
   }
@@ -146,16 +145,16 @@ TEST(EncryptThenAuthenticateTest, testEncryptDecrypt) {
   auto res = createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
                         HashType::SHA1);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
 
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
   auto ct = cipher->Encrypt(message, aad);
   EXPECT_TRUE(ct.ok()) << ct.status();
-  EXPECT_EQ(ct.ValueOrDie().size(), message.size() + iv_size + tag_size);
-  auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+  EXPECT_EQ(ct.value().size(), message.size() + iv_size + tag_size);
+  auto pt = cipher->Decrypt(ct.value(), aad);
   EXPECT_TRUE(pt.ok()) << pt.status();
-  EXPECT_EQ(pt.ValueOrDie(), message);
+  EXPECT_EQ(pt.value(), message);
 }
 
 TEST(EncryptThenAuthenticateTest, testEncryptDecrypt_randomMessage) {
@@ -166,17 +165,17 @@ TEST(EncryptThenAuthenticateTest, testEncryptDecrypt_randomMessage) {
   auto res = createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
                         HashType::SHA1);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
 
   for (int i = 0; i < 256; i++) {
     std::string message = Random::GetRandomBytes(i);
     std::string aad = Random::GetRandomBytes(i);
     auto ct = cipher->Encrypt(message, aad);
     EXPECT_TRUE(ct.ok()) << ct.status();
-    EXPECT_EQ(ct.ValueOrDie().size(), message.size() + iv_size + tag_size);
-    auto pt = cipher->Decrypt(ct.ValueOrDie(), aad);
+    EXPECT_EQ(ct.value().size(), message.size() + iv_size + tag_size);
+    auto pt = cipher->Decrypt(ct.value(), aad);
     EXPECT_TRUE(pt.ok()) << pt.status();
-    EXPECT_EQ(pt.ValueOrDie(), message);
+    EXPECT_EQ(pt.value(), message);
   }
 }
 
@@ -188,13 +187,13 @@ TEST(AesCtrBoringSslTest, testMultipleEncrypt) {
   auto res = createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
                         HashType::SHA1);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
 
   std::string message = Random::GetRandomBytes(20);
   std::string aad = Random::GetRandomBytes(20);
   auto ct1 = cipher->Encrypt(message, aad);
   auto ct2 = cipher->Encrypt(message, aad);
-  EXPECT_NE(ct1.ValueOrDie(), ct2.ValueOrDie());
+  EXPECT_NE(ct1.value(), ct2.value());
 }
 
 TEST(EncryptThenAuthenticateTest, testEncryptDecrypt_invalidTagSize) {
@@ -215,11 +214,11 @@ TEST(EncryptThenAuthenticateTest, testDecrypt_modifiedCiphertext) {
   auto res = createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
                         HashType::SHA1);
   EXPECT_TRUE(res.ok()) << res.status();
-  auto cipher = std::move(res.ValueOrDie());
+  auto cipher = std::move(res.value());
 
   std::string message = "Some data to encrypt.";
   std::string aad = "Some data to authenticate.";
-  std::string ct = cipher->Encrypt(message, aad).ValueOrDie();
+  std::string ct = cipher->Encrypt(message, aad).value();
   EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
   // Modify the ciphertext
   for (size_t i = 0; i < ct.size() * 8; i++) {
@@ -233,7 +232,7 @@ TEST(EncryptThenAuthenticateTest, testDecrypt_modifiedCiphertext) {
     std::string modified_aad = aad;
     modified_aad[i / 8] ^= 1 << (i % 8);
     auto decrypted = cipher->Decrypt(ct, modified_aad);
-    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.ValueOrDie();
+    EXPECT_FALSE(decrypted.ok()) << i << " pt:" << decrypted.value();
   }
 
   // Truncate the ciphertext
@@ -248,20 +247,20 @@ TEST(EncryptThenAuthenticateTest, testParamsEmptyVersusNullStringView) {
   int iv_size = 12;
   int mac_key_size = 16;
   int tag_size = 16;
-  auto cipher = std::move(
-      createAead(encryption_key_size, iv_size, mac_key_size, tag_size,
-                 HashType::SHA1).ValueOrDie());
+  auto cipher = std::move(createAead(encryption_key_size, iv_size, mac_key_size,
+                                     tag_size, HashType::SHA1)
+                              .value());
 
   { // AAD null string_view.
     const std::string message = "Some data to encrypt.";
     const absl::string_view aad;
-    const std::string ct = cipher->Encrypt(message, "").ValueOrDie();
+    const std::string ct = cipher->Encrypt(message, "").value();
     EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
   }
   { // Both message and AAD null string_view.
     const absl::string_view message;
     const absl::string_view aad;
-    const std::string ct = cipher->Encrypt(message, "").ValueOrDie();
+    const std::string ct = cipher->Encrypt(message, "").value();
     EXPECT_TRUE(cipher->Decrypt(ct, aad).ok());
   }
 }
@@ -284,7 +283,7 @@ TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
   int tag_size = 16;
   auto cipher = std::move(createAead(encryption_key_size, iv_size, mac_key_size,
                                      tag_size, HashType::SHA1)
-                              .ValueOrDie());
+                              .value());
 
   // Encrypt a message...
   const std::string message = "Some data to encrypt.";
@@ -293,7 +292,7 @@ TEST(EncryptThenAuthenticateTest, testAuthBypassShouldNotWork) {
   const std::string aad = std::string(1 << 29, 'a');
   auto encrypted = cipher->Encrypt(message, aad);
   EXPECT_TRUE(encrypted.ok()) << encrypted.status();
-  auto ct = encrypted.ValueOrDie();
+  auto ct = encrypted.value();
   auto decrypted = cipher->Decrypt(ct, aad);
   EXPECT_TRUE(decrypted.ok()) << decrypted.status();
 

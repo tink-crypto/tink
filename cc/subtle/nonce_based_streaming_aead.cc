@@ -41,7 +41,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::OutputStream>>
   auto segment_encrypter_result = NewSegmentEncrypter(associated_data);
   if (!segment_encrypter_result.ok()) return segment_encrypter_result.status();
   return StreamingAeadEncryptingStream::New(
-      std::move(segment_encrypter_result.ValueOrDie()),
+      std::move(segment_encrypter_result.value()),
       std::move(ciphertext_destination));
 }
 
@@ -52,7 +52,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::InputStream>>
   auto segment_decrypter_result = NewSegmentDecrypter(associated_data);
   if (!segment_decrypter_result.ok()) return segment_decrypter_result.status();
   return StreamingAeadDecryptingStream::New(
-      std::move(segment_decrypter_result.ValueOrDie()),
+      std::move(segment_decrypter_result.value()),
       std::move(ciphertext_source));
 }
 
@@ -63,7 +63,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<crypto::tink::RandomAccessStream>>
   auto segment_decrypter_result = NewSegmentDecrypter(associated_data);
   if (!segment_decrypter_result.ok()) return segment_decrypter_result.status();
   return DecryptingRandomAccessStream::New(
-      std::move(segment_decrypter_result.ValueOrDie()),
+      std::move(segment_decrypter_result.value()),
       std::move(ciphertext_source));
 }
 
