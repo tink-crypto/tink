@@ -26,7 +26,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 
@@ -55,11 +54,11 @@ GcpKmsAead::New(absl::string_view key_name,
                 std::shared_ptr<KeyManagementService::Stub> kms_stub) {
   if (key_name.empty()) {
     return Status(absl::StatusCode::kInvalidArgument,
-                  "Key URI cannot be empty.");
+                        "Key URI cannot be empty.");
   }
   if (kms_stub == nullptr) {
     return Status(absl::StatusCode::kInvalidArgument,
-                  "KMS stub cannot be null.");
+                        "KMS stub cannot be null.");
   }
   std::unique_ptr<Aead> aead(new GcpKmsAead(key_name, kms_stub));
   return std::move(aead);
@@ -80,8 +79,9 @@ StatusOr<std::string> GcpKmsAead::Encrypt(
   auto status =  kms_stub_->Encrypt(&context, req, &resp);
 
   if (status.ok()) return resp.ciphertext();
-  return ToStatusF(absl::StatusCode::kInvalidArgument,
-                   "GCP KMS encryption failed: %s", status.error_message());
+  return Status(
+      absl::StatusCode::kInvalidArgument,
+      absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
 }
 
 StatusOr<std::string> GcpKmsAead::Decrypt(
@@ -99,8 +99,9 @@ StatusOr<std::string> GcpKmsAead::Decrypt(
   auto status =  kms_stub_->Decrypt(&context, req, &resp);
 
   if (status.ok()) return resp.plaintext();
-  return ToStatusF(absl::StatusCode::kInvalidArgument,
-                   "GCP KMS encryption failed: %s", status.error_message());
+  return Status(
+      absl::StatusCode::kInvalidArgument,
+      absl::StrCat("GCP KMS encryption failed: ", status.error_message()));
 }
 
 }  // namespace gcpkms

@@ -10,8 +10,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//:aead",
-        "//:version",
-        "//util:errors",
+        "//:tink_cc",
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
@@ -30,7 +29,6 @@ cc_library(
         ":gcp_kms_aead",
         "//:kms_client",
         "//:kms_clients",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@com_github_grpc_grpc//:grpc++",
@@ -48,7 +46,6 @@ cc_test(
     srcs = ["gcp_kms_aead_test.cc"],
     deps = [
         ":gcp_kms_aead",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "@com_google_googletest//:gtest_main",
@@ -62,7 +59,6 @@ cc_test(
     data = ["@tink_base//testdata:credentials"],
     deps = [
         ":gcp_kms_client",
-        "//util:errors",
         "//util:status",
         "//util:statusor",
         "//util:test_matchers",

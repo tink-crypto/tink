@@ -32,7 +32,6 @@
 #include "absl/strings/string_view.h"
 #include "tink/integration/gcpkms/gcp_kms_aead.h"
 #include "tink/kms_clients.h"
-#include "tink/util/errors.h"
 #include "tink/util/status.h"
 #include "tink/util/statusor.h"
 #include "tink/version.h"
@@ -44,7 +43,6 @@ namespace gcpkms {
 
 namespace {
 
-using crypto::tink::ToStatusF;
 using crypto::tink::Version;
 using crypto::tink::util::Status;
 using crypto::tink::util::StatusOr;
@@ -60,8 +58,8 @@ StatusOr<std::string> ReadFile(absl::string_view filename) {
   std::ifstream input_stream;
   input_stream.open(std::string(filename), std::ifstream::in);
   if (!input_stream.is_open()) {
-    return ToStatusF(absl::StatusCode::kInvalidArgument,
-                     "Error reading file %s", filename);
+    return Status(absl::StatusCode::kInvalidArgument,
+                  absl::StrCat("Error reading file ", filename));
   }
   std::stringstream input;
   input << input_stream.rdbuf();
@@ -91,8 +89,9 @@ StatusOr<std::shared_ptr<ChannelCredentials>> GetCredentials(
     auto channel_creds = grpc::SslCredentials(grpc::SslCredentialsOptions());
     return grpc::CompositeChannelCredentials(channel_creds, creds);
   }
-  return ToStatusF(absl::StatusCode::kInvalidArgument,
-                   "Could not load credentials from file %s", credentials_path);
+  return Status(
+      absl::StatusCode::kInvalidArgument,
+      absl::StrCat("Could not load credentials from file ", credentials_path));
 }
 
 // Returns GCP KMS key name contained in 'key_uri'.
@@ -105,17 +104,16 @@ std::string GetKeyName(absl::string_view key_uri) {
 }  // namespace
 
 // static
-StatusOr<std::unique_ptr<GcpKmsClient>>
-GcpKmsClient::New(absl::string_view key_uri,
-                  absl::string_view credentials_path) {
+StatusOr<std::unique_ptr<GcpKmsClient>> GcpKmsClient::New(
+    absl::string_view key_uri, absl::string_view credentials_path) {
   std::unique_ptr<GcpKmsClient> client(new GcpKmsClient());
 
   // If a specific key is given, create a GCP KMSClient.
   if (!key_uri.empty()) {
     client->key_name_ = GetKeyName(key_uri);
     if (client->key_name_.empty()) {
-      return ToStatusF(absl::StatusCode::kInvalidArgument,
-                       "Key '%s' not supported", key_uri);
+      return Status(absl::StatusCode::kInvalidArgument,
+                    absl::StrCat("Key '", key_uri, "' not supported"));
     }
   }
   // Read credentials.
@@ -140,16 +138,16 @@ bool GcpKmsClient::DoesSupport(absl::string_view key_uri) const {
   return !GetKeyName(key_uri).empty();
 }
 
-StatusOr<std::unique_ptr<Aead>>
-GcpKmsClient::GetAead(absl::string_view key_uri) const {
+StatusOr<std::unique_ptr<Aead>> GcpKmsClient::GetAead(
+    absl::string_view key_uri) const {
   if (!DoesSupport(key_uri)) {
     if (!key_name_.empty()) {
-      return ToStatusF(absl::StatusCode::kInvalidArgument,
-                       "This client is bound to '%s', and cannot use key '%s'.",
-                       key_name_, key_uri);
+      return Status(absl::StatusCode::kInvalidArgument,
+                    absl::StrCat("This client is bound to ", key_name_,
+                                 " and cannot use key ", key_uri));
     } else {
-      return ToStatusF(absl::StatusCode::kInvalidArgument,
-                       "This client does not support key '%s'.", key_uri);
+      return Status(absl::StatusCode::kInvalidArgument,
+                    absl::StrCat("This client does not support key ", key_uri));
     }
   }
   if (!key_name_.empty()) {  // This client is bound to a specific key.
