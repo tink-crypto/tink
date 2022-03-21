@@ -112,17 +112,17 @@ TEST_F(PublicKeyVerifySetWrapperTest, testBasic) {
     ASSERT_TRUE(entry_result.ok());
 
     // The last key is the primary.
-    ASSERT_THAT(pk_verify_set->set_primary(entry_result.ValueOrDie()), IsOk());
+    ASSERT_THAT(pk_verify_set->set_primary(entry_result.value()), IsOk());
 
     // Wrap pk_verify_set and test the resulting PublicKeyVerify.
     auto pk_verify_result =
         PublicKeyVerifyWrapper().Wrap(std::move(pk_verify_set));
     EXPECT_TRUE(pk_verify_result.ok()) << pk_verify_result.status();
-    pk_verify = std::move(pk_verify_result.ValueOrDie());
+    pk_verify = std::move(pk_verify_result.value());
     std::string data = "some data to sign";
     std::unique_ptr<PublicKeySign> pk_sign(
         new DummyPublicKeySign(signature_name_0));
-    std::string signature = pk_sign->Sign(data).ValueOrDie();
+    std::string signature = pk_sign->Sign(data).value();
     util::Status status = pk_verify->Verify(signature, data);
     EXPECT_TRUE(status.ok()) << status;
   }

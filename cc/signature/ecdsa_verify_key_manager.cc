@@ -54,7 +54,7 @@ EcdsaVerifyKeyManager::PublicKeyVerifyFactory::Create(
       ec_key, Enums::ProtoToSubtle(ecdsa_public_key.params().hash_type()),
       Enums::ProtoToSubtle(ecdsa_public_key.params().encoding()));
   if (!result.ok()) return result.status();
-  return {std::move(result.ValueOrDie())};
+  return {std::move(result.value())};
 }
 
 Status EcdsaVerifyKeyManager::ValidateParams(const EcdsaParams& params) const {

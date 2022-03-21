@@ -177,7 +177,7 @@ util::StatusOr<RsaSsaPssPublicKey> GetRsaSsaPssPublicKeyProto(
   public_key_proto.mutable_params()->set_mgf1_hash(hash_type);
   public_key_proto.mutable_params()->set_sig_hash(hash_type);
   public_key_proto.mutable_params()->set_salt_length(
-      util::Enums::HashLength(hash_type).ValueOrDie());
+      util::Enums::HashLength(hash_type).value());
 
   return public_key_proto;
 }
@@ -223,7 +223,7 @@ util::StatusOr<RsaSsaPssPrivateKey> GetRsaSsaPssPrivateKeyProto(
   public_key_proto->mutable_params()->set_mgf1_hash(hash_type);
   public_key_proto->mutable_params()->set_sig_hash(hash_type);
   public_key_proto->mutable_params()->set_salt_length(
-      util::Enums::HashLength(hash_type).ValueOrDie());
+      util::Enums::HashLength(hash_type).value());
 
   return private_key_proto;
 }
@@ -250,7 +250,7 @@ TEST(SignaturePemKeysetReaderTest, ReadEncryptedUnsupported) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->ReadEncrypted().status(),
               StatusIs(absl::StatusCode::kUnimplemented));
@@ -275,11 +275,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPublicKey) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
   ASSERT_THAT(keyset_or.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_or).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   // Key manager to validate key type and key material type.
   RsaSsaPssVerifyKeyManager verify_key_manager;
@@ -345,11 +345,11 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaCorrectPrivateKey) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   auto keyset_or = keyset_reader->Read();
   ASSERT_THAT(keyset_or.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_or).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_or).value();
 
   EXPECT_THAT(keyset->key(), SizeIs(2));
   EXPECT_EQ(keyset->primary_key_id(), keyset->key(0).key_id());
@@ -409,7 +409,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPrivateKeyKeyTypeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -430,7 +430,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyKeyTypeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -450,7 +450,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyTooSmall) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -471,7 +471,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeySizeMismatch) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -491,7 +491,7 @@ TEST(SignaturePemKeysetReaderTest, ReadRsaPublicKeyInvalidHashType) {
   auto keyset_reader_or = builder.Build();
   ASSERT_THAT(keyset_reader_or.status(), IsOk());
   std::unique_ptr<KeysetReader> keyset_reader =
-      std::move(keyset_reader_or).ValueOrDie();
+      std::move(keyset_reader_or).value();
 
   EXPECT_THAT(keyset_reader->Read().status(),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -518,7 +518,7 @@ TEST(SignaturePemKeysetReaderTest, ReadECDSACorrectPublicKey) {
 
   auto keyset_read = reader->get()->Read();
   ASSERT_THAT(keyset_read.status(), IsOk());
-  std::unique_ptr<Keyset> keyset = std::move(keyset_read).ValueOrDie();
+  std::unique_ptr<Keyset> keyset = std::move(keyset_read).value();
 
   // Key manager to validate key type and key material type.
   EcdsaVerifyKeyManager key_manager;

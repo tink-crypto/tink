@@ -98,7 +98,7 @@ TEST_F(PublicKeyVerifyFactoryTest, testPrimitive) {
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(public_key_verify_result.ok())
       << public_key_verify_result.status();
-  auto public_key_verify = std::move(public_key_verify_result.ValueOrDie());
+  auto public_key_verify = std::move(public_key_verify_result.value());
 }
 
 }  // namespace

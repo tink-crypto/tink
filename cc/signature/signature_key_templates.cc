@@ -84,7 +84,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPkcs1KeyTemplate(HashType hash_type,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }
@@ -107,7 +107,7 @@ std::unique_ptr<KeyTemplate> NewRsaSsaPssKeyTemplate(HashType sig_hash,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   key_format.SerializeToString(key_template->mutable_value());
   return key_template;
 }

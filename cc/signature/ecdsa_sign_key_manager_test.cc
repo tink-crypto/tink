@@ -129,7 +129,7 @@ TEST(EcdsaSignKeyManagerTest, CreateKey) {
   EcdsaKeyFormat format = CreateValidKeyFormat();
   StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EcdsaPrivateKey key = key_or.ValueOrDie();
+  EcdsaPrivateKey key = key_or.value();
 
   EXPECT_THAT(key.version(), Eq(0));
 
@@ -150,12 +150,12 @@ TEST(EcdsaSignKeyManagerTest, CreateKeyValid) {
   EcdsaKeyFormat format = CreateValidKeyFormat();
   StatusOr<EcdsaPrivateKey> key_or = EcdsaSignKeyManager().CreateKey(format);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key_or.ValueOrDie()), IsOk());
+  EXPECT_THAT(EcdsaSignKeyManager().ValidateKey(key_or.value()), IsOk());
 }
 
 EcdsaPrivateKey CreateValidKey() {
   EcdsaKeyFormat format = CreateValidKeyFormat();
-  return EcdsaSignKeyManager().CreateKey(format).ValueOrDie();
+  return EcdsaSignKeyManager().CreateKey(format).value();
 }
 
 TEST(EcdsaSignKeyManagerTest, ValidateKey) {
@@ -199,7 +199,7 @@ TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
       EcdsaSignKeyManager().GetPublicKey(key);
 
   ASSERT_THAT(public_key_or.status(), IsOk());
-  EcdsaPublicKey public_key = public_key_or.ValueOrDie();
+  EcdsaPublicKey public_key = public_key_or.value();
 
   EXPECT_THAT(public_key.version(), Eq(key.public_key().version()));
   EXPECT_THAT(public_key.params().hash_type(),
@@ -216,7 +216,7 @@ TEST(EcdsaSignKeyManagerTest, GetPublicKey) {
 TEST(EcdsaSignKeyManagerTest, Create) {
   EcdsaPrivateKey private_key = CreateValidKey();
   EcdsaPublicKey public_key =
-      EcdsaSignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      EcdsaSignKeyManager().GetPublicKey(private_key).value();
 
   auto signer_or =
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
@@ -232,8 +232,8 @@ TEST(EcdsaSignKeyManagerTest, Create) {
   ASSERT_THAT(direct_verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.ValueOrDie()->Sign(message).value(), message),
               IsOk());
 }
 
@@ -241,7 +241,7 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
   EcdsaPrivateKey private_key = CreateValidKey();
   // Note: we create a new key in the next line.
   EcdsaPublicKey public_key =
-      EcdsaSignKeyManager().GetPublicKey(CreateValidKey()).ValueOrDie();
+      EcdsaSignKeyManager().GetPublicKey(CreateValidKey()).value();
 
   auto signer_or =
       EcdsaSignKeyManager().GetPrimitive<PublicKeySign>(private_key);
@@ -257,8 +257,8 @@ TEST(EcdsaSignKeyManagerTest, CreateDifferentKey) {
   ASSERT_THAT(direct_verifier_or.status(), IsOk());
 
   std::string message = "Some message";
-  EXPECT_THAT(direct_verifier_or.ValueOrDie()->Verify(
-                  signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+  EXPECT_THAT(direct_verifier_or.value()->Verify(
+                  signer_or.ValueOrDie()->Sign(message).value(), message),
               Not(IsOk()));
 }
 

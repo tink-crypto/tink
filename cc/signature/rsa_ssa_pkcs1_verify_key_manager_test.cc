@@ -80,7 +80,7 @@ RsaSsaPkcs1KeyFormat CreateKeyFormat(HashType hash_type,
   internal::SslUniquePtr<BIGNUM> e(BN_new());
   BN_set_word(e.get(), public_exponent);
   key_format.set_public_exponent(
-      internal::BignumToString(e.get(), BN_num_bytes(e.get())).ValueOrDie());
+      internal::BignumToString(e.get(), BN_num_bytes(e.get())).value());
   return key_format;
 }
 
@@ -89,13 +89,13 @@ RsaSsaPkcs1KeyFormat ValidKeyFormat() {
 }
 
 RsaSsaPkcs1PrivateKey CreateValidPrivateKey() {
-  return RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat()).ValueOrDie();
+  return RsaSsaPkcs1SignKeyManager().CreateKey(ValidKeyFormat()).value();
 }
 
 RsaSsaPkcs1PublicKey CreateValidPublicKey() {
   return RsaSsaPkcs1SignKeyManager()
       .GetPublicKey(CreateValidPrivateKey())
-      .ValueOrDie();
+      .value();
 }
 
 // Checks that a public key generaed by the SignKeyManager is considered valid.
@@ -131,9 +131,9 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, Create) {
   StatusOr<RsaSsaPkcs1PrivateKey> private_key_or =
       RsaSsaPkcs1SignKeyManager().CreateKey(key_format);
   ASSERT_THAT(private_key_or.status(), IsOk());
-  RsaSsaPkcs1PrivateKey private_key = private_key_or.ValueOrDie();
+  RsaSsaPkcs1PrivateKey private_key = private_key_or.value();
   RsaSsaPkcs1PublicKey public_key =
-      RsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).ValueOrDie();
+      RsaSsaPkcs1SignKeyManager().GetPublicKey(private_key).value();
 
   internal::RsaPrivateKey private_key_subtle;
   private_key_subtle.n = private_key.public_key().n();
@@ -154,8 +154,8 @@ TEST(RsaSsaPkcs1SignKeyManagerTest, Create) {
 
   std::string message = "Some message";
   EXPECT_THAT(
-      verifier_or.ValueOrDie()->Verify(
-          direct_signer_or.ValueOrDie()->Sign(message).ValueOrDie(), message),
+      verifier_or.value()->Verify(
+          direct_signer_or.ValueOrDie()->Sign(message).value(), message),
       IsOk());
 }
 
@@ -205,8 +205,8 @@ TEST(RsaSsaPkcs1VerifyKeyManagerTest, NistTestVector) {
   auto result =
       RsaSsaPkcs1VerifyKeyManager().GetPrimitive<PublicKeyVerify>(key);
   EXPECT_THAT(result.status(), IsOk());
-  EXPECT_THAT(result.ValueOrDie()->Verify(nist_test_vector.signature,
-                                          nist_test_vector.message),
+  EXPECT_THAT(result.value()->Verify(nist_test_vector.signature,
+                                     nist_test_vector.message),
               IsOk());
 }
 

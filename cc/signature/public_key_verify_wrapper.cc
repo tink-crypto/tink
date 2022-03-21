@@ -82,7 +82,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
   if (primitives_result.ok()) {
     absl::string_view raw_signature =
         signature.substr(CryptoFormat::kNonRawPrefixSize);
-    for (auto& entry : *(primitives_result.ValueOrDie())) {
+    for (auto& entry : *(primitives_result.value())) {
       std::string legacy_data;
       absl::string_view view_on_data_or_legacy_data = data;
       if (entry->get_output_prefix_type() == OutputPrefixType::LEGACY) {
@@ -103,8 +103,7 @@ util::Status PublicKeyVerifySetWrapper::Verify(absl::string_view signature,
   // No matching key succeeded with verification, try all RAW keys.
   auto raw_primitives_result = public_key_verify_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& public_key_verify_entry :
-         *(raw_primitives_result.ValueOrDie())) {
+    for (auto& public_key_verify_entry : *(raw_primitives_result.value())) {
       auto& public_key_verify = public_key_verify_entry->get_primitive();
       auto verify_result = public_key_verify.Verify(signature, data);
       if (verify_result.ok()) {

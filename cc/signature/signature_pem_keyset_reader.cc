@@ -79,7 +79,7 @@ util::Status SetRsaSsaPssParameters(const PemKeyParams& pem_parameters,
   parameters->set_sig_hash(pem_parameters.hash_type);
   auto salt_len_or = util::Enums::HashLength(pem_parameters.hash_type);
   if (!salt_len_or.ok()) return salt_len_or.status();
-  parameters->set_salt_length(salt_len_or.ValueOrDie());
+  parameters->set_salt_length(salt_len_or.value());
 
   return util::OkStatus();
 }
@@ -212,7 +212,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
   if (!private_key_subtle_or.ok()) return private_key_subtle_or.status();
 
   std::unique_ptr<internal::RsaPrivateKey> private_key_subtle =
-      std::move(private_key_subtle_or).ValueOrDie();
+      std::move(private_key_subtle_or).value();
 
   size_t modulus_size = private_key_subtle->n.length() * 8;
   if (pem_key.parameters.key_size_in_bits != modulus_size) {
@@ -228,7 +228,7 @@ util::Status AddRsaSsaPrivateKey(const PemKey& pem_key, Keyset* keyset) {
       auto private_key_proto_or = NewRsaSsaPrivateKey(
           *private_key_subtle, key_manager.get_version(), pem_key.parameters);
       if (!private_key_proto_or.ok()) return private_key_proto_or.status();
-      RsaSsaPssPrivateKey private_key_proto = private_key_proto_or.ValueOrDie();
+      RsaSsaPssPrivateKey private_key_proto = private_key_proto_or.value();
 
       // Validate the key.
       auto key_validation_status = key_manager.ValidateKey(private_key_proto);
@@ -273,7 +273,7 @@ util::Status AddEcdsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
   std::unique_ptr<internal::EcKey> public_key_subtle =
-      std::move(public_key_subtle_or).ValueOrDie();
+      std::move(public_key_subtle_or).value();
 
   EcdsaPublicKey ecdsa_key;
   EcdsaVerifyKeyManager key_manager;
@@ -307,7 +307,7 @@ util::Status AddRsaSsaPublicKey(const PemKey& pem_key, Keyset* keyset) {
   if (!public_key_subtle_or.ok()) return public_key_subtle_or.status();
 
   std::unique_ptr<internal::RsaPublicKey> public_key_subtle =
-      std::move(public_key_subtle_or).ValueOrDie();
+      std::move(public_key_subtle_or).value();
 
   // Check key length is as expected.
   size_t modulus_size = public_key_subtle->n.length() * 8;
