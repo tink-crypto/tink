@@ -122,7 +122,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateKey) {
   ASSERT_THAT(Cecpq2AeadHkdfPrivateKeyManager().CreateKey(key_format).status(),
               IsOk());
   Cecpq2AeadHkdfPrivateKey key =
-      Cecpq2AeadHkdfPrivateKeyManager().CreateKey(key_format).ValueOrDie();
+      Cecpq2AeadHkdfPrivateKeyManager().CreateKey(key_format).value();
   EXPECT_THAT(key.public_key().params().kem_params().curve_type(),
               Eq(key_format.params().kem_params().curve_type()));
   EXPECT_THAT(key.public_key().params().kem_params().hkdf_hash_type(),
@@ -145,7 +145,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateKey) {
 Cecpq2AeadHkdfPrivateKey CreateValidKey() {
   return Cecpq2AeadHkdfPrivateKeyManager()
       .CreateKey(CreateValidKeyFormat())
-      .ValueOrDie();
+      .value();
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, ValidateKeyEmpty) {
@@ -211,7 +211,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, GetPublicKey) {
   ASSERT_THAT(Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(key).status(),
               IsOk());
   Cecpq2AeadHkdfPublicKey public_key =
-      Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(key).ValueOrDie();
+      Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(key).value();
   EXPECT_THAT(public_key.params().kem_params().curve_type(),
               Eq(key.public_key().params().kem_params().curve_type()));
   EXPECT_THAT(public_key.params().kem_params().hkdf_hash_type(),
@@ -237,7 +237,7 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, Create) {
 
   Cecpq2AeadHkdfPrivateKey private_key = CreateValidKey();
   Cecpq2AeadHkdfPublicKey public_key =
-      Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(private_key).ValueOrDie();
+      Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(private_key).value();
 
   auto decrypt_or =
       Cecpq2AeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(
@@ -248,12 +248,12 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, Create) {
 
   std::string plaintext = "some text";
   std::string context_info = "some aad";
-  auto ciphertext = encrypt_or.ValueOrDie()->Encrypt(plaintext, context_info);
+  auto ciphertext = encrypt_or.value()->Encrypt(plaintext, context_info);
   ASSERT_THAT(ciphertext.status(), IsOk());
   auto decryption =
-      decrypt_or.ValueOrDie()->Decrypt(ciphertext.ValueOrDie(), context_info);
+      decrypt_or.value()->Decrypt(ciphertext.value(), context_info);
   ASSERT_THAT(decryption.status(), IsOk());
-  ASSERT_EQ(decryption.ValueOrDie(), plaintext);
+  ASSERT_EQ(decryption.value(), plaintext);
 }
 
 TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
@@ -263,9 +263,8 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
 
   Cecpq2AeadHkdfPrivateKey private_key = CreateValidKey();
   // Note: we create a new private key in the next line.
-  Cecpq2AeadHkdfPublicKey public_key = Cecpq2AeadHkdfPrivateKeyManager()
-                                           .GetPublicKey(CreateValidKey())
-                                           .ValueOrDie();
+  Cecpq2AeadHkdfPublicKey public_key =
+      Cecpq2AeadHkdfPrivateKeyManager().GetPublicKey(CreateValidKey()).value();
 
   auto decrypt_or =
       Cecpq2AeadHkdfPrivateKeyManager().GetPrimitive<HybridDecrypt>(
@@ -276,10 +275,10 @@ TEST(Cecpq2AeadHkdfPrivateKeyManagerTest, CreateDifferentKey) {
 
   std::string plaintext = "some text";
   std::string context_info = "some aad";
-  auto ciphertext = encrypt_or.ValueOrDie()->Encrypt(plaintext, context_info);
+  auto ciphertext = encrypt_or.value()->Encrypt(plaintext, context_info);
   ASSERT_THAT(ciphertext.status(), IsOk());
   auto decryption =
-      decrypt_or.ValueOrDie()->Decrypt(ciphertext.ValueOrDie(), context_info);
+      decrypt_or.value()->Decrypt(ciphertext.value(), context_info);
   ASSERT_THAT(decryption.status(), Not(IsOk()));
 }
 

@@ -731,7 +731,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::GetPrimitive(
     const google::crypto::tink::KeyData& key_data) const {
   auto key_manager_result = get_key_manager<P>(key_data.type_url());
   if (key_manager_result.ok()) {
-    return key_manager_result.ValueOrDie()->GetPrimitive(key_data);
+    return key_manager_result.value()->GetPrimitive(key_data);
   }
   return key_manager_result.status();
 }
@@ -786,7 +786,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::Wrap(
     return wrapper_result.status();
   }
   crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(std::move(primitive_set));
+      wrapper_result.value()->Wrap(std::move(primitive_set));
   return std::move(primitive_result);
 }
 
@@ -799,7 +799,7 @@ crypto::tink::util::StatusOr<std::unique_ptr<P>> RegistryImpl::WrapKeyset(
     return wrapper_result.status();
   }
   crypto::tink::util::StatusOr<std::unique_ptr<P>> primitive_result =
-      wrapper_result.ValueOrDie()->Wrap(keyset);
+      wrapper_result.value()->Wrap(keyset);
   return std::move(primitive_result);
 }
 

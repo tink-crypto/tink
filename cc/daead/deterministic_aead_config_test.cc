@@ -82,24 +82,24 @@ TEST_F(DeterministicAeadConfigTest, WrappersRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyDeterministicAead>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto registry_wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(registry_wrapped.ok()) << registry_wrapped.status();
   auto encryption_result =
-      registry_wrapped.ValueOrDie()->EncryptDeterministically("secret", "");
+      registry_wrapped.value()->EncryptDeterministically("secret", "");
   ASSERT_TRUE(encryption_result.ok());
 
   auto decryption_result =
       DummyDeterministicAead("dummy").DecryptDeterministically(
-          encryption_result.ValueOrDie(), "");
+          encryption_result.value(), "");
   ASSERT_TRUE(decryption_result.status().ok());
-  EXPECT_THAT(decryption_result.ValueOrDie(), Eq("secret"));
+  EXPECT_THAT(decryption_result.value(), Eq("secret"));
 
   decryption_result = DummyDeterministicAead("dummy").DecryptDeterministically(
-      encryption_result.ValueOrDie(), "wrong");
+      encryption_result.value(), "wrong");
   EXPECT_FALSE(decryption_result.status().ok());
 }
 

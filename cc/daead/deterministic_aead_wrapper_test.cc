@@ -108,24 +108,24 @@ TEST_F(DeterministicAeadSetWrapperTest, testBasic) {
         daead_set->AddPrimitive(std::move(daead), keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
-    ASSERT_THAT(daead_set->set_primary(entry_result.ValueOrDie()), IsOk());
+    ASSERT_THAT(daead_set->set_primary(entry_result.value()), IsOk());
 
     // Wrap daead_set and test the resulting DeterministicAead.
     auto daead_result =
         DeterministicAeadWrapper().Wrap(std::move(daead_set));
     EXPECT_TRUE(daead_result.ok()) << daead_result.status();
-    daead = std::move(daead_result.ValueOrDie());
+    daead = std::move(daead_result.value());
     std::string plaintext = "some_plaintext";
     std::string aad = "some_aad";
 
     auto encrypt_result = daead->EncryptDeterministically(plaintext, aad);
     EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    std::string ciphertext = encrypt_result.ValueOrDie();
+    std::string ciphertext = encrypt_result.value();
     EXPECT_PRED_FORMAT2(testing::IsSubstring, daead_name_2, ciphertext);
 
     auto decrypt_result = daead->DecryptDeterministically(ciphertext, aad);
     EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-    EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+    EXPECT_EQ(plaintext, decrypt_result.value());
 
     decrypt_result =
         daead->DecryptDeterministically("some bad ciphertext", aad);

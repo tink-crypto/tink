@@ -92,21 +92,20 @@ TEST_F(Cecpq2HybridConfigTest, EncryptWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyHybridEncrypt>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_THAT(wrapped.status(), IsOk());
-  auto encryption_result = wrapped.ValueOrDie()->Encrypt("secret", "");
+  auto encryption_result = wrapped.value()->Encrypt("secret", "");
   ASSERT_THAT(encryption_result.status(), IsOk());
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
   EXPECT_EQ(
-      encryption_result.ValueOrDie(),
-      absl::StrCat(
-          prefix,
-          DummyHybridEncrypt("dummy").Encrypt("secret", "").ValueOrDie()));
+      encryption_result.value(),
+      absl::StrCat(prefix,
+                   DummyHybridEncrypt("dummy").Encrypt("secret", "").value()));
 }
 
 // Tests that the HybridDecrypt wrapper has been properly registered and we
@@ -128,20 +127,20 @@ TEST_F(Cecpq2HybridConfigTest, DecryptWrapperRegistered) {
           primitive_set
               ->AddPrimitive(absl::make_unique<DummyHybridDecrypt>("dummy"),
                              key_info)
-              .ValueOrDie()),
+              .value()),
       IsOk());
 
   auto wrapped = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_THAT(wrapped.status(), IsOk());
 
-  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).ValueOrDie();
+  std::string prefix = CryptoFormat::GetOutputPrefix(key_info).value();
   std::string encryption =
-      DummyHybridEncrypt("dummy").Encrypt("secret", "").ValueOrDie();
+      DummyHybridEncrypt("dummy").Encrypt("secret", "").value();
 
   ASSERT_EQ(wrapped.ValueOrDie()
                 ->Decrypt(absl::StrCat(prefix, encryption), "")
-                .ValueOrDie(),
+                .value(),
             "secret");
 }
 

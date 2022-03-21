@@ -60,7 +60,7 @@ StatusOr<Cecpq2AeadHkdfPrivateKey> Cecpq2AeadHkdfPrivateKeyManager::CreateKey(
   auto cecpq2_key_pair_or =
       pqc::GenerateCecpq2Keypair(subtle::EllipticCurveType::CURVE25519);
   if (!cecpq2_key_pair_or.ok()) return cecpq2_key_pair_or.status();
-  auto cecpq2_key_pair = std::move(cecpq2_key_pair_or.ValueOrDie());
+  auto cecpq2_key_pair = std::move(cecpq2_key_pair_or.value());
 
   // Build Cecpq2AeadHkdfPrivateKey
   Cecpq2AeadHkdfPrivateKey cecpq2_private_key;

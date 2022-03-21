@@ -104,7 +104,7 @@ TEST(KeysetWrapperImplTest, Basic) {
       wrapper_or->Wrap(keyset);
 
   ASSERT_THAT(wrapped.status(), IsOk());
-  ASSERT_THAT(*wrapped.ValueOrDie(),
+  ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(333, "three")));
 }
@@ -155,7 +155,7 @@ TEST(KeysetWrapperImplTest, OnlyEnabled) {
       wrapper_or->Wrap(keyset);
 
   ASSERT_THAT(wrapped.status(), IsOk());
-  ASSERT_THAT(*wrapped.ValueOrDie(),
+  ASSERT_THAT(*wrapped.value(),
               UnorderedElementsAre(Pair(111, "one"), Pair(222, "two (primary)"),
                                    Pair(444, "four")));
 }

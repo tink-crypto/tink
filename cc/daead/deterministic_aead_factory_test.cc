@@ -70,17 +70,17 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   // Prepare a Keyset.
   Keyset keyset;
   uint32_t key_id_1 = 1234543;
-  auto new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  auto new_key = std::move(key_factory.NewKey(key_format).value());
   AddTinkKey(key_type, key_id_1, *new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_2 = 726329;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  new_key = std::move(key_factory.NewKey(key_format).value());
   AddRawKey(key_type, key_id_2, *new_key, KeyStatusType::ENABLED,
             KeyData::SYMMETRIC, &keyset);
 
   uint32_t key_id_3 = 7213743;
-  new_key = std::move(key_factory.NewKey(key_format).ValueOrDie());
+  new_key = std::move(key_factory.NewKey(key_format).value());
   AddTinkKey(key_type, key_id_3, *new_key, KeyStatusType::ENABLED,
              KeyData::SYMMETRIC, &keyset);
 
@@ -93,7 +93,7 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
   auto daead_result = DeterministicAeadFactory::GetPrimitive(
       *TestKeysetHandle::GetKeysetHandle(keyset));
   EXPECT_TRUE(daead_result.ok()) << daead_result.status();
-  auto daead = std::move(daead_result.ValueOrDie());
+  auto daead = std::move(daead_result.value());
 
   // Test the resulting DeterministicAead-instance.
   std::string plaintext = "some_plaintext";
@@ -101,14 +101,14 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
 
   auto encrypt_result = daead->EncryptDeterministically(plaintext, aad);
   EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-  std::string ciphertext = encrypt_result.ValueOrDie();
+  std::string ciphertext = encrypt_result.value();
   std::string prefix =
-      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(2))).ValueOrDie();
+      CryptoFormat::GetOutputPrefix(KeyInfoFromKey(keyset.key(2))).value();
   EXPECT_PRED_FORMAT2(testing::IsSubstring, prefix, ciphertext);
 
   auto decrypt_result = daead->DecryptDeterministically(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 
   decrypt_result = daead->DecryptDeterministically("some bad ciphertext", aad);
   EXPECT_FALSE(decrypt_result.ok());
@@ -119,13 +119,13 @@ TEST_F(DeterministicAeadFactoryTest, testPrimitive) {
 
   // Create raw ciphertext with 2nd key, and decrypt
   // with DeterministicAead-instance.
-  auto raw_daead = std::move(
-      key_manager->GetPrimitive(keyset.key(1).key_data()).ValueOrDie());
+  auto raw_daead =
+      std::move(key_manager->GetPrimitive(keyset.key(1).key_data()).value());
   std::string raw_ciphertext =
-      raw_daead->EncryptDeterministically(plaintext, aad).ValueOrDie();
+      raw_daead->EncryptDeterministically(plaintext, aad).value();
   decrypt_result = daead->DecryptDeterministically(ciphertext, aad);
   EXPECT_TRUE(decrypt_result.ok()) << decrypt_result.status();
-  EXPECT_EQ(plaintext, decrypt_result.ValueOrDie());
+  EXPECT_EQ(plaintext, decrypt_result.value());
 }
 
 }  // namespace

@@ -76,7 +76,7 @@ Cecpq2AeadHkdfPublicKey CreatePublicKey() {
   auto private_key_manager = Cecpq2AeadHkdfPrivateKeyManager();
   return private_key_manager
       .GetPublicKey(private_key_manager.CreateKey(key_format).ValueOrDie())
-      .ValueOrDie();
+      .value();
 }
 
 TEST(Cecpq2AeadHkdfPublicKeyManagerTest, ValidateParams) {

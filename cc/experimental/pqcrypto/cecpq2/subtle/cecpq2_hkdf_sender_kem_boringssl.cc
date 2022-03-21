@@ -167,7 +167,7 @@ Cecpq2HkdfX25519SenderKemBoringSsl::GenerateKey(
   if (!symmetric_key_or.ok()) {
     return symmetric_key_or.status();
   }
-  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
+  util::SecretData symmetric_key = symmetric_key_or.value();
 
   // Return the produced pair kem_bytes and symmetric_key
   return absl::make_unique<const KemKey>(kem_bytes, symmetric_key);

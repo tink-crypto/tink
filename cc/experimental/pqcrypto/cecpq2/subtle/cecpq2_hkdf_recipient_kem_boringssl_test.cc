@@ -186,7 +186,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestNotPostQuantumSecureKeyLength) {
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
   ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
-  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
+  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
   auto kem_key_or = cecpq2_recipient_kem->GenerateKey(
@@ -213,7 +213,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
   ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
-  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
+  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
   auto kem_key_or = cecpq2_recipient_kem->GenerateKey(
@@ -223,9 +223,8 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowSuccess) {
   ASSERT_THAT(kem_key_or.status(), IsOk());
 
   // The generated symmetric key should match the expected one
-  EXPECT_EQ(
-      kCorrectSharedSecret,
-      test::HexEncode(util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
+  EXPECT_EQ(kCorrectSharedSecret,
+            test::HexEncode(util::SecretDataAsStringView(kem_key_or.value())));
 }
 
 TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
@@ -251,7 +250,7 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
           test::HexDecodeOrDie(kCecpq2X25519PrivateKeyHex)),
       std::move(hrss_private_key_seed));
   ASSERT_THAT(cecpq2_recipient_kem_or.status(), IsOk());
-  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).ValueOrDie();
+  auto cecpq2_recipient_kem = std::move(cecpq2_recipient_kem_or).value();
 
   // Recovering the symmetric key
   auto kem_key_or = cecpq2_recipient_kem->GenerateKey(
@@ -261,9 +260,8 @@ TEST(Cecpq2HkdfRecipientKemBoringSslTest, TestRecipientFlowFailure) {
 
   // The produced symmetric key should match the one produced by CECPQ2 in case
   // of HRSS decapsulation failure for the altered HRSS kem_bytes
-  EXPECT_EQ(
-      kFailSharedSecret,
-      test::HexEncode(util::SecretDataAsStringView(kem_key_or.ValueOrDie())));
+  EXPECT_EQ(kFailSharedSecret,
+            test::HexEncode(util::SecretDataAsStringView(kem_key_or.value())));
 }
 
 }  // namespace

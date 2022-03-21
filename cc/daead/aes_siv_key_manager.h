@@ -104,7 +104,7 @@ class AesSivKeyManager
     }
     google::crypto::tink::AesSivKey key;
     key.set_version(get_version());
-    key.set_key_value(randomness.ValueOrDie());
+    key.set_key_value(randomness.value());
     return key;
   }
 

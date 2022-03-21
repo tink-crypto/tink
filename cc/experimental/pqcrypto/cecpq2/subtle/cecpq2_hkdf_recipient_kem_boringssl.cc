@@ -129,7 +129,7 @@ Cecpq2HkdfX25519RecipientKemBoringSsl::GenerateKey(
   if (!symmetric_key_or.ok()) {
     return symmetric_key_or.status();
   }
-  util::SecretData symmetric_key = symmetric_key_or.ValueOrDie();
+  util::SecretData symmetric_key = symmetric_key_or.value();
 
   return symmetric_key;
 }

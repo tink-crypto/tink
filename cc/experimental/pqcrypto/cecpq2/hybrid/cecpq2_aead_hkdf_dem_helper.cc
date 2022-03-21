@@ -61,11 +61,11 @@ class Cecpq2AeadHkdfDemHelperImpl : public Cecpq2AeadHkdfDemHelper {
     auto key_or = internal::RegistryImpl::GlobalInstance().DeriveKey(
         key_template_, &input_stream);
     if (!key_or.ok()) return key_or.status();
-    auto key = std::move(key_or).ValueOrDie();
+    auto key = std::move(key_or).value();
     util::StatusOr<std::unique_ptr<EncryptionPrimitive>> primitive_or =
         Registry::GetPrimitive<EncryptionPrimitive>(key);
     if (!primitive_or.ok()) return primitive_or.status();
-    return absl::make_unique<AeadOrDaead>(std::move(primitive_or.ValueOrDie()));
+    return absl::make_unique<AeadOrDaead>(std::move(primitive_or.value()));
   }
 
   crypto::tink::util::StatusOr<uint32_t> GetKeyMaterialSize() const override {

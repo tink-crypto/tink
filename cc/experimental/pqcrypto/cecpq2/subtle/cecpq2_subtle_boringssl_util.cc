@@ -69,8 +69,7 @@ GenerateCecpq2Keypair(subtle::EllipticCurveType curve_type) {
   util::SecretData generate_hrss_key_entropy =
       crypto::tink::subtle::Random::GetRandomKeyBytes(HRSS_GENERATE_KEY_BYTES);
   auto hrss_key_pair_or_status = GenerateHrssKeyPair(generate_hrss_key_entropy);
-  cecpq2_key_pair.hrss_key_pair =
-      std::move(hrss_key_pair_or_status.ValueOrDie());
+  cecpq2_key_pair.hrss_key_pair = std::move(hrss_key_pair_or_status.value());
 
   return cecpq2_key_pair;
 }

@@ -115,11 +115,11 @@ TEST(CreatesNewCecpq2KeyPairTest, GeneratesDifferentKeysEveryTime) {
 
   std::string keypair1_pub_marsh_str(
       reinterpret_cast<const char*>(
-          keypair1.ValueOrDie().hrss_public_key_marshaled.data()),
+          keypair1.value().hrss_public_key_marshaled.data()),
       HRSS_PUBLIC_KEY_BYTES);
   std::string keypair2_pub_marsh_str(
       reinterpret_cast<const char*>(
-          keypair2.ValueOrDie().hrss_public_key_marshaled.data()),
+          keypair2.value().hrss_public_key_marshaled.data()),
       HRSS_PUBLIC_KEY_BYTES);
 
   // the two HRSS key pairs should be different with very high probability
@@ -137,7 +137,7 @@ TEST(CreatesNewCecpq2KeyPairTest, SuccessfullHrssKeyGen) {
   auto keypair = crypto::tink::pqc::GenerateHrssKeyPair(hrss_key_gen_entropy);
 
   // Checking that the generated HRSS public key matched the test vector one
-  EXPECT_EQ(test::HexEncode(keypair.ValueOrDie().hrss_public_key_marshaled),
+  EXPECT_EQ(test::HexEncode(keypair.value().hrss_public_key_marshaled),
             kExpectedPub);
 }
 

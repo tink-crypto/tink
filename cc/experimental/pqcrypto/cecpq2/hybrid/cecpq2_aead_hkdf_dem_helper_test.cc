@@ -48,9 +48,9 @@ crypto::tink::util::Status EncryptThenDecrypt(
   StatusOr<std::string> encryption_or = dem.Encrypt(message, associated_data);
   if (!encryption_or.status().ok()) return encryption_or.status();
   StatusOr<std::string> decryption_or =
-      dem.Decrypt(encryption_or.ValueOrDie(), associated_data);
+      dem.Decrypt(encryption_or.value(), associated_data);
   if (!decryption_or.status().ok()) return decryption_or.status();
-  if (decryption_or.ValueOrDie() != message) {
+  if (decryption_or.value() != message) {
     return crypto::tink::util::Status(absl::StatusCode::kInternal,
                                       "Message/Decryption mismatch");
   }
@@ -80,7 +80,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesGcmKeyType) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   util::SecretData seed_32_bytes = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"
@@ -89,7 +89,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesGcmKeyType) {
       dem_helper->GetAeadOrDaead(seed_32_bytes);
   ASSERT_THAT(aead_or_daead_result_or.status(), IsOk());
 
-  auto aead_or_daead = std::move(aead_or_daead_result_or.ValueOrDie());
+  auto aead_or_daead = std::move(aead_or_daead_result_or.value());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),
               IsOk());
 }
@@ -108,7 +108,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesSivKeyType) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   util::SecretData seed_64_bytes = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"
@@ -119,7 +119,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithAesSivKeyType) {
       dem_helper->GetAeadOrDaead(seed_64_bytes);
   ASSERT_THAT(aead_or_daead_result_or.status(), IsOk());
 
-  auto aead_or_daead = std::move(aead_or_daead_result_or.ValueOrDie());
+  auto aead_or_daead = std::move(aead_or_daead_result_or.value());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),
               IsOk());
 }
@@ -137,7 +137,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithXchacha20Poly1305KeyType) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   util::SecretData seed_32_bytes = util::SecretDataFromStringView(
       test::HexDecodeOrDie("000102030405060708090a0b0c0d0e0f"
@@ -146,7 +146,7 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperWithXchacha20Poly1305KeyType) {
       dem_helper->GetAeadOrDaead(seed_32_bytes);
   ASSERT_THAT(aead_or_daead_result_or.status(), IsOk());
 
-  auto aead_or_daead = std::move(aead_or_daead_result_or.ValueOrDie());
+  auto aead_or_daead = std::move(aead_or_daead_result_or.value());
   EXPECT_THAT(EncryptThenDecrypt(*aead_or_daead, "test_plaintext", "test_ad"),
               IsOk());
 }
@@ -164,11 +164,11 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialXChacha20Poly1305) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   auto key_material_size_or = dem_helper->GetKeyMaterialSize();
   ASSERT_THAT(key_material_size_or.status(), IsOk());
-  ASSERT_EQ(key_material_size_or.ValueOrDie(), 32);
+  ASSERT_EQ(key_material_size_or.value(), 32);
 }
 
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesGcm) {
@@ -184,11 +184,11 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesGcm) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   auto key_material_size_or = dem_helper->GetKeyMaterialSize();
   ASSERT_THAT(key_material_size_or.status(), IsOk());
-  ASSERT_EQ(key_material_size_or.ValueOrDie(), 32);
+  ASSERT_EQ(key_material_size_or.value(), 32);
 }
 
 TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesSiv) {
@@ -204,11 +204,11 @@ TEST(Cecpq2AeadHkdfDemHelperTest, DemHelperKeyMaterialAesSiv) {
 
   auto dem_helper_or = Cecpq2AeadHkdfDemHelper::New(dem_key_template);
   ASSERT_THAT(dem_helper_or.status(), IsOk());
-  auto dem_helper = std::move(dem_helper_or.ValueOrDie());
+  auto dem_helper = std::move(dem_helper_or.value());
 
   auto key_material_size_or = dem_helper->GetKeyMaterialSize();
   ASSERT_THAT(key_material_size_or.status(), IsOk());
-  ASSERT_EQ(key_material_size_or.ValueOrDie(), 64);
+  ASSERT_EQ(key_material_size_or.value(), 64);
 }
 
 }  // namespace

@@ -77,7 +77,7 @@ DeterministicAeadSetWrapper::EncryptDeterministically(
           plaintext, associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   const std::string& key_id = daead_set_->get_primary()->get_identifier();
-  return key_id + encrypt_result.ValueOrDie();
+  return key_id + encrypt_result.value();
 }
 
 util::StatusOr<std::string>
@@ -94,12 +94,12 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
-      for (auto& daead_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& daead_entry : *(primitives_result.value())) {
         DeterministicAead& daead = daead_entry->get_primitive();
         auto decrypt_result =
             daead.DecryptDeterministically(raw_ciphertext, associated_data);
         if (decrypt_result.ok()) {
-          return std::move(decrypt_result.ValueOrDie());
+          return std::move(decrypt_result.value());
         } else {
           // LOG that a matching key didn't decrypt the ciphertext.
         }
@@ -110,12 +110,12 @@ DeterministicAeadSetWrapper::DecryptDeterministically(
   // No matching key succeeded with decryption, try all RAW keys.
   auto raw_primitives_result = daead_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& daead_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& daead_entry : *(raw_primitives_result.value())) {
       DeterministicAead& daead = daead_entry->get_primitive();
       auto decrypt_result =
           daead.DecryptDeterministically(ciphertext, associated_data);
       if (decrypt_result.ok()) {
-        return std::move(decrypt_result.ValueOrDie());
+        return std::move(decrypt_result.value());
       }
     }
   }
