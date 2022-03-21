@@ -82,7 +82,7 @@ util::StatusOr<std::string> MacSetWrapper::ComputeMac(
   auto compute_mac_result = primary->get_primitive().ComputeMac(data);
   if (!compute_mac_result.ok()) return compute_mac_result.status();
   const std::string& key_id = primary->get_identifier();
-  return key_id + compute_mac_result.ValueOrDie();
+  return key_id + compute_mac_result.value();
 }
 
 util::Status MacSetWrapper::VerifyMac(
@@ -98,7 +98,7 @@ util::Status MacSetWrapper::VerifyMac(
     if (primitives_result.ok()) {
       absl::string_view raw_mac_value =
           mac_value.substr(CryptoFormat::kNonRawPrefixSize);
-      for (auto& mac_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& mac_entry : *(primitives_result.value())) {
         std::string legacy_data;
         absl::string_view view_on_data_or_legacy_data = data;
         if (mac_entry->get_output_prefix_type() == OutputPrefixType::LEGACY) {
@@ -120,7 +120,7 @@ util::Status MacSetWrapper::VerifyMac(
   // No matching key succeeded with verification, try all RAW keys.
   auto raw_primitives_result = mac_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& mac_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& mac_entry : *(raw_primitives_result.value())) {
       Mac& mac = mac_entry->get_primitive();
       util::Status status = mac.VerifyMac(mac_value, data);
       if (status.ok()) {

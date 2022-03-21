@@ -80,21 +80,19 @@ TEST_F(MacConfigTest, WrappersRegistered) {
           ->set_primary(
               primitive_set
                   ->AddPrimitive(absl::make_unique<DummyMac>("dummy"), key_info)
-                  .ValueOrDie())
+                  .value())
           .ok());
 
   auto primitive_result = Registry::Wrap(std::move(primitive_set));
 
   ASSERT_TRUE(primitive_result.ok()) << primitive_result.status();
-  auto mac_result =
-      primitive_result.ValueOrDie()->ComputeMac("verified text");
+  auto mac_result = primitive_result.value()->ComputeMac("verified text");
   ASSERT_TRUE(mac_result.ok());
 
-  EXPECT_TRUE(DummyMac("dummy")
-                  .VerifyMac(mac_result.ValueOrDie(), "verified text")
-                  .ok());
+  EXPECT_TRUE(
+      DummyMac("dummy").VerifyMac(mac_result.value(), "verified text").ok());
   EXPECT_FALSE(
-      DummyMac("dummy").VerifyMac(mac_result.ValueOrDie(), "faked text").ok());
+      DummyMac("dummy").VerifyMac(mac_result.value(), "faked text").ok());
 }
 
 // FIPS-only mode tests

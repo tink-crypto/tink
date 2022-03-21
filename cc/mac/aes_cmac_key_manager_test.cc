@@ -131,7 +131,7 @@ TEST(AesCmacKeyManagerTest, ValidateKeyFormatTagSizes) {
 TEST(AesCmacKeyManagerTest, CreateKey) {
   AesCmacKeyFormat format = ValidKeyFormat();
   ASSERT_THAT(AesCmacKeyManager().CreateKey(format).status(), IsOk());
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   EXPECT_THAT(key.version(), Eq(0));
   EXPECT_THAT(key.key_value(), SizeIs(format.key_size()));
   EXPECT_THAT(key.params().tag_size(), Eq(format.params().tag_size()));
@@ -139,27 +139,27 @@ TEST(AesCmacKeyManagerTest, CreateKey) {
 
 TEST(AesCmacKeyManagerTest, ValidateKey) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), IsOk());
 }
 
 TEST(AesCmacKeyManagerTest, ValidateKeyInvalidVersion) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   key.set_version(1);
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
 TEST(AesCmacKeyManagerTest, ValidateKeyShortKey) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   key.set_key_value("0123456789abcdef");
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
 TEST(AesCmacKeyManagerTest, ValidateKeyLongTagSize) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   key.mutable_params()->set_tag_size(17);
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
@@ -167,24 +167,25 @@ TEST(AesCmacKeyManagerTest, ValidateKeyLongTagSize) {
 
 TEST(AesCmacKeyManagerTest, ValidateKeyTooShortTagSize) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   key.mutable_params()->set_tag_size(9);
   EXPECT_THAT(AesCmacKeyManager().ValidateKey(key), Not(IsOk()));
 }
 
 TEST(AesCmacKeyManagerTest, GetPrimitive) {
   AesCmacKeyFormat format = ValidKeyFormat();
-  AesCmacKey key = AesCmacKeyManager().CreateKey(format).ValueOrDie();
+  AesCmacKey key = AesCmacKeyManager().CreateKey(format).value();
   auto manager_mac_or = AesCmacKeyManager().GetPrimitive<Mac>(key);
   ASSERT_THAT(manager_mac_or.status(), IsOk());
-  auto mac_value_or = manager_mac_or.ValueOrDie()->ComputeMac("some plaintext");
+  auto mac_value_or = manager_mac_or.value()->ComputeMac("some plaintext");
   ASSERT_THAT(mac_value_or.status(), IsOk());
 
   auto direct_mac_or = subtle::AesCmacBoringSsl::New(
       util::SecretDataFromStringView(key.key_value()), key.params().tag_size());
   ASSERT_THAT(direct_mac_or.status(), IsOk());
-  EXPECT_THAT(direct_mac_or.ValueOrDie()->VerifyMac(mac_value_or.ValueOrDie(),
-                                                    "some plaintext"), IsOk());
+  EXPECT_THAT(
+      direct_mac_or.value()->VerifyMac(mac_value_or.value(), "some plaintext"),
+      IsOk());
 }
 
 }  // namespace

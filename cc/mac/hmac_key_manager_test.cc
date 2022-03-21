@@ -154,15 +154,13 @@ TEST(HmacKeyManagerTest, CreateKey) {
   key_format.mutable_params()->set_hash(HashType::SHA512);
   auto hmac_key_or = HmacKeyManager().CreateKey(key_format);
   ASSERT_THAT(hmac_key_or.status(), IsOk());
-  EXPECT_EQ(hmac_key_or.ValueOrDie().version(), 0);
-  EXPECT_EQ(hmac_key_or.ValueOrDie().params().hash(),
-            key_format.params().hash());
-  EXPECT_EQ(hmac_key_or.ValueOrDie().params().tag_size(),
+  EXPECT_EQ(hmac_key_or.value().version(), 0);
+  EXPECT_EQ(hmac_key_or.value().params().hash(), key_format.params().hash());
+  EXPECT_EQ(hmac_key_or.value().params().tag_size(),
             key_format.params().tag_size());
-  EXPECT_THAT(hmac_key_or.ValueOrDie().key_value(),
-              SizeIs(key_format.key_size()));
+  EXPECT_THAT(hmac_key_or.value().key_value(), SizeIs(key_format.key_size()));
 
-  EXPECT_THAT(HmacKeyManager().ValidateKey(hmac_key_or.ValueOrDie()), IsOk());
+  EXPECT_THAT(HmacKeyManager().ValidateKey(hmac_key_or.value()), IsOk());
 }
 
 TEST(HmacKeyManagerTest, ValidKey) {
@@ -259,10 +257,9 @@ TEST(HmacKeyManagerTest, DeriveKey) {
 
   StatusOr<HmacKey> key_or = HmacKeyManager().DeriveKey(format, &input_stream);
   ASSERT_THAT(key_or.status(), IsOk());
-  EXPECT_EQ(key_or.ValueOrDie().key_value(), "0123456789abcdefghijklm");
-  EXPECT_EQ(key_or.ValueOrDie().params().hash(), format.params().hash());
-  EXPECT_EQ(key_or.ValueOrDie().params().tag_size(),
-            format.params().tag_size());
+  EXPECT_EQ(key_or.value().key_value(), "0123456789abcdefghijklm");
+  EXPECT_EQ(key_or.value().params().hash(), format.params().hash());
+  EXPECT_EQ(key_or.value().params().tag_size(), format.params().tag_size());
 }
 
 TEST(HmacKeyManagerTest, DeriveKeyNotEnoughRandomness) {
@@ -299,19 +296,19 @@ TEST(HmacKeyManagerTest, GetPrimitive) {
   key_format.mutable_params()->set_tag_size(16);
   key_format.mutable_params()->set_hash(HashType::SHA256);
   key_format.set_key_size(16);
-  HmacKey key = HmacKeyManager().CreateKey(key_format).ValueOrDie();
+  HmacKey key = HmacKeyManager().CreateKey(key_format).value();
   auto manager_mac_or = HmacKeyManager().GetPrimitive<Mac>(key);
   ASSERT_THAT(manager_mac_or.status(), IsOk());
-  auto mac_value_or = manager_mac_or.ValueOrDie()->ComputeMac("some plaintext");
+  auto mac_value_or = manager_mac_or.value()->ComputeMac("some plaintext");
   ASSERT_THAT(mac_value_or.status(), IsOk());
 
   auto direct_mac_or = subtle::HmacBoringSsl::New(
       util::Enums::ProtoToSubtle(key.params().hash()), key.params().tag_size(),
       util::SecretDataFromStringView(key.key_value()));
   ASSERT_THAT(direct_mac_or.status(), IsOk());
-  EXPECT_THAT(direct_mac_or.ValueOrDie()->VerifyMac(mac_value_or.ValueOrDie(),
-                                                    "some plaintext"),
-              IsOk());
+  EXPECT_THAT(
+      direct_mac_or.value()->VerifyMac(mac_value_or.value(), "some plaintext"),
+      IsOk());
 }
 
 }  // namespace

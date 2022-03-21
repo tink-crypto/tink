@@ -91,21 +91,21 @@ TEST(PrfSetWrapperTest, TestPrimitivesEndToEnd) {
   auto keyset_manager_result =
       KeysetManager::New(PrfKeyTemplates::HkdfSha256());
   ASSERT_TRUE(keyset_manager_result.ok()) << keyset_manager_result.status();
-  auto keyset_manager = std::move(keyset_manager_result.ValueOrDie());
+  auto keyset_manager = std::move(keyset_manager_result.value());
   auto id_result = keyset_manager->Add(PrfKeyTemplates::HmacSha256());
   ASSERT_TRUE(id_result.ok()) << id_result.status();
-  uint32_t hmac_sha256_id = id_result.ValueOrDie();
+  uint32_t hmac_sha256_id = id_result.value();
   id_result = keyset_manager->Add(PrfKeyTemplates::HmacSha512());
   ASSERT_TRUE(id_result.ok()) << id_result.status();
-  uint32_t hmac_sha512_id = id_result.ValueOrDie();
+  uint32_t hmac_sha512_id = id_result.value();
   id_result = keyset_manager->Add(PrfKeyTemplates::AesCmac());
   ASSERT_TRUE(id_result.ok()) << id_result.status();
-  uint32_t aes_cmac_id = id_result.ValueOrDie();
+  uint32_t aes_cmac_id = id_result.value();
   auto keyset_handle = keyset_manager->GetKeysetHandle();
   uint32_t hkdf_id = keyset_handle->GetKeysetInfo().primary_key_id();
   auto prf_set_result = keyset_handle->GetPrimitive<PrfSet>();
   ASSERT_TRUE(prf_set_result.ok()) << prf_set_result.status();
-  auto prf_set = std::move(prf_set_result.ValueOrDie());
+  auto prf_set = std::move(prf_set_result.value());
   EXPECT_THAT(prf_set->GetPrimaryId(), Eq(hkdf_id));
   auto prf_map = prf_set->GetPrfs();
   EXPECT_THAT(prf_map, UnorderedElementsAre(Pair(Eq(hkdf_id), _),
@@ -136,18 +136,18 @@ TEST(PrfSetWrapperTest, TestPrimitivesEndToEnd) {
       }
       std::string output;
       if (output_result.ok()) {
-        output = output_result.ValueOrDie();
+        output = output_result.value();
         results.push_back(output);
       }
       output_result = prf.second->Compute(input2, output_length);
       EXPECT_TRUE(output_result.ok()) << output_result.status();
       if (output_result.ok()) {
-        results.push_back(output_result.ValueOrDie());
+        results.push_back(output_result.value());
       }
       output_result = prf.second->Compute(input, output_length);
       EXPECT_TRUE(output_result.ok()) << output_result.status();
       if (output_result.ok()) {
-        EXPECT_THAT(output_result.ValueOrDie(), StrEq(output));
+        EXPECT_THAT(output_result.value(), StrEq(output));
       }
     }
     for (int i = 0; i < results.size(); i++) {

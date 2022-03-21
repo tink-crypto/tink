@@ -85,7 +85,7 @@ StatusOr<HmacPrfKey> HmacPrfKeyManager::DeriveKey(
   HmacPrfKey key;
   key.set_version(get_version());
   *(key.mutable_params()) = hmac_prf_key_format.params();
-  key.set_key_value(randomness.ValueOrDie());
+  key.set_key_value(randomness.value());
   return key;
 }
 
