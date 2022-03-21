@@ -65,8 +65,8 @@ TEST(KmsClientsTest, AddAndGet) {
   EXPECT_THAT(status, IsOk());
   auto client_result = KmsClients::Get(data_1.uri);
   EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
   // Verify there is no client for data_2.
   client_result = KmsClients::Get(data_2.uri);
@@ -78,9 +78,8 @@ TEST(KmsClientsTest, AddAndGet) {
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_2.uri);
   EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
   // Verify there is no client for data_3.
   client_result = KmsClients::Get(data_3.uri);
@@ -92,20 +91,20 @@ TEST(KmsClientsTest, AddAndGet) {
   EXPECT_THAT(status, IsOk());
   client_result = KmsClients::Get(data_3.uri);
   EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_3.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_3.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 
   // Verify that clients for data_1 and data_2 are still present.
   client_result = KmsClients::Get(data_1.uri);
   EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_1.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_2.uri));
 
   client_result = KmsClients::Get(data_2.uri);
   EXPECT_THAT(client_result.status(), IsOk());
-  EXPECT_TRUE(client_result.ValueOrDie()->DoesSupport(data_2.uri));
-  EXPECT_FALSE(client_result.ValueOrDie()->DoesSupport(data_1.uri));
+  EXPECT_TRUE(client_result.value()->DoesSupport(data_2.uri));
+  EXPECT_FALSE(client_result.value()->DoesSupport(data_1.uri));
 }
 
 

@@ -114,21 +114,21 @@ class ExampleKeyTypeManager : public KeyTypeManager<AesGcmKey, AesGcmKeyFormat,
 TEST(KeyManagerTest, CreateAead) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).value();
   std::unique_ptr<Aead> aead =
-      ExampleKeyTypeManager().GetPrimitive<Aead>(key).ValueOrDie();
+      ExampleKeyTypeManager().GetPrimitive<Aead>(key).value();
 
-  std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
-  std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
+  std::string encryption = aead->Encrypt("Hi", "aad").value();
+  std::string decryption = aead->Decrypt(encryption, "aad").value();
   EXPECT_THAT(decryption, Eq("Hi"));
 }
 
 TEST(KeyManagerTest, CreateAeadVariant) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).value();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleKeyTypeManager().GetPrimitive<AeadVariant>(key).ValueOrDie();
+      ExampleKeyTypeManager().GetPrimitive<AeadVariant>(key).value();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 
@@ -188,22 +188,21 @@ class ExampleKeyTypeManagerWithoutFactory
 TEST(KeyManagerWithoutFactoryTest, CreateAead) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie();
-  std::unique_ptr<Aead> aead = ExampleKeyTypeManagerWithoutFactory()
-                                   .GetPrimitive<Aead>(key)
-                                   .ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).value();
+  std::unique_ptr<Aead> aead =
+      ExampleKeyTypeManagerWithoutFactory().GetPrimitive<Aead>(key).value();
 
-  std::string encryption = aead->Encrypt("Hi", "aad").ValueOrDie();
-  std::string decryption = aead->Decrypt(encryption, "aad").ValueOrDie();
+  std::string encryption = aead->Encrypt("Hi", "aad").value();
+  std::string decryption = aead->Decrypt(encryption, "aad").value();
   EXPECT_THAT(decryption, Eq("Hi"));
 }
 
 TEST(KeyManagerWithoutFactoryTest, CreateAeadVariant) {
   AesGcmKeyFormat key_format;
   key_format.set_key_size(16);
-  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).ValueOrDie();
+  AesGcmKey key = ExampleKeyTypeManager().CreateKey(key_format).value();
   std::unique_ptr<AeadVariant> aead_variant =
-      ExampleKeyTypeManager().GetPrimitive<AeadVariant>(key).ValueOrDie();
+      ExampleKeyTypeManager().GetPrimitive<AeadVariant>(key).value();
   EXPECT_THAT(aead_variant->get(), Eq(key.key_value()));
 }
 

@@ -203,14 +203,14 @@ util::StatusOr<std::unique_ptr<JsonKeysetWriter>> JsonKeysetWriter::New(
 util::Status JsonKeysetWriter::Write(const Keyset& keyset) {
   auto json_string_result = ToJsonString(keyset);
   if (!json_string_result.ok()) return json_string_result.status();
-  return WriteData(json_string_result.ValueOrDie(), destination_stream_.get());
+  return WriteData(json_string_result.value(), destination_stream_.get());
 }
 
 util::Status JsonKeysetWriter::Write(
     const EncryptedKeyset& encrypted_keyset) {
   auto json_string_result = ToJsonString(encrypted_keyset);
   if (!json_string_result.ok()) return json_string_result.status();
-  return WriteData(json_string_result.ValueOrDie(), destination_stream_.get());
+  return WriteData(json_string_result.value(), destination_stream_.get());
 }
 
 }  // namespace tink

@@ -110,7 +110,7 @@ KeysetInfoFromJson(const rapidjson::Value& json_value) {
   for (const auto& json_key_info : json_value["keyInfo"].GetArray()) {
     auto key_info_result = KeyInfoFromJson(json_key_info);
     if (!key_info_result.ok()) return key_info_result.status();
-    *(keyset_info->add_key_info()) = *(key_info_result.ValueOrDie());
+    *(keyset_info->add_key_info()) = *(key_info_result.value());
   }
   return std::move(keyset_info);
 }
@@ -133,8 +133,7 @@ EncryptedKeysetFromJson(const rapidjson::Document& json_doc) {
     if (!keyset_info_result.ok()) {
       return keyset_info_result.status();
     }
-    *(encrypted_keyset->mutable_keyset_info()) =
-        *(keyset_info_result.ValueOrDie());
+    *(encrypted_keyset->mutable_keyset_info()) = *(keyset_info_result.value());
   }
   return std::move(encrypted_keyset);
 }
@@ -208,7 +207,7 @@ KeyFromJson(const rapidjson::Value& json_value) {
   key->set_status(Enums::KeyStatus(json_value["status"].GetString()));
   key->set_output_prefix_type(
       Enums::OutputPrefix(json_value["outputPrefixType"].GetString()));
-  *(key->mutable_key_data()) = *(key_data_result.ValueOrDie());
+  *(key->mutable_key_data()) = *(key_data_result.value());
   return std::move(key);
 }
 
@@ -221,7 +220,7 @@ KeysetFromJson(const rapidjson::Document& json_doc) {
   for (const auto& json_key : json_doc["key"].GetArray()) {
     auto key_result = KeyFromJson(json_key);
     if (!key_result.ok()) return key_result.status();
-    *(keyset->add_key()) = *(key_result.ValueOrDie());
+    *(keyset->add_key()) = *(key_result.value());
   }
   return std::move(keyset);
 }

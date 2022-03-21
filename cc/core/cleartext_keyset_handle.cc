@@ -44,7 +44,7 @@ util::StatusOr<std::unique_ptr<KeysetHandle>> CleartextKeysetHandle::Read(
                      keyset_result.status().message());
   }
   std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.ValueOrDie())));
+      new KeysetHandle(std::move(keyset_result.value())));
   return std::move(handle);
 }
 

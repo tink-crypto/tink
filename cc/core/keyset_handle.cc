@@ -49,7 +49,7 @@ util::StatusOr<std::unique_ptr<EncryptedKeyset>> Encrypt(
       master_key_aead.Encrypt(keyset.SerializeAsString(), associated_data);
   if (!encrypt_result.ok()) return encrypt_result.status();
   auto enc_keyset = absl::make_unique<EncryptedKeyset>();
-  enc_keyset->set_encrypted_keyset(encrypt_result.ValueOrDie());
+  enc_keyset->set_encrypted_keyset(encrypt_result.value());
   return std::move(enc_keyset);
 }
 
@@ -60,7 +60,7 @@ util::StatusOr<std::unique_ptr<Keyset>> Decrypt(
       master_key_aead.Decrypt(enc_keyset.encrypted_keyset(), associated_data);
   if (!decrypt_result.ok()) return decrypt_result.status();
   auto keyset = absl::make_unique<Keyset>();
-  if (!keyset->ParseFromString(decrypt_result.ValueOrDie())) {
+  if (!keyset->ParseFromString(decrypt_result.value())) {
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         "Could not parse the decrypted data as a Keyset-proto.");
@@ -102,8 +102,8 @@ KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
                      enc_keyset_result.status().message());
   }
 
-  auto keyset_result = Decrypt(*enc_keyset_result.ValueOrDie(), master_key_aead,
-                               associated_data);
+  auto keyset_result =
+      Decrypt(*enc_keyset_result.value(), master_key_aead, associated_data);
   if (!keyset_result.ok()) {
     return ToStatusF(absl::StatusCode::kInvalidArgument,
                      "Error decrypting encrypted keyset: %s",
@@ -111,7 +111,7 @@ KeysetHandle::ReadWithAssociatedData(std::unique_ptr<KeysetReader> reader,
   }
 
   std::unique_ptr<KeysetHandle> handle(
-      new KeysetHandle(std::move(keyset_result.ValueOrDie())));
+      new KeysetHandle(std::move(keyset_result.value())));
   return std::move(handle);
 }
 
@@ -146,7 +146,7 @@ util::Status KeysetHandle::WriteWithAssociatedData(
                      "Encryption of the keyset failed: %s",
                      encrypt_result.status().message());
   }
-  return writer->Write(*(encrypt_result.ValueOrDie()));
+  return writer->Write(*(encrypt_result.value()));
 }
 
 util::Status KeysetHandle::WriteNoSecret(KeysetWriter* writer) const {
@@ -183,7 +183,7 @@ util::StatusOr<std::unique_ptr<Keyset::Key>> ExtractPublicKey(
                                                     key.key_data().value());
   if (!key_data_result.ok()) return key_data_result.status();
   auto public_key = absl::make_unique<Keyset::Key>(key);
-  public_key->mutable_key_data()->Swap(key_data_result.ValueOrDie().get());
+  public_key->mutable_key_data()->Swap(key_data_result.value().get());
   return std::move(public_key);
 }
 
@@ -193,7 +193,7 @@ KeysetHandle::GetPublicKeysetHandle() const {
   for (const Keyset::Key& key : get_keyset().key()) {
     auto public_key_result = ExtractPublicKey(key);
     if (!public_key_result.ok()) return public_key_result.status();
-    public_keyset->add_key()->Swap(public_key_result.ValueOrDie().get());
+    public_keyset->add_key()->Swap(public_key_result.value().get());
   }
   public_keyset->set_primary_key_id(get_keyset().primary_key_id());
   std::unique_ptr<KeysetHandle> handle(
@@ -211,7 +211,7 @@ crypto::tink::util::StatusOr<uint32_t> KeysetHandle::AddToKeyset(
   }
   auto key_data_result = Registry::NewKeyData(key_template);
   if (!key_data_result.ok()) return key_data_result.status();
-  auto key_data = std::move(key_data_result.ValueOrDie());
+  auto key_data = std::move(key_data_result.value());
   Keyset::Key* key = keyset->add_key();
   uint32_t key_id = GenerateUnusedKeyId(*keyset);
   *(key->mutable_key_data()) = *key_data;
