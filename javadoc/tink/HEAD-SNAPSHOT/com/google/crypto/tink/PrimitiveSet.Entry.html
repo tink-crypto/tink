@@ -148,7 +148,9 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="type parameter in PrimitiveSet.Entry">P</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html#getPrimitive--">getPrimitive</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html#getPrimitive--">getPrimitive</a></span>()</code>
+<div class="block">Returns the primitive for this entry.</div>
+</td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/crypto/tink/proto/KeyStatusType.html" title="enum in com.google.crypto.tink.proto">KeyStatusType</a></code></td>
@@ -183,6 +185,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>getPrimitive</h4>
 <pre>public&nbsp;<a href="../../../../com/google/crypto/tink/PrimitiveSet.Entry.html" title="type parameter in PrimitiveSet.Entry">P</a>&nbsp;getPrimitive()</pre>
+<div class="block">Returns the primitive for this entry.
+
+ <p>For primitives of type <code>Mac</code>, <code>Aead</code>, <code>PublicKeySign</code>, <code>PublicKeyVerify</code>, <code>DeterministicAead</code>, <code>HybridEncrypt</code>, and <code>HybridDecrypt</code>
+ this is a primitive which <b>ignores</b> the output prefix and assumes "RAW".</div>
 </li>
 </ul>
 <a name="getStatus--">
