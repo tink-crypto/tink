@@ -61,12 +61,12 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
     if (primitives_result.ok()) {
       absl::string_view raw_ciphertext =
           ciphertext.substr(CryptoFormat::kNonRawPrefixSize);
-      for (auto& hybrid_decrypt_entry : *(primitives_result.ValueOrDie())) {
+      for (auto& hybrid_decrypt_entry : *(primitives_result.value())) {
         HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
         auto decrypt_result =
             hybrid_decrypt.Decrypt(raw_ciphertext, context_info);
         if (decrypt_result.ok()) {
-          return std::move(decrypt_result.ValueOrDie());
+          return std::move(decrypt_result.value());
         } else {
           // LOG that a matching key didn't decrypt the ciphertext.
         }
@@ -77,11 +77,11 @@ util::StatusOr<std::string> HybridDecryptSetWrapper::Decrypt(
   // No matching key succeeded with decryption, try all RAW keys.
   auto raw_primitives_result = hybrid_decrypt_set_->get_raw_primitives();
   if (raw_primitives_result.ok()) {
-    for (auto& hybrid_decrypt_entry : *(raw_primitives_result.ValueOrDie())) {
+    for (auto& hybrid_decrypt_entry : *(raw_primitives_result.value())) {
       HybridDecrypt& hybrid_decrypt = hybrid_decrypt_entry->get_primitive();
       auto decrypt_result = hybrid_decrypt.Decrypt(ciphertext, context_info);
       if (decrypt_result.ok()) {
-        return std::move(decrypt_result.ValueOrDie());
+        return std::move(decrypt_result.value());
       }
     }
   }

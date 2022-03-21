@@ -110,20 +110,19 @@ TEST_F(HybridEncryptSetWrapperTest, testBasic) {
                                                     keyset_info.key_info(2));
     ASSERT_TRUE(entry_result.ok());
     // The last key is the primary.
-    ASSERT_THAT(hybrid_encrypt_set->set_primary(entry_result.ValueOrDie()),
-                IsOk());
+    ASSERT_THAT(hybrid_encrypt_set->set_primary(entry_result.value()), IsOk());
 
     // Wrap hybrid_encrypt_set and test the resulting HybridEncrypt.
     auto hybrid_encrypt_result = HybridEncryptWrapper().Wrap(
         std::move(hybrid_encrypt_set));
     EXPECT_TRUE(hybrid_encrypt_result.ok()) << hybrid_encrypt_result.status();
-    hybrid_encrypt = std::move(hybrid_encrypt_result.ValueOrDie());
+    hybrid_encrypt = std::move(hybrid_encrypt_result.value());
     std::string plaintext = "some_plaintext";
     std::string context_info = "some_context";
 
     auto encrypt_result = hybrid_encrypt->Encrypt(plaintext, context_info);
     EXPECT_TRUE(encrypt_result.ok()) << encrypt_result.status();
-    std::string ciphertext = encrypt_result.ValueOrDie();
+    std::string ciphertext = encrypt_result.value();
     EXPECT_PRED_FORMAT2(testing::IsSubstring,
         hybrid_name_2, ciphertext);
   }
