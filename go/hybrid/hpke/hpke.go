@@ -55,6 +55,9 @@ func init() {
 	if err := registry.RegisterKeyManager(new(publicKeyManager)); err != nil {
 		panic(fmt.Sprintf("hpke.init() failed: %v", err))
 	}
+	if err := registry.RegisterKeyManager(new(privateKeyManager)); err != nil {
+		panic(fmt.Sprintf("hpke.init() failed: %v", err))
+	}
 }
 
 // kemSuiteID generates the KEM suite ID from kemID according to

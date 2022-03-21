@@ -15,6 +15,7 @@ go_library(
         "kdf.go",
         "kem.go",
         "primitive_factory.go",
+        "private_key_manager.go",
         "public_key_manager.go",
         "x25519_kem.go",
     ],
@@ -41,6 +42,7 @@ go_test(
         "hkdf_kdf_test.go",
         "hpke_test.go",
         "primitive_factory_test.go",
+        "private_key_manager_test.go",
         "public_key_manager_test.go",
         "x25519_kem_test.go",
     ],
@@ -49,20 +51,17 @@ go_test(
     deps = [
         "//core/registry",
         "//proto/hpke_go_proto",
+        "//proto/tink_go_proto",
         "//subtle",
         "//subtle/random",
         "//testutil",
+        "@com_github_google_go_cmp//cmp",
         "@org_golang_google_protobuf//proto",
+        "@org_golang_google_protobuf//testing/protocmp",
     ],
 )
 
 filegroup(
     name = "testdata",
     srcs = ["testdata/boringssl_hpke_test_vectors.json"],
-)
-
-alias(
-    name = "go_default_library",
-    actual = ":hpke",
-    visibility = ["//visibility:public"],
 )
